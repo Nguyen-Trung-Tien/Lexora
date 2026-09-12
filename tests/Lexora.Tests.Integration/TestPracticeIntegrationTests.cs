@@ -115,6 +115,69 @@ public class TestPracticeIntegrationTests : IDisposable
         weakWords.Should().NotBeEmpty();
     }
 
+    [Fact]
+    public async Task CustomWordList_SingleWordBoundary_ShouldGenerateSingleQuestionWithDistractors()
+    {
+        // 1. Arrange: Pick a single word from DB
+        var singleWord = await _context.Words.Include(w => w.Meanings).FirstAsync();
+        var config = new TestConfigurationDto(
+            Type: TestType.WordToMeaning,
+            QuestionCount: 20, // Intentionally requested more questions than available custom words
+            CustomWordIds: new List<Guid> { singleWord.Id }
+        );
+
+        // 2. Act: Generate test
+        var session = await _testService.GenerateTestAsync(config);
+
+        // 3. Assert: Exactly 1 question is generated without boundary exception
+        session.Questions.Should().HaveCount(1);
+        var q = session.Questions[0];
+        q.WordId.Should().Be(singleWord.Id);
+        q.Options.Should().HaveCount(4);
+        q.Options.Should().Contain(q.CorrectAnswer);
+
+        // 4. Submit correct answer
+        var answers = new List<TestAnswerSubmissionDto>
+        {
+            new(q.WordId, q.QuestionNumber, q.CorrectAnswer)
+        };
+        var result = await _testService.SubmitTestAsync(session.SessionId, answers);
+
+        result.TotalQuestions.Should().Be(1);
+        result.CorrectCount.Should().Be(1);
+        result.ScorePercentage.Should().Be(100.0);
+        result.WeakWords.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ContextUnit_DirectTestFlow_ShouldSeamlesslyIntegrateWithCustomTest()
+    {
+        // 1. Arrange: Use VocabularyService to get real Context Units
+        var vocabService = new VocabularyService(_vocabRepo, _reviewRepo, _unitOfWork);
+        var units = await vocabService.GetContextUnitsAsync();
+        units.Should().NotBeEmpty();
+
+        var testUnit = units.First(u => u.Words.Count > 0);
+
+        // 2. Act: Generate test directly from Context Unit words
+        var config = new TestConfigurationDto(
+            Type: TestType.Mixed,
+            QuestionCount: testUnit.Words.Count,
+            CustomWordIds: testUnit.Words.Select(w => w.Id).ToList()
+        );
+
+        var session = await _testService.GenerateTestAsync(config);
+
+        // 3. Assert: Questions match unit words
+        session.Questions.Should().HaveCount(testUnit.Words.Count);
+        var testWordIds = testUnit.Words.Select(w => w.Id).ToHashSet();
+        foreach (var q in session.Questions)
+        {
+            testWordIds.Should().Contain(q.WordId);
+            q.Options.Should().HaveCount(4);
+        }
+    }
+
     public void Dispose()
     {
         _context.Dispose();

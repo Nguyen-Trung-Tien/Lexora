@@ -57,10 +57,20 @@ public sealed partial class VocabularyPage : Page
 
     private void PopulateTopicFilterCombo()
     {
+        var currentSelectedId = (TopicFilterCombo.SelectedItem as TopicDto)?.Id ?? ViewModel.SelectedTopicId;
         var topics = new List<object> { "Tất cả Unit / Chủ đề" };
         topics.AddRange(ViewModel.AvailableTopics);
         TopicFilterCombo.ItemsSource = topics;
-        TopicFilterCombo.SelectedIndex = 0;
+
+        if (currentSelectedId.HasValue)
+        {
+            var idx = topics.FindIndex(t => t is TopicDto td && td.Id == currentSelectedId.Value);
+            TopicFilterCombo.SelectedIndex = idx >= 0 ? idx : 0;
+        }
+        else
+        {
+            TopicFilterCombo.SelectedIndex = 0;
+        }
     }
 
     private readonly DispatcherTimer _searchDebounceTimer;
@@ -187,6 +197,7 @@ public sealed partial class VocabularyPage : Page
         if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
         {
             await ViewModel.SaveWordAsync(dialog.ResultDto);
+            PopulateTopicFilterCombo();
         }
     }
 
@@ -205,6 +216,7 @@ public sealed partial class VocabularyPage : Page
         if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
         {
             await ViewModel.SaveWordAsync(dialog.ResultDto);
+            PopulateTopicFilterCombo();
         }
     }
 
@@ -432,6 +444,7 @@ public sealed partial class VocabularyPage : Page
         if (!string.IsNullOrWhiteSpace(contentToImport))
         {
             var importResult = await ViewModel.ImportDataAsync(contentToImport, isJson);
+            PopulateTopicFilterCombo();
             await Task.Yield();
             var summaryDialog = new ContentDialog
             {

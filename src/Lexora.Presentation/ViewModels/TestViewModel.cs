@@ -298,11 +298,34 @@ public partial class TestViewModel : ObservableObject
     {
         await LoadCustomWordCandidatesAsync();
         var set = wordIds.ToHashSet();
+
+        foreach (var id in set)
+        {
+            if (!CustomWordCandidates.Any(c => c.Word.Id == id))
+            {
+                var word = await _vocabService.GetWordByIdAsync(id);
+                if (word != null)
+                {
+                    var newItem = new SelectableWordItem(word);
+                    newItem.PropertyChanged += (s, e) =>
+                    {
+                        if (e.PropertyName == nameof(SelectableWordItem.IsSelected))
+                        {
+                            UpdateSelectedCustomWordsCount();
+                        }
+                    };
+                    CustomWordCandidates.Insert(0, newItem);
+                }
+            }
+        }
+
         foreach (var item in CustomWordCandidates)
         {
             item.IsSelected = set.Contains(item.Word.Id);
         }
+
         UpdateSelectedCustomWordsCount();
+        ApplyCustomWordFilter();
         IsCustomListMode = true;
     }
 
