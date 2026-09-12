@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Lexora.Presentation (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Lexora.Presentation (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

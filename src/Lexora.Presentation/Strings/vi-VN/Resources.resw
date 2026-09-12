@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppTitle" xml:space="preserve">
+    <value>Lexora — Quản lý Học Tiếng Anh</value>
+  </data>
+  <data name="Nav_Dashboard" xml:space="preserve">
+    <value>Tổng quan</value>
+  </data>
+  <data name="Nav_Vocabulary" xml:space="preserve">
+    <value>Từ vựng</value>
+  </data>
+  <data name="Nav_Review" xml:space="preserve">
+    <value>Ôn tập ngắt quãng</value>
+  </data>
+  <data name="Nav_Grammar" xml:space="preserve">
+    <value>Ngữ pháp</value>
+  </data>
+  <data name="Nav_Settings" xml:space="preserve">
+    <value>Cài đặt</value>
+  </data>
+  <data name="Dashboard_TotalWords" xml:space="preserve">
+    <value>Tổng số từ</value>
+  </data>
+  <data name="Dashboard_DueToday" xml:space="preserve">
+    <value>Cần ôn hôm nay</value>
+  </data>
+  <data name="Dashboard_Mastered" xml:space="preserve">
+    <value>Đã thành thạo</value>
+  </data>
+  <data name="Dashboard_Streak" xml:space="preserve">
+    <value>Chuỗi ngày học</value>
+  </data>
+  <data name="Dashboard_StartReview" xml:space="preserve">
+    <value>Bắt đầu ôn tập hôm nay</value>
+  </data>
+  <data name="Settings_Theme" xml:space="preserve">
+    <value>Giao diện</value>
+  </data>
+  <data name="Settings_Theme_System" xml:space="preserve">
+    <value>Theo hệ thống</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
+    <value>Sáng</value>
+  </data>
+  <data name="Settings_Theme_Dark" xml:space="preserve">
+    <value>Tối</value>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Ngôn ngữ ứng dụng</value>
+  </data>
+</root>

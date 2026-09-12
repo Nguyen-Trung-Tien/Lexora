@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Lexora.Application/Lexora.Application.csproj" />
+    <Project Path="src/Lexora.Domain/Lexora.Domain.csproj" />
+    <Project Path="src/Lexora.Infrastructure/Lexora.Infrastructure.csproj" />
+    <Project Path="src/Lexora.Presentation/Lexora.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Lexora.Tests.Integration/Lexora.Tests.Integration.csproj" />
+    <Project Path="tests/Lexora.Tests.Unit/Lexora.Tests.Unit.csproj" />
+  </Folder>
+</Solution>

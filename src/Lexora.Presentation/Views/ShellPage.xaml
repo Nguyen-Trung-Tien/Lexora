@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Lexora.Presentation.Views.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        <NavigationView
+            x:Name="NavView"
+            IsBackButtonVisible="Collapsed"
+            PaneDisplayMode="Left"
+            IsSettingsVisible="True"
+            ItemInvoked="NavView_ItemInvoked"
+            Loaded="NavView_Loaded">
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="NavItemDashboard" Content="Dashboard" Tag="Dashboard">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE80F;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemVocabulary" Content="Vocabulary" Tag="Vocabulary">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE82D;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemReview" Content="Spaced Review" Tag="Review">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE895;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemGrammar" Content="Grammar" Tag="Grammar">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8D2;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.AutoSuggestBox>
+                <AutoSuggestBox x:Name="GlobalSearchBox" PlaceholderText="Search Lexora..." QuerySubmitted="GlobalSearchBox_QuerySubmitted" />
+            </NavigationView.AutoSuggestBox>
+
+            <Grid>
+                <Frame x:Name="ContentFrame" />
+                <InfoBar x:Name="DueReviewInfoBar"
+                         IsOpen="{x:Bind ViewModel.HasDueReviews, Mode=OneWay}"
+                         Severity="Informational"
+                         Title="Review Reminder"
+                         Message="{x:Bind ViewModel.DueReviewMessage, Mode=OneWay}"
+                         VerticalAlignment="Top"
+                         Margin="24,12,24,0">
+                    <InfoBar.ActionButton>
+                        <Button Content="Review Now" Style="{ThemeResource AccentButtonStyle}" Click="ReviewNowButton_Click" />
+                    </InfoBar.ActionButton>
+                </InfoBar>
+            </Grid>
+        </NavigationView>
+    </Grid>
+</Page>

@@ -1,0 +1,32 @@
+## Visual Studio / .NET
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+## Windows App SDK / WinUI
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+
+## Test Results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+## Database & Local Data
+*.db
+*.db-shm
+*.db-wal
+
+## OS generated
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Lexora.Presentation.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
+        <StackPanel Spacing="24" MaxWidth="800" HorizontalAlignment="Left">
+            <TextBlock Text="Settings" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
+
+            <!-- Appearance Theme Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Appearance Theme" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Choose whether Lexora displays in Light, Dark, or System mode." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <RadioButtons SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=TwoWay}" SelectionChanged="ThemeRadioButtons_SelectionChanged">
+                        <RadioButton Content="Use system setting" />
+                        <RadioButton Content="Light" />
+                        <RadioButton Content="Dark" />
+                    </RadioButtons>
+                </StackPanel>
+            </Border>
+
+            <!-- Language Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Application Language" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Select the display language for Lexora interface." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button x:Name="LangViButton" Content="Tiếng Việt" Click="LangViButton_Click" />
+                        <Button x:Name="LangEnButton" Content="English" Click="LangEnButton_Click" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Database & Backup Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Database &amp; Backup" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Lexora uses an offline-first SQLite database stored safely in your local application directory. You can export a snapshot backup anytime." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Button Content="Create Database Backup" Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" />
+                    <TextBlock Text="{x:Bind ViewModel.BackupStatusMessage, Mode=OneWay}" Foreground="#107C41" FontWeight="SemiBold" />
+                </StackPanel>
+            </Border>
+
+            <!-- About Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="About Lexora" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Lexora — English Learning Manager v1.0.0 (Preview)" FontWeight="SemiBold" />
+                    <TextBlock Text="Built with .NET 10, Windows App SDK / WinUI 3, EF Core SQLite, and Clean Architecture." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

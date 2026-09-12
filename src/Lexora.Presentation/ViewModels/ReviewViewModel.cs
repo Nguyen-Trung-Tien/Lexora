@@ -1,0 +1,263 @@
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
+using Lexora.Domain.Enums;
+using Lexora.Presentation.Services;
+
+namespace Lexora.Presentation.ViewModels;
+
+public partial class ReviewViewModel : ObservableObject
+{
+    private readonly IReviewService _reviewService;
+    private readonly IAudioPlayerService _audioPlayer;
+    private readonly Stopwatch _cardTimer = new();
+
+    private Guid? _currentSessionId;
+    private int _initialQueueCount;
+
+    [ObservableProperty]
+    public partial bool IsLoading { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsAnswerVisible { get; set; } = false;
+
+    [ObservableProperty]
+    public partial ReviewCardDto? CurrentCard { get; set; }
+
+    [ObservableProperty]
+    public partial int RemainingCount { get; set; }
+
+    [ObservableProperty]
+    public partial int CompletedCount { get; set; }
+
+    [ObservableProperty]
+    public partial int TotalQueueCount { get; set; }
+
+    [ObservableProperty]
+    public partial double ProgressPercent { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsCompleted { get; set; } = false;
+
+    [ObservableProperty]
+    public partial ReviewSessionMode CurrentMode { get; set; } = ReviewSessionMode.TodayDue;
+
+    [ObservableProperty]
+    public partial string AgainIntervalText { get; set; } = "< 1d";
+
+    [ObservableProperty]
+    public partial string HardIntervalText { get; set; } = "1d";
+
+    [ObservableProperty]
+    public partial string GoodIntervalText { get; set; } = "4d";
+
+    [ObservableProperty]
+    public partial string EasyIntervalText { get; set; } = "7d";
+
+    // Session stats
+    [ObservableProperty]
+    public partial int SessionCorrectCount { get; set; }
+
+    [ObservableProperty]
+    public partial int SessionIncorrectCount { get; set; }
+
+    [ObservableProperty]
+    public partial double SessionAccuracyRate { get; set; }
+
+    [ObservableProperty]
+    public partial string SessionDurationText { get; set; } = "00:00";
+
+    // Counts for mode badges
+    [ObservableProperty]
+    public partial int DueCardsCount { get; set; }
+
+    public ObservableCollection<ReviewCardDto> ReviewQueue { get; } = new();
+    public ObservableCollection<StudyLogDto> RecentLogs { get; } = new();
+    public ObservableCollection<StudySessionDto> RecentSessions { get; } = new();
+
+    public ReviewViewModel(IReviewService reviewService, IAudioPlayerService audioPlayer)
+    {
+        _reviewService = reviewService;
+        _audioPlayer = audioPlayer;
+    }
+
+    [RelayCommand]
+    public async Task InitializeAsync()
+    {
+        await RefreshDueCountAsync();
+        await StartReviewAsync(CurrentMode);
+        await LoadHistoryAsync();
+    }
+
+    [RelayCommand]
+    public async Task RefreshDueCountAsync()
+    {
+        DueCardsCount = await _reviewService.GetDueCardsCountAsync();
+    }
+
+    [RelayCommand]
+    public async Task StartReviewAsync(ReviewSessionMode mode)
+    {
+        IsLoading = true;
+        IsCompleted = false;
+        IsAnswerVisible = false;
+        CurrentMode = mode;
+        SessionCorrectCount = 0;
+        SessionIncorrectCount = 0;
+        SessionAccuracyRate = 0.0;
+        CompletedCount = 0;
+
+        try
+        {
+            IReadOnlyList<ReviewCardDto> cards = mode switch
+            {
+                ReviewSessionMode.LearnNew => await _reviewService.GetNewCardsAsync(limit: 20),
+                ReviewSessionMode.Difficult => await _reviewService.GetDifficultCardsAsync(limit: 20),
+                _ => await _reviewService.GetDueCardsAsync(limit: 30)
+            };
+
+            // If in TodayDue mode and empty, fallback to new cards automatically
+            if (mode == ReviewSessionMode.TodayDue && cards.Count == 0)
+            {
+                cards = await _reviewService.GetNewCardsAsync(limit: 15);
+            }
+
+            ReviewQueue.Clear();
+            foreach (var c in cards)
+            {
+                ReviewQueue.Add(c);
+            }
+
+            _initialQueueCount = ReviewQueue.Count;
+            TotalQueueCount = _initialQueueCount;
+            RemainingCount = ReviewQueue.Count;
+            ProgressPercent = 0.0;
+
+            if (ReviewQueue.Count > 0)
+            {
+                var session = await _reviewService.StartSessionAsync(mode, ReviewQueue.Count);
+                _currentSessionId = session.Id;
+
+                SetCurrentCard(ReviewQueue[0]);
+            }
+            else
+            {
+                CurrentCard = null;
+                _currentSessionId = null;
+                IsCompleted = true;
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    public void RevealAnswer()
+    {
+        IsAnswerVisible = true;
+    }
+
+    [RelayCommand]
+    public async Task RateCardAsync(ReviewRating rating)
+    {
+        if (CurrentCard == null) return;
+
+        _cardTimer.Stop();
+        int responseTimeMs = (int)_cardTimer.ElapsedMilliseconds;
+
+        if (rating >= ReviewRating.Good)
+        {
+            SessionCorrectCount++;
+        }
+        else
+        {
+            SessionIncorrectCount++;
+        }
+
+        int totalReviewed = SessionCorrectCount + SessionIncorrectCount;
+        SessionAccuracyRate = totalReviewed == 0 ? 0.0 : Math.Round((double)SessionCorrectCount / totalReviewed * 100, 1);
+
+        await _reviewService.SubmitReviewAsync(CurrentCard.Id, rating, responseTimeMs, _currentSessionId);
+
+        if (ReviewQueue.Count > 0)
+        {
+            ReviewQueue.RemoveAt(0);
+        }
+
+        CompletedCount++;
+        RemainingCount = ReviewQueue.Count;
+        ProgressPercent = _initialQueueCount == 0 ? 100.0 : Math.Round((double)CompletedCount / _initialQueueCount * 100, 1);
+        IsAnswerVisible = false;
+
+        if (ReviewQueue.Count > 0)
+        {
+            SetCurrentCard(ReviewQueue[0]);
+        }
+        else
+        {
+            CurrentCard = null;
+            IsCompleted = true;
+
+            if (_currentSessionId.HasValue)
+            {
+                await _reviewService.CompleteSessionAsync(
+                    _currentSessionId.Value,
+                    _initialQueueCount,
+                    SessionCorrectCount,
+                    SessionIncorrectCount);
+            }
+
+            await RefreshDueCountAsync();
+            await LoadHistoryAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task PlayUkAudioAsync()
+    {
+        if (CurrentCard == null) return;
+        await _audioPlayer.PlayPronunciationAsync(CurrentCard.Term, "uk");
+    }
+
+    [RelayCommand]
+    public async Task PlayUsAudioAsync()
+    {
+        if (CurrentCard == null) return;
+        await _audioPlayer.PlayPronunciationAsync(CurrentCard.Term, "us");
+    }
+
+    [RelayCommand]
+    public async Task LoadHistoryAsync()
+    {
+        var logs = await _reviewService.GetRecentLogsAsync(15);
+        RecentLogs.Clear();
+        foreach (var l in logs)
+        {
+            RecentLogs.Add(l);
+        }
+
+        var sessions = await _reviewService.GetRecentSessionsAsync(5);
+        RecentSessions.Clear();
+        foreach (var s in sessions)
+        {
+            RecentSessions.Add(s);
+        }
+    }
+
+    private void SetCurrentCard(ReviewCardDto card)
+    {
+        CurrentCard = card;
+        _cardTimer.Restart();
+
+        var preview = _reviewService.GetCardIntervalPreview(card);
+        AgainIntervalText = preview.AgainText;
+        HardIntervalText = preview.HardText;
+        GoodIntervalText = preview.GoodText;
+        EasyIntervalText = preview.EasyText;
+    }
+}
