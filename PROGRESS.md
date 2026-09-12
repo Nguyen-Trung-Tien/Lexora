@@ -159,6 +159,12 @@
 - [x] Tối ưu hóa chuyển trang (Page Transitions & Entrance Animations qua `NavigationService`).
 - [x] Hỗ trợ Text-to-Speech (TTS) tự nhiên & âm thanh đàm thoại song ngữ UK/US, kèm card kiểm tra phát âm trong Settings.
 - [x] Bảng hướng dẫn phím tắt (Keyboard Shortcuts Reference) trực quan ngay trong Settings.
+- [x] **Hệ thống Nhận diện Thương hiệu & Startup Animation (Windows 11 Fluent Design)**:
+  - Giữ trọn vẹn thiết kế Logo Lexora: biểu tượng chữ L cách điệu lồng ghép gáy sách & các tầng tri thức (Cyan, Emerald Teal, Amber Gold).
+  - Bộ tài sản Vector SVG chuẩn hóa 6 phiên bản (`assets/brand/`): App Icon 1024x1024, Icon-only, Horizontal Logo Light/Dark, Monochrome B&W.
+  - Startup Animation 1.8s mượt mà 60 FPS: Logo reveal (scale 82% → 100%), cánh tri thức xuất hiện so le, hiệu ứng vệt sáng quét qua logo (soft light sweep), chữ Lexora trượt nhẹ lên (slide-up + fade-in), và thanh loading mỏng tối giản.
+  - Xử lý tương tác 5 trạng thái chuẩn mực (`Starting`, `Loading`, `Ready`, `LoadingError`, `Cancelled/Closed`).
+  - Hỗ trợ `CancellationToken`, tự động nhận diện và tôn trọng chế độ **Reduced Motion / Accessibility** (`UISettings.AnimationsEnabled`).
 
 ---
 

@@ -24,6 +24,12 @@
             IsSettingsVisible="True"
             ItemInvoked="NavView_ItemInvoked"
             Loaded="NavView_Loaded">
+            <NavigationView.PaneHeader>
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="12,10,12,6">
+                    <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="26" Height="26" VerticalAlignment="Center" />
+                    <TextBlock Text="Lexora" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" />
+                </StackPanel>
+            </NavigationView.PaneHeader>
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="NavItemDashboard" Content="Dashboard" Tag="Dashboard" ToolTipService.ToolTip="Dashboard (Ctrl+1)">
                     <NavigationViewItem.Icon>

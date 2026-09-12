@@ -43,6 +43,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddSingleton<IThemeService, ThemeService>();
                 services.AddSingleton<ILocalizationService, LocalizationService>();
                 services.AddSingleton<IAudioPlayerService, WindowsAudioPlayerService>();
+                services.AddSingleton<IStartupOrchestrator, StartupOrchestrator>();
 
                 // ViewModels
                 services.AddTransient<ShellViewModel>();
@@ -65,23 +66,22 @@ public partial class App : Microsoft.UI.Xaml.Application
             .Build();
     }
 
-    protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        // 1. Initialize SQLite Database & seed data
-        using (var scope = Services.CreateScope())
-        {
-            var dbInitializer = scope.ServiceProvider.GetRequiredService<SqliteDatabaseInitializer>();
-            await dbInitializer.InitializeAsync();
-        }
-
-        // 2. Setup Main Window
+        // 1. Setup Main Window (hosts the splash overlay and main shell)
         _window = new MainWindow();
 
-        // 3. Initialize Theme
+        // 2. Initialize Theme
         var themeService = Services.GetRequiredService<IThemeService>();
         themeService.Initialize(_window);
 
-        // 4. Activate Window
+        // 3. Activate Window immediately with Mica backdrop and Splash Screen
         _window.Activate();
+
+        // 4. Begin Async Startup Orchestration
+        if (_window is MainWindow mainWindow)
+        {
+            _ = mainWindow.StartStartupSequenceAsync();
+        }
     }
 }

@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Lexora.Presentation.Views.SplashScreenOverlay"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!-- Storyboard for Entrance Animation (GPU-friendly DoubleAnimations) -->
+        <Storyboard x:Name="EntranceStoryboard">
+            <!-- 1. Logo Scale from 82% to 100% -->
+            <DoubleAnimation
+                Storyboard.TargetName="LogoScale"
+                Storyboard.TargetProperty="ScaleX"
+                From="0.82" To="1.0"
+                Duration="0:0:0.6"
+                BeginTime="0:0:0.0">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="LogoScale"
+                Storyboard.TargetProperty="ScaleY"
+                From="0.82" To="1.0"
+                Duration="0:0:0.6"
+                BeginTime="0:0:0.0">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+
+            <!-- 2. Logo Container Fade-In -->
+            <DoubleAnimation
+                Storyboard.TargetName="LogoTile"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0" To="1.0"
+                Duration="0:0:0.5"
+                BeginTime="0:0:0.0">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+
+            <!-- 3. Soft Light Sweep across logo -->
+            <DoubleAnimation
+                Storyboard.TargetName="LightSweepTransform"
+                Storyboard.TargetProperty="X"
+                From="-140" To="140"
+                Duration="0:0:0.65"
+                BeginTime="0:0:0.55">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseInOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimationUsingKeyFrames
+                Storyboard.TargetName="LightSweep"
+                Storyboard.TargetProperty="Opacity"
+                BeginTime="0:0:0.55">
+                <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.2" Value="0.75" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.45" Value="0.75" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.65" Value="0.0" />
+            </DoubleAnimationUsingKeyFrames>
+
+            <!-- 4. Wordmark "Lexora" Slide-Up + Fade-In -->
+            <DoubleAnimation
+                Storyboard.TargetName="TypographyContainer"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0" To="1.0"
+                Duration="0:0:0.5"
+                BeginTime="0:0:0.65">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="TypographyTranslate"
+                Storyboard.TargetProperty="Y"
+                From="14" To="0"
+                Duration="0:0:0.5"
+                BeginTime="0:0:0.65">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+
+            <!-- 5. Loading Indicator Fade-In -->
+            <DoubleAnimation
+                Storyboard.TargetName="LoadingContainer"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0" To="1.0"
+                Duration="0:0:0.4"
+                BeginTime="0:0:0.85">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Storyboard for Completion Exit Transition -->
+        <Storyboard x:Name="ExitStoryboard">
+            <!-- Loading indicator quick fade -->
+            <DoubleAnimation
+                Storyboard.TargetName="LoadingContainer"
+                Storyboard.TargetProperty="Opacity"
+                To="0.0"
+                Duration="0:0:0.15" />
+
+            <!-- Soft Logo Opacity Drop -->
+            <DoubleAnimation
+                Storyboard.TargetName="LogoTile"
+                Storyboard.TargetProperty="Opacity"
+                To="0.85"
+                Duration="0:0:0.2" />
+
+            <!-- Overall Splash Screen Fade-Out -->
+            <DoubleAnimation
+                Storyboard.TargetName="RootGrid"
+                Storyboard.TargetProperty="Opacity"
+                To="0.0"
+                Duration="0:0:0.35"
+                BeginTime="0:0:0.05">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseInOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Reduced Motion Entrance (Simple instant fade) -->
+        <Storyboard x:Name="ReducedMotionEntrance">
+            <DoubleAnimation
+                Storyboard.TargetName="LogoTile"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0" To="1.0"
+                Duration="0:0:0.2" />
+            <DoubleAnimation
+                Storyboard.TargetName="TypographyContainer"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0" To="1.0"
+                Duration="0:0:0.2" />
+            <DoubleAnimation
+                Storyboard.TargetName="LoadingContainer"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0" To="1.0"
+                Duration="0:0:0.2" />
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid x:Name="RootGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <!-- Subtle Ambient Background Radial Tint -->
+        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="0.15">
+            <Border.Background>
+                <RadialGradientBrush Center="0.5,0.45" GradientOrigin="0.5,0.45" RadiusX="0.6" RadiusY="0.6">
+                    <GradientStop Color="#3B82F6" Offset="0" />
+                    <GradientStop Color="#00000000" Offset="1" />
+                </RadialGradientBrush>
+            </Border.Background>
+        </Border>
+
+        <!-- Main Visual Center Stack -->
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="28">
+
+            <!-- 1. Logo Vector Squircle Container -->
+            <Grid
+                x:Name="LogoContainer"
+                Width="150"
+                Height="150"
+                HorizontalAlignment="Center">
+                <Grid.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="LogoScale" CenterX="75" CenterY="75" ScaleX="1" ScaleY="1" />
+                    </TransformGroup>
+                </Grid.RenderTransform>
+
+                <!-- Master Authentic Logo Tile (100% Detail & Precision) -->
+                <Image
+                    x:Name="LogoTile"
+                    Source="ms-appx:///Assets/brand/lexora-app-icon-1024.png"
+                    Width="140"
+                    Height="140"
+                    Opacity="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                    <Image.Shadow>
+                        <ThemeShadow />
+                    </Image.Shadow>
+                </Image>
+
+                <!-- Soft Light Sweep Highlight -->
+                <Border
+                    x:Name="LightSweep"
+                    Width="50"
+                    Height="180"
+                    Opacity="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    IsHitTestVisible="False">
+                    <Border.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="25" />
+                            <TranslateTransform x:Name="LightSweepTransform" X="-140" Y="0" />
+                        </TransformGroup>
+                    </Border.RenderTransform>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#00FFFFFF" Offset="0" />
+                            <GradientStop Color="#70FFFFFF" Offset="0.5" />
+                            <GradientStop Color="#00FFFFFF" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+            </Grid>
+
+            <!-- 2. Wordmark & Tagline -->
+            <StackPanel
+                x:Name="TypographyContainer"
+                HorizontalAlignment="Center"
+                Spacing="6"
+                Opacity="0">
+                <StackPanel.RenderTransform>
+                    <TranslateTransform x:Name="TypographyTranslate" Y="14" />
+                </StackPanel.RenderTransform>
+
+                <TextBlock
+                    Text="Lexora"
+                    FontSize="38"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Center"
+                    CharacterSpacing="-15"
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                <TextBlock
+                    Text="INTELLIGENT VOCABULARY &amp; GRAMMAR"
+                    FontSize="11"
+                    FontWeight="SemiBold"
+                    HorizontalAlignment="Center"
+                    CharacterSpacing="130"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- 3. Minimalist Loading State -->
+            <StackPanel
+                x:Name="LoadingContainer"
+                HorizontalAlignment="Center"
+                Spacing="12"
+                Opacity="0">
+
+                <!-- Thin Modern Fluent ProgressBar -->
+                <ProgressBar
+                    x:Name="StartupProgressBar"
+                    IsIndeterminate="True"
+                    Width="180"
+                    Height="3"
+                    CornerRadius="2"
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+
+                <!-- Status Feedback Label -->
+                <TextBlock
+                    x:Name="StatusTextBlock"
+                    Text="Đang khởi tạo hệ thống..."
+                    FontSize="12"
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+            </StackPanel>
+
+            <!-- 4. Error State Panel (Initially Collapsed) -->
+            <Border
+                x:Name="ErrorCard"
+                Visibility="Collapsed"
+                MaxWidth="380"
+                Padding="16"
+                CornerRadius="8"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
+                BorderThickness="1">
+                <StackPanel Spacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE783;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="16" />
+                        <TextBlock Text="Không thể khởi tạo Lexora" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </StackPanel>
+
+                    <TextBlock
+                        x:Name="ErrorDetailsTextBlock"
+                        Text="Đã có lỗi xảy ra khi tải cơ sở dữ liệu."
+                        TextWrapping="Wrap"
+                        FontSize="12"
+                        TextAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12" Margin="0,4,0,0">
+                        <Button
+                            x:Name="RetryButton"
+                            Content="Thử lại"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="RetryButton_Click" />
+                        <Button
+                            x:Name="ExitButton"
+                            Content="Đóng ứng dụng"
+                            Click="ExitButton_Click" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>

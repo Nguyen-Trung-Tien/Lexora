@@ -28,6 +28,7 @@ erDiagram
 ## 3. Tables Specification
 
 ### `Words`
+
 - `Id` (Guid, PK)
 - `Term` (NVARCHAR(150), Indexed)
 - `NormalizedTerm` (NVARCHAR(150), Indexed)
@@ -42,6 +43,7 @@ erDiagram
 - `UpdatedAt` (DATETIME)
 
 ### `WordMeanings`
+
 - `Id` (Guid, PK)
 - `WordId` (Guid, FK -> Words.Id, Cascade Delete)
 - `PartOfSpeech` (INTEGER, PartOfSpeech enum)
@@ -51,6 +53,7 @@ erDiagram
 - `OrderIndex` (INTEGER)
 
 ### `ExampleSentences`
+
 - `Id` (Guid, PK)
 - `WordMeaningId` (Guid, FK -> WordMeanings.Id, Cascade Delete)
 - `SentenceEn` (NVARCHAR(1000))
@@ -58,6 +61,7 @@ erDiagram
 - `AudioPath` (NVARCHAR)
 
 ### `ReviewCards`
+
 - `Id` (Guid, PK)
 - `WordId` (Guid, FK -> Words.Id, Unique, Cascade Delete)
 - `Status` (INTEGER, Indexed, LearningStatus enum)
@@ -71,6 +75,7 @@ erDiagram
 - `CorrectReviews` (INTEGER)
 
 ### `StudyLogs`
+
 - `Id` (Guid, PK)
 - `ReviewCardId` (Guid, FK -> ReviewCards.Id, Cascade Delete)
 - `StudySessionId` (Guid, FK -> StudySessions.Id, Nullable, Cascade Delete)
@@ -81,6 +86,7 @@ erDiagram
 - `CreatedAt` (DATETIME, Indexed)
 
 ### `GrammarRules` & `GrammarExamples`
+
 - `Id` (Guid, PK)
 - `Title` (NVARCHAR(200))
 - `Structure` (NVARCHAR(500))
@@ -92,6 +98,7 @@ erDiagram
 - `Topic` (NVARCHAR)
 
 ### `UserStreaks`
+
 - `Id` (Guid, PK)
 - `CurrentStreak` (INTEGER)
 - `LongestStreak` (INTEGER)

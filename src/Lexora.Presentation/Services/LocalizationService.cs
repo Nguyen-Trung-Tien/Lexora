@@ -17,7 +17,7 @@ public class LocalizationService : ILocalizationService
     {
         ["vi-VN"] = new Dictionary<string, string>
         {
-            ["AppTitle"] = "Lexora — Quản lý Học Tiếng Anh",
+            ["AppTitle"] = "Lexora - Quản lý Học Tiếng Anh",
             ["Nav_Dashboard"] = "Tổng quan",
             ["Nav_Vocabulary"] = "Từ vựng",
             ["Nav_Review"] = "Ôn tập ngắt quãng",
@@ -42,7 +42,7 @@ public class LocalizationService : ILocalizationService
         },
         ["en-US"] = new Dictionary<string, string>
         {
-            ["AppTitle"] = "Lexora — English Learning Manager",
+            ["AppTitle"] = "Lexora - English Learning Manager",
             ["Nav_Dashboard"] = "Dashboard",
             ["Nav_Vocabulary"] = "Vocabulary",
             ["Nav_Review"] = "Spaced Review",

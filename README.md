@@ -1,6 +1,13 @@
-# Lexora — English Learning Manager
+<p align="center">
+  <img src="assets/brand/lexora-logo-full-light.png" alt="Lexora Logo" width="560" />
+</p>
 
-> High-performance, offline-first English learning and vocabulary mastery desktop application built with **C# / .NET 10**, **WinUI 3 (Windows App SDK)**, **Clean Architecture**, and **Entity Framework Core with SQLite**.
+<h1 align="center">Lexora — Intelligent Vocabulary &amp; Grammar Manager</h1>
+
+<p align="center">
+  <strong>High-performance, offline-first English learning desktop application for Windows 11</strong><br>
+  <em>Built with C# / .NET 10 • WinUI 3 (Windows App SDK) • Clean Architecture • SQLite / EF Core 10</em>
+</p>
 
 ---
 
