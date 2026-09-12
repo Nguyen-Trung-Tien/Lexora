@@ -48,27 +48,28 @@
             </Storyboard>
         </Grid.Resources>
 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Custom TitleBar with Lexora Icon & Brand Title -->
+        <TitleBar x:Name="AppTitleBar" Title="Lexora - English Learning Manager">
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="ms-appx:///Assets/brand/lexora-icon-only.png" />
+            </TitleBar.IconSource>
+        </TitleBar>
+
         <!-- Main Application Shell (starts hidden with subtle scale) -->
-        <Grid x:Name="MainContentGrid" Opacity="0">
+        <Grid x:Name="MainContentGrid" Grid.Row="1" Opacity="0">
             <Grid.RenderTransform>
                 <ScaleTransform x:Name="MainContentScale" CenterX="600" CenterY="400" ScaleX="0.99" ScaleY="0.99" />
             </Grid.RenderTransform>
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <TitleBar x:Name="AppTitleBar" Title="Lexora - English Learning Manager">
-                <TitleBar.IconSource>
-                    <ImageIconSource ImageSource="ms-appx:///Assets/brand/lexora-icon-only.png" />
-                </TitleBar.IconSource>
-            </TitleBar>
-
-            <Frame x:Name="RootFrame" Grid.Row="1" />
+            <Frame x:Name="RootFrame" />
         </Grid>
 
         <!-- Splash Screen Startup Animation Overlay -->
-        <views:SplashScreenOverlay x:Name="SplashOverlay" />
+        <views:SplashScreenOverlay x:Name="SplashOverlay" Grid.Row="1" />
     </Grid>
 </Window>

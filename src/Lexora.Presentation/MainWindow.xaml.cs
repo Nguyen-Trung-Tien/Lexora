@@ -1,7 +1,10 @@
+using System.IO;
+using System.Runtime.InteropServices;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using WinRT.Interop;
 
 namespace Lexora.Presentation;
 
@@ -13,6 +16,13 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+        // 1. Extend content into TitleBar & set custom title bar
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
+
+        // 2. Set Taskbar and Window Icon
+        SetWindowAndTaskbarIcon();
 
         _startupOrchestrator = App.Current.Services.GetRequiredService<IStartupOrchestrator>();
 
@@ -41,6 +51,46 @@ public sealed partial class MainWindow : Window
             }
         };
     }
+
+    private void SetWindowAndTaskbarIcon()
+    {
+        try
+        {
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
+            if (File.Exists(iconPath))
+            {
+                // Set Windows App SDK window icon
+                AppWindow.SetIcon(iconPath);
+
+                // Set Win32 window & taskbar icon via SendMessage WM_SETICON
+                var hwnd = WindowNative.GetWindowHandle(this);
+                if (hwnd != IntPtr.Zero)
+                {
+                    IntPtr hIconSmall = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, 16, 16, 0x00000010 /*LR_LOADFROMFILE*/);
+                    IntPtr hIconBig = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, 32, 32, 0x00000010 /*LR_LOADFROMFILE*/);
+
+                    if (hIconSmall != IntPtr.Zero)
+                    {
+                        SendMessage(hwnd, 0x0080 /*WM_SETICON*/, (IntPtr)0 /*ICON_SMALL*/, hIconSmall);
+                    }
+                    if (hIconBig != IntPtr.Zero)
+                    {
+                        SendMessage(hwnd, 0x0080 /*WM_SETICON*/, (IntPtr)1 /*ICON_BIG*/, hIconBig);
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Fallback gracefully
+        }
+    }
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern IntPtr LoadImage(IntPtr hinst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
 
     public async Task StartStartupSequenceAsync()
     {

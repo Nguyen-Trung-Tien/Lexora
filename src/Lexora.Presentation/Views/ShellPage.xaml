@@ -25,10 +25,16 @@
             ItemInvoked="NavView_ItemInvoked"
             Loaded="NavView_Loaded">
             <NavigationView.PaneHeader>
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="12,10,12,6">
-                    <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="26" Height="26" VerticalAlignment="Center" />
-                    <TextBlock Text="Lexora" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" />
-                </StackPanel>
+                <Grid Height="40" Margin="8,6,8,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="36" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="32" Height="32" CornerRadius="8" Background="{ThemeResource LayerFillColorDefaultBrush}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="Lexora" FontWeight="Bold" FontSize="16" Margin="10,0,0,0" VerticalAlignment="Center" />
+                </Grid>
             </NavigationView.PaneHeader>
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="NavItemDashboard" Content="Dashboard" Tag="Dashboard" ToolTipService.ToolTip="Dashboard (Ctrl+1)">
