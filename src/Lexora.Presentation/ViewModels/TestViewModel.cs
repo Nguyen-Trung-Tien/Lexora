@@ -120,7 +120,7 @@ public partial class TestViewModel : ObservableObject
     public partial string ResultMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string ResultBadgeColor { get; set; } = "#107C41";
+    public partial TestScoreTier ResultScoreTier { get; set; } = TestScoreTier.NeedsPractice;
 
     public ObservableCollection<WordDto> WeakWordsList { get; } = new();
     public ObservableCollection<TestQuestionDto> QuestionResultsList { get; } = new();
@@ -318,21 +318,19 @@ public partial class TestViewModel : ObservableObject
             CorrectCount = result.CorrectCount;
             IncorrectCount = result.IncorrectCount;
             TimeTakenText = $"{result.TimeTaken.Minutes:D2}:{result.TimeTaken.Seconds:D2}";
+            ResultScoreTier = result.ScoreTier;
 
             if (ScorePercentage >= 85.0)
             {
                 ResultMessage = "Excellent! Outstanding mastery!";
-                ResultBadgeColor = "#107C41"; // Green
             }
             else if (ScorePercentage >= 60.0)
             {
                 ResultMessage = "Good job! Keep reviewing to improve!";
-                ResultBadgeColor = "#0078D4"; // Blue
             }
             else
             {
                 ResultMessage = "Needs practice. Let's review the weak words!";
-                ResultBadgeColor = "#D83B01"; // Orange/Red
             }
 
             WeakWordsList.Clear();

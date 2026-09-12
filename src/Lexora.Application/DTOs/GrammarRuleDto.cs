@@ -53,7 +53,6 @@ public record GrammarQuizQuestionDto(
     bool? IsCorrect = null
 )
 {
-    public string CorrectnessBadgeColor => IsCorrect == true ? "#107C41" : "#D83B01";
     public string CorrectnessText => IsCorrect == true ? "Correct" : "Incorrect";
 }
 

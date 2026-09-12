@@ -206,12 +206,19 @@ public class TestService : ITestService
                 var card = await _reviewRepo.GetByWordIdAsync(q.WordId, cancellationToken);
                 if (card != null)
                 {
-                    if (!isCorrect)
+                    card.TotalReviews++;
+                    if (isCorrect)
+                    {
+                        card.CorrectReviews++;
+                    }
+                    else
                     {
                         card.Lapses++;
                         card.Status = LearningStatus.NotRemembered;
                         card.NextReviewAt = DateTime.UtcNow;
                     }
+                    card.UpdatedAt = DateTime.UtcNow;
+                    await _reviewRepo.UpdateAsync(card, cancellationToken);
 
                     var log = new StudyLog
                     {
@@ -259,6 +266,10 @@ public class TestService : ITestService
             resultType = parsedType;
         }
 
+        var scoreTier = scorePercent >= 85.0 ? TestScoreTier.Excellent
+            : scorePercent >= 60.0 ? TestScoreTier.Good
+            : TestScoreTier.NeedsPractice;
+
         return new TestResultDto(
             sessionId,
             resultType,
@@ -271,7 +282,8 @@ public class TestService : ITestService
             timeTaken,
             evaluatedQuestions,
             weakWords.DistinctBy(w => w.Id).ToList(),
-            weakWords.DistinctBy(w => w.Id).ToList()
+            weakWords.DistinctBy(w => w.Id).ToList(),
+            scoreTier
         );
     }
 

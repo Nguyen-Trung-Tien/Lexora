@@ -11,6 +11,13 @@ public record TestConfigurationDto(
     bool WeakWordsOnly = false
 );
 
+public enum TestScoreTier
+{
+    Excellent,
+    Good,
+    NeedsPractice
+}
+
 public record TestQuestionDto(
     Guid WordId,
     int QuestionNumber,
@@ -27,7 +34,6 @@ public record TestQuestionDto(
 )
 {
     public string CorrectnessText => IsCorrect == true ? "Correct" : "Incorrect";
-    public string CorrectnessBadgeColor => IsCorrect == true ? "#107C41" : "#D83B01";
 }
 
 public record TestAnswerSubmissionDto(
@@ -56,5 +62,6 @@ public record TestResultDto(
     TimeSpan TimeTaken,
     List<TestQuestionDto> Questions,
     List<WordDto> WeakWords,
-    List<WordDto> RecommendedReviewWords
+    List<WordDto> RecommendedReviewWords,
+    TestScoreTier ScoreTier = TestScoreTier.NeedsPractice
 );

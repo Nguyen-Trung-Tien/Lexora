@@ -39,6 +39,22 @@ public sealed partial class SettingsPage : Page
         ViewModel.ChangeLanguage("en-US");
     }
 
+    private async void AutoPlayToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleSwitch ts)
+        {
+            await ViewModel.SetAutoPlayAudioAsync(ts.IsOn);
+        }
+    }
+
+    private async void ReminderToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleSwitch ts)
+        {
+            await ViewModel.SetReviewReminderAsync(ts.IsOn);
+        }
+    }
+
     private async void RefreshStatsButton_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.LoadDatabaseStatsAsync();

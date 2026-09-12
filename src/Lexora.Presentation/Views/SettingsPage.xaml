@@ -37,6 +37,26 @@
                 </StackPanel>
             </Border>
 
+            <!-- Study Experience & Notifications Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="Study Experience &amp; Notifications" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Customize study behavior, audio automation, and daily practice reminders." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <ToggleSwitch Header="Auto-play Audio Pronunciation"
+                                  IsOn="{x:Bind ViewModel.AutoPlayAudio, Mode=OneWay}"
+                                  Toggled="AutoPlayToggle_Toggled"
+                                  OffContent="Disabled"
+                                  OnContent="Automatically play UK audio when revealing flashcards" />
+
+                    <ToggleSwitch Header="Due Review Reminders"
+                                  IsOn="{x:Bind ViewModel.EnableReviewReminder, Mode=OneWay}"
+                                  Toggled="ReminderToggle_Toggled"
+                                  OffContent="Disabled"
+                                  OnContent="Show notification banner when words are due for review" />
+                </StackPanel>
+            </Border>
+
             <!-- Database & Backup Management Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
                 <StackPanel Spacing="14">

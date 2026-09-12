@@ -25,10 +25,10 @@
                       Grid.RowSpan="3" Canvas.ZIndex="10" />
 
         <!-- ========================================== -->
-        <!-- TOP ACTIONS BAR (Visible when not in Practice) -->
+        <!-- TOP ACTIONS BAR (Visible in Main Mode only) -->
         <!-- ========================================== -->
         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12"
-              Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+              Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <TextBox PlaceholderText="Search grammar rules, structures, explanations..."
                      Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}"
                      TextChanged="SearchBox_TextChanged" />
@@ -49,10 +49,10 @@
         </Grid>
 
         <!-- ========================================== -->
-        <!-- FILTERS BAR (Visible when not in Practice) -->
+        <!-- FILTERS BAR (Visible in Main Mode only)    -->
         <!-- ========================================== -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12"
-                    Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <ComboBox PlaceholderText="All Levels" Width="130"
                       ItemsSource="{x:Bind ViewModel.CefrLevels}"
                       SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}"

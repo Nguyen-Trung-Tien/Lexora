@@ -46,6 +46,9 @@ public static class DependencyInjection
         // Review reminder & notifications
         services.AddScoped<IReviewReminderService, ReviewReminderService>();
 
+        // User preferences persistence
+        services.AddSingleton<IUserPreferencesService, UserPreferencesService>();
+
         return services;
     }
 }

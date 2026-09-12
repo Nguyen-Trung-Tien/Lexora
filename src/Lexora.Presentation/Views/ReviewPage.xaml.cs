@@ -13,13 +13,18 @@ public sealed partial class ReviewPage : Page
 {
     public ReviewViewModel ViewModel { get; }
 
+    private readonly Lexora.Infrastructure.Services.IUserPreferencesService _preferencesService;
+
     public ReviewPage()
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<ReviewViewModel>();
+        _preferencesService = App.Current.Services.GetRequiredService<Lexora.Infrastructure.Services.IUserPreferencesService>();
 
+        IsTabStop = true;
         Loaded += async (s, e) =>
         {
+            Focus(FocusState.Programmatic);
             await ViewModel.InitializeAsync();
             UpdateModeButtonStyles(ViewModel.CurrentMode);
         };
@@ -34,6 +39,10 @@ public sealed partial class ReviewPage : Page
         if (e.Key == VirtualKey.Space && !ViewModel.IsAnswerVisible)
         {
             ViewModel.RevealAnswer();
+            if (_preferencesService.GetPreferences().AutoPlayAudio)
+            {
+                _ = ViewModel.PlayUkAudioAsync();
+            }
             e.Handled = true;
         }
         else if (ViewModel.IsAnswerVisible)
@@ -102,6 +111,10 @@ public sealed partial class ReviewPage : Page
     private void ShowAnswerButton_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.RevealAnswer();
+        if (_preferencesService.GetPreferences().AutoPlayAudio)
+        {
+            _ = ViewModel.PlayUkAudioAsync();
+        }
     }
 
     private async void AgainButton_Click(object sender, RoutedEventArgs e)

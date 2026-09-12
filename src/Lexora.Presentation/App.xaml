@@ -43,6 +43,8 @@
             <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
             <converters:IntZeroToVisibilityConverter x:Key="IntZeroToVisibilityConverter" />
             <converters:HeatmapLevelToBrushConverter x:Key="HeatmapLevelToBrushConverter" />
+            <converters:ScoreTierToBrushConverter x:Key="ScoreTierToBrushConverter" />
+            <converters:CorrectnessToBrushConverter x:Key="CorrectnessToBrushConverter" />
 
             <!-- Fallback Button Style -->
             <Style x:Key="DefaultButtonStyle" TargetType="Button" />

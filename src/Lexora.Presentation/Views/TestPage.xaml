@@ -306,7 +306,7 @@
                         
                         <!-- Score Ring -->
                         <Border Width="110" Height="110" CornerRadius="55"
-                                Background="{x:Bind ViewModel.ResultBadgeColor, Mode=OneWay}"
+                                Background="{x:Bind ViewModel.ResultScoreTier, Mode=OneWay, Converter={StaticResource ScoreTierToBrushConverter}}"
                                 HorizontalAlignment="Center" VerticalAlignment="Center">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock Text="{x:Bind ViewModel.ScorePercentage, Mode=OneWay}"
@@ -429,7 +429,7 @@
                                         <Grid ColumnDefinitions="*,Auto">
                                             <TextBlock Text="{x:Bind Prompt}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
                                             <Border Grid.Column="1" CornerRadius="4" Padding="6,2"
-                                                    Background="{x:Bind CorrectnessBadgeColor}">
+                                                    Background="{x:Bind IsCorrect, Converter={StaticResource CorrectnessToBrushConverter}}">
                                                 <TextBlock Text="{x:Bind CorrectnessText}" Foreground="White" FontSize="11" FontWeight="Bold" />
                                             </Border>
                                         </Grid>

@@ -69,6 +69,25 @@ public class LocalizationService : ILocalizationService
         }
     };
 
+    private readonly Lexora.Infrastructure.Services.IUserPreferencesService _preferencesService;
+
+    public LocalizationService(Lexora.Infrastructure.Services.IUserPreferencesService preferencesService)
+    {
+        _preferencesService = preferencesService;
+        var prefs = _preferencesService.GetPreferences();
+        var savedLang = prefs.LanguageCode;
+        if (_resources.ContainsKey(savedLang))
+        {
+            _currentLanguage = savedLang;
+            try
+            {
+                CultureInfo.CurrentUICulture = new CultureInfo(savedLang);
+                CultureInfo.CurrentCulture = new CultureInfo(savedLang);
+            }
+            catch { /* fallback to default */ }
+        }
+    }
+
     public string CurrentLanguage => _currentLanguage;
     public event EventHandler? LanguageChanged;
 
@@ -79,6 +98,13 @@ public class LocalizationService : ILocalizationService
             _currentLanguage = languageCode;
             CultureInfo.CurrentUICulture = new CultureInfo(languageCode);
             CultureInfo.CurrentCulture = new CultureInfo(languageCode);
+
+            var currentPrefs = _preferencesService.GetPreferences();
+            if (currentPrefs.LanguageCode != languageCode)
+            {
+                _ = _preferencesService.SavePreferencesAsync(currentPrefs with { LanguageCode = languageCode });
+            }
+
             LanguageChanged?.Invoke(this, EventArgs.Empty);
         }
     }

@@ -27,13 +27,19 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
     {
         if (string.IsNullOrWhiteSpace(term)) return;
 
+        var safeTerm = term.Trim();
+        if (safeTerm.Length > 150)
+        {
+            safeTerm = safeTerm.Substring(0, 150);
+        }
+
         try
         {
             // Stop any currently playing audio before beginning new playback
             _mediaPlayer.Pause();
 
             // 1. Check if cached audio file exists
-            var cachedPath = _audioStorage.GetCachedAudioPath(term, accent);
+            var cachedPath = _audioStorage.GetCachedAudioPath(safeTerm, accent);
             if (cachedPath != null && File.Exists(cachedPath))
             {
                 var fileUri = new Uri(cachedPath);
@@ -62,7 +68,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
                 _synthesizer.Voice = targetVoice;
             }
 
-            var stream = await _synthesizer.SynthesizeTextToStreamAsync(term);
+            var stream = await _synthesizer.SynthesizeTextToStreamAsync(safeTerm);
             _mediaPlayer.Source = MediaSource.CreateFromStream(stream, stream.ContentType);
             _mediaPlayer.Play();
         }

@@ -15,12 +15,19 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IVocabularyService _vocabService;
     private readonly IGrammarService _grammarService;
     private readonly IAudioPlayerService _audioService;
+    private readonly IUserPreferencesService _preferencesService;
 
     [ObservableProperty]
     public partial int SelectedThemeIndex { get; set; } = 0; // 0 = System, 1 = Light, 2 = Dark
 
     [ObservableProperty]
     public partial string CurrentLanguage { get; set; }
+
+    [ObservableProperty]
+    public partial bool AutoPlayAudio { get; set; }
+
+    [ObservableProperty]
+    public partial bool EnableReviewReminder { get; set; } = true;
 
     [ObservableProperty]
     public partial string BackupStatusMessage { get; set; } = string.Empty;
@@ -49,7 +56,8 @@ public partial class SettingsViewModel : ObservableObject
         IDatabaseBackupService backupService,
         IVocabularyService vocabService,
         IGrammarService grammarService,
-        IAudioPlayerService audioService)
+        IAudioPlayerService audioService,
+        IUserPreferencesService preferencesService)
     {
         _themeService = themeService;
         _locService = locService;
@@ -57,16 +65,31 @@ public partial class SettingsViewModel : ObservableObject
         _vocabService = vocabService;
         _grammarService = grammarService;
         _audioService = audioService;
+        _preferencesService = preferencesService;
 
         CurrentLanguage = _locService.CurrentLanguage;
-        SelectedThemeIndex = _themeService.CurrentTheme switch
-        {
-            ElementTheme.Light => 1,
-            ElementTheme.Dark => 2,
-            _ => 0
-        };
+        var prefs = _preferencesService.GetPreferences();
+        SelectedThemeIndex = prefs.ThemeIndex;
+        AutoPlayAudio = prefs.AutoPlayAudio;
+        EnableReviewReminder = prefs.EnableReviewReminder;
 
         DatabasePath = _backupService.DatabasePath;
+    }
+
+    [RelayCommand]
+    public async Task SetAutoPlayAudioAsync(bool enabled)
+    {
+        AutoPlayAudio = enabled;
+        var current = _preferencesService.GetPreferences();
+        await _preferencesService.SavePreferencesAsync(current with { AutoPlayAudio = enabled });
+    }
+
+    [RelayCommand]
+    public async Task SetReviewReminderAsync(bool enabled)
+    {
+        EnableReviewReminder = enabled;
+        var current = _preferencesService.GetPreferences();
+        await _preferencesService.SavePreferencesAsync(current with { EnableReviewReminder = enabled });
     }
 
     [RelayCommand]
