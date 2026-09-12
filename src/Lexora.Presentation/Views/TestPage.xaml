@@ -41,7 +41,7 @@
                 </Grid>
 
                 <!-- Status InfoBar -->
-                <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"
+                <InfoBar IsOpen="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"
                          Severity="Informational"
                          Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
 
@@ -333,7 +333,7 @@
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                         <StackPanel Spacing="4">
                             <TextBlock Text="Correct" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                            <TextBlock Text="{x:Bind ViewModel.CorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#107C41" />
+                            <TextBlock Text="{x:Bind ViewModel.CorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                         </StackPanel>
                     </Border>
 
@@ -342,7 +342,7 @@
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                         <StackPanel Spacing="4">
                             <TextBlock Text="Incorrect" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                            <TextBlock Text="{x:Bind ViewModel.IncorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#D83B01" />
+                            <TextBlock Text="{x:Bind ViewModel.IncorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                         </StackPanel>
                     </Border>
 
@@ -382,7 +382,7 @@
                 <!-- Weak Words Identified Section -->
                 <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.WeakWordsList.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE7BA;" Foreground="#D83B01" FontSize="18" />
+                        <FontIcon Glyph="&#xE7BA;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="18" />
                         <TextBlock Text="Weak Words Requiring Review" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
                     </StackPanel>
 
@@ -438,7 +438,7 @@
                                             <TextBlock Text="Your answer:" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" />
                                             <TextBlock Text="{x:Bind UserAnswer}" FontWeight="SemiBold" FontSize="12" />
                                             <TextBlock Text="• Correct answer:" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" />
-                                            <TextBlock Text="{x:Bind CorrectAnswer}" FontWeight="SemiBold" FontSize="12" Foreground="#107C41" />
+                                            <TextBlock Text="{x:Bind CorrectAnswer}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>

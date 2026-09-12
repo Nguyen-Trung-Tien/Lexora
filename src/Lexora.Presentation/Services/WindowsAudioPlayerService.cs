@@ -29,6 +29,9 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 
         try
         {
+            // Stop any currently playing audio before beginning new playback
+            _mediaPlayer.Pause();
+
             // 1. Check if cached audio file exists
             var cachedPath = _audioStorage.GetCachedAudioPath(term, accent);
             if (cachedPath != null && File.Exists(cachedPath))

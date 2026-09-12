@@ -183,12 +183,32 @@ public partial class VocabularyViewModel : ObservableObject
         _isMarkingStatus = true;
         try
         {
-            await _reviewService.MarkStatusQuickAsync(SelectedWord.Id, remembered);
-            var currentId = SelectedWord.Id;
-            await LoadWordsAsync();
-            // Restore selection to the same word after list refresh
-            var refreshed = Words.FirstOrDefault(w => w.Id == currentId);
-            if (refreshed != null) SelectedWord = refreshed;
+            var wordId = SelectedWord.Id;
+            var term = SelectedWord.Term;
+            await _reviewService.MarkStatusQuickAsync(wordId, remembered);
+
+            var newStatus = remembered ? LearningStatus.Remembered : LearningStatus.NotRemembered;
+            var updatedWord = SelectedWord with { LearningStatus = newStatus };
+
+            int idx = -1;
+            for (int i = 0; i < Words.Count; i++)
+            {
+                if (Words[i].Id == wordId)
+                {
+                    idx = i;
+                    break;
+                }
+            }
+
+            if (idx >= 0)
+            {
+                Words[idx] = updatedWord;
+            }
+            SelectedWord = updatedWord;
+
+            StatusMessage = remembered
+                ? $"✓ Đã đánh dấu '{term}' là Nhớ rồi."
+                : $"✕ Đã đánh dấu '{term}' là Chưa nhớ.";
         }
         finally
         {

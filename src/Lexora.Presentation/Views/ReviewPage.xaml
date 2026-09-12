@@ -24,7 +24,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE823;" FontSize="14" />
                             <TextBlock Text="Today's Due" />
-                            <Border Background="#D83B01" CornerRadius="10" Padding="6,1" Margin="4,0,0,0"
+                            <Border Background="{ThemeResource SystemFillColorCriticalBrush}" CornerRadius="10" Padding="6,1" Margin="4,0,0,0"
                                     Visibility="{x:Bind ViewModel.DueCardsCount, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                                 <TextBlock Text="{x:Bind ViewModel.DueCardsCount, Mode=OneWay}" Foreground="White" FontSize="11" FontWeight="Bold" />
                             </Border>
@@ -40,7 +40,7 @@
 
                     <Button x:Name="ModeDifficultButton" Click="ModeDifficultButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="#D83B01" />
+                            <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                             <TextBlock Text="Difficult &amp; Lapses" />
                         </StackPanel>
                     </Button>
@@ -83,9 +83,9 @@
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="16" Padding="40" MinHeight="360"
-                        Visibility="{x:Bind ViewModel.CurrentCard, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
+                        Visibility="{x:Bind ViewModel.IsEmptyQueue, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Border Width="68" Height="68" CornerRadius="18" Background="#15107C41" Padding="10" HorizontalAlignment="Center">
+                        <Border Width="68" Height="68" CornerRadius="18" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="10" HorizontalAlignment="Center">
                             <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
                         </Border>
                         <TextBlock Text="All Caught Up! 🎉" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
@@ -102,7 +102,7 @@
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="16" Padding="32" MinHeight="380"
-                        Visibility="{x:Bind ViewModel.CurrentCard, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                        Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
 
                     <Grid RowDefinitions="Auto,*,Auto">
                         <!-- Front Card: Term, Phonetics, Audio Buttons, Badges -->
@@ -144,7 +144,7 @@
 
                                 <Button Padding="10,6" Click="PlayUsAudio_Click" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="#107C41" />
+                                        <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                         <TextBlock Text="US" FontWeight="Bold" />
                                         <TextBlock Text="{x:Bind ViewModel.CurrentCard.PhoneticUs, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     </StackPanel>
@@ -194,34 +194,34 @@
                             <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12"
                                   Visibility="{x:Bind ViewModel.IsAnswerVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
 
-                                <!-- 1: Again -->
-                                <Button Background="#D83B01" Foreground="White" HorizontalAlignment="Stretch" Padding="8,10" CornerRadius="8" Click="AgainButton_Click">
+                                <!-- 1: Again / Chưa nhớ -->
+                                <Button Background="{ThemeResource SystemFillColorCriticalBrush}" Foreground="White" HorizontalAlignment="Stretch" Padding="8,10" CornerRadius="8" Click="AgainButton_Click">
                                     <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                        <TextBlock Text="Again (1)" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="✕ Chưa nhớ (1)" FontWeight="Bold" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Bind ViewModel.AgainIntervalText, Mode=OneWay}" FontSize="12" Opacity="0.9" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
 
-                                <!-- 2: Hard -->
-                                <Button Grid.Column="1" Background="#EA4300" Foreground="White" HorizontalAlignment="Stretch" Padding="8,10" CornerRadius="8" Click="HardButton_Click">
+                                <!-- 2: Hard / Khó nhớ -->
+                                <Button Grid.Column="1" Background="{ThemeResource SystemFillColorAttentionBrush}" Foreground="White" HorizontalAlignment="Stretch" Padding="8,10" CornerRadius="8" Click="HardButton_Click">
                                     <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                        <TextBlock Text="Hard (2)" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Khó nhớ (2)" FontWeight="Bold" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Bind ViewModel.HardIntervalText, Mode=OneWay}" FontSize="12" Opacity="0.9" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
 
-                                <!-- 3: Good -->
-                                <Button Grid.Column="2" Background="#0078D4" Foreground="White" HorizontalAlignment="Stretch" Padding="8,10" CornerRadius="8" Click="GoodButton_Click">
+                                <!-- 3: Good / Nhớ -->
+                                <Button Grid.Column="2" Background="{ThemeResource AccentFillColorDefaultBrush}" Foreground="White" HorizontalAlignment="Stretch" Padding="8,10" CornerRadius="8" Click="GoodButton_Click">
                                     <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                        <TextBlock Text="Good (3)" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="✓ Nhớ (3)" FontWeight="Bold" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Bind ViewModel.GoodIntervalText, Mode=OneWay}" FontSize="12" Opacity="0.9" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
 
-                                <!-- 4: Easy -->
-                                <Button Grid.Column="3" Background="#107C41" Foreground="White" HorizontalAlignment="Stretch" Padding="8,10" CornerRadius="8" Click="EasyButton_Click">
+                                <!-- 4: Easy / Rất dễ -->
+                                <Button Grid.Column="3" Background="{ThemeResource SystemFillColorSuccessBrush}" Foreground="White" HorizontalAlignment="Stretch" Padding="8,10" CornerRadius="8" Click="EasyButton_Click">
                                     <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                        <TextBlock Text="Easy (4)" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Rất dễ (4)" FontWeight="Bold" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Bind ViewModel.EasyIntervalText, Mode=OneWay}" FontSize="12" Opacity="0.9" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -234,10 +234,10 @@
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="16" Padding="40"
-                        Visibility="{x:Bind ViewModel.IsCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        Visibility="{x:Bind ViewModel.IsSessionCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
 
                     <StackPanel Spacing="20" HorizontalAlignment="Center">
-                        <Border Width="72" Height="72" CornerRadius="18" Background="#18107C41" Padding="10" HorizontalAlignment="Center">
+                        <Border Width="72" Height="72" CornerRadius="18" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="10" HorizontalAlignment="Center">
                             <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="52" Height="52" />
                         </Border>
                         <TextBlock Text="Session Completed! 🎉" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />

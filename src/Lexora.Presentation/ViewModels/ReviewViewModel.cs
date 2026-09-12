@@ -19,12 +19,17 @@ public partial class ReviewViewModel : ObservableObject
     private int _initialQueueCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCardActive))]
+    [NotifyPropertyChangedFor(nameof(IsEmptyQueue))]
+    [NotifyPropertyChangedFor(nameof(IsSessionCompleted))]
     public partial bool IsLoading { get; set; } = true;
 
     [ObservableProperty]
     public partial bool IsAnswerVisible { get; set; } = false;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCardActive))]
+    [NotifyPropertyChangedFor(nameof(IsEmptyQueue))]
     public partial ReviewCardDto? CurrentCard { get; set; }
 
     [ObservableProperty]
@@ -40,7 +45,13 @@ public partial class ReviewViewModel : ObservableObject
     public partial double ProgressPercent { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmptyQueue))]
+    [NotifyPropertyChangedFor(nameof(IsSessionCompleted))]
     public partial bool IsCompleted { get; set; } = false;
+
+    public bool IsCardActive => CurrentCard != null && !IsLoading;
+    public bool IsEmptyQueue => CurrentCard == null && !IsCompleted && !IsLoading;
+    public bool IsSessionCompleted => IsCompleted && !IsLoading;
 
     [ObservableProperty]
     public partial ReviewSessionMode CurrentMode { get; set; } = ReviewSessionMode.TodayDue;
@@ -140,6 +151,7 @@ public partial class ReviewViewModel : ObservableObject
             {
                 var session = await _reviewService.StartSessionAsync(mode, ReviewQueue.Count);
                 _currentSessionId = session.Id;
+                IsCompleted = false;
 
                 SetCurrentCard(ReviewQueue[0]);
             }
@@ -147,7 +159,7 @@ public partial class ReviewViewModel : ObservableObject
             {
                 CurrentCard = null;
                 _currentSessionId = null;
-                IsCompleted = true;
+                IsCompleted = false;
             }
         }
         finally

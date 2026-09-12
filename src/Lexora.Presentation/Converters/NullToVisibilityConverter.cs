@@ -7,6 +7,10 @@ public class NullToVisibilityConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object parameter, string language)
     {
+        if (value is string s)
+        {
+            return !string.IsNullOrWhiteSpace(s) ? Visibility.Visible : Visibility.Collapsed;
+        }
         return value != null ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -20,6 +24,10 @@ public class InverseNullToVisibilityConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object parameter, string language)
     {
+        if (value is string s)
+        {
+            return string.IsNullOrWhiteSpace(s) ? Visibility.Visible : Visibility.Collapsed;
+        }
         return value == null ? Visibility.Visible : Visibility.Collapsed;
     }
 

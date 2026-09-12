@@ -17,7 +17,13 @@ public class DatabaseBackupServiceTests : IDisposable
         Directory.CreateDirectory(_tempDirectory);
 
         _mockDbPath = Path.Combine(_tempDirectory, "mock_lexora.db");
-        File.WriteAllBytes(_mockDbPath, [0x53, 0x51, 0x4C, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6F, 0x72, 0x6D, 0x61, 0x74, 0x20, 0x33, 0x00]); // SQLite header magic bytes
+        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_mockDbPath};Pooling=False;"))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "CREATE TABLE TestTable (Id INTEGER PRIMARY KEY, Name TEXT); INSERT INTO TestTable VALUES (1, 'Lexora');";
+            cmd.ExecuteNonQuery();
+        }
 
         _backupService = new DatabaseBackupService(_mockDbPath, NullLogger<DatabaseBackupService>.Instance);
     }
@@ -36,9 +42,15 @@ public class DatabaseBackupServiceTests : IDisposable
         Path.GetDirectoryName(backupFilePath).Should().Be(backupDestDir);
         Path.GetFileName(backupFilePath).Should().StartWith("lexora_backup_").And.EndWith(".db");
 
-        var sourceBytes = await File.ReadAllBytesAsync(_mockDbPath);
-        var backupBytes = await File.ReadAllBytesAsync(backupFilePath);
-        backupBytes.Should().Equal(sourceBytes);
+        // Verify backup contains the same data and valid SQLite header
+        using (var backupConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={backupFilePath};Mode=ReadOnly;Pooling=False;"))
+        {
+            await backupConn.OpenAsync();
+            using var cmd = backupConn.CreateCommand();
+            cmd.CommandText = "SELECT Name FROM TestTable WHERE Id = 1;";
+            var name = (string?)await cmd.ExecuteScalarAsync();
+            name.Should().Be("Lexora");
+        }
     }
 
     [Fact]
@@ -60,16 +72,26 @@ public class DatabaseBackupServiceTests : IDisposable
     {
         // Arrange
         var customBackupPath = Path.Combine(_tempDirectory, "restore_test.db");
-        var headerBytes = System.Text.Encoding.ASCII.GetBytes("SQLite format 3\0");
-        var newPayload = headerBytes.Concat(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }).ToArray();
-        await File.WriteAllBytesAsync(customBackupPath, newPayload);
+        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={customBackupPath};Pooling=False;"))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "CREATE TABLE RestoredTable (Val TEXT); INSERT INTO RestoredTable VALUES ('RestoredData');";
+            cmd.ExecuteNonQuery();
+        }
 
         // Act
         await _backupService.RestoreBackupAsync(customBackupPath);
 
         // Assert
-        var restoredBytes = await File.ReadAllBytesAsync(_mockDbPath);
-        restoredBytes.Should().Equal(newPayload);
+        using (var checkConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_mockDbPath};Mode=ReadOnly;Pooling=False;"))
+        {
+            await checkConn.OpenAsync();
+            using var cmd = checkConn.CreateCommand();
+            cmd.CommandText = "SELECT Val FROM RestoredTable;";
+            var val = (string?)await cmd.ExecuteScalarAsync();
+            val.Should().Be("RestoredData");
+        }
     }
 
     [Fact]
@@ -95,6 +117,7 @@ public class DatabaseBackupServiceTests : IDisposable
     {
         try
         {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             if (Directory.Exists(_tempDirectory))
             {
                 Directory.Delete(_tempDirectory, recursive: true);

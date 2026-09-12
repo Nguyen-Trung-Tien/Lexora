@@ -60,8 +60,9 @@ public class LocalAudioStorageService : IAudioStorageService
         var fileName = $"{safeTerm}_{safeAccent}.mp3";
         var fullPath = Path.GetFullPath(Path.Combine(_cacheDirectory, fileName));
 
-        // Ensure path remains strictly within cache directory
-        if (!fullPath.StartsWith(_cacheDirectory, StringComparison.OrdinalIgnoreCase))
+        // Ensure path remains strictly within cache directory with trailing separator
+        var safeBaseDir = _cacheDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        if (!fullPath.StartsWith(safeBaseDir, StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }

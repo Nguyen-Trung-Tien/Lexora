@@ -239,8 +239,8 @@ public class TestService : ITestService
             await _reviewRepo.UpdateStudySessionAsync(session, cancellationToken);
         }
 
-        // Update learning streak
-        await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+        // Update learning streak using local user date
+        await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Clean up cache

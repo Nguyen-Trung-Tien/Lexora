@@ -227,7 +227,6 @@ public sealed partial class VocabularyPage : Page
         {
             if (sender is Button btn) btn.IsEnabled = false;
             await ViewModel.MarkWordStatusAsync(remembered: true);
-            ViewModel.StatusMessage = $"✓ Đã đánh dấu '{ViewModel.SelectedWord?.Term ?? string.Empty}' là Nhớ rồi.";
         }
         catch (Exception ex)
         {
@@ -246,7 +245,6 @@ public sealed partial class VocabularyPage : Page
         {
             if (sender is Button btn) btn.IsEnabled = false;
             await ViewModel.MarkWordStatusAsync(remembered: false);
-            ViewModel.StatusMessage = $"✕ Đã đánh dấu '{ViewModel.SelectedWord?.Term ?? string.Empty}' là Chưa nhớ.";
         }
         catch (Exception ex)
         {
@@ -263,18 +261,8 @@ public sealed partial class VocabularyPage : Page
         try
         {
             var json = await ViewModel.ExportToJsonAsync();
-            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            var filePath = Path.Combine(desktop, $"lexora_export_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json");
-            await File.WriteAllTextAsync(filePath, json);
-
-            var dialog = new ContentDialog
-            {
-                Title = "Export Complete",
-                Content = $"Vocabulary exported successfully to:\n{filePath}",
-                CloseButtonText = "OK",
-                XamlRoot = this.XamlRoot
-            };
-            await dialog.ShowAsync();
+            var defaultName = $"lexora_export_{DateTime.Now:yyyyMMdd_HHmmss}";
+            await ExportFileAsync(json, defaultName, ".json", "JSON Vocabulary File");
         }
         catch (Exception ex)
         {
@@ -287,18 +275,8 @@ public sealed partial class VocabularyPage : Page
         try
         {
             var csv = await ViewModel.ExportToCsvAsync();
-            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            var filePath = Path.Combine(desktop, $"lexora_export_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
-            await File.WriteAllTextAsync(filePath, csv);
-
-            var dialog = new ContentDialog
-            {
-                Title = "Export Complete",
-                Content = $"Vocabulary exported successfully to:\n{filePath}",
-                CloseButtonText = "OK",
-                XamlRoot = this.XamlRoot
-            };
-            await dialog.ShowAsync();
+            var defaultName = $"lexora_export_{DateTime.Now:yyyyMMdd_HHmmss}";
+            await ExportFileAsync(csv, defaultName, ".csv", "CSV Vocabulary File");
         }
         catch (Exception ex)
         {
@@ -306,40 +284,126 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
+    private async Task ExportFileAsync(string content, string defaultName, string extension, string fileTypeDescription)
+    {
+        string? savedPath = null;
+        try
+        {
+            var savePicker = new FileSavePicker();
+            savePicker.SuggestedStartLocation = PickerLocationId.Desktop;
+            savePicker.FileTypeChoices.Add(fileTypeDescription, new List<string> { extension });
+            savePicker.SuggestedFileName = defaultName;
+
+            var mainWindow = App.Current.MainWindow;
+            if (mainWindow != null)
+            {
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(mainWindow);
+                WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
+            }
+
+            var file = await savePicker.PickSaveFileAsync();
+            if (file != null)
+            {
+                await Windows.Storage.FileIO.WriteTextAsync(file, content);
+                savedPath = file.Path;
+            }
+            else
+            {
+                // User cancelled
+                return;
+            }
+        }
+        catch
+        {
+            // Fallback: save to Desktop if picker initialization fails
+            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            savedPath = Path.Combine(desktop, $"{defaultName}{extension}");
+            await File.WriteAllTextAsync(savedPath, content);
+        }
+
+        if (!string.IsNullOrEmpty(savedPath))
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "Export Complete",
+                Content = $"Vocabulary exported successfully to:\n{savedPath}",
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot
+            };
+            await dialog.ShowAsync();
+        }
+    }
+
     private async void ImportJson_Click(object sender, RoutedEventArgs e)
     {
-        await ShowImportTextInputDialog(isJson: true);
+        await ShowImportDialogAsync(isJson: true);
     }
 
     private async void ImportCsv_Click(object sender, RoutedEventArgs e)
     {
-        await ShowImportTextInputDialog(isJson: false);
+        await ShowImportDialogAsync(isJson: false);
     }
 
-    private async Task ShowImportTextInputDialog(bool isJson)
+    private async Task ShowImportDialogAsync(bool isJson)
     {
-        var textBox = new TextBox
-        {
-            AcceptsReturn = true,
-            TextWrapping = TextWrapping.Wrap,
-            Height = 250,
-            PlaceholderText = isJson ? "Paste JSON array of vocabulary here..." : "Paste CSV content (with header line) here..."
-        };
+        string fileExt = isJson ? ".json" : ".csv";
+        string filterName = isJson ? "JSON Files" : "CSV Files";
+        string? contentToImport = null;
 
-        var dialog = new ContentDialog
+        try
         {
-            Title = isJson ? "Import Vocabulary (JSON)" : "Import Vocabulary (CSV)",
-            Content = textBox,
-            PrimaryButtonText = "Import Now",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = this.XamlRoot
-        };
+            var picker = new FileOpenPicker();
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
+            picker.FileTypeFilter.Add(fileExt);
 
-        var res = await dialog.ShowAsync();
-        if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(textBox.Text))
+            var mainWindow = App.Current.MainWindow;
+            if (mainWindow != null)
+            {
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(mainWindow);
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                contentToImport = await Windows.Storage.FileIO.ReadTextAsync(file);
+            }
+        }
+        catch
         {
-            var importResult = await ViewModel.ImportDataAsync(textBox.Text, isJson);
+            // Fallback to text prompt
+        }
+
+        if (string.IsNullOrEmpty(contentToImport))
+        {
+            var textBox = new TextBox
+            {
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                Height = 250,
+                PlaceholderText = isJson ? "Or paste JSON array of vocabulary here..." : "Or paste CSV content (with header line) here..."
+            };
+
+            var dialog = new ContentDialog
+            {
+                Title = isJson ? "Import Vocabulary (JSON)" : "Import Vocabulary (CSV)",
+                Content = textBox,
+                PrimaryButtonText = "Import Content",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot
+            };
+
+            var res = await dialog.ShowAsync();
+            if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(textBox.Text))
+            {
+                contentToImport = textBox.Text;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(contentToImport))
+        {
+            var importResult = await ViewModel.ImportDataAsync(contentToImport, isJson);
             await Task.Yield();
             var summaryDialog = new ContentDialog
             {

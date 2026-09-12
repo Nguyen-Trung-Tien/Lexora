@@ -23,6 +23,11 @@ public class SqliteDatabaseInitializer
             _logger.LogInformation("Ensuring SQLite database is created...");
             await _context.Database.EnsureCreatedAsync(cancellationToken);
 
+            // Configure optimal client SQLite PRAGMAs
+            await _context.Database.ExecuteSqlRawAsync(
+                "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON;",
+                cancellationToken);
+
             if (!await _context.Words.AnyAsync(cancellationToken))
             {
                 _logger.LogInformation("Seeding initial starter pack data...");

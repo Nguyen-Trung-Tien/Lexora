@@ -121,8 +121,8 @@ public class ReviewService : IReviewService
         };
         _reviewRepo.AddStudyLog(log);
 
-        // Update streak
-        await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+        // Update streak (using local user date to reflect user's real calendar day)
+        await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
 
         await _reviewRepo.UpdateAsync(card, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -171,7 +171,7 @@ public class ReviewService : IReviewService
         };
         _reviewRepo.AddStudyLog(log);
 
-        await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+        await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 

@@ -76,16 +76,16 @@ public sealed partial class MainWindow : Window
                 var hwnd = WindowNative.GetWindowHandle(this);
                 if (hwnd != IntPtr.Zero)
                 {
-                    IntPtr hIconSmall = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, 16, 16, 0x00000010 /*LR_LOADFROMFILE*/);
-                    IntPtr hIconBig = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, 32, 32, 0x00000010 /*LR_LOADFROMFILE*/);
+                    _hIconSmall = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, 16, 16, 0x00000010 /*LR_LOADFROMFILE*/);
+                    _hIconBig = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, 32, 32, 0x00000010 /*LR_LOADFROMFILE*/);
 
-                    if (hIconSmall != IntPtr.Zero)
+                    if (_hIconSmall != IntPtr.Zero)
                     {
-                        SendMessage(hwnd, 0x0080 /*WM_SETICON*/, (IntPtr)0 /*ICON_SMALL*/, hIconSmall);
+                        SendMessage(hwnd, 0x0080 /*WM_SETICON*/, (IntPtr)0 /*ICON_SMALL*/, _hIconSmall);
                     }
-                    if (hIconBig != IntPtr.Zero)
+                    if (_hIconBig != IntPtr.Zero)
                     {
-                        SendMessage(hwnd, 0x0080 /*WM_SETICON*/, (IntPtr)1 /*ICON_BIG*/, hIconBig);
+                        SendMessage(hwnd, 0x0080 /*WM_SETICON*/, (IntPtr)1 /*ICON_BIG*/, _hIconBig);
                     }
                 }
             }
@@ -96,11 +96,18 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private IntPtr _hIconSmall = IntPtr.Zero;
+    private IntPtr _hIconBig = IntPtr.Zero;
+
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern IntPtr LoadImage(IntPtr hinst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DestroyIcon(IntPtr hIcon);
 
     public async Task StartStartupSequenceAsync()
     {
@@ -159,5 +166,17 @@ public sealed partial class MainWindow : Window
         _startupCts?.Cancel();
         _startupCts?.Dispose();
         _startupCts = null;
+
+        if (_hIconSmall != IntPtr.Zero)
+        {
+            DestroyIcon(_hIconSmall);
+            _hIconSmall = IntPtr.Zero;
+        }
+
+        if (_hIconBig != IntPtr.Zero)
+        {
+            DestroyIcon(_hIconBig);
+            _hIconBig = IntPtr.Zero;
+        }
     }
 }

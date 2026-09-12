@@ -72,7 +72,7 @@
                         <Button Content="Restore from Backup (.db)..." Click="RestoreButton_Click" />
                     </StackPanel>
 
-                    <TextBlock Text="{x:Bind ViewModel.BackupStatusMessage, Mode=OneWay}" Foreground="#107C41" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{x:Bind ViewModel.BackupStatusMessage, Mode=OneWay}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
 

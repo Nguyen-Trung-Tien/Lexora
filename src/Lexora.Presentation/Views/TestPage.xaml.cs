@@ -117,8 +117,8 @@ public sealed partial class TestPage : Page
 
     private void UpdateTypeButtonStyles(TestType selected)
     {
-        var accent = (Style)Microsoft.UI.Xaml.Application.Current.Resources["AccentButtonStyle"];
-        var def = (Style)Microsoft.UI.Xaml.Application.Current.Resources["DefaultButtonStyle"];
+        var accent = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
+        var def = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("DefaultButtonStyle", out var d) ? (Style)d : null;
 
         BtnTypeMixed.Style = selected == TestType.Mixed ? accent : def;
         BtnTypeWordToMeaning.Style = selected == TestType.WordToMeaning ? accent : def;
@@ -130,8 +130,8 @@ public sealed partial class TestPage : Page
 
     private void UpdateCountButtonStyles(int count)
     {
-        var accent = (Style)Microsoft.UI.Xaml.Application.Current.Resources["AccentButtonStyle"];
-        var def = (Style)Microsoft.UI.Xaml.Application.Current.Resources["DefaultButtonStyle"];
+        var accent = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
+        var def = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("DefaultButtonStyle", out var d) ? (Style)d : null;
 
         BtnCount5.Style = count == 5 ? accent : def;
         BtnCount10.Style = count == 10 ? accent : def;

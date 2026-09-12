@@ -37,14 +37,16 @@
         </Grid>
 
         <!-- Filters & Sorting Bar -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12">
-            <ComboBox x:Name="LevelFilterCombo" PlaceholderText="CEFR Level" SelectionChanged="LevelFilterCombo_SelectionChanged" Width="130" />
-            <ComboBox x:Name="PosFilterCombo" PlaceholderText="Part of Speech" SelectionChanged="PosFilterCombo_SelectionChanged" Width="140" />
-            <ComboBox x:Name="StatusFilterCombo" PlaceholderText="Status" SelectionChanged="StatusFilterCombo_SelectionChanged" Width="140" />
-            <ComboBox x:Name="SortCombo" PlaceholderText="Sort by" SelectionChanged="SortCombo_SelectionChanged" Width="150" />
-            <Button Content="Reset Filters" Click="ResetFiltersButton_Click" />
-            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" VerticalAlignment="Center" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" Margin="12,0,0,0" />
-        </StackPanel>
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+            <StackPanel Orientation="Horizontal" Spacing="12" Padding="0,2,0,6">
+                <ComboBox x:Name="LevelFilterCombo" PlaceholderText="CEFR Level" SelectionChanged="LevelFilterCombo_SelectionChanged" Width="130" />
+                <ComboBox x:Name="PosFilterCombo" PlaceholderText="Part of Speech" SelectionChanged="PosFilterCombo_SelectionChanged" Width="140" />
+                <ComboBox x:Name="StatusFilterCombo" PlaceholderText="Status" SelectionChanged="StatusFilterCombo_SelectionChanged" Width="140" />
+                <ComboBox x:Name="SortCombo" PlaceholderText="Sort by" SelectionChanged="SortCombo_SelectionChanged" Width="150" />
+                <Button Content="Reset Filters" Click="ResetFiltersButton_Click" />
+                <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" VerticalAlignment="Center" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" Margin="12,0,0,0" />
+            </StackPanel>
+        </ScrollViewer>
 
         <!-- Master-Detail Content -->
         <Grid Grid.Row="2" ColumnDefinitions="380,*" ColumnSpacing="20">
@@ -148,7 +150,7 @@
                                     <!-- US Audio Button -->
                                     <Button Padding="8,4" Click="PlayUsAudio_Click" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="#107C41" />
+                                            <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                             <TextBlock Text="US" FontWeight="Bold" />
                                             <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUs, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
@@ -162,7 +164,7 @@
                                     <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
                                 </Border>
                                 <Button Content="Edit" Click="EditWordButton_Click" />
-                                <Button Content="Delete" Foreground="#D83B01" Click="DeleteWordButton_Click" />
+                                <Button Content="Delete" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Click="DeleteWordButton_Click" />
                             </StackPanel>
                         </Grid>
 

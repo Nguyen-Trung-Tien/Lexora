@@ -73,7 +73,7 @@
         <!-- 1. MASTER-DETAIL VIEW (Main Mode)          -->
         <!-- ========================================== -->
         <Grid Grid.Row="2" ColumnDefinitions="380,*" ColumnSpacing="20"
-              Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+              Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             
             <!-- Left: Rules List -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -110,7 +110,7 @@
                                             <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Right">
                                                 <TextBlock Text="{x:Bind Level}" FontSize="10" Foreground="White" FontWeight="Bold" />
                                             </Border>
-                                            <Border Background="#107C41" CornerRadius="4" Padding="6,2" HorizontalAlignment="Right">
+                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Right">
                                                 <TextBlock Text="{x:Bind ExamTarget}" FontSize="10" Foreground="White" FontWeight="SemiBold" />
                                             </Border>
                                         </StackPanel>
@@ -157,8 +157,8 @@
                                 </Button>
                                 <Button Click="DeleteRuleButton_Click" ToolTipService.ToolTip="Delete Rule (Del)" Padding="10,6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="#D83B01" />
-                                        <TextBlock Text="Delete" Foreground="#D83B01" />
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                        <TextBlock Text="Delete" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -169,7 +169,7 @@
                             <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,4">
                                 <TextBlock Text="{x:Bind ViewModel.SelectedRule.Level, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
                             </Border>
-                            <Border Background="#107C41" CornerRadius="6" Padding="10,4">
+                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="6" Padding="10,4">
                                 <TextBlock Text="{x:Bind ViewModel.SelectedRule.ExamTarget, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
                             </Border>
                         </StackPanel>
@@ -293,13 +293,13 @@
                         <Border Grid.Column="1" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8" Padding="16">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="Correct" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                <TextBlock Text="{x:Bind ViewModel.PracticeResult.CorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#107C41" />
+                                <TextBlock Text="{x:Bind ViewModel.PracticeResult.CorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                             </StackPanel>
                         </Border>
                         <Border Grid.Column="2" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8" Padding="16">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="Incorrect" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                <TextBlock Text="{x:Bind ViewModel.PracticeResult.IncorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#D83B01" />
+                                <TextBlock Text="{x:Bind ViewModel.PracticeResult.IncorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                             </StackPanel>
                         </Border>
                     </Grid>

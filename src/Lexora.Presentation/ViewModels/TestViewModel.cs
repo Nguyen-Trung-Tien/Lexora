@@ -36,7 +36,10 @@ public partial class TestViewModel : ObservableObject
     public partial bool IsLoading { get; set; } = false;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
     public partial string StatusMessage { get; set; } = string.Empty;
+
+    public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
 
     // Setup configuration
     [ObservableProperty]

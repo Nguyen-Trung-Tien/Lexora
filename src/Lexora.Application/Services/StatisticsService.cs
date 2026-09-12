@@ -34,8 +34,8 @@ public class StatisticsService : IStatisticsService
         int correctReviews = recentLogs.Count(l => l.Rating >= ReviewRating.Good);
         double accuracy = totalReviews == 0 ? 0.0 : Math.Round((double)correctReviews / totalReviews * 100, 1);
 
-        var today = DateTime.UtcNow.Date;
-        int studiedToday = recentLogs.Count(l => l.CreatedAt.Date == today);
+        var today = DateTime.Today;
+        int studiedToday = recentLogs.Count(l => l.CreatedAt.ToLocalTime().Date == today);
 
         return new DashboardSummaryDto(
             TotalWords: totalWords,
@@ -146,12 +146,12 @@ public class StatisticsService : IStatisticsService
         }
 
         // 6. Last 30 Days Study Heatmap
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(DateTime.Now);
         var heatmap = new List<StudyHistoryDayDto>();
 
-        // Pre-group logs by DateOnly
+        // Pre-group logs by local DateOnly
         var logsByDate = recentLogs
-            .GroupBy(l => DateOnly.FromDateTime(l.CreatedAt))
+            .GroupBy(l => DateOnly.FromDateTime(l.CreatedAt.ToLocalTime()))
             .ToDictionary(g => g.Key, g => g.ToList());
 
         for (int i = 29; i >= 0; i--)

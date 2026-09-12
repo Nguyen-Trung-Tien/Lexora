@@ -81,7 +81,8 @@ public sealed partial class SettingsPage : Page
             var pathBox = new TextBox
             {
                 PlaceholderText = @"C:\path\to\lexora_backup_xxxx.db",
-                Width = 400
+                MaxWidth = 450,
+                HorizontalAlignment = HorizontalAlignment.Stretch
             };
 
             var promptDialog = new ContentDialog

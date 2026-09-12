@@ -32,10 +32,14 @@ public partial class GrammarViewModel : ObservableObject
 
     // Practice Mode State
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMainMode))]
     public partial bool IsPracticeMode { get; set; } = false;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMainMode))]
     public partial bool IsPracticeResultMode { get; set; } = false;
+
+    public bool IsMainMode => !IsPracticeMode && !IsPracticeResultMode;
 
     [ObservableProperty]
     public partial int CurrentQuestionIndex { get; set; } = 0;

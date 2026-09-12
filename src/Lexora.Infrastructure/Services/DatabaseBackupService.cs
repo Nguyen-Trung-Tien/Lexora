@@ -34,11 +34,13 @@ public class DatabaseBackupService : IDatabaseBackupService
 
         _logger.LogInformation("Creating backup from {Source} to {Target}", _dbFilePath, targetPath);
 
-        // Copy file
-        using (var sourceStream = new FileStream(_dbFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-        using (var destStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
+        // Use SQLite Online Backup API to ensure atomic, WAL-checkpointed snapshot
+        using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadOnly"))
+        using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={targetPath}"))
         {
-            await sourceStream.CopyToAsync(destStream, cancellationToken);
+            await sourceConn.OpenAsync(cancellationToken);
+            await destConn.OpenAsync(cancellationToken);
+            sourceConn.BackupDatabase(destConn);
         }
 
         return targetPath;
@@ -49,7 +51,10 @@ public class DatabaseBackupService : IDatabaseBackupService
         if (!File.Exists(backupFilePath))
             throw new FileNotFoundException("Backup file not found.", backupFilePath);
 
-        // 1. Validate SQLite header magic bytes (16 bytes: "SQLite format 3\0")
+        // 1. Clear all active SQLite connection pools first to release any open file handles
+        Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+
+        // 2. Validate SQLite header magic bytes (16 bytes: "SQLite format 3\0")
         var fileInfo = new FileInfo(backupFilePath);
         if (fileInfo.Length < 16)
         {
@@ -57,7 +62,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         }
 
         byte[] header = new byte[16];
-        using (var fs = new FileStream(backupFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using (var fs = new FileStream(backupFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
             int read = await fs.ReadAsync(header.AsMemory(0, 16), cancellationToken);
             if (read < 16)
@@ -73,9 +78,6 @@ public class DatabaseBackupService : IDatabaseBackupService
         }
 
         _logger.LogWarning("Restoring database from {Backup} to {Target}", backupFilePath, _dbFilePath);
-
-        // 2. Clear all active SQLite connection pools to prevent file locking and corruption
-        Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
         var targetDir = Path.GetDirectoryName(_dbFilePath);
         if (!string.IsNullOrEmpty(targetDir))
@@ -94,7 +96,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         }
 
         // 4. Overwrite main database file
-        using (var sourceStream = new FileStream(backupFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using (var sourceStream = new FileStream(backupFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         using (var destStream = new FileStream(_dbFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
         {
             await sourceStream.CopyToAsync(destStream, cancellationToken);
