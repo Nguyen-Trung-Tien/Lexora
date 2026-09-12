@@ -54,11 +54,20 @@
         </Grid.RowDefinitions>
 
         <!-- Custom TitleBar with Lexora Icon & Brand Title -->
-        <TitleBar x:Name="AppTitleBar" Title="Lexora - English Learning Manager">
-            <TitleBar.IconSource>
-                <ImageIconSource ImageSource="ms-appx:///Assets/brand/lexora-icon-only.png" />
-            </TitleBar.IconSource>
-        </TitleBar>
+        <Grid x:Name="AppTitleBar" Height="36" Background="Transparent" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" Spacing="10" Margin="14,0,0,0" VerticalAlignment="Center">
+                <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Lexora - English Learning Manager"
+                           FontSize="12"
+                           VerticalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </Grid>
 
         <!-- Main Application Shell (starts hidden with subtle scale) -->
         <Grid x:Name="MainContentGrid" Grid.Row="1" Opacity="0">

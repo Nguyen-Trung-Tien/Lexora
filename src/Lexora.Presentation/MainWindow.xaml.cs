@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.Views;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using WinRT.Interop;
 
@@ -18,6 +20,14 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
 
         // 1. Extend content into TitleBar & set custom title bar
+        if (AppWindowTitleBar.IsCustomizationSupported())
+        {
+            var titleBar = AppWindow.TitleBar;
+            titleBar.ExtendsContentIntoTitleBar = true;
+            titleBar.ButtonBackgroundColor = Colors.Transparent;
+            titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        }
+
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
 
