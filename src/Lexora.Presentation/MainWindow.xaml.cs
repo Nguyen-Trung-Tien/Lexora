@@ -72,20 +72,27 @@ public sealed partial class MainWindow : Window
                 // Set Windows App SDK window icon
                 AppWindow.SetIcon(iconPath);
 
-                // Set Win32 window & taskbar icon via SendMessage WM_SETICON
+                // Set Win32 window & taskbar icon via SendMessage WM_SETICON and SetClassLongPtr
                 var hwnd = WindowNative.GetWindowHandle(this);
                 if (hwnd != IntPtr.Zero)
                 {
-                    _hIconSmall = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, 16, 16, 0x00000010 /*LR_LOADFROMFILE*/);
-                    _hIconBig = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, 32, 32, 0x00000010 /*LR_LOADFROMFILE*/);
+                    var cxSmall = Math.Max(GetSystemMetrics(49 /*SM_CXSMICON*/), 16);
+                    var cySmall = Math.Max(GetSystemMetrics(50 /*SM_CYSMICON*/), 16);
+                    var cxBig = Math.Max(GetSystemMetrics(11 /*SM_CXICON*/), 48);
+                    var cyBig = Math.Max(GetSystemMetrics(12 /*SM_CYICON*/), 48);
+
+                    _hIconSmall = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, cxSmall, cySmall, 0x00000010 /*LR_LOADFROMFILE*/);
+                    _hIconBig = LoadImage(IntPtr.Zero, iconPath, 1 /*IMAGE_ICON*/, cxBig, cyBig, 0x00000010 /*LR_LOADFROMFILE*/);
 
                     if (_hIconSmall != IntPtr.Zero)
                     {
                         SendMessage(hwnd, 0x0080 /*WM_SETICON*/, (IntPtr)0 /*ICON_SMALL*/, _hIconSmall);
+                        SetClassLongPtr(hwnd, -34 /*GCLP_HICONSM*/, _hIconSmall);
                     }
                     if (_hIconBig != IntPtr.Zero)
                     {
                         SendMessage(hwnd, 0x0080 /*WM_SETICON*/, (IntPtr)1 /*ICON_BIG*/, _hIconBig);
+                        SetClassLongPtr(hwnd, -14 /*GCLP_HICON*/, _hIconBig);
                     }
                 }
             }
@@ -108,6 +115,20 @@ public sealed partial class MainWindow : Window
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool DestroyIcon(IntPtr hIcon);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int nIndex);
+
+    [DllImport("user32.dll", EntryPoint = "SetClassLongPtr")]
+    private static extern IntPtr SetClassLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport("user32.dll", EntryPoint = "SetClassLong")]
+    private static extern IntPtr SetClassLong32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    private static IntPtr SetClassLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+    {
+        return IntPtr.Size == 8 ? SetClassLongPtr64(hWnd, nIndex, dwNewLong) : SetClassLong32(hWnd, nIndex, dwNewLong);
+    }
 
     public async Task StartStartupSequenceAsync()
     {
