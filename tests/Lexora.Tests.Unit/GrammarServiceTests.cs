@@ -111,7 +111,7 @@ public class GrammarServiceTests
 
         _mockGrammarRepo.Verify(r => r.RemoveExamples(It.IsAny<IEnumerable<GrammarExample>>()), Times.Once);
         _mockGrammarRepo.Verify(r => r.AddExamples(It.IsAny<IEnumerable<GrammarExample>>()), Times.Once);
-        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.AtLeast(2));
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

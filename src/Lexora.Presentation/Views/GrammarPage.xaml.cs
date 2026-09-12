@@ -14,7 +14,16 @@ public sealed partial class GrammarPage : Page
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<GrammarViewModel>();
+
+        _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+        _searchDebounceTimer.Tick += async (s, e) =>
+        {
+            _searchDebounceTimer.Stop();
+            await ViewModel.LoadRulesAsync();
+        };
     }
+
+    private readonly DispatcherTimer _searchDebounceTimer;
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -24,7 +33,8 @@ public sealed partial class GrammarPage : Page
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        _ = ViewModel.LoadRulesAsync();
+        _searchDebounceTimer.Stop();
+        _searchDebounceTimer.Start();
     }
 
     private void FilterChanged(object sender, SelectionChangedEventArgs e)

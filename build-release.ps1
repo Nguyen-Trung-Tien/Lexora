@@ -4,7 +4,8 @@
 param (
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
-    [string]$OutputDir = "./publish/win-x64"
+    [string]$OutputDir = "./publish/win-x64",
+    [bool]$SelfContained = $true
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,11 +29,12 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # 3. Publish Presentation Project
-Write-Host "`n[PUBLISH] Step 2: Publishing WinUI 3 Presentation App ($Configuration | $Runtime)..." -ForegroundColor Green
+Write-Host "`n[PUBLISH] Step 2: Publishing WinUI 3 Presentation App ($Configuration | $Runtime | SelfContained: $SelfContained)..." -ForegroundColor Green
 dotnet publish src/Lexora.Presentation/Lexora.Presentation.csproj `
     -c $Configuration `
     -r $Runtime `
-    --self-contained false `
+    --self-contained $SelfContained `
+    -p:WindowsAppSDKSelfContained=$SelfContained `
     -o $OutputDir
 
 if ($LASTEXITCODE -ne 0) {

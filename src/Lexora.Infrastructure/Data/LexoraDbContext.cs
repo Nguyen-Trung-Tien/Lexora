@@ -150,5 +150,11 @@ public class LexoraDbContext : DbContext
             b.Property(ge => ge.SentenceEn).IsRequired().HasMaxLength(1000);
             b.Property(ge => ge.SentenceVi).IsRequired().HasMaxLength(1000);
         });
+
+        modelBuilder.Entity<UserStreak>(b =>
+        {
+            b.HasKey(s => s.Id);
+            b.HasIndex(s => s.LastActiveDate);
+        });
     }
 }

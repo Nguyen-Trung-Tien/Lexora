@@ -54,7 +54,8 @@ public class StatisticsService : IStatisticsService
     public async Task<DetailedAnalyticsDto> GetDetailedAnalyticsAsync(CancellationToken cancellationToken = default)
     {
         var summary = await GetDashboardSummaryAsync(cancellationToken);
-        var allWords = await _vocabRepo.SearchAsync(take: 5000, cancellationToken: cancellationToken);
+        var allWords = await _vocabRepo.GetWordsForAnalyticsAsync(cancellationToken)
+            ?? await _vocabRepo.SearchAsync(take: 5000, cancellationToken: cancellationToken);
         var statusCounts = await _reviewRepo.GetCardCountsByStatusAsync(cancellationToken);
         var recentLogs = await _reviewRepo.GetRecentLogsAsync(500, cancellationToken);
         var recentSessions = await _reviewRepo.GetRecentSessionsAsync(6, cancellationToken);

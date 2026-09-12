@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Lexora.Domain\Lexora.Domain.csproj" />
     <ProjectReference Include="..\..\src\Lexora.Application\Lexora.Application.csproj" />
+    <ProjectReference Include="..\..\src\Lexora.Infrastructure\Lexora.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

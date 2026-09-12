@@ -154,7 +154,6 @@ public class VocabularyService : IVocabularyService
 
         // Clean up previous children in DB context
         _vocabRepo.RemoveWordChildren(word);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Update Meanings
         var newMeanings = new List<WordMeaning>();

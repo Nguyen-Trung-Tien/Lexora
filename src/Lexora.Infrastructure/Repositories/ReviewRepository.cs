@@ -79,7 +79,9 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
 
     public async Task UpdateStreakAsync(DateOnly date, CancellationToken cancellationToken = default)
     {
-        var streak = await Context.UserStreaks.FirstOrDefaultAsync(cancellationToken);
+        var streak = Context.UserStreaks.Local.FirstOrDefault()
+            ?? await Context.UserStreaks.FirstOrDefaultAsync(cancellationToken);
+
         if (streak == null)
         {
             streak = new UserStreak

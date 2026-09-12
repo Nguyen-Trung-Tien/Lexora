@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Lexora.Infrastructure.Services;
 
 public interface IAudioStorageService
@@ -10,13 +12,14 @@ public interface IAudioStorageService
 public class LocalAudioStorageService : IAudioStorageService
 {
     private readonly string _cacheDirectory;
+    private static readonly Regex SafeCharRegex = new(@"[^a-zA-Z0-9_\-]", RegexOptions.Compiled);
 
     public LocalAudioStorageService(string? baseDir = null)
     {
-        _cacheDirectory = baseDir ?? Path.Combine(
+        _cacheDirectory = Path.GetFullPath(baseDir ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Lexora",
-            "audio");
+            "audio"));
 
         Directory.CreateDirectory(_cacheDirectory);
     }
@@ -25,8 +28,8 @@ public class LocalAudioStorageService : IAudioStorageService
 
     public async Task<string?> CacheAudioAsync(string term, string accent, Stream audioStream, CancellationToken cancellationToken = default)
     {
-        var sanitized = string.Concat(term.Split(Path.GetInvalidFileNameChars()));
-        var filePath = Path.Combine(_cacheDirectory, $"{sanitized}_{accent.ToLowerInvariant()}.mp3");
+        var filePath = GetSafeFilePath(term, accent);
+        if (filePath == null) return null;
 
         using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
         await audioStream.CopyToAsync(fileStream, cancellationToken);
@@ -36,8 +39,33 @@ public class LocalAudioStorageService : IAudioStorageService
 
     public string? GetCachedAudioPath(string term, string accent)
     {
-        var sanitized = string.Concat(term.Split(Path.GetInvalidFileNameChars()));
-        var filePath = Path.Combine(_cacheDirectory, $"{sanitized}_{accent.ToLowerInvariant()}.mp3");
+        var filePath = GetSafeFilePath(term, accent);
+        if (filePath == null) return null;
         return File.Exists(filePath) ? filePath : null;
+    }
+
+    private string? GetSafeFilePath(string term, string accent)
+    {
+        if (string.IsNullOrWhiteSpace(term)) return null;
+
+        var safeTerm = SafeCharRegex.Replace(term.Trim().ToLowerInvariant(), "_").Trim('_');
+        var safeAccent = SafeCharRegex.Replace((accent ?? "uk").Trim().ToLowerInvariant(), "").Trim();
+
+        if (string.IsNullOrWhiteSpace(safeTerm)) return null;
+        if (string.IsNullOrWhiteSpace(safeAccent)) safeAccent = "uk";
+
+        // Limit file name length
+        if (safeTerm.Length > 100) safeTerm = safeTerm.Substring(0, 100);
+
+        var fileName = $"{safeTerm}_{safeAccent}.mp3";
+        var fullPath = Path.GetFullPath(Path.Combine(_cacheDirectory, fileName));
+
+        // Ensure path remains strictly within cache directory
+        if (!fullPath.StartsWith(_cacheDirectory, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return fullPath;
     }
 }

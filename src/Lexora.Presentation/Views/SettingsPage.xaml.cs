@@ -103,6 +103,7 @@ public sealed partial class SettingsPage : Page
 
         if (!string.IsNullOrEmpty(selectedFilePath) && File.Exists(selectedFilePath))
         {
+            await Task.Yield();
             var confirmDialog = new ContentDialog
             {
                 Title = "Restore Database Confirmation",
@@ -119,6 +120,7 @@ public sealed partial class SettingsPage : Page
                 var restored = await ViewModel.RestoreBackupAsync(selectedFilePath);
                 if (restored)
                 {
+                    await Task.Yield();
                     var doneDialog = new ContentDialog
                     {
                         Title = "Restore Completed",

@@ -162,58 +162,68 @@ public partial class ReviewViewModel : ObservableObject
         IsAnswerVisible = true;
     }
 
+    private bool _isRatingInProgress;
+
     [RelayCommand]
     public async Task RateCardAsync(ReviewRating rating)
     {
-        if (CurrentCard == null) return;
+        if (CurrentCard == null || _isRatingInProgress) return;
+        _isRatingInProgress = true;
 
-        _cardTimer.Stop();
-        int responseTimeMs = (int)_cardTimer.ElapsedMilliseconds;
-
-        if (rating >= ReviewRating.Good)
+        try
         {
-            SessionCorrectCount++;
-        }
-        else
-        {
-            SessionIncorrectCount++;
-        }
+            _cardTimer.Stop();
+            int responseTimeMs = (int)_cardTimer.ElapsedMilliseconds;
 
-        int totalReviewed = SessionCorrectCount + SessionIncorrectCount;
-        SessionAccuracyRate = totalReviewed == 0 ? 0.0 : Math.Round((double)SessionCorrectCount / totalReviewed * 100, 1);
-
-        await _reviewService.SubmitReviewAsync(CurrentCard.Id, rating, responseTimeMs, _currentSessionId);
-
-        if (ReviewQueue.Count > 0)
-        {
-            ReviewQueue.RemoveAt(0);
-        }
-
-        CompletedCount++;
-        RemainingCount = ReviewQueue.Count;
-        ProgressPercent = _initialQueueCount == 0 ? 100.0 : Math.Round((double)CompletedCount / _initialQueueCount * 100, 1);
-        IsAnswerVisible = false;
-
-        if (ReviewQueue.Count > 0)
-        {
-            SetCurrentCard(ReviewQueue[0]);
-        }
-        else
-        {
-            CurrentCard = null;
-            IsCompleted = true;
-
-            if (_currentSessionId.HasValue)
+            if (rating >= ReviewRating.Good)
             {
-                await _reviewService.CompleteSessionAsync(
-                    _currentSessionId.Value,
-                    _initialQueueCount,
-                    SessionCorrectCount,
-                    SessionIncorrectCount);
+                SessionCorrectCount++;
+            }
+            else
+            {
+                SessionIncorrectCount++;
             }
 
-            await RefreshDueCountAsync();
-            await LoadHistoryAsync();
+            int totalReviewed = SessionCorrectCount + SessionIncorrectCount;
+            SessionAccuracyRate = totalReviewed == 0 ? 0.0 : Math.Round((double)SessionCorrectCount / totalReviewed * 100, 1);
+
+            await _reviewService.SubmitReviewAsync(CurrentCard.Id, rating, responseTimeMs, _currentSessionId);
+
+            if (ReviewQueue.Count > 0)
+            {
+                ReviewQueue.RemoveAt(0);
+            }
+
+            CompletedCount++;
+            RemainingCount = ReviewQueue.Count;
+            ProgressPercent = _initialQueueCount == 0 ? 100.0 : Math.Round((double)CompletedCount / _initialQueueCount * 100, 1);
+            IsAnswerVisible = false;
+
+            if (ReviewQueue.Count > 0)
+            {
+                SetCurrentCard(ReviewQueue[0]);
+            }
+            else
+            {
+                CurrentCard = null;
+                IsCompleted = true;
+
+                if (_currentSessionId.HasValue)
+                {
+                    await _reviewService.CompleteSessionAsync(
+                        _currentSessionId.Value,
+                        _initialQueueCount,
+                        SessionCorrectCount,
+                        SessionIncorrectCount);
+                }
+
+                await RefreshDueCountAsync();
+                await LoadHistoryAsync();
+            }
+        }
+        finally
+        {
+            _isRatingInProgress = false;
         }
     }
 

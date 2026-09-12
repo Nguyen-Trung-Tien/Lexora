@@ -15,47 +15,32 @@
         <KeyboardAccelerator Key="P" Modifiers="Control" Invoked="PracticeAccelerator_Invoked" />
     </Page.KeyboardAccelerators>
 
-    <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="24" RowSpacing="12">
         
         <!-- Loading Ring Overlay -->
         <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                       Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                       Width="40" Height="40"
                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                      Grid.RowSpan="2" Canvas.ZIndex="10" />
+                      Grid.RowSpan="3" Canvas.ZIndex="10" />
 
         <!-- ========================================== -->
-        <!-- TOP TOOLBAR (Visible when not in Practice) -->
+        <!-- TOP ACTIONS BAR (Visible when not in Practice) -->
         <!-- ========================================== -->
-        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10"
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12"
               Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
             <TextBox PlaceholderText="Search grammar rules, structures, explanations..."
                      Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}"
                      TextChanged="SearchBox_TextChanged" />
 
-            <ComboBox Grid.Column="1" PlaceholderText="All Levels" Width="120"
-                      ItemsSource="{x:Bind ViewModel.CefrLevels}"
-                      SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}"
-                      SelectionChanged="FilterChanged" />
-
-            <ComboBox Grid.Column="2" PlaceholderText="All Exams" Width="130"
-                      ItemsSource="{x:Bind ViewModel.ExamTypes}"
-                      SelectedItem="{x:Bind ViewModel.SelectedExamTarget, Mode=TwoWay}"
-                      SelectionChanged="FilterChanged" />
-
-            <ComboBox Grid.Column="3" PlaceholderText="All Topics" Width="130"
-                      ItemsSource="{x:Bind ViewModel.Topics}"
-                      SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}"
-                      SelectionChanged="FilterChanged" />
-
-            <Button Grid.Column="4" Click="AddRuleButton_Click" ToolTipService.ToolTip="Add Rule (Ctrl+N)" Style="{ThemeResource AccentButtonStyle}" Padding="14,8">
+            <Button Grid.Column="1" Click="AddRuleButton_Click" ToolTipService.ToolTip="Add Rule (Ctrl+N)" Style="{ThemeResource AccentButtonStyle}" Padding="14,8">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE710;" FontSize="14" />
                     <TextBlock Text="Add Rule" FontWeight="SemiBold" />
                 </StackPanel>
             </Button>
 
-            <Button Grid.Column="5" Click="PracticeButton_Click" ToolTipService.ToolTip="Practice (Ctrl+P)" Padding="14,8">
+            <Button Grid.Column="2" Click="PracticeButton_Click" ToolTipService.ToolTip="Practice (Ctrl+P)" Padding="14,8">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE768;" FontSize="14" />
                     <TextBlock Text="Practice" FontWeight="SemiBold" />
@@ -64,9 +49,30 @@
         </Grid>
 
         <!-- ========================================== -->
+        <!-- FILTERS BAR (Visible when not in Practice) -->
+        <!-- ========================================== -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            <ComboBox PlaceholderText="All Levels" Width="130"
+                      ItemsSource="{x:Bind ViewModel.CefrLevels}"
+                      SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}"
+                      SelectionChanged="FilterChanged" />
+
+            <ComboBox PlaceholderText="All Exams" Width="140"
+                      ItemsSource="{x:Bind ViewModel.ExamTypes}"
+                      SelectedItem="{x:Bind ViewModel.SelectedExamTarget, Mode=TwoWay}"
+                      SelectionChanged="FilterChanged" />
+
+            <ComboBox PlaceholderText="All Topics" Width="150"
+                      ItemsSource="{x:Bind ViewModel.Topics}"
+                      SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}"
+                      SelectionChanged="FilterChanged" />
+        </StackPanel>
+
+        <!-- ========================================== -->
         <!-- 1. MASTER-DETAIL VIEW (Main Mode)          -->
         <!-- ========================================== -->
-        <Grid Grid.Row="1" ColumnDefinitions="380,*" ColumnSpacing="20"
+        <Grid Grid.Row="2" ColumnDefinitions="380,*" ColumnSpacing="20"
               Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
             
             <!-- Left: Rules List -->
@@ -184,11 +190,11 @@
                         </StackPanel>
 
                         <!-- Common Mistakes -->
-                        <Border Background="#FFF4CE" BorderBrush="#FFB900" BorderThickness="1" CornerRadius="8" Padding="14"
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="14"
                                 Visibility="{x:Bind ViewModel.SelectedRule.CommonMistakes, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                             <StackPanel Spacing="4">
-                                <TextBlock Text="⚠️ Common Mistakes &amp; Notes" FontWeight="Bold" Foreground="#323130" />
-                                <TextBlock Text="{x:Bind ViewModel.SelectedRule.CommonMistakes, Mode=OneWay}" Foreground="#323130" FontSize="13" TextWrapping="Wrap" />
+                                <TextBlock Text="⚠️ Common Mistakes &amp; Notes" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                <TextBlock Text="{x:Bind ViewModel.SelectedRule.CommonMistakes, Mode=OneWay}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" FontSize="13" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
 

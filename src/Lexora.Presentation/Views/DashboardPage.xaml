@@ -119,54 +119,51 @@
             </Border>
 
             <!-- SECTION 2: Exam Readiness Progress (TOEIC, VSTEP, IELTS) -->
+            <!-- SECTION 2: Exam Readiness Progress (TOEIC, VSTEP, IELTS) -->
             <StackPanel Spacing="12">
                 <TextBlock Text="Exam Target Progress" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
-                    <ItemsControl Grid.ColumnSpan="3" ItemsSource="{x:Bind ViewModel.ExamProgressList}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="16" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="dto:ExamProgressDto">
-                                <Border Width="340" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                                    <StackPanel Spacing="12">
-                                        <Grid ColumnDefinitions="*,Auto">
-                                            <StackPanel Spacing="2">
-                                                <TextBlock Text="{x:Bind ExamName}" FontWeight="Bold" FontSize="16" />
-                                                <TextBlock Text="{x:Bind TargetDescription}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.ExamProgressList}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal" MinItemWidth="280" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="dto:ExamProgressDto">
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
+                                <StackPanel Spacing="12">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{x:Bind ExamName}" FontWeight="Bold" FontSize="16" />
+                                            <TextBlock Text="{x:Bind TargetDescription}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,4">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{x:Bind ProgressPercentage}" Foreground="White" FontWeight="Bold" FontSize="12" />
+                                                <TextBlock Text="%" Foreground="White" FontWeight="Bold" FontSize="12" />
                                             </StackPanel>
-                                            <Border Grid.Column="1" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,4">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{x:Bind ProgressPercentage}" Foreground="White" FontWeight="Bold" FontSize="12" />
-                                                    <TextBlock Text="%" Foreground="White" FontWeight="Bold" FontSize="12" />
-                                                </StackPanel>
-                                            </Border>
-                                        </Grid>
+                                        </Border>
+                                    </Grid>
 
-                                        <ProgressBar Value="{x:Bind ProgressPercentage}" Maximum="100" Height="8" CornerRadius="4" />
+                                    <ProgressBar Value="{x:Bind ProgressPercentage}" Maximum="100" Height="8" CornerRadius="4" />
 
-                                        <Grid ColumnDefinitions="*,*,*">
-                                            <StackPanel>
-                                                <TextBlock Text="Total" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
-                                                <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="15" />
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Learning" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
-                                                <TextBlock Text="{x:Bind LearningWords}" FontWeight="Bold" FontSize="15" Foreground="#0078D4" />
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Mastered" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
-                                                <TextBlock Text="{x:Bind MasteredWords}" FontWeight="Bold" FontSize="15" Foreground="#107C41" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Grid>
+                                    <Grid ColumnDefinitions="*,*,*">
+                                        <StackPanel>
+                                            <TextBlock Text="Total" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                            <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="15" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Learning" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                            <TextBlock Text="{x:Bind LearningWords}" FontWeight="Bold" FontSize="15" Foreground="#0078D4" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Mastered" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                            <TextBlock Text="{x:Bind MasteredWords}" FontWeight="Bold" FontSize="15" Foreground="#107C41" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
             </StackPanel>
 
             <!-- SECTION 3: Study Activity Heatmap (Last 30 Days) -->
@@ -201,7 +198,7 @@
                                         Background="{x:Bind ColorHex}"
                                         ToolTipService.ToolTip="{x:Bind TooltipText}">
                                     <TextBlock Text="{x:Bind Date.Day}" FontSize="10" FontWeight="Bold"
-                                               Foreground="#323130" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                               Foreground="{x:Bind TextColorHex}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

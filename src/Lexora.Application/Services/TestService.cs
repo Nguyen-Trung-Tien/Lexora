@@ -13,8 +13,8 @@ public class TestService : ITestService
     private readonly IReviewRepository _reviewRepo;
     private readonly IUnitOfWork _unitOfWork;
 
-    // Cache of active in-memory test questions for scoring
-    private static readonly Dictionary<Guid, List<TestQuestionDto>> ActiveTestSessions = new();
+    private record ActiveSessionEntry(DateTime CreatedAt, List<TestQuestionDto> Questions);
+    private static readonly Dictionary<Guid, ActiveSessionEntry> ActiveTestSessions = new();
 
     public TestService(
         IVocabularyRepository vocabRepo,
@@ -135,10 +135,17 @@ public class TestService : ITestService
         var createdSession = await _reviewRepo.CreateStudySessionAsync(studySession, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Cache session in memory for submission validation
+        // Cache session in memory for submission validation, pruning stale sessions (> 2 hours)
         lock (ActiveTestSessions)
         {
-            ActiveTestSessions[createdSession.Id] = questions;
+            var cutoff = DateTime.UtcNow.AddHours(-2);
+            var staleKeys = ActiveTestSessions.Where(kvp => kvp.Value.CreatedAt < cutoff).Select(kvp => kvp.Key).ToList();
+            foreach (var key in staleKeys)
+            {
+                ActiveTestSessions.Remove(key);
+            }
+
+            ActiveTestSessions[createdSession.Id] = new ActiveSessionEntry(DateTime.UtcNow, questions);
         }
 
         return new TestSessionDto(
@@ -151,10 +158,13 @@ public class TestService : ITestService
 
     public async Task<TestResultDto> SubmitTestAsync(Guid sessionId, List<TestAnswerSubmissionDto> answers, CancellationToken cancellationToken = default)
     {
-        List<TestQuestionDto>? cachedQuestions;
+        List<TestQuestionDto>? cachedQuestions = null;
         lock (ActiveTestSessions)
         {
-            ActiveTestSessions.TryGetValue(sessionId, out cachedQuestions);
+            if (ActiveTestSessions.TryGetValue(sessionId, out var entry))
+            {
+                cachedQuestions = entry.Questions;
+            }
         }
 
         var session = await _reviewRepo.GetStudySessionByIdAsync(sessionId, cancellationToken);

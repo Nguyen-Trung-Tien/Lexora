@@ -104,9 +104,16 @@ public partial class GrammarViewModel : ObservableObject
         foreach (var t in topics) Topics.Add(t);
     }
 
+    private CancellationTokenSource? _loadCts;
+
     [RelayCommand]
     public async Task LoadRulesAsync()
     {
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        _loadCts = new CancellationTokenSource();
+        var ct = _loadCts.Token;
+
         IsLoading = true;
         try
         {
@@ -114,8 +121,11 @@ public partial class GrammarViewModel : ObservableObject
                 level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
                 examType: SelectedExamTarget == ExamType.General ? null : SelectedExamTarget,
                 topic: SelectedTopic,
-                search: string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery
+                search: string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery,
+                cancellationToken: ct
             );
+
+            if (ct.IsCancellationRequested) return;
 
             Rules.Clear();
             foreach (var r in results)
@@ -135,9 +145,16 @@ public partial class GrammarViewModel : ObservableObject
                 SelectedRule = null;
             }
         }
+        catch (OperationCanceledException)
+        {
+            // Ignore cancelled queries
+        }
         finally
         {
-            IsLoading = false;
+            if (!ct.IsCancellationRequested)
+            {
+                IsLoading = false;
+            }
         }
     }
 

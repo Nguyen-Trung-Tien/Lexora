@@ -117,7 +117,6 @@ public class GrammarService : IGrammarService
         {
             _grammarRepo.RemoveExamples(rule.Examples.ToList());
             rule.Examples.Clear();
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         if (dto.Examples != null)

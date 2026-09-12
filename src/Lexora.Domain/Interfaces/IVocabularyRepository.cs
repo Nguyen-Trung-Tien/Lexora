@@ -30,6 +30,7 @@ public interface IVocabularyRepository : IRepository<Word>
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Word>> GetRandomWordsAsync(int count, Guid? excludeWordId = null, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Word>> GetWordsForAnalyticsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Topic>> GetAllTopicsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ExamTag>> GetAllExamTagsAsync(CancellationToken cancellationToken = default);
     void RemoveWordChildren(Word word);

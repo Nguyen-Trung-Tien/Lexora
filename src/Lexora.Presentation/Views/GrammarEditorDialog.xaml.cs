@@ -88,12 +88,32 @@ public sealed partial class GrammarEditorDialog : ContentDialog
 
     private void GrammarEditorDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
+        DialogInfoBar.IsOpen = false;
+
         string title = TitleTextBox.Text.Trim();
         string structure = StructureTextBox.Text.Trim();
         string explanationVi = ExplanationViTextBox.Text.Trim();
 
-        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(structure) || string.IsNullOrWhiteSpace(explanationVi))
+        if (string.IsNullOrWhiteSpace(title))
         {
+            DialogInfoBar.Message = "Please enter a rule title.";
+            DialogInfoBar.IsOpen = true;
+            args.Cancel = true;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(structure))
+        {
+            DialogInfoBar.Message = "Please enter the structure formula.";
+            DialogInfoBar.IsOpen = true;
+            args.Cancel = true;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(explanationVi))
+        {
+            DialogInfoBar.Message = "Please provide the Vietnamese explanation.";
+            DialogInfoBar.IsOpen = true;
             args.Cancel = true;
             return;
         }

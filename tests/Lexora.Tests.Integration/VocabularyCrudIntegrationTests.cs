@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Lexora.Application.DTOs;
 using Lexora.Application.Services;
+using Lexora.Application.SpacedRepetition;
 using Lexora.Domain.Enums;
 using Lexora.Infrastructure.Data;
 using Lexora.Infrastructure.Repositories;
@@ -202,6 +203,46 @@ public class VocabularyCrudIntegrationTests : IDisposable
         var streakInDb = await _context.UserStreaks.FirstOrDefaultAsync();
         streakInDb.Should().NotBeNull();
         streakInDb!.CurrentStreak.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task MarkStatusQuickAsync_ShouldUpdateStatusAndLogCorrectly()
+    {
+        // 1. Arrange word
+        var createDto = new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "quicktest",
+            PhoneticUk: null,
+            PhoneticUs: null,
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.B1,
+            PrimaryPartOfSpeech: PartOfSpeech.Noun,
+            Notes: null,
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(PartOfSpeech.Noun, "bài kiểm tra nhanh", null, null, new List<ExampleSentenceCreateDto>())
+            },
+            TopicIds: new List<Guid>(),
+            ExamTagIds: new List<Guid>()
+        );
+
+        var word = await _vocabService.CreateWordAsync(createDto);
+        var reviewService = new ReviewService(_reviewRepo, new Sm2SpacedRepetitionEngine(), _unitOfWork);
+
+        // 2. Act: Mark remembered = true
+        await reviewService.MarkStatusQuickAsync(word.Id, remembered: true);
+
+        // 3. Assert
+        var card = await _reviewRepo.GetByWordIdAsync(word.Id);
+        card.Should().NotBeNull();
+        card!.Status.Should().Be(LearningStatus.Remembered);
+
+        // 4. Act: Mark remembered = false (Chưa nhớ)
+        await reviewService.MarkStatusQuickAsync(word.Id, remembered: false);
+
+        var cardUpdated = await _reviewRepo.GetByWordIdAsync(word.Id);
+        cardUpdated!.Status.Should().Be(LearningStatus.NotRemembered);
     }
 
     public void Dispose()

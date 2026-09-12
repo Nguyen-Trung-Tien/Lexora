@@ -20,7 +20,13 @@ public sealed partial class ShellPage : Page
         _localizationService = App.Current.Services.GetRequiredService<ILocalizationService>();
 
         UpdateNavigationLabels();
-        _localizationService.LanguageChanged += (s, e) => UpdateNavigationLabels();
+        _localizationService.LanguageChanged += OnLanguageChanged;
+        Unloaded += (s, e) => _localizationService.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        UpdateNavigationLabels();
     }
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)

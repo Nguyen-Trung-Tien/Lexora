@@ -147,21 +147,21 @@ public sealed partial class WordEditorDialog : ContentDialog
 
     private void WordEditorDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        ErrorMessageTextBlock.Visibility = Visibility.Collapsed;
+        DialogInfoBar.IsOpen = false;
 
         var term = TermTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(term))
         {
-            ErrorMessageTextBlock.Text = "Please enter a word or term.";
-            ErrorMessageTextBlock.Visibility = Visibility.Visible;
+            DialogInfoBar.Message = "Please enter a word or term.";
+            DialogInfoBar.IsOpen = true;
             args.Cancel = true;
             return;
         }
 
         if (Meanings.Count == 0 || string.IsNullOrWhiteSpace(Meanings[0].DefinitionVi))
         {
-            ErrorMessageTextBlock.Text = "Please provide at least one Vietnamese definition.";
-            ErrorMessageTextBlock.Visibility = Visibility.Visible;
+            DialogInfoBar.Message = "Please provide at least one Vietnamese definition.";
+            DialogInfoBar.IsOpen = true;
             args.Cancel = true;
             return;
         }

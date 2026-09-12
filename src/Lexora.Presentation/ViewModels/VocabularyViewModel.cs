@@ -89,9 +89,16 @@ public partial class VocabularyViewModel : ObservableObject
         }
     }
 
+    private CancellationTokenSource? _loadCts;
+
     [RelayCommand]
     public async Task LoadWordsAsync()
     {
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        _loadCts = new CancellationTokenSource();
+        var ct = _loadCts.Token;
+
         IsLoading = true;
         try
         {
@@ -104,7 +111,10 @@ public partial class VocabularyViewModel : ObservableObject
                 status: SelectedStatus,
                 sortBy: SortBy,
                 isAscending: IsAscending,
-                pageSize: 200);
+                pageSize: 200,
+                cancellationToken: ct);
+
+            if (ct.IsCancellationRequested) return;
 
             Words.Clear();
             foreach (var w in results)
@@ -121,9 +131,16 @@ public partial class VocabularyViewModel : ObservableObject
                 SelectedWord = null;
             }
         }
+        catch (OperationCanceledException)
+        {
+            // Ignore cancelled queries
+        }
         finally
         {
-            IsLoading = false;
+            if (!ct.IsCancellationRequested)
+            {
+                IsLoading = false;
+            }
         }
     }
 

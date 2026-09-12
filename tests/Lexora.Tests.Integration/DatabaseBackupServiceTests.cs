@@ -60,7 +60,8 @@ public class DatabaseBackupServiceTests : IDisposable
     {
         // Arrange
         var customBackupPath = Path.Combine(_tempDirectory, "restore_test.db");
-        var newPayload = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+        var headerBytes = System.Text.Encoding.ASCII.GetBytes("SQLite format 3\0");
+        var newPayload = headerBytes.Concat(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }).ToArray();
         await File.WriteAllBytesAsync(customBackupPath, newPayload);
 
         // Act

@@ -73,6 +73,8 @@ public record StudyHistoryDayDto(
         _ => "#E1DFDD"  // Neutral empty
     };
 
+    public string TextColorHex => HeatmapLevel >= 3 ? "#FFFFFF" : "#202020";
+
     public string TooltipText => $"{Date:dd/MM/yyyy}: {ReviewsCount} reviews ({CorrectCount} correct)";
 }
 

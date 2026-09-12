@@ -108,6 +108,17 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Word>> GetWordsForAnalyticsAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(w => w.WordTopics)
+            .Include(w => w.WordExamTags)
+                .ThenInclude(wet => wet.ExamTag)
+            .Include(w => w.ReviewCard)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     private static IQueryable<Word> ApplyFilters(
         IQueryable<Word> query,
         string? searchTerm,

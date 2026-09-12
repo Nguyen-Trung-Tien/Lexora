@@ -40,11 +40,20 @@ public sealed partial class VocabularyPage : Page
         SortCombo.ItemsSource = new List<string> { "Term (A-Z)", "Term (Z-A)", "CEFR Level (A1-C2)", "CEFR Level (C2-A1)", "Date Added (Newest)", "Date Added (Oldest)" };
         SortCombo.SelectedIndex = 0;
 
+        _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+        _searchDebounceTimer.Tick += async (s, e) =>
+        {
+            _searchDebounceTimer.Stop();
+            await ViewModel.LoadWordsAsync();
+        };
+
         Loaded += async (s, e) =>
         {
             await ViewModel.InitializeAsync();
         };
     }
+
+    private readonly DispatcherTimer _searchDebounceTimer;
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -55,9 +64,10 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
-    private async void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        await ViewModel.LoadWordsAsync();
+        _searchDebounceTimer.Stop();
+        _searchDebounceTimer.Start();
     }
 
     private async void LevelFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -302,6 +312,7 @@ public sealed partial class VocabularyPage : Page
         if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(textBox.Text))
         {
             var importResult = await ViewModel.ImportDataAsync(textBox.Text, isJson);
+            await Task.Yield();
             var summaryDialog = new ContentDialog
             {
                 Title = "Import Results",

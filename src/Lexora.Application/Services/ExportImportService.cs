@@ -91,11 +91,23 @@ public class ExportImportService : IExportImportService
         return sb.ToString();
     }
 
+    private const int MaxImportPayloadLength = 20_000_000; // 20 MB safety limit
+
     public async Task<ImportResult> ImportFromJsonAsync(string jsonContent, CancellationToken cancellationToken = default)
     {
         int imported = 0;
         int skipped = 0;
         var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(jsonContent))
+        {
+            return new ImportResult(0, 0, new List<string> { "JSON data is empty" });
+        }
+
+        if (jsonContent.Length > MaxImportPayloadLength)
+        {
+            return new ImportResult(0, 0, new List<string> { $"Payload exceeds maximum allowed size of {MaxImportPayloadLength / (1024 * 1024)} MB" });
+        }
 
         try
         {
@@ -105,8 +117,13 @@ public class ExportImportService : IExportImportService
                 return new ImportResult(0, 0, new List<string> { "JSON data is empty or invalid" });
             }
 
-            var allTopics = (await _vocabRepo.GetAllTopicsAsync(cancellationToken)).ToDictionary(t => t.Name.ToLowerInvariant());
-            var allExamTags = (await _vocabRepo.GetAllExamTagsAsync(cancellationToken)).ToDictionary(et => et.Name.ToLowerInvariant());
+            var rawTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
+            var allTopics = rawTopics != null ? rawTopics.ToDictionary(t => t.Name.ToLowerInvariant()) : new Dictionary<string, Topic>();
+
+            var rawTags = await _vocabRepo.GetAllExamTagsAsync(cancellationToken);
+            var allExamTags = rawTags != null ? rawTags.ToDictionary(et => et.Name.ToLowerInvariant()) : new Dictionary<string, ExamTag>();
+
+            var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var item in list)
             {
@@ -117,6 +134,14 @@ public class ExportImportService : IExportImportService
                 }
 
                 var normalized = item.Term.Trim().ToLowerInvariant();
+
+                // Check intra-file duplicate
+                if (!seenTerms.Add(normalized))
+                {
+                    skipped++;
+                    continue;
+                }
+
                 var existing = await _vocabRepo.GetByTermAsync(normalized, cancellationToken);
                 if (existing != null)
                 {
@@ -219,23 +244,36 @@ public class ExportImportService : IExportImportService
         int skipped = 0;
         var errors = new List<string>();
 
+        if (string.IsNullOrWhiteSpace(csvContent))
+        {
+            return new ImportResult(0, 0, new List<string> { "CSV content is empty" });
+        }
+
+        if (csvContent.Length > MaxImportPayloadLength)
+        {
+            return new ImportResult(0, 0, new List<string> { $"Payload exceeds maximum allowed size of {MaxImportPayloadLength / (1024 * 1024)} MB" });
+        }
+
         try
         {
-            using var reader = new StringReader(csvContent);
-            string? headerLine = await reader.ReadLineAsync(cancellationToken);
-            if (headerLine == null)
+            var records = ParseCsvRecords(csvContent);
+            if (records.Count <= 1)
             {
-                return new ImportResult(0, 0, new List<string> { "CSV content is empty" });
+                return new ImportResult(0, 0, new List<string> { "CSV content has no data rows" });
             }
 
-            string? line;
-            int lineNumber = 1;
-            while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
-            {
-                lineNumber++;
-                if (string.IsNullOrWhiteSpace(line)) continue;
+            var rawTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
+            var allTopics = rawTopics != null ? rawTopics.ToDictionary(t => t.Name.ToLowerInvariant()) : new Dictionary<string, Topic>();
 
-                var columns = ParseCsvLine(line);
+            var rawTags = await _vocabRepo.GetAllExamTagsAsync(cancellationToken);
+            var allExamTags = rawTags != null ? rawTags.ToDictionary(et => et.Name.ToLowerInvariant()) : new Dictionary<string, ExamTag>();
+
+            var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // Skip row 0 (header)
+            for (int r = 1; r < records.Count; r++)
+            {
+                var columns = records[r];
                 if (columns.Count == 0 || string.IsNullOrWhiteSpace(columns[0]))
                 {
                     skipped++;
@@ -244,6 +282,13 @@ public class ExportImportService : IExportImportService
 
                 string term = columns[0].Trim();
                 string normalized = term.ToLowerInvariant();
+
+                // Check intra-file duplicate
+                if (!seenTerms.Add(normalized))
+                {
+                    skipped++;
+                    continue;
+                }
 
                 var existing = await _vocabRepo.GetByTermAsync(normalized, cancellationToken);
                 if (existing != null)
@@ -270,6 +315,8 @@ public class ExportImportService : IExportImportService
                 string? phoneticUs = columns.Count > 4 && !string.IsNullOrWhiteSpace(columns[4]) ? columns[4].Trim() : null;
                 string meaningsVi = columns.Count > 5 ? columns[5].Trim() : term;
                 string examplesText = columns.Count > 6 ? columns[6].Trim() : "";
+                string topicsText = columns.Count > 7 ? columns[7].Trim() : "";
+                string examTagsText = columns.Count > 8 ? columns[8].Trim() : "";
                 string? notes = columns.Count > 9 ? columns[9].Trim() : null;
 
                 var word = new Word
@@ -341,6 +388,32 @@ public class ExportImportService : IExportImportService
                     }
                 }
 
+                // Link topics from CSV
+                if (!string.IsNullOrWhiteSpace(topicsText))
+                {
+                    var topicTokens = topicsText.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    foreach (var tname in topicTokens)
+                    {
+                        if (allTopics.TryGetValue(tname.ToLowerInvariant(), out var topic))
+                        {
+                            word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = topic.Id });
+                        }
+                    }
+                }
+
+                // Link exam tags from CSV
+                if (!string.IsNullOrWhiteSpace(examTagsText))
+                {
+                    var tagTokens = examTagsText.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    foreach (var etname in tagTokens)
+                    {
+                        if (allExamTags.TryGetValue(etname.ToLowerInvariant(), out var examTag))
+                        {
+                            word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = examTag.Id });
+                        }
+                    }
+                }
+
                 word.ReviewCard = new ReviewCard
                 {
                     WordId = word.Id,
@@ -372,21 +445,22 @@ public class ExportImportService : IExportImportService
         return field;
     }
 
-    private static List<string> ParseCsvLine(string line)
+    private static List<List<string>> ParseCsvRecords(string csvContent)
     {
-        var result = new List<string>();
-        var current = new StringBuilder();
+        var records = new List<List<string>>();
+        var currentRecord = new List<string>();
+        var currentField = new StringBuilder();
         bool inQuotes = false;
 
-        for (int i = 0; i < line.Length; i++)
+        for (int i = 0; i < csvContent.Length; i++)
         {
-            char c = line[i];
+            char c = csvContent[i];
 
             if (c == '"')
             {
-                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                if (inQuotes && i + 1 < csvContent.Length && csvContent[i + 1] == '"')
                 {
-                    current.Append('"');
+                    currentField.Append('"');
                     i++; // skip escaped quote
                 }
                 else
@@ -396,17 +470,41 @@ public class ExportImportService : IExportImportService
             }
             else if (c == ',' && !inQuotes)
             {
-                result.Add(current.ToString());
-                current.Clear();
+                currentRecord.Add(currentField.ToString());
+                currentField.Clear();
+            }
+            else if ((c == '\r' || c == '\n') && !inQuotes)
+            {
+                if (c == '\r' && i + 1 < csvContent.Length && csvContent[i + 1] == '\n')
+                {
+                    i++;
+                }
+
+                currentRecord.Add(currentField.ToString());
+                currentField.Clear();
+
+                if (currentRecord.Any(f => !string.IsNullOrWhiteSpace(f)))
+                {
+                    records.Add(currentRecord);
+                }
+                currentRecord = new List<string>();
             }
             else
             {
-                current.Append(c);
+                currentField.Append(c);
             }
         }
 
-        result.Add(current.ToString());
-        return result;
+        if (currentField.Length > 0 || currentRecord.Count > 0)
+        {
+            currentRecord.Add(currentField.ToString());
+            if (currentRecord.Any(f => !string.IsNullOrWhiteSpace(f)))
+            {
+                records.Add(currentRecord);
+            }
+        }
+
+        return records;
     }
 
     private class WordExportModel

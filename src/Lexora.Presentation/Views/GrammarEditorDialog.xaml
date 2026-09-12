@@ -20,8 +20,11 @@
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <ScrollViewer MaxHeight="620" Width="680" Padding="0,8,16,8">
+    <ScrollViewer MaxHeight="520" MaxWidth="640" HorizontalAlignment="Stretch" Padding="0,8,16,8">
         <StackPanel Spacing="16">
+            <!-- Validation Error InfoBar -->
+            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Title="Validation Error" Margin="0,0,0,8" />
+
             <!-- Title & Structure -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <TextBox x:Name="TitleTextBox" Header="Rule Title *" PlaceholderText="e.g. Present Perfect Continuous" />
@@ -47,9 +50,9 @@
                      AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50" />
 
             <!-- Common Mistakes -->
-            <Border Background="#FFF4CE" BorderBrush="#FFB900" BorderThickness="1" CornerRadius="8" Padding="12">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="12">
                 <StackPanel Spacing="6">
-                    <TextBlock Text="⚠️ Common Mistakes &amp; Pitfalls" FontWeight="Bold" Foreground="#323130" FontSize="13" />
+                    <TextBlock Text="⚠️ Common Mistakes &amp; Pitfalls" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" FontSize="13" />
                     <TextBox x:Name="CommonMistakesTextBox"
                              PlaceholderText="Các lỗi sai thí sinh hay mắc phải, lưu ý phân biệt..."
                              AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50" />

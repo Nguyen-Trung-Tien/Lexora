@@ -270,22 +270,34 @@ public partial class TestViewModel : ObservableObject
         ));
     }
 
+    private bool _isNextInProgress;
+
     [RelayCommand]
     public async Task NextQuestionAsync()
     {
-        if (!IsAnswerSubmitted)
-        {
-            // Auto submit empty/current answer if user clicks next directly
-            SubmitAnswer();
-        }
+        if (_isNextInProgress) return;
+        _isNextInProgress = true;
 
-        if (CurrentQuestionIndex + 1 < _allQuestions.Count)
+        try
         {
-            LoadQuestion(CurrentQuestionIndex + 1);
+            if (!IsAnswerSubmitted)
+            {
+                // Auto submit empty/current answer if user clicks next directly
+                SubmitAnswer();
+            }
+
+            if (CurrentQuestionIndex + 1 < _allQuestions.Count)
+            {
+                LoadQuestion(CurrentQuestionIndex + 1);
+            }
+            else
+            {
+                await FinishTestAsync();
+            }
         }
-        else
+        finally
         {
-            await FinishTestAsync();
+            _isNextInProgress = false;
         }
     }
 
