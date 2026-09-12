@@ -77,9 +77,11 @@ dotnet run --project src/Lexora.Presentation/Lexora.Presentation.csproj
 
 ## 🗺️ 8-Phase Master Roadmap
 
+> Chi tiết tiến độ từng tính năng được cập nhật tại [PROGRESS.md](file:///d:/LEARN/Lexora/PROGRESS.md).
+
 - [x] **Phase 1 — Foundation**: Solution setup, Clean Architecture, DI, EF Core + SQLite, MVVM, Theme/Localization, Unit & Integration tests.
-- [ ] **Phase 2 — Vocabulary**: Full CRUD, multiple meanings, IPA + audio player, CEFR levels, TOEIC/VSTEP exam tagging, CSV/JSON import/export.
-- [ ] **Phase 3 — Learning & Review**: Leitner/SM-2 spaced repetition, Remembered/NotRemembered tracking, NextReviewAt scheduling, daily reviews.
+- [x] **Phase 2 — Vocabulary**: Full CRUD, multiple meanings, IPA + audio player, CEFR levels, TOEIC/VSTEP exam tagging, CSV/JSON import/export.
+- [x] **Phase 3 — Learning & Review**: Leitner/SM-2 spaced repetition, Remembered/NotRemembered tracking, NextReviewAt scheduling, daily reviews & interactive flip flashcards.
 - [ ] **Phase 4 — Vocabulary Test**: Word-to-Meaning, Meaning-to-Word, Multiple Choice, Fill-in-the-blank, Part-of-Speech, and Mixed quizzes.
 - [ ] **Phase 5 — Grammar**: Grammar structure explorer, explanations, examples, common mistake alerts, and grammar quizzes.
 - [ ] **Phase 6 — Dashboard & Statistics**: Learning streaks, retention accuracy charts, TOEIC/VSTEP progress breakdowns, study history timeline.
