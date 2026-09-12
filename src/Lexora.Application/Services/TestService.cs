@@ -30,7 +30,17 @@ public class TestService : ITestService
     {
         IReadOnlyList<Word> candidateWords;
 
-        if (config.WeakWordsOnly)
+        if (config.CustomWordIds != null && config.CustomWordIds.Count > 0)
+        {
+            var loadedWords = new List<Word>();
+            foreach (var id in config.CustomWordIds)
+            {
+                var w = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken);
+                if (w != null) loadedWords.Add(w);
+            }
+            candidateWords = loadedWords;
+        }
+        else if (config.WeakWordsOnly)
         {
             var difficultCards = await _reviewRepo.GetDifficultCardsAsync(50, cancellationToken);
             var weakWordIds = difficultCards.Select(c => c.WordId).ToList();
@@ -83,9 +93,13 @@ public class TestService : ITestService
         }
 
         // Shuffle candidate words and pick question count
+        int countToTake = (config.CustomWordIds != null && config.CustomWordIds.Count > 0)
+            ? Math.Min(config.QuestionCount > 0 ? config.QuestionCount : candidateWords.Count, candidateWords.Count)
+            : Math.Min(config.QuestionCount, candidateWords.Count);
+
         var selectedWords = candidateWords
             .OrderBy(_ => Random.Shared.Next())
-            .Take(config.QuestionCount)
+            .Take(countToTake)
             .ToList();
 
         var questions = new List<TestQuestionDto>();

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
+    xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
@@ -149,76 +150,175 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Card 2: Question Count & Customization -->
+                <!-- Card 2: Question Scope, Filters & Custom Word List -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="12" Padding="20">
                     <StackPanel Spacing="18">
                         <StackPanel Spacing="2">
                             <TextBlock Text="Test Scope &amp; Target" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
-                            <TextBlock Text="Configure question count, exam focus, and difficulty targets" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="Configure question count, exam focus, or select specific custom words to test" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                         </StackPanel>
 
-                        <!-- Number of Questions Segmented Bar -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Number of Questions:" FontWeight="SemiBold" />
-                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="4" HorizontalAlignment="Left">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <Button x:Name="BtnCount5" Content="5 Questions" Click="QuestionCountButton_Click" Tag="5" CornerRadius="6" Padding="14,6" />
-                                    <Button x:Name="BtnCount10" Content="10 Questions" Click="QuestionCountButton_Click" Tag="10" CornerRadius="6" Padding="14,6" />
-                                    <Button x:Name="BtnCount20" Content="20 Questions" Click="QuestionCountButton_Click" Tag="20" CornerRadius="6" Padding="14,6" />
-                                    <Button x:Name="BtnCount30" Content="30 Questions" Click="QuestionCountButton_Click" Tag="30" CornerRadius="6" Padding="14,6" />
+                        <!-- Mode Switcher Segmented Bar -->
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="4" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Button x:Name="BtnModeFilters" Content="🎯 Bộ lọc chủ đề &amp; Cấp độ" Click="ModeFiltersButton_Click" CornerRadius="6" Padding="14,8" />
+                                <Button x:Name="BtnModeCustomList" Click="ModeCustomListButton_Click" CornerRadius="6" Padding="14,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE70F;" FontSize="13" />
+                                        <TextBlock Text="Danh sách từ muốn kiểm tra" FontWeight="SemiBold" />
+                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="8" Padding="6,1" Margin="4,0,0,0"
+                                                Visibility="{x:Bind ViewModel.SelectedCustomWordsCount, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                                            <TextBlock Text="{x:Bind ViewModel.SelectedCustomWordsCount, Mode=OneWay}" Foreground="White" FontSize="11" FontWeight="Bold" />
+                                        </Border>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Option Area A: Filter Mode (Topic, Level, Exam, Weak Words) -->
+                        <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsCustomListMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                            <!-- Number of Questions Segmented Bar -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Number of Questions:" FontWeight="SemiBold" />
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="4" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <Button x:Name="BtnCount5" Content="5 Questions" Click="QuestionCountButton_Click" Tag="5" CornerRadius="6" Padding="14,6" />
+                                        <Button x:Name="BtnCount10" Content="10 Questions" Click="QuestionCountButton_Click" Tag="10" CornerRadius="6" Padding="14,6" />
+                                        <Button x:Name="BtnCount20" Content="20 Questions" Click="QuestionCountButton_Click" Tag="20" CornerRadius="6" Padding="14,6" />
+                                        <Button x:Name="BtnCount30" Content="30 Questions" Click="QuestionCountButton_Click" Tag="30" CornerRadius="6" Padding="14,6" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <MenuFlyoutSeparator />
+
+                            <!-- Filter options Grid -->
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
+                                <!-- Exam Filter -->
+                                <StackPanel Grid.Column="0" Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE9D5;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="Exam Simulation:" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="ExamFilterComboBox" HorizontalAlignment="Stretch"
+                                              ItemsSource="{x:Bind ViewModel.ExamTypes}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedExamType, Mode=TwoWay}"
+                                              PlaceholderText="All Exam Types" />
                                 </StackPanel>
+
+                                <!-- Topic Filter -->
+                                <StackPanel Grid.Column="1" Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE8EC;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="Topic / Category:" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="TopicFilterComboBox" HorizontalAlignment="Stretch"
+                                              ItemsSource="{x:Bind ViewModel.Topics}"
+                                              DisplayMemberPath="Name"
+                                              SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}"
+                                              PlaceholderText="All Topics" />
+                                </StackPanel>
+
+                                <!-- Level Filter -->
+                                <StackPanel Grid.Column="2" Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE7C1;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="CEFR Level:" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="LevelFilterComboBox" HorizontalAlignment="Stretch"
+                                              ItemsSource="{x:Bind ViewModel.CefrLevels}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}"
+                                              PlaceholderText="All Levels" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Weak Words Focus Toggle -->
+                            <ToggleSwitch Header="Target Weak Words Only"
+                                          IsOn="{x:Bind ViewModel.WeakWordsOnly, Mode=TwoWay}"
+                                          OffContent="Include all words"
+                                          OnContent="Focus on low-confidence &amp; difficult words" />
+                        </StackPanel>
+
+                        <!-- Option Area B: Custom Word List Mode -->
+                        <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsCustomListMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock Text="Chọn các từ vựng cụ thể hoặc dán danh sách từ bạn muốn làm bài kiểm tra"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+
+                            <!-- Search Bar & Action Buttons -->
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+                                <TextBox x:Name="CustomWordSearchBox"
+                                         PlaceholderText="Tìm kiếm từ trong kho từ vựng..."
+                                         Text="{x:Bind ViewModel.CustomListSearchTerm, Mode=TwoWay}"
+                                         TextChanged="CustomWordSearchBox_TextChanged"
+                                         CornerRadius="6" />
+                                <Button Grid.Column="1" Content="Chọn tất cả" Click="SelectAllCustomWords_Click" CornerRadius="6" />
+                                <Button Grid.Column="2" Content="Bỏ chọn" Click="DeselectAllCustomWords_Click" CornerRadius="6" />
+                                <Button Grid.Column="3" Content="⚡ Từ chưa thuộc" Click="SelectWeakCustomWords_Click" CornerRadius="6" />
+                            </Grid>
+
+                            <!-- Selected Count Indicator Badge -->
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="8,3">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="Đã chọn:" Foreground="White" FontSize="12" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedCustomWordsCount, Mode=OneWay}" Foreground="White" FontSize="12" FontWeight="Bold" />
+                                        <TextBlock Text="từ" Foreground="White" FontSize="12" />
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock Text="Đề thi sẽ tạo câu hỏi chính xác cho các từ đã chọn ở đây." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Scrollable Word Candidates List with Checkboxes -->
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8" MaxHeight="300">
+                                <ListView ItemsSource="{x:Bind ViewModel.FilteredCustomWordCandidates}" SelectionMode="None" Padding="4">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:SelectableWordItem">
+                                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,2">
+                                                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                                    <CheckBox IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                              VerticalAlignment="Center" Margin="0,0,10,0" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="{x:Bind Word.Term}" FontWeight="Bold" FontSize="14" />
+                                                            <TextBlock Text="{x:Bind Word.PhoneticUs}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                            <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="6,1">
+                                                                <TextBlock Text="{x:Bind Word.PrimaryPartOfSpeech}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{x:Bind Word.PrimaryDefinition}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                    <Border Grid.Column="2" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" Margin="8,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{x:Bind Word.Level}" FontSize="11" FontWeight="SemiBold" />
+                                                    </Border>
+                                                    <Border Grid.Column="3" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center"
+                                                            Visibility="{x:Bind Word.LearningStatus, Converter={StaticResource NullToVisibilityConverter}}">
+                                                        <TextBlock Text="{x:Bind Word.LearningStatus}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
                             </Border>
+
+                            <!-- Expander for Pasting Terms -->
+                            <Expander Header="📋 Dán danh sách từ (ngăn cách bằng dấu phẩy hoặc dòng mới)" HorizontalAlignment="Stretch">
+                                <StackPanel Spacing="10" Padding="12">
+                                    <TextBlock Text="Nhập danh sách từ tiếng Anh (ví dụ: achieve, brilliant, challenge, determine):" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                    <TextBox Text="{x:Bind ViewModel.CustomListPastedTerms, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             AcceptsReturn="True" Height="80" TextWrapping="Wrap" CornerRadius="6"
+                                             PlaceholderText="Nhập từ cần kiểm tra..." />
+                                    <Button Content="Áp dụng danh sách này" Style="{ThemeResource AccentButtonStyle}"
+                                            Click="ApplyPastedTermsButton_Click" CornerRadius="6" />
+                                </StackPanel>
+                            </Expander>
                         </StackPanel>
-
-                        <MenuFlyoutSeparator />
-
-                        <!-- Filter options Grid -->
-                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
-                            <!-- Exam Filter -->
-                            <StackPanel Grid.Column="0" Spacing="6">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE9D5;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="Exam Simulation:" FontWeight="SemiBold" />
-                                </StackPanel>
-                                <ComboBox x:Name="ExamFilterComboBox" HorizontalAlignment="Stretch"
-                                          ItemsSource="{x:Bind ViewModel.ExamTypes}"
-                                          SelectedItem="{x:Bind ViewModel.SelectedExamType, Mode=TwoWay}"
-                                          PlaceholderText="All Exam Types" />
-                            </StackPanel>
-
-                            <!-- Topic Filter -->
-                            <StackPanel Grid.Column="1" Spacing="6">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE8EC;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="Topic / Category:" FontWeight="SemiBold" />
-                                </StackPanel>
-                                <ComboBox x:Name="TopicFilterComboBox" HorizontalAlignment="Stretch"
-                                          ItemsSource="{x:Bind ViewModel.Topics}"
-                                          DisplayMemberPath="Name"
-                                          SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}"
-                                          PlaceholderText="All Topics" />
-                            </StackPanel>
-
-                            <!-- Level Filter -->
-                            <StackPanel Grid.Column="2" Spacing="6">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE7C1;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="CEFR Level:" FontWeight="SemiBold" />
-                                </StackPanel>
-                                <ComboBox x:Name="LevelFilterComboBox" HorizontalAlignment="Stretch"
-                                          ItemsSource="{x:Bind ViewModel.CefrLevels}"
-                                          SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}"
-                                          PlaceholderText="All Levels" />
-                            </StackPanel>
-                        </Grid>
-
-                        <!-- Weak Words Focus Toggle -->
-                        <ToggleSwitch Header="Target Weak Words Only"
-                                      IsOn="{x:Bind ViewModel.WeakWordsOnly, Mode=TwoWay}"
-                                      OffContent="Include all words"
-                                      OnContent="Focus on low-confidence &amp; difficult words" />
                     </StackPanel>
                 </Border>
 

@@ -32,7 +32,7 @@ public class NavigationService : INavigationService
     public bool Navigate(Type pageType, object? parameter = null, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo? transitionInfo = null)
     {
         if (_frame == null) return false;
-        if (_frame.Content?.GetType() == pageType) return false;
+        if (_frame.Content?.GetType() == pageType && parameter == null) return false;
 
         transitionInfo ??= new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo();
         return _frame.Navigate(pageType, parameter, transitionInfo);

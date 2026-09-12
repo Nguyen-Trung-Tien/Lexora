@@ -64,6 +64,22 @@ public partial class TestViewModel : ObservableObject
     public ObservableCollection<ExamType> ExamTypes { get; } = new();
     public ObservableCollection<CefrLevel> CefrLevels { get; } = new();
 
+    // Custom Word List Mode properties
+    [ObservableProperty]
+    public partial bool IsCustomListMode { get; set; } = false;
+
+    [ObservableProperty]
+    public partial string CustomListSearchTerm { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CustomListPastedTerms { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial int SelectedCustomWordsCount { get; set; } = 0;
+
+    public ObservableCollection<SelectableWordItem> CustomWordCandidates { get; } = new();
+    public ObservableCollection<SelectableWordItem> FilteredCustomWordCandidates { get; } = new();
+
     // Testing Active State
     [ObservableProperty]
     public partial int CurrentQuestionIndex { get; set; } = 0;
@@ -160,6 +176,134 @@ public partial class TestViewModel : ObservableObject
             CefrLevels.Clear();
             foreach (var cl in Enum.GetValues<CefrLevel>()) CefrLevels.Add(cl);
         }
+
+        await LoadCustomWordCandidatesAsync();
+    }
+
+    [RelayCommand]
+    public async Task LoadCustomWordCandidatesAsync()
+    {
+        if (CustomWordCandidates.Count == 0)
+        {
+            var words = await _vocabService.SearchWordsAsync(pageSize: 300);
+            CustomWordCandidates.Clear();
+            foreach (var w in words)
+            {
+                var item = new SelectableWordItem(w);
+                item.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(SelectableWordItem.IsSelected))
+                    {
+                        UpdateSelectedCustomWordsCount();
+                    }
+                };
+                CustomWordCandidates.Add(item);
+            }
+        }
+        ApplyCustomWordFilter();
+    }
+
+    public void UpdateSelectedCustomWordsCount()
+    {
+        SelectedCustomWordsCount = CustomWordCandidates.Count(w => w.IsSelected);
+    }
+
+    [RelayCommand]
+    public void ApplyCustomWordFilter()
+    {
+        FilteredCustomWordCandidates.Clear();
+        var term = CustomListSearchTerm?.Trim();
+        var list = string.IsNullOrEmpty(term)
+            ? CustomWordCandidates
+            : CustomWordCandidates.Where(w =>
+                w.Word.Term.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                w.Word.PrimaryDefinition.Contains(term, StringComparison.OrdinalIgnoreCase));
+
+        foreach (var item in list)
+        {
+            FilteredCustomWordCandidates.Add(item);
+        }
+    }
+
+    [RelayCommand]
+    public void SelectAllCustomWords()
+    {
+        foreach (var item in FilteredCustomWordCandidates)
+        {
+            item.IsSelected = true;
+        }
+        UpdateSelectedCustomWordsCount();
+    }
+
+    [RelayCommand]
+    public void DeselectAllCustomWords()
+    {
+        foreach (var item in CustomWordCandidates)
+        {
+            item.IsSelected = false;
+        }
+        UpdateSelectedCustomWordsCount();
+    }
+
+    [RelayCommand]
+    public void SelectWeakCustomWords()
+    {
+        foreach (var item in CustomWordCandidates)
+        {
+            item.IsSelected = item.Word.LearningStatus == LearningStatus.NotRemembered || item.Word.LearningStatus == null;
+        }
+        UpdateSelectedCustomWordsCount();
+    }
+
+    [RelayCommand]
+    public void ApplyPastedTerms()
+    {
+        if (string.IsNullOrWhiteSpace(CustomListPastedTerms)) return;
+
+        var separators = new[] { ',', '\n', '\r', ';', '|' };
+        var terms = CustomListPastedTerms
+            .Split(separators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        int matchedCount = 0;
+        foreach (var item in CustomWordCandidates)
+        {
+            if (terms.Contains(item.Word.Term))
+            {
+                item.IsSelected = true;
+                matchedCount++;
+            }
+        }
+
+        UpdateSelectedCustomWordsCount();
+        StatusMessage = matchedCount > 0
+            ? $"Đã tìm thấy và chọn {matchedCount} từ từ danh sách dán."
+            : "Không tìm thấy từ nào phù hợp trong kho từ vựng.";
+    }
+
+    [RelayCommand]
+    public void SwitchToFilterMode()
+    {
+        IsCustomListMode = false;
+    }
+
+    [RelayCommand]
+    public async Task SwitchToCustomListModeAsync()
+    {
+        IsCustomListMode = true;
+        await LoadCustomWordCandidatesAsync();
+    }
+
+    public async Task SetCustomWordSelectionAsync(IEnumerable<Guid> wordIds)
+    {
+        await LoadCustomWordCandidatesAsync();
+        var set = wordIds.ToHashSet();
+        foreach (var item in CustomWordCandidates)
+        {
+            item.IsSelected = set.Contains(item.Word.Id);
+        }
+        UpdateSelectedCustomWordsCount();
+        IsCustomListMode = true;
     }
 
     [RelayCommand]
@@ -170,13 +314,30 @@ public partial class TestViewModel : ObservableObject
 
         try
         {
+            List<Guid>? customWordIds = null;
+            int qCount = QuestionCount;
+
+            if (IsCustomListMode)
+            {
+                var selected = CustomWordCandidates.Where(c => c.IsSelected).Select(c => c.Word.Id).ToList();
+                if (selected.Count == 0)
+                {
+                    StatusMessage = "Vui lòng chọn ít nhất 1 từ trong danh sách để kiểm tra.";
+                    IsLoading = false;
+                    return;
+                }
+                customWordIds = selected;
+                qCount = selected.Count;
+            }
+
             var config = new TestConfigurationDto(
                 Type: SelectedTestType,
-                QuestionCount: QuestionCount,
+                QuestionCount: qCount,
                 Level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
                 TopicId: SelectedTopic?.Id,
                 ExamType: SelectedExamType == ExamType.General ? null : SelectedExamType,
-                WeakWordsOnly: WeakWordsOnly
+                WeakWordsOnly: WeakWordsOnly,
+                CustomWordIds: customWordIds
             );
 
             var session = await _testService.GenerateTestAsync(config);

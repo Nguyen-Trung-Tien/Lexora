@@ -27,10 +27,23 @@ public sealed partial class TestPage : Page
         UpdateTypeButtonStyles(ViewModel.SelectedTestType);
         UpdateCountButtonStyles(ViewModel.QuestionCount);
         await ViewModel.InitializeAsync();
+
+        if (e.Parameter is IEnumerable<Guid> wordIds)
+        {
+            await ViewModel.SetCustomWordSelectionAsync(wordIds);
+            UpdateModeSelectorStyles(true);
+        }
+        else
+        {
+            UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
+        }
     }
 
     private async void TestPage_KeyDown(object sender, KeyRoutedEventArgs e)
     {
+        // Guard against hotkeys when typing in a text box
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+
         if (ViewModel.IsTestingMode)
         {
             if (e.Key == VirtualKey.Space)
@@ -105,6 +118,70 @@ public sealed partial class TestPage : Page
         ViewModel.RestartSetup();
         UpdateTypeButtonStyles(ViewModel.SelectedTestType);
         UpdateCountButtonStyles(ViewModel.QuestionCount);
+        UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
+    }
+
+    private void ModeFiltersButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SwitchToFilterMode();
+        UpdateModeSelectorStyles(false);
+    }
+
+    private async void ModeCustomListButton_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.SwitchToCustomListModeAsync();
+        UpdateModeSelectorStyles(true);
+    }
+
+    private void CustomWordSearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ViewModel.ApplyCustomWordFilter();
+    }
+
+    private void SelectAllCustomWords_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SelectAllCustomWords();
+    }
+
+    private void DeselectAllCustomWords_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.DeselectAllCustomWords();
+    }
+
+    private void SelectWeakCustomWords_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SelectWeakCustomWords();
+    }
+
+    private void ApplyPastedTermsButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ApplyPastedTerms();
+    }
+
+    private void UpdateModeSelectorStyles(bool isCustomList)
+    {
+        var accentStyle = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
+        var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        var subtleText = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
+
+        if (isCustomList)
+        {
+            BtnModeFilters.Style = null;
+            BtnModeFilters.Background = transparent;
+            BtnModeFilters.BorderThickness = new Thickness(0);
+            if (subtleText != null) BtnModeFilters.Foreground = subtleText;
+
+            BtnModeCustomList.Style = accentStyle;
+        }
+        else
+        {
+            BtnModeFilters.Style = accentStyle;
+
+            BtnModeCustomList.Style = null;
+            BtnModeCustomList.Background = transparent;
+            BtnModeCustomList.BorderThickness = new Thickness(0);
+            if (subtleText != null) BtnModeCustomList.Foreground = subtleText;
+        }
     }
 
     private async void WeakWordAudio_Click(object sender, RoutedEventArgs e)

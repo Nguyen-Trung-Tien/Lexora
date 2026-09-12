@@ -8,7 +8,8 @@ public record TestConfigurationDto(
     CefrLevel? Level = null,
     Guid? TopicId = null,
     ExamType? ExamType = null,
-    bool WeakWordsOnly = false
+    bool WeakWordsOnly = false,
+    IReadOnlyList<Guid>? CustomWordIds = null
 );
 
 public enum TestScoreTier

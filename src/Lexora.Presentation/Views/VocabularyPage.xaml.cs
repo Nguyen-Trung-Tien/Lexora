@@ -455,4 +455,13 @@ public sealed partial class VocabularyPage : Page
             args.Handled = true;
         }
     }
+
+    private void TestThisWordButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWord != null)
+        {
+            var navService = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.INavigationService>();
+            navService.Navigate(typeof(TestPage), new[] { ViewModel.SelectedWord.Id });
+        }
+    }
 }

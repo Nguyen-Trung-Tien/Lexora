@@ -40,6 +40,9 @@ public class TestServiceTests
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(_sampleWords);
 
+        _mockVocabRepo.Setup(r => r.GetWithDetailsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Guid id, CancellationToken _) => _sampleWords.FirstOrDefault(w => w.Id == id));
+
         _mockReviewRepo.Setup(r => r.CreateStudySessionAsync(It.IsAny<StudySession>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((StudySession s, CancellationToken _) => s);
 
@@ -191,6 +194,29 @@ public class TestServiceTests
         result.WeakWords.Should().HaveCount(2);
         result.WeakWords.Select(w => w.Id).Should().Contain(session.Questions[1].WordId);
         result.WeakWords.Select(w => w.Id).Should().Contain(session.Questions[2].WordId);
+    }
+
+    [Fact]
+    public async Task GenerateTestAsync_WithCustomWordIds_ShouldGenerateQuestionsOnlyForSpecifiedWords()
+    {
+        // Arrange: Select 2 specific word IDs from sample words
+        var targetWord1 = _sampleWords[0];
+        var targetWord2 = _sampleWords[3];
+        var customIds = new List<Guid> { targetWord1.Id, targetWord2.Id };
+
+        var config = new TestConfigurationDto(
+            Type: TestType.WordToMeaning,
+            QuestionCount: 2,
+            CustomWordIds: customIds
+        );
+
+        // Act
+        var session = await _testService.GenerateTestAsync(config);
+
+        // Assert
+        session.Questions.Should().HaveCount(2);
+        var questionWordIds = session.Questions.Select(q => q.WordId).ToList();
+        questionWordIds.Should().BeEquivalentTo(customIds);
     }
 
     private static List<Word> CreateSampleWords()
