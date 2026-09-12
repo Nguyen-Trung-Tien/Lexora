@@ -45,6 +45,7 @@ public sealed partial class VocabularyPage : Page
         {
             _searchDebounceTimer.Stop();
             await ViewModel.LoadWordsAsync();
+            ViewModel.ApplyUnitFilter();
         };
 
         Loaded += async (s, e) =>
@@ -516,16 +517,33 @@ public sealed partial class VocabularyPage : Page
 
     private void UpdateViewModeButtons()
     {
-        if (ViewModel.IsUnitViewMode)
+        var res = Microsoft.UI.Xaml.Application.Current.Resources;
+        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
+        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
+        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
+        var secondaryText = res.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
+        var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+        void ApplySegment(Button btn, bool isActive)
         {
-            BtnViewUnits.Style = Microsoft.UI.Xaml.Application.Current.Resources["AccentButtonStyle"] as Style;
-            BtnViewList.Style = Microsoft.UI.Xaml.Application.Current.Resources["DefaultButtonStyle"] as Style;
+            btn.Style = null;
+            if (isActive)
+            {
+                if (cardBg != null) btn.Background = cardBg;
+                if (cardStroke != null) btn.BorderBrush = cardStroke;
+                btn.BorderThickness = new Thickness(1);
+                if (accentText != null) btn.Foreground = accentText;
+            }
+            else
+            {
+                btn.Background = transparent;
+                btn.BorderThickness = new Thickness(0);
+                if (secondaryText != null) btn.Foreground = secondaryText;
+            }
         }
-        else
-        {
-            BtnViewList.Style = Microsoft.UI.Xaml.Application.Current.Resources["AccentButtonStyle"] as Style;
-            BtnViewUnits.Style = Microsoft.UI.Xaml.Application.Current.Resources["DefaultButtonStyle"] as Style;
-        }
+
+        ApplySegment(BtnViewList, !ViewModel.IsUnitViewMode);
+        ApplySegment(BtnViewUnits, ViewModel.IsUnitViewMode);
     }
 
     private async void ViewUnitWords_Click(object sender, RoutedEventArgs e)

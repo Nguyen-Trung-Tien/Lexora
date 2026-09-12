@@ -32,7 +32,7 @@
                                 <TextBlock Text="Start Review" />
                             </StackPanel>
                         </Button>
-                        <Button Click="StartPracticeButton_Click" Background="#20FFFFFF" Foreground="White" BorderBrush="White" BorderThickness="1" FontWeight="SemiBold" Padding="16,10" CornerRadius="8">
+                        <Button Click="StartPracticeButton_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontWeight="SemiBold" Padding="16,10" CornerRadius="8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE768;" FontSize="15" />
                                 <TextBlock Text="Practice Test" />

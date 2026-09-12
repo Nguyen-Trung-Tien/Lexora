@@ -55,6 +55,7 @@ public partial class VocabularyViewModel : ObservableObject
     public ObservableCollection<TopicDto> AvailableTopics { get; } = new();
     public ObservableCollection<ExamTagDto> AvailableExamTags { get; } = new();
     public ObservableCollection<ContextUnitDto> ContextUnits { get; } = new();
+    public ObservableCollection<ContextUnitDto> FilteredContextUnits { get; } = new();
 
     public VocabularyViewModel(
         IVocabularyService vocabService,
@@ -87,10 +88,28 @@ public partial class VocabularyViewModel : ObservableObject
             {
                 ContextUnits.Add(u);
             }
+            ApplyUnitFilter();
         }
         catch
         {
             // Keep collection stable on error
+        }
+    }
+
+    public void ApplyUnitFilter()
+    {
+        FilteredContextUnits.Clear();
+        var query = SearchTerm?.Trim();
+        var list = string.IsNullOrEmpty(query)
+            ? ContextUnits
+            : ContextUnits.Where(u =>
+                u.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                (u.Description != null && u.Description.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                u.Words.Any(w => w.Term.Contains(query, StringComparison.OrdinalIgnoreCase)));
+
+        foreach (var unit in list)
+        {
+            FilteredContextUnits.Add(unit);
         }
     }
 
