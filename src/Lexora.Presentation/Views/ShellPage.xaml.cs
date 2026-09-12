@@ -32,6 +32,10 @@ public sealed partial class ShellPage : Page
     private async void NavView_Loaded(object sender, RoutedEventArgs e)
     {
         _navigationService.Initialize(ContentFrame);
+        ContentFrame.Navigated += (s, args) =>
+        {
+            ViewModel.IsOnReviewPage = ContentFrame.Content is ReviewPage;
+        };
         _navigationService.Navigate(typeof(DashboardPage));
         NavView.SelectedItem = NavItemDashboard;
         await ViewModel.CheckDueReviewsAsync();

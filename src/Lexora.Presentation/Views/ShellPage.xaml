@@ -60,7 +60,7 @@
                 <!-- Due Review Reminder InfoBar (Top, above content) -->
                 <InfoBar x:Name="DueReviewInfoBar"
                          Grid.Row="0"
-                         IsOpen="{x:Bind ViewModel.HasDueReviews, Mode=OneWay}"
+                         IsOpen="{x:Bind ViewModel.IsReminderVisible, Mode=OneWay}"
                          Severity="Informational"
                          Title="Review Reminder"
                          Message="{x:Bind ViewModel.DueReviewMessage, Mode=OneWay}"

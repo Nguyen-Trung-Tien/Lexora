@@ -16,7 +16,14 @@ public partial class ShellViewModel : ObservableObject
     public partial string Title { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsReminderVisible))]
     public partial bool HasDueReviews { get; set; } = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsReminderVisible))]
+    public partial bool IsOnReviewPage { get; set; } = false;
+
+    public bool IsReminderVisible => HasDueReviews && !IsOnReviewPage;
 
     [ObservableProperty]
     public partial string DueReviewMessage { get; set; } = string.Empty;
