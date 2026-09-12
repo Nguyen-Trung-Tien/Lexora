@@ -53,6 +53,15 @@ public partial class ReviewViewModel : ObservableObject
     public partial string HintText { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial string ClozeSentenceEn { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ClozeSentenceVi { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HasClozeSentence { get; set; } = false;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCardActive))]
     [NotifyPropertyChangedFor(nameof(IsEmptyQueue))]
     [NotifyPropertyChangedFor(nameof(IsSessionCompleted))]
@@ -403,5 +412,32 @@ public partial class ReviewViewModel : ObservableObject
         HardIntervalText = preview.HardText;
         GoodIntervalText = preview.GoodText;
         EasyIntervalText = preview.EasyText;
+
+        if (card.Examples != null && card.Examples.Count > 0)
+        {
+            var ex = card.Examples.FirstOrDefault(e => !string.IsNullOrWhiteSpace(e.SentenceEn) && e.SentenceEn.Contains(card.Term, StringComparison.OrdinalIgnoreCase))
+                     ?? card.Examples.FirstOrDefault(e => !string.IsNullOrWhiteSpace(e.SentenceEn));
+
+            if (ex != null && !string.IsNullOrWhiteSpace(ex.SentenceEn))
+            {
+                var pattern = System.Text.RegularExpressions.Regex.Escape(card.Term);
+                var masked = System.Text.RegularExpressions.Regex.Replace(ex.SentenceEn, pattern, "[ ________ ]", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                ClozeSentenceEn = $"\"{masked}\"";
+                ClozeSentenceVi = string.IsNullOrWhiteSpace(ex.SentenceVi) ? string.Empty : $"\"{ex.SentenceVi}\"";
+                HasClozeSentence = true;
+            }
+            else
+            {
+                ClozeSentenceEn = string.Empty;
+                ClozeSentenceVi = string.Empty;
+                HasClozeSentence = false;
+            }
+        }
+        else
+        {
+            ClozeSentenceEn = string.Empty;
+            ClozeSentenceVi = string.Empty;
+            HasClozeSentence = false;
+        }
     }
 }
