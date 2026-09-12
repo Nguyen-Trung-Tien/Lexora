@@ -44,9 +44,11 @@ public sealed partial class GrammarPage : Page
 
     private async void AddRuleButton_Click(object sender, RoutedEventArgs e)
     {
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var dialog = new GrammarEditorDialog
         {
-            XamlRoot = XamlRoot
+            XamlRoot = XamlRoot,
+            RequestedTheme = activeTheme
         };
         dialog.InitializeForCreate();
 
@@ -61,9 +63,11 @@ public sealed partial class GrammarPage : Page
     {
         if (ViewModel.SelectedRule == null) return;
 
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var dialog = new GrammarEditorDialog
         {
-            XamlRoot = XamlRoot
+            XamlRoot = XamlRoot,
+            RequestedTheme = activeTheme
         };
         dialog.InitializeForEdit(ViewModel.SelectedRule);
 

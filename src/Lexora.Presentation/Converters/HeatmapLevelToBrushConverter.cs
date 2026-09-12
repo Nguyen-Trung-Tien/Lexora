@@ -1,6 +1,8 @@
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
 using XamlApplication = Microsoft.UI.Xaml.Application;
 
@@ -8,6 +10,18 @@ namespace Lexora.Presentation.Converters;
 
 public class HeatmapLevelToBrushConverter : IValueConverter
 {
+    private static readonly SolidColorBrush LightL0 = new(Color.FromArgb(255, 235, 238, 242));
+    private static readonly SolidColorBrush LightL1 = new(Color.FromArgb(255, 155, 233, 168));
+    private static readonly SolidColorBrush LightL2 = new(Color.FromArgb(255, 64, 196, 99));
+    private static readonly SolidColorBrush LightL3 = new(Color.FromArgb(255, 48, 161, 78));
+    private static readonly SolidColorBrush LightL4 = new(Color.FromArgb(255, 33, 110, 57));
+
+    private static readonly SolidColorBrush DarkL0 = new(Color.FromArgb(255, 38, 44, 54));
+    private static readonly SolidColorBrush DarkL1 = new(Color.FromArgb(255, 14, 68, 41));
+    private static readonly SolidColorBrush DarkL2 = new(Color.FromArgb(255, 0, 109, 50));
+    private static readonly SolidColorBrush DarkL3 = new(Color.FromArgb(255, 38, 166, 65));
+    private static readonly SolidColorBrush DarkL4 = new(Color.FromArgb(255, 57, 211, 83));
+
     public object Convert(object? value, Type targetType, object parameter, string language)
     {
         int level = value is int lvl ? lvl : 0;
@@ -20,15 +34,51 @@ public class HeatmapLevelToBrushConverter : IValueConverter
             _ => "HeatmapLevel0Brush"
         };
 
-        if (XamlApplication.Current?.Resources != null &&
-            XamlApplication.Current.Resources.TryGetValue(brushKey, out var res) &&
-            res is Brush brush)
+        bool isDark = false;
+        if (XamlApplication.Current != null)
         {
-            return brush;
+            if (XamlApplication.Current.RequestedTheme == ApplicationTheme.Dark)
+            {
+                isDark = true;
+            }
+            else if (XamlApplication.Current.Resources.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cardBg) && cardBg is SolidColorBrush scb)
+            {
+                // Luminance threshold to detect dark theme
+                isDark = (scb.Color.R * 0.299 + scb.Color.G * 0.587 + scb.Color.B * 0.114) < 128;
+            }
+
+            // Attempt to look inside ThemeDictionaries
+            string themeKey = isDark ? "Dark" : "Light";
+            if (XamlApplication.Current.Resources.ThemeDictionaries.TryGetValue(themeKey, out var dictObj) &&
+                dictObj is ResourceDictionary dict &&
+                dict.TryGetValue(brushKey, out var res) &&
+                res is Brush themeBrush)
+            {
+                return themeBrush;
+            }
         }
 
-        return (XamlApplication.Current?.Resources["SubtleFillColorSecondaryBrush"] as Brush)
-            ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        // High-fidelity fallback
+        if (isDark)
+        {
+            return level switch
+            {
+                1 => DarkL1,
+                2 => DarkL2,
+                3 => DarkL3,
+                4 => DarkL4,
+                _ => DarkL0
+            };
+        }
+
+        return level switch
+        {
+            1 => LightL1,
+            2 => LightL2,
+            3 => LightL3,
+            4 => LightL4,
+            _ => LightL0
+        };
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

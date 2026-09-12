@@ -152,9 +152,11 @@ public sealed partial class VocabularyPage : Page
 
     private async void AddWordButton_Click(object sender, RoutedEventArgs e)
     {
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var dialog = new WordEditorDialog(null, ViewModel.AvailableTopics, ViewModel.AvailableExamTags)
         {
-            XamlRoot = this.XamlRoot
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
         };
 
         var result = await dialog.ShowAsync();
@@ -168,9 +170,11 @@ public sealed partial class VocabularyPage : Page
     {
         if (ViewModel.SelectedWord == null) return;
 
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var dialog = new WordEditorDialog(ViewModel.SelectedWord, ViewModel.AvailableTopics, ViewModel.AvailableExamTags)
         {
-            XamlRoot = this.XamlRoot
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
         };
 
         var result = await dialog.ShowAsync();

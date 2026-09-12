@@ -43,6 +43,7 @@
             <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
             <converters:IntZeroToVisibilityConverter x:Key="IntZeroToVisibilityConverter" />
             <converters:HeatmapLevelToBrushConverter x:Key="HeatmapLevelToBrushConverter" />
+            <converters:HeatmapLevelToForegroundConverter x:Key="HeatmapLevelToForegroundConverter" />
             <converters:ScoreTierToBrushConverter x:Key="ScoreTierToBrushConverter" />
             <converters:CorrectnessToBrushConverter x:Key="CorrectnessToBrushConverter" />
 

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Lexora.Application.DTOs;
 using Lexora.Domain.Enums;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -36,6 +37,11 @@ public sealed partial class WordEditorDialog : ContentDialog
         IReadOnlyList<ExamTagDto> allExamTags)
     {
         InitializeComponent();
+
+        if (App.Current?.Services?.GetService<Lexora.Presentation.Services.IThemeService>() is { } themeService)
+        {
+            RequestedTheme = themeService.CurrentTheme;
+        }
 
         _allTopics = allTopics.ToList();
         _allExamTags = allExamTags.ToList();

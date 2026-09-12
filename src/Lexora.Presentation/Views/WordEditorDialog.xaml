@@ -20,99 +20,123 @@
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <ScrollViewer MaxHeight="520" MaxWidth="640" HorizontalAlignment="Stretch" Padding="0,8,16,8">
+    <ScrollViewer MaxHeight="540" MaxWidth="720" HorizontalAlignment="Stretch" Padding="0,8,12,8">
         <StackPanel Spacing="16">
             <!-- Validation Error InfoBar -->
-            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Title="Validation Error" Margin="0,0,0,8" />
+            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Title="Validation Error" Margin="0,0,0,4" />
 
-            <!-- Term & IPA -->
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                <TextBox x:Name="TermTextBox" Header="Word / Term *" PlaceholderText="e.g. collaborate" />
-                <TextBox Grid.Column="1" x:Name="IpaUkTextBox" Header="Phonetic (UK)" PlaceholderText="e.g. /kəˈlæb.ə.reɪt/" />
-                <TextBox Grid.Column="2" x:Name="IpaUsTextBox" Header="Phonetic (US)" PlaceholderText="e.g. /kəˈlæb.ə.reɪt/" />
-            </Grid>
+            <!-- Card 1: Term & Core Attributes -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="2*,*,*" ColumnSpacing="12">
+                        <TextBox x:Name="TermTextBox" Header="Word / Term *" PlaceholderText="e.g. collaborate" FontWeight="SemiBold" />
+                        <ComboBox Grid.Column="1" x:Name="PosComboBox" Header="Part of Speech" HorizontalAlignment="Stretch" />
+                        <ComboBox Grid.Column="2" x:Name="LevelComboBox" Header="CEFR Level" HorizontalAlignment="Stretch" />
+                    </Grid>
 
-            <!-- POS & Level -->
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                <ComboBox x:Name="PosComboBox" Header="Primary Part of Speech" HorizontalAlignment="Stretch" />
-                <ComboBox Grid.Column="1" x:Name="LevelComboBox" Header="CEFR Level" HorizontalAlignment="Stretch" />
-                <TextBox Grid.Column="2" x:Name="NotesTextBox" Header="Personal Notes" PlaceholderText="Memory cues, collocations..." />
-            </Grid>
-
-            <MenuFlyoutSeparator />
-
-            <!-- Meanings Section -->
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Definitions &amp; Meanings *" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
-                <Button Grid.Column="1" Content="+ Add Meaning" Click="AddMeaningButton_Click" Style="{ThemeResource AccentButtonStyle}" />
-            </Grid>
-
-            <!-- Meanings Items -->
-            <ItemsControl x:Name="MeaningsItemsControl">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                            <StackPanel Spacing="10">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <TextBox Header="Vietnamese Meaning *" Text="{Binding DefinitionVi, Mode=TwoWay}" PlaceholderText="Định nghĩa tiếng Việt..." />
-                                    <Button Grid.Column="1" VerticalAlignment="Bottom" Content="✕" ToolTipService.ToolTip="Delete Meaning" Click="DeleteMeaningButton_Click" />
-                                </Grid>
-
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                    <TextBox Header="English Definition" Text="{Binding DefinitionEn, Mode=TwoWay}" PlaceholderText="English definition..." />
-                                    <TextBox Grid.Column="1" Header="Context / Nuance" Text="{Binding Explanation, Mode=TwoWay}" PlaceholderText="When to use, formality..." />
-                                </Grid>
-
-                                <!-- Examples list -->
-                                <TextBlock Text="Examples" FontSize="13" FontWeight="SemiBold" Margin="0,4,0,0" />
-                                <ItemsControl ItemsSource="{Binding Examples}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8" Margin="0,2,0,4">
-                                                <TextBox PlaceholderText="English sentence" Text="{Binding SentenceEn, Mode=TwoWay}" />
-                                                <TextBox Grid.Column="1" PlaceholderText="Vietnamese translation" Text="{Binding SentenceVi, Mode=TwoWay}" />
-                                                <Button Grid.Column="2" Content="✕" Click="DeleteExampleButton_Click" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                                <Button Content="+ Add Example" HorizontalAlignment="Left" Click="AddExampleButton_Click" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <MenuFlyoutSeparator />
-
-            <!-- Topics & Exams -->
-            <TextBlock Text="Topics &amp; Exam Certifications" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                <!-- Topics list -->
-                <StackPanel Spacing="6">
-                    <TextBlock Text="Topics" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <ListView x:Name="TopicsListView" SelectionMode="Multiple" MaxHeight="140" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" />
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                        <TextBox x:Name="IpaUkTextBox" Header="Phonetic (UK)" PlaceholderText="e.g. /kəˈlæb.ə.reɪt/" />
+                        <TextBox Grid.Column="1" x:Name="IpaUsTextBox" Header="Phonetic (US)" PlaceholderText="e.g. /kəˈlæb.ə.reɪt/" />
+                        <TextBox Grid.Column="2" x:Name="NotesTextBox" Header="Personal Notes" PlaceholderText="Memory cues, collocations..." />
+                    </Grid>
                 </StackPanel>
+            </Border>
 
-                <!-- Exam tags list -->
-                <StackPanel Grid.Column="1" Spacing="6">
-                    <TextBlock Text="Exam Targets (TOEIC / VSTEP / IELTS)" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <ListView x:Name="ExamTagsListView" SelectionMode="Multiple" MaxHeight="140" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" />
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+            <!-- Card 2: Meanings Section -->
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Definitions &amp; Meanings *" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
+                        <TextBlock Text="Add contextual meanings, examples, and nuance notes" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Click="AddMeaningButton_Click" Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE710;" FontSize="12" />
+                            <TextBlock Text="Add Meaning" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Meanings Items -->
+                <ItemsControl x:Name="MeaningsItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                                <StackPanel Spacing="12">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <TextBox Header="Vietnamese Meaning *" Text="{Binding DefinitionVi, Mode=TwoWay}" PlaceholderText="Định nghĩa tiếng Việt rõ ràng..." FontWeight="Medium" />
+                                        <Button Grid.Column="1" VerticalAlignment="Bottom" ToolTipService.ToolTip="Delete Meaning" Click="DeleteMeaningButton_Click" Padding="8,6">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                        <TextBox Header="English Definition" Text="{Binding DefinitionEn, Mode=TwoWay}" PlaceholderText="English definition..." />
+                                        <TextBox Grid.Column="1" Header="Context / Nuance" Text="{Binding Explanation, Mode=TwoWay}" PlaceholderText="When to use, register, collocations..." />
+                                    </Grid>
+
+                                    <!-- Examples list -->
+                                    <StackPanel Spacing="6" Margin="0,4,0,0">
+                                        <TextBlock Text="Example Sentences" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <ItemsControl ItemsSource="{Binding Examples}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8" Margin="0,2,0,6">
+                                                        <TextBox PlaceholderText="English example sentence..." Text="{Binding SentenceEn, Mode=TwoWay}" />
+                                                        <TextBox Grid.Column="1" PlaceholderText="Vietnamese translation..." Text="{Binding SentenceVi, Mode=TwoWay}" />
+                                                        <Button Grid.Column="2" ToolTipService.ToolTip="Delete Example" Click="DeleteExampleButton_Click" Padding="8,6">
+                                                            <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                                        </Button>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <Button HorizontalAlignment="Left" Click="AddExampleButton_Click" Padding="10,6">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE710;" FontSize="11" />
+                                                <TextBlock Text="Add Example" FontSize="12" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- Card 3: Topics & Exams -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Topics &amp; Exam Certifications" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                        <!-- Topics list -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Topics" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <ListView x:Name="TopicsListView" SelectionMode="Multiple" MaxHeight="140" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+
+                        <!-- Exam tags list -->
+                        <StackPanel Grid.Column="1" Spacing="6">
+                            <TextBlock Text="Exam Targets (TOEIC / VSTEP / IELTS)" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <ListView x:Name="ExamTagsListView" SelectionMode="Multiple" MaxHeight="140" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
-            </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>

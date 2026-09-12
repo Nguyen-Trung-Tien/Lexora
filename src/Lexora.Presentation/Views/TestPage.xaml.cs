@@ -117,26 +117,74 @@ public sealed partial class TestPage : Page
 
     private void UpdateTypeButtonStyles(TestType selected)
     {
-        var accent = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
-        var def = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("DefaultButtonStyle", out var d) ? (Style)d : null;
+        var res = Microsoft.UI.Xaml.Application.Current.Resources;
+        var accentBrush = res.TryGetValue("AccentFillColorDefaultBrush", out var ab) && ab is Microsoft.UI.Xaml.Media.Brush bAb ? bAb : null;
+        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
+        var subtleBg = res.TryGetValue("SubtleFillColorSecondaryBrush", out var sb) && sb is Microsoft.UI.Xaml.Media.Brush bSb ? bSb : null;
+        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
+        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
+        var primaryText = res.TryGetValue("TextFillColorPrimaryBrush", out var pt) && pt is Microsoft.UI.Xaml.Media.Brush bPt ? bPt : null;
 
-        BtnTypeMixed.Style = selected == TestType.Mixed ? accent : def;
-        BtnTypeWordToMeaning.Style = selected == TestType.WordToMeaning ? accent : def;
-        BtnTypeMeaningToWord.Style = selected == TestType.MeaningToWord ? accent : def;
-        BtnTypeFillInTheBlank.Style = selected == TestType.FillInTheBlank ? accent : def;
-        BtnTypePartOfSpeech.Style = selected == TestType.PartOfSpeech ? accent : def;
-        BtnTypeListeningQuiz.Style = selected == TestType.ListeningQuiz ? accent : def;
+        void ApplyCard(Button btn, FontIcon icon, TextBlock title, FontIcon check, bool isSelected)
+        {
+            btn.BorderThickness = new Thickness(isSelected ? 2 : 1);
+            if (isSelected)
+            {
+                if (accentBrush != null) btn.BorderBrush = accentBrush;
+                if (subtleBg != null) btn.Background = subtleBg;
+                if (accentText != null)
+                {
+                    icon.Foreground = accentText;
+                    title.Foreground = accentText;
+                }
+                check.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                if (cardStroke != null) btn.BorderBrush = cardStroke;
+                if (cardBg != null) btn.Background = cardBg;
+                if (primaryText != null)
+                {
+                    icon.Foreground = primaryText;
+                    title.Foreground = primaryText;
+                }
+                check.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        ApplyCard(BtnTypeMixed, IconTypeMixed, TitleTypeMixed, CheckTypeMixed, selected == TestType.Mixed);
+        ApplyCard(BtnTypeWordToMeaning, IconTypeWordToMeaning, TitleTypeWordToMeaning, CheckTypeWordToMeaning, selected == TestType.WordToMeaning);
+        ApplyCard(BtnTypeMeaningToWord, IconTypeMeaningToWord, TitleTypeMeaningToWord, CheckTypeMeaningToWord, selected == TestType.MeaningToWord);
+        ApplyCard(BtnTypeFillInTheBlank, IconTypeFillInTheBlank, TitleTypeFillInTheBlank, CheckTypeFillInTheBlank, selected == TestType.FillInTheBlank);
+        ApplyCard(BtnTypePartOfSpeech, IconTypePartOfSpeech, TitleTypePartOfSpeech, CheckTypePartOfSpeech, selected == TestType.PartOfSpeech);
+        ApplyCard(BtnTypeListeningQuiz, IconTypeListeningQuiz, TitleTypeListeningQuiz, CheckTypeListeningQuiz, selected == TestType.ListeningQuiz);
     }
 
     private void UpdateCountButtonStyles(int count)
     {
         var accent = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
-        var def = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("DefaultButtonStyle", out var d) ? (Style)d : null;
+        var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        var subtleText = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
 
-        BtnCount5.Style = count == 5 ? accent : def;
-        BtnCount10.Style = count == 10 ? accent : def;
-        BtnCount20.Style = count == 20 ? accent : def;
-        BtnCount30.Style = count == 30 ? accent : def;
+        void ApplyPill(Button btn, bool isSelected)
+        {
+            if (isSelected)
+            {
+                btn.Style = accent;
+            }
+            else
+            {
+                btn.Style = null;
+                btn.Background = transparent;
+                btn.BorderThickness = new Thickness(0);
+                if (subtleText != null) btn.Foreground = subtleText;
+            }
+        }
+
+        ApplyPill(BtnCount5, count == 5);
+        ApplyPill(BtnCount10, count == 10);
+        ApplyPill(BtnCount20, count == 20);
+        ApplyPill(BtnCount30, count == 30);
     }
 
     public InfoBarSeverity GetFeedbackSeverity(bool isCorrect)

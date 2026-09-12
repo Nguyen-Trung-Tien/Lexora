@@ -20,74 +20,91 @@
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <ScrollViewer MaxHeight="520" MaxWidth="640" HorizontalAlignment="Stretch" Padding="0,8,16,8">
+    <ScrollViewer MaxHeight="540" MaxWidth="720" HorizontalAlignment="Stretch" Padding="0,8,12,8">
         <StackPanel Spacing="16">
             <!-- Validation Error InfoBar -->
-            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Title="Validation Error" Margin="0,0,0,8" />
+            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Title="Validation Error" Margin="0,0,0,4" />
 
-            <!-- Title & Structure -->
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                <TextBox x:Name="TitleTextBox" Header="Rule Title *" PlaceholderText="e.g. Present Perfect Continuous" />
-                <TextBox Grid.Column="1" x:Name="StructureTextBox" Header="Structure Formula *" PlaceholderText="e.g. S + have/has + been + V-ing" FontFamily="Consolas, Segoe UI Variable" />
-            </Grid>
+            <!-- Card 1: Title & Structure -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <TextBox x:Name="TitleTextBox" Header="Rule Title *" PlaceholderText="e.g. Present Perfect Continuous" FontWeight="SemiBold" />
+                        <TextBox Grid.Column="1" x:Name="StructureTextBox" Header="Structure Formula *" PlaceholderText="e.g. S + have/has + been + V-ing" FontFamily="Consolas, Segoe UI Variable" />
+                    </Grid>
 
-            <!-- Level, Exam & Topic -->
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                <ComboBox x:Name="LevelComboBox" Header="CEFR Level" HorizontalAlignment="Stretch" />
-                <ComboBox Grid.Column="1" x:Name="ExamComboBox" Header="Target Exam" HorizontalAlignment="Stretch" />
-                <TextBox Grid.Column="2" x:Name="TopicTextBox" Header="Topic / Category" PlaceholderText="e.g. Tenses, Passive Voice..." />
-            </Grid>
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                        <ComboBox x:Name="LevelComboBox" Header="CEFR Level" HorizontalAlignment="Stretch" />
+                        <ComboBox Grid.Column="1" x:Name="ExamComboBox" Header="Target Exam" HorizontalAlignment="Stretch" />
+                        <TextBox Grid.Column="2" x:Name="TopicTextBox" Header="Topic / Category" PlaceholderText="e.g. Tenses, Passive Voice..." />
+                    </Grid>
+                </StackPanel>
+            </Border>
 
-            <MenuFlyoutSeparator />
+            <!-- Card 2: Explanations -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="12">
+                    <TextBox x:Name="ExplanationViTextBox" Header="Vietnamese Explanation *"
+                             PlaceholderText="Giải thích chi tiết cách dùng, trường hợp áp dụng bằng Tiếng Việt..."
+                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" />
 
-            <!-- Explanation Vi & En -->
-            <TextBox x:Name="ExplanationViTextBox" Header="Vietnamese Explanation *"
-                     PlaceholderText="Giải thích cách dùng, trường hợp sử dụng bằng Tiếng Việt..."
-                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" />
-
-            <TextBox x:Name="ExplanationEnTextBox" Header="English Explanation (Optional)"
-                     PlaceholderText="Explanation in English..."
-                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50" />
-
-            <!-- Common Mistakes -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="12">
-                <StackPanel Spacing="6">
-                    <TextBlock Text="⚠️ Common Mistakes &amp; Pitfalls" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" FontSize="13" />
-                    <TextBox x:Name="CommonMistakesTextBox"
-                             PlaceholderText="Các lỗi sai thí sinh hay mắc phải, lưu ý phân biệt..."
+                    <TextBox x:Name="ExplanationEnTextBox" Header="English Explanation (Optional)"
+                             PlaceholderText="Explanation and nuance in English..."
                              AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50" />
                 </StackPanel>
             </Border>
 
-            <MenuFlyoutSeparator />
+            <!-- Card 3: Common Mistakes -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                        <TextBlock Text="Common Mistakes &amp; Pitfalls" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" FontSize="13" />
+                    </StackPanel>
+                    <TextBox x:Name="CommonMistakesTextBox"
+                             PlaceholderText="Các lỗi sai thí sinh hay mắc phải, lưu ý phân biệt với các cấu trúc tương đương..."
+                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50" />
+                </StackPanel>
+            </Border>
 
-            <!-- Examples Section -->
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Examples &amp; Sample Sentences" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
-                <Button Grid.Column="1" Content="+ Add Example" Click="AddExampleButton_Click" Style="{ThemeResource AccentButtonStyle}" />
-            </Grid>
+            <!-- Card 4: Examples Section -->
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Examples &amp; Sample Sentences" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
+                        <TextBlock Text="Add clear bilingual example sentences demonstrating the rule" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Click="AddExampleButton_Click" Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE710;" FontSize="12" />
+                            <TextBlock Text="Add Example" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
 
-            <ItemsControl x:Name="ExamplesItemsControl">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,10">
-                            <StackPanel Spacing="8">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <TextBox Header="English Sentence *" Text="{Binding SentenceEn, Mode=TwoWay}" PlaceholderText="e.g. I have been working for three hours." />
-                                    <Button Grid.Column="1" VerticalAlignment="Bottom" Content="✕" ToolTipService.ToolTip="Remove Example" Click="RemoveExampleButton_Click" />
-                                </Grid>
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                    <TextBox Header="Vietnamese Translation *" Text="{Binding SentenceVi, Mode=TwoWay}" PlaceholderText="Bản dịch tiếng Việt..." />
-                                    <TextBox Grid.Column="1" Header="Grammar Note" Text="{Binding Note, Mode=TwoWay}" PlaceholderText="Ghi chú ngữ pháp bổ sung..." />
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
+                <ItemsControl x:Name="ExamplesItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                <StackPanel Spacing="10">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <TextBox Header="English Sentence *" Text="{Binding SentenceEn, Mode=TwoWay}" PlaceholderText="e.g. I have been working here for three years." />
+                                        <Button Grid.Column="1" VerticalAlignment="Bottom" ToolTipService.ToolTip="Remove Example" Click="RemoveExampleButton_Click" Padding="8,6">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                        </Button>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                        <TextBox Header="Vietnamese Translation *" Text="{Binding SentenceVi, Mode=TwoWay}" PlaceholderText="Bản dịch tiếng Việt..." />
+                                        <TextBox Grid.Column="1" Header="Grammar Note" Text="{Binding Note, Mode=TwoWay}" PlaceholderText="Ghi chú ngữ pháp bổ sung..." />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>
