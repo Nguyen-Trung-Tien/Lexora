@@ -171,6 +171,39 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
         return Task.CompletedTask;
     }
 
+    public async Task<IReadOnlyList<ReviewCard>> GetCardsByWordIdsAsync(IReadOnlyList<Guid> wordIds, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(rc => rc.Word)
+                .ThenInclude(w => w.Meanings)
+                    .ThenInclude(m => m.Examples)
+            .Where(rc => wordIds.Contains(rc.WordId))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<ReviewCard>> GetCardsByTopicIdAsync(Guid topicId, int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var query = DbSet
+            .Include(rc => rc.Word)
+                .ThenInclude(w => w.Meanings)
+                    .ThenInclude(m => m.Examples)
+            .Include(rc => rc.Word)
+                .ThenInclude(w => w.WordTopics);
+
+        if (topicId == Guid.Empty)
+        {
+            return await query
+                .Where(rc => !rc.Word.WordTopics.Any())
+                .Take(limit)
+                .ToListAsync(cancellationToken);
+        }
+
+        return await query
+            .Where(rc => rc.Word.WordTopics.Any(wt => wt.TopicId == topicId))
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
+
     public void AddStudyLog(StudyLog log)
     {
         Context.StudyLogs.Add(log);

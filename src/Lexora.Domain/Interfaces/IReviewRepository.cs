@@ -18,5 +18,7 @@ public interface IReviewRepository : IRepository<ReviewCard>
     Task<StudySession?> GetStudySessionByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StudySession>> GetRecentSessionsAsync(int limit = 10, CancellationToken cancellationToken = default);
     Task UpdateStudySessionAsync(StudySession session, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ReviewCard>> GetCardsByWordIdsAsync(IReadOnlyList<Guid> wordIds, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ReviewCard>> GetCardsByTopicIdAsync(Guid topicId, int limit = 50, CancellationToken cancellationToken = default);
     void AddStudyLog(StudyLog log);
 }

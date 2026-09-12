@@ -22,14 +22,52 @@ public sealed partial class ReviewPage : Page
         _preferencesService = App.Current.Services.GetRequiredService<Lexora.Infrastructure.Services.IUserPreferencesService>();
 
         IsTabStop = true;
-        Loaded += async (s, e) =>
+        Loaded += (s, e) =>
         {
             Focus(FocusState.Programmatic);
-            await ViewModel.InitializeAsync();
-            UpdateModeButtonStyles(ViewModel.CurrentMode);
         };
 
         KeyDown += ReviewPage_KeyDown;
+    }
+
+    protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        Focus(FocusState.Programmatic);
+
+        if (e.Parameter is ContextUnitDto unit)
+        {
+            await ViewModel.LoadAvailableTopicsAsync();
+            var prefs = _preferencesService.GetPreferences();
+            ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
+            ViewModel.SpeechRate = prefs.SpeechRate;
+            UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
+            await ViewModel.StartUnitReviewAsync(unit);
+        }
+        else if (e.Parameter is IEnumerable<Guid> wordIds)
+        {
+            var idList = wordIds.ToList();
+            await ViewModel.LoadAvailableTopicsAsync();
+            var prefs = _preferencesService.GetPreferences();
+            ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
+            ViewModel.SpeechRate = prefs.SpeechRate;
+            UpdateModeButtonStyles(ReviewSessionMode.CustomSelection);
+            await ViewModel.StartCustomWordReviewAsync(idList, $"Từ vựng chọn lọc ({idList.Count})");
+        }
+        else if (e.Parameter is TopicDto topic)
+        {
+            await ViewModel.LoadAvailableTopicsAsync();
+            var prefs = _preferencesService.GetPreferences();
+            ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
+            ViewModel.SpeechRate = prefs.SpeechRate;
+            UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
+            await ViewModel.StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: topic.Id, customTitle: $"Unit: {topic.Name}");
+        }
+        else
+        {
+            await ViewModel.InitializeAsync();
+            UpdateModeButtonStyles(ViewModel.CurrentMode);
+        }
     }
 
     private void ReviewPage_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -139,6 +177,18 @@ public sealed partial class ReviewPage : Page
         await ViewModel.StartReviewAsync(ReviewSessionMode.Difficult);
     }
 
+    private async void ReviewUnitCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ReviewUnitCombo?.SelectedItem is TopicDto selectedTopic)
+        {
+            UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
+            await ViewModel.StartReviewWithFilterAsync(
+                ReviewSessionMode.ByTopic,
+                topicId: selectedTopic.Id,
+                customTitle: $"Unit: {selectedTopic.Name}");
+        }
+    }
+
     private void UpdateModeButtonStyles(ReviewSessionMode mode)
     {
         var accentStyle = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
@@ -147,6 +197,11 @@ public sealed partial class ReviewPage : Page
         ModeDueButton.Style = mode == ReviewSessionMode.TodayDue ? accentStyle : defaultStyle;
         ModeNewButton.Style = mode == ReviewSessionMode.LearnNew ? accentStyle : defaultStyle;
         ModeDifficultButton.Style = mode == ReviewSessionMode.Difficult ? accentStyle : defaultStyle;
+
+        if (mode != ReviewSessionMode.ByTopic && ReviewUnitCombo != null)
+        {
+            ReviewUnitCombo.SelectedItem = null;
+        }
     }
 
     private void ShowAnswerButton_Click(object sender, RoutedEventArgs e)

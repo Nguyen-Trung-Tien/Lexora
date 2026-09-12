@@ -41,6 +41,18 @@ public class ReviewService : IReviewService
         return cards.Select(MapToDto).ToList();
     }
 
+    public async Task<IReadOnlyList<ReviewCardDto>> GetCardsByTopicIdAsync(Guid topicId, int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var cards = await _reviewRepo.GetCardsByTopicIdAsync(topicId, limit, cancellationToken);
+        return cards.Select(MapToDto).ToList();
+    }
+
+    public async Task<IReadOnlyList<ReviewCardDto>> GetCardsByWordIdsAsync(IReadOnlyList<Guid> wordIds, CancellationToken cancellationToken = default)
+    {
+        var cards = await _reviewRepo.GetCardsByWordIdsAsync(wordIds, cancellationToken);
+        return cards.Select(MapToDto).ToList();
+    }
+
     public async Task<int> GetDueCardsCountAsync(CancellationToken cancellationToken = default)
     {
         var cards = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, 1000, cancellationToken);

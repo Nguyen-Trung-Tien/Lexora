@@ -520,6 +520,15 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
+    private void ReviewThisWordButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWord != null)
+        {
+            var navService = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.INavigationService>();
+            navService.Navigate(typeof(ReviewPage), new[] { ViewModel.SelectedWord.Id });
+        }
+    }
+
     private void BtnViewList_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.SwitchToListView();
@@ -602,6 +611,22 @@ public sealed partial class VocabularyPage : Page
             else
             {
                 ShowErrorDialog("Chưa có từ vựng", $"Unit '{unit.Name}' chưa có từ vựng nào để làm bài kiểm tra.");
+            }
+        }
+    }
+
+    private void ReviewUnit_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && (fe.Tag as ContextUnitDto ?? fe.DataContext as ContextUnitDto) is ContextUnitDto unit)
+        {
+            if (unit.Words.Count > 0)
+            {
+                var navService = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.INavigationService>();
+                navService.Navigate(typeof(ReviewPage), unit);
+            }
+            else
+            {
+                ShowErrorDialog("Chưa có từ vựng", $"Unit '{unit.Name}' chưa có từ vựng nào để luyện ngắt quãng.");
             }
         }
     }

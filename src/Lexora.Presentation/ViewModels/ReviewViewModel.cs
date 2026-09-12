@@ -16,10 +16,17 @@ public partial class ReviewViewModel : ObservableObject
     private readonly IReviewService _reviewService;
     private readonly IAudioPlayerService _audioPlayer;
     private readonly IUserPreferencesService _preferencesService;
+    private readonly IVocabularyService _vocabService;
     private readonly Stopwatch _cardTimer = new();
 
     private Guid? _currentSessionId;
     private int _initialQueueCount;
+
+    [ObservableProperty]
+    public partial string WordScaffold { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ActiveSessionTitle { get; set; } = "Ôn tập đến hạn hôm nay";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SpeechRateLabel))]
@@ -134,12 +141,18 @@ public partial class ReviewViewModel : ObservableObject
     public ObservableCollection<ReviewCardDto> ReviewQueue { get; } = new();
     public ObservableCollection<StudyLogDto> RecentLogs { get; } = new();
     public ObservableCollection<StudySessionDto> RecentSessions { get; } = new();
+    public ObservableCollection<TopicDto> AvailableTopics { get; } = new();
 
-    public ReviewViewModel(IReviewService reviewService, IAudioPlayerService audioPlayer, IUserPreferencesService preferencesService)
+    public ReviewViewModel(
+        IReviewService reviewService,
+        IAudioPlayerService audioPlayer,
+        IUserPreferencesService preferencesService,
+        IVocabularyService vocabService)
     {
         _reviewService = reviewService;
         _audioPlayer = audioPlayer;
         _preferencesService = preferencesService;
+        _vocabService = vocabService;
 
         var prefs = _preferencesService.GetPreferences();
         SpeechRate = prefs.SpeechRate;
@@ -150,9 +163,27 @@ public partial class ReviewViewModel : ObservableObject
     [RelayCommand]
     public async Task InitializeAsync()
     {
+        await LoadAvailableTopicsAsync();
         await RefreshDueCountAsync();
         await StartReviewAsync(CurrentMode);
         await LoadHistoryAsync();
+    }
+
+    public async Task LoadAvailableTopicsAsync()
+    {
+        try
+        {
+            var topics = await _vocabService.GetAllTopicsAsync();
+            AvailableTopics.Clear();
+            foreach (var t in topics)
+            {
+                AvailableTopics.Add(t);
+            }
+        }
+        catch
+        {
+            // Ignore if topics failed to load
+        }
     }
 
     [RelayCommand]
@@ -164,6 +195,11 @@ public partial class ReviewViewModel : ObservableObject
     [RelayCommand]
     public async Task StartReviewAsync(ReviewSessionMode mode)
     {
+        await StartReviewWithFilterAsync(mode, null, null, null);
+    }
+
+    public async Task StartReviewWithFilterAsync(ReviewSessionMode mode, Guid? topicId = null, IReadOnlyList<Guid>? wordIds = null, string? customTitle = null)
+    {
         IsLoading = true;
         IsCompleted = false;
         IsAnswerVisible = false;
@@ -173,12 +209,23 @@ public partial class ReviewViewModel : ObservableObject
         SessionAccuracyRate = 0.0;
         CompletedCount = 0;
 
+        ActiveSessionTitle = customTitle ?? mode switch
+        {
+            ReviewSessionMode.LearnNew => "Học từ vựng mới",
+            ReviewSessionMode.Difficult => "Từ vựng khó & Hay quên",
+            ReviewSessionMode.ByTopic => "Ôn tập theo Unit ngữ cảnh",
+            ReviewSessionMode.CustomSelection => "Ôn tập danh sách từ chọn lọc",
+            _ => "Ôn tập đến hạn hôm nay"
+        };
+
         try
         {
             IReadOnlyList<ReviewCardDto> cards = mode switch
             {
                 ReviewSessionMode.LearnNew => await _reviewService.GetNewCardsAsync(limit: 20),
                 ReviewSessionMode.Difficult => await _reviewService.GetDifficultCardsAsync(limit: 20),
+                ReviewSessionMode.ByTopic when topicId.HasValue => await _reviewService.GetCardsByTopicIdAsync(topicId.Value, limit: 50),
+                ReviewSessionMode.CustomSelection when wordIds != null && wordIds.Count > 0 => await _reviewService.GetCardsByWordIdsAsync(wordIds),
                 _ => await _reviewService.GetDueCardsAsync(limit: 30)
             };
 
@@ -218,6 +265,16 @@ public partial class ReviewViewModel : ObservableObject
         {
             IsLoading = false;
         }
+    }
+
+    public async Task StartUnitReviewAsync(ContextUnitDto unit)
+    {
+        await StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: unit.Id, wordIds: null, customTitle: $"Unit: {unit.Name}");
+    }
+
+    public async Task StartCustomWordReviewAsync(IReadOnlyList<Guid> wordIds, string? title = null)
+    {
+        await StartReviewWithFilterAsync(ReviewSessionMode.CustomSelection, topicId: null, wordIds: wordIds, customTitle: title ?? $"Ôn {wordIds.Count} từ đã chọn");
     }
 
     [RelayCommand]
@@ -406,6 +463,7 @@ public partial class ReviewViewModel : ObservableObject
         TypingFeedbackMessage = string.Empty;
         IsHintVisible = false;
         HintText = string.Empty;
+        WordScaffold = GenerateWordScaffold(card.Term);
 
         var preview = _reviewService.GetCardIntervalPreview(card);
         AgainIntervalText = preview.AgainText;
@@ -439,5 +497,31 @@ public partial class ReviewViewModel : ObservableObject
             ClozeSentenceVi = string.Empty;
             HasClozeSentence = false;
         }
+    }
+
+    private static string GenerateWordScaffold(string term)
+    {
+        if (string.IsNullOrWhiteSpace(term)) return string.Empty;
+        var words = term.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var parts = new List<string>();
+        int totalLetters = 0;
+
+        foreach (var w in words)
+        {
+            totalLetters += w.Length;
+            if (w.Length <= 2)
+            {
+                parts.Add(w);
+            }
+            else
+            {
+                char first = w[0];
+                char last = w[^1];
+                string blanks = string.Join(" ", Enumerable.Repeat("_", w.Length - 2));
+                parts.Add($"{first} {blanks} {last}");
+            }
+        }
+
+        return $"{string.Join("   ", parts)}  ({totalLetters} ký tự)";
     }
 }

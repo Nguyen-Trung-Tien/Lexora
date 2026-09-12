@@ -40,7 +40,9 @@ public enum ReviewSessionMode
 {
     TodayDue = 0,
     LearnNew = 1,
-    Difficult = 2
+    Difficult = 2,
+    ByTopic = 3,
+    CustomSelection = 4
 }
 
 public record StudySessionDto(

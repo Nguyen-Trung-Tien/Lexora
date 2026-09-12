@@ -179,11 +179,17 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <!-- Test, Edit & Delete Buttons -->
+                            <!-- Test, Review, Edit & Delete Buttons -->
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                 <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="12,6" VerticalAlignment="Center">
                                     <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
                                 </Border>
+                                <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="Luyện ngắt quãng (SM-2) từ này" CornerRadius="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE823;" FontSize="13" />
+                                        <TextBlock Text="Ôn SM-2" />
+                                    </StackPanel>
+                                </Button>
                                 <Button Click="TestThisWordButton_Click" ToolTipService.ToolTip="Kiểm tra từ này trong bài test" CornerRadius="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE765;" FontSize="13" />
@@ -399,19 +405,27 @@
 
                                         <MenuFlyoutSeparator Grid.Row="2" Margin="0,-4" />
 
-                                        <!-- Actions: View Words & Test Unit -->
-                                        <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="8">
-                                            <Button HorizontalAlignment="Stretch" Click="ViewUnitWords_Click" Tag="{x:Bind}" CornerRadius="6" Padding="8,7">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <FontIcon Glyph="&#xE8C0;" FontSize="13" />
-                                                    <TextBlock Text="Xem từ" FontWeight="SemiBold" />
+                                        <!-- Actions: View Words, Review Unit (SM-2) & Test Unit -->
+                                        <Grid Grid.Row="3" ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                                            <Button HorizontalAlignment="Stretch" Click="ViewUnitWords_Click" Tag="{x:Bind}" CornerRadius="6" Padding="6,7">
+                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE8C0;" FontSize="12" />
+                                                    <TextBlock Text="Xem từ" FontSize="12" FontWeight="SemiBold" />
                                                 </StackPanel>
                                             </Button>
                                             <Button Grid.Column="1" Style="{ThemeResource AccentButtonStyle}"
-                                                    HorizontalAlignment="Stretch" Click="TestUnit_Click" Tag="{x:Bind}" CornerRadius="6" Padding="8,7">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <FontIcon Glyph="&#xE765;" FontSize="13" />
-                                                    <TextBlock Text="Kiểm tra" FontWeight="SemiBold" />
+                                                    HorizontalAlignment="Stretch" Click="ReviewUnit_Click" Tag="{x:Bind}" CornerRadius="6" Padding="6,7"
+                                                    ToolTipService.ToolTip="Luyện ngắt quãng (SM-2) theo Unit này">
+                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE823;" FontSize="12" />
+                                                    <TextBlock Text="Ôn SM-2" FontSize="12" FontWeight="SemiBold" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Grid.Column="2"
+                                                    HorizontalAlignment="Stretch" Click="TestUnit_Click" Tag="{x:Bind}" CornerRadius="6" Padding="6,7">
+                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE765;" FontSize="12" />
+                                                    <TextBlock Text="Kiểm tra" FontSize="12" FontWeight="SemiBold" />
                                                 </StackPanel>
                                             </Button>
                                         </Grid>
