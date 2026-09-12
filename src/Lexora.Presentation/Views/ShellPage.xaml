@@ -7,6 +7,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="Number1" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Number2" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Number3" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Number4" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Number5" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
+        <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="SearchAccelerator_Invoked" />
+    </Page.KeyboardAccelerators>
+
     <Grid>
         <NavigationView
             x:Name="NavView"
@@ -16,22 +25,27 @@
             ItemInvoked="NavView_ItemInvoked"
             Loaded="NavView_Loaded">
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="NavItemDashboard" Content="Dashboard" Tag="Dashboard">
+                <NavigationViewItem x:Name="NavItemDashboard" Content="Dashboard" Tag="Dashboard" ToolTipService.ToolTip="Dashboard (Ctrl+1)">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE80F;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="NavItemVocabulary" Content="Vocabulary" Tag="Vocabulary">
+                <NavigationViewItem x:Name="NavItemVocabulary" Content="Vocabulary" Tag="Vocabulary" ToolTipService.ToolTip="Vocabulary (Ctrl+2)">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE82D;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="NavItemReview" Content="Spaced Review" Tag="Review">
+                <NavigationViewItem x:Name="NavItemReview" Content="Spaced Review" Tag="Review" ToolTipService.ToolTip="Spaced Review (Ctrl+3)">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE895;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="NavItemGrammar" Content="Grammar" Tag="Grammar">
+                <NavigationViewItem x:Name="NavItemTest" Content="Practice &amp; Test" Tag="Test" ToolTipService.ToolTip="Practice &amp; Test (Ctrl+4)">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE765;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemGrammar" Content="Grammar" Tag="Grammar" ToolTipService.ToolTip="Grammar (Ctrl+5)">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8D2;" />
                     </NavigationViewItem.Icon>
@@ -39,7 +53,7 @@
             </NavigationView.MenuItems>
 
             <NavigationView.AutoSuggestBox>
-                <AutoSuggestBox x:Name="GlobalSearchBox" PlaceholderText="Search Lexora..." QuerySubmitted="GlobalSearchBox_QuerySubmitted" />
+                <AutoSuggestBox x:Name="GlobalSearchBox" PlaceholderText="Search Lexora..." ToolTipService.ToolTip="Search Lexora (Ctrl+F)" QuerySubmitted="GlobalSearchBox_QuerySubmitted" />
             </NavigationView.AutoSuggestBox>
 
             <Grid>

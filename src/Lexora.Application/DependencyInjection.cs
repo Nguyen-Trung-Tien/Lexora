@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddScoped<IStatisticsService, StatisticsService>();
         services.AddScoped<IGrammarService, GrammarService>();
         services.AddScoped<IExportImportService, ExportImportService>();
+        services.AddScoped<ITestService, TestService>();
 
         return services;
     }

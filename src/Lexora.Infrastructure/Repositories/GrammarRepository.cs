@@ -46,4 +46,60 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
             .OrderBy(gr => gr.OrderIndex)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<GrammarRule>> GetFilteredAsync(
+        CefrLevel? level = null,
+        ExamType? examType = null,
+        string? topic = null,
+        string? query = null,
+        CancellationToken cancellationToken = default)
+    {
+        var q = DbSet.Include(gr => gr.Examples).AsQueryable();
+
+        if (level.HasValue && level.Value != CefrLevel.None)
+        {
+            q = q.Where(gr => gr.Level == level.Value);
+        }
+
+        if (examType.HasValue && examType.Value != ExamType.General)
+        {
+            q = q.Where(gr => gr.ExamTarget == examType.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(topic))
+        {
+            q = q.Where(gr => gr.Topic != null && gr.Topic.ToLower() == topic.ToLower());
+        }
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var normalized = query.Trim().ToLowerInvariant();
+            q = q.Where(gr => gr.Title.ToLower().Contains(normalized) ||
+                              gr.Structure.ToLower().Contains(normalized) ||
+                              gr.ExplanationVi.ToLower().Contains(normalized));
+        }
+
+        return await q.OrderBy(gr => gr.OrderIndex).ThenBy(gr => gr.Title).ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<string>> GetAllTopicsAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Where(gr => !string.IsNullOrEmpty(gr.Topic))
+            .Select(gr => gr.Topic!)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToListAsync(cancellationToken);
+    }
+
+    public void RemoveExamples(IEnumerable<GrammarExample> examples)
+    {
+        Context.GrammarExamples.RemoveRange(examples);
+    }
+
+    public void AddExamples(IEnumerable<GrammarExample> examples)
+    {
+        Context.GrammarExamples.AddRange(examples);
+    }
 }
+

@@ -42,6 +42,9 @@
   <data name="Nav_Review" xml:space="preserve">
     <value>Spaced Review</value>
   </data>
+  <data name="Nav_Test" xml:space="preserve">
+    <value>Practice &amp; Test</value>
+  </data>
   <data name="Nav_Grammar" xml:space="preserve">
     <value>Grammar</value>
   </data>

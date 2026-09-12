@@ -2,6 +2,7 @@ using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
@@ -13,6 +14,11 @@ public sealed partial class SettingsPage : Page
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<SettingsViewModel>();
+    }
+
+    private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.InitializeAsync();
     }
 
     private void ThemeRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -33,8 +39,106 @@ public sealed partial class SettingsPage : Page
         ViewModel.ChangeLanguage("en-US");
     }
 
+    private async void RefreshStatsButton_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.LoadDatabaseStatsAsync();
+    }
+
     private async void BackupButton_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.CreateBackupAsync();
+    }
+
+    private async void RestoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        string? selectedFilePath = null;
+
+        try
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".db");
+
+            var mainWindow = App.Current.MainWindow;
+            if (mainWindow != null)
+            {
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(mainWindow);
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                selectedFilePath = file.Path;
+            }
+        }
+        catch
+        {
+            // Fallback to text path prompt if picker encounters WinRT uninitialized handle
+        }
+
+        if (string.IsNullOrEmpty(selectedFilePath))
+        {
+            var pathBox = new TextBox
+            {
+                PlaceholderText = @"C:\path\to\lexora_backup_xxxx.db",
+                Width = 400
+            };
+
+            var promptDialog = new ContentDialog
+            {
+                Title = "Specify Backup File Path",
+                Content = pathBox,
+                PrimaryButtonText = "Select",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot
+            };
+
+            var promptRes = await promptDialog.ShowAsync();
+            if (promptRes == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(pathBox.Text))
+            {
+                selectedFilePath = pathBox.Text.Trim();
+            }
+        }
+
+        if (!string.IsNullOrEmpty(selectedFilePath) && File.Exists(selectedFilePath))
+        {
+            var confirmDialog = new ContentDialog
+            {
+                Title = "Restore Database Confirmation",
+                Content = $"Are you sure you want to restore database from:\n{selectedFilePath}\n\nWARNING: All current local data will be replaced by the backup copy!",
+                PrimaryButtonText = "Restore Now",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.XamlRoot
+            };
+
+            var result = await confirmDialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                var restored = await ViewModel.RestoreBackupAsync(selectedFilePath);
+                if (restored)
+                {
+                    var doneDialog = new ContentDialog
+                    {
+                        Title = "Restore Completed",
+                        Content = "Database has been restored successfully. It is recommended to restart the application to reload all active caches.",
+                        CloseButtonText = "OK",
+                        XamlRoot = this.XamlRoot
+                    };
+                    await doneDialog.ShowAsync();
+                }
+            }
+        }
+    }
+
+    private async void TestUkVoice_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.TestVoiceAsync("uk");
+    }
+
+    private async void TestUsVoice_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.TestVoiceAsync("us");
     }
 }

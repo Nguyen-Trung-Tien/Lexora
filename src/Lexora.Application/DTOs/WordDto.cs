@@ -18,7 +18,10 @@ public record WordDto(
     LearningStatus? LearningStatus,
     DateTime? NextReviewAt,
     double Confidence
-);
+)
+{
+    public string PrimaryDefinition => Meanings.FirstOrDefault()?.DefinitionVi ?? string.Empty;
+}
 
 public record WordMeaningDto(
     Guid Id,

@@ -7,5 +7,6 @@ public enum TestType
     MultipleChoice = 3,
     FillInTheBlank = 4,
     PartOfSpeech = 5,
-    Mixed = 6
+    Mixed = 6,
+    ListeningQuiz = 7
 }

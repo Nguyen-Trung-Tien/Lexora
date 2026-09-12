@@ -42,6 +42,9 @@
   <data name="Nav_Review" xml:space="preserve">
     <value>Ôn tập ngắt quãng</value>
   </data>
+  <data name="Nav_Test" xml:space="preserve">
+    <value>Luyện tập &amp; Kiểm tra</value>
+  </data>
   <data name="Nav_Grammar" xml:space="preserve">
     <value>Ngữ pháp</value>
   </data>

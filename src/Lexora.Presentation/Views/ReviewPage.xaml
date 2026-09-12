@@ -76,12 +76,34 @@
                 </StackPanel>
             </Grid>
 
+            <!-- Loading Indicator -->
+            <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                          Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                          Width="44" Height="44" HorizontalAlignment="Center" VerticalAlignment="Center" Canvas.ZIndex="10" />
+
+            <!-- Empty Due Queue State (when no cards in current session) -->
+            <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="16" Padding="40" MinHeight="360"
+                    Visibility="{x:Bind ViewModel.CurrentCard, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
+                <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE73E;" FontSize="54" Foreground="#107C41" HorizontalAlignment="Center" />
+                    <TextBlock Text="All Caught Up! 🎉" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
+                    <TextBlock Text="You have 0 pending reviews due in this queue right now. Great job keeping your streak active!"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="440" />
+                    <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,8,0,0">
+                        <Button Content="Learn New Words" Style="{ThemeResource AccentButtonStyle}" Padding="20,10" CornerRadius="8" Click="ModeNewButton_Click" />
+                        <Button Content="Practice Difficult Words" Padding="20,10" CornerRadius="8" Click="ModeDifficultButton_Click" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <!-- Active Flashcard Section -->
             <Border Grid.Row="2"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="16" Padding="32" MinHeight="380"
-                    Visibility="{x:Bind ViewModel.IsCompleted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    Visibility="{x:Bind ViewModel.CurrentCard, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
 
                 <Grid RowDefinitions="Auto,*,Auto">
                     <!-- Front Card: Term, Phonetics, Audio Buttons, Badges -->

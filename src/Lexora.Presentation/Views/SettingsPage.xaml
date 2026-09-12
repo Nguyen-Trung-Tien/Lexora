@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Loaded="SettingsPage_Loaded"
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
@@ -36,13 +37,93 @@
                 </StackPanel>
             </Border>
 
-            <!-- Database & Backup Card -->
+            <!-- Database & Backup Management Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Database &amp; Backup Management" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <Button Grid.Column="1" Content="Refresh Stats" Click="RefreshStatsButton_Click" />
+                    </Grid>
+
+                    <TextBlock Text="Lexora uses an offline-first SQLite database. You can inspect database metrics, create instant backups, or restore from a previous backup file." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <!-- Database Stats Grid -->
+                    <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="6" Padding="14">
+                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="8" ColumnSpacing="16">
+                            <TextBlock Text="Database Location:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.DatabasePath, Mode=OneWay}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                            <TextBlock Grid.Row="1" Text="Database File Size:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind ViewModel.DatabaseSizeFormatted, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                            <TextBlock Grid.Row="2" Text="Total Stored Data:" FontWeight="SemiBold" />
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <TextBlock Text="{x:Bind ViewModel.TotalWordsCount, Mode=OneWay}" FontWeight="Bold" />
+                                <TextBlock Text="Words •" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{x:Bind ViewModel.TotalGrammarCount, Mode=OneWay}" FontWeight="Bold" />
+                                <TextBlock Text="Grammar Rules" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Backup Actions -->
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Content="Create Backup (.db)" Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" />
+                        <Button Content="Restore from Backup (.db)..." Click="RestoreButton_Click" />
+                    </StackPanel>
+
+                    <TextBlock Text="{x:Bind ViewModel.BackupStatusMessage, Mode=OneWay}" Foreground="#107C41" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- Voice & Pronunciation Test Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Database &amp; Backup" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                    <TextBlock Text="Lexora uses an offline-first SQLite database stored safely in your local application directory. You can export a snapshot backup anytime." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <Button Content="Create Database Backup" Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" />
-                    <TextBlock Text="{x:Bind ViewModel.BackupStatusMessage, Mode=OneWay}" Foreground="#107C41" FontWeight="SemiBold" />
+                    <TextBlock Text="Voice &amp; Pronunciation (TTS)" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Test English Text-to-Speech audio output. Lexora caches native human pronunciations and falls back to high-quality Windows Speech Synthesis." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                        <TextBox PlaceholderText="Enter sample word or phrase..." Text="{x:Bind ViewModel.TestVoiceTerm, Mode=TwoWay}" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Content="🔊 Test UK Voice" Click="TestUkVoice_Click" />
+                        <Button Grid.Column="2" Content="🔊 Test US Voice" Click="TestUsVoice_Click" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Keyboard Shortcuts Reference Guide -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Keyboard Shortcuts Reference" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Navigate and study rapidly without reaching for the mouse." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="200,*" RowSpacing="8">
+                        <TextBlock Text="Ctrl + 1 / 2 / 3 / 4 / 5" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Column="1" Text="Navigate to Dashboard, Vocabulary, Review, Test, Grammar" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock Grid.Row="1" Text="Ctrl + F" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Focus global search box from anywhere" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock Grid.Row="2" Text="Ctrl + N" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Add a new vocabulary word (Vocabulary Page)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock Grid.Row="3" Text="Ctrl + E" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="Edit selected vocabulary word (Vocabulary Page)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock Grid.Row="4" Text="Delete" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="Delete selected vocabulary word (Vocabulary Page)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock Grid.Row="5" Text="Space" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="Flip flashcard (Review Page) / Replay audio (Practice Test)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock Grid.Row="6" Text="1, 2, 3, 4" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="Grade card: Again, Hard, Good, Easy (Review) / Choose option (Test)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock Grid.Row="7" Text="U / S" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Row="7" Grid.Column="1" Text="Play UK / US pronunciation audio (Review Page)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock Grid.Row="8" Text="Enter" FontWeight="SemiBold" FontFamily="Consolas" />
+                        <TextBlock Grid.Row="8" Grid.Column="1" Text="Submit answer / Next question (Practice Test)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Grid>
                 </StackPanel>
             </Border>
 
@@ -50,7 +131,7 @@
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
                 <StackPanel Spacing="6">
                     <TextBlock Text="About Lexora" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                    <TextBlock Text="Lexora — English Learning Manager v1.0.0 (Preview)" FontWeight="SemiBold" />
+                    <TextBlock Text="Lexora - English Learning Manager v1.0.0" FontWeight="SemiBold" />
                     <TextBlock Text="Built with .NET 10, Windows App SDK / WinUI 3, EF Core SQLite, and Clean Architecture." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
             </Border>

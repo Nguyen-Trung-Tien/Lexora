@@ -4,75 +4,299 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
-        <StackPanel Spacing="24" MaxWidth="1200" HorizontalAlignment="Stretch">
-            <!-- Header section -->
-            <Grid>
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Welcome back to Lexora" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="SemiBold" />
-                    <TextBlock Text="Track your active vocabulary, review progress, and build your daily learning habit."
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource BodyTextBlockStyle}" />
-                </StackPanel>
-            </Grid>
+        <StackPanel Spacing="24" MaxWidth="1100" HorizontalAlignment="Center">
+            
+            <!-- Loading Ring Overlay -->
+            <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                          Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                          Width="40" Height="40" HorizontalAlignment="Center" />
 
-            <!-- Quick Action Banner -->
-            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="20">
-                <Grid ColumnDefinitions="*,Auto">
+            <!-- Header & Welcome Banner -->
+            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="24">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Today's Spaced Repetition Queue" Foreground="White" FontWeight="Bold" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                        <TextBlock Text="Consistent daily review trains long-term retention via the SM-2 spaced repetition algorithm."
+                        <TextBlock Text="Welcome back to Lexora" Foreground="White" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
+                        <TextBlock Text="Master vocabulary through Spaced Repetition (SM-2), track exam goals, and build consistent habits."
                                    Foreground="White" Opacity="0.9" Style="{ThemeResource BodyTextBlockStyle}" />
                     </StackPanel>
-                    <Button Grid.Column="1" VerticalAlignment="Center" Content="Start Review Session"
-                            Background="White" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontWeight="SemiBold"
-                            Padding="16,8" CornerRadius="8" Click="StartReviewButton_Click" />
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Button Click="StartReviewButton_Click" Background="White" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontWeight="Bold" Padding="18,10" CornerRadius="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE895;" FontSize="15" />
+                                <TextBlock Text="Start Review" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="StartPracticeButton_Click" Background="#20FFFFFF" Foreground="White" BorderBrush="White" BorderThickness="1" FontWeight="SemiBold" Padding="16,10" CornerRadius="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE768;" FontSize="15" />
+                                <TextBlock Text="Practice Test" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Metrics Grid -->
+            <!-- 4 Hero Metric Cards -->
             <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="16">
-                <!-- Card 1: Total Words -->
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <!-- Total Words -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                     <StackPanel Spacing="8">
-                        <FontIcon Glyph="&#xE82D;" FontSize="24" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left" />
-                        <TextBlock Text="Total Words" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" />
-                        <TextBlock Text="{x:Bind ViewModel.TotalWords, Mode=OneWay}" Style="{ThemeResource HeaderTextBlockStyle}" FontWeight="Bold" />
+                        <FontIcon Glyph="&#xE82D;" FontSize="22" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left" />
+                        <TextBlock Text="Total Vocabulary" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                        <TextBlock Text="{x:Bind ViewModel.TotalWords, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="28" FontWeight="Bold" />
                     </StackPanel>
                 </Border>
 
-                <!-- Card 2: Due Today -->
-                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <!-- Due Today -->
+                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                     <StackPanel Spacing="8">
-                        <FontIcon Glyph="&#xE823;" FontSize="24" Foreground="#D83B01" HorizontalAlignment="Left" />
-                        <TextBlock Text="Due For Review" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" />
-                        <TextBlock Text="{x:Bind ViewModel.DueToday, Mode=OneWay}" Style="{ThemeResource HeaderTextBlockStyle}" FontWeight="Bold" />
+                        <FontIcon Glyph="&#xE823;" FontSize="22" Foreground="#D83B01" HorizontalAlignment="Left" />
+                        <TextBlock Text="Due For Review" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                        <TextBlock Text="{x:Bind ViewModel.DueToday, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="28" FontWeight="Bold" Foreground="#D83B01" />
                     </StackPanel>
                 </Border>
 
-                <!-- Card 3: Mastered Words -->
-                <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <!-- Mastered Words -->
+                <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                     <StackPanel Spacing="8">
-                        <FontIcon Glyph="&#xE73E;" FontSize="24" Foreground="#107C41" HorizontalAlignment="Left" />
-                        <TextBlock Text="Mastered Words" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" />
-                        <TextBlock Text="{x:Bind ViewModel.Mastered, Mode=OneWay}" Style="{ThemeResource HeaderTextBlockStyle}" FontWeight="Bold" />
+                        <FontIcon Glyph="&#xE73E;" FontSize="22" Foreground="#107C41" HorizontalAlignment="Left" />
+                        <TextBlock Text="Mastered Words" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                        <TextBlock Text="{x:Bind ViewModel.Mastered, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="28" FontWeight="Bold" Foreground="#107C41" />
                     </StackPanel>
                 </Border>
 
-                <!-- Card 4: Day Streak -->
-                <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <!-- Day Streak -->
+                <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                     <StackPanel Spacing="8">
-                        <FontIcon Glyph="&#xEC58;" FontSize="24" Foreground="#FFB900" HorizontalAlignment="Left" />
-                        <TextBlock Text="Daily Streak" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" />
-                        <TextBlock Text="{x:Bind ViewModel.StreakDays, Mode=OneWay}" Style="{ThemeResource HeaderTextBlockStyle}" FontWeight="Bold" />
+                        <FontIcon Glyph="&#xEC58;" FontSize="22" Foreground="#FFB900" HorizontalAlignment="Left" />
+                        <TextBlock Text="Daily Streak" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{x:Bind ViewModel.StreakDays, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="28" FontWeight="Bold" />
+                            <TextBlock Text="days" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Grid>
 
-            <!-- Loading Indicator -->
-            <ProgressBar IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" HorizontalAlignment="Stretch" />
+            <!-- SECTION 1: Memory Status Breakdown & Spaced Repetition -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="20">
+                <StackPanel Spacing="16">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Memory Retention Distribution (SM-2)" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                            <TextBlock Text="Distribution of vocabulary across spaced repetition learning stages" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text="Accuracy:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                            <TextBlock Text="{x:Bind ViewModel.AccuracyRate, Mode=OneWay}" FontWeight="Bold" FontSize="14" Foreground="#107C41" />
+                            <TextBlock Text="%" FontWeight="Bold" FontSize="14" Foreground="#107C41" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Status Items list -->
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.StatusBreakdown}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="dto:LearningStatusDistributionDto">
+                                <Grid ColumnDefinitions="130,*,60,60" Margin="0,4,0,6" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
+                                    <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="8" CornerRadius="4" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="13" />
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind Percentage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                        <TextBlock Text="%" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- SECTION 2: Exam Readiness Progress (TOEIC, VSTEP, IELTS) -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Exam Target Progress" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
+                    <ItemsControl Grid.ColumnSpan="3" ItemsSource="{x:Bind ViewModel.ExamProgressList}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="16" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="dto:ExamProgressDto">
+                                <Border Width="340" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
+                                    <StackPanel Spacing="12">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{x:Bind ExamName}" FontWeight="Bold" FontSize="16" />
+                                                <TextBlock Text="{x:Bind TargetDescription}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,4">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{x:Bind ProgressPercentage}" Foreground="White" FontWeight="Bold" FontSize="12" />
+                                                    <TextBlock Text="%" Foreground="White" FontWeight="Bold" FontSize="12" />
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+
+                                        <ProgressBar Value="{x:Bind ProgressPercentage}" Maximum="100" Height="8" CornerRadius="4" />
+
+                                        <Grid ColumnDefinitions="*,*,*">
+                                            <StackPanel>
+                                                <TextBlock Text="Total" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                                <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="15" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="Learning" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                                <TextBlock Text="{x:Bind LearningWords}" FontWeight="Bold" FontSize="15" Foreground="#0078D4" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Mastered" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                                <TextBlock Text="{x:Bind MasteredWords}" FontWeight="Bold" FontSize="15" Foreground="#107C41" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </StackPanel>
+
+            <!-- SECTION 3: Study Activity Heatmap (Last 30 Days) -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="20">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Daily Study Heatmap (Last 30 Days)" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                            <TextBlock Text="Your daily review consistency and learning habit streak" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="Less" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            <Border Width="14" Height="14" CornerRadius="3" Background="#E1DFDD" />
+                            <Border Width="14" Height="14" CornerRadius="3" Background="#9BE9A8" />
+                            <Border Width="14" Height="14" CornerRadius="3" Background="#40C463" />
+                            <Border Width="14" Height="14" CornerRadius="3" Background="#30A14E" />
+                            <Border Width="14" Height="14" CornerRadius="3" Background="#216E39" />
+                            <TextBlock Text="More" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Heatmap Grid -->
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.StudyHeatmapList}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="15" ItemWidth="42" ItemHeight="42" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="dto:StudyHistoryDayDto">
+                                <Border Width="34" Height="34" CornerRadius="6" Margin="4"
+                                        Background="{x:Bind ColorHex}"
+                                        ToolTipService.ToolTip="{x:Bind TooltipText}">
+                                    <TextBlock Text="{x:Bind Date.Day}" FontSize="10" FontWeight="Bold"
+                                               Foreground="#323130" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Grid ColumnDefinitions="*,*,*" Margin="0,8,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="Reviewed Today:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind ViewModel.StudiedTodayCount, Mode=OneWay}" FontWeight="Bold" FontSize="12" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                            <TextBlock Text="Current Streak:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind ViewModel.StreakDays, Mode=OneWay}" FontWeight="Bold" FontSize="12" Foreground="#FFB900" />
+                            <TextBlock Text="days" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                            <TextBlock Text="Best Streak:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind ViewModel.LongestStreakDays, Mode=OneWay}" FontWeight="Bold" FontSize="12" Foreground="#107C41" />
+                            <TextBlock Text="days" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- SECTION 4: CEFR & POS Breakdown -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                <!-- CEFR Breakdown -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="CEFR Level Breakdown" FontWeight="Bold" FontSize="15" />
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.CefrDistributionList}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="dto:CefrLevelDistributionDto">
+                                    <Grid ColumnDefinitions="50,*,40" Margin="0,3,0,3" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind Level}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                                        <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="6" CornerRadius="3" VerticalAlignment="Center" Margin="8,0" />
+                                        <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- POS Breakdown -->
+                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Part of Speech Breakdown" FontWeight="Bold" FontSize="15" />
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.PosDistributionList}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="dto:PosDistributionDto">
+                                    <Grid ColumnDefinitions="110,*,40" Margin="0,3,0,3" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind PartOfSpeech}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
+                                        <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="6" CornerRadius="3" VerticalAlignment="Center" Margin="8,0" />
+                                        <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- SECTION 5: Recent Sessions -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Recent Learning &amp; Test Sessions" FontWeight="Bold" FontSize="15" />
+                    <ListView ItemsSource="{x:Bind ViewModel.RecentSessionsList}" SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="dto:StudySessionDto">
+                                <Grid ColumnDefinitions="160,*,Auto,Auto" Padding="6,8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind SessionType}" FontWeight="SemiBold" FontSize="13" />
+                                        <TextBlock Text="{x:Bind StartedAtText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                        <TextBlock Text="Cards:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                        <TextBlock Text="{x:Bind TotalCards}" FontWeight="Bold" FontSize="12" />
+                                        <TextBlock Text="Correct:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                        <TextBlock Text="{x:Bind CorrectCards}" FontWeight="Bold" FontSize="12" Foreground="#107C41" />
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="8,2" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                            <TextBlock Text="{x:Bind AccuracyRate}" FontWeight="Bold" FontSize="12" />
+                                            <TextBlock Text="%" FontSize="12" />
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock Grid.Column="3" Text="{x:Bind DurationText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+
         </StackPanel>
     </ScrollViewer>
 </Page>

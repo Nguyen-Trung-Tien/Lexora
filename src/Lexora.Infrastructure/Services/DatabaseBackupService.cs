@@ -4,6 +4,7 @@ namespace Lexora.Infrastructure.Services;
 
 public interface IDatabaseBackupService
 {
+    string DatabasePath { get; }
     Task<string> CreateBackupAsync(string destinationDirectory, CancellationToken cancellationToken = default);
     Task RestoreBackupAsync(string backupFilePath, CancellationToken cancellationToken = default);
 }
@@ -12,6 +13,8 @@ public class DatabaseBackupService : IDatabaseBackupService
 {
     private readonly string _dbFilePath;
     private readonly ILogger<DatabaseBackupService> _logger;
+
+    public string DatabasePath => _dbFilePath;
 
     public DatabaseBackupService(string dbFilePath, ILogger<DatabaseBackupService> logger)
     {

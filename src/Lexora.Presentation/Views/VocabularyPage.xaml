@@ -8,6 +8,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="N" Modifiers="Control" Invoked="AddWordAccelerator_Invoked" />
+        <KeyboardAccelerator Key="E" Modifiers="Control" Invoked="EditWordAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Delete" Invoked="DeleteWordAccelerator_Invoked" />
+    </Page.KeyboardAccelerators>
+
     <Grid RowDefinitions="Auto,Auto,*" Padding="24" RowSpacing="12">
         <!-- Top Action Bar -->
         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
@@ -15,7 +21,7 @@
                      Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay}"
                      TextChanged="SearchBox_TextChanged" />
 
-            <Button Grid.Column="1" Content="+ Add Word" Style="{ThemeResource AccentButtonStyle}" Click="AddWordButton_Click" />
+            <Button Grid.Column="1" Content="+ Add Word" ToolTipService.ToolTip="Add New Word (Ctrl+N)" Style="{ThemeResource AccentButtonStyle}" Click="AddWordButton_Click" />
 
             <DropDownButton Grid.Column="2" Content="Import / Export">
                 <DropDownButton.Flyout>
@@ -50,52 +56,79 @@
                         <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.Words.Count, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
                     </Grid>
 
-                    <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.Words, Mode=OneWay}"
-                              SelectedItem="{x:Bind ViewModel.SelectedWord, Mode=TwoWay}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="dto:WordDto">
-                                <Grid Padding="8,10" ColumnDefinitions="*,Auto,Auto">
-                                    <StackPanel Spacing="4">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="15" />
-                                            <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="6,2">
-                                                <TextBlock Text="{x:Bind PrimaryPartOfSpeech}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            </Border>
-                                            <Border Background="#E6F2FB" CornerRadius="4" Padding="6,2" Visibility="{x:Bind LearningStatus, Converter={StaticResource NullToVisibilityConverter}}">
-                                                <TextBlock Text="{x:Bind LearningStatus}" FontSize="11" Foreground="#0078D4" FontWeight="SemiBold" />
-                                            </Border>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="{x:Bind PhoneticUk}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            <TextBlock Text="•" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                                            <TextBlock Text="{x:Bind Confidence}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            <TextBlock Text="% acc" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="-6,0,0,0" />
-                                        </StackPanel>
-                                    </StackPanel>
+                    <Grid Grid.Row="1">
+                        <!-- ProgressRing Loading State -->
+                        <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
-                                    <!-- Quick audio speaker -->
-                                    <Button Grid.Column="1" VerticalAlignment="Center" Margin="4,0" Padding="6,4"
-                                            Background="Transparent" BorderThickness="0"
-                                            ToolTipService.ToolTip="Listen UK pronunciation"
-                                            Click="QuickListenButton_Click">
-                                        <FontIcon Glyph="&#xE768;" FontSize="14" />
-                                    </Button>
+                        <!-- Empty State -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="24"
+                                    Visibility="{x:Bind ViewModel.Words.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
+                            <FontIcon Glyph="&#xE721;" FontSize="36" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock Text="No words found" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Text="Try adjusting your filters or search query." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" />
+                            <Button Content="Reset Filters" HorizontalAlignment="Center" Margin="0,6,0,0" Click="ResetFiltersButton_Click" />
+                        </StackPanel>
 
-                                    <!-- Level badge -->
-                                    <Border Grid.Column="2" VerticalAlignment="Center" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
-                                        <TextBlock Text="{x:Bind Level}" FontSize="11" Foreground="White" FontWeight="SemiBold" />
-                                    </Border>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                        <ListView ItemsSource="{x:Bind ViewModel.Words, Mode=OneWay}"
+                                  SelectedItem="{x:Bind ViewModel.SelectedWord, Mode=TwoWay}"
+                                  Visibility="{x:Bind ViewModel.Words.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="dto:WordDto">
+                                    <Grid Padding="8,10" ColumnDefinitions="*,Auto,Auto">
+                                        <StackPanel Spacing="4">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="15" />
+                                                <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="6,2">
+                                                    <TextBlock Text="{x:Bind PrimaryPartOfSpeech}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </Border>
+                                                <Border Background="#E6F2FB" CornerRadius="4" Padding="6,2" Visibility="{x:Bind LearningStatus, Converter={StaticResource NullToVisibilityConverter}}">
+                                                    <TextBlock Text="{x:Bind LearningStatus}" FontSize="11" Foreground="#0078D4" FontWeight="SemiBold" />
+                                                </Border>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{x:Bind PhoneticUk}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="•" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind Confidence}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="% acc" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="-6,0,0,0" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- Quick audio speaker -->
+                                        <Button Grid.Column="1" VerticalAlignment="Center" Margin="4,0" Padding="6,4"
+                                                Background="Transparent" BorderThickness="0"
+                                                ToolTipService.ToolTip="Listen UK pronunciation"
+                                                Click="QuickListenButton_Click">
+                                            <FontIcon Glyph="&#xE768;" FontSize="14" />
+                                        </Button>
+
+                                        <!-- Level badge -->
+                                        <Border Grid.Column="2" VerticalAlignment="Center" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                            <TextBlock Text="{x:Bind Level}" FontSize="11" Foreground="White" FontWeight="SemiBold" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
                 </Grid>
             </Border>
 
             <!-- Right: Word Detail -->
             <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="24">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.SelectedWord, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Grid>
+                        <!-- Detail Empty State -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Padding="40"
+                                    Visibility="{x:Bind ViewModel.SelectedWord, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
+                            <FontIcon Glyph="&#xE82D;" FontSize="52" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock Text="Select a Word" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <TextBlock Text="Select any vocabulary item on the left list to inspect full definitions, examples, CEFR level, and listen to pronunciation audio."
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" MaxWidth="360" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.SelectedWord, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                         <!-- Term, Pronunciation & Actions -->
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="6">
@@ -218,6 +251,7 @@
                             <Button Content="✕ Chưa nhớ (Not Remembered)" Click="NotRememberedButton_Click" />
                         </StackPanel>
                     </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </Border>
         </Grid>

@@ -14,6 +14,7 @@ namespace Lexora.Presentation;
 public partial class App : Microsoft.UI.Xaml.Application
 {
     private Window? _window;
+    public Window? MainWindow => _window;
     private readonly IHost _host;
 
     public static new App Current => (App)Microsoft.UI.Xaml.Application.Current;
@@ -48,6 +49,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<DashboardViewModel>();
                 services.AddTransient<VocabularyViewModel>();
                 services.AddTransient<ReviewViewModel>();
+                services.AddTransient<TestViewModel>();
                 services.AddTransient<GrammarViewModel>();
                 services.AddTransient<SettingsViewModel>();
 
@@ -56,6 +58,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<DashboardPage>();
                 services.AddTransient<VocabularyPage>();
                 services.AddTransient<ReviewPage>();
+                services.AddTransient<TestPage>();
                 services.AddTransient<GrammarPage>();
                 services.AddTransient<SettingsPage>();
             })

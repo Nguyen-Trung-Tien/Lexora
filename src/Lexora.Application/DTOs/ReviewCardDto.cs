@@ -52,7 +52,13 @@ public record StudySessionDto(
     int IncorrectCards,
     double AccuracyRate,
     string? SessionType
-);
+)
+{
+    public string StartedAtText => StartedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+    public string DurationText => CompletedAt.HasValue
+        ? $"{(CompletedAt.Value - StartedAt).Minutes:D2}:{(CompletedAt.Value - StartedAt).Seconds:D2}"
+        : "In progress";
+}
 
 public record StudyLogDto(
     Guid Id,

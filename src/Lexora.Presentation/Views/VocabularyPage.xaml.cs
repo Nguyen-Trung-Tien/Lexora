@@ -324,4 +324,28 @@ public sealed partial class VocabularyPage : Page
         };
         await dialog.ShowAsync();
     }
+
+    private void AddWordAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        AddWordButton_Click(this, new RoutedEventArgs());
+        args.Handled = true;
+    }
+
+    private void EditWordAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ViewModel.SelectedWord != null)
+        {
+            EditWordButton_Click(this, new RoutedEventArgs());
+            args.Handled = true;
+        }
+    }
+
+    private void DeleteWordAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ViewModel.SelectedWord != null)
+        {
+            DeleteWordButton_Click(this, new RoutedEventArgs());
+            args.Handled = true;
+        }
+    }
 }

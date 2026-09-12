@@ -8,58 +8,163 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="N" Modifiers="Control" Invoked="AddRuleAccelerator_Invoked" />
+        <KeyboardAccelerator Key="E" Modifiers="Control" Invoked="EditRuleAccelerator_Invoked" />
+        <KeyboardAccelerator Key="Delete" Invoked="DeleteRuleAccelerator_Invoked" />
+        <KeyboardAccelerator Key="P" Modifiers="Control" Invoked="PracticeAccelerator_Invoked" />
+    </Page.KeyboardAccelerators>
+
     <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
-        <!-- Top Toolbar -->
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-            <TextBox PlaceholderText="Search grammar rules, structures..."
+        
+        <!-- Loading Ring Overlay -->
+        <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                      Width="40" Height="40"
+                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                      Grid.RowSpan="2" Canvas.ZIndex="10" />
+
+        <!-- ========================================== -->
+        <!-- TOP TOOLBAR (Visible when not in Practice) -->
+        <!-- ========================================== -->
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10"
+              Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            <TextBox PlaceholderText="Search grammar rules, structures, explanations..."
                      Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}"
                      TextChanged="SearchBox_TextChanged" />
+
+            <ComboBox Grid.Column="1" PlaceholderText="All Levels" Width="120"
+                      ItemsSource="{x:Bind ViewModel.CefrLevels}"
+                      SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}"
+                      SelectionChanged="FilterChanged" />
+
+            <ComboBox Grid.Column="2" PlaceholderText="All Exams" Width="130"
+                      ItemsSource="{x:Bind ViewModel.ExamTypes}"
+                      SelectedItem="{x:Bind ViewModel.SelectedExamTarget, Mode=TwoWay}"
+                      SelectionChanged="FilterChanged" />
+
+            <ComboBox Grid.Column="3" PlaceholderText="All Topics" Width="130"
+                      ItemsSource="{x:Bind ViewModel.Topics}"
+                      SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}"
+                      SelectionChanged="FilterChanged" />
+
+            <Button Grid.Column="4" Click="AddRuleButton_Click" ToolTipService.ToolTip="Add Rule (Ctrl+N)" Style="{ThemeResource AccentButtonStyle}" Padding="14,8">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE710;" FontSize="14" />
+                    <TextBlock Text="Add Rule" FontWeight="SemiBold" />
+                </StackPanel>
+            </Button>
+
+            <Button Grid.Column="5" Click="PracticeButton_Click" ToolTipService.ToolTip="Practice (Ctrl+P)" Padding="14,8">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE768;" FontSize="14" />
+                    <TextBlock Text="Practice" FontWeight="SemiBold" />
+                </StackPanel>
+            </Button>
         </Grid>
 
-        <!-- Master-Detail Content -->
-        <Grid Grid.Row="1" ColumnDefinitions="380,*" ColumnSpacing="20">
+        <!-- ========================================== -->
+        <!-- 1. MASTER-DETAIL VIEW (Main Mode)          -->
+        <!-- ========================================== -->
+        <Grid Grid.Row="1" ColumnDefinitions="380,*" ColumnSpacing="20"
+              Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            
             <!-- Left: Rules List -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8">
                 <Grid RowDefinitions="Auto,*">
-                    <TextBlock Text="Grammar Structures" Margin="16,12" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                    <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.Rules, Mode=OneWay}"
-                              SelectedItem="{x:Bind ViewModel.SelectedRule, Mode=TwoWay}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="dto:GrammarRuleDto">
-                                <Grid Padding="8,10" ColumnDefinitions="*,Auto">
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="{x:Bind Title}" FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{x:Bind Structure}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
-                                    <Border Grid.Column="1" VerticalAlignment="Center" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
-                                        <TextBlock Text="{x:Bind ExamTarget}" FontSize="11" Foreground="White" FontWeight="SemiBold" />
-                                    </Border>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Grammar Structures" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.Rules.Count, Mode=OneWay}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <!-- Empty State -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="24"
+                                    Visibility="{x:Bind ViewModel.Rules.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
+                            <FontIcon Glyph="&#xE8D2;" FontSize="36" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock Text="No grammar rules found" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Text="Try clearing search or filters to see available grammar lessons." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" />
+                        </StackPanel>
+
+                        <ListView ItemsSource="{x:Bind ViewModel.Rules, Mode=OneWay}"
+                                  SelectedItem="{x:Bind ViewModel.SelectedRule, Mode=TwoWay}"
+                                  Visibility="{x:Bind ViewModel.Rules.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="dto:GrammarRuleDto">
+                                    <Grid Padding="8,10" ColumnDefinitions="*,Auto">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{x:Bind Title}" FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{x:Bind Structure}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{x:Bind Topic}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Right">
+                                                <TextBlock Text="{x:Bind Level}" FontSize="10" Foreground="White" FontWeight="Bold" />
+                                            </Border>
+                                            <Border Background="#107C41" CornerRadius="4" Padding="6,2" HorizontalAlignment="Right">
+                                                <TextBlock Text="{x:Bind ExamTarget}" FontSize="10" Foreground="White" FontWeight="SemiBold" />
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
                 </Grid>
             </Border>
 
             <!-- Right: Rule Detail -->
-            <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="24">
+            <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="24">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Spacing="18" Visibility="{x:Bind ViewModel.SelectedRule, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
-                        <!-- Header -->
+                    <Grid>
+                        <!-- Detail Empty State -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Padding="40"
+                                    Visibility="{x:Bind ViewModel.SelectedRule, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
+                            <FontIcon Glyph="&#xE8D2;" FontSize="52" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock Text="Select a Grammar Rule" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <TextBlock Text="Choose any grammar rule from the left to inspect its formula, detailed explanations, contextual examples, and common pitfalls."
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" MaxWidth="360" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="18" Visibility="{x:Bind ViewModel.SelectedRule, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                        
+                        <!-- Header with Action Buttons -->
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{x:Bind ViewModel.SelectedRule.Title, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
                                 <TextBlock Text="{x:Bind ViewModel.SelectedRule.Topic, Mode=OneWay}" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontWeight="SemiBold" />
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,4">
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedRule.Level, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
-                                </Border>
-                                <Border Background="#107C41" CornerRadius="6" Padding="10,4">
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedRule.ExamTarget, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
-                                </Border>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                                <Button Click="EditRuleButton_Click" ToolTipService.ToolTip="Edit Grammar Rule (Ctrl+E)" Padding="10,6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE70F;" FontSize="14" />
+                                        <TextBlock Text="Edit" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Click="DeleteRuleButton_Click" ToolTipService.ToolTip="Delete Rule (Del)" Padding="10,6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="#D83B01" />
+                                        <TextBlock Text="Delete" Foreground="#D83B01" />
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </Grid>
+
+                        <!-- Badges -->
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,4">
+                                <TextBlock Text="{x:Bind ViewModel.SelectedRule.Level, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
+                            </Border>
+                            <Border Background="#107C41" CornerRadius="6" Padding="10,4">
+                                <TextBlock Text="{x:Bind ViewModel.SelectedRule.ExamTarget, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
+                            </Border>
+                        </StackPanel>
 
                         <!-- Formula / Structure box -->
                         <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8" Padding="16">
@@ -77,10 +182,11 @@
                         </StackPanel>
 
                         <!-- Common Mistakes -->
-                        <Border Background="#FFF4CE" BorderBrush="#FFB900" BorderThickness="1" CornerRadius="8" Padding="14">
+                        <Border Background="#FFF4CE" BorderBrush="#FFB900" BorderThickness="1" CornerRadius="8" Padding="14"
+                                Visibility="{x:Bind ViewModel.SelectedRule.CommonMistakes, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="⚠️ Common Mistakes &amp; Notes" FontWeight="Bold" Foreground="#323130" />
-                                <TextBlock Text="{x:Bind ViewModel.SelectedRule.CommonMistakes, Mode=OneWay}" Foreground="#323130" FontSize="13" />
+                                <TextBlock Text="{x:Bind ViewModel.SelectedRule.CommonMistakes, Mode=OneWay}" Foreground="#323130" FontSize="13" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
 
@@ -89,8 +195,8 @@
                         <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedRule.Examples, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="dto:GrammarExampleDto">
-                                    <Border Margin="0,4,0,8" Padding="12,8" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8">
-                                        <StackPanel Spacing="2">
+                                    <Border Margin="0,4,0,8" Padding="14,10" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8">
+                                        <StackPanel Spacing="3">
                                             <TextBlock Text="{x:Bind SentenceEn}" FontWeight="SemiBold" FontSize="14" />
                                             <TextBlock Text="{x:Bind SentenceVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                                             <TextBlock Text="{x:Bind Note}" FontSize="11" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontStyle="Italic" Margin="0,2,0,0" />
@@ -100,8 +206,103 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </Border>
         </Grid>
+
+        <!-- ========================================== -->
+        <!-- 2. GRAMMAR PRACTICE VIEW                   -->
+        <!-- ========================================== -->
+        <Grid Grid.Row="0" Grid.RowSpan="2" MaxWidth="800" HorizontalAlignment="Center"
+              Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="12" Padding="28" Margin="0,20">
+                <StackPanel Spacing="20">
+                    
+                    <!-- Progress Bar -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <ProgressBar Value="{x:Bind ViewModel.PracticeProgressPercent, Mode=OneWay}" Maximum="100" Height="6" CornerRadius="3" />
+                            <TextBlock Text="{x:Bind ViewModel.PracticeProgressText, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Exit Practice" Click="ExitPracticeButton_Click" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Question Prompt -->
+                    <TextBlock Text="{x:Bind ViewModel.CurrentPracticeQuestion.Prompt, Mode=OneWay}"
+                               Style="{ThemeResource TitleTextBlockStyle}" FontSize="20" FontWeight="Bold" TextWrapping="Wrap" />
+
+                    <TextBlock Text="{x:Bind ViewModel.CurrentPracticeQuestion.SubPrompt, Mode=OneWay}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontStyle="Italic" FontSize="14" TextWrapping="Wrap" />
+
+                    <!-- Options -->
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentPracticeOptions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                        Margin="0,0,0,10" Padding="16,12" CornerRadius="8"
+                                        Click="PracticeOption_Click" Tag="{x:Bind}">
+                                    <TextBlock Text="{x:Bind}" FontSize="15" TextWrapping="Wrap" />
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Feedback InfoBar -->
+                    <InfoBar IsOpen="{x:Bind ViewModel.IsAnswerSubmitted, Mode=OneWay}"
+                             Severity="{x:Bind GetFeedbackSeverity(ViewModel.IsAnswerCorrect), Mode=OneWay}"
+                             Title="{x:Bind GetFeedbackTitle(ViewModel.IsAnswerCorrect), Mode=OneWay}"
+                             Message="{x:Bind ViewModel.ExplanationText, Mode=OneWay}" />
+
+                    <!-- Next button -->
+                    <Button HorizontalAlignment="Right" Style="{ThemeResource AccentButtonStyle}"
+                            Content="Next Question" Click="NextPracticeQuestion_Click" Padding="24,10" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ========================================== -->
+        <!-- 3. GRAMMAR PRACTICE RESULT VIEW            -->
+        <!-- ========================================== -->
+        <Grid Grid.Row="0" Grid.RowSpan="2" MaxWidth="800" HorizontalAlignment="Center"
+              Visibility="{x:Bind ViewModel.IsPracticeResultMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="12" Padding="28" Margin="0,20">
+                <StackPanel Spacing="24">
+                    <TextBlock Text="Grammar Practice Complete!" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
+
+                    <!-- Score Card -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
+                        <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8" Padding="16">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Score" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <TextBlock Text="{x:Bind ViewModel.PracticeResult.ScorePercentage, Mode=OneWay}" FontSize="24" FontWeight="Bold" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8" Padding="16">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Correct" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <TextBlock Text="{x:Bind ViewModel.PracticeResult.CorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#107C41" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8" Padding="16">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Incorrect" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <TextBlock Text="{x:Bind ViewModel.PracticeResult.IncorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#D83B01" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+                        <Button Content="Try Another Practice" Click="PracticeButton_Click" Padding="16,10" />
+                        <Button Style="{ThemeResource AccentButtonStyle}" Content="Back to Rules" Click="ExitPracticeButton_Click" Padding="20,10" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
     </Grid>
 </Page>
