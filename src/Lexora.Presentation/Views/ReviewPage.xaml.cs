@@ -36,6 +36,9 @@ public sealed partial class ReviewPage : Page
     {
         if (ViewModel.IsCompleted || ViewModel.IsLoading) return;
 
+        // Guard against hotkeys when typing in a text box
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+
         if (e.Key == VirtualKey.Space && !ViewModel.IsAnswerVisible)
         {
             ViewModel.RevealAnswer();
@@ -78,6 +81,44 @@ public sealed partial class ReviewPage : Page
             _ = ViewModel.PlayUsAudioAsync();
             e.Handled = true;
         }
+    }
+
+    private void TypingInputBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == VirtualKey.Enter)
+        {
+            ViewModel.CheckTypedAnswer();
+            e.Handled = true;
+        }
+    }
+
+    private async void TypingModeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.ToggleTypingPracticeAsync();
+    }
+
+    private async void SpeedItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && fe.Tag is string tagStr &&
+            double.TryParse(tagStr, System.Globalization.CultureInfo.InvariantCulture, out double rate))
+        {
+            await ViewModel.SetSpeechRateAsync(rate);
+        }
+    }
+
+    private void CheckTypedAnswerButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.CheckTypedAnswer();
+    }
+
+    private void HintButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ProvideHint();
+    }
+
+    private void SkipTypingButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SkipTyping();
     }
 
     private async void ModeDueButton_Click(object sender, RoutedEventArgs e)

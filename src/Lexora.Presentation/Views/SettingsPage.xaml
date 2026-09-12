@@ -54,6 +54,29 @@
                                   Toggled="ReminderToggle_Toggled"
                                   OffContent="Disabled"
                                   OnContent="Show notification banner when words are due for review" />
+
+                    <MenuFlyoutSeparator />
+
+                    <!-- Speech Playback Speed -->
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Pronunciation Speech Rate (Tốc độ đọc)" FontWeight="SemiBold" />
+                        <TextBlock Text="Adjust audio playback speed for learning pronunciation." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        <ComboBox x:Name="SpeechRateCombo" Width="220" SelectionChanged="SpeechRateCombo_SelectionChanged">
+                            <ComboBoxItem Content="0.75x (Chậm - Slow)" Tag="0.75" />
+                            <ComboBoxItem Content="1.0x (Chuẩn - Normal)" Tag="1.0" />
+                            <ComboBoxItem Content="1.25x (Nhanh - Fast)" Tag="1.25" />
+                            <ComboBoxItem Content="1.5x (Rất nhanh - Very Fast)" Tag="1.5" />
+                        </ComboBox>
+                    </StackPanel>
+
+                    <MenuFlyoutSeparator />
+
+                    <!-- Typing Practice Toggle -->
+                    <ToggleSwitch Header="Typing Practice (Chế độ điền từ sau khi học)"
+                                  IsOn="{x:Bind ViewModel.EnableTypingPractice, Mode=OneWay}"
+                                  Toggled="TypingPracticeToggle_Toggled"
+                                  OffContent="Tắt (Lật thẻ flashcard truyền thống)"
+                                  OnContent="Bật (Gõ lại từ vựng để củng cố chính tả và phản xạ)" />
                 </StackPanel>
             </Border>
 

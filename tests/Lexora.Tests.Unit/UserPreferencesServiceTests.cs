@@ -47,6 +47,8 @@ public class UserPreferencesServiceTests : IDisposable
         prefs.LanguageCode.Should().Be("vi-VN");
         prefs.AutoPlayAudio.Should().BeFalse();
         prefs.EnableReviewReminder.Should().BeTrue();
+        prefs.SpeechRate.Should().Be(1.0);
+        prefs.EnableTypingPractice.Should().BeFalse();
     }
 
     [Fact]
@@ -62,7 +64,9 @@ public class UserPreferencesServiceTests : IDisposable
             ThemeIndex = 2,
             LanguageCode = "en-US",
             AutoPlayAudio = true,
-            EnableReviewReminder = false
+            EnableReviewReminder = false,
+            SpeechRate = 0.75,
+            EnableTypingPractice = true
         };
 
         // Act

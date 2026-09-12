@@ -19,6 +19,32 @@ public sealed partial class SettingsPage : Page
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.InitializeAsync();
+
+        SpeechRateCombo.SelectedIndex = ViewModel.SpeechRate switch
+        {
+            <= 0.8 => 0,
+            <= 1.1 => 1,
+            <= 1.35 => 2,
+            _ => 3
+        };
+    }
+
+    private async void SpeechRateCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (SpeechRateCombo?.SelectedItem is ComboBoxItem item &&
+            item.Tag is string tagStr &&
+            double.TryParse(tagStr, System.Globalization.CultureInfo.InvariantCulture, out var rate))
+        {
+            await ViewModel.SetSpeechRateAsync(rate);
+        }
+    }
+
+    private async void TypingPracticeToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleSwitch ts)
+        {
+            await ViewModel.SetTypingPracticeAsync(ts.IsOn);
+        }
     }
 
     private void ThemeRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -9,6 +9,8 @@ public record UserPreferences
     public string LanguageCode { get; init; } = "vi-VN";
     public bool AutoPlayAudio { get; init; } = false;
     public bool EnableReviewReminder { get; init; } = true;
+    public double SpeechRate { get; init; } = 1.0;
+    public bool EnableTypingPractice { get; init; } = false;
 }
 
 public interface IUserPreferencesService

@@ -30,6 +30,12 @@ public partial class SettingsViewModel : ObservableObject
     public partial bool EnableReviewReminder { get; set; } = true;
 
     [ObservableProperty]
+    public partial double SpeechRate { get; set; } = 1.0;
+
+    [ObservableProperty]
+    public partial bool EnableTypingPractice { get; set; }
+
+    [ObservableProperty]
     public partial string BackupStatusMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -72,6 +78,8 @@ public partial class SettingsViewModel : ObservableObject
         SelectedThemeIndex = prefs.ThemeIndex;
         AutoPlayAudio = prefs.AutoPlayAudio;
         EnableReviewReminder = prefs.EnableReviewReminder;
+        SpeechRate = prefs.SpeechRate;
+        EnableTypingPractice = prefs.EnableTypingPractice;
 
         DatabasePath = _backupService.DatabasePath;
     }
@@ -90,6 +98,23 @@ public partial class SettingsViewModel : ObservableObject
         EnableReviewReminder = enabled;
         var current = _preferencesService.GetPreferences();
         await _preferencesService.SavePreferencesAsync(current with { EnableReviewReminder = enabled });
+    }
+
+    [RelayCommand]
+    public async Task SetSpeechRateAsync(double rate)
+    {
+        SpeechRate = rate;
+        _audioService.PlaybackRate = rate;
+        var current = _preferencesService.GetPreferences();
+        await _preferencesService.SavePreferencesAsync(current with { SpeechRate = rate });
+    }
+
+    [RelayCommand]
+    public async Task SetTypingPracticeAsync(bool enabled)
+    {
+        EnableTypingPractice = enabled;
+        var current = _preferencesService.GetPreferences();
+        await _preferencesService.SavePreferencesAsync(current with { EnableTypingPractice = enabled });
     }
 
     [RelayCommand]

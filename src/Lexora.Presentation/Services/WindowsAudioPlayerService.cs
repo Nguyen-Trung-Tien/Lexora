@@ -7,23 +7,34 @@ namespace Lexora.Presentation.Services;
 
 public interface IAudioPlayerService
 {
-    Task PlayPronunciationAsync(string term, string accent = "uk");
+    double PlaybackRate { get; set; }
+    Task PlayPronunciationAsync(string term, string accent = "uk", double? rate = null);
 }
 
 public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 {
     private readonly IAudioStorageService _audioStorage;
+    private readonly IUserPreferencesService _preferencesService;
     private readonly MediaPlayer _mediaPlayer;
     private readonly SpeechSynthesizer _synthesizer;
 
-    public WindowsAudioPlayerService(IAudioStorageService audioStorage)
+    public double PlaybackRate { get; set; } = 1.0;
+
+    public WindowsAudioPlayerService(IAudioStorageService audioStorage, IUserPreferencesService preferencesService)
     {
         _audioStorage = audioStorage;
+        _preferencesService = preferencesService;
         _mediaPlayer = new MediaPlayer();
         _synthesizer = new SpeechSynthesizer();
+
+        PlaybackRate = _preferencesService.GetPreferences().SpeechRate;
+        _preferencesService.PreferencesChanged += (_, prefs) =>
+        {
+            PlaybackRate = prefs.SpeechRate;
+        };
     }
 
-    public async Task PlayPronunciationAsync(string term, string accent = "uk")
+    public async Task PlayPronunciationAsync(string term, string accent = "uk", double? rate = null)
     {
         if (string.IsNullOrWhiteSpace(term)) return;
 
@@ -33,10 +44,15 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             safeTerm = safeTerm.Substring(0, 150);
         }
 
+        double effectiveRate = Math.Clamp(rate ?? PlaybackRate, 0.5, 2.0);
+
         try
         {
             // Stop any currently playing audio before beginning new playback
             _mediaPlayer.Pause();
+
+            // Set media player playback speed
+            _mediaPlayer.PlaybackSession.PlaybackRate = effectiveRate;
 
             // 1. Check if cached audio file exists
             var cachedPath = _audioStorage.GetCachedAudioPath(safeTerm, accent);
@@ -67,6 +83,8 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             {
                 _synthesizer.Voice = targetVoice;
             }
+
+            _synthesizer.Options.SpeakingRate = effectiveRate;
 
             var stream = await _synthesizer.SynthesizeTextToStreamAsync(safeTerm);
             _mediaPlayer.Source = MediaSource.CreateFromStream(stream, stream.ContentType);
