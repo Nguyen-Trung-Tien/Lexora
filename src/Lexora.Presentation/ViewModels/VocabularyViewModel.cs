@@ -48,9 +48,13 @@ public partial class VocabularyViewModel : ObservableObject
     [ObservableProperty]
     public partial string StatusMessage { get; set; } = string.Empty;
 
+    [ObservableProperty]
+    public partial bool IsUnitViewMode { get; set; } = false;
+
     public ObservableCollection<WordDto> Words { get; } = new();
     public ObservableCollection<TopicDto> AvailableTopics { get; } = new();
     public ObservableCollection<ExamTagDto> AvailableExamTags { get; } = new();
+    public ObservableCollection<ContextUnitDto> ContextUnits { get; } = new();
 
     public VocabularyViewModel(
         IVocabularyService vocabService,
@@ -68,6 +72,52 @@ public partial class VocabularyViewModel : ObservableObject
     public async Task InitializeAsync()
     {
         await LoadFiltersAsync();
+        await LoadContextUnitsAsync();
+        await LoadWordsAsync();
+    }
+
+    [RelayCommand]
+    public async Task LoadContextUnitsAsync()
+    {
+        try
+        {
+            var units = await _vocabService.GetContextUnitsAsync();
+            ContextUnits.Clear();
+            foreach (var u in units)
+            {
+                ContextUnits.Add(u);
+            }
+        }
+        catch
+        {
+            // Keep collection stable on error
+        }
+    }
+
+    [RelayCommand]
+    public void SwitchToListView()
+    {
+        IsUnitViewMode = false;
+    }
+
+    [RelayCommand]
+    public void SwitchToUnitView()
+    {
+        IsUnitViewMode = true;
+    }
+
+    [RelayCommand]
+    public async Task FilterByUnitAsync(ContextUnitDto? unit)
+    {
+        if (unit == null || unit.Id == Guid.Empty)
+        {
+            SelectedTopicId = null;
+        }
+        else
+        {
+            SelectedTopicId = unit.Id;
+        }
+        IsUnitViewMode = false;
         await LoadWordsAsync();
     }
 
@@ -159,6 +209,7 @@ public partial class VocabularyViewModel : ObservableObject
         }
 
         await LoadWordsAsync();
+        _ = LoadContextUnitsAsync();
         SelectedWord = Words.FirstOrDefault(w => w.Term.Equals(dto.Term, StringComparison.OrdinalIgnoreCase));
     }
 
@@ -171,6 +222,7 @@ public partial class VocabularyViewModel : ObservableObject
             await _vocabService.DeleteWordAsync(id);
             StatusMessage = $"Deleted '{word.Term}'.";
             await LoadWordsAsync();
+            _ = LoadContextUnitsAsync();
         }
     }
 
@@ -205,6 +257,7 @@ public partial class VocabularyViewModel : ObservableObject
                 Words[idx] = updatedWord;
             }
             SelectedWord = updatedWord;
+            _ = LoadContextUnitsAsync();
 
             StatusMessage = remembered
                 ? $"✓ Đã đánh dấu '{term}' là Nhớ rồi."
@@ -246,6 +299,7 @@ public partial class VocabularyViewModel : ObservableObject
         }
 
         await LoadWordsAsync();
+        _ = LoadContextUnitsAsync();
         return result;
     }
 }

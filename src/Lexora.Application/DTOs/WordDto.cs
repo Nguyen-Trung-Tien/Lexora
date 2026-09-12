@@ -83,3 +83,17 @@ public record ExamTagDto(
     string Name,
     string? TargetScore
 );
+
+public record ContextUnitDto(
+    Guid Id,
+    string Name,
+    string? Description,
+    string? IconGlyph,
+    string? ColorHex,
+    int TotalWords,
+    int RememberedWords,
+    int NotRememberedWords,
+    double MasteryPercentage,
+    IReadOnlyList<WordDto> Words
+);
+

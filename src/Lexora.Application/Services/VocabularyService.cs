@@ -222,6 +222,67 @@ public class VocabularyService : IVocabularyService
         return tags.Select(t => new ExamTagDto(t.Id, t.Type, t.Name, t.TargetScore)).ToList();
     }
 
+    public async Task<IReadOnlyList<ContextUnitDto>> GetContextUnitsAsync(CancellationToken cancellationToken = default)
+    {
+        var topics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
+        var allWords = await _vocabRepo.SearchAsync(take: 1000, cancellationToken: cancellationToken);
+
+        var result = new List<ContextUnitDto>();
+
+        foreach (var topic in topics)
+        {
+            var unitWords = allWords
+                .Where(w => w.WordTopics.Any(wt => wt.TopicId == topic.Id))
+                .Select(MapToDto)
+                .ToList();
+
+            int remembered = unitWords.Count(w => w.LearningStatus == LearningStatus.Remembered || w.LearningStatus == LearningStatus.Mastered);
+            int notRemembered = unitWords.Count(w => w.LearningStatus == LearningStatus.NotRemembered);
+            double mastery = unitWords.Count == 0 ? 0.0 : Math.Round((double)remembered / unitWords.Count * 100.0, 1);
+
+            result.Add(new ContextUnitDto(
+                topic.Id,
+                topic.Name,
+                topic.Description,
+                topic.IconGlyph ?? "\uE8EC",
+                topic.ColorHex ?? "#0078D4",
+                unitWords.Count,
+                remembered,
+                notRemembered,
+                mastery,
+                unitWords
+            ));
+        }
+
+        // Untagged words group if any
+        var untaggedWords = allWords
+            .Where(w => w.WordTopics.Count == 0)
+            .Select(MapToDto)
+            .ToList();
+
+        if (untaggedWords.Count > 0)
+        {
+            int remembered = untaggedWords.Count(w => w.LearningStatus == LearningStatus.Remembered || w.LearningStatus == LearningStatus.Mastered);
+            int notRemembered = untaggedWords.Count(w => w.LearningStatus == LearningStatus.NotRemembered);
+            double mastery = Math.Round((double)remembered / untaggedWords.Count * 100.0, 1);
+
+            result.Add(new ContextUnitDto(
+                Guid.Empty,
+                "Chủ đề chung (General Context)",
+                "Các từ vựng cơ bản và thông dụng hàng ngày",
+                "\uE8D2",
+                "#69797E",
+                untaggedWords.Count,
+                remembered,
+                notRemembered,
+                mastery,
+                untaggedWords
+            ));
+        }
+
+        return result;
+    }
+
     private static WordDto MapToDto(Word w)
     {
         var meanings = w.Meanings

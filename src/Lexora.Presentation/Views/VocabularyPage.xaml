@@ -16,14 +16,20 @@
 
     <Grid RowDefinitions="Auto,Auto,*" Padding="24" RowSpacing="12">
         <!-- Top Action Bar -->
-        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-            <TextBox x:Name="SearchBox" PlaceholderText="Search words, meanings, phonetics..."
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+            <!-- View Switcher -->
+            <StackPanel Orientation="Horizontal" Spacing="4" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" Padding="4" CornerRadius="8">
+                <Button x:Name="BtnViewList" Content="📋 Danh sách từ" Click="BtnViewList_Click" />
+                <Button x:Name="BtnViewUnits" Content="📚 Theo Unit ngữ cảnh" Click="BtnViewUnits_Click" />
+            </StackPanel>
+
+            <TextBox Grid.Column="1" x:Name="SearchBox" PlaceholderText="Search words, meanings, phonetics..."
                      Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay}"
                      TextChanged="SearchBox_TextChanged" />
 
-            <Button Grid.Column="1" Content="+ Add Word" ToolTipService.ToolTip="Add New Word (Ctrl+N)" Style="{ThemeResource AccentButtonStyle}" Click="AddWordButton_Click" />
+            <Button Grid.Column="2" Content="+ Add Word" ToolTipService.ToolTip="Add New Word (Ctrl+N)" Style="{ThemeResource AccentButtonStyle}" Click="AddWordButton_Click" />
 
-            <DropDownButton Grid.Column="2" Content="Import / Export">
+            <DropDownButton Grid.Column="3" Content="Import / Export">
                 <DropDownButton.Flyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Export to JSON" Click="ExportJson_Click" />
@@ -39,6 +45,7 @@
         <!-- Filters & Sorting Bar -->
         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
             <StackPanel Orientation="Horizontal" Spacing="12" Padding="0,2,0,6">
+                <ComboBox x:Name="TopicFilterCombo" PlaceholderText="Unit / Chủ đề" SelectionChanged="TopicFilterCombo_SelectionChanged" Width="160" />
                 <ComboBox x:Name="LevelFilterCombo" PlaceholderText="CEFR Level" SelectionChanged="LevelFilterCombo_SelectionChanged" Width="130" />
                 <ComboBox x:Name="PosFilterCombo" PlaceholderText="Part of Speech" SelectionChanged="PosFilterCombo_SelectionChanged" Width="140" />
                 <ComboBox x:Name="StatusFilterCombo" PlaceholderText="Status" SelectionChanged="StatusFilterCombo_SelectionChanged" Width="140" />
@@ -48,8 +55,9 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Master-Detail Content -->
-        <Grid Grid.Row="2" ColumnDefinitions="380,*" ColumnSpacing="20">
+        <!-- Master-Detail Content (List View) -->
+        <Grid Grid.Row="2" ColumnDefinitions="380,*" ColumnSpacing="20"
+              Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
             <!-- Left: Word List -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                 <Grid RowDefinitions="Auto,*">
@@ -264,6 +272,115 @@
                     </Grid>
                 </ScrollViewer>
             </Border>
+        </Grid>
+
+        <!-- Context Units View -->
+        <Grid Grid.Row="2"
+              Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Phân chia Từ vựng theo Unit Ngữ cảnh" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                            <TextBlock Text="Học từ theo ngữ cảnh thực tế (Chủ đề, Tình huống, Kỳ thi), theo dõi độ thành thạo và làm bài kiểm tra theo từng Unit."
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE8F1;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind ViewModel.ContextUnits.Count, Mode=OneWay}" FontWeight="Bold" />
+                                <TextBlock Text="Units" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Empty state -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="40"
+                                Visibility="{x:Bind ViewModel.ContextUnits.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
+                        <FontIcon Glyph="&#xE8F1;" FontSize="40" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Chưa có Unit ngữ cảnh nào" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        <TextBlock Text="Hãy thêm từ vựng hoặc gán Chủ đề cho các từ để tạo Unit ngữ cảnh tự động." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- Cards Grid -->
+                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.ContextUnits, Mode=OneWay}"
+                                   Visibility="{x:Bind ViewModel.ContextUnits.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                        <ItemsRepeater.Layout>
+                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="340" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="dto:ContextUnitDto">
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="10" Padding="18">
+                                    <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
+                                        <!-- Header: Icon, Name, Word Count Badge -->
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                            <Border Width="40" Height="40" CornerRadius="8"
+                                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    BorderThickness="1">
+                                                <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="18"
+                                                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="{x:Bind Name}" FontWeight="Bold" FontSize="16" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{x:Bind Description}" FontSize="12"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           TextWrapping="Wrap" MaxLines="2" />
+                                            </StackPanel>
+
+                                            <Border Grid.Column="2" VerticalAlignment="Top"
+                                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    BorderThickness="1" CornerRadius="6" Padding="8,3">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="12" />
+                                                    <TextBlock Text="từ" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Mastery Stats & Progress Bar -->
+                                        <StackPanel Grid.Row="1" Spacing="6">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Text="Độ thành thạo" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Grid.Column="1" Text="{x:Bind MasteryPercentage}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </Grid>
+                                            <ProgressBar Value="{x:Bind MasteryPercentage}" Maximum="100" Height="6" CornerRadius="3" />
+                                            <Grid ColumnDefinitions="*,*">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                    <TextBlock Text="{x:Bind RememberedWords}" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                    <TextBlock Text="đã thuộc" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+                                                    <FontIcon Glyph="&#xE711;" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                                    <TextBlock Text="{x:Bind NotRememberedWords}" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                                    <TextBlock Text="cần ôn" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <MenuFlyoutSeparator Grid.Row="2" Margin="0,-4" />
+
+                                        <!-- Actions: View Words & Test Unit -->
+                                        <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="8">
+                                            <Button Content="Xem danh sách từ" HorizontalAlignment="Stretch"
+                                                    Click="ViewUnitWords_Click" Tag="{x:Bind}" />
+                                            <Button Grid.Column="1" Content="Kiểm tra Unit" Style="{ThemeResource AccentButtonStyle}"
+                                                    HorizontalAlignment="Stretch"
+                                                    Click="TestUnit_Click" Tag="{x:Bind}" />
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>

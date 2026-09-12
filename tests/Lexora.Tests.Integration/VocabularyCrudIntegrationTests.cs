@@ -245,6 +245,96 @@ public class VocabularyCrudIntegrationTests : IDisposable
         cardUpdated!.Status.Should().Be(LearningStatus.NotRemembered);
     }
 
+    [Fact]
+    public async Task GetContextUnitsAsync_ShouldReturnGroupedUnitsWithMasteryMetrics()
+    {
+        // 1. Create a Topic
+        var topic = new Lexora.Domain.Entities.Topic
+        {
+            Id = Guid.NewGuid(),
+            Name = "Work & Career",
+            Description = "Vocabulary for professional workplace contexts",
+            IconGlyph = "\uE8F1",
+            ColorHex = "#4A90E2"
+        };
+        _context.Topics.Add(topic);
+        await _unitOfWork.SaveChangesAsync();
+
+        // 2. Create Word 1 with topic
+        var word1Dto = new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "negotiation",
+            PhoneticUk: null,
+            PhoneticUs: null,
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.B2,
+            PrimaryPartOfSpeech: PartOfSpeech.Noun,
+            Notes: null,
+            Meanings: new List<WordMeaningCreateDto> { new(PartOfSpeech.Noun, "đàm phán", null, null, new List<ExampleSentenceCreateDto>()) },
+            TopicIds: new List<Guid> { topic.Id },
+            ExamTagIds: new List<Guid>()
+        );
+        var word1 = await _vocabService.CreateWordAsync(word1Dto);
+
+        // 3. Create Word 2 with topic
+        var word2Dto = new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "contract",
+            PhoneticUk: null,
+            PhoneticUs: null,
+            Level: CefrLevel.B1,
+            PrimaryPartOfSpeech: PartOfSpeech.Noun,
+            Notes: null,
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Meanings: new List<WordMeaningCreateDto> { new(PartOfSpeech.Noun, "hợp đồng", null, null, new List<ExampleSentenceCreateDto>()) },
+            TopicIds: new List<Guid> { topic.Id },
+            ExamTagIds: new List<Guid>()
+        );
+        var word2 = await _vocabService.CreateWordAsync(word2Dto);
+
+        // 4. Create Word 3 without topic (untagged)
+        var word3Dto = new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "serendipity",
+            PhoneticUk: null,
+            PhoneticUs: null,
+            Level: CefrLevel.C2,
+            PrimaryPartOfSpeech: PartOfSpeech.Noun,
+            Notes: null,
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Meanings: new List<WordMeaningCreateDto> { new(PartOfSpeech.Noun, "sự tình cờ may mắn", null, null, new List<ExampleSentenceCreateDto>()) },
+            TopicIds: new List<Guid>(),
+            ExamTagIds: new List<Guid>()
+        );
+        await _vocabService.CreateWordAsync(word3Dto);
+
+        // 5. Mark word1 as Remembered
+        var reviewService = new ReviewService(_reviewRepo, new Sm2SpacedRepetitionEngine(), _unitOfWork);
+        await reviewService.MarkStatusQuickAsync(word1.Id, remembered: true);
+
+        // 6. Act: Retrieve context units
+        var units = await _vocabService.GetContextUnitsAsync();
+
+        // 7. Assert
+        units.Should().NotBeNull();
+        var careerUnit = units.FirstOrDefault(u => u.Id == topic.Id);
+        careerUnit.Should().NotBeNull();
+        careerUnit!.Name.Should().Be("Work & Career");
+        careerUnit.TotalWords.Should().Be(2);
+        careerUnit.RememberedWords.Should().Be(1);
+        careerUnit.NotRememberedWords.Should().Be(0);
+        careerUnit.MasteryPercentage.Should().Be(50.0);
+        careerUnit.Words.Should().HaveCount(2);
+
+        var generalUnit = units.FirstOrDefault(u => u.Id == Guid.Empty);
+        generalUnit.Should().NotBeNull();
+        generalUnit!.TotalWords.Should().Be(1);
+        generalUnit.Words.Any(w => w.Term == "serendipity").Should().BeTrue();
+    }
+
     public void Dispose()
     {
         _context.Dispose();

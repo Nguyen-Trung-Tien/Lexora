@@ -33,4 +33,5 @@ public interface IVocabularyService
     Task DeleteWordAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<TopicDto>> GetAllTopicsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ExamTagDto>> GetAllExamTagsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ContextUnitDto>> GetContextUnitsAsync(CancellationToken cancellationToken = default);
 }

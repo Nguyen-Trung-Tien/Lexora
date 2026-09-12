@@ -50,7 +50,17 @@ public sealed partial class VocabularyPage : Page
         Loaded += async (s, e) =>
         {
             await ViewModel.InitializeAsync();
+            PopulateTopicFilterCombo();
+            UpdateViewModeButtons();
         };
+    }
+
+    private void PopulateTopicFilterCombo()
+    {
+        var topics = new List<object> { "Tất cả Unit / Chủ đề" };
+        topics.AddRange(ViewModel.AvailableTopics);
+        TopicFilterCombo.ItemsSource = topics;
+        TopicFilterCombo.SelectedIndex = 0;
     }
 
     private readonly DispatcherTimer _searchDebounceTimer;
@@ -68,6 +78,19 @@ public sealed partial class VocabularyPage : Page
     {
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
+    }
+
+    private async void TopicFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (TopicFilterCombo.SelectedItem is TopicDto topic)
+        {
+            ViewModel.SelectedTopicId = topic.Id;
+        }
+        else
+        {
+            ViewModel.SelectedTopicId = null;
+        }
+        await ViewModel.LoadWordsAsync();
     }
 
     private async void LevelFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -144,6 +167,7 @@ public sealed partial class VocabularyPage : Page
     private void ResetFiltersButton_Click(object sender, RoutedEventArgs e)
     {
         SearchBox.Text = string.Empty;
+        TopicFilterCombo.SelectedIndex = 0;
         LevelFilterCombo.SelectedIndex = 0;
         PosFilterCombo.SelectedIndex = 0;
         StatusFilterCombo.SelectedIndex = 0;
@@ -462,6 +486,75 @@ public sealed partial class VocabularyPage : Page
         {
             var navService = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.INavigationService>();
             navService.Navigate(typeof(TestPage), new[] { ViewModel.SelectedWord.Id });
+        }
+    }
+
+    private void BtnViewList_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SwitchToListView();
+        UpdateViewModeButtons();
+    }
+
+    private void BtnViewUnits_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SwitchToUnitView();
+        UpdateViewModeButtons();
+    }
+
+    private void UpdateViewModeButtons()
+    {
+        if (ViewModel.IsUnitViewMode)
+        {
+            BtnViewUnits.Style = Microsoft.UI.Xaml.Application.Current.Resources["AccentButtonStyle"] as Style;
+            BtnViewList.Style = Microsoft.UI.Xaml.Application.Current.Resources["DefaultButtonStyle"] as Style;
+        }
+        else
+        {
+            BtnViewList.Style = Microsoft.UI.Xaml.Application.Current.Resources["AccentButtonStyle"] as Style;
+            BtnViewUnits.Style = Microsoft.UI.Xaml.Application.Current.Resources["DefaultButtonStyle"] as Style;
+        }
+    }
+
+    private async void ViewUnitWords_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && (fe.Tag as ContextUnitDto ?? fe.DataContext as ContextUnitDto) is ContextUnitDto unit)
+        {
+            await ViewModel.FilterByUnitAsync(unit);
+
+            // Sync TopicFilterCombo selection
+            if (unit.Id == Guid.Empty)
+            {
+                TopicFilterCombo.SelectedIndex = 0;
+            }
+            else
+            {
+                for (int i = 0; i < TopicFilterCombo.Items.Count; i++)
+                {
+                    if (TopicFilterCombo.Items[i] is TopicDto t && t.Id == unit.Id)
+                    {
+                        TopicFilterCombo.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            UpdateViewModeButtons();
+        }
+    }
+
+    private void TestUnit_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && (fe.Tag as ContextUnitDto ?? fe.DataContext as ContextUnitDto) is ContextUnitDto unit)
+        {
+            if (unit.Words.Count > 0)
+            {
+                var navService = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.INavigationService>();
+                navService.Navigate(typeof(TestPage), unit.Words.Select(w => w.Id).ToList());
+            }
+            else
+            {
+                ShowErrorDialog("Chưa có từ vựng", $"Unit '{unit.Name}' chưa có từ vựng nào để làm bài kiểm tra.");
+            }
         }
     }
 }
