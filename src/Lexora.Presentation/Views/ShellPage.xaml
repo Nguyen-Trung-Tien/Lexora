@@ -56,19 +56,23 @@
                 <AutoSuggestBox x:Name="GlobalSearchBox" PlaceholderText="Search Lexora..." ToolTipService.ToolTip="Search Lexora (Ctrl+F)" QuerySubmitted="GlobalSearchBox_QuerySubmitted" />
             </NavigationView.AutoSuggestBox>
 
-            <Grid>
-                <Frame x:Name="ContentFrame" />
+            <Grid RowDefinitions="Auto,*">
+                <!-- Due Review Reminder InfoBar (Top, above content) -->
                 <InfoBar x:Name="DueReviewInfoBar"
+                         Grid.Row="0"
                          IsOpen="{x:Bind ViewModel.HasDueReviews, Mode=OneWay}"
                          Severity="Informational"
                          Title="Review Reminder"
                          Message="{x:Bind ViewModel.DueReviewMessage, Mode=OneWay}"
-                         VerticalAlignment="Top"
-                         Margin="24,12,24,0">
+                         Margin="16,8,16,0"
+                         CornerRadius="8">
                     <InfoBar.ActionButton>
                         <Button Content="Review Now" Style="{ThemeResource AccentButtonStyle}" Click="ReviewNowButton_Click" />
                     </InfoBar.ActionButton>
                 </InfoBar>
+
+                <!-- Page Content Frame -->
+                <Frame x:Name="ContentFrame" Grid.Row="1" />
             </Grid>
         </NavigationView>
     </Grid>

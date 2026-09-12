@@ -174,15 +174,26 @@ public partial class VocabularyViewModel : ObservableObject
         }
     }
 
+    private bool _isMarkingStatus = false;
+
     [RelayCommand]
     public async Task MarkWordStatusAsync(bool remembered)
     {
-        if (SelectedWord == null) return;
-
-        await _reviewService.MarkStatusQuickAsync(SelectedWord.Id, remembered);
-        var currentId = SelectedWord.Id;
-        await LoadWordsAsync();
-        SelectedWord = Words.FirstOrDefault(w => w.Id == currentId);
+        if (SelectedWord == null || _isMarkingStatus) return;
+        _isMarkingStatus = true;
+        try
+        {
+            await _reviewService.MarkStatusQuickAsync(SelectedWord.Id, remembered);
+            var currentId = SelectedWord.Id;
+            await LoadWordsAsync();
+            // Restore selection to the same word after list refresh
+            var refreshed = Words.FirstOrDefault(w => w.Id == currentId);
+            if (refreshed != null) SelectedWord = refreshed;
+        }
+        finally
+        {
+            _isMarkingStatus = false;
+        }
     }
 
     [RelayCommand]

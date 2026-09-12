@@ -222,7 +222,7 @@
         <!-- ========================================== -->
         <!-- 2. GRAMMAR PRACTICE VIEW                   -->
         <!-- ========================================== -->
-        <Grid Grid.Row="0" Grid.RowSpan="2" MaxWidth="800" HorizontalAlignment="Center"
+        <Grid Grid.Row="2" MaxWidth="800" HorizontalAlignment="Center"
               Visibility="{x:Bind ViewModel.IsPracticeMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -274,7 +274,7 @@
         <!-- ========================================== -->
         <!-- 3. GRAMMAR PRACTICE RESULT VIEW            -->
         <!-- ========================================== -->
-        <Grid Grid.Row="0" Grid.RowSpan="2" MaxWidth="800" HorizontalAlignment="Center"
+        <Grid Grid.Row="2" MaxWidth="800" HorizontalAlignment="Center"
               Visibility="{x:Bind ViewModel.IsPracticeResultMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

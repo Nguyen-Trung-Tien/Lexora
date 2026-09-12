@@ -222,12 +222,40 @@ public sealed partial class VocabularyPage : Page
 
     private async void RememberedButton_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.MarkWordStatusAsync(remembered: true);
+        if (ViewModel.SelectedWord == null) return;
+        try
+        {
+            if (sender is Button btn) btn.IsEnabled = false;
+            await ViewModel.MarkWordStatusAsync(remembered: true);
+            ViewModel.StatusMessage = $"✓ Đã đánh dấu '{ViewModel.SelectedWord?.Term ?? string.Empty}' là Nhớ rồi.";
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog("Lỗi đánh dấu từ", ex.Message);
+        }
+        finally
+        {
+            if (sender is Button btn2) btn2.IsEnabled = true;
+        }
     }
 
     private async void NotRememberedButton_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.MarkWordStatusAsync(remembered: false);
+        if (ViewModel.SelectedWord == null) return;
+        try
+        {
+            if (sender is Button btn) btn.IsEnabled = false;
+            await ViewModel.MarkWordStatusAsync(remembered: false);
+            ViewModel.StatusMessage = $"✕ Đã đánh dấu '{ViewModel.SelectedWord?.Term ?? string.Empty}' là Chưa nhớ.";
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog("Lỗi đánh dấu từ", ex.Message);
+        }
+        finally
+        {
+            if (sender is Button btn2) btn2.IsEnabled = true;
+        }
     }
 
     private async void ExportJson_Click(object sender, RoutedEventArgs e)

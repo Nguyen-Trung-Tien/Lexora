@@ -67,6 +67,8 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     {
         return await Context.StudyLogs
             .AsNoTracking()
+            .Include(l => l.ReviewCard)
+                .ThenInclude(rc => rc.Word)
             .OrderByDescending(l => l.CreatedAt)
             .Take(limit)
             .ToListAsync(cancellationToken);
