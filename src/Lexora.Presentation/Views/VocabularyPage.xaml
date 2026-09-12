@@ -58,7 +58,7 @@
         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled"
                       Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
             <StackPanel Orientation="Horizontal" Spacing="10" Padding="0,2,0,6">
-                <ComboBox x:Name="TopicFilterCombo" PlaceholderText="Unit / Chủ đề" SelectionChanged="TopicFilterCombo_SelectionChanged" Width="160" CornerRadius="6" />
+                <ComboBox x:Name="TopicFilterCombo" PlaceholderText="Unit / Chủ đề" SelectionChanged="TopicFilterCombo_SelectionChanged" Width="180" CornerRadius="6" />
                 <ComboBox x:Name="LevelFilterCombo" PlaceholderText="CEFR Level" SelectionChanged="LevelFilterCombo_SelectionChanged" Width="130" CornerRadius="6" />
                 <ComboBox x:Name="PosFilterCombo" PlaceholderText="Part of Speech" SelectionChanged="PosFilterCombo_SelectionChanged" Width="140" CornerRadius="6" />
                 <ComboBox x:Name="StatusFilterCombo" PlaceholderText="Status" SelectionChanged="StatusFilterCombo_SelectionChanged" Width="140" CornerRadius="6" />

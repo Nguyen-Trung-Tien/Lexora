@@ -58,20 +58,37 @@ public sealed partial class VocabularyPage : Page
 
     private void PopulateTopicFilterCombo()
     {
-        var currentSelectedId = (TopicFilterCombo.SelectedItem as TopicDto)?.Id ?? ViewModel.SelectedTopicId;
-        var topics = new List<object> { "Tất cả Unit / Chủ đề" };
-        topics.AddRange(ViewModel.AvailableTopics);
-        TopicFilterCombo.ItemsSource = topics;
+        var currentSelectedId = ViewModel.SelectedTopicId;
+        TopicFilterCombo.SelectionChanged -= TopicFilterCombo_SelectionChanged;
+        TopicFilterCombo.Items.Clear();
 
-        if (currentSelectedId.HasValue)
+        var allItem = new ComboBoxItem
         {
-            var idx = topics.FindIndex(t => t is TopicDto td && td.Id == currentSelectedId.Value);
-            TopicFilterCombo.SelectedIndex = idx >= 0 ? idx : 0;
-        }
-        else
+            Content = "Tất cả Unit / Chủ đề",
+            Tag = null
+        };
+        TopicFilterCombo.Items.Add(allItem);
+
+        int selectedIndex = 0;
+        int idx = 1;
+        foreach (var topic in ViewModel.AvailableTopics)
         {
-            TopicFilterCombo.SelectedIndex = 0;
+            var item = new ComboBoxItem
+            {
+                Content = topic.Name,
+                Tag = topic.Id
+            };
+            TopicFilterCombo.Items.Add(item);
+
+            if (currentSelectedId.HasValue && topic.Id == currentSelectedId.Value)
+            {
+                selectedIndex = idx;
+            }
+            idx++;
         }
+
+        TopicFilterCombo.SelectedIndex = selectedIndex;
+        TopicFilterCombo.SelectionChanged += TopicFilterCombo_SelectionChanged;
     }
 
     private readonly DispatcherTimer _searchDebounceTimer;
@@ -93,9 +110,9 @@ public sealed partial class VocabularyPage : Page
 
     private async void TopicFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (TopicFilterCombo.SelectedItem is TopicDto topic)
+        if (TopicFilterCombo.SelectedItem is ComboBoxItem cbi && cbi.Tag is Guid topicId)
         {
-            ViewModel.SelectedTopicId = topic.Id;
+            ViewModel.SelectedTopicId = topicId;
         }
         else
         {
@@ -561,7 +578,7 @@ public sealed partial class VocabularyPage : Page
             {
                 for (int i = 0; i < TopicFilterCombo.Items.Count; i++)
                 {
-                    if (TopicFilterCombo.Items[i] is TopicDto t && t.Id == unit.Id)
+                    if (TopicFilterCombo.Items[i] is ComboBoxItem cbi && cbi.Tag is Guid gid && gid == unit.Id)
                     {
                         TopicFilterCombo.SelectedIndex = i;
                         break;
