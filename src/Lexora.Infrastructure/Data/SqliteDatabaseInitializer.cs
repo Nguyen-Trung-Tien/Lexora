@@ -28,6 +28,8 @@ public class SqliteDatabaseInitializer
                 "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON;",
                 cancellationToken);
 
+            await EnsureSchemaCompatibilityAsync(cancellationToken);
+
             if (!await _context.Words.AnyAsync(cancellationToken))
             {
                 _logger.LogInformation("Seeding initial starter pack data...");
@@ -270,5 +272,68 @@ public class SqliteDatabaseInitializer
         };
 
         return word;
+    }
+
+    private async Task EnsureSchemaCompatibilityAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync(cancellationToken);
+            }
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "PRAGMA table_info(\"StudyLogs\");";
+            using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+
+            bool needsStudySessionIdMigration = false;
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var colName = reader.GetString(1);
+                var notNull = reader.GetInt32(3);
+                if (string.Equals(colName, "StudySessionId", StringComparison.OrdinalIgnoreCase) && notNull == 1)
+                {
+                    needsStudySessionIdMigration = true;
+                    break;
+                }
+            }
+            reader.Close();
+
+            if (needsStudySessionIdMigration)
+            {
+                _logger.LogInformation("Migrating StudyLogs table to allow NULL StudySessionId...");
+                const string migrationSql = """
+                    PRAGMA foreign_keys = OFF;
+                    CREATE TABLE "StudyLogs_temp" (
+                        "Id" TEXT NOT NULL CONSTRAINT "PK_StudyLogs" PRIMARY KEY,
+                        "StudySessionId" TEXT NULL,
+                        "ReviewCardId" TEXT NOT NULL,
+                        "Rating" INTEGER NOT NULL,
+                        "ResponseTimeMs" INTEGER NOT NULL,
+                        "ResultingStatus" INTEGER NOT NULL,
+                        "ResultingIntervalDays" INTEGER NOT NULL,
+                        "CreatedAt" TEXT NOT NULL,
+                        "UpdatedAt" TEXT NOT NULL,
+                        CONSTRAINT "FK_StudyLogs_ReviewCards_ReviewCardId" FOREIGN KEY ("ReviewCardId") REFERENCES "ReviewCards" ("Id") ON DELETE CASCADE,
+                        CONSTRAINT "FK_StudyLogs_StudySessions_StudySessionId" FOREIGN KEY ("StudySessionId") REFERENCES "StudySessions" ("Id") ON DELETE SET NULL
+                    );
+                    INSERT INTO "StudyLogs_temp" SELECT "Id", "StudySessionId", "ReviewCardId", "Rating", "ResponseTimeMs", "ResultingStatus", "ResultingIntervalDays", "CreatedAt", "UpdatedAt" FROM "StudyLogs";
+                    DROP TABLE "StudyLogs";
+                    ALTER TABLE "StudyLogs_temp" RENAME TO "StudyLogs";
+                    CREATE INDEX IF NOT EXISTS "IX_StudyLogs_CreatedAt" ON "StudyLogs" ("CreatedAt");
+                    CREATE INDEX IF NOT EXISTS "IX_StudyLogs_ReviewCardId" ON "StudyLogs" ("ReviewCardId");
+                    CREATE INDEX IF NOT EXISTS "IX_StudyLogs_StudySessionId" ON "StudyLogs" ("StudySessionId");
+                    PRAGMA foreign_keys = ON;
+                    """;
+                await _context.Database.ExecuteSqlRawAsync(migrationSql, cancellationToken);
+                _logger.LogInformation("StudyLogs table successfully migrated.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Schema compatibility check encountered an issue (can be ignored if table does not exist yet).");
+        }
     }
 }

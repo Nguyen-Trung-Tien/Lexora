@@ -80,7 +80,7 @@
                                 </Grid>
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                     <TextBox Header="Vietnamese Translation *" Text="{Binding SentenceVi, Mode=TwoWay}" PlaceholderText="Bản dịch tiếng Việt..." />
-                                    <TextBox Header="Grammar Note" Text="{Binding Note, Mode=TwoWay}" PlaceholderText="Ghi chú ngữ pháp bổ sung..." />
+                                    <TextBox Grid.Column="1" Header="Grammar Note" Text="{Binding Note, Mode=TwoWay}" PlaceholderText="Ghi chú ngữ pháp bổ sung..." />
                                 </Grid>
                             </StackPanel>
                         </Border>

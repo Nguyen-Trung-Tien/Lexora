@@ -157,6 +157,62 @@ public class DatabaseIntegrityAndPerformanceTests : IDisposable
         await act.Should().ThrowAsync<OperationCanceledException>();
     }
 
+    [Fact]
+    public async Task StudyLog_WithNullStudySessionId_ShouldSaveSuccessfully()
+    {
+        // Arrange
+        var word = new Word { Term = "standalone", Level = CefrLevel.B2 };
+        _context.Words.Add(word);
+        await _unitOfWork.SaveChangesAsync();
+
+        var card = new ReviewCard { WordId = word.Id, Status = LearningStatus.Learning };
+        _context.ReviewCards.Add(card);
+        await _unitOfWork.SaveChangesAsync();
+
+        var log = new StudyLog
+        {
+            ReviewCardId = card.Id,
+            StudySessionId = null, // Quick marking without an active study session
+            Rating = ReviewRating.Easy,
+            ResponseTimeMs = 800,
+            ResultingStatus = LearningStatus.Review,
+            ResultingIntervalDays = 1
+        };
+
+        // Act
+        _context.StudyLogs.Add(log);
+        var affected = await _unitOfWork.SaveChangesAsync();
+
+        // Assert
+        affected.Should().BeGreaterThan(0);
+        var savedLog = await _context.StudyLogs.FindAsync(log.Id);
+        savedLog.Should().NotBeNull();
+        savedLog!.StudySessionId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task UnitOfWork_ShouldDetachEntries_WhenSaveFails()
+    {
+        // Arrange - Force a constraint failure by setting null on a required property
+        var invalidWord = new Word { Term = null!, Level = CefrLevel.A1 };
+        _context.Words.Add(invalidWord);
+
+        // Act - First save fails
+        var act = async () => await _unitOfWork.SaveChangesAsync();
+        await act.Should().ThrowAsync<DbUpdateException>();
+
+        // Assert - ChangeTracker must be clean (no Added/Modified entries remain)
+        _context.ChangeTracker.Entries()
+            .Any(e => e.State is EntityState.Added or EntityState.Modified)
+            .Should().BeFalse("All pending entries should be detached after an error to avoid ChangeTracker poisoning");
+
+        // Act 2 - Subsequent valid operation must succeed
+        var validWord = new Word { Term = "valid", Level = CefrLevel.A2 };
+        _context.Words.Add(validWord);
+        var affected = await _unitOfWork.SaveChangesAsync();
+        affected.Should().BeGreaterThan(0);
+    }
+
     public void Dispose()
     {
         _context.Dispose();

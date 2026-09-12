@@ -60,7 +60,7 @@
 
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                     <TextBox Header="English Definition" Text="{Binding DefinitionEn, Mode=TwoWay}" PlaceholderText="English definition..." />
-                                    <TextBox Header="Context / Nuance" Text="{Binding Explanation, Mode=TwoWay}" PlaceholderText="When to use, formality..." />
+                                    <TextBox Grid.Column="1" Header="Context / Nuance" Text="{Binding Explanation, Mode=TwoWay}" PlaceholderText="When to use, formality..." />
                                 </Grid>
 
                                 <!-- Examples list -->
@@ -102,7 +102,7 @@
                 </StackPanel>
 
                 <!-- Exam tags list -->
-                <StackPanel Spacing="6">
+                <StackPanel Grid.Column="1" Spacing="6">
                     <TextBlock Text="Exam Targets (TOEIC / VSTEP / IELTS)" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <ListView x:Name="ExamTagsListView" SelectionMode="Multiple" MaxHeight="140" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6">
                         <ListView.ItemTemplate>
