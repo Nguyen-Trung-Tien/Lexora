@@ -55,7 +55,7 @@ public sealed partial class MainWindow : Window
 
             // Run entrance animation and backend initialization concurrently
             var entranceTask = SplashOverlay.PlayEntranceAsync();
-            var minDisplayTask = Task.Delay(1800, ct);
+            var minDisplayTask = Task.Delay(1100, ct);
             var initTask = _startupOrchestrator.InitializeAppAsync(ct);
 
             // Wait for backend initialization
@@ -69,9 +69,7 @@ public sealed partial class MainWindow : Window
                 // Pre-navigate to ShellPage while splash is still covering
                 RootFrame.Navigate(typeof(ShellPage));
 
-                // Smoothly fade out splash and reveal main application shell
-                await SplashOverlay.PlayExitAsync();
-
+                // Seamless concurrent cross-fade: reveal main shell while fading out splash
                 if (SplashOverlay.IsAnimationEnabled)
                 {
                     MainEntranceStoryboard.Begin();
@@ -82,6 +80,8 @@ public sealed partial class MainWindow : Window
                     MainContentScale.ScaleX = 1.0;
                     MainContentScale.ScaleY = 1.0;
                 }
+
+                await SplashOverlay.PlayExitAsync();
             }
         }
         catch (OperationCanceledException)

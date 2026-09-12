@@ -123,9 +123,11 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid>
                         <!-- Detail Empty State -->
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Padding="40"
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14" Padding="40"
                                     Visibility="{x:Bind ViewModel.SelectedRule, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
-                            <FontIcon Glyph="&#xE8D2;" FontSize="52" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            <Border Width="64" Height="64" CornerRadius="16" Background="{ThemeResource LayerFillColorDefaultBrush}" Padding="8" HorizontalAlignment="Center" Opacity="0.85">
+                                <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
+                            </Border>
                             <TextBlock Text="Select a Grammar Rule" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
                             <TextBlock Text="Choose any grammar rule from the left to inspect its formula, detailed explanations, contextual examples, and common pitfalls."
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" MaxWidth="360" />

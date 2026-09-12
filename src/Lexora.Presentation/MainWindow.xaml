@@ -22,7 +22,7 @@
                     Storyboard.TargetName="MainContentGrid"
                     Storyboard.TargetProperty="Opacity"
                     From="0.0" To="1.0"
-                    Duration="0:0:0.35">
+                    Duration="0:0:0.25">
                     <DoubleAnimation.EasingFunction>
                         <CubicEase EasingMode="EaseOut" />
                     </DoubleAnimation.EasingFunction>
@@ -30,8 +30,8 @@
                 <DoubleAnimation
                     Storyboard.TargetName="MainContentScale"
                     Storyboard.TargetProperty="ScaleX"
-                    From="0.98" To="1.0"
-                    Duration="0:0:0.35">
+                    From="0.99" To="1.0"
+                    Duration="0:0:0.25">
                     <DoubleAnimation.EasingFunction>
                         <CubicEase EasingMode="EaseOut" />
                     </DoubleAnimation.EasingFunction>
@@ -39,8 +39,8 @@
                 <DoubleAnimation
                     Storyboard.TargetName="MainContentScale"
                     Storyboard.TargetProperty="ScaleY"
-                    From="0.98" To="1.0"
-                    Duration="0:0:0.35">
+                    From="0.99" To="1.0"
+                    Duration="0:0:0.25">
                     <DoubleAnimation.EasingFunction>
                         <CubicEase EasingMode="EaseOut" />
                     </DoubleAnimation.EasingFunction>
@@ -51,7 +51,7 @@
         <!-- Main Application Shell (starts hidden with subtle scale) -->
         <Grid x:Name="MainContentGrid" Opacity="0">
             <Grid.RenderTransform>
-                <ScaleTransform x:Name="MainContentScale" CenterX="600" CenterY="400" ScaleX="0.98" ScaleY="0.98" />
+                <ScaleTransform x:Name="MainContentScale" CenterX="600" CenterY="400" ScaleX="0.99" ScaleY="0.99" />
             </Grid.RenderTransform>
 
             <Grid.RowDefinitions>
@@ -61,7 +61,7 @@
 
             <TitleBar x:Name="AppTitleBar" Title="Lexora - English Learning Manager">
                 <TitleBar.IconSource>
-                    <ImageIconSource ImageSource="Assets/AppIcon.ico" />
+                    <ImageIconSource ImageSource="ms-appx:///Assets/brand/lexora-icon-only.png" />
                 </TitleBar.IconSource>
             </TitleBar>
 

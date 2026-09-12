@@ -29,11 +29,16 @@
                         Visibility="{x:Bind ViewModel.IsSetupMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 
                 <!-- Page Title -->
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Vocabulary Practice &amp; Test" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
-                    <TextBlock Text="Challenge your memory, practice multiple test formats, and identify weak words for targeted review."
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                </StackPanel>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <Border Width="52" Height="52" CornerRadius="14" Background="{ThemeResource LayerFillColorDefaultBrush}" Padding="6" VerticalAlignment="Center">
+                        <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="40" Height="40" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="Vocabulary Practice &amp; Test" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
+                        <TextBlock Text="Challenge your memory, practice multiple test formats, and identify weak words for targeted review."
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Grid>
 
                 <!-- Status InfoBar -->
                 <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"

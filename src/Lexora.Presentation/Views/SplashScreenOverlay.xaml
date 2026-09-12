@@ -10,12 +10,12 @@
     <UserControl.Resources>
         <!-- Storyboard for Entrance Animation (GPU-friendly DoubleAnimations) -->
         <Storyboard x:Name="EntranceStoryboard">
-            <!-- 1. Logo Scale from 82% to 100% -->
+            <!-- 1. Logo Scale from 88% to 100% -->
             <DoubleAnimation
                 Storyboard.TargetName="LogoScale"
                 Storyboard.TargetProperty="ScaleX"
-                From="0.82" To="1.0"
-                Duration="0:0:0.6"
+                From="0.88" To="1.0"
+                Duration="0:0:0.45"
                 BeginTime="0:0:0.0">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
@@ -24,8 +24,8 @@
             <DoubleAnimation
                 Storyboard.TargetName="LogoScale"
                 Storyboard.TargetProperty="ScaleY"
-                From="0.82" To="1.0"
-                Duration="0:0:0.6"
+                From="0.88" To="1.0"
+                Duration="0:0:0.45"
                 BeginTime="0:0:0.0">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
@@ -37,7 +37,7 @@
                 Storyboard.TargetName="LogoTile"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.5"
+                Duration="0:0:0.35"
                 BeginTime="0:0:0.0">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
@@ -49,8 +49,8 @@
                 Storyboard.TargetName="LightSweepTransform"
                 Storyboard.TargetProperty="X"
                 From="-140" To="140"
-                Duration="0:0:0.65"
-                BeginTime="0:0:0.55">
+                Duration="0:0:0.45"
+                BeginTime="0:0:0.30">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut" />
                 </DoubleAnimation.EasingFunction>
@@ -58,11 +58,11 @@
             <DoubleAnimationUsingKeyFrames
                 Storyboard.TargetName="LightSweep"
                 Storyboard.TargetProperty="Opacity"
-                BeginTime="0:0:0.55">
+                BeginTime="0:0:0.30">
                 <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.2" Value="0.75" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.45" Value="0.75" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.65" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.12" Value="0.75" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.32" Value="0.75" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.45" Value="0.0" />
             </DoubleAnimationUsingKeyFrames>
 
             <!-- 4. Wordmark "Lexora" Slide-Up + Fade-In -->
@@ -70,8 +70,8 @@
                 Storyboard.TargetName="TypographyContainer"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.5"
-                BeginTime="0:0:0.65">
+                Duration="0:0:0.35"
+                BeginTime="0:0:0.35">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -79,9 +79,9 @@
             <DoubleAnimation
                 Storyboard.TargetName="TypographyTranslate"
                 Storyboard.TargetProperty="Y"
-                From="14" To="0"
-                Duration="0:0:0.5"
-                BeginTime="0:0:0.65">
+                From="10" To="0"
+                Duration="0:0:0.35"
+                BeginTime="0:0:0.35">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -92,8 +92,8 @@
                 Storyboard.TargetName="LoadingContainer"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.4"
-                BeginTime="0:0:0.85">
+                Duration="0:0:0.3"
+                BeginTime="0:0:0.45">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -107,22 +107,21 @@
                 Storyboard.TargetName="LoadingContainer"
                 Storyboard.TargetProperty="Opacity"
                 To="0.0"
-                Duration="0:0:0.15" />
+                Duration="0:0:0.12" />
 
             <!-- Soft Logo Opacity Drop -->
             <DoubleAnimation
                 Storyboard.TargetName="LogoTile"
                 Storyboard.TargetProperty="Opacity"
                 To="0.85"
-                Duration="0:0:0.2" />
+                Duration="0:0:0.15" />
 
             <!-- Overall Splash Screen Fade-Out -->
             <DoubleAnimation
                 Storyboard.TargetName="RootGrid"
                 Storyboard.TargetProperty="Opacity"
                 To="0.0"
-                Duration="0:0:0.35"
-                BeginTime="0:0:0.05">
+                Duration="0:0:0.25">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut" />
                 </DoubleAnimation.EasingFunction>

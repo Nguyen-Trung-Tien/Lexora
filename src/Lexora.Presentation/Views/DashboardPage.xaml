@@ -18,14 +18,19 @@
 
             <!-- Header & Welcome Banner -->
             <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="24">
-                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                    <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
+                    <!-- Brand Icon Emblem -->
+                    <Border Width="56" Height="56" CornerRadius="14" Background="#20FFFFFF" Padding="6" VerticalAlignment="Center">
+                        <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="44" Height="44" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
                         <TextBlock Text="Welcome back to Lexora" Foreground="White" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
                         <TextBlock Text="Master vocabulary through Spaced Repetition (SM-2), track exam goals, and build consistent habits."
                                    Foreground="White" Opacity="0.9" Style="{ThemeResource BodyTextBlockStyle}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                         <Button Click="StartReviewButton_Click" Background="White" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontWeight="Bold" Padding="18,10" CornerRadius="8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE895;" FontSize="15" />

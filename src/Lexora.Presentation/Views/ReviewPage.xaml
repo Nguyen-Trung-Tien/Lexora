@@ -87,7 +87,9 @@
                     BorderThickness="1" CornerRadius="16" Padding="40" MinHeight="360"
                     Visibility="{x:Bind ViewModel.CurrentCard, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
                 <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <FontIcon Glyph="&#xE73E;" FontSize="54" Foreground="#107C41" HorizontalAlignment="Center" />
+                    <Border Width="68" Height="68" CornerRadius="18" Background="#15107C41" Padding="10" HorizontalAlignment="Center">
+                        <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
+                    </Border>
                     <TextBlock Text="All Caught Up! 🎉" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
                     <TextBlock Text="You have 0 pending reviews due in this queue right now. Great job keeping your streak active!"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="440" />
@@ -239,7 +241,9 @@
                     Visibility="{x:Bind ViewModel.IsCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
 
                 <StackPanel Spacing="20" HorizontalAlignment="Center">
-                    <FontIcon Glyph="&#xE73E;" FontSize="64" Foreground="#107C41" HorizontalAlignment="Center" />
+                    <Border Width="72" Height="72" CornerRadius="18" Background="#18107C41" Padding="10" HorizontalAlignment="Center">
+                        <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="52" Height="52" />
+                    </Border>
                     <TextBlock Text="Session Completed! 🎉" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
                     <TextBlock Text="You've finished your scheduled reviews for this queue. Excellent streak progress!"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
