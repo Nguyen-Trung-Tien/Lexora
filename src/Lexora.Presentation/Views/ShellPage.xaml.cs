@@ -34,7 +34,7 @@ public sealed partial class ShellPage : Page
         _navigationService.Initialize(ContentFrame);
         ContentFrame.Navigated += (s, args) =>
         {
-            ViewModel.IsOnReviewPage = ContentFrame.Content is ReviewPage;
+            ViewModel.IsOnReviewPage = ContentFrame.Content is ReviewPage or TestPage;
         };
         _navigationService.Navigate(typeof(DashboardPage));
         NavView.SelectedItem = NavItemDashboard;

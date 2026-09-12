@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Padding="24" MaxWidth="1160" HorizontalAlignment="Stretch">
+        <Grid Padding="24,16" MaxWidth="1400" HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -51,11 +51,11 @@
                               SelectionChanged="ReviewUnitCombo_SelectionChanged"
                               ItemsSource="{x:Bind ViewModel.AvailableTopics, Mode=OneWay}"
                               DisplayMemberPath="Name"
-                              Width="180" CornerRadius="6"
+                              Width="170" CornerRadius="6"
                               ToolTipService.ToolTip="Chọn Unit / Chủ đề để luyện ngắt quãng (SM-2)" />
                 </StackPanel>
 
-                <!-- Top Actions & Shortcut Legend -->
+                <!-- Top Actions & Speech Settings -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <!-- Typing Recall Mode Toggle -->
                     <ToggleButton x:Name="TypingModeToggle"
@@ -83,36 +83,36 @@
                             </MenuFlyout>
                         </DropDownButton.Flyout>
                     </DropDownButton>
-
-                    <TextBlock Text="⌨️ Space: Flip | 1-4: Rate" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0" />
                 </StackPanel>
             </Grid>
 
             <!-- Progress Bar & Counter -->
-            <Grid Grid.Row="1" Margin="0,0,0,20" ColumnDefinitions="*,Auto"
+            <Grid Grid.Row="1" Margin="0,0,0,16" ColumnDefinitions="*,Auto"
                   Visibility="{x:Bind ViewModel.IsCompleted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                 <StackPanel Spacing="6">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind ViewModel.ActiveSessionTitle, Mode=OneWay}" FontWeight="Bold" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12">
+                                <Run Text="Tiến độ: " />
+                                <Run Text="{x:Bind ViewModel.CompletedCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                <Run Text=" / " />
+                                <Run Text="{x:Bind ViewModel.TotalQueueCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                <Run Text=" (" />
+                                <Run Text="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" />
+                                <Run Text="%)" />
+                            </TextBlock>
+                        </Border>
                     </StackPanel>
                     <ProgressBar Value="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" Maximum="100" Height="6" CornerRadius="3" />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12">
-                        <Run Text="Progress: " />
-                        <Run Text="{x:Bind ViewModel.CompletedCount, Mode=OneWay}" FontWeight="SemiBold" />
-                        <Run Text=" / " />
-                        <Run Text="{x:Bind ViewModel.TotalQueueCount, Mode=OneWay}" FontWeight="SemiBold" />
-                        <Run Text=" (" />
-                        <Run Text="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" />
-                        <Run Text="%)" />
-                    </TextBlock>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <TextBlock Text="Remaining:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
-                        <TextBlock Text="{x:Bind ViewModel.RemainingCount, Mode=OneWay}" FontWeight="Bold" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontSize="13" />
+                <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="12,6" Margin="16,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Text="Còn lại:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        <TextBlock Text="{x:Bind ViewModel.RemainingCount, Mode=OneWay}" FontWeight="Bold" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontSize="14" />
                     </StackPanel>
-                </StackPanel>
+                </Border>
             </Grid>
 
             <!-- Loading / Card / Empty / Completed area - all stacked in Row 2 -->
@@ -121,7 +121,7 @@
                 <!-- Empty Due Queue State -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="16" Padding="40" MinHeight="360"
+                        BorderThickness="1" CornerRadius="16" Padding="40" MinHeight="400"
                         Visibility="{x:Bind ViewModel.IsEmptyQueue, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Border Width="68" Height="68" CornerRadius="18" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="10" HorizontalAlignment="Center">
@@ -138,12 +138,12 @@
 
                 <!-- Active Flashcard Section (2-Column Responsive Workspace) -->
                 <Grid Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                      ColumnDefinitions="*,330" ColumnSpacing="20">
+                      ColumnDefinitions="*,340" ColumnSpacing="20">
 
                     <!-- Left: Main Study Card -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="16" Padding="28"
+                            BorderThickness="1" CornerRadius="16" Padding="28" MinHeight="460"
                             HorizontalAlignment="Stretch">
 
                         <Grid RowDefinitions="Auto,Auto,Auto">
@@ -503,7 +503,7 @@
                         <!-- Session Live Progress Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="12" Padding="18">
+                                BorderThickness="1" CornerRadius="12" Padding="16,14">
                             <StackPanel Spacing="12">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE9D5;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -539,7 +539,7 @@
                         <!-- Current Card SM-2 Insights Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="12" Padding="18">
+                                BorderThickness="1" CornerRadius="12" Padding="16,14">
                             <StackPanel Spacing="10">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE9D9;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -547,35 +547,35 @@
                                 </StackPanel>
 
                                 <StackPanel Spacing="8">
-                                    <Grid ColumnDefinitions="*,Auto">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <TextBlock Text="Trạng thái:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                         <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
                                             <TextBlock Text="{x:Bind ViewModel.CurrentCard.Status, Mode=OneWay}" FontWeight="SemiBold" FontSize="11" />
                                         </Border>
                                     </Grid>
-                                    <Grid ColumnDefinitions="*,Auto">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <TextBlock Text="Độ thành thạo:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
                                             <TextBlock Text="{x:Bind ViewModel.CurrentCard.Confidence, Mode=OneWay}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" />
                                             <TextBlock Text="%" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" />
                                         </StackPanel>
                                     </Grid>
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <TextBlock Text="Khoảng cách lặp:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <TextBlock Text="Khoảng lặp:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
                                             <TextBlock Text="{x:Bind ViewModel.CurrentCard.IntervalDays, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
                                             <TextBlock Text="ngày" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                         </StackPanel>
                                     </Grid>
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <TextBlock Text="Hệ số dễ (Ease Factor):" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <TextBlock Text="Hệ số ghi nhớ (EF):" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.EaseFactor, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
                                     </Grid>
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <TextBlock Text="Số lần đã ôn tập:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <TextBlock Text="Số lần đã ôn:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.Repetitions, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
                                     </Grid>
-                                    <Grid ColumnDefinitions="*,Auto">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <TextBlock Text="Số lần quên (Lapses):" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.Lapses, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="12" />
                                     </Grid>
@@ -586,7 +586,7 @@
                         <!-- Quick Shortcuts Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="12" Padding="18">
+                                BorderThickness="1" CornerRadius="12" Padding="16,14">
                             <StackPanel Spacing="10">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE765;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
