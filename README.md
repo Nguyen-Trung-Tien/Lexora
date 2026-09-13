@@ -6,8 +6,8 @@
 <h1 align="center">Lexora — Intelligent Vocabulary &amp; Grammar Manager</h1>
 
 <p align="center">
-  <strong>High-performance, offline-first English learning & spaced repetition desktop application for Windows 11</strong><br>
-  <em>Built with C# 13 / .NET 10 • WinUI 3 (Windows App SDK) • Clean Architecture • SQLite & EF Core 10 • Inno Setup 6</em>
+  <strong>High-performance, offline-first English learning &amp; spaced repetition desktop application for Windows 11</strong><br>
+  <em>Built with C# 13 / .NET 10 • WinUI 3 (Windows App SDK) • Clean Architecture • SQLite WAL &amp; EF Core 10 • Inno Setup 6</em>
 </p>
 
 <p align="center">
@@ -15,47 +15,53 @@
   <img src="https://img.shields.io/badge/Framework-.NET%2010.0-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt=".NET 10" />
   <img src="https://img.shields.io/badge/UI-WinUI%203%20Windows%20App%20SDK-0078D4?style=flat-square&logo=windows&logoColor=white" alt="WinUI 3" />
   <img src="https://img.shields.io/badge/Architecture-Clean%20Architecture-107C41?style=flat-square" alt="Clean Architecture" />
-  <img src="https://img.shields.io/badge/Database-SQLite%20%2F%20EF%20Core%2010-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
+  <img src="https://img.shields.io/badge/Database-SQLite%20WAL%20%2F%20EF%20Core%2010-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
   <img src="https://img.shields.io/badge/Algorithm-SuperMemo%20SM--2-E3008C?style=flat-square" alt="SM-2" />
-  <img src="https://img.shields.io/badge/Tests-55%2F55%20Passed-2EA44F?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-64%2F64%20Passed-2EA44F?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/Installer-Inno%20Setup%206-FF8C00?style=flat-square" alt="Inno Setup" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
+</p>
+
+<p align="center">
+  <img src="assets/brand/windows-desktop-mockup.jpg" alt="Lexora Windows Desktop Interface Mockup" width="920" style="border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.2);" />
 </p>
 
 ---
 
 ## 📖 Table of Contents
 
-- [Overview & Key Features](#-overview--key-features)
-- [Clean Architecture & System Design](#-clean-architecture--system-design)
-- [Spaced Repetition Algorithm (SM-2)](#-spaced-repetition-algorithm-sm-2)
-- [Keyboard Shortcuts](#-keyboard-shortcuts)
-- [Quick Start Guide](#-quick-start-guide)
+- [✨ Overview & Core Capabilities](#-overview--core-capabilities)
+- [🏛️ Clean Architecture & System Design](#-clean-architecture--system-design)
+- [🧠 Spaced Repetition Algorithm (SM-2)](#-spaced-repetition-algorithm-sm-2)
+- [⌨️ Keyboard Shortcuts](#-keyboard-shortcuts)
+- [🚀 Quick Start Guide](#-quick-start-guide)
   - [Prerequisites](#prerequisites)
-  - [Building & Testing](#building--testing)
-  - [Running the App](#running-the-app)
-- [Packaging & Installer Distribution](#-packaging--installer-distribution)
-- [Project Layout](#-project-layout)
-- [Documentation & References](#-documentation--references)
-- [License & Contributions](#-license--contributions)
+  - [Building & Running All Tests](#building--running-all-tests)
+  - [Launching the Application](#launching-the-application)
+- [📦 Packaging & Distribution](#-packaging--distribution)
+- [📂 Repository Structure](#-repository-structure)
+- [📚 Documentation Library](#-documentation-library)
+- [📜 Engineering Rules & Guidelines](#-engineering-rules--guidelines)
+- [🤝 Contributing & License](#-contributing--license)
 
 ---
 
-## ✨ Overview & Key Features
+## ✨ Overview & Core Capabilities
 
-Lexora is an enterprise-grade, offline-first personal English learning platform engineered specifically for Windows desktop environments. Combining cognitive science (Ebbinghaus forgetting curve & SuperMemo SM-2) with Windows 11 Fluent Design, Lexora empowers learners to master English vocabulary and grammar with measurable long-term retention.
+**Lexora** is an enterprise-grade, offline-first personal English learning platform engineered specifically for Windows desktop environments. Combining cognitive science (the Ebbinghaus forgetting curve & Piotr Woźniak's SuperMemo SM-2 algorithm) with Windows 11 Fluent Design, Lexora empowers learners to master English vocabulary and grammar with measurable, long-term retention.
 
-### 🌟 Core Capabilities
+### 🌟 Feature Matrix
 
-| Feature | Description |
-| :--- | :--- |
-| 🧠 **SM-2 Spaced Repetition** | Adaptive algorithm calculating review intervals ($I(n)$), ease factors ($EF \ge 1.3$), and scheduling based on active recall response ratings (*Again*, *Hard*, *Good*, *Easy*). |
-| 📚 **Rich Vocabulary Management** | Comprehensive word entries with CEFR levels (A1–C2), POS categorization, UK/US IPA phonetics, multiple nuances, context examples, and exam taggings (TOEIC, VSTEP, IELTS). |
-| 🔊 **Native Pronunciation Audio** | Offline-cached English audio with automatic local storage fallback, thread-safe background playback, and input path traversal sanitization. |
-| 📝 **Interactive Practice & Quizzes** | 4 customizable quiz modes: *Word-to-Meaning*, *Meaning-to-Word*, *Fill-in-the-Blank*, and *Multiple Choice* with immediate scoring and review suggestions. |
-| 📐 **Grammar Mastery Engine** | Structured grammar catalog with formula syntax highlighting, comprehensive Vietnamese & English explanations, and prominent *Common Mistakes* guidance. |
-| 📊 **Analytics & Heatmap** | GitHub-style daily learning activity heatmap, day streak counters, CEFR level distribution charts, and exam certification readiness tracking. |
-| 🔄 **Robust Import & Export** | High-throughput RFC-4180 multiline CSV and JSON data exchange, payload validation (up to 20MB), deduplication, and single-click database backup/restore. |
-| 🎨 **Windows 11 Fluent Design** | Modern Mica backdrop, adaptive Light/Dark theme switching, responsive layouts, 250ms debounced search, and zero UI thread stalls. |
+| Module | Feature | Technical Highlights |
+| :--- | :--- | :--- |
+| 🧠 **SRS Engine** | **SuperMemo SM-2 Spaced Repetition** | Mathematically bounded Ease Factor ($EF \ge 1.3$), automatic review queue scheduling, lapse management, and daily streak tracking. |
+| 📚 **Vocabulary** | **Rich Multi-Meaning Dictionary** | Comprehensive word entries with CEFR levels (A1–C2), POS categorization, UK/US IPA phonetics, contextual examples, and exam tags (TOEIC, VSTEP, IELTS). |
+| 🔊 **Audio** | **Native Pronunciation Caching** | Offline-cached English audio with automatic local storage fallback, thread-safe background playback, and input path traversal sanitization. |
+| 📝 **Practice** | **Interactive 4-Mode Quiz Simulator** | 4 customizable modes: *Word-to-Meaning*, *Meaning-to-Word*, *Fill-in-the-Blank*, and *Multiple Choice* with authentic POS-matched distractors. |
+| 📐 **Grammar** | **Structured Grammar Engine** | Structural formula highlighting, in-depth bilingual explanations (Vietnamese & English), and prominent *Common Mistakes* guidance. |
+| 📊 **Analytics** | **Dashboard & Activity Heatmap** | GitHub-style 365-day review activity heatmap, streak counters, CEFR level distribution charts, and exam certification readiness meters. |
+| 🔄 **Data** | **Robust Import / Export & Backup** | High-throughput RFC-4180 multiline CSV and JSON exchange, 20MB payload ceiling, and 16-byte header verified database backup/restore. |
+| 🎨 **Design** | **Windows 11 Fluent Design** | Modern Mica backdrop, adaptive Light/Dark theme switching, responsive layouts, 250ms debounced search, and zero UI thread stalls. |
 
 ---
 
@@ -63,23 +69,18 @@ Lexora is an enterprise-grade, offline-first personal English learning platform 
 
 Lexora enforces strict architectural boundaries following **Clean Architecture** and **Domain-Driven Design (DDD)**:
 
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Lexora.Presentation                             │
-│       (WinUI 3 Desktop App • MVVM • Mica Backdrop • Dialogs)           │
-└───────────────────┬──────────────────────────────┬─────────────────────┘
-                    │                              │
-                    ▼                              │
-┌──────────────────────────────────────┐           │
-│          Lexora.Application          │           │
-│   (Use Cases • SM-2 • DTOs • Ports)  │           │
-└───────────────────┬──────────────────┘           │
-                    │                              │
-                    ▼                              ▼
-┌──────────────────────────────────────┐  ┌──────────────────────────────┐
-│            Lexora.Domain             │◄─┤    Lexora.Infrastructure     │
-│ (Entities • Value Objects • Enums)   │  │ (EF Core 10 • SQLite • Repos)│
-└──────────────────────────────────────┘  └──────────────────────────────┘
+```mermaid
+graph TD
+    UI["Lexora.Presentation<br/>(WinUI 3 / Windows App SDK / MVVM)"]
+    APP["Lexora.Application<br/>(Use Cases / DTOs / SM-2 Engine)"]
+    DOM["Lexora.Domain<br/>(Entities / Value Objects / Contracts)"]
+    INFRA["Lexora.Infrastructure<br/>(EF Core 10 / SQLite WAL / Caches)"]
+
+    UI -->|Consumes Use Cases & DTOs| APP
+    UI -.->|Wires DI Container| INFRA
+    INFRA -->|Implements Ports & Repositories| APP
+    INFRA -->|Maps & Persists Entities| DOM
+    APP -->|Coordinates Business Logic| DOM
 ```
 
 ### Layer Responsibility Matrix
@@ -106,18 +107,22 @@ Lexora enforces strict architectural boundaries following **Clean Architecture**
    - Responsive layouts (`UniformGridLayout`, adaptive dialogs with top-docked `InfoBar` validation).
    - Dynamic theme switching (`ThemeService`) and runtime bilingual localization (`vi-VN` & `en-US`).
 
+> [!IMPORTANT]
+> The Presentation layer (ViewModels and Views) **MUST NEVER** directly execute EF Core queries or reference `LexoraDbContext`. All interactions flow through Application service abstractions.
+
 ---
 
-## 🧮 Spaced Repetition Algorithm (SM-2)
+## 🧠 Spaced Repetition Algorithm (SM-2)
 
 Lexora utilizes a mathematically verified implementation of the **SuperMemo SM-2** spaced repetition model:
 
-$$\text{EF}' = \max\left(1.3,\; \text{EF} + \left(0.1 - (5 - q) \cdot (0.08 + (5 - q) \cdot 0.02)\right)\right)$$
+$$EF' = \max\left(1.3,\; EF + \left(0.1 - (5 - q) \cdot (0.08 + (5 - q) \cdot 0.02)\right)\right)$$
 
-$$\text{Interval}(n) = \begin{cases} 1 \text{ day}, & n = 1 \\ 6 \text{ days}, & n = 2 \\ \text{Round}(\text{Interval}(n - 1) \cdot \text{EF}'), & n > 2 \end{cases}$$
+$$Interval(n) = \begin{cases} 1 \text{ day}, & n = 1 \\ 6 \text{ days}, & n = 2 \\ \text{Round}(Interval(n - 1) \cdot EF'), & n > 2 \end{cases}$$
 
-- **Ratings**: $q \in \{1, 2, 4, 5\}$ mapped to *Again (1)*, *Hard (2)*, *Good (4)*, *Easy (5)*.
-- **Ease Factor Floor**: Guaranteed $\text{EF} \ge 1.3$ to prevent cards from falling into inescapable review traps.
+- **Ratings ($q$)**: Mapped to *Again (1)*, *Hard (2)*, *Good (4)*, *Easy (5)*.
+- **Ease Factor Floor**: Guaranteed $EF \ge 1.3$ to prevent cards from falling into inescapable review traps ("Ease Hell").
+- **Lapse Reset**: Rating a card as *Again* resets repetitions to $0$, schedules the next review for tomorrow ($1$ day), increments lapses, and marks status as `Learning`.
 - **Streak Preservation**: Daily active reviews automatically log `StudyLog` entries and update consecutive learning streaks.
 
 ---
@@ -147,24 +152,24 @@ $$\text{Interval}(n) = \begin{cases} 1 \text{ day}, & n = 1 \\ 6 \text{ days}, &
 
 - **OS**: Windows 10 (Version 1809+, Build 17763) or Windows 11 (Recommended).
 - **SDK**: [.NET 10 SDK (v10.0+)](https://dotnet.microsoft.com/download/dotnet/10.0).
-- **Tooling**: Visual Studio 2026 / VS Code with C# Dev Kit.
-- **Installer Tooling** *(Optional)*: [Inno Setup 6](https://jrsoftware.org/isdl.php).
+- **Tooling**: Visual Studio 2026 / Visual Studio 2022 (v17.10+) or VS Code with C# Dev Kit.
+- **Installer Compiler** *(Optional)*: [Inno Setup 6](https://jrsoftware.org/isdl.php).
 
-### Building & Testing
+### Building & Running All Tests
 
 ```powershell
 # 1. Clone repository
 git clone https://github.com/Nguyen-Trung-Tien/Lexora.git
 cd Lexora
 
-# 2. Build entire solution
+# 2. Build entire solution (must finish with 0 errors and 0 warnings)
 dotnet build Lexora.slnx
 
-# 3. Run all unit and integration tests (55 tests)
+# 3. Run all unit and integration tests (64 tests)
 dotnet test Lexora.slnx
 ```
 
-### Running the App
+### Launching the Application
 
 ```powershell
 # Launch WinUI 3 desktop application
@@ -173,68 +178,96 @@ dotnet run --project src/Lexora.Presentation/Lexora.Presentation.csproj
 
 ---
 
-## 📦 Packaging & Installer Distribution
+## 📦 Packaging & Distribution
 
-Lexora provides an automated, one-click build and packaging pipeline using **Inno Setup 6** for generating a standalone, self-contained Windows installer:
+Lexora provides an automated build and packaging pipeline using **Inno Setup 6** for generating a standalone, self-contained Windows installer:
 
 ```powershell
-# Run packaging pipeline (Runs tests -> Publishes Self-contained x64 -> Compiles Setup.exe)
+# Run automated packaging pipeline (Tests -> Self-contained x64 publish -> Inno Setup compilation)
 powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.0.0"
 ```
 
 ### Installer Characteristics
-- **Output File**: `publish/installer/Lexora-Setup-v1.0.0.exe` (~73 MB).
-- **Self-Contained Deployment**: Includes .NET 10 runtime and Windows App SDK binaries; runs immediately without requiring runtime prerequisites on end-user machines.
+- **Output Artifact**: `publish/installer/Lexora-Setup-v1.0.0.exe` (~73 MB).
+- **Self-Contained Deployment**: Includes .NET 10 runtime and Windows App SDK binaries; runs out-of-the-box without requiring runtime installations on client machines.
 - **User Data Retention**: Upgrading or uninstalling prompts users to preserve their study progress and SQLite database (`%LocalAppData%\Lexora\data\lexora.db`).
-- **Dual-Mode Privileges**: Supports standard non-admin per-user installs as well as system-wide administrator installations.
+- **Silent Deployment**: Supports `/SILENT` and `/VERYSILENT` command-line switches for enterprise rollout.
 
 ---
 
-## 📂 Project Layout
+## 📂 Repository Structure
 
 ```text
 Lexora/
-├── .agents/                        # AI agent & pair programming configurations
 ├── assets/                         # Vector & high-res brand identity assets
-│   └── brand/                      # App icons, SVG logos, guidelines
-├── docs/                           # Detailed technical documentation
-│   ├── architecture.md             # Clean Architecture & Layer boundaries
-│   ├── database_schema.md          # SQLite schema, indexing & cascades
-│   ├── spaced_repetition.md        # SM-2 mathematical model & proof
-│   └── installer_and_distribution.md # Inno Setup packaging specification
+│   ├── brand/                      # App icons, SVG logos, desktop mockup, brand guide
+│   └── vocabularies/               # Seed vocabulary and grammar collections
+├── docs/                           # Comprehensive technical documentation library
+│   ├── README.md                   # Central documentation portal
+│   ├── user_guide.md               # End-user manual & learning guide
+│   ├── architecture.md             # Clean Architecture & data flow diagrams
+│   ├── api_and_services.md         # Application services & DTO API reference
+│   ├── database_schema.md          # SQLite schema, ERD, indexes & cascades
+│   ├── spaced_repetition.md        # SM-2 mathematical model & worked proofs
+│   ├── testing_and_qa.md           # 64-test taxonomy & QA checklists
+│   ├── installer_and_distribution.md # Packaging & Inno Setup specification
+│   └── contributing.md             # Contribution guide & Git workflow
+├── rules/                          # Engineering rules & architecture invariants
+│   ├── README.md                   # Rules index and precedence matrix
+│   ├── 01-clean-architecture.md    # Boundary rules & DI scope policies
+│   ├── 02-csharp-dotnet-standards.md # C# 13, primary constructors, async/await
+│   ├── 03-winui3-fluent-design.md  # Zero hardcoded colors, responsive layouts
+│   ├── 04-security-and-data-protection.md # Path sanitization, SQLite WAL & magic header
+│   ├── 05-spaced-repetition-sm2.md # SM-2 invariants & UI concurrency guards
+│   └── 06-testing-and-verification.md # 0-warning policy & test protocols
 ├── installer/                      # Inno Setup compiler scripts
 │   └── LexoraSetup.iss             # Inno Setup 6 configuration script
-├── publish/                        # Build artifacts and installer outputs
-│   ├── installer/                  # Generated Lexora-Setup-v*.exe
-│   └── win-x64/                    # Published self-contained binaries
+├── publish/                        # Generated build artifacts & installers
 ├── src/
 │   ├── Lexora.Domain/              # Pure business entities, enums, repository contracts
-│   ├── Lexora.Application/         # SM-2 engine, DTOs, service implementations
+│   ├── Lexora.Application/         # SM-2 engine, service implementations, DTOs
 │   ├── Lexora.Infrastructure/      # EF Core 10, SQLite, caching, backup engines
 │   └── Lexora.Presentation/        # WinUI 3 Fluent UI, MVVM ViewModels, Pages, Dialogs
 ├── tests/
-│   ├── Lexora.Tests.Unit/          # SM-2 math, business rules, resilience unit tests
-│   └── Lexora.Tests.Integration/   # EF Core SQLite in-memory integration tests
+│   ├── Lexora.Tests.Unit/          # 40 Unit tests (SM-2 math, security, business rules)
+│   └── Lexora.Tests.Integration/   # 24 Integration tests (EF Core SQLite in-memory)
 ├── AGENTS.md                       # Developer & AI Agent development guidelines
 ├── PROGRESS.md                     # Comprehensive phase completion tracking
 ├── build-installer.ps1             # Automated packaging & installer script
 ├── build-release.ps1               # Automated release publish script
-└── Lexora.slnx                     # Solution file
+└── Lexora.slnx                     # Visual Studio solution file
 ```
 
 ---
 
-## 📚 Documentation & References
+## 📚 Documentation Library
 
-- [Architecture & Layer Guidelines](docs/architecture.md)
-- [Database Schema & Migration Standards](docs/database_schema.md)
-- [Spaced Repetition & SM-2 Specifications](docs/spaced_repetition.md)
-- [Installer & Distribution Guide](docs/installer_and_distribution.md)
-- [Developer & AI Agent Rules](AGENTS.md)
-- [Feature Progress & Verification History](PROGRESS.md)
+Explore our in-depth documentation guides:
+- 📖 [**User Guide & Learning Manual**](docs/user_guide.md)
+- 🏛️ [**Architecture & System Design**](docs/architecture.md)
+- 🔌 [**Application Services & API Reference**](docs/api_and_services.md)
+- 🗄️ [**Database Schema & Persistence**](docs/database_schema.md)
+- 🧠 [**Spaced Repetition (SM-2) Specifications**](docs/spaced_repetition.md)
+- 🧪 [**Testing & Quality Assurance Guide**](docs/testing_and_qa.md)
+- 📦 [**Installer & Distribution Guide**](docs/installer_and_distribution.md)
+- 🤝 [**Contributing Guidelines**](docs/contributing.md)
 
 ---
 
-## 📄 License & Contributions
+## 📜 Engineering Rules & Guidelines
 
-Developed by **Lexora Team**. Distributed under the MIT License. Contributions and issues are welcome via GitHub Pull Requests.
+All contributors and autonomous agents must follow the repository invariants:
+- 🏛️ [**Rule 01: Clean Architecture & Boundaries**](rules/01-clean-architecture.md)
+- 💻 [**Rule 02: C# 13 & .NET 10 Coding Standards**](rules/02-csharp-dotnet-standards.md)
+- 🎨 [**Rule 03: WinUI 3 & Fluent UI/UX Guidelines**](rules/03-winui3-fluent-design.md)
+- 🔒 [**Rule 04: Security & Data Protection Invariants**](rules/04-security-and-data-protection.md)
+- 🧠 [**Rule 05: Spaced Repetition (SM-2) Integrity**](rules/05-spaced-repetition-sm2.md)
+- 🧪 [**Rule 06: Testing & Quality Gate Protocols**](rules/06-testing-and-verification.md)
+
+---
+
+## 🤝 Contributing & License
+
+Contributions are welcome! Please read [CONTRIBUTING.md](docs/contributing.md) and submit pull requests to our GitHub repository.
+
+Developed by **Lexora Team**. Distributed under the [MIT License](https://opensource.org/licenses/MIT).

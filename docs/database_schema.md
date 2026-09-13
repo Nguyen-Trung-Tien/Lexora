@@ -1,182 +1,151 @@
-# Lexora Database Schema & Persistence Documentation
+# 🗄️ Lexora Database Schema & Persistence Documentation
 
 ---
 
-## 1. Overview & Engine Configuration
+## 1. Engine Configuration & PRAGMA Settings
 
-Lexora uses **SQLite** managed via **Entity Framework Core 10**.
+Lexora leverages an embedded **SQLite** database managed via **Entity Framework Core 10**.
 
-- **Default Location**: `%LocalAppData%\Lexora\data\lexora.db`
-- **Journal Mode**: Write-Ahead Logging (`PRAGMA journal_mode=WAL;`), enabling simultaneous reads while writing.
-- **Foreign Key Constraints**: Enabled (`PRAGMA foreign_keys=ON;`).
-- **Synchronous Mode**: Normal (`PRAGMA synchronous=NORMAL;`), balancing durability with high disk I/O performance.
+- **Default File Path**: `%LocalAppData%\Lexora\data\lexora.db`
+- **Companion Files**:
+  - `%LocalAppData%\Lexora\data\lexora.db-wal` (Write-Ahead Log)
+  - `%LocalAppData%\Lexora\data\lexora.db-shm` (Shared Memory Index)
+- **Engine PRAGMAs**:
+  ```sql
+  PRAGMA journal_mode = WAL;          -- Enables concurrent reads during active writes
+  PRAGMA foreign_keys = ON;           -- Enforces referential integrity and cascade deletes
+  PRAGMA synchronous = NORMAL;        -- Optimal balance of durability and disk I/O performance
+  PRAGMA busy_timeout = 5000;         -- 5-second busy timeout to mitigate concurrency locks
+  ```
 
 ---
 
-## 2. Entity-Relationship Diagram
+## 2. Entity-Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
-    Words ||--o{ WordMeanings : "1:N (Cascade)"
-    WordMeanings ||--o{ ExampleSentences : "1:N (Cascade)"
+    Words ||--o{ WordMeanings : "1:N (Cascade Delete)"
+    WordMeanings ||--o{ ExampleSentences : "1:N (Cascade Delete)"
     Words ||--o{ WordTopics : "M:N"
     Topics ||--o{ WordTopics : "categorizes"
     Words ||--o{ WordExamTags : "M:N"
     ExamTags ||--o{ WordExamTags : "targets"
-    Words ||--|| ReviewCards : "1:1 (Cascade)"
-    ReviewCards ||--o{ StudyLogs : "1:N (Cascade)"
+    Words ||--|| ReviewCards : "1:1 (Cascade Delete)"
+    ReviewCards ||--o{ StudyLogs : "1:N (Cascade Delete)"
     StudySessions ||--o{ StudyLogs : "1:N (SetNull/Cascade)"
-    GrammarRules ||--o{ GrammarExamples : "1:N (Cascade)"
+    GrammarRules ||--o{ GrammarExamples : "1:N (Cascade Delete)"
     UserStreaks
 ```
 
 ---
 
-## 3. Table Specifications
+## 3. Detailed Table Specifications
 
-### 3.1. `Words`
-Root vocabulary entity.
+### 3.1. `Words` (Root Vocabulary Entity)
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `Id` | `TEXT` (Guid) | PK, Non-null | Primary identifier |
-| `Term` | `TEXT` (150) | Non-null | Word or phrase (case-preserved) |
-| `NormalizedTerm` | `TEXT` (150) | Non-null, Indexed | Lowercased, trimmed for fast lookups |
-| `PhoneticUk` | `TEXT` (100) | Nullable | British IPA notation |
-| `PhoneticUs` | `TEXT` (100) | Nullable | American IPA notation |
-| `AudioUkPath` | `TEXT` | Nullable | Local audio file cache path |
-| `AudioUsPath` | `TEXT` | Nullable | Local audio file cache path |
-| `Level` | `INTEGER` | Non-null, Indexed | CEFR level (0=None, 1=A1 .. 6=C2) |
-| `PrimaryPartOfSpeech` | `INTEGER` | Non-null, Indexed | Enum (`Noun`, `Verb`, `Adjective`, etc.) |
-| `Notes` | `TEXT` | Nullable | User memory cues and notes |
-| `CreatedAt` | `TEXT` (ISO8601) | Non-null | Timestamp of creation |
-| `UpdatedAt` | `TEXT` (ISO8601) | Non-null | Timestamp of last modification |
-
-**Indexes**:
-- `IX_Words_NormalizedTerm` (Non-unique, B-Tree)
-- `IX_Words_Level` (Filtered index)
-- `IX_Words_PrimaryPartOfSpeech`
-
----
-
-### 3.2. `WordMeanings`
-Nuances and definitions for a word.
-
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `Id` | `TEXT` (Guid) | PK, Non-null | Primary identifier |
-| `WordId` | `TEXT` (Guid) | FK -> `Words.Id` (Cascade) | Parent word reference |
-| `PartOfSpeech` | `INTEGER` | Non-null | Part of speech for this specific meaning |
-| `DefinitionVi` | `TEXT` (500) | Non-null | Primary Vietnamese translation |
-| `DefinitionEn` | `TEXT` (1000) | Nullable | English definition |
-| `Explanation` | `TEXT` | Nullable | Nuance and context usage notes |
-| `OrderIndex` | `INTEGER` | Non-null | Ordering position in UI |
-
----
-
-### 3.3. `ExampleSentences`
-Sample sentences demonstrating a specific meaning.
-
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `Id` | `TEXT` (Guid) | PK, Non-null | Primary identifier |
-| `WordMeaningId` | `TEXT` (Guid) | FK -> `WordMeanings.Id` (Cascade) | Parent meaning reference |
-| `SentenceEn` | `TEXT` (1000) | Non-null | English example sentence |
-| `SentenceVi` | `TEXT` (1000) | Non-null | Vietnamese translation |
-| `AudioPath` | `TEXT` | Nullable | Optional sentence audio |
-
----
-
-### 3.4. `ReviewCards`
-Spaced repetition metadata tracking memory retention.
-
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `Id` | `TEXT` (Guid) | PK, Non-null | Primary identifier |
-| `WordId` | `TEXT` (Guid) | FK -> `Words.Id` (Unique, Cascade) | 1-to-1 link with Word |
-| `Status` | `INTEGER` | Non-null, Indexed | Enum: `New`, `Learning`, `Reviewing`, `Mastered` |
-| `EaseFactor` | `REAL` | Non-null (Default 2.5) | SM-2 multiplier ($\ge 1.3$) |
-| `IntervalDays` | `INTEGER` | Non-null (Default 0) | Days until subsequent review |
-| `Repetitions` | `INTEGER` | Non-null (Default 0) | Consecutive successful reviews |
-| `Lapses` | `INTEGER` | Non-null (Default 0) | Number of times failed |
-| `LastReviewedAt` | `TEXT` | Nullable | Last review timestamp |
-| `NextReviewAt` | `TEXT` | Non-null, Indexed | Scheduled review timestamp |
-| `TotalReviews` | `INTEGER` | Non-null (Default 0) | Lifetime review count |
-| `CorrectReviews` | `INTEGER` | Non-null (Default 0) | Lifetime correct count |
+| Column | Type | Nullable | Constraints | Description |
+| :--- | :--- | :---: | :--- | :--- |
+| `Id` | `TEXT` (Guid) | No | **PK** | Unique identifier (UUIDv4) |
+| `Term` | `TEXT` (150) | No | Non-empty | Word or phrase (case-preserved for display) |
+| `NormalizedTerm` | `TEXT` (150) | No | Indexed | Lowercased, trimmed for fast indexing & search |
+| `PhoneticUk` | `TEXT` (100) | Yes | | British IPA phonetic notation |
+| `PhoneticUs` | `TEXT` (100) | Yes | | American IPA phonetic notation |
+| `AudioUkPath` | `TEXT` | Yes | | Local path to cached British MP3 audio |
+| `AudioUsPath` | `TEXT` | Yes | | Local path to cached American MP3 audio |
+| `Level` | `INTEGER` | No | Indexed | CEFR level enum (`0=None`, `1=A1`, `2=A2`, `3=B1`, `4=B2`, `5=C1`, `6=C2`) |
+| `PrimaryPartOfSpeech` | `INTEGER` | No | Indexed | Primary POS enum (`Noun`, `Verb`, `Adjective`, etc.) |
+| `Notes` | `TEXT` | Yes | | User memory cues, etymology, or personal notes |
+| `CreatedAt` | `TEXT` (ISO8601)| No | | UTC timestamp of record creation |
+| `UpdatedAt` | `TEXT` (ISO8601)| No | | UTC timestamp of last modification |
 
 **Indexes**:
-- `IX_ReviewCards_WordId` (Unique)
-- `IX_ReviewCards_NextReviewAt_Status` (Composite, used for fetching due cards)
+- `IX_Words_NormalizedTerm`: B-Tree index for prefix and equality searches.
+- `IX_Words_Level`: Filtered index for CEFR level queries.
+- `IX_Words_PrimaryPartOfSpeech`: Filtered index for part of speech categorization.
 
 ---
 
-### 3.5. `StudyLogs`
-Granular audit record of every review event.
+### 3.2. `WordMeanings` (Word Nuances & Definitions)
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `Id` | `TEXT` (Guid) | PK, Non-null | Primary identifier |
-| `ReviewCardId` | `TEXT` (Guid) | FK -> `ReviewCards.Id` (Cascade) | Associated card |
-| `StudySessionId` | `TEXT` (Guid) | FK -> `StudySessions.Id` (Nullable) | Associated session |
-| `Rating` | `INTEGER` | Non-null | 1 (Again), 2 (Hard), 4 (Good), 5 (Easy) |
-| `ResponseTimeMs` | `INTEGER` | Non-null | User recall latency in milliseconds |
-| `ResultingStatus` | `INTEGER` | Non-null | Card status after this review |
-| `ResultingIntervalDays`| `INTEGER` | Non-null | Next scheduled interval |
-| `CreatedAt` | `TEXT` | Non-null, Indexed | Event timestamp |
+| Column | Type | Nullable | Constraints | Description |
+| :--- | :--- | :---: | :--- | :--- |
+| `Id` | `TEXT` (Guid) | No | **PK** | Unique identifier (UUIDv4) |
+| `WordId` | `TEXT` (Guid) | No | **FK** -> `Words.Id` (Cascade) | Parent word foreign key |
+| `PartOfSpeech` | `INTEGER` | No | | POS enum specific to this meaning |
+| `DefinitionVi` | `TEXT` (500) | No | Non-empty | Primary Vietnamese translation/definition |
+| `DefinitionEn` | `TEXT` (1000)| Yes | | English explanation/definition |
+| `Explanation` | `TEXT` | Yes | | Nuance, context, and usage notes |
+| `OrderIndex` | `INTEGER` | No | Default `0` | Order of presentation in UI card |
+
+---
+
+### 3.3. `ExampleSentences` (Bilingual Context Examples)
+
+| Column | Type | Nullable | Constraints | Description |
+| :--- | :--- | :---: | :--- | :--- |
+| `Id` | `TEXT` (Guid) | No | **PK** | Unique identifier (UUIDv4) |
+| `WordMeaningId` | `TEXT` (Guid) | No | **FK** -> `WordMeanings.Id` (Cascade) | Parent meaning foreign key |
+| `SentenceEn` | `TEXT` (1000)| No | Non-empty | English sentence demonstrating usage |
+| `SentenceVi` | `TEXT` (1000)| No | Non-empty | Vietnamese contextual translation |
+| `AudioPath` | `TEXT` | Yes | | Optional local audio file for sentence playback |
+
+---
+
+### 3.4. `ReviewCards` (SRS / SM-2 State)
+
+| Column | Type | Nullable | Constraints | Description |
+| :--- | :--- | :---: | :--- | :--- |
+| `Id` | `TEXT` (Guid) | No | **PK** | Unique identifier (UUIDv4) |
+| `WordId` | `TEXT` (Guid) | No | **FK** -> `Words.Id` (Unique, Cascade) | 1-to-1 link with `Word` |
+| `Status` | `INTEGER` | No | Indexed | Learning status (`0=New`, `1=Learning`, `2=Reviewing`, `3=Mastered`) |
+| `EaseFactor` | `REAL` | No | Default `2.5`, $\ge 1.3$ | SuperMemo difficulty multiplier |
+| `IntervalDays` | `INTEGER` | No | Default `0` | Days scheduled until next review |
+| `Repetitions` | `INTEGER` | No | Default `0` | Consecutive successful reviews count |
+| `Lapses` | `INTEGER` | No | Default `0` | Number of times forgotten (`Again` rating) |
+| `NextReviewAt` | `TEXT` (ISO8601)| No | Indexed | UTC date/time when card becomes due |
+| `LastReviewedAt`| `TEXT` (ISO8601)| Yes | | UTC date/time of most recent review |
 
 **Indexes**:
-- `IX_StudyLogs_CreatedAt` (Used for activity heatmaps & daily statistics)
+- `IX_ReviewCards_NextReviewAt_Status`: Composite index for lightning-fast queue loading (`WHERE NextReviewAt <= @Now`).
 
 ---
 
-### 3.6. `StudySessions`
-Session grouping for flashcard review rounds.
+### 3.5. `StudyLogs` & `StudySessions` (Historical Analytics)
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `Id` | `TEXT` (Guid) | PK, Non-null | Session identifier |
-| `StartTime` | `TEXT` | Non-null | Session start timestamp |
-| `EndTime` | `TEXT` | Nullable | Session completion timestamp |
-| `TotalCards` | `INTEGER` | Non-null | Cards reviewed in session |
-| `CorrectCards` | `INTEGER` | Non-null | Cards remembered in session |
-| `SessionType` | `INTEGER` | Non-null | Enum (`DueReview`, `LearnNew`, `Cram`) |
-
----
-
-### 3.7. `GrammarRules` & `GrammarExamples`
-Grammar knowledge base and sample usages.
-
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `Id` | `TEXT` (Guid) | PK, Non-null | Rule identifier |
-| `Title` | `TEXT` (200) | Non-null | Grammar rule name |
-| `Structure` | `TEXT` (500) | Non-null | Formula formula syntax |
-| `ExplanationVi` | `TEXT` | Non-null | Detailed Vietnamese explanation |
-| `ExplanationEn` | `TEXT` | Nullable | English explanation |
-| `CommonMistakes` | `TEXT` | Nullable | Traps, common errors & distinctions |
-| `Level` | `INTEGER` | Non-null | CEFR Level |
-| `ExamTarget` | `INTEGER` | Non-null | Exam target (`TOEIC`, `VSTEP`, `IELTS`) |
-| `Topic` | `TEXT` (100) | Nullable | Category (Tenses, Conditionals, etc.) |
+- **`StudySessions`**:
+  - `Id` (PK), `StartedAt`, `EndedAt`, `TotalCards`, `CardsReviewed`, `TestType`.
+- **`StudyLogs`**:
+  - `Id` (PK), `ReviewCardId` (FK), `StudySessionId` (FK Nullable).
+  - `Rating` (1=Again, 2=Hard, 4=Good, 5=Easy).
+  - `ResponseTimeMs` (Integer latency in milliseconds).
+  - `IntervalDays` (Snapshot interval).
+  - `EaseFactor` (Snapshot ease factor).
+  - `ReviewedAt` (Timestamp).
 
 ---
 
-### 3.8. `UserStreaks`
-User engagement streak tracking.
+### 3.6. `GrammarRules` & `GrammarExamples`
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `Id` | `TEXT` (Guid) | PK, Non-null | Unique record identifier |
-| `CurrentStreak` | `INTEGER` | Non-null (Default 0) | Consecutive active days |
-| `LongestStreak` | `INTEGER` | Non-null (Default 0) | Historical peak streak |
-| `LastActiveDate` | `TEXT` (Date) | Nullable | Date of last completed review |
-| `TotalDaysLearned` | `INTEGER` | Non-null (Default 0) | Total unique learning days |
+- **`GrammarRules`**:
+  - `Id` (PK), `TitleEn`, `TitleVi`, `StructureFormula`, `ExplanationEn`, `ExplanationVi`, `CommonMistakes`, `Level` (CEFR), `ExamTag`, `OrderIndex`.
+- **`GrammarExamples`**:
+  - `Id` (PK), `GrammarRuleId` (FK Cascade), `SentenceEn`, `SentenceVi`, `Explanation`.
 
 ---
 
-## 4. Concurrency & Backup Protocol
+### 3.7. `UserStreaks`
 
-1. **Backup Verification**:
-   - Backups are stored as `.bak` SQLite snapshots.
-   - Restoring performs a 16-byte magic number verification (`SQLite format 3\0`).
-   - Active database connections are purged via `SqliteConnection.ClearAllPools()` before replacing the file.
-   - Companion SQLite files (`-wal` and `-shm`) are explicitly deleted prior to replacement to avoid corruption.
+- Single-row table tracking learner habit consistency:
+  - `Id` (PK), `CurrentStreak` (Days), `LongestStreak` (Days), `LastActiveDate` (Date), `TotalReviewsCompleted`.
+
+---
+
+## 4. Cascading & Deletion Invariants
+
+1. **Deleting a `Word`**:
+   - Automatically cascades and purges child `WordMeanings`, `ExampleSentences`, `ReviewCards`, and associated `StudyLogs`.
+   - Cleans up `WordTopics` and `WordExamTags` junction records without deleting the shared `Topic` or `ExamTag` entities.
+2. **Deleting a `GrammarRule`**:
+   - Automatically cascades and deletes child `GrammarExamples`.
+3. **Restoring Backups**:
+   - Flushes connection pools via `SqliteConnection.ClearAllPools()` to release file locks before atomic swap.

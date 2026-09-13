@@ -78,11 +78,24 @@ Before completing any task or sub-phase, agents MUST run and verify:
 # 1. Build entire solution (Must complete with 0 errors and 0 warnings)
 dotnet build Lexora.slnx
 
-# 2. Run all unit and integration tests (All tests MUST pass)
+# 2. Run all unit and integration tests (All 64 tests MUST pass)
 dotnet test Lexora.slnx
 
 # 3. Packaging verification (When modifying installer or release configs)
 powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.0.0"
 ```
 
-All 55+ tests MUST pass with **0 errors and 0 warnings**.
+All 64 tests (40 Unit + 24 Integration) MUST pass with **0 errors and 0 warnings**.
+
+---
+
+## 7. Modular Rules Reference
+
+For in-depth explanations and checklists by topic, see:
+- [Rule 01: Clean Architecture & Boundaries](rules/01-clean-architecture.md)
+- [Rule 02: C# 13 & .NET 10 Coding Standards](rules/02-csharp-dotnet-standards.md)
+- [Rule 03: WinUI 3 & Fluent UI/UX Guidelines](rules/03-winui3-fluent-design.md)
+- [Rule 04: Security & Data Protection Invariants](rules/04-security-and-data-protection.md)
+- [Rule 05: Spaced Repetition (SM-2) Integrity](rules/05-spaced-repetition-sm2.md)
+- [Rule 06: Testing & Quality Gate Protocols](rules/06-testing-and-verification.md)
+
