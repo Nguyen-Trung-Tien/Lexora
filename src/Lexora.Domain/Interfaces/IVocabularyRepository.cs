@@ -32,6 +32,10 @@ public interface IVocabularyRepository : IRepository<Word>
     Task<IReadOnlyList<Word>> GetRandomWordsAsync(int count, Guid? excludeWordId = null, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Word>> GetWordsForAnalyticsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Topic>> GetAllTopicsAsync(CancellationToken cancellationToken = default);
+    Task<Topic?> GetTopicByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Topic?> GetTopicByNameAsync(string name, CancellationToken cancellationToken = default);
+    Task AddTopicAsync(Topic topic, CancellationToken cancellationToken = default);
+    void DeleteTopic(Topic topic);
     Task<IReadOnlyList<ExamTag>> GetAllExamTagsAsync(CancellationToken cancellationToken = default);
     void RemoveWordChildren(Word word);
     void AddMeanings(IEnumerable<WordMeaning> meanings);

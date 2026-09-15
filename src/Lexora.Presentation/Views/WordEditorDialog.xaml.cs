@@ -92,7 +92,8 @@ public sealed partial class WordEditorDialog : ContentDialog
     public WordEditorDialog(
         WordDto? existingWord,
         IReadOnlyList<TopicDto> allTopics,
-        IReadOnlyList<ExamTagDto> allExamTags)
+        IReadOnlyList<ExamTagDto> allExamTags,
+        Guid? preselectedTopicId = null)
     {
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
 
@@ -181,11 +182,21 @@ public sealed partial class WordEditorDialog : ContentDialog
             var defaultMeaning = new EditableMeaning { PartOfSpeech = PartOfSpeech.Noun };
             defaultMeaning.Examples.Add(new EditableExample());
             Meanings.Add(defaultMeaning);
+
+            if (preselectedTopicId.HasValue)
+            {
+                var preselected = _allTopics.FirstOrDefault(t => t.Id == preselectedTopicId.Value);
+                if (preselected != null)
+                {
+                    TopicsListView.SelectedItems.Add(preselected);
+                }
+            }
         }
 
         RefreshMeaningIndices();
         PrimaryButtonClick += WordEditorDialog_PrimaryButtonClick;
     }
+
 
     private void RefreshMeaningIndices()
     {
@@ -247,7 +258,56 @@ public sealed partial class WordEditorDialog : ContentDialog
         }
     }
 
+    private void NewTopicNameTextBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            CreateTopicQuickButton_Click(sender, new RoutedEventArgs());
+            e.Handled = true;
+        }
+    }
+
+    private async void CreateTopicQuickButton_Click(object sender, RoutedEventArgs e)
+    {
+        var name = NewTopicNameTextBox.Text?.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            NewTopicNameTextBox.Focus(FocusState.Programmatic);
+            return;
+        }
+
+        var vocabService = App.Current.Services.GetService<Lexora.Application.Interfaces.IVocabularyService>();
+        if (vocabService == null) return;
+
+        try
+        {
+            var desc = NewTopicDescTextBox.Text?.Trim();
+            var newTopic = await vocabService.CreateTopicAsync(new TopicCreateOrUpdateDto(
+                Name: name,
+                Description: string.IsNullOrWhiteSpace(desc) ? null : desc,
+                IconGlyph: "\uE8EC",
+                ColorHex: "#0078D4"
+            ));
+
+            _allTopics.Add(newTopic);
+            TopicsListView.ItemsSource = null;
+            TopicsListView.ItemsSource = _allTopics;
+            TopicsListView.SelectedItems.Add(newTopic);
+            EmptyTopicsTextBlock.Visibility = Visibility.Collapsed;
+
+            NewTopicNameTextBox.Text = string.Empty;
+            NewTopicDescTextBox.Text = string.Empty;
+            AddTopicFlyout.Hide();
+        }
+        catch (Exception ex)
+        {
+            DialogInfoBar.Message = ex.Message;
+            DialogInfoBar.IsOpen = true;
+        }
+    }
+
     private void WordEditorDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+
     {
         DialogInfoBar.IsOpen = false;
 

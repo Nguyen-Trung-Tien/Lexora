@@ -216,6 +216,46 @@ public class VocabularyService : IVocabularyService
         return topics.Select(t => new TopicDto(t.Id, t.Name, t.Description, t.IconGlyph, t.ColorHex)).ToList();
     }
 
+    public async Task<TopicDto> CreateTopicAsync(TopicCreateOrUpdateDto dto, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        var trimmedName = dto.Name?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(trimmedName))
+        {
+            throw new ArgumentException("Topic name cannot be empty.", nameof(dto));
+        }
+
+        var existing = await _vocabRepo.GetTopicByNameAsync(trimmedName, cancellationToken);
+        if (existing != null)
+        {
+            throw new InvalidOperationException($"Topic with name '{trimmedName}' already exists.");
+        }
+
+        var topic = new Topic
+        {
+            Name = trimmedName,
+            Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim(),
+            IconGlyph = string.IsNullOrWhiteSpace(dto.IconGlyph) ? "\uE8EC" : dto.IconGlyph.Trim(),
+            ColorHex = string.IsNullOrWhiteSpace(dto.ColorHex) ? "#0078D4" : dto.ColorHex.Trim()
+        };
+
+        await _vocabRepo.AddTopicAsync(topic, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new TopicDto(topic.Id, topic.Name, topic.Description, topic.IconGlyph, topic.ColorHex);
+    }
+
+    public async Task DeleteTopicAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var topic = await _vocabRepo.GetTopicByIdAsync(id, cancellationToken);
+        if (topic != null)
+        {
+            _vocabRepo.DeleteTopic(topic);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+
     public async Task<IReadOnlyList<ExamTagDto>> GetAllExamTagsAsync(CancellationToken cancellationToken = default)
     {
         var tags = await _vocabRepo.GetAllExamTagsAsync(cancellationToken);

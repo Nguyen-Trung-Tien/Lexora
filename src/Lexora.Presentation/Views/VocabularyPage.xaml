@@ -39,6 +39,7 @@
 
             <!-- Search Box with Live Debounce -->
             <TextBox Grid.Column="1" x:Name="SearchBox"
+                     MinWidth="160"
                      PlaceholderText="{x:Bind Loc.GetString('Vocab_SearchPlaceholder')}"
                      Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay}"
                      TextChanged="SearchBox_TextChanged" CornerRadius="10" Padding="14,8" />
@@ -76,39 +77,43 @@
         <!-- ========================================================= -->
         <Border Grid.Row="1" Background="{ThemeResource LayerFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1" CornerRadius="10" Padding="12,8"
+                BorderThickness="1" CornerRadius="10" Padding="10,6"
                 Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="8">
-                <ComboBox x:Name="TopicFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllTopics')}"
-                          SelectionChanged="TopicFilterCombo_SelectionChanged" Width="145" CornerRadius="8" />
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="10" MinWidth="860">
+                    <ComboBox x:Name="TopicFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllTopics')}"
+                              SelectionChanged="TopicFilterCombo_SelectionChanged" MinWidth="185" CornerRadius="8" />
 
-                <ComboBox Grid.Column="1" x:Name="LevelFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllLevels')}"
-                          SelectionChanged="LevelFilterCombo_SelectionChanged" Width="115" CornerRadius="8" />
+                    <ComboBox Grid.Column="1" x:Name="LevelFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllLevels')}"
+                              SelectionChanged="LevelFilterCombo_SelectionChanged" MinWidth="125" CornerRadius="8" />
 
-                <ComboBox Grid.Column="2" x:Name="PosFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllPos')}"
-                          SelectionChanged="PosFilterCombo_SelectionChanged" Width="120" CornerRadius="8" />
+                    <ComboBox Grid.Column="2" x:Name="PosFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllPos')}"
+                              SelectionChanged="PosFilterCombo_SelectionChanged" MinWidth="135" CornerRadius="8" />
 
-                <ComboBox Grid.Column="3" x:Name="StatusFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllStatus')}"
-                          SelectionChanged="StatusFilterCombo_SelectionChanged" Width="120" CornerRadius="8" />
+                    <ComboBox Grid.Column="3" x:Name="StatusFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllStatus')}"
+                              SelectionChanged="StatusFilterCombo_SelectionChanged" MinWidth="140" CornerRadius="8" />
 
-                <ComboBox Grid.Column="4" x:Name="SortCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_SortBy')}"
-                          SelectionChanged="SortCombo_SelectionChanged" Width="130" CornerRadius="8" />
+                    <ComboBox Grid.Column="4" x:Name="SortCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_SortBy')}"
+                              SelectionChanged="SortCombo_SelectionChanged" MinWidth="155" CornerRadius="8" />
 
-                <Button Grid.Column="5" Content="{x:Bind Loc.GetString('Action_Reset')}" Click="ResetFiltersButton_Click" CornerRadius="8" Padding="12,6" />
+                    <Button Grid.Column="5" Content="{x:Bind Loc.GetString('Action_Reset')}" Click="ResetFiltersButton_Click" CornerRadius="8" Padding="12,6" />
 
-                <Border Grid.Column="7" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <TextBlock Text="{x:Bind ViewModel.Words.Count, Mode=OneWay}" FontWeight="Bold" FontSize="12" />
-                        <TextBlock Text="{x:Bind Loc.GetString('Vocab_WordsCount')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                    </StackPanel>
-                </Border>
-            </Grid>
+
+                    <Border Grid.Column="7" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{x:Bind ViewModel.Words.Count, Mode=OneWay}" FontWeight="Bold" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_WordsCount')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </ScrollViewer>
         </Border>
 
         <!-- ======================================================== -->
         <!-- MASTER-DETAIL CONTENT (Word List Mode: Non-Overlapping Layout) -->
         <!-- ======================================================== -->
-        <Grid Grid.Row="2" ColumnDefinitions="320,*" ColumnSpacing="18"
+        <Grid Grid.Row="2" ColumnDefinitions="300,*" ColumnSpacing="16"
               Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
             
             <!-- Left: Word List -->
@@ -223,32 +228,32 @@
                                 </StackPanel>
 
                                 <!-- Action Buttons -->
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
-                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="12" />
                                     </Border>
-                                    <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="Spaced Review (SM-2)" CornerRadius="8" Padding="10,6">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="Spaced Review (SM-2)" CornerRadius="8" Padding="8,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE823;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                            <TextBlock Text="Review" />
+                                            <TextBlock Text="Review" FontSize="12" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Click="TestThisWordButton_Click" ToolTipService.ToolTip="Practice test" CornerRadius="8" Padding="10,6">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Button Click="TestThisWordButton_Click" ToolTipService.ToolTip="Practice test" CornerRadius="8" Padding="8,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE765;" FontSize="13" />
-                                            <TextBlock Text="Test" />
+                                            <TextBlock Text="Test" FontSize="12" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Click="EditWordButton_Click" ToolTipService.ToolTip="Edit word (Ctrl+E)" CornerRadius="8" Padding="10,6">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Button Click="EditWordButton_Click" ToolTipService.ToolTip="Edit word (Ctrl+E)" CornerRadius="8" Padding="8,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE70F;" FontSize="13" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Action_Edit')}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Action_Edit')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Foreground="{ThemeResource SystemFillColorCriticalBrush}" Click="DeleteWordButton_Click" ToolTipService.ToolTip="Delete word (Delete)" CornerRadius="8" Padding="10,6">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Button Foreground="{ThemeResource SystemFillColorCriticalBrush}" Click="DeleteWordButton_Click" ToolTipService.ToolTip="Delete word (Delete)" CornerRadius="8" Padding="8,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE74D;" FontSize="13" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Action_Delete')}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Action_Delete')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
@@ -297,12 +302,12 @@
                                         <Border Margin="0,0,0,16" Padding="18,16" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
                                             <StackPanel Spacing="10">
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
                                                         <TextBlock Text="{x:Bind PartOfSpeech}" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" />
                                                     </Border>
-                                                    <TextBlock Text="{x:Bind DefinitionVi}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                                </StackPanel>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind DefinitionVi}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                                </Grid>
 
                                                 <TextBlock Text="{x:Bind DefinitionEn}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
                                                 <TextBlock Text="{x:Bind Explanation}" FontStyle="Italic" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextWrapping="Wrap" />
@@ -366,34 +371,49 @@
         <Grid Grid.Row="2" Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="16">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Vocabulary Grouped by Context Units" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
-                            <TextBlock Text="Learn words by realistic topics and exam situations, track mastery percentage, and launch unit-based practice."
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                        <StackPanel Spacing="4" Margin="0,0,16,0">
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_UnitsHeaderTitle')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" TextWrapping="Wrap" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_UnitsHeaderDesc')}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
                         </StackPanel>
-                        <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE8F1;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay}" FontWeight="Bold" />
-                                <TextBlock Text="Units" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            </StackPanel>
-                        </Border>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                            <Button Style="{ThemeResource AccentButtonStyle}" CornerRadius="10" Padding="14,8" Click="AddTopicButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE710;" FontSize="13" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_AddTopic')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE8F1;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay}" FontWeight="Bold" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_UnitsCount')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </Grid>
 
                     <!-- Empty state -->
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="40"
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="40"
                                 Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
                         <FontIcon Glyph="&#xE8F1;" FontSize="40" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
-                        <TextBlock Text="No context units match your query" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                        <TextBlock Text="Add vocabulary with topic tags or clear your search to explore units." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptyUnitsTitle')}" FontWeight="SemiBold" HorizontalAlignment="Center" TextWrapping="Wrap" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptyUnitsSubtitle')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" />
+                        <Button Style="{ThemeResource AccentButtonStyle}" CornerRadius="8" Padding="14,8" Margin="0,8,0,0" Click="AddTopicButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE710;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_AddTopic')}" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
+
 
                     <!-- Cards Grid -->
                     <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredContextUnits, Mode=OneWay}"
                                    Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                         <ItemsRepeater.Layout>
-                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="320" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
+                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="280" MinColumnSpacing="14" MinRowSpacing="14" ItemsStretch="Fill" />
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate x:DataType="dto:ContextUnitDto">
@@ -453,30 +473,40 @@
 
                                         <MenuFlyoutSeparator Grid.Row="2" Margin="0,-4" />
 
-                                        <!-- Actions: View Words, Review Unit (SM-2) & Test Unit -->
-                                        <Grid Grid.Row="3" ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                                            <Button HorizontalAlignment="Stretch" Click="ViewUnitWords_Click" Tag="{x:Bind}" CornerRadius="8" Padding="6,8">
+                                        <!-- Actions: View Words, Add Word, Review Unit (SM-2) & Test Unit -->
+                                        <Grid Grid.Row="3" ColumnDefinitions="*,*,*,*" ColumnSpacing="6">
+                                            <Button HorizontalAlignment="Stretch" Click="ViewUnitWords_Click" Tag="{x:Bind}" CornerRadius="8" Padding="4,8"
+                                                    ToolTipService.ToolTip="View all words in this unit">
                                                 <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE8C0;" FontSize="12" />
-                                                    <TextBlock Text="View" FontSize="12" FontWeight="SemiBold" />
+                                                    <FontIcon Glyph="&#xE8C0;" FontSize="11" />
+                                                    <TextBlock Text="View" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
                                             </Button>
-                                            <Button Grid.Column="1" Style="{ThemeResource AccentButtonStyle}"
-                                                    HorizontalAlignment="Stretch" Click="ReviewUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="6,8"
+                                            <Button Grid.Column="1" HorizontalAlignment="Stretch" Click="AddWordToUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="4,8"
+                                                    ToolTipService.ToolTip="Add a new word directly into this unit">
+                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE710;" FontSize="11" />
+                                                    <TextBlock Text="+ Word" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Grid.Column="2" Style="{ThemeResource AccentButtonStyle}"
+                                                    HorizontalAlignment="Stretch" Click="ReviewUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="4,8"
                                                     ToolTipService.ToolTip="Spaced review (SM-2) for this unit">
                                                 <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE823;" FontSize="12" />
-                                                    <TextBlock Text="Review" FontSize="12" FontWeight="SemiBold" />
+                                                    <FontIcon Glyph="&#xE823;" FontSize="11" />
+                                                    <TextBlock Text="Review" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
                                             </Button>
-                                            <Button Grid.Column="2"
-                                                    HorizontalAlignment="Stretch" Click="TestUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="6,8">
+                                            <Button Grid.Column="3"
+                                                    HorizontalAlignment="Stretch" Click="TestUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="4,8"
+                                                    ToolTipService.ToolTip="Quiz on words in this unit">
                                                 <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE765;" FontSize="12" />
-                                                    <TextBlock Text="Quiz" FontSize="12" FontWeight="SemiBold" />
+                                                    <FontIcon Glyph="&#xE765;" FontSize="11" />
+                                                    <TextBlock Text="Quiz" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
                                             </Button>
                                         </Grid>
+
                                     </Grid>
                                 </Border>
                             </DataTemplate>

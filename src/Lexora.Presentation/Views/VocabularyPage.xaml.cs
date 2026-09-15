@@ -74,6 +74,7 @@ public sealed partial class VocabularyPage : Page
             Content = "Tất cả Unit / Chủ đề",
             Tag = null
         };
+        ToolTipService.SetToolTip(allItem, "Tất cả Unit / Chủ đề");
         TopicFilterCombo.Items.Add(allItem);
 
         int selectedIndex = 0;
@@ -85,6 +86,7 @@ public sealed partial class VocabularyPage : Page
                 Content = topic.Name,
                 Tag = topic.Id
             };
+            ToolTipService.SetToolTip(item, topic.Name);
             TopicFilterCombo.Items.Add(item);
 
             if (currentSelectedId.HasValue && topic.Id == currentSelectedId.Value)
@@ -95,6 +97,10 @@ public sealed partial class VocabularyPage : Page
         }
 
         TopicFilterCombo.SelectedIndex = selectedIndex;
+        if (TopicFilterCombo.SelectedItem is ComboBoxItem initialCbi && initialCbi.Content != null)
+        {
+            ToolTipService.SetToolTip(TopicFilterCombo, initialCbi.Content.ToString());
+        }
         TopicFilterCombo.SelectionChanged += TopicFilterCombo_SelectionChanged;
     }
 
@@ -118,16 +124,19 @@ public sealed partial class VocabularyPage : Page
     private async void TopicFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_isInitializing) return;
-        if (TopicFilterCombo.SelectedItem is ComboBoxItem cbi && cbi.Tag is Guid topicId)
+        if (TopicFilterCombo.SelectedItem is ComboBoxItem cbi)
         {
-            ViewModel.SelectedTopicId = topicId;
+            ToolTipService.SetToolTip(TopicFilterCombo, cbi.Content?.ToString());
+            ViewModel.SelectedTopicId = cbi.Tag as Guid?;
         }
         else
         {
             ViewModel.SelectedTopicId = null;
+            ToolTipService.SetToolTip(TopicFilterCombo, null);
         }
         await ViewModel.LoadWordsAsync();
     }
+
 
     private async void LevelFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -642,4 +651,50 @@ public sealed partial class VocabularyPage : Page
             }
         }
     }
+
+    private async void AddTopicButton_Click(object sender, RoutedEventArgs e)
+    {
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+        var dialog = new TopicEditorDialog
+        {
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+        {
+            try
+            {
+                var created = await ViewModel.CreateTopicAsync(dialog.ResultDto);
+                PopulateTopicFilterCombo();
+            }
+            catch (Exception ex)
+            {
+                ShowErrorDialog("Tạo chủ đề thất bại", ex.Message);
+            }
+        }
+    }
+
+    private async void AddWordToUnit_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && (fe.Tag as ContextUnitDto ?? fe.DataContext as ContextUnitDto) is ContextUnitDto unit)
+        {
+            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var targetTopicId = unit.Id == Guid.Empty ? (Guid?)null : unit.Id;
+            var dialog = new WordEditorDialog(null, ViewModel.AvailableTopics, ViewModel.AvailableExamTags, preselectedTopicId: targetTopicId)
+            {
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = activeTheme
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            {
+                await ViewModel.SaveWordAsync(dialog.ResultDto);
+                PopulateTopicFilterCombo();
+            }
+        }
+    }
 }
+

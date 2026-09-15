@@ -153,6 +153,7 @@ public class LocalizationService : ILocalizationService
             // Grammar
             ["Grammar_Title"] = "Cẩm Nang Ngữ Pháp",
             ["Grammar_SearchPlaceholder"] = "Tìm quy tắc, công thức ngữ pháp, cấu trúc... (Ctrl+F)",
+            ["Grammar_AllExams"] = "Tất cả kỳ thi",
             ["Grammar_AddRule"] = "Thêm quy tắc",
             ["Grammar_Practice"] = "Luyện tập",
             ["Grammar_Structures"] = "Cấu trúc ngữ pháp",
@@ -165,6 +166,14 @@ public class LocalizationService : ILocalizationService
             ["Grammar_CommonMistakes"] = "⚠️ Lỗi thường gặp & Lưu ý",
             ["Grammar_Examples"] = "Ví dụ minh họa ngữ cảnh",
             ["Grammar_ExitPractice"] = "Thoát luyện tập",
+            ["Grammar_PracticeComplete"] = "Hoàn thành bài luyện tập ngữ pháp! 🎉",
+            ["Grammar_Score"] = "Điểm số",
+            ["Grammar_Correct"] = "Chính xác",
+            ["Grammar_Incorrect"] = "Chưa đúng",
+            ["Grammar_PracticeAgain"] = "Luyện tập tiếp",
+            ["Grammar_BackToRules"] = "Quay lại cẩm nang",
+
+
 
             // Settings
             ["Settings_Title"] = "Cài Đặt Ứng Dụng",
@@ -226,6 +235,32 @@ public class LocalizationService : ILocalizationService
             ["WordEditor_HeaderExams"] = "Mục tiêu kỳ thi (TOEIC / IELTS / VSTEP)",
             ["WordEditor_EmptyTopics"] = "Chưa có danh mục chủ đề nào trong hệ thống.",
             ["WordEditor_EmptyExams"] = "Chưa có mục tiêu kỳ thi nào trong hệ thống.",
+            ["WordEditor_AddTopic"] = "Tạo chủ đề mới",
+            ["WordEditor_AddTopicFlyoutTitle"] = "Thêm nhanh chủ đề mới",
+
+            // Topic Editor Dialog
+            ["TopicEditor_TitleAdd"] = "Tạo chủ đề từ vựng mới",
+            ["TopicEditor_Save"] = "Lưu chủ đề",
+            ["TopicEditor_Cancel"] = "Hủy bỏ",
+            ["TopicEditor_ValidationTitle"] = "Lỗi kiểm tra dữ liệu",
+            ["TopicEditor_ErrNameRequired"] = "Vui lòng nhập tên chủ đề từ vựng.",
+            ["TopicEditor_ErrNameDuplicate"] = "Chủ đề với tên này đã tồn tại.",
+            ["TopicEditor_HeaderName"] = "Tên chủ đề *",
+            ["TopicEditor_PlaceholderName"] = "Ví dụ: Business & Negotiations, Travel, Technology...",
+            ["TopicEditor_HeaderDesc"] = "Mô tả chủ đề",
+            ["TopicEditor_PlaceholderDesc"] = "Mô tả ngắn gọn về các từ vựng và ngữ cảnh thuộc chủ đề này...",
+            ["TopicEditor_HeaderIcon"] = "Biểu tượng đại diện",
+            ["Vocab_AddTopic"] = "Thêm chủ đề",
+            ["Vocab_UnitsHeaderTitle"] = "Chủ đề & Bài học (Context Units)",
+            ["Vocab_UnitsHeaderDesc"] = "Nhóm từ vựng theo ngữ cảnh thực tế và chủ điểm giao tiếp",
+            ["Vocab_UnitsCount"] = "chủ đề",
+            ["Vocab_UnitAddWord"] = "Thêm từ",
+            ["Vocab_UnitAddWordTooltip"] = "Thêm từ vựng mới vào chủ đề này",
+            ["Vocab_UnitViewWords"] = "Xem từ",
+            ["Vocab_UnitReview"] = "Ôn tập",
+            ["Vocab_UnitQuiz"] = "Kiểm tra",
+            ["Vocab_EmptyUnitsTitle"] = "Không tìm thấy chủ đề nào phù hợp",
+            ["Vocab_EmptyUnitsSubtitle"] = "Thêm từ vựng có gắn thẻ chủ đề hoặc tạo chủ đề mới để bắt đầu học theo ngữ cảnh.",
 
             // Grammar Editor Dialog
             ["GrammarEditor_TitleAdd"] = "Thêm quy tắc ngữ pháp mới",
@@ -463,8 +498,10 @@ public class LocalizationService : ILocalizationService
             // Grammar
             ["Grammar_Title"] = "Grammar Master",
             ["Grammar_SearchPlaceholder"] = "Search grammar rules, structures, formulas... (Ctrl+F)",
+            ["Grammar_AllExams"] = "All Target Exams",
             ["Grammar_AddRule"] = "Add Rule",
             ["Grammar_Practice"] = "Practice",
+
             ["Grammar_Structures"] = "Grammar Structures",
             ["Grammar_EmptyTitle"] = "No grammar rules found",
             ["Grammar_EmptySubtitle"] = "Try clearing search or filters to see available grammar lessons.",
@@ -475,6 +512,13 @@ public class LocalizationService : ILocalizationService
             ["Grammar_CommonMistakes"] = "⚠️ Common Mistakes & Pitfalls",
             ["Grammar_Examples"] = "Contextual Examples",
             ["Grammar_ExitPractice"] = "Exit Practice",
+            ["Grammar_PracticeComplete"] = "Grammar Practice Complete! 🎉",
+            ["Grammar_Score"] = "Score",
+            ["Grammar_Correct"] = "Correct",
+            ["Grammar_Incorrect"] = "Incorrect",
+            ["Grammar_PracticeAgain"] = "Try Another Practice",
+            ["Grammar_BackToRules"] = "Back to Rules",
+
 
             // Settings
             ["Settings_Title"] = "Application Settings",
@@ -540,6 +584,33 @@ public class LocalizationService : ILocalizationService
             ["WordEditor_HeaderExams"] = "Exam Targets (TOEIC / IELTS / VSTEP)",
             ["WordEditor_EmptyTopics"] = "No topics available in database.",
             ["WordEditor_EmptyExams"] = "No exam targets available in database.",
+            ["WordEditor_AddTopic"] = "New Topic",
+            ["WordEditor_AddTopicFlyoutTitle"] = "Quick Add Topic",
+
+            // Topic Editor Dialog
+            ["TopicEditor_TitleAdd"] = "Create New Vocabulary Topic",
+            ["TopicEditor_Save"] = "Save Topic",
+            ["TopicEditor_Cancel"] = "Cancel",
+            ["TopicEditor_ValidationTitle"] = "Validation Error",
+            ["TopicEditor_ErrNameRequired"] = "Please enter a topic name.",
+            ["TopicEditor_ErrNameDuplicate"] = "A topic with this name already exists.",
+            ["TopicEditor_HeaderName"] = "Topic Name *",
+            ["TopicEditor_PlaceholderName"] = "e.g. Business & Negotiations, Travel, Technology...",
+            ["TopicEditor_HeaderDesc"] = "Topic Description",
+            ["TopicEditor_PlaceholderDesc"] = "Brief description of vocabulary and contexts in this topic...",
+            ["TopicEditor_HeaderIcon"] = "Representative Icon",
+            ["Vocab_AddTopic"] = "Add Topic",
+            ["Vocab_UnitsHeaderTitle"] = "Context Units & Topics",
+            ["Vocab_UnitsHeaderDesc"] = "Group vocabulary by practical contexts and thematic domains",
+            ["Vocab_UnitsCount"] = "topics",
+            ["Vocab_UnitAddWord"] = "Add Word",
+            ["Vocab_UnitAddWordTooltip"] = "Add a new word to this topic",
+            ["Vocab_UnitViewWords"] = "View",
+            ["Vocab_UnitReview"] = "Review",
+            ["Vocab_UnitQuiz"] = "Quiz",
+            ["Vocab_EmptyUnitsTitle"] = "No context units match your query",
+            ["Vocab_EmptyUnitsSubtitle"] = "Add vocabulary with topic tags or create a new topic to explore units.",
+
 
             // Grammar Editor Dialog
             ["GrammarEditor_TitleAdd"] = "Add New Grammar Rule",

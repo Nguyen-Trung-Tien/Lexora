@@ -169,6 +169,28 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         return await Context.Topics.AsNoTracking().OrderBy(t => t.Name).ToListAsync(cancellationToken);
     }
 
+    public async Task<Topic?> GetTopicByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await Context.Topics.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    }
+
+    public async Task<Topic?> GetTopicByNameAsync(string name, CancellationToken cancellationToken = default)
+    {
+        var trimmed = name.Trim().ToLower();
+        return await Context.Topics.FirstOrDefaultAsync(t => t.Name.ToLower() == trimmed, cancellationToken);
+    }
+
+    public async Task AddTopicAsync(Topic topic, CancellationToken cancellationToken = default)
+    {
+        await Context.Topics.AddAsync(topic, cancellationToken);
+    }
+
+    public void DeleteTopic(Topic topic)
+    {
+        Context.Topics.Remove(topic);
+    }
+
+
     public async Task<IReadOnlyList<ExamTag>> GetAllExamTagsAsync(CancellationToken cancellationToken = default)
     {
         return await Context.ExamTags.AsNoTracking().OrderBy(et => et.Name).ToListAsync(cancellationToken);

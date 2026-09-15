@@ -233,6 +233,17 @@ public partial class VocabularyViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task<TopicDto> CreateTopicAsync(TopicCreateOrUpdateDto dto)
+    {
+        var created = await _vocabService.CreateTopicAsync(dto);
+        await LoadFiltersAsync();
+        await LoadContextUnitsAsync();
+        StatusMessage = $"Created topic '{created.Name}'.";
+        return created;
+    }
+
+
+    [RelayCommand]
     public async Task DeleteWordAsync(Guid id)
     {
         var word = Words.FirstOrDefault(w => w.Id == id);

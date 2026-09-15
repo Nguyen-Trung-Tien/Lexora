@@ -77,6 +77,14 @@ public record TopicDto(
     string? ColorHex
 );
 
+public record TopicCreateOrUpdateDto(
+    string Name,
+    string? Description = null,
+    string? IconGlyph = null,
+    string? ColorHex = null
+);
+
+
 public record ExamTagDto(
     Guid Id,
     ExamType Type,

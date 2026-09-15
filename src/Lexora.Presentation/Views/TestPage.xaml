@@ -272,7 +272,7 @@
             <!-- ========================================== -->
             <StackPanel Grid.Row="1" Spacing="18"
                         Visibility="{x:Bind ViewModel.IsTestingMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                        MaxWidth="860" HorizontalAlignment="Center">
+                        MaxWidth="860" HorizontalAlignment="Stretch">
                 
                 <!-- Progress Header -->
                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
@@ -283,7 +283,7 @@
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <TextBlock Text="Shortcuts: 1-4: Select | Space: Audio | Enter: Next"
-                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" />
+                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" TextWrapping="Wrap" />
                     </StackPanel>
                 </Grid>
 
@@ -367,7 +367,7 @@
             <!-- ========================================== -->
             <StackPanel Grid.Row="1" Spacing="22"
                         Visibility="{x:Bind ViewModel.IsResultMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                        MaxWidth="960" HorizontalAlignment="Center">
+                        MaxWidth="960" HorizontalAlignment="Stretch">
                 
                 <!-- Score Summary Banner -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -389,15 +389,17 @@
                         <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
                             <TextBlock Text="{x:Bind Loc.GetString('Test_ResultTitle')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />
                             <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}"
-                                       FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                       FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextWrapping="Wrap" />
                             <TextBlock Text="Review your performance summary and follow the recommended Spaced Repetition study plan below."
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- Statistics Metrics Grid -->
-                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="14">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                              HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="14" MinWidth="560">
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                         <StackPanel Spacing="4">
@@ -430,6 +432,7 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+            </ScrollViewer>
 
                 <!-- Action Bar -->
                 <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">

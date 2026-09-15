@@ -18,74 +18,79 @@
             </Grid.RowDefinitions>
 
             <!-- 1. MODE SELECTOR & SETTINGS BAR -->
-            <Grid Grid.Row="0" Margin="0,0,0,16" ColumnDefinitions="*,Auto">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button x:Name="ModeDueButton" Click="ModeDueButton_Click" CornerRadius="8" Padding="14,8">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE823;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Review_TodayDue')}" FontWeight="SemiBold" />
-                            <Border Background="{ThemeResource SystemFillColorCriticalBrush}" CornerRadius="10" Padding="6,1" Margin="2,0,0,0"
-                                    Visibility="{x:Bind ViewModel.DueCardsCount, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
-                                <TextBlock Text="{x:Bind ViewModel.DueCardsCount, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
-                            </Border>
-                        </StackPanel>
-                    </Button>
+            <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled" Margin="0,0,0,16">
+                <Grid ColumnDefinitions="*,Auto" MinWidth="740">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="ModeDueButton" Click="ModeDueButton_Click" CornerRadius="8" Padding="14,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE823;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_TodayDue')}" FontWeight="SemiBold" />
+                                <Border Background="{ThemeResource SystemFillColorCriticalBrush}" CornerRadius="10" Padding="6,1" Margin="2,0,0,0"
+                                        Visibility="{x:Bind ViewModel.DueCardsCount, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                                    <TextBlock Text="{x:Bind ViewModel.DueCardsCount, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
+                                </Border>
+                            </StackPanel>
+                        </Button>
 
-                    <Button x:Name="ModeNewButton" Click="ModeNewButton_Click" CornerRadius="8" Padding="14,8">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE710;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Review_LearnNew')}" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Button>
+                        <Button x:Name="ModeNewButton" Click="ModeNewButton_Click" CornerRadius="8" Padding="14,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE710;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_LearnNew')}" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
 
-                    <Button x:Name="ModeDifficultButton" Click="ModeDifficultButton_Click" CornerRadius="8" Padding="14,8">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Review_Difficult')}" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Button>
+                        <Button x:Name="ModeDifficultButton" Click="ModeDifficultButton_Click" CornerRadius="8" Padding="14,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_Difficult')}" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
 
-                    <!-- Unit / Topic Dropdown -->
-                    <ComboBox x:Name="ReviewUnitCombo"
-                              PlaceholderText="📚 Filter by Unit..."
-                              SelectionChanged="ReviewUnitCombo_SelectionChanged"
-                              ItemsSource="{x:Bind ViewModel.AvailableTopics, Mode=OneWay}"
-                              DisplayMemberPath="Name"
-                              Width="180" CornerRadius="8"
-                              ToolTipService.ToolTip="Select specific Unit to review" />
-                </StackPanel>
+                        <!-- Unit / Topic Dropdown -->
+                        <ComboBox x:Name="ReviewUnitCombo"
+                                  PlaceholderText="{x:Bind Loc.GetString('Vocab_TopicFilter')}"
+                                  SelectionChanged="ReviewUnitCombo_SelectionChanged"
+                                  ItemsSource="{x:Bind ViewModel.AvailableTopics, Mode=OneWay}"
+                                  DisplayMemberPath="Name"
+                                  MinWidth="200" MaxWidth="280" CornerRadius="8"
+                                  ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TopicFilter')}" />
 
-                <!-- Top Right: Audio & Typing Controls -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <!-- Typing Recall Mode Toggle -->
-                    <ToggleButton x:Name="TypingModeToggle"
-                                  IsChecked="{x:Bind ViewModel.IsTypingPracticeEnabled, Mode=OneWay}"
-                                  Click="TypingModeToggle_Click"
-                                  CornerRadius="8" Padding="12,7"
-                                  ToolTipService.ToolTip="Toggle spelling typing recall practice">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE765;" FontSize="13" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Review_TypingDrill')}" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </ToggleButton>
 
-                    <!-- Speech Rate DropDown -->
-                    <DropDownButton ToolTipService.ToolTip="Pronunciation playback speed" CornerRadius="8" Padding="12,7">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE767;" FontSize="13" />
-                            <TextBlock Text="{x:Bind ViewModel.SpeechRateLabel, Mode=OneWay}" FontWeight="SemiBold" />
-                        </StackPanel>
-                        <DropDownButton.Flyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Text="0.75x (Slow)" Tag="0.75" Click="SpeedItem_Click" />
-                                <MenuFlyoutItem Text="1.0x (Normal)" Tag="1.0" Click="SpeedItem_Click" />
-                                <MenuFlyoutItem Text="1.25x (Fast)" Tag="1.25" Click="SpeedItem_Click" />
-                                <MenuFlyoutItem Text="1.5x (Very Fast)" Tag="1.5" Click="SpeedItem_Click" />
-                            </MenuFlyout>
-                        </DropDownButton.Flyout>
-                    </DropDownButton>
-                </StackPanel>
-            </Grid>
+                    </StackPanel>
+
+                    <!-- Top Right: Audio & Typing Controls -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <!-- Typing Recall Mode Toggle -->
+                        <ToggleButton x:Name="TypingModeToggle"
+                                      IsChecked="{x:Bind ViewModel.IsTypingPracticeEnabled, Mode=OneWay}"
+                                      Click="TypingModeToggle_Click"
+                                      CornerRadius="8" Padding="12,7"
+                                      ToolTipService.ToolTip="Toggle spelling typing recall practice">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE765;" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_TypingDrill')}" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <!-- Speech Rate DropDown -->
+                        <DropDownButton ToolTipService.ToolTip="Pronunciation playback speed" CornerRadius="8" Padding="12,7">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE767;" FontSize="13" />
+                                <TextBlock Text="{x:Bind ViewModel.SpeechRateLabel, Mode=OneWay}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <DropDownButton.Flyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Text="0.75x (Slow)" Tag="0.75" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem Text="1.0x (Normal)" Tag="1.0" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem Text="1.25x (Fast)" Tag="1.25" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem Text="1.5x (Very Fast)" Tag="1.5" Click="SpeedItem_Click" />
+                                </MenuFlyout>
+                            </DropDownButton.Flyout>
+                        </DropDownButton>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
 
             <!-- 2. PROGRESS BAR & SESSION INDICATOR -->
             <Grid Grid.Row="1" Margin="0,0,0,16" ColumnDefinitions="*,Auto"
@@ -139,7 +144,7 @@
 
                 <!-- ACTIVE FLASHCARD WORKSPACE (Responsive 2-Column or Centered) -->
                 <Grid Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                      ColumnDefinitions="*,300" ColumnSpacing="20">
+                      ColumnDefinitions="*,260" ColumnSpacing="16">
 
                     <!-- Left: Main Study Flashcard -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -384,70 +389,70 @@
                                         Click="ShowAnswerButton_Click" />
 
                                 <!-- 4 SM-2 Rating Buttons -->
-                                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10"
+                                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8"
                                       Visibility="{x:Bind ViewModel.IsAnswerVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
 
                                     <!-- 1: Again -->
-                                    <Button HorizontalAlignment="Stretch" Padding="8,12" CornerRadius="10" Click="AgainButton_Click"
+                                    <Button HorizontalAlignment="Stretch" Padding="6,10" CornerRadius="10" Click="AgainButton_Click"
                                             BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1.5"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                                         <StackPanel HorizontalAlignment="Center" Spacing="4">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                 <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingAgain')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="4,1">
-                                                    <TextBlock Text="1" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingAgain')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="13" />
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="3,1">
+                                                    <TextBlock Text="1" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </Border>
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.AgainIntervalText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind ViewModel.AgainIntervalText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                     </Button>
 
                                     <!-- 2: Hard -->
-                                    <Button Grid.Column="1" HorizontalAlignment="Stretch" Padding="8,12" CornerRadius="10" Click="HardButton_Click"
+                                    <Button Grid.Column="1" HorizontalAlignment="Stretch" Padding="6,10" CornerRadius="10" Click="HardButton_Click"
                                             BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1.5"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                                         <StackPanel HorizontalAlignment="Center" Spacing="4">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                 <FontIcon Glyph="&#xE7BA;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingHard')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="4,1">
-                                                    <TextBlock Text="2" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingHard')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" FontSize="13" />
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="3,1">
+                                                    <TextBlock Text="2" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </Border>
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.HardIntervalText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind ViewModel.HardIntervalText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                     </Button>
 
                                     <!-- 3: Good -->
-                                    <Button Grid.Column="2" HorizontalAlignment="Stretch" Padding="8,12" CornerRadius="10" Click="GoodButton_Click"
+                                    <Button Grid.Column="2" HorizontalAlignment="Stretch" Padding="6,10" CornerRadius="10" Click="GoodButton_Click"
                                             BorderBrush="{ThemeResource AccentFillColorDefaultBrush}" BorderThickness="1.5"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                                         <StackPanel HorizontalAlignment="Center" Spacing="4">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                 <FontIcon Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingGood')}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="4,1">
-                                                    <TextBlock Text="3" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingGood')}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="13" />
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="3,1">
+                                                    <TextBlock Text="3" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </Border>
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.GoodIntervalText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind ViewModel.GoodIntervalText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                     </Button>
 
                                     <!-- 4: Easy -->
-                                    <Button Grid.Column="3" HorizontalAlignment="Stretch" Padding="8,12" CornerRadius="10" Click="EasyButton_Click"
+                                    <Button Grid.Column="3" HorizontalAlignment="Stretch" Padding="6,10" CornerRadius="10" Click="EasyButton_Click"
                                             BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1.5"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                                         <StackPanel HorizontalAlignment="Center" Spacing="4">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                 <FontIcon Glyph="&#xEC4A;" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingEasy')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="4,1">
-                                                    <TextBlock Text="4" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingEasy')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="13" />
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="3,1">
+                                                    <TextBlock Text="4" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </Border>
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.EasyIntervalText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind ViewModel.EasyIntervalText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                     </Button>
                                 </Grid>
