@@ -51,6 +51,9 @@
   <data name="Nav_Settings" xml:space="preserve">
     <value>Cài đặt</value>
   </data>
+  <data name="Search_Placeholder" xml:space="preserve">
+    <value>Tìm kiếm trong Lexora... (Ctrl+F)</value>
+  </data>
   <data name="Dashboard_TotalWords" xml:space="preserve">
     <value>Tổng số từ</value>
   </data>

@@ -13,6 +13,7 @@ namespace Lexora.Presentation;
 public sealed partial class MainWindow : Window
 {
     private readonly IStartupOrchestrator _startupOrchestrator;
+    private readonly ILocalizationService _localizationService;
     private CancellationTokenSource? _startupCts;
 
     public MainWindow()
@@ -35,6 +36,10 @@ public sealed partial class MainWindow : Window
         SetWindowAndTaskbarIcon();
 
         _startupOrchestrator = App.Current.Services.GetRequiredService<IStartupOrchestrator>();
+        _localizationService = App.Current.Services.GetRequiredService<ILocalizationService>();
+
+        UpdateAppTitle();
+        _localizationService.LanguageChanged += (s, e) => DispatcherQueue.TryEnqueue(UpdateAppTitle);
 
         // Wire up cancellation on window close
         Closed += OnWindowClosed;
@@ -143,7 +148,7 @@ public sealed partial class MainWindow : Window
 
             // Run entrance animation and backend initialization concurrently
             var entranceTask = SplashOverlay.PlayEntranceAsync();
-            var minDisplayTask = Task.Delay(1100, ct);
+            var minDisplayTask = Task.Delay(1350, ct);
             var initTask = _startupOrchestrator.InitializeAppAsync(ct);
 
             // Wait for backend initialization
@@ -199,5 +204,12 @@ public sealed partial class MainWindow : Window
             DestroyIcon(_hIconBig);
             _hIconBig = IntPtr.Zero;
         }
+    }
+
+    private void UpdateAppTitle()
+    {
+        var title = _localizationService.GetString("AppTitle");
+        Title = title;
+        AppTitleTextBlock.Text = title;
     }
 }

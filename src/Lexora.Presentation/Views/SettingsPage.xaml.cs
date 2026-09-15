@@ -9,16 +9,19 @@ namespace Lexora.Presentation.Views;
 public sealed partial class SettingsPage : Page
 {
     public SettingsViewModel ViewModel { get; }
+    public Lexora.Presentation.Services.ILocalizationService Loc { get; }
 
     public SettingsPage()
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<SettingsViewModel>();
+        Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
     }
 
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.InitializeAsync();
+        UpdateLanguageButtons();
 
         SpeechRateCombo.SelectedIndex = ViewModel.SpeechRate switch
         {
@@ -27,6 +30,19 @@ public sealed partial class SettingsPage : Page
             <= 1.35 => 2,
             _ => 3
         };
+    }
+
+    private void UpdateLanguageButtons()
+    {
+        bool isVi = Loc.CurrentLanguage == "vi-VN";
+        if (App.Current.Resources.TryGetValue(isVi ? "AccentButtonStyle" : "DefaultButtonStyle", out var viStyle) && viStyle is Style vs)
+        {
+            LangViButton.Style = vs;
+        }
+        if (App.Current.Resources.TryGetValue(!isVi ? "AccentButtonStyle" : "DefaultButtonStyle", out var enStyle) && enStyle is Style es)
+        {
+            LangEnButton.Style = es;
+        }
     }
 
     private async void SpeechRateCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -58,11 +74,13 @@ public sealed partial class SettingsPage : Page
     private void LangViButton_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.ChangeLanguage("vi-VN");
+        UpdateLanguageButtons();
     }
 
     private void LangEnButton_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.ChangeLanguage("en-US");
+        UpdateLanguageButtons();
     }
 
     private async void AutoPlayToggle_Toggled(object sender, RoutedEventArgs e)

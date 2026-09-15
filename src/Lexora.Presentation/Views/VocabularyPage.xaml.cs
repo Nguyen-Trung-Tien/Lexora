@@ -12,11 +12,16 @@ namespace Lexora.Presentation.Views;
 public sealed partial class VocabularyPage : Page
 {
     public VocabularyViewModel ViewModel { get; }
+    public Lexora.Presentation.Services.ILocalizationService Loc { get; }
+    private bool _isInitializing = true;
 
     public VocabularyPage()
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<VocabularyViewModel>();
+        Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
+
+        _isInitializing = true;
 
         // Populate Level combo
         var levels = new List<object> { "All Levels" };
@@ -50,9 +55,11 @@ public sealed partial class VocabularyPage : Page
 
         Loaded += async (s, e) =>
         {
+            _isInitializing = true;
             await ViewModel.InitializeAsync();
             PopulateTopicFilterCombo();
             UpdateViewModeButtons();
+            _isInitializing = false;
         };
     }
 
@@ -110,6 +117,7 @@ public sealed partial class VocabularyPage : Page
 
     private async void TopicFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isInitializing) return;
         if (TopicFilterCombo.SelectedItem is ComboBoxItem cbi && cbi.Tag is Guid topicId)
         {
             ViewModel.SelectedTopicId = topicId;
@@ -123,6 +131,7 @@ public sealed partial class VocabularyPage : Page
 
     private async void LevelFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isInitializing) return;
         if (LevelFilterCombo.SelectedItem is CefrLevel level)
         {
             ViewModel.SelectedLevel = level;
@@ -136,6 +145,7 @@ public sealed partial class VocabularyPage : Page
 
     private async void PosFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isInitializing) return;
         if (PosFilterCombo.SelectedItem is PartOfSpeech pos)
         {
             ViewModel.SelectedPartOfSpeech = pos;
@@ -149,6 +159,7 @@ public sealed partial class VocabularyPage : Page
 
     private async void StatusFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isInitializing) return;
         if (StatusFilterCombo.SelectedItem is LearningStatus status)
         {
             ViewModel.SelectedStatus = status;
@@ -162,6 +173,7 @@ public sealed partial class VocabularyPage : Page
 
     private async void SortCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isInitializing) return;
         switch (SortCombo.SelectedIndex)
         {
             case 0: // Term A-Z

@@ -9,11 +9,13 @@ namespace Lexora.Presentation.Views;
 public sealed partial class GrammarPage : Page
 {
     public GrammarViewModel ViewModel { get; }
+    public Lexora.Presentation.Services.ILocalizationService Loc { get; }
 
     public GrammarPage()
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<GrammarViewModel>();
+        Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
 
         _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
         _searchDebounceTimer.Tick += async (s, e) =>
@@ -129,7 +131,9 @@ public sealed partial class GrammarPage : Page
 
     public string GetFeedbackTitle(bool isCorrect)
     {
-        return isCorrect ? "Correct!" : "Incorrect!";
+        return isCorrect 
+            ? (Loc.CurrentLanguage == "vi-VN" ? "Chính xác! 🎉" : "Correct! 🎉")
+            : (Loc.CurrentLanguage == "vi-VN" ? "Chưa chính xác!" : "Incorrect!");
     }
 
     private void AddRuleAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)

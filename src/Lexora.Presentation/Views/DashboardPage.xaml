@@ -8,94 +8,162 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
-        <StackPanel Spacing="24" MaxWidth="1100" HorizontalAlignment="Center">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20">
+        <StackPanel Spacing="24" MaxWidth="1180" HorizontalAlignment="Center">
             
             <!-- Loading Ring Overlay -->
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                           Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                          Width="40" Height="40" HorizontalAlignment="Center" />
+                          Width="36" Height="36" HorizontalAlignment="Center" />
 
-            <!-- Header & Welcome Banner -->
-            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="24">
+            <!-- HERO BANNER: Elegant Fluent Surface Card with 1-Click Quick Actions -->
+            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="16" Padding="28,24">
                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Welcome back to Lexora" Foreground="White" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
-                        <TextBlock Text="Master vocabulary through Spaced Repetition (SM-2), track exam goals, and build consistent habits."
-                                   Foreground="White" Opacity="0.9" Style="{ThemeResource BodyTextBlockStyle}" />
+                    <StackPanel Spacing="8" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="10" Padding="8,3">
+                                <TextBlock Text="SPACED REPETITION (SM-2)" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
+                            </Border>
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="8,3">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <FontIcon Glyph="&#xEC08;" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                    <TextBlock Text="Daily Consistency" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <TextBlock Text="Welcome back to Lexora" Style="{ThemeResource TitleTextBlockStyle}" FontSize="26" FontWeight="Bold" />
+                        <TextBlock Text="Master English vocabulary scientifically with active recall drills, spaced repetition, and exam readiness tracking."
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" MaxWidth="620" TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                        <Button Click="StartReviewButton_Click" Background="White" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontWeight="Bold" Padding="18,10" CornerRadius="8">
+                    <!-- Quick Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Button Click="StartReviewButton_Click"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                FontWeight="Bold" Padding="20,12" CornerRadius="10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE895;" FontSize="15" />
-                                <TextBlock Text="Start Review" />
+                                <FontIcon Glyph="&#xE895;" FontSize="16" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_StartReview')}" FontSize="14" />
+                                <Border Background="{ThemeResource TextOnAccentFillColorPrimaryBrush}" CornerRadius="10" Padding="6,1" Margin="4,0,0,0"
+                                        Visibility="{x:Bind ViewModel.DueToday, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                                    <TextBlock Text="{x:Bind ViewModel.DueToday, Mode=OneWay}" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontSize="11" FontWeight="Bold" />
+                                </Border>
                             </StackPanel>
                         </Button>
-                        <Button Click="StartPracticeButton_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontWeight="SemiBold" Padding="16,10" CornerRadius="8">
+
+                        <Button Click="StartPracticeButton_Click"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                FontWeight="SemiBold" Padding="18,12" CornerRadius="10">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE768;" FontSize="15" />
-                                <TextBlock Text="Practice Test" />
+                                <FontIcon Glyph="&#xE765;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_QuickPractice')}" FontSize="14" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- 4 Hero Metric Cards -->
+            <!-- 4 HERO METRIC CARDS -->
             <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="16">
-                <!-- Total Words -->
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                    <StackPanel Spacing="8">
-                        <FontIcon Glyph="&#xE82D;" FontSize="22" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left" />
-                        <TextBlock Text="Total Vocabulary" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
-                        <TextBlock Text="{x:Bind ViewModel.TotalWords, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="28" FontWeight="Bold" />
+                <!-- Total Vocabulary -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="14" Padding="20,18">
+                    <StackPanel Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Border Width="38" Height="38" CornerRadius="19" Background="{ThemeResource SubtleFillColorSecondaryBrush}" HorizontalAlignment="Left">
+                                <FontIcon Glyph="&#xE82D;" FontSize="18" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="6,2">
+                                <TextBlock Text="Active" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.TotalWords, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="30" FontWeight="Bold" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_TotalWords')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                     </StackPanel>
                 </Border>
 
                 <!-- Due Today -->
-                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                    <StackPanel Spacing="8">
-                        <FontIcon Glyph="&#xE823;" FontSize="22" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Left" />
-                        <TextBlock Text="Due For Review" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
-                        <TextBlock Text="{x:Bind ViewModel.DueToday, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="14" Padding="20,18">
+                    <StackPanel Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Border Width="38" Height="38" CornerRadius="19" Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" HorizontalAlignment="Left">
+                                <FontIcon Glyph="&#xE823;" FontSize="18" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <Border Grid.Column="1" Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" CornerRadius="6" Padding="6,2">
+                                <TextBlock Text="Urgent" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.DueToday, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="30" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DueToday')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                     </StackPanel>
                 </Border>
 
                 <!-- Mastered Words -->
-                <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                    <StackPanel Spacing="8">
-                        <FontIcon Glyph="&#xE73E;" FontSize="22" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Left" />
-                        <TextBlock Text="Mastered Words" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
-                        <TextBlock Text="{x:Bind ViewModel.Mastered, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="14" Padding="20,18">
+                    <StackPanel Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Border Width="38" Height="38" CornerRadius="19" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" HorizontalAlignment="Left">
+                                <FontIcon Glyph="&#xE73E;" FontSize="18" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <Border Grid.Column="1" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="6" Padding="6,2">
+                                <TextBlock Text="Retention" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.Mastered, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="30" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_Mastered')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                     </StackPanel>
                 </Border>
 
                 <!-- Day Streak -->
-                <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                    <StackPanel Spacing="8">
-                        <FontIcon Glyph="&#xEC58;" FontSize="22" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Left" />
-                        <TextBlock Text="Daily Streak" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="14" Padding="20,18">
+                    <StackPanel Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Border Width="38" Height="38" CornerRadius="19" Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" HorizontalAlignment="Left">
+                                <FontIcon Glyph="&#xEC08;" FontSize="18" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <Border Grid.Column="1" Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" CornerRadius="6" Padding="6,2">
+                                <TextBlock Text="Habit" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="{x:Bind ViewModel.StreakDays, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="28" FontWeight="Bold" />
-                            <TextBlock Text="days" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                            <TextBlock Text="{x:Bind ViewModel.StreakDays, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontSize="30" FontWeight="Bold" />
+                            <TextBlock Text="days" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,5" FontWeight="SemiBold" />
                         </StackPanel>
+                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_Streak')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                     </StackPanel>
                 </Border>
             </Grid>
 
-            <!-- SECTION 1: Memory Status Breakdown & Spaced Repetition -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="20">
-                <StackPanel Spacing="16">
+            <!-- SECTION 1: Memory Status Breakdown & Retention -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="14" Padding="24">
+                <StackPanel Spacing="18">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="2">
-                            <TextBlock Text="Memory Retention Distribution (SM-2)" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
-                            <TextBlock Text="Distribution of vocabulary across spaced repetition learning stages" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionDistribution')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <TextBlock Text="Accuracy:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
-                            <TextBlock Text="{x:Bind ViewModel.AccuracyRate, Mode=OneWay}" FontWeight="Bold" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                            <TextBlock Text="%" FontWeight="Bold" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                            <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="8" Padding="10,4">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_OverallAccuracy')}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="12" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Bind ViewModel.AccuracyRate, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                    <TextBlock Text="%" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Grid>
 
@@ -103,7 +171,7 @@
                     <ItemsControl ItemsSource="{x:Bind ViewModel.StatusBreakdown}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="dto:LearningStatusDistributionDto">
-                                <Grid ColumnDefinitions="130,*,60,60" Margin="0,4,0,6" VerticalAlignment="Center">
+                                <Grid ColumnDefinitions="140,*,70,60" Margin="0,6" VerticalAlignment="Center">
                                     <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
                                     <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="8" CornerRadius="4" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="13" />
@@ -118,18 +186,19 @@
                 </StackPanel>
             </Border>
 
-            <!-- SECTION 2: Exam Readiness Progress (TOEIC, VSTEP, IELTS) -->
-            <!-- SECTION 2: Exam Readiness Progress (TOEIC, VSTEP, IELTS) -->
-            <StackPanel Spacing="12">
-                <TextBlock Text="Exam Target Progress" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+            <!-- SECTION 2: Exam Target Progress -->
+            <StackPanel Spacing="14">
+                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_ExamTargetProgress')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.ExamProgressList}">
                     <ItemsRepeater.Layout>
-                        <UniformGridLayout Orientation="Horizontal" MinItemWidth="280" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
+                        <UniformGridLayout Orientation="Horizontal" MinItemWidth="300" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="dto:ExamProgressDto">
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                                <StackPanel Spacing="12">
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="12" Padding="20">
+                                <StackPanel Spacing="14">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <StackPanel Spacing="2">
                                             <TextBlock Text="{x:Bind ExamName}" FontWeight="Bold" FontSize="16" />
@@ -137,8 +206,8 @@
                                         </StackPanel>
                                         <Border Grid.Column="1" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,4">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{x:Bind ProgressPercentage}" Foreground="White" FontWeight="Bold" FontSize="12" />
-                                                <TextBlock Text="%" Foreground="White" FontWeight="Bold" FontSize="12" />
+                                                <TextBlock Text="{x:Bind ProgressPercentage}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="12" />
+                                                <TextBlock Text="%" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="12" />
                                             </StackPanel>
                                         </Border>
                                     </Grid>
@@ -167,25 +236,26 @@
             </StackPanel>
 
             <!-- SECTION 3: Study Activity Heatmap (Last 30 Days) -->
-            <!-- SECTION 3: Study Activity Heatmap (Last 30 Days) -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="14" Padding="24">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="2">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xEC08;" FontSize="16" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                <TextBlock Text="Daily Study Heatmap (Last 30 Days)" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapTitle')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
                             </StackPanel>
-                            <TextBlock Text="Your daily review consistency and habit streak tracking" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <TextBlock Text="Less" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapLess')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel0Brush}" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel1Brush}" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel2Brush}" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel3Brush}" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel4Brush}" />
-                            <TextBlock Text="More" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapMore')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Grid>
 
@@ -213,27 +283,27 @@
                     </ScrollViewer>
 
                     <Grid ColumnDefinitions="*,*,*" Margin="0,4,0,0">
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="12,8" Margin="0,0,6,0">
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="14,10" Margin="0,0,6,0">
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="Reviewed Today:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_ReviewedToday')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                 <TextBlock Text="{x:Bind ViewModel.StudiedTodayCount, Mode=OneWay}" FontWeight="Bold" FontSize="13" />
                             </StackPanel>
                         </Border>
-                        <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="12,8" Margin="3,0,3,0">
+                        <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="14,10" Margin="3,0,3,0">
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <FontIcon Glyph="&#xEC08;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                <TextBlock Text="Current Streak:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <FontIcon Glyph="&#xEC08;" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_CurrentStreak')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                 <TextBlock Text="{x:Bind ViewModel.StreakDays, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                <TextBlock Text="days" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DaysUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             </StackPanel>
                         </Border>
-                        <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="12,8" Margin="6,0,0,0">
+                        <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="14,10" Margin="6,0,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                <FontIcon Glyph="&#xE735;" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                <TextBlock Text="Best Streak:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <FontIcon Glyph="&#xE735;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_BestStreak')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                 <TextBlock Text="{x:Bind ViewModel.LongestStreakDays, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                <TextBlock Text="days" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DaysUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -243,15 +313,17 @@
             <!-- SECTION 4: CEFR & POS Breakdown -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
                 <!-- CEFR Breakdown -->
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="CEFR Level Breakdown" FontWeight="Bold" FontSize="15" />
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="12" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_CefrBreakdown')}" FontWeight="Bold" FontSize="15" />
                         <ItemsControl ItemsSource="{x:Bind ViewModel.CefrDistributionList}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="dto:CefrLevelDistributionDto">
-                                    <Grid ColumnDefinitions="50,*,40" Margin="0,3,0,3" VerticalAlignment="Center">
+                                    <Grid ColumnDefinitions="50,*,40" Margin="0,4" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind Level}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
-                                        <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="6" CornerRadius="3" VerticalAlignment="Center" Margin="8,0" />
+                                        <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="6" CornerRadius="3" VerticalAlignment="Center" Margin="10,0" />
                                         <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12" />
                                     </Grid>
                                 </DataTemplate>
@@ -261,15 +333,17 @@
                 </Border>
 
                 <!-- POS Breakdown -->
-                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Part of Speech Breakdown" FontWeight="Bold" FontSize="15" />
+                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="12" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_PosBreakdown')}" FontWeight="Bold" FontSize="15" />
                         <ItemsControl ItemsSource="{x:Bind ViewModel.PosDistributionList}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="dto:PosDistributionDto">
-                                    <Grid ColumnDefinitions="110,*,40" Margin="0,3,0,3" VerticalAlignment="Center">
+                                    <Grid ColumnDefinitions="110,*,40" Margin="0,4" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind PartOfSpeech}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
-                                        <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="6" CornerRadius="3" VerticalAlignment="Center" Margin="8,0" />
+                                        <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="6" CornerRadius="3" VerticalAlignment="Center" Margin="10,0" />
                                         <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12" />
                                     </Grid>
                                 </DataTemplate>
@@ -280,13 +354,15 @@
             </Grid>
 
             <!-- SECTION 5: Recent Sessions -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                <StackPanel Spacing="12">
-                    <TextBlock Text="Recent Learning &amp; Test Sessions" FontWeight="Bold" FontSize="15" />
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="12" Padding="20">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RecentSessions')}" FontWeight="Bold" FontSize="15" />
                     <ListView ItemsSource="{x:Bind ViewModel.RecentSessionsList}" SelectionMode="None">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="dto:StudySessionDto">
-                                <Grid ColumnDefinitions="160,*,Auto,Auto" Padding="6,8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                <Grid ColumnDefinitions="160,*,Auto,Auto" Padding="8,10" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind SessionType}" FontWeight="SemiBold" FontSize="13" />
                                         <TextBlock Text="{x:Bind StartedAtText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />

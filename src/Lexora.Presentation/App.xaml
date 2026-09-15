@@ -9,6 +9,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///Themes/DesignSystem.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <ResourceDictionary.ThemeDictionaries>
@@ -46,6 +47,7 @@
             <converters:HeatmapLevelToForegroundConverter x:Key="HeatmapLevelToForegroundConverter" />
             <converters:ScoreTierToBrushConverter x:Key="ScoreTierToBrushConverter" />
             <converters:CorrectnessToBrushConverter x:Key="CorrectnessToBrushConverter" />
+            <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
 
             <!-- Fallback Button Style -->
             <Style x:Key="DefaultButtonStyle" TargetType="Button" />

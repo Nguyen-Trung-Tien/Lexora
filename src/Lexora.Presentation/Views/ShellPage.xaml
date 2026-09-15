@@ -67,7 +67,7 @@
                          Margin="16,8,16,0"
                          CornerRadius="8">
                     <InfoBar.ActionButton>
-                        <Button Content="Review Now" Style="{ThemeResource AccentButtonStyle}" Click="ReviewNowButton_Click" />
+                        <Button x:Name="ReviewNowBtn" Content="Review Now" Style="{ThemeResource AccentButtonStyle}" Click="ReviewNowButton_Click" />
                     </InfoBar.ActionButton>
                 </InfoBar>
 

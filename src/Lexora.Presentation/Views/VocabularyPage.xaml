@@ -14,69 +14,116 @@
         <KeyboardAccelerator Key="Delete" Invoked="DeleteWordAccelerator_Invoked" />
     </Page.KeyboardAccelerators>
 
-    <Grid RowDefinitions="Auto,Auto,*" Padding="24" RowSpacing="12">
-        <!-- Top Action Bar -->
+    <Grid RowDefinitions="Auto,Auto,*" Padding="24,18" RowSpacing="14">
+        <!-- ========================================================= -->
+        <!-- TOP COMMAND BAR: Segmented Mode, Search, Actions          -->
+        <!-- ========================================================= -->
         <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
-            <!-- Segmented View Switcher -->
-            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="3">
-                <StackPanel Orientation="Horizontal" Spacing="2">
-                    <Button x:Name="BtnViewList" Click="BtnViewList_Click" CornerRadius="6" Padding="12,6">
+            <!-- Segmented View Mode Switcher -->
+            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Button x:Name="BtnViewList" Click="BtnViewList_Click" CornerRadius="8" Padding="14,6">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE8C0;" FontSize="13" />
-                            <TextBlock Text="Danh sách từ" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_ViewList')}" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnViewUnits" Click="BtnViewUnits_Click" CornerRadius="6" Padding="12,6">
+                    <Button x:Name="BtnViewUnits" Click="BtnViewUnits_Click" CornerRadius="8" Padding="14,6">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE8F1;" FontSize="13" />
-                            <TextBlock Text="Unit ngữ cảnh" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_ViewUnits')}" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
             </Border>
 
-            <TextBox Grid.Column="1" x:Name="SearchBox" PlaceholderText="Tìm kiếm từ vựng, ngữ nghĩa, phiên âm..."
+            <!-- Search Box with Live Debounce -->
+            <TextBox Grid.Column="1" x:Name="SearchBox"
+                     PlaceholderText="{x:Bind Loc.GetString('Vocab_SearchPlaceholder')}"
                      Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay}"
-                     TextChanged="SearchBox_TextChanged" CornerRadius="8" />
+                     TextChanged="SearchBox_TextChanged" CornerRadius="10" Padding="14,8" />
 
-            <Button Grid.Column="2" Content="+ Add Word" ToolTipService.ToolTip="Thêm từ mới (Ctrl+N)" Style="{ThemeResource AccentButtonStyle}" CornerRadius="8" Padding="14,6" Click="AddWordButton_Click" />
+            <!-- Add Word Primary Button -->
+            <Button Grid.Column="2" Style="{ThemeResource AccentButtonStyle}"
+                    ToolTipService.ToolTip="Add New Word (Ctrl+N)"
+                    CornerRadius="10" Padding="16,8" Click="AddWordButton_Click">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE710;" FontSize="14" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_AddWord')}" FontWeight="Bold" />
+                </StackPanel>
+            </Button>
 
-            <DropDownButton Grid.Column="3" Content="Import / Export" CornerRadius="8" Padding="14,6">
+            <!-- Import / Export DropDown -->
+            <DropDownButton Grid.Column="3" CornerRadius="10" Padding="14,8">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE8B7;" FontSize="14" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontWeight="SemiBold" />
+                </StackPanel>
                 <DropDownButton.Flyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem Text="Export to JSON" Click="ExportJson_Click" />
-                        <MenuFlyoutItem Text="Export to CSV" Click="ExportCsv_Click" />
+                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportJson')}" Click="ExportJson_Click" />
+                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportCsv')}" Click="ExportCsv_Click" />
                         <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="Import from JSON..." Click="ImportJson_Click" />
-                        <MenuFlyoutItem Text="Import from CSV..." Click="ImportCsv_Click" />
+                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportJson')}" Click="ImportJson_Click" />
+                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportCsv')}" Click="ImportCsv_Click" />
                     </MenuFlyout>
                 </DropDownButton.Flyout>
             </DropDownButton>
         </Grid>
 
-        <!-- Filters & Sorting Bar (List Mode Only) -->
-        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled"
-                      Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-            <StackPanel Orientation="Horizontal" Spacing="10" Padding="0,2,0,6">
-                <ComboBox x:Name="TopicFilterCombo" PlaceholderText="Unit / Chủ đề" SelectionChanged="TopicFilterCombo_SelectionChanged" Width="180" CornerRadius="6" />
-                <ComboBox x:Name="LevelFilterCombo" PlaceholderText="CEFR Level" SelectionChanged="LevelFilterCombo_SelectionChanged" Width="130" CornerRadius="6" />
-                <ComboBox x:Name="PosFilterCombo" PlaceholderText="Part of Speech" SelectionChanged="PosFilterCombo_SelectionChanged" Width="140" CornerRadius="6" />
-                <ComboBox x:Name="StatusFilterCombo" PlaceholderText="Status" SelectionChanged="StatusFilterCombo_SelectionChanged" Width="140" CornerRadius="6" />
-                <ComboBox x:Name="SortCombo" PlaceholderText="Sort by" SelectionChanged="SortCombo_SelectionChanged" Width="150" CornerRadius="6" />
-                <Button Content="Reset Filters" Click="ResetFiltersButton_Click" CornerRadius="6" />
-                <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" VerticalAlignment="Center" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" Margin="8,0,0,0" />
-            </StackPanel>
-        </ScrollViewer>
+        <!-- ========================================================= -->
+        <!-- FILTERS & SORTING BAR (Clean, non-overflowing Row 1)      -->
+        <!-- ========================================================= -->
+        <Border Grid.Row="1" Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1" CornerRadius="10" Padding="12,8"
+                Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="8">
+                <ComboBox x:Name="TopicFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllTopics')}"
+                          SelectionChanged="TopicFilterCombo_SelectionChanged" Width="145" CornerRadius="8" />
 
-        <!-- Master-Detail Content (List View) -->
-        <Grid Grid.Row="2" ColumnDefinitions="380,*" ColumnSpacing="20"
+                <ComboBox Grid.Column="1" x:Name="LevelFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllLevels')}"
+                          SelectionChanged="LevelFilterCombo_SelectionChanged" Width="115" CornerRadius="8" />
+
+                <ComboBox Grid.Column="2" x:Name="PosFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllPos')}"
+                          SelectionChanged="PosFilterCombo_SelectionChanged" Width="120" CornerRadius="8" />
+
+                <ComboBox Grid.Column="3" x:Name="StatusFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllStatus')}"
+                          SelectionChanged="StatusFilterCombo_SelectionChanged" Width="120" CornerRadius="8" />
+
+                <ComboBox Grid.Column="4" x:Name="SortCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_SortBy')}"
+                          SelectionChanged="SortCombo_SelectionChanged" Width="130" CornerRadius="8" />
+
+                <Button Grid.Column="5" Content="{x:Bind Loc.GetString('Action_Reset')}" Click="ResetFiltersButton_Click" CornerRadius="8" Padding="12,6" />
+
+                <Border Grid.Column="7" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{x:Bind ViewModel.Words.Count, Mode=OneWay}" FontWeight="Bold" FontSize="12" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Vocab_WordsCount')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ======================================================== -->
+        <!-- MASTER-DETAIL CONTENT (Word List Mode: Non-Overlapping Layout) -->
+        <!-- ======================================================== -->
+        <Grid Grid.Row="2" ColumnDefinitions="320,*" ColumnSpacing="18"
               Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            
             <!-- Left: Word List -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="12">
                 <Grid RowDefinitions="Auto,*">
-                    <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                        <TextBlock Text="Vocabulary" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.Words.Count, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
+                    <Grid Padding="16,14" ColumnDefinitions="*,Auto" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                        <TextBlock Text="{x:Bind Loc.GetString('Vocab_Title')}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" />
+                        <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,2">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{x:Bind ViewModel.Words.Count, Mode=OneWay}" FontWeight="Bold" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_WordsCount')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            </StackPanel>
+                        </Border>
                     </Grid>
 
                     <Grid Grid.Row="1">
@@ -86,49 +133,36 @@
                                       Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
                         <!-- Empty State -->
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="24"
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="24"
                                     Visibility="{x:Bind ViewModel.Words.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
-                            <FontIcon Glyph="&#xE721;" FontSize="36" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
-                            <TextBlock Text="No words found" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Text="Try adjusting your filters or search query." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" />
-                            <Button Content="Reset Filters" HorizontalAlignment="Center" Margin="0,6,0,0" Click="ResetFiltersButton_Click" />
+                            <FontIcon Glyph="&#xE82D;" FontSize="36" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptyTitle')}" FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptySubtitle')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
                         </StackPanel>
 
-                        <ListView ItemsSource="{x:Bind ViewModel.Words, Mode=OneWay}"
+                        <!-- Words ListView -->
+                        <ListView x:Name="WordsListView"
+                                  ItemsSource="{x:Bind ViewModel.Words, Mode=OneWay}"
                                   SelectedItem="{x:Bind ViewModel.SelectedWord, Mode=TwoWay}"
-                                  Visibility="{x:Bind ViewModel.Words.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                                  Visibility="{x:Bind ViewModel.Words.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}"
+                                  Padding="6">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="dto:WordDto">
-                                    <Grid Padding="8,10" ColumnDefinitions="*,Auto,Auto">
-                                        <StackPanel Spacing="4">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="15" />
-                                                <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="6,2">
-                                                    <TextBlock Text="{x:Bind PrimaryPartOfSpeech}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Border>
-                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Visibility="{x:Bind LearningStatus, Converter={StaticResource NullToVisibilityConverter}}">
-                                                    <TextBlock Text="{x:Bind LearningStatus}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
-                                                </Border>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <TextBlock Text="{x:Bind PhoneticUk}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                <TextBlock Text="•" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                                                <TextBlock Text="{x:Bind Confidence}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                <TextBlock Text="% acc" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="-6,0,0,0" />
-                                            </StackPanel>
+                                    <Grid Padding="8,8" ColumnDefinitions="Auto,*,Auto">
+                                        <!-- Review Status Dot Indicator -->
+                                        <Ellipse Width="7" Height="7" Margin="0,0,10,0" VerticalAlignment="Center"
+                                                 Fill="{x:Bind LearningStatus, Converter={StaticResource StatusToBrushConverter}}" />
+
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,8,0">
+                                            <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{x:Bind PhoneticUk}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
 
-                                        <!-- Quick audio speaker -->
-                                        <Button Grid.Column="1" VerticalAlignment="Center" Margin="4,0" Padding="6,4"
-                                                Background="Transparent" BorderThickness="0"
-                                                ToolTipService.ToolTip="Listen UK pronunciation"
-                                                Click="QuickListenButton_Click">
-                                            <FontIcon Glyph="&#xE768;" FontSize="14" />
-                                        </Button>
-
-                                        <!-- Level badge -->
-                                        <Border Grid.Column="2" VerticalAlignment="Center" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
-                                            <TextBlock Text="{x:Bind Level}" FontSize="11" Foreground="White" FontWeight="SemiBold" />
+                                        <!-- Level Badge -->
+                                        <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                                CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Level}" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         </Border>
                                     </Grid>
                                 </DataTemplate>
@@ -138,190 +172,204 @@
                 </Grid>
             </Border>
 
-            <!-- Right: Word Detail -->
-            <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="24">
+            <!-- Right: Word Detail (Oxford / Cambridge Dictionary Style) -->
+            <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="12" Padding="28">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid>
-                        <!-- Detail Empty State -->
+                        <!-- Empty State (No word selected) -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14" Padding="40"
                                     Visibility="{x:Bind ViewModel.SelectedWord, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
-                            <Border Width="64" Height="64" CornerRadius="16" Background="{ThemeResource LayerFillColorDefaultBrush}" Padding="8" HorizontalAlignment="Center" Opacity="0.85">
+                            <Border Width="64" Height="64" CornerRadius="18" Background="{ThemeResource LayerFillColorDefaultBrush}" Padding="8" HorizontalAlignment="Center">
                                 <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
                             </Border>
-                            <TextBlock Text="Select a Word" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
-                            <TextBlock Text="Select any vocabulary item on the left list to inspect full definitions, examples, CEFR level, and listen to pronunciation audio."
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" MaxWidth="360" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_SelectPromptTitle')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_SelectPromptSubtitle')}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" MaxWidth="380" TextWrapping="Wrap" />
                         </StackPanel>
 
-                        <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.SelectedWord, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
-                        <!-- Term, Pronunciation & Actions -->
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Spacing="6">
-                                <TextBlock Text="{x:Bind ViewModel.SelectedWord.Term, Mode=OneWay}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="32" />
-                                <StackPanel Orientation="Horizontal" Spacing="16">
-                                    <!-- UK Audio Button -->
-                                    <Button Padding="8,4" Click="PlayUkAudio_Click" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
-                                            <TextBlock Text="UK" FontWeight="Bold" />
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUk, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                    </Button>
+                        <!-- Selected Word Content -->
+                        <StackPanel Spacing="18" Visibility="{x:Bind ViewModel.SelectedWord, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                            
+                            <!-- Header with Title & Action Buttons -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedWord.Term, Mode=OneWay}"
+                                               Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="30" TextWrapping="Wrap" />
 
-                                    <!-- US Audio Button -->
-                                    <Button Padding="8,4" Click="PlayUsAudio_Click" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                            <TextBlock Text="US" FontWeight="Bold" />
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUs, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                    </Button>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!-- Test, Review, Edit & Delete Buttons -->
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="12,6" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="White" FontWeight="Bold" />
-                                </Border>
-                                <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="Luyện ngắt quãng (SM-2) từ này" CornerRadius="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE823;" FontSize="13" />
-                                        <TextBlock Text="Ôn SM-2" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Click="TestThisWordButton_Click" ToolTipService.ToolTip="Kiểm tra từ này trong bài test" CornerRadius="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE765;" FontSize="13" />
-                                        <TextBlock Text="Kiểm tra" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Click="EditWordButton_Click" ToolTipService.ToolTip="Chỉnh sửa từ vựng (Ctrl+E)" CornerRadius="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE70F;" FontSize="13" />
-                                        <TextBlock Text="Sửa" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Foreground="{ThemeResource SystemFillColorCriticalBrush}" Click="DeleteWordButton_Click" ToolTipService.ToolTip="Xóa từ vựng (Delete)" CornerRadius="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE74D;" FontSize="13" />
-                                        <TextBlock Text="Xóa" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-
-                        <!-- Topic & Exam Badges -->
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedWord.Topics, Mode=OneWay}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="6" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="8,3">
-                                            <TextBlock Text="{Binding}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="11" FontWeight="SemiBold" />
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                            <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedWord.ExamTags, Mode=OneWay}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="6" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="4" Padding="8,3">
-                                            <TextBlock Text="{Binding}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="11" FontWeight="Bold" />
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-
-                        <MenuFlyoutSeparator />
-
-                        <!-- Meanings List -->
-                        <TextBlock Text="Definitions &amp; Explanations" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedWord.Meanings, Mode=OneWay}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="dto:WordMeaningDto">
-                                    <Border Margin="0,0,0,16" Padding="16" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8">
-                                        <StackPanel Spacing="8">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
-                                                    <TextBlock Text="{x:Bind PartOfSpeech}" FontSize="11" Foreground="White" FontWeight="Bold" />
-                                                </Border>
-                                                <TextBlock Text="{x:Bind DefinitionVi}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" />
+                                    <!-- Phonetics & Pronunciation audio buttons -->
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <!-- UK Audio Button -->
+                                        <Button Padding="10,6" Click="PlayUkAudio_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                                <TextBlock Text="UK" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUk, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             </StackPanel>
+                                        </Button>
 
-                                            <TextBlock Text="{x:Bind DefinitionEn}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
-                                            <TextBlock Text="{x:Bind Explanation}" FontStyle="Italic" FontSize="12" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                        <!-- US Audio Button -->
+                                        <Button Padding="10,6" Click="PlayUsAudio_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="US" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUs, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
 
-                                            <!-- Examples -->
-                                            <TextBlock Text="Contextual Examples:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
-                                            <ItemsControl ItemsSource="{x:Bind Examples}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate x:DataType="dto:ExampleSentenceDto">
-                                                        <Border Margin="0,2,0,4" Padding="10,6" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="6">
-                                                            <StackPanel Spacing="2">
-                                                                <TextBlock Text="{x:Bind SentenceEn}" FontWeight="SemiBold" FontSize="13" />
-                                                                <TextBlock Text="{x:Bind SentenceVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                                            </StackPanel>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
+                                <!-- Action Buttons -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" />
                                     </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                    <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="Spaced Review (SM-2)" CornerRadius="8" Padding="10,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE823;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="Review" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Click="TestThisWordButton_Click" ToolTipService.ToolTip="Practice test" CornerRadius="8" Padding="10,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE765;" FontSize="13" />
+                                            <TextBlock Text="Test" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Click="EditWordButton_Click" ToolTipService.ToolTip="Edit word (Ctrl+E)" CornerRadius="8" Padding="10,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE70F;" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Action_Edit')}" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Foreground="{ThemeResource SystemFillColorCriticalBrush}" Click="DeleteWordButton_Click" ToolTipService.ToolTip="Delete word (Delete)" CornerRadius="8" Padding="10,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Action_Delete')}" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
 
-                        <!-- Notes Section (if any) -->
-                        <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="8" Padding="12"
-                                Visibility="{x:Bind ViewModel.SelectedWord.Notes, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="📝 Notes &amp; Collocations" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                <TextBlock Text="{x:Bind ViewModel.SelectedWord.Notes, Mode=OneWay}" Style="{ThemeResource BodyTextBlockStyle}" />
+                            <!-- Topic & Exam Badges -->
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedWord.Topics, Mode=OneWay}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,3">
+                                                <TextBlock Text="{Binding}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="11" FontWeight="SemiBold" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedWord.ExamTags, Mode=OneWay}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="6" Padding="8,3">
+                                                <TextBlock Text="{Binding}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="11" FontWeight="Bold" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
-                        </Border>
 
-                        <!-- Quick Memory Rating -->
-                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
-                            <Button Style="{ThemeResource AccentButtonStyle}" Click="RememberedButton_Click" CornerRadius="6" Padding="16,8">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="13" />
-                                    <TextBlock Text="Nhớ (Remembered)" FontWeight="SemiBold" />
+                            <MenuFlyoutSeparator />
+
+                            <!-- Meanings List -->
+                            <TextBlock Text="Definitions &amp; Explanations" FontWeight="Bold" FontSize="16" />
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedWord.Meanings, Mode=OneWay}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:WordMeaningDto">
+                                        <Border Margin="0,0,0,16" Padding="18,16" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                                            <StackPanel Spacing="10">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                                        <TextBlock Text="{x:Bind PartOfSpeech}" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" />
+                                                    </Border>
+                                                    <TextBlock Text="{x:Bind DefinitionVi}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                                </StackPanel>
+
+                                                <TextBlock Text="{x:Bind DefinitionEn}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
+                                                <TextBlock Text="{x:Bind Explanation}" FontStyle="Italic" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextWrapping="Wrap" />
+
+                                                <!-- Examples -->
+                                                <TextBlock Text="Contextual Examples:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                                                <ItemsControl ItemsSource="{x:Bind Examples}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="dto:ExampleSentenceDto">
+                                                            <Border Margin="0,2,0,4" Padding="12,8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                                                                <StackPanel Spacing="2">
+                                                                    <TextBlock Text="{x:Bind SentenceEn}" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
+                                                                    <TextBlock Text="{x:Bind SentenceVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Notes Section (if any) -->
+                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                    CornerRadius="10" Padding="16"
+                                    Visibility="{x:Bind ViewModel.SelectedWord.Notes, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_Notes')}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedWord.Notes, Mode=OneWay}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" />
                                 </StackPanel>
-                            </Button>
-                            <Button Click="NotRememberedButton_Click" CornerRadius="6" Padding="16,8">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                    <TextBlock Text="Chưa nhớ (Not Remembered)" />
-                                </StackPanel>
-                            </Button>
+                            </Border>
+
+                            <!-- Quick Memory Rating -->
+                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                                <Button Style="{ThemeResource AccentButtonStyle}" Click="RememberedButton_Click" CornerRadius="8" Padding="18,10">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE73E;" FontSize="14" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Action_Remembered')}" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Click="NotRememberedButton_Click" CornerRadius="8" Padding="18,10">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE711;" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Action_NotRemembered')}" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
                     </Grid>
                 </ScrollViewer>
             </Border>
         </Grid>
 
-        <!-- Context Units View -->
-        <Grid Grid.Row="2"
-              Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+        <!-- ======================================================== -->
+        <!-- CONTEXT UNITS VIEW                                       -->
+        <!-- ======================================================== -->
+        <Grid Grid.Row="2" Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Phân chia Từ vựng theo Unit Ngữ cảnh" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
-                            <TextBlock Text="Học từ theo ngữ cảnh thực tế (Chủ đề, Tình huống, Kỳ thi), theo dõi độ thành thạo và làm bài kiểm tra theo từng Unit."
+                            <TextBlock Text="Vocabulary Grouped by Context Units" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                            <TextBlock Text="Learn words by realistic topics and exam situations, track mastery percentage, and launch unit-based practice."
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                         </StackPanel>
                         <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
@@ -337,26 +385,26 @@
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="40"
                                 Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
                         <FontIcon Glyph="&#xE8F1;" FontSize="40" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
-                        <TextBlock Text="Chưa có Unit ngữ cảnh nào phù hợp" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                        <TextBlock Text="Hãy thêm từ vựng hoặc điều chỉnh từ khóa tìm kiếm để xem các Unit ngữ cảnh." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="No context units match your query" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        <TextBlock Text="Add vocabulary with topic tags or clear your search to explore units." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Cards Grid -->
                     <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredContextUnits, Mode=OneWay}"
                                    Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                         <ItemsRepeater.Layout>
-                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="340" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
+                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="320" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate x:DataType="dto:ContextUnitDto">
                                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="10" Padding="18">
+                                        BorderThickness="1" CornerRadius="12" Padding="20">
                                     <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
                                         <!-- Header: Icon, Name, Word Count Badge -->
                                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                            <Border Width="40" Height="40" CornerRadius="8"
-                                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                            <Border Width="42" Height="42" CornerRadius="10"
+                                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                     BorderThickness="1">
                                                 <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="18"
@@ -377,7 +425,7 @@
                                                     BorderThickness="1" CornerRadius="6" Padding="8,3">
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                                     <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="12" />
-                                                    <TextBlock Text="từ" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock Text="words" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </StackPanel>
                                             </Border>
                                         </Grid>
@@ -385,7 +433,7 @@
                                         <!-- Mastery Stats & Progress Bar -->
                                         <StackPanel Grid.Row="1" Spacing="6">
                                             <Grid ColumnDefinitions="*,Auto">
-                                                <TextBlock Text="Độ thành thạo" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="Mastery Level" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <TextBlock Grid.Column="1" Text="{x:Bind MasteryPercentage}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             </Grid>
                                             <ProgressBar Value="{x:Bind MasteryPercentage}" Maximum="100" Height="6" CornerRadius="3" />
@@ -393,12 +441,12 @@
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                                     <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                                     <TextBlock Text="{x:Bind RememberedWords}" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                                    <TextBlock Text="đã thuộc" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock Text="mastered" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
                                                     <FontIcon Glyph="&#xE711;" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
                                                     <TextBlock Text="{x:Bind NotRememberedWords}" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                                    <TextBlock Text="cần ôn" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock Text="learning" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </StackPanel>
                                             </Grid>
                                         </StackPanel>
@@ -406,26 +454,26 @@
                                         <MenuFlyoutSeparator Grid.Row="2" Margin="0,-4" />
 
                                         <!-- Actions: View Words, Review Unit (SM-2) & Test Unit -->
-                                        <Grid Grid.Row="3" ColumnDefinitions="*,*,*" ColumnSpacing="6">
-                                            <Button HorizontalAlignment="Stretch" Click="ViewUnitWords_Click" Tag="{x:Bind}" CornerRadius="6" Padding="6,7">
+                                        <Grid Grid.Row="3" ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                            <Button HorizontalAlignment="Stretch" Click="ViewUnitWords_Click" Tag="{x:Bind}" CornerRadius="8" Padding="6,8">
                                                 <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                     <FontIcon Glyph="&#xE8C0;" FontSize="12" />
-                                                    <TextBlock Text="Xem từ" FontSize="12" FontWeight="SemiBold" />
+                                                    <TextBlock Text="View" FontSize="12" FontWeight="SemiBold" />
                                                 </StackPanel>
                                             </Button>
                                             <Button Grid.Column="1" Style="{ThemeResource AccentButtonStyle}"
-                                                    HorizontalAlignment="Stretch" Click="ReviewUnit_Click" Tag="{x:Bind}" CornerRadius="6" Padding="6,7"
-                                                    ToolTipService.ToolTip="Luyện ngắt quãng (SM-2) theo Unit này">
+                                                    HorizontalAlignment="Stretch" Click="ReviewUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="6,8"
+                                                    ToolTipService.ToolTip="Spaced review (SM-2) for this unit">
                                                 <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                     <FontIcon Glyph="&#xE823;" FontSize="12" />
-                                                    <TextBlock Text="Ôn SM-2" FontSize="12" FontWeight="SemiBold" />
+                                                    <TextBlock Text="Review" FontSize="12" FontWeight="SemiBold" />
                                                 </StackPanel>
                                             </Button>
                                             <Button Grid.Column="2"
-                                                    HorizontalAlignment="Stretch" Click="TestUnit_Click" Tag="{x:Bind}" CornerRadius="6" Padding="6,7">
+                                                    HorizontalAlignment="Stretch" Click="TestUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="6,8">
                                                 <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                     <FontIcon Glyph="&#xE765;" FontSize="12" />
-                                                    <TextBlock Text="Kiểm tra" FontSize="12" FontWeight="SemiBold" />
+                                                    <TextBlock Text="Quiz" FontSize="12" FontWeight="SemiBold" />
                                                 </StackPanel>
                                             </Button>
                                         </Grid>

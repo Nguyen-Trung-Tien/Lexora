@@ -51,6 +51,9 @@
   <data name="Nav_Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Search_Placeholder" xml:space="preserve">
+    <value>Search Lexora... (Ctrl+F)</value>
+  </data>
   <data name="Dashboard_TotalWords" xml:space="preserve">
     <value>Total Vocabulary</value>
   </data>

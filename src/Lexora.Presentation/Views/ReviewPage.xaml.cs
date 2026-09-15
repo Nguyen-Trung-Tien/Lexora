@@ -12,6 +12,7 @@ namespace Lexora.Presentation.Views;
 public sealed partial class ReviewPage : Page
 {
     public ReviewViewModel ViewModel { get; }
+    public Lexora.Presentation.Services.ILocalizationService Loc { get; }
 
     private readonly Lexora.Infrastructure.Services.IUserPreferencesService _preferencesService;
 
@@ -19,6 +20,7 @@ public sealed partial class ReviewPage : Page
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<ReviewViewModel>();
+        Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _preferencesService = App.Current.Services.GetRequiredService<Lexora.Infrastructure.Services.IUserPreferencesService>();
 
         IsTabStop = true;

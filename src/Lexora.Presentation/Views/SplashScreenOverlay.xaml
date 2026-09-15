@@ -8,15 +8,81 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!-- Storyboard for Entrance Animation (GPU-friendly DoubleAnimations) -->
+        <!-- ======================================================= -->
+        <!-- CINEMATIC ENTRANCE STORYBOARD                           -->
+        <!-- Multi-layered camera push-in, aurora glow, specular     -->
+        <!-- light sweep, and staggered title reveal                 -->
+        <!-- ======================================================= -->
         <Storyboard x:Name="EntranceStoryboard">
-            <!-- 1. Logo Scale from 88% to 100% -->
+            <!-- 1. Ambient Aurora Glow Expand & Breathe -->
+            <DoubleAnimation
+                Storyboard.TargetName="AuraScale"
+                Storyboard.TargetProperty="ScaleX"
+                From="0.6" To="1.25"
+                Duration="0:0:0.9"
+                BeginTime="0:0:0.0">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="AuraScale"
+                Storyboard.TargetProperty="ScaleY"
+                From="0.6" To="1.25"
+                Duration="0:0:0.9"
+                BeginTime="0:0:0.0">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="AuroraGlow"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0" To="0.75"
+                Duration="0:0:0.6"
+                BeginTime="0:0:0.0">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+
+            <!-- 2. Energy Pulse Ripple Ring (Expands & Fades Out) -->
+            <DoubleAnimation
+                Storyboard.TargetName="RippleScale"
+                Storyboard.TargetProperty="ScaleX"
+                From="0.75" To="1.65"
+                Duration="0:0:0.85"
+                BeginTime="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="RippleScale"
+                Storyboard.TargetProperty="ScaleY"
+                From="0.75" To="1.65"
+                Duration="0:0:0.85"
+                BeginTime="0:0:0.15">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimationUsingKeyFrames
+                Storyboard.TargetName="RippleRing"
+                Storyboard.TargetProperty="Opacity"
+                BeginTime="0:0:0.15">
+                <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.2" Value="0.8" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.85" Value="0.0" />
+            </DoubleAnimationUsingKeyFrames>
+
+            <!-- 3. Logo Camera Push-In (Scale from 0.82 to 1.0 with subtle elastic settle) -->
             <DoubleAnimation
                 Storyboard.TargetName="LogoScale"
                 Storyboard.TargetProperty="ScaleX"
-                From="0.88" To="1.0"
-                Duration="0:0:0.45"
-                BeginTime="0:0:0.0">
+                From="0.82" To="1.0"
+                Duration="0:0:0.75"
+                BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -24,33 +90,31 @@
             <DoubleAnimation
                 Storyboard.TargetName="LogoScale"
                 Storyboard.TargetProperty="ScaleY"
-                From="0.88" To="1.0"
-                Duration="0:0:0.45"
-                BeginTime="0:0:0.0">
+                From="0.82" To="1.0"
+                Duration="0:0:0.75"
+                BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
-
-            <!-- 2. Logo Container Fade-In -->
             <DoubleAnimation
                 Storyboard.TargetName="LogoTile"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.35"
-                BeginTime="0:0:0.0">
+                Duration="0:0:0.5"
+                BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
 
-            <!-- 3. Soft Light Sweep across logo -->
+            <!-- 4. Cinematic Specular Light Sweep Across Logo Glass -->
             <DoubleAnimation
                 Storyboard.TargetName="LightSweepTransform"
                 Storyboard.TargetProperty="X"
-                From="-140" To="140"
-                Duration="0:0:0.45"
-                BeginTime="0:0:0.30">
+                From="-160" To="160"
+                Duration="0:0:0.65"
+                BeginTime="0:0:0.40">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut" />
                 </DoubleAnimation.EasingFunction>
@@ -58,20 +122,42 @@
             <DoubleAnimationUsingKeyFrames
                 Storyboard.TargetName="LightSweep"
                 Storyboard.TargetProperty="Opacity"
-                BeginTime="0:0:0.30">
+                BeginTime="0:0:0.40">
                 <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.12" Value="0.75" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.32" Value="0.75" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.45" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.18" Value="0.85" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.45" Value="0.85" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.65" Value="0.0" />
             </DoubleAnimationUsingKeyFrames>
 
-            <!-- 4. Wordmark "Lexora" Slide-Up + Fade-In -->
+            <!-- 5. Horizontal Energy Divider Line Expand (ScaleX 0 -> 1) -->
+            <DoubleAnimation
+                Storyboard.TargetName="DividerScale"
+                Storyboard.TargetProperty="ScaleX"
+                From="0.0" To="1.0"
+                Duration="0:0:0.5"
+                BeginTime="0:0:0.45">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="GlowingDivider"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0" To="1.0"
+                Duration="0:0:0.4"
+                BeginTime="0:0:0.45">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+
+            <!-- 6. Wordmark "Lexora" Slide Up & Fade In -->
             <DoubleAnimation
                 Storyboard.TargetName="TypographyContainer"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.35"
-                BeginTime="0:0:0.35">
+                Duration="0:0:0.5"
+                BeginTime="0:0:0.40">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -79,28 +165,30 @@
             <DoubleAnimation
                 Storyboard.TargetName="TypographyTranslate"
                 Storyboard.TargetProperty="Y"
-                From="10" To="0"
-                Duration="0:0:0.35"
-                BeginTime="0:0:0.35">
+                From="16" To="0"
+                Duration="0:0:0.5"
+                BeginTime="0:0:0.40">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
 
-            <!-- 5. Loading Indicator Fade-In -->
+            <!-- 7. Loading Status Fade In -->
             <DoubleAnimation
                 Storyboard.TargetName="LoadingContainer"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.3"
-                BeginTime="0:0:0.45">
+                Duration="0:0:0.4"
+                BeginTime="0:0:0.55">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
         </Storyboard>
 
-        <!-- Storyboard for Completion Exit Transition -->
+        <!-- ======================================================= -->
+        <!-- CINEMATIC EXIT STORYBOARD (Camera Push-through & Dissolve)-->
+        <!-- ======================================================= -->
         <Storyboard x:Name="ExitStoryboard">
             <!-- Loading indicator quick fade -->
             <DoubleAnimation
@@ -109,26 +197,39 @@
                 To="0.0"
                 Duration="0:0:0.12" />
 
-            <!-- Soft Logo Opacity Drop -->
+            <!-- Cinematic Push-through zoom on exit (1.0 -> 1.08) -->
             <DoubleAnimation
-                Storyboard.TargetName="LogoTile"
-                Storyboard.TargetProperty="Opacity"
-                To="0.85"
-                Duration="0:0:0.15" />
+                Storyboard.TargetName="MainStackScale"
+                Storyboard.TargetProperty="ScaleX"
+                To="1.06"
+                Duration="0:0:0.35">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="MainStackScale"
+                Storyboard.TargetProperty="ScaleY"
+                To="1.06"
+                Duration="0:0:0.35">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
 
-            <!-- Overall Splash Screen Fade-Out -->
+            <!-- Overall Splash Dissolve -->
             <DoubleAnimation
                 Storyboard.TargetName="RootGrid"
                 Storyboard.TargetProperty="Opacity"
                 To="0.0"
-                Duration="0:0:0.25">
+                Duration="0:0:0.35">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
         </Storyboard>
 
-        <!-- Reduced Motion Entrance (Simple instant fade) -->
+        <!-- Reduced Motion Entrance -->
         <Storyboard x:Name="ReducedMotionEntrance">
             <DoubleAnimation
                 Storyboard.TargetName="LogoTile"
@@ -149,40 +250,64 @@
     </UserControl.Resources>
 
     <Grid x:Name="RootGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <!-- Subtle Ambient Background Radial Tint -->
-        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="0.15">
+        
+        <!-- Ambient Backdrop Aurora Radial Glow (Center behind logo) -->
+        <Border x:Name="AuroraGlow" Width="360" Height="360"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Opacity="0" IsHitTestVisible="False">
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="AuraScale" CenterX="180" CenterY="180" ScaleX="0.6" ScaleY="0.6" />
+            </Border.RenderTransform>
             <Border.Background>
-                <RadialGradientBrush Center="0.5,0.45" GradientOrigin="0.5,0.45" RadiusX="0.6" RadiusY="0.6">
-                    <GradientStop Color="#3B82F6" Offset="0" />
+                <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                    <GradientStop Color="{ThemeResource SystemAccentColorLight2}" Offset="0" />
+                    <GradientStop Color="{ThemeResource SystemAccentColorDark1}" Offset="0.45" />
                     <GradientStop Color="#00000000" Offset="1" />
                 </RadialGradientBrush>
             </Border.Background>
         </Border>
 
-        <!-- Main Visual Center Stack -->
+        <!-- Energy Ripple Wave Ring -->
+        <Border x:Name="RippleRing" Width="180" Height="180" CornerRadius="90"
+                BorderThickness="1.5" BorderBrush="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Opacity="0" IsHitTestVisible="False">
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="RippleScale" CenterX="90" CenterY="90" ScaleX="0.75" ScaleY="0.75" />
+            </Border.RenderTransform>
+        </Border>
+
+        <!-- Main Visual Center Stack (Supports Push-in Zoom on Exit) -->
         <StackPanel
+            x:Name="MainVisualStack"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Spacing="28">
+            Spacing="24">
+            <StackPanel.RenderTransform>
+                <ScaleTransform x:Name="MainStackScale" CenterX="200" CenterY="160" ScaleX="1" ScaleY="1" />
+            </StackPanel.RenderTransform>
 
             <!-- 1. Logo Vector Squircle Container -->
             <Grid
                 x:Name="LogoContainer"
-                Width="150"
-                Height="150"
+                Width="160"
+                Height="160"
                 HorizontalAlignment="Center">
                 <Grid.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform x:Name="LogoScale" CenterX="75" CenterY="75" ScaleX="1" ScaleY="1" />
-                    </TransformGroup>
+                    <ScaleTransform x:Name="LogoScale" CenterX="80" CenterY="80" ScaleX="0.82" ScaleY="0.82" />
                 </Grid.RenderTransform>
 
-                <!-- Master Authentic Logo Tile (100% Detail & Precision) -->
+                <!-- Subtle Logo Glow Shadow Behind Tile -->
+                <Border Width="144" Height="144" CornerRadius="32"
+                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                        Opacity="0.25" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                <!-- Master Authentic Logo Tile -->
                 <Image
                     x:Name="LogoTile"
                     Source="ms-appx:///Assets/brand/lexora-app-icon-1024.png"
-                    Width="140"
-                    Height="140"
+                    Width="144"
+                    Height="144"
                     Opacity="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
@@ -191,25 +316,25 @@
                     </Image.Shadow>
                 </Image>
 
-                <!-- Soft Light Sweep Highlight -->
+                <!-- Soft Glass Specular Light Sweep Highlight -->
                 <Border
                     x:Name="LightSweep"
-                    Width="50"
-                    Height="180"
+                    Width="54"
+                    Height="200"
                     Opacity="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     IsHitTestVisible="False">
                     <Border.RenderTransform>
                         <TransformGroup>
-                            <RotateTransform Angle="25" />
-                            <TranslateTransform x:Name="LightSweepTransform" X="-140" Y="0" />
+                            <RotateTransform Angle="28" />
+                            <TranslateTransform x:Name="LightSweepTransform" X="-160" Y="0" />
                         </TransformGroup>
                     </Border.RenderTransform>
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                             <GradientStop Color="#00FFFFFF" Offset="0" />
-                            <GradientStop Color="#70FFFFFF" Offset="0.5" />
+                            <GradientStop Color="#90FFFFFF" Offset="0.5" />
                             <GradientStop Color="#00FFFFFF" Offset="1" />
                         </LinearGradientBrush>
                     </Border.Background>
@@ -220,26 +345,41 @@
             <StackPanel
                 x:Name="TypographyContainer"
                 HorizontalAlignment="Center"
-                Spacing="6"
+                Spacing="8"
                 Opacity="0">
                 <StackPanel.RenderTransform>
-                    <TranslateTransform x:Name="TypographyTranslate" Y="14" />
+                    <TranslateTransform x:Name="TypographyTranslate" Y="16" />
                 </StackPanel.RenderTransform>
 
                 <TextBlock
                     Text="Lexora"
-                    FontSize="38"
+                    FontSize="44"
                     FontWeight="Bold"
                     HorizontalAlignment="Center"
-                    CharacterSpacing="-15"
+                    CharacterSpacing="30"
                     Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
+                <!-- Glowing Divider Beam -->
+                <Border x:Name="GlowingDivider" Width="180" Height="1.5"
+                        HorizontalAlignment="Center" Opacity="0">
+                    <Border.RenderTransform>
+                        <ScaleTransform x:Name="DividerScale" CenterX="90" CenterY="0.75" ScaleX="0" ScaleY="1" />
+                    </Border.RenderTransform>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#00000000" Offset="0" />
+                            <GradientStop Color="{ThemeResource SystemAccentColorLight2}" Offset="0.5" />
+                            <GradientStop Color="#00000000" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+
                 <TextBlock
-                    Text="INTELLIGENT VOCABULARY &amp; GRAMMAR"
+                    Text="INTELLIGENT VOCABULARY &amp; SPACED REPETITION"
                     FontSize="11"
                     FontWeight="SemiBold"
                     HorizontalAlignment="Center"
-                    CharacterSpacing="130"
+                    CharacterSpacing="150"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
@@ -247,18 +387,20 @@
             <StackPanel
                 x:Name="LoadingContainer"
                 HorizontalAlignment="Center"
-                Spacing="12"
+                Spacing="14"
                 Opacity="0">
 
-                <!-- Thin Modern Fluent ProgressBar -->
-                <ProgressBar
-                    x:Name="StartupProgressBar"
-                    IsIndeterminate="True"
-                    Width="180"
-                    Height="3"
-                    CornerRadius="2"
-                    HorizontalAlignment="Center"
-                    Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                <!-- Fluent Modern Capsule Progress Track -->
+                <Border Width="220" Height="4" CornerRadius="2"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0.5">
+                    <ProgressBar
+                        x:Name="StartupProgressBar"
+                        IsIndeterminate="True"
+                        Height="4"
+                        CornerRadius="2"
+                        Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                </Border>
 
                 <!-- Status Feedback Label -->
                 <TextBlock
@@ -273,16 +415,16 @@
             <Border
                 x:Name="ErrorCard"
                 Visibility="Collapsed"
-                MaxWidth="380"
-                Padding="16"
-                CornerRadius="8"
+                MaxWidth="400"
+                Padding="20"
+                CornerRadius="12"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
-                BorderThickness="1">
-                <StackPanel Spacing="10">
+                BorderThickness="1.5">
+                <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                        <FontIcon Glyph="&#xE783;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="16" />
-                        <TextBlock Text="Không thể khởi tạo Lexora" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <FontIcon Glyph="&#xE783;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="18" />
+                        <TextBlock Text="Không thể khởi tạo Lexora" FontWeight="Bold" FontSize="15" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                     </StackPanel>
 
                     <TextBlock
@@ -298,10 +440,14 @@
                             x:Name="RetryButton"
                             Content="Thử lại"
                             Style="{StaticResource AccentButtonStyle}"
+                            CornerRadius="8"
+                            Padding="16,8"
                             Click="RetryButton_Click" />
                         <Button
                             x:Name="ExitButton"
                             Content="Đóng ứng dụng"
+                            CornerRadius="8"
+                            Padding="16,8"
                             Click="ExitButton_Click" />
                     </StackPanel>
                 </StackPanel>

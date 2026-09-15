@@ -27,6 +27,13 @@ public sealed partial class ShellPage : Page
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         UpdateNavigationLabels();
+
+        // Dynamically reload current page to reflect new language without restarting
+        if (ContentFrame.Content is Page currentPage)
+        {
+            var pageType = currentPage.GetType();
+            _navigationService.Navigate(pageType);
+        }
     }
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)
@@ -81,6 +88,11 @@ public sealed partial class ShellPage : Page
         NavItemTest.Content = _localizationService.GetString("Nav_Test");
         NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
         GlobalSearchBox.PlaceholderText = _localizationService.GetString("Search_Placeholder");
+        DueReviewInfoBar.Title = _localizationService.GetString("Review_Reminder_Title");
+        if (ReviewNowBtn != null)
+        {
+            ReviewNowBtn.Content = _localizationService.GetString("Review_Now");
+        }
     }
 
     private void GlobalSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

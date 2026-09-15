@@ -9,11 +9,13 @@ namespace Lexora.Presentation.Views;
 public sealed partial class DashboardPage : Page
 {
     public DashboardViewModel ViewModel { get; }
+    public Lexora.Presentation.Services.ILocalizationService Loc { get; }
 
     public DashboardPage()
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<DashboardViewModel>();
+        Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
