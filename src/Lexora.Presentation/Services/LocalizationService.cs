@@ -260,7 +260,71 @@ public class LocalizationService : ILocalizationService
             ["GrammarEditor_PlaceholderSentenceVi"] = "Bản dịch nghĩa tiếng Việt chuẩn xác...",
             ["GrammarEditor_HeaderNote"] = "Ghi chú ngữ pháp bổ sung",
             ["GrammarEditor_PlaceholderNote"] = "Lưu ý về thì, trạng từ, đảo ngữ...",
-            ["GrammarEditor_TooltipRemoveExample"] = "Xóa câu ví dụ này"
+            ["GrammarEditor_TooltipRemoveExample"] = "Xóa câu ví dụ này",
+
+            // Settings - Study Experience & Notifications
+            ["Settings_StudyExperience"] = "Trải nghiệm học tập & Thông báo",
+            ["Settings_StudyExperienceSubtitle"] = "Tùy biến hành vi học tập, tự động phát âm thanh và nhắc nhở ôn tập hàng ngày.",
+            ["Settings_AutoPlayAudio"] = "Tự động phát âm thanh từ vựng",
+            ["Settings_AutoPlayAudio_On"] = "Tự động phát âm UK khi lật mở thẻ flashcard",
+            ["Settings_AutoPlayAudio_Off"] = "Tắt",
+            ["Settings_DueReminder"] = "Thông báo từ vựng đến hạn ôn",
+            ["Settings_DueReminder_On"] = "Hiển thị thanh nhắc nhở khi có từ vựng đến hạn ôn tập",
+            ["Settings_DueReminder_Off"] = "Tắt",
+            ["Settings_SpeechRate"] = "Tốc độ phát âm (TTS)",
+            ["Settings_SpeechRateSubtitle"] = "Điều chỉnh tốc độ giọng đọc audio để luyện nghe và phát âm.",
+            ["Settings_Speed_Slow"] = "0.75x (Chậm)",
+            ["Settings_Speed_Normal"] = "1.0x (Chuẩn)",
+            ["Settings_Speed_Fast"] = "1.25x (Nhanh)",
+            ["Settings_Speed_VeryFast"] = "1.5x (Rất nhanh)",
+            ["Settings_TypingPractice"] = "Chế độ gõ từ (Active Recall Drill)",
+            ["Settings_TypingPractice_On"] = "Bật (Yêu cầu gõ chính xác từ vựng để rèn trí nhớ chủ động)",
+            ["Settings_TypingPractice_Off"] = "Tắt (Lật thẻ ôn tập tiêu chuẩn)",
+
+            // Settings - Database & Backup Management
+            ["Settings_DatabaseManagement"] = "Quản lý Cơ sở Dữ liệu & Sao lưu",
+            ["Settings_DatabaseManagementSubtitle"] = "Lexora lưu trữ dữ liệu offline bằng SQLite. Bạn có thể theo dõi dung lượng, sao lưu tức thì hoặc khôi phục dữ liệu.",
+            ["Settings_RefreshStats"] = "Làm mới số liệu",
+            ["Settings_DbLocation"] = "Vị trí cơ sở dữ liệu:",
+            ["Settings_DbSize"] = "Dung lượng tệp CSDL:",
+            ["Settings_DbTotalData"] = "Tổng dữ liệu lưu trữ:",
+            ["Settings_DbWordsUnit"] = "Từ vựng •",
+            ["Settings_DbGrammarUnit"] = "Quy tắc ngữ pháp",
+            ["Settings_CreateBackupBtn"] = "Tạo bản sao lưu (.db)",
+            ["Settings_RestoreBackupBtn"] = "Khôi phục từ bản sao lưu (.db)...",
+
+            // Settings - Voice & Pronunciation Test
+            ["Settings_TtsTitle"] = "Thử nghiệm Giọng đọc & Phát âm (TTS)",
+            ["Settings_TtsSubtitle"] = "Kiểm tra giọng đọc tiếng Anh Text-to-Speech. Lexora ưu tiên phát âm thanh người thật bản xứ và tự động chuyển sang Windows TTS khi cần.",
+            ["Settings_TtsPlaceholder"] = "Nhập từ hoặc câu mẫu để nghe thử...",
+            ["Settings_TestUkVoice"] = "🔊 Nghe giọng UK (Anh)",
+            ["Settings_TestUsVoice"] = "🔊 Nghe giọng US (Mỹ)",
+
+            // Settings - Keyboard Shortcuts
+            ["Settings_ShortcutsTitle"] = "Bảng Tra cứu Phím tắt Nhanh",
+            ["Settings_ShortcutsSubtitle"] = "Thao tác nhanh và học tập hiệu quả mà không cần chạm chuột.",
+            ["Settings_Shortcut_Nav"] = "Chuyển nhanh đến: Tổng quan, Từ vựng, Ôn tập, Thi, Ngữ pháp",
+            ["Settings_Shortcut_Search"] = "Trỏ nhanh con trỏ vào ô tìm kiếm toàn cục từ bất kỳ đâu",
+            ["Settings_Shortcut_AddWord"] = "Thêm từ vựng mới (trên trang Kho Từ Vựng)",
+            ["Settings_Shortcut_EditWord"] = "Chỉnh sửa từ vựng đang chọn (trên trang Kho Từ Vựng)",
+            ["Settings_Shortcut_DeleteWord"] = "Xóa từ vựng đang chọn (trên trang Kho Từ Vựng)",
+            ["Settings_Shortcut_Flip"] = "Lật thẻ flashcard (Ôn tập) / Phát lại âm thanh (Luyện tập)",
+            ["Settings_Shortcut_Rate"] = "Đánh giá mức nhớ: Quên, Khó, Nhớ, Dễ (Ôn tập) / Chọn đáp án (Thi)",
+            ["Settings_Shortcut_Audio"] = "Phát âm thanh chuẩn UK / US (trên trang Ôn tập)",
+            ["Settings_Shortcut_Enter"] = "Nộp câu trả lời / Chuyển câu hỏi tiếp theo (Luyện tập & Thi)",
+
+            // Settings - About
+            ["Settings_AboutSubtitle"] = "Hệ thống Quản lý Học Từ vựng & Ngữ pháp Thông minh cho TOEIC / VSTEP / IELTS",
+            ["Settings_AboutTech"] = "Phát triển bằng C# / .NET 10 • Windows App SDK / WinUI 3 • EF Core 10 SQLite • Clean Architecture.",
+
+            // Settings - Restore Dialogs
+            ["Settings_DlgRestorePathTitle"] = "Nhập Đường Dẫn Tệp Sao Lưu",
+            ["Settings_DlgRestorePathSelect"] = "Chọn tệp",
+            ["Settings_DlgRestoreConfirmTitle"] = "Xác Nhận Khôi Phục Cơ Sở Dữ Liệu",
+            ["Settings_DlgRestoreConfirmMsg"] = "Bạn có chắc chắn muốn khôi phục cơ sở dữ liệu từ:\n{0}\n\nCẢNH BÁO: Toàn bộ dữ liệu hiện tại trên máy sẽ bị thay thế bằng bản sao lưu này!",
+            ["Settings_DlgRestoreConfirmBtn"] = "Khôi phục ngay",
+            ["Settings_DlgRestoreSuccessTitle"] = "Khôi Phục Thành Công",
+            ["Settings_DlgRestoreSuccessMsg"] = "Cơ sở dữ liệu đã được khôi phục thành công. Khuyến nghị khởi động lại ứng dụng để tải lại toàn bộ bộ nhớ đệm."
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -506,7 +570,71 @@ public class LocalizationService : ILocalizationService
             ["GrammarEditor_PlaceholderSentenceVi"] = "Accurate Vietnamese translation...",
             ["GrammarEditor_HeaderNote"] = "Grammar Note",
             ["GrammarEditor_PlaceholderNote"] = "Notes on tenses, adverbs, inversions...",
-            ["GrammarEditor_TooltipRemoveExample"] = "Remove this example"
+            ["GrammarEditor_TooltipRemoveExample"] = "Remove this example",
+
+            // Settings - Study Experience & Notifications
+            ["Settings_StudyExperience"] = "Study Experience & Notifications",
+            ["Settings_StudyExperienceSubtitle"] = "Customize study behavior, audio automation, and daily practice reminders.",
+            ["Settings_AutoPlayAudio"] = "Auto-play Audio Pronunciation",
+            ["Settings_AutoPlayAudio_On"] = "Automatically play UK audio when revealing flashcards",
+            ["Settings_AutoPlayAudio_Off"] = "Disabled",
+            ["Settings_DueReminder"] = "Due Review Reminders",
+            ["Settings_DueReminder_On"] = "Show notification banner when words are due for review",
+            ["Settings_DueReminder_Off"] = "Disabled",
+            ["Settings_SpeechRate"] = "Pronunciation Speech Rate",
+            ["Settings_SpeechRateSubtitle"] = "Adjust audio playback speed for learning pronunciation.",
+            ["Settings_Speed_Slow"] = "0.75x (Slow)",
+            ["Settings_Speed_Normal"] = "1.0x (Normal)",
+            ["Settings_Speed_Fast"] = "1.25x (Fast)",
+            ["Settings_Speed_VeryFast"] = "1.5x (Very Fast)",
+            ["Settings_TypingPractice"] = "Typing Practice (Active Recall Drill)",
+            ["Settings_TypingPractice_On"] = "On (Type word to drill active spelling recall)",
+            ["Settings_TypingPractice_Off"] = "Off (Standard card flip)",
+
+            // Settings - Database & Backup Management
+            ["Settings_DatabaseManagement"] = "Database & Backup Management",
+            ["Settings_DatabaseManagementSubtitle"] = "Lexora uses an offline-first SQLite database. You can inspect database metrics, create instant backups, or restore from a backup file.",
+            ["Settings_RefreshStats"] = "Refresh Stats",
+            ["Settings_DbLocation"] = "Database Location:",
+            ["Settings_DbSize"] = "Database File Size:",
+            ["Settings_DbTotalData"] = "Total Stored Data:",
+            ["Settings_DbWordsUnit"] = "Words •",
+            ["Settings_DbGrammarUnit"] = "Grammar Rules",
+            ["Settings_CreateBackupBtn"] = "Create Backup (.db)",
+            ["Settings_RestoreBackupBtn"] = "Restore from Backup (.db)...",
+
+            // Settings - Voice & Pronunciation Test
+            ["Settings_TtsTitle"] = "Voice & Pronunciation (TTS)",
+            ["Settings_TtsSubtitle"] = "Test English Text-to-Speech audio output. Lexora caches native human pronunciations and falls back to Windows Speech Synthesis.",
+            ["Settings_TtsPlaceholder"] = "Enter sample word or phrase...",
+            ["Settings_TestUkVoice"] = "🔊 Test UK Voice",
+            ["Settings_TestUsVoice"] = "🔊 Test US Voice",
+
+            // Settings - Keyboard Shortcuts
+            ["Settings_ShortcutsTitle"] = "Keyboard Shortcuts Reference Guide",
+            ["Settings_ShortcutsSubtitle"] = "Navigate and study rapidly without reaching for the mouse.",
+            ["Settings_Shortcut_Nav"] = "Navigate to Dashboard, Vocabulary, Review, Test, Grammar",
+            ["Settings_Shortcut_Search"] = "Focus global search box from anywhere",
+            ["Settings_Shortcut_AddWord"] = "Add a new vocabulary word (Vocabulary Page)",
+            ["Settings_Shortcut_EditWord"] = "Edit selected vocabulary word (Vocabulary Page)",
+            ["Settings_Shortcut_DeleteWord"] = "Delete selected vocabulary word (Vocabulary Page)",
+            ["Settings_Shortcut_Flip"] = "Flip flashcard (Review Page) / Replay audio (Practice Test)",
+            ["Settings_Shortcut_Rate"] = "Grade card: Again, Hard, Good, Easy (Review) / Choose option (Test)",
+            ["Settings_Shortcut_Audio"] = "Play UK / US pronunciation audio (Review Page)",
+            ["Settings_Shortcut_Enter"] = "Submit answer / Next question (Practice Test)",
+
+            // Settings - About
+            ["Settings_AboutSubtitle"] = "Intelligent Vocabulary & Grammar Manager for TOEIC / VSTEP / IELTS",
+            ["Settings_AboutTech"] = "Built with C# / .NET 10 • Windows App SDK / WinUI 3 • EF Core 10 SQLite • Clean Architecture.",
+
+            // Settings - Restore Dialogs
+            ["Settings_DlgRestorePathTitle"] = "Specify Backup File Path",
+            ["Settings_DlgRestorePathSelect"] = "Select",
+            ["Settings_DlgRestoreConfirmTitle"] = "Restore Database Confirmation",
+            ["Settings_DlgRestoreConfirmMsg"] = "Are you sure you want to restore database from:\n{0}\n\nWARNING: All current local data will be replaced by the backup copy!",
+            ["Settings_DlgRestoreConfirmBtn"] = "Restore Now",
+            ["Settings_DlgRestoreSuccessTitle"] = "Restore Completed",
+            ["Settings_DlgRestoreSuccessMsg"] = "Database has been restored successfully. It is recommended to restart the application to reload all active caches."
         }
     };
 

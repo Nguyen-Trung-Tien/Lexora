@@ -147,10 +147,10 @@ public sealed partial class SettingsPage : Page
 
             var promptDialog = new ContentDialog
             {
-                Title = "Specify Backup File Path",
+                Title = Loc.GetString("Settings_DlgRestorePathTitle"),
                 Content = pathBox,
-                PrimaryButtonText = "Select",
-                CloseButtonText = "Cancel",
+                PrimaryButtonText = Loc.GetString("Settings_DlgRestorePathSelect"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Primary,
                 XamlRoot = this.XamlRoot
             };
@@ -167,10 +167,10 @@ public sealed partial class SettingsPage : Page
             await Task.Yield();
             var confirmDialog = new ContentDialog
             {
-                Title = "Restore Database Confirmation",
-                Content = $"Are you sure you want to restore database from:\n{selectedFilePath}\n\nWARNING: All current local data will be replaced by the backup copy!",
-                PrimaryButtonText = "Restore Now",
-                CloseButtonText = "Cancel",
+                Title = Loc.GetString("Settings_DlgRestoreConfirmTitle"),
+                Content = string.Format(Loc.GetString("Settings_DlgRestoreConfirmMsg"), selectedFilePath),
+                PrimaryButtonText = Loc.GetString("Settings_DlgRestoreConfirmBtn"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Close,
                 XamlRoot = this.XamlRoot
             };
@@ -184,9 +184,9 @@ public sealed partial class SettingsPage : Page
                     await Task.Yield();
                     var doneDialog = new ContentDialog
                     {
-                        Title = "Restore Completed",
-                        Content = "Database has been restored successfully. It is recommended to restart the application to reload all active caches.",
-                        CloseButtonText = "OK",
+                        Title = Loc.GetString("Settings_DlgRestoreSuccessTitle"),
+                        Content = Loc.GetString("Settings_DlgRestoreSuccessMsg"),
+                        CloseButtonText = Loc.GetString("Action_Close"),
                         XamlRoot = this.XamlRoot
                     };
                     await doneDialog.ShowAsync();

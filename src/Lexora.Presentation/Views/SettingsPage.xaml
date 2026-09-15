@@ -31,8 +31,8 @@
                     <TextBlock Text="{x:Bind Loc.GetString('Settings_Language')}" FontWeight="Bold" FontSize="16" />
                     <TextBlock Text="{x:Bind Loc.GetString('Settings_LanguageSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Button x:Name="LangViButton" Content="Tiếng Việt" Click="LangViButton_Click" CornerRadius="8" Padding="16,8" />
-                        <Button x:Name="LangEnButton" Content="English" Click="LangEnButton_Click" CornerRadius="8" Padding="16,8" />
+                        <Button x:Name="LangViButton" Content="🇻🇳 Tiếng Việt" Click="LangViButton_Click" CornerRadius="8" Padding="16,8" />
+                        <Button x:Name="LangEnButton" Content="🇬🇧 English" Click="LangEnButton_Click" CornerRadius="8" Padding="16,8" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -40,43 +40,43 @@
             <!-- Study Experience & Notifications Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="22">
                 <StackPanel Spacing="14">
-                    <TextBlock Text="Study Experience &amp; Notifications" FontWeight="Bold" FontSize="16" />
-                    <TextBlock Text="Customize study behavior, audio automation, and daily practice reminders." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Settings_StudyExperience')}" FontWeight="Bold" FontSize="16" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Settings_StudyExperienceSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
 
-                    <ToggleSwitch Header="Auto-play Audio Pronunciation"
+                    <ToggleSwitch Header="{x:Bind Loc.GetString('Settings_AutoPlayAudio')}"
                                   IsOn="{x:Bind ViewModel.AutoPlayAudio, Mode=OneWay}"
                                   Toggled="AutoPlayToggle_Toggled"
-                                  OffContent="Disabled"
-                                  OnContent="Automatically play UK audio when revealing flashcards" />
+                                  OffContent="{x:Bind Loc.GetString('Settings_AutoPlayAudio_Off')}"
+                                  OnContent="{x:Bind Loc.GetString('Settings_AutoPlayAudio_On')}" />
 
-                    <ToggleSwitch Header="Due Review Reminders"
+                    <ToggleSwitch Header="{x:Bind Loc.GetString('Settings_DueReminder')}"
                                   IsOn="{x:Bind ViewModel.EnableReviewReminder, Mode=OneWay}"
                                   Toggled="ReminderToggle_Toggled"
-                                  OffContent="Disabled"
-                                  OnContent="Show notification banner when words are due for review" />
+                                  OffContent="{x:Bind Loc.GetString('Settings_DueReminder_Off')}"
+                                  OnContent="{x:Bind Loc.GetString('Settings_DueReminder_On')}" />
 
                     <MenuFlyoutSeparator />
 
                     <!-- Speech Playback Speed -->
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Pronunciation Speech Rate" FontWeight="SemiBold" FontSize="13" />
-                        <TextBlock Text="Adjust audio playback speed for learning pronunciation." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                        <ComboBox x:Name="SpeechRateCombo" Width="240" SelectionChanged="SpeechRateCombo_SelectionChanged" CornerRadius="8">
-                            <ComboBoxItem Content="0.75x (Slow)" Tag="0.75" />
-                            <ComboBoxItem Content="1.0x (Normal)" Tag="1.0" />
-                            <ComboBoxItem Content="1.25x (Fast)" Tag="1.25" />
-                            <ComboBoxItem Content="1.5x (Very Fast)" Tag="1.5" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Settings_SpeechRate')}" FontWeight="SemiBold" FontSize="13" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Settings_SpeechRateSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        <ComboBox x:Name="SpeechRateCombo" Width="260" SelectionChanged="SpeechRateCombo_SelectionChanged" CornerRadius="8">
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Speed_Slow')}" Tag="0.75" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Speed_Normal')}" Tag="1.0" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Speed_Fast')}" Tag="1.25" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Speed_VeryFast')}" Tag="1.5" />
                         </ComboBox>
                     </StackPanel>
 
                     <MenuFlyoutSeparator />
 
                     <!-- Typing Practice Toggle -->
-                    <ToggleSwitch Header="Typing Practice (Active Recall Drill)"
+                    <ToggleSwitch Header="{x:Bind Loc.GetString('Settings_TypingPractice')}"
                                   IsOn="{x:Bind ViewModel.EnableTypingPractice, Mode=OneWay}"
                                   Toggled="TypingPracticeToggle_Toggled"
-                                  OffContent="Off (Standard card flip)"
-                                  OnContent="On (Type word to drill active spelling recall)" />
+                                  OffContent="{x:Bind Loc.GetString('Settings_TypingPractice_Off')}"
+                                  OnContent="{x:Bind Loc.GetString('Settings_TypingPractice_On')}" />
                 </StackPanel>
             </Border>
 
@@ -84,35 +84,35 @@
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="22">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="Database &amp; Backup Management" FontWeight="Bold" FontSize="16" />
-                        <Button Grid.Column="1" Content="Refresh Stats" Click="RefreshStatsButton_Click" CornerRadius="8" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Settings_DatabaseManagement')}" FontWeight="Bold" FontSize="16" />
+                        <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Settings_RefreshStats')}" Click="RefreshStatsButton_Click" CornerRadius="8" />
                     </Grid>
 
-                    <TextBlock Text="Lexora uses an offline-first SQLite database. You can inspect database metrics, create instant backups, or restore from a backup file." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Settings_DatabaseManagementSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
 
                     <!-- Database Stats Grid -->
                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="16">
                         <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="8" ColumnSpacing="16">
-                            <TextBlock Text="Database Location:" FontWeight="SemiBold" FontSize="13" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_DbLocation')}" FontWeight="SemiBold" FontSize="13" />
                             <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.DatabasePath, Mode=OneWay}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
 
-                            <TextBlock Grid.Row="1" Text="Database File Size:" FontWeight="SemiBold" FontSize="13" />
+                            <TextBlock Grid.Row="1" Text="{x:Bind Loc.GetString('Settings_DbSize')}" FontWeight="SemiBold" FontSize="13" />
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind ViewModel.DatabaseSizeFormatted, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
 
-                            <TextBlock Grid.Row="2" Text="Total Stored Data:" FontWeight="SemiBold" FontSize="13" />
+                            <TextBlock Grid.Row="2" Text="{x:Bind Loc.GetString('Settings_DbTotalData')}" FontWeight="SemiBold" FontSize="13" />
                             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="{x:Bind ViewModel.TotalWordsCount, Mode=OneWay}" FontWeight="Bold" FontSize="13" />
-                                <TextBlock Text="Words •" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_DbWordsUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                                 <TextBlock Text="{x:Bind ViewModel.TotalGrammarCount, Mode=OneWay}" FontWeight="Bold" FontSize="13" />
-                                <TextBlock Text="Grammar Rules" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_DbGrammarUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- Backup Actions -->
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Button Content="Create Backup (.db)" Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" CornerRadius="8" Padding="16,8" />
-                        <Button Content="Restore from Backup (.db)..." Click="RestoreButton_Click" CornerRadius="8" Padding="16,8" />
+                        <Button Content="{x:Bind Loc.GetString('Settings_CreateBackupBtn')}" Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" CornerRadius="8" Padding="16,8" />
+                        <Button Content="{x:Bind Loc.GetString('Settings_RestoreBackupBtn')}" Click="RestoreButton_Click" CornerRadius="8" Padding="16,8" />
                     </StackPanel>
 
                     <TextBlock Text="{x:Bind ViewModel.BackupStatusMessage, Mode=OneWay}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -122,13 +122,13 @@
             <!-- Voice & Pronunciation Test Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="22">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Voice &amp; Pronunciation (TTS)" FontWeight="Bold" FontSize="16" />
-                    <TextBlock Text="Test English Text-to-Speech audio output. Lexora caches native human pronunciations and falls back to Windows Speech Synthesis." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Settings_TtsTitle')}" FontWeight="Bold" FontSize="16" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Settings_TtsSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
 
                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-                        <TextBox PlaceholderText="Enter sample word or phrase..." Text="{x:Bind ViewModel.TestVoiceTerm, Mode=TwoWay}" VerticalAlignment="Center" CornerRadius="8" />
-                        <Button Grid.Column="1" Content="🔊 Test UK Voice" Click="TestUkVoice_Click" CornerRadius="8" />
-                        <Button Grid.Column="2" Content="🔊 Test US Voice" Click="TestUsVoice_Click" CornerRadius="8" />
+                        <TextBox PlaceholderText="{x:Bind Loc.GetString('Settings_TtsPlaceholder')}" Text="{x:Bind ViewModel.TestVoiceTerm, Mode=TwoWay}" VerticalAlignment="Center" CornerRadius="8" />
+                        <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Settings_TestUkVoice')}" Click="TestUkVoice_Click" CornerRadius="8" />
+                        <Button Grid.Column="2" Content="{x:Bind Loc.GetString('Settings_TestUsVoice')}" Click="TestUsVoice_Click" CornerRadius="8" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -136,36 +136,36 @@
             <!-- Keyboard Shortcuts Reference Guide -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="22">
                 <StackPanel Spacing="14">
-                    <TextBlock Text="Keyboard Shortcuts Reference" FontWeight="Bold" FontSize="16" />
-                    <TextBlock Text="Navigate and study rapidly without reaching for the mouse." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Settings_ShortcutsTitle')}" FontWeight="Bold" FontSize="16" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Settings_ShortcutsSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
 
                     <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="200,*" RowSpacing="10">
                         <TextBlock Text="Ctrl + 1 / 2 / 3 / 4 / 5" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Column="1" Text="Navigate to Dashboard, Vocabulary, Review, Test, Grammar" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Nav')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                         <TextBlock Grid.Row="1" Text="Ctrl + F" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Focus global search box from anywhere" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Search')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                         <TextBlock Grid.Row="2" Text="Ctrl + N" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Add a new vocabulary word (Vocabulary Page)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_AddWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                         <TextBlock Grid.Row="3" Text="Ctrl + E" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="Edit selected vocabulary word (Vocabulary Page)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_EditWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                         <TextBlock Grid.Row="4" Text="Delete" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="Delete selected vocabulary word (Vocabulary Page)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_DeleteWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                         <TextBlock Grid.Row="5" Text="Space" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="Flip flashcard (Review Page) / Replay audio (Practice Test)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Flip')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                         <TextBlock Grid.Row="6" Text="1, 2, 3, 4" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="Grade card: Again, Hard, Good, Easy (Review) / Choose option (Test)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Rate')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                         <TextBlock Grid.Row="7" Text="U / S" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Row="7" Grid.Column="1" Text="Play UK / US pronunciation audio (Review Page)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Audio')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                         <TextBlock Grid.Row="8" Text="Enter" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" />
-                        <TextBlock Grid.Row="8" Grid.Column="1" Text="Submit answer / Next question (Practice Test)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Enter')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -183,8 +183,8 @@
                                 <TextBlock Text="v1.0.0" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="Intelligent Vocabulary &amp; Grammar Manager for TOEIC / VSTEP / IELTS" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
-                        <TextBlock Text="Built with C# / .NET 10 • Windows App SDK / WinUI 3 • EF Core 10 SQLite • Clean Architecture." Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,2,0,0" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Settings_AboutSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Settings_AboutTech')}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,2,0,0" />
                     </StackPanel>
                 </Grid>
             </Border>
