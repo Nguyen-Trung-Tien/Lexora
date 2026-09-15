@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lexora.Application.DTOs;
 using Lexora.Domain.Enums;
+using Lexora.Presentation.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -11,17 +12,24 @@ namespace Lexora.Presentation.Views;
 public sealed partial class GrammarEditorDialog : ContentDialog
 {
     private Guid? _editingRuleId;
+    public ILocalizationService Loc { get; }
     public GrammarRuleCreateOrUpdateDto? ResultDto { get; private set; }
     public ObservableCollection<GrammarExampleEditorModel> ExampleItems { get; } = new();
 
     public GrammarEditorDialog()
     {
+        Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+
         InitializeComponent();
 
-        if (App.Current?.Services?.GetService<Lexora.Presentation.Services.IThemeService>() is { } themeService)
+        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService)
         {
             RequestedTheme = themeService.CurrentTheme;
         }
+
+        PrimaryButtonText = Loc.GetString("GrammarEditor_Save");
+        CloseButtonText = Loc.GetString("GrammarEditor_Cancel");
+        DialogInfoBar.Title = Loc.GetString("GrammarEditor_ValidationTitle");
 
         ExamplesItemsControl.ItemsSource = ExampleItems;
 
@@ -33,7 +41,7 @@ public sealed partial class GrammarEditorDialog : ContentDialog
 
     public void InitializeForCreate()
     {
-        Title = "Add New Grammar Rule";
+        Title = Loc.GetString("GrammarEditor_TitleAdd");
         _editingRuleId = null;
 
         TitleTextBox.Text = string.Empty;
@@ -47,11 +55,12 @@ public sealed partial class GrammarEditorDialog : ContentDialog
 
         ExampleItems.Clear();
         ExampleItems.Add(new GrammarExampleEditorModel());
+        RefreshExampleIndices();
     }
 
     public void InitializeForEdit(GrammarRuleDto rule)
     {
-        Title = "Edit Grammar Rule";
+        Title = string.Format(Loc.GetString("GrammarEditor_TitleEdit"), rule.Title);
         _editingRuleId = rule.Id;
 
         TitleTextBox.Text = rule.Title;
@@ -78,18 +87,31 @@ public sealed partial class GrammarEditorDialog : ContentDialog
         {
             ExampleItems.Add(new GrammarExampleEditorModel());
         }
+
+        RefreshExampleIndices();
+    }
+
+    private void RefreshExampleIndices()
+    {
+        for (int i = 0; i < ExampleItems.Count; i++)
+        {
+            ExampleItems[i].Index = i + 1;
+            ExampleItems[i].CanRemove = ExampleItems.Count > 1;
+        }
     }
 
     private void AddExampleButton_Click(object sender, RoutedEventArgs e)
     {
         ExampleItems.Add(new GrammarExampleEditorModel());
+        RefreshExampleIndices();
     }
 
     private void RemoveExampleButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.DataContext is GrammarExampleEditorModel item)
+        if (ExampleItems.Count > 1 && sender is Button btn && btn.DataContext is GrammarExampleEditorModel item)
         {
             ExampleItems.Remove(item);
+            RefreshExampleIndices();
         }
     }
 
@@ -103,7 +125,7 @@ public sealed partial class GrammarEditorDialog : ContentDialog
 
         if (string.IsNullOrWhiteSpace(title))
         {
-            DialogInfoBar.Message = "Please enter a rule title.";
+            DialogInfoBar.Message = Loc.GetString("GrammarEditor_ErrTitleRequired");
             DialogInfoBar.IsOpen = true;
             args.Cancel = true;
             return;
@@ -111,7 +133,7 @@ public sealed partial class GrammarEditorDialog : ContentDialog
 
         if (string.IsNullOrWhiteSpace(structure))
         {
-            DialogInfoBar.Message = "Please enter the structure formula.";
+            DialogInfoBar.Message = Loc.GetString("GrammarEditor_ErrStructureRequired");
             DialogInfoBar.IsOpen = true;
             args.Cancel = true;
             return;
@@ -119,7 +141,7 @@ public sealed partial class GrammarEditorDialog : ContentDialog
 
         if (string.IsNullOrWhiteSpace(explanationVi))
         {
-            DialogInfoBar.Message = "Please provide the Vietnamese explanation.";
+            DialogInfoBar.Message = Loc.GetString("GrammarEditor_ErrExplanationViRequired");
             DialogInfoBar.IsOpen = true;
             args.Cancel = true;
             return;
@@ -147,6 +169,16 @@ public sealed partial class GrammarEditorDialog : ContentDialog
 
 public partial class GrammarExampleEditorModel : ObservableObject
 {
+    private static ILocalizationService? Localization => App.Current?.Services?.GetService<ILocalizationService>();
+
+    [ObservableProperty]
+    public partial int Index { get; set; } = 1;
+
+    public string ExampleBadge => string.Format(Localization?.GetString("GrammarEditor_ExampleBadge") ?? "Ví dụ #{0}", Index);
+
+    [ObservableProperty]
+    public partial bool CanRemove { get; set; } = true;
+
     [ObservableProperty]
     public partial string SentenceEn { get; set; } = string.Empty;
 
@@ -155,4 +187,17 @@ public partial class GrammarExampleEditorModel : ObservableObject
 
     [ObservableProperty]
     public partial string Note { get; set; } = string.Empty;
+
+    public string HeaderSentenceEn => Localization?.GetString("GrammarEditor_HeaderSentenceEn") ?? "English Sentence *";
+    public string PlaceholderSentenceEn => Localization?.GetString("GrammarEditor_PlaceholderSentenceEn") ?? "e.g. I have been working here for three years.";
+    public string HeaderSentenceVi => Localization?.GetString("GrammarEditor_HeaderSentenceVi") ?? "Vietnamese Translation *";
+    public string PlaceholderSentenceVi => Localization?.GetString("GrammarEditor_PlaceholderSentenceVi") ?? "Bản dịch tiếng Việt...";
+    public string HeaderNote => Localization?.GetString("GrammarEditor_HeaderNote") ?? "Grammar Note";
+    public string PlaceholderNote => Localization?.GetString("GrammarEditor_PlaceholderNote") ?? "Ghi chú ngữ pháp bổ sung...";
+    public string TooltipRemoveExample => Localization?.GetString("GrammarEditor_TooltipRemoveExample") ?? "Remove this example";
+
+    partial void OnIndexChanged(int value)
+    {
+        OnPropertyChanged(nameof(ExampleBadge));
+    }
 }
