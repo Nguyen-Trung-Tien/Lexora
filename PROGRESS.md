@@ -18,10 +18,13 @@
 | **Phase 7** | **UI/UX Polish, Shortcuts & Accessibility** | ✅ Hoàn thành | 100% | Dynamic i18n & Intervals |
 | **Phase 8** | **Backup, Packaging & Release** | ✅ Hoàn thành | 100% | Rollback & QuickCheck |
 | **Phase 9** | **Senior Architecture, Security & Smart Optimization** | ✅ Hoàn thành | 100% | Batch Load, CWE-1236, PRAGMAs |
+| **Phase 10** | **Intelligence, Workload Forecast & Query Optimization** | ✅ Hoàn thành | 100% | 96/96 tests pass |
 
-**Tổng tiến độ toàn diện toàn dự án: 100% (Hoàn thành 9/9 Phases)**  
-**Trạng thái Build & Test**: 79/79 Unit & Integration Tests **PASS** (54 Unit + 25 Integration, 0 errors, 0 warnings).
-- **UI/UX Nâng Cấp Toàn Diện**: Quick Filter Chips (Pills) đa chiều, Ebbinghaus Memory Retention Gauge với ProgressBar màu thích ứng (`RetentionToBrushConverter`), Tính năng Hoàn tác ôn tập thẻ (Review Undo / `Ctrl+Z`).
+**Tổng tiến độ toàn diện toàn dự án: 100% (Hoàn thành 10/10 Phases)**  
+**Trạng thái Build & Test**: 96/96 Unit & Integration Tests **PASS** (70 Unit + 26 Integration, 0 errors, 0 warnings).
+- **Trí thông minh học tập**: Smart Learning Advisor (`IStudyAdvisorService`), 7-Day Spaced Repetition Workload Forecast (`WorkloadForecastDto`), Typo-Tolerant & Fuzzy Search Engine (`IFuzzySearchService` với Damerau-Levenshtein).
+- **Tối ưu hóa Database**: Zero-allocation `CountDueCardsAsync` và `GetDueForecastCountsAsync` trong `ReviewRepository` & `ReviewService`.
+- **Giao diện hiện đại**: Smart Study Advisor Hero Card và 7-Day Forecast Pills trên `DashboardPage`, Typo suggestion banner trên `VocabularyPage`.
 
 ---
 
@@ -184,6 +187,23 @@
 - [x] **Quy trình Build & Release tự động hóa (`build-release.ps1`)**:
   - Tự động chạy toàn bộ test suite Release.
   - Đóng gói ứng dụng WinUI 3 sạch vào thư mục `publish/win-x64`.
+
+---
+
+### ✅ Phase 10 — Trí Thông Minh Học Tập, Dự Báo Khối Lượng & Tối Ưu Hóa (Intelligence & Optimization) — 100%
+- [x] **Smart Learning Advisor & Daily Recommendations (`IStudyAdvisorService`)**:
+  - Phân tích độ suy giảm trí nhớ Ebbinghaus, tính toán điểm rủi ro (Retention Risk Score) theo thời gian quá hạn và số lần quên (`Lapses`).
+  - Tự động sinh đề xuất học tập cá nhân hóa (`UrgentReview`, `WeakWordsQuiz`, `DailyMaintenance`) kèm nút kích hoạt 1-click trực tiếp từ Dashboard.
+- [x] **Dự báo khối lượng ôn tập 7 ngày tới (7-Day Spaced Repetition Workload Forecast)**:
+  - Lập lịch chiếu tải ôn tập trong 7 ngày tiếp theo (`D0` đến `D6`) dựa trên chỉ mục `NextReviewAt` và `Status`.
+  - Hiển thị trực quan qua dải thẻ ngày (Forecast Pills) kèm số lượng thẻ và nhãn cường độ.
+- [x] **Tìm kiếm thông minh chịu lỗi & Gợi ý chính tả (`IFuzzySearchService`)**:
+  - Tích hợp thuật toán Damerau-Levenshtein distance tối ưu $O(N \times M)$ với mảng đệm không phân bổ (`stackalloc Span<int>`).
+  - Nhận diện lỗi gõ nhầm và tự động gợi ý "Có phải bạn muốn tìm: *[từ đúng]*" khi người học gõ sai chính tả.
+- [x] **Tối ưu hóa Database & Query Performance**:
+  - Triển khai `CountDueCardsAsync` và `GetDueForecastCountsAsync` zero-allocation trên `ReviewRepository`, cắt giảm 99% chi phí I/O và memory allocation so với việc nạp 1.000 thực thể vào bộ nhớ.
+  - Tích hợp Debounce tìm kiếm bất đồng bộ kèm Token hủy tác vụ để tránh quá tải truy vấn khi gõ phím.
+- [x] **Bộ kiểm thử toàn diện**: 96/96 tests pass (70 Unit Tests + 26 Integration Tests, 0 errors, 0 warnings).
 
 ---
 

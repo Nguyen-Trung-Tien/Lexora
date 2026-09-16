@@ -39,6 +39,11 @@
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE895;" />
                     </NavigationViewItem.Icon>
+                    <NavigationViewItem.InfoBadge>
+                        <InfoBadge x:Name="ReviewInfoBadge"
+                                   Value="{x:Bind ViewModel.DueCardsCount, Mode=OneWay}"
+                                   Visibility="{x:Bind ViewModel.HasDueReviews, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </NavigationViewItem.InfoBadge>
                 </NavigationViewItem>
                 <NavigationViewItem x:Name="NavItemTest" Content="Practice &amp; Test" Tag="Test" ToolTipService.ToolTip="Practice &amp; Test (Ctrl+4)">
                     <NavigationViewItem.Icon>

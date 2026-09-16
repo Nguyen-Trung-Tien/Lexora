@@ -3,8 +3,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ================================================================= -->
-    <!-- LEXORA MODERN FLUENT DESIGN SYSTEM                                -->
-    <!-- Strictly follows WinUI 3 ThemeResource guidelines & clean tokens  -->
+    <!-- LEXORA MODERN FLUENT 2 DESIGN SYSTEM                              -->
+    <!-- Strictly follows WinUI 3 ThemeResource guidelines & zero hardcode -->
     <!-- ================================================================= -->
 
     <!-- Radii Tokens -->
@@ -14,7 +14,46 @@
     <CornerRadius x:Key="RadiusCard">16</CornerRadius>
     <CornerRadius x:Key="RadiusPill">20</CornerRadius>
 
-    <!-- Card & Surface Borders -->
+    <!-- Typography Scale Tokens -->
+    <Style x:Key="LexoraHeroHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="LexoraSectionHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="LexoraCardTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="LexoraBodyStrongStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="LexoraBodyStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="LexoraCaptionStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorTertiaryBrush}" />
+    </Style>
+
+    <!-- Card & Surface Hierarchy -->
     <Style x:Key="ModernElevatedCard" TargetType="Border">
         <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
@@ -39,7 +78,12 @@
         <Setter Property="Padding" Value="16" />
     </Style>
 
-    <!-- Accent Outline Pill Button -->
+    <Style x:Key="ModernInteractiveCard" TargetType="Border" BasedOn="{StaticResource ModernElevatedCard}">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
+        <Setter Property="Padding" Value="18" />
+    </Style>
+
+    <!-- Filter Buttons (Pills) -->
     <Style x:Key="PillFilterButton" TargetType="Button">
         <Setter Property="CornerRadius" Value="{StaticResource RadiusPill}" />
         <Setter Property="Padding" Value="14,6" />
@@ -56,10 +100,21 @@
         <Setter Property="BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
     </Style>
 
+    <!-- Circular Icon Button -->
+    <Style x:Key="CircleIconButton" TargetType="Button">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
     <!-- SM-2 Rating Buttons -->
     <Style x:Key="RatingAgainButton" TargetType="Button">
         <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
-        <Setter Property="Padding" Value="12,14" />
+        <Setter Property="Padding" Value="12,12" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource SystemFillColorCriticalBrush}" />
@@ -68,7 +123,7 @@
 
     <Style x:Key="RatingHardButton" TargetType="Button">
         <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
-        <Setter Property="Padding" Value="12,14" />
+        <Setter Property="Padding" Value="12,12" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource SystemFillColorCautionBrush}" />
@@ -77,7 +132,7 @@
 
     <Style x:Key="RatingGoodButton" TargetType="Button">
         <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
-        <Setter Property="Padding" Value="12,14" />
+        <Setter Property="Padding" Value="12,12" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
@@ -86,7 +141,7 @@
 
     <Style x:Key="RatingEasyButton" TargetType="Button">
         <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
-        <Setter Property="Padding" Value="12,14" />
+        <Setter Property="Padding" Value="12,12" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource SystemFillColorSuccessBrush}" />
@@ -108,10 +163,20 @@
 
     <Style x:Key="BadgeExamTag" TargetType="Border">
         <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource SystemFillColorSuccessBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource RadiusSmall}" />
         <Setter Property="Padding" Value="8,2" />
+    </Style>
+
+    <!-- Empty State Style -->
+    <Style x:Key="EmptyStateCard" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusCard}" />
+        <Setter Property="Padding" Value="40,32" />
+        <Setter Property="MinHeight" Value="320" />
     </Style>
 
 </ResourceDictionary>

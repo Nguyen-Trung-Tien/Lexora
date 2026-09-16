@@ -36,8 +36,8 @@ public class StatisticsServiceTests
             [LearningStatus.NotRemembered] = 10
         };
         _mockReviewRepo.Setup(r => r.GetCardCountsByStatusAsync(It.IsAny<CancellationToken>())).ReturnsAsync(counts);
-        _mockReviewRepo.Setup(r => r.GetDueCardsAsync(It.IsAny<DateTime>(), 1000, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<ReviewCard> { new(), new() });
+        _mockReviewRepo.Setup(r => r.CountDueCardsAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(2);
         _mockReviewRepo.Setup(r => r.GetUserStreakAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new UserStreak { CurrentStreak = 5, LongestStreak = 12 });
 

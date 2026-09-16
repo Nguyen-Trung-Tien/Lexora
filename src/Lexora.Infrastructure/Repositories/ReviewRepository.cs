@@ -204,6 +204,44 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> CountDueCardsAsync(DateTime asOfUtc, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AsNoTracking()
+            .CountAsync(rc => rc.NextReviewAt <= asOfUtc && rc.Status != LearningStatus.Mastered, cancellationToken);
+    }
+
+    public async Task<Dictionary<DateOnly, int>> GetDueForecastCountsAsync(DateTime startUtc, int days, CancellationToken cancellationToken = default)
+    {
+        var startDate = DateOnly.FromDateTime(startUtc.Date);
+        var endUtc = startUtc.Date.AddDays(days);
+
+        var dueDates = await DbSet.AsNoTracking()
+            .Where(rc => rc.Status != LearningStatus.Mastered && rc.NextReviewAt <= endUtc)
+            .Select(rc => rc.NextReviewAt)
+            .ToListAsync(cancellationToken);
+
+        var result = new Dictionary<DateOnly, int>();
+        for (int i = 0; i < days; i++)
+        {
+            result[startDate.AddDays(i)] = 0;
+        }
+
+        foreach (var dt in dueDates)
+        {
+            var cardDate = DateOnly.FromDateTime(dt.Date);
+            if (cardDate <= startDate)
+            {
+                result[startDate]++;
+            }
+            else if (result.ContainsKey(cardDate))
+            {
+                result[cardDate]++;
+            }
+        }
+
+        return result;
+    }
+
     public void AddStudyLog(StudyLog log)
     {
         Context.StudyLogs.Add(log);

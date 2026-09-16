@@ -20,5 +20,7 @@ public interface IReviewRepository : IRepository<ReviewCard>
     Task UpdateStudySessionAsync(StudySession session, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ReviewCard>> GetCardsByWordIdsAsync(IReadOnlyList<Guid> wordIds, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ReviewCard>> GetCardsByTopicIdAsync(Guid topicId, int limit = 50, CancellationToken cancellationToken = default);
+    Task<int> CountDueCardsAsync(DateTime asOfUtc, CancellationToken cancellationToken = default);
+    Task<Dictionary<DateOnly, int>> GetDueForecastCountsAsync(DateTime startUtc, int days, CancellationToken cancellationToken = default);
     void AddStudyLog(StudyLog log);
 }

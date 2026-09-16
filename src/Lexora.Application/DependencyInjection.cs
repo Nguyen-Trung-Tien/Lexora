@@ -16,6 +16,8 @@ public static class DependencyInjection
         services.AddScoped<IGrammarService, GrammarService>();
         services.AddScoped<IExportImportService, ExportImportService>();
         services.AddScoped<ITestService, TestService>();
+        services.AddSingleton<IFuzzySearchService, FuzzySearchService>();
+        services.AddScoped<IStudyAdvisorService, StudyAdvisorService>();
 
         return services;
     }

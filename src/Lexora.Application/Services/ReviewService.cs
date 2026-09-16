@@ -55,8 +55,7 @@ public class ReviewService : IReviewService
 
     public async Task<int> GetDueCardsCountAsync(CancellationToken cancellationToken = default)
     {
-        var cards = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, 1000, cancellationToken);
-        return cards.Count;
+        return await _reviewRepo.CountDueCardsAsync(DateTime.UtcNow, cancellationToken);
     }
 
     public async Task<StudySessionDto> StartSessionAsync(ReviewSessionMode mode, int limit = 30, CancellationToken cancellationToken = default)

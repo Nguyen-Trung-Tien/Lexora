@@ -14,12 +14,20 @@ public partial class VocabularyViewModel : ObservableObject
     private readonly IReviewService _reviewService;
     private readonly IExportImportService _exportImportService;
     private readonly IAudioPlayerService _audioPlayer;
+    private readonly IFuzzySearchService _fuzzySearchService;
+    private readonly List<string> _knownTerms = new();
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
 
     [ObservableProperty]
     public partial string SearchTerm { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string? TypoSuggestion { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasTypoSuggestion { get; set; }
 
     [ObservableProperty]
     public partial CefrLevel? SelectedLevel { get; set; }
@@ -77,12 +85,14 @@ public partial class VocabularyViewModel : ObservableObject
         IVocabularyService vocabService,
         IReviewService reviewService,
         IExportImportService exportImportService,
-        IAudioPlayerService audioPlayer)
+        IAudioPlayerService audioPlayer,
+        IFuzzySearchService fuzzySearchService)
     {
         _vocabService = vocabService;
         _reviewService = reviewService;
         _exportImportService = exportImportService;
         _audioPlayer = audioPlayer;
+        _fuzzySearchService = fuzzySearchService;
     }
 
     [RelayCommand]
@@ -250,6 +260,17 @@ public partial class VocabularyViewModel : ObservableObject
             {
                 SelectedWord = null;
             }
+
+            // Update known terms cache
+            foreach (var w in Words)
+            {
+                if (!_knownTerms.Contains(w.Term, StringComparer.OrdinalIgnoreCase))
+                {
+                    _knownTerms.Add(w.Term);
+                }
+            }
+
+            CheckTypoSuggestion();
         }
         catch (OperationCanceledException)
         {
@@ -382,5 +403,40 @@ public partial class VocabularyViewModel : ObservableObject
         await LoadWordsAsync();
         _ = LoadContextUnitsAsync();
         return result;
+    }
+
+    public void CheckTypoSuggestion()
+    {
+        var query = SearchTerm?.Trim();
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 3 || Words.Count > 0)
+        {
+            TypoSuggestion = null;
+            HasTypoSuggestion = false;
+            return;
+        }
+
+        var candidates = _knownTerms.Count > 0 ? _knownTerms : ContextUnits.SelectMany(u => u.Words).Select(w => w.Term).Distinct();
+        var suggestion = _fuzzySearchService.SuggestCorrection(query, candidates);
+        if (!string.IsNullOrEmpty(suggestion) && !string.Equals(suggestion, query, StringComparison.OrdinalIgnoreCase))
+        {
+            TypoSuggestion = suggestion;
+            HasTypoSuggestion = true;
+        }
+        else
+        {
+            TypoSuggestion = null;
+            HasTypoSuggestion = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task ApplyTypoSuggestionAsync()
+    {
+        if (string.IsNullOrWhiteSpace(TypoSuggestion)) return;
+        SearchTerm = TypoSuggestion;
+        TypoSuggestion = null;
+        HasTypoSuggestion = false;
+        await LoadWordsAsync();
+        ApplyUnitFilter();
     }
 }

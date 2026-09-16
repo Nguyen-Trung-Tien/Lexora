@@ -12,6 +12,31 @@ public partial class DashboardViewModel : ObservableObject
 {
     private readonly IStatisticsService _statsService;
     private readonly INavigationService _navService;
+    private readonly ILocalizationService _localizationService;
+    private readonly IStudyAdvisorService _advisorService;
+
+    [ObservableProperty]
+    public partial string GreetingText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial StudyAdviceSummaryDto? DailyAdvice { get; set; }
+
+    [ObservableProperty]
+    public partial WorkloadForecastDto? WorkloadForecast { get; set; }
+
+    [ObservableProperty]
+    public partial string AdviceTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AdviceDescription { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AdviceButtonText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial int TotalForecastNext7Days { get; set; } = 0;
+
+    public ObservableCollection<DailyForecastItemDto> ForecastDaysList { get; } = new();
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
@@ -48,10 +73,44 @@ public partial class DashboardViewModel : ObservableObject
     public ObservableCollection<StudyHistoryDayDto> StudyHeatmapList { get; } = new();
     public ObservableCollection<StudySessionDto> RecentSessionsList { get; } = new();
 
-    public DashboardViewModel(IStatisticsService statsService, INavigationService navService)
+    public DashboardViewModel(
+        IStatisticsService statsService,
+        INavigationService navService,
+        ILocalizationService localizationService,
+        IStudyAdvisorService advisorService)
     {
         _statsService = statsService;
         _navService = navService;
+        _localizationService = localizationService;
+        _advisorService = advisorService;
+
+        UpdateGreeting();
+        _localizationService.LanguageChanged += (s, e) =>
+        {
+            UpdateGreeting();
+            UpdateAdviceDisplay();
+        };
+    }
+
+    private void UpdateGreeting()
+    {
+        int hour = DateTime.Now.Hour;
+        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+        if (hour < 12)
+            GreetingText = isVi ? "Chào buổi sáng, bạn học!" : "Good morning, Learner!";
+        else if (hour < 18)
+            GreetingText = isVi ? "Chào buổi chiều, bạn học!" : "Good afternoon, Learner!";
+        else
+            GreetingText = isVi ? "Chào buổi tối, bạn học!" : "Good evening, Learner!";
+    }
+
+    private void UpdateAdviceDisplay()
+    {
+        if (DailyAdvice == null) return;
+        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+        AdviceTitle = isVi ? DailyAdvice.AdviceTitleVi : DailyAdvice.AdviceTitleEn;
+        AdviceDescription = isVi ? DailyAdvice.AdviceDescriptionVi : DailyAdvice.AdviceDescriptionEn;
+        AdviceButtonText = isVi ? DailyAdvice.ActionButtonTextVi : DailyAdvice.ActionButtonTextEn;
     }
 
     [RelayCommand]
@@ -60,7 +119,25 @@ public partial class DashboardViewModel : ObservableObject
         IsLoading = true;
         try
         {
-            var analytics = await _statsService.GetDetailedAnalyticsAsync();
+            var analyticsTask = _statsService.GetDetailedAnalyticsAsync();
+            var adviceTask = _advisorService.GetDailyAdviceAsync();
+            var forecastTask = _advisorService.Get7DayForecastAsync();
+
+            await Task.WhenAll(analyticsTask, adviceTask, forecastTask);
+
+            var analytics = await analyticsTask;
+            DailyAdvice = await adviceTask;
+            WorkloadForecast = await forecastTask;
+
+            UpdateAdviceDisplay();
+
+            ForecastDaysList.Clear();
+            if (WorkloadForecast != null)
+            {
+                TotalForecastNext7Days = WorkloadForecast.TotalDueNext7Days;
+                foreach (var d in WorkloadForecast.Days) ForecastDaysList.Add(d);
+            }
+
             var summary = analytics.Summary;
 
             TotalWords = summary.TotalWords;
@@ -96,6 +173,25 @@ public partial class DashboardViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    public void ExecuteAdviceAction()
+    {
+        if (DailyAdvice == null) return;
+        switch (DailyAdvice.RecommendedAction)
+        {
+            case StudyAdviceActionType.UrgentReview:
+                _navService.Navigate(typeof(ReviewPage));
+                break;
+            case StudyAdviceActionType.WeakWordsQuiz:
+            case StudyAdviceActionType.MilestonePractice:
+                _navService.Navigate(typeof(TestPage));
+                break;
+            default:
+                _navService.Navigate(typeof(VocabularyPage));
+                break;
         }
     }
 

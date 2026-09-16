@@ -21,7 +21,7 @@ public class StatisticsService : IStatisticsService
     {
         int totalWords = await _vocabRepo.CountAsync(cancellationToken: cancellationToken);
         var statusCounts = await _reviewRepo.GetCardCountsByStatusAsync(cancellationToken);
-        var dueCards = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, 1000, cancellationToken);
+        var dueCount = await _reviewRepo.CountDueCardsAsync(DateTime.UtcNow, cancellationToken);
         var streak = await _reviewRepo.GetUserStreakAsync(cancellationToken);
         var recentLogs = await _reviewRepo.GetRecentLogsAsync(200, cancellationToken);
 
@@ -43,7 +43,7 @@ public class StatisticsService : IStatisticsService
             TotalNotRemembered: notRemembered,
             TotalLearning: learning,
             TotalMastered: mastered,
-            DueReviewsToday: dueCards.Count,
+            DueReviewsToday: dueCount,
             CurrentStreakDays: streak?.CurrentStreak ?? 0,
             LongestStreakDays: streak?.LongestStreak ?? 0,
             AccuracyRate: accuracy,

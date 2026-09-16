@@ -33,4 +33,14 @@ public sealed partial class DashboardPage : Page
     {
         ViewModel.StartPracticeTest();
     }
+
+    private void TotalWordsCard_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        ViewModel.OpenVocabulary();
+    }
+
+    private void DueTodayCard_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        ViewModel.StartReviewSession();
+    }
 }

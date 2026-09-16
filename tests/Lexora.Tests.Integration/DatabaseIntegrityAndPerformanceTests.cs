@@ -213,6 +213,62 @@ public class DatabaseIntegrityAndPerformanceTests : IDisposable
         affected.Should().BeGreaterThan(0);
     }
 
+    [Fact]
+    public async Task CountDueCardsAsync_And_GetDueForecastCountsAsync_ShouldExecuteAccuratelyOnRealSqlite()
+    {
+        // Arrange
+        var reviewRepo = new ReviewRepository(_context);
+        var now = DateTime.UtcNow;
+
+        var word1 = new Word { Term = "forecasting", Level = CefrLevel.B2 };
+        var word2 = new Word { Term = "optimizer", Level = CefrLevel.C1 };
+        var word3 = new Word { Term = "mastered_term", Level = CefrLevel.C2 };
+
+        _context.Words.AddRange(word1, word2, word3);
+        await _context.SaveChangesAsync();
+
+        // Card 1: Overdue (yesterday)
+        var card1 = new ReviewCard
+        {
+            WordId = word1.Id,
+            Status = LearningStatus.Learning,
+            NextReviewAt = now.AddDays(-1)
+        };
+
+        // Card 2: Due tomorrow
+        var card2 = new ReviewCard
+        {
+            WordId = word2.Id,
+            Status = LearningStatus.Learning,
+            NextReviewAt = now.AddDays(1)
+        };
+
+        // Card 3: Mastered (should NOT count as due)
+        var card3 = new ReviewCard
+        {
+            WordId = word3.Id,
+            Status = LearningStatus.Mastered,
+            NextReviewAt = now.AddDays(-1)
+        };
+
+        _context.ReviewCards.AddRange(card1, card2, card3);
+        await _context.SaveChangesAsync();
+
+        // Act 1: CountDueCardsAsync
+        int dueCount = await reviewRepo.CountDueCardsAsync(now);
+
+        // Act 2: GetDueForecastCountsAsync (7 days)
+        var forecast = await reviewRepo.GetDueForecastCountsAsync(now, 7);
+
+        // Assert
+        dueCount.Should().Be(1, "Only card1 is due today/overdue and not Mastered");
+
+        var today = DateOnly.FromDateTime(now.Date);
+        forecast[today].Should().Be(1, "Today/overdue bucket has 1 card");
+        forecast[today.AddDays(1)].Should().Be(1, "Tomorrow has 1 card");
+        forecast.Values.Sum().Should().Be(2, "Mastered card is excluded from workload forecast");
+    }
+
     public void Dispose()
     {
         _context.Dispose();

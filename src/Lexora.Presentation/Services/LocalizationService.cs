@@ -73,6 +73,13 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_RecentSessions"] = "Lịch sử học tập & kiểm tra gần đây",
             ["Dashboard_SessionCards"] = "Số thẻ:",
             ["Dashboard_SessionCorrect"] = "Chính xác:",
+            ["Dashboard_AdvisorTitle"] = "Cố Vấn Học Tập Thông Minh",
+            ["Dashboard_AdvisorBadge"] = "Đề xuất thông minh",
+            ["Dashboard_ForecastTitle"] = "Dự Báo Khối Lượng Ôn Tập (7 Ngày Tới)",
+            ["Dashboard_ForecastSubtitle"] = "Phân bố số thẻ dự kiến đến hạn theo thuật toán lặp lại ngắt quãng SM-2",
+            ["Dashboard_ForecastTotal"] = "Tổng thẻ 7 ngày tới:",
+            ["Vocab_DidYouMean"] = "Có phải bạn muốn tìm:",
+            ["Vocab_ApplyTypo"] = "Áp dụng",
 
             // Vocabulary Hub
             ["Vocab_Title"] = "Kho Từ Vựng",
@@ -446,6 +453,13 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_RecentSessions"] = "Recent Learning & Test Sessions",
             ["Dashboard_SessionCards"] = "Cards:",
             ["Dashboard_SessionCorrect"] = "Correct:",
+            ["Dashboard_AdvisorTitle"] = "Smart Study Advisor",
+            ["Dashboard_AdvisorBadge"] = "Smart Recommendation",
+            ["Dashboard_ForecastTitle"] = "Workload Forecast (Next 7 Days)",
+            ["Dashboard_ForecastSubtitle"] = "Projected review workload scheduled by the SM-2 algorithm",
+            ["Dashboard_ForecastTotal"] = "Total reviews next 7 days:",
+            ["Vocab_DidYouMean"] = "Did you mean:",
+            ["Vocab_ApplyTypo"] = "Apply",
 
             // Vocabulary Hub
             ["Vocab_Title"] = "Vocabulary Hub",

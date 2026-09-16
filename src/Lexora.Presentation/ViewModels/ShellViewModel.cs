@@ -28,6 +28,9 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty]
     public partial string DueReviewMessage { get; set; } = string.Empty;
 
+    [ObservableProperty]
+    public partial int DueCardsCount { get; set; } = 0;
+
     public ShellViewModel(
         INavigationService navigationService,
         ILocalizationService localizationService,
@@ -57,6 +60,7 @@ public partial class ShellViewModel : ObservableObject
             }
 
             int count = await _reviewService.GetDueCardsCountAsync();
+            DueCardsCount = count;
             HasDueReviews = count > 0;
             DueReviewMessage = count > 0 ? $"You have {count} word{(count > 1 ? "s" : "")} ready for spaced repetition review." : string.Empty;
         }

@@ -49,6 +49,7 @@
             <converters:CorrectnessToBrushConverter x:Key="CorrectnessToBrushConverter" />
             <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
             <converters:RetentionToBrushConverter x:Key="RetentionToBrushConverter" />
+            <converters:CefrToBrushConverter x:Key="CefrToBrushConverter" />
 
             <!-- Fallback Button Style -->
             <Style x:Key="DefaultButtonStyle" TargetType="Button" />

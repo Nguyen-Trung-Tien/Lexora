@@ -80,6 +80,20 @@
         <!-- ========================================================= -->
         <StackPanel Grid.Row="1" Spacing="8"
                     Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            <!-- Smart Typo Suggestion Banner -->
+            <Border Visibility="{x:Bind ViewModel.HasTypoSuggestion, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="14,6">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE946;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_DidYouMean')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                    <HyperlinkButton Command="{x:Bind ViewModel.ApplyTypoSuggestionCommand}" Padding="0" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind ViewModel.TypoSuggestion, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontStyle="Italic" />
+                    </HyperlinkButton>
+                    <TextBlock Text="?" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
             <!-- Quick Filter Chips (Pills) -->
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                           HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
@@ -198,11 +212,13 @@
                                       Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
                         <!-- Empty State -->
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="24"
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Margin="24"
                                     Visibility="{x:Bind ViewModel.Words.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
-                            <FontIcon Glyph="&#xE82D;" FontSize="36" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptyTitle')}" FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptySubtitle')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+                            <Border Width="56" Height="56" CornerRadius="16" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Padding="10" HorizontalAlignment="Center">
+                                <FontIcon Glyph="&#xE82D;" FontSize="24" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptyTitle')}" FontWeight="Bold" FontSize="15" HorizontalAlignment="Center" TextAlignment="Center" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptySubtitle')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="240" />
                         </StackPanel>
 
                         <!-- Words ListView -->
@@ -213,21 +229,24 @@
                                   Padding="6">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="dto:WordDto">
-                                    <Grid Padding="8,8" ColumnDefinitions="Auto,*,Auto">
+                                    <Grid Padding="10,8" ColumnDefinitions="Auto,*,Auto" Margin="0,2">
                                         <!-- Review Status Dot Indicator -->
-                                        <Ellipse Width="7" Height="7" Margin="0,0,10,0" VerticalAlignment="Center"
+                                        <Ellipse Width="8" Height="8" Margin="0,0,12,0" VerticalAlignment="Center"
                                                  Fill="{x:Bind LearningStatus, Converter={StaticResource StatusToBrushConverter}}" />
 
-                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,8,0">
+                                        <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center" Margin="0,0,8,0">
                                             <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{x:Bind PhoneticUk}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
 
-                                        <!-- Level Badge -->
-                                        <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                                CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock Text="{x:Bind Level}" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <!-- Semantic CEFR Level Badge -->
+                                        <Border Grid.Column="2"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{x:Bind Level, Converter={StaticResource CefrToBrushConverter}}"
+                                                BorderThickness="1"
+                                                CornerRadius="6" Padding="7,2" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Level}" FontSize="11" FontWeight="Bold"
+                                                       Foreground="{x:Bind Level, Converter={StaticResource CefrToBrushConverter}}" />
                                         </Border>
                                     </Grid>
                                 </DataTemplate>
@@ -289,7 +308,7 @@
 
                                 <!-- Action Buttons -->
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
-                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+                                    <Border Background="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay, Converter={StaticResource CefrToBrushConverter}}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="12" />
                                     </Border>
                                     <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="Spaced Review (SM-2)" CornerRadius="8" Padding="8,6">
