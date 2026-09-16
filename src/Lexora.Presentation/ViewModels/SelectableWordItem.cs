@@ -8,7 +8,7 @@ public partial class SelectableWordItem : ObservableObject
     public WordDto Word { get; }
 
     [ObservableProperty]
-    public partial bool IsSelected { get; set; }
+    public partial bool? IsSelected { get; set; } = false;
 
     public SelectableWordItem(WordDto word, bool isSelected = false)
     {

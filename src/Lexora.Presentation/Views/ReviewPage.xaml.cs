@@ -210,8 +210,8 @@ public sealed partial class ReviewPage : Page
 
     private void UpdateModeButtonStyles(ReviewSessionMode mode)
     {
-        var accentStyle = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
-        var defaultStyle = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("DefaultButtonStyle", out var d) ? (Style)d : null;
+        var accentStyle = App.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
+        var defaultStyle = App.Current.Resources.TryGetValue("DefaultButtonStyle", out var d) ? (Style)d : null;
 
         ModeDueButton.Style = mode == ReviewSessionMode.TodayDue ? accentStyle : defaultStyle;
         ModeNewButton.Style = mode == ReviewSessionMode.LearnNew ? accentStyle : defaultStyle;

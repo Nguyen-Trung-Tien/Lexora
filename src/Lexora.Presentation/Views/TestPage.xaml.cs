@@ -28,12 +28,17 @@ public sealed partial class TestPage : Page
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
-        DispatcherQueue.TryEnqueue(() => Bindings.Update());
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            Bindings.Update();
+            UpdateCountButtonLabels();
+        });
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        UpdateCountButtonLabels();
         UpdateTypeButtonStyles(ViewModel.SelectedTestType);
         UpdateCountButtonStyles(ViewModel.QuestionCount);
         await ViewModel.InitializeAsync();
@@ -168,9 +173,17 @@ public sealed partial class TestPage : Page
         ViewModel.ApplyPastedTerms();
     }
 
+    private void UpdateCountButtonLabels()
+    {
+        BtnCount5.Content = Loc.GetString("Test_Count5");
+        BtnCount10.Content = Loc.GetString("Test_Count10");
+        BtnCount20.Content = Loc.GetString("Test_Count20");
+        BtnCount30.Content = Loc.GetString("Test_Count30");
+    }
+
     private void UpdateModeSelectorStyles(bool isCustomList)
     {
-        var res = Microsoft.UI.Xaml.Application.Current.Resources;
+        var res = App.Current.Resources;
         var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
         var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
         var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
@@ -211,7 +224,7 @@ public sealed partial class TestPage : Page
 
     private void UpdateTypeButtonStyles(TestType selected)
     {
-        var res = Microsoft.UI.Xaml.Application.Current.Resources;
+        var res = App.Current.Resources;
         var accentBrush = res.TryGetValue("AccentFillColorDefaultBrush", out var ab) && ab is Microsoft.UI.Xaml.Media.Brush bAb ? bAb : null;
         var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
         var subtleBg = res.TryGetValue("SubtleFillColorSecondaryBrush", out var sb) && sb is Microsoft.UI.Xaml.Media.Brush bSb ? bSb : null;
@@ -256,7 +269,7 @@ public sealed partial class TestPage : Page
 
     private void UpdateCountButtonStyles(int count)
     {
-        var res = Microsoft.UI.Xaml.Application.Current.Resources;
+        var res = App.Current.Resources;
         var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
         var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
         var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
@@ -296,6 +309,6 @@ public sealed partial class TestPage : Page
 
     public string GetFeedbackTitle(bool isCorrect)
     {
-        return isCorrect ? "Correct! Well done." : "Incorrect.";
+        return isCorrect ? Loc.GetString("Grammar_Correct") : Loc.GetString("Grammar_Incorrect");
     }
 }

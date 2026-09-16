@@ -56,9 +56,17 @@
                                   PlaceholderText="{x:Bind Loc.GetString('Vocab_TopicFilter')}"
                                   SelectionChanged="ReviewUnitCombo_SelectionChanged"
                                   ItemsSource="{x:Bind ViewModel.AvailableTopics, Mode=OneWay}"
-                                  DisplayMemberPath="Name"
                                   MinWidth="130" MaxWidth="210" CornerRadius="8"
-                                  ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TopicFilter')}" />
+                                  ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TopicFilter')}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="dto:TopicDto">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE8EC;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </StackPanel>
 
                     <!-- Top Right: Audio & Typing Controls -->

@@ -66,8 +66,8 @@
                             VerticalAlignment="Stretch">
                         <StackPanel Spacing="16">
                             <StackPanel Spacing="2">
-                                <TextBlock Text="1. Choose Test Format" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" FontSize="16" />
-                                <TextBlock Text="Select question style to test recognition, spelling, or active recall" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Test_ChooseFormat')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" FontSize="16" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Test_ChooseFormatDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             </StackPanel>
                             
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
@@ -79,8 +79,8 @@
                                             <FontIcon x:Name="IconTypeMixed" Glyph="&#xE765;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TitleTypeMixed" Text="Mixed Test" FontWeight="SemiBold" FontSize="13" />
-                                            <TextBlock Text="Balanced combination" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock x:Name="TitleTypeMixed" Text="{x:Bind Loc.GetString('Test_FormatMixed')}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Test_FormatMixedDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
                                         <FontIcon x:Name="CheckTypeMixed" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                     </Grid>
@@ -94,8 +94,8 @@
                                             <FontIcon x:Name="IconTypeWordToMeaning" Glyph="&#xE82D;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TitleTypeWordToMeaning" Text="Word → Meaning" FontWeight="SemiBold" FontSize="13" />
-                                            <TextBlock Text="Term to definition" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock x:Name="TitleTypeWordToMeaning" Text="{x:Bind Loc.GetString('Test_FormatWordToMeaning')}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Test_FormatWordToMeaningDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
                                         <FontIcon x:Name="CheckTypeWordToMeaning" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                     </Grid>
@@ -109,8 +109,8 @@
                                             <FontIcon x:Name="IconTypeMeaningToWord" Glyph="&#xE895;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TitleTypeMeaningToWord" Text="Meaning → Word" FontWeight="SemiBold" FontSize="13" />
-                                            <TextBlock Text="Definition to term" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock x:Name="TitleTypeMeaningToWord" Text="{x:Bind Loc.GetString('Test_FormatMeaningToWord')}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Test_FormatMeaningToWordDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
                                         <FontIcon x:Name="CheckTypeMeaningToWord" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                     </Grid>
@@ -124,8 +124,8 @@
                                             <FontIcon x:Name="IconTypeFillInTheBlank" Glyph="&#xE70F;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TitleTypeFillInTheBlank" Text="Fill in Blank" FontWeight="SemiBold" FontSize="13" />
-                                            <TextBlock Text="Context sentence blanks" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock x:Name="TitleTypeFillInTheBlank" Text="{x:Bind Loc.GetString('Test_FormatFillBlank')}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Test_FormatFillBlankDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
                                         <FontIcon x:Name="CheckTypeFillInTheBlank" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                     </Grid>
@@ -139,8 +139,8 @@
                                             <FontIcon x:Name="IconTypePartOfSpeech" Glyph="&#xE8D2;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TitleTypePartOfSpeech" Text="Part of Speech" FontWeight="SemiBold" FontSize="13" />
-                                            <TextBlock Text="Noun, Verb, Adj, etc." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock x:Name="TitleTypePartOfSpeech" Text="{x:Bind Loc.GetString('Test_FormatPartOfSpeech')}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Test_FormatPartOfSpeechDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
                                         <FontIcon x:Name="CheckTypePartOfSpeech" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                     </Grid>
@@ -154,8 +154,8 @@
                                             <FontIcon x:Name="IconTypeListeningQuiz" Glyph="&#xE767;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TitleTypeListeningQuiz" Text="Audio Quiz" FontWeight="SemiBold" FontSize="13" />
-                                            <TextBlock Text="Native audio quiz" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock x:Name="TitleTypeListeningQuiz" Text="{x:Bind Loc.GetString('Test_FormatAudioQuiz')}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Test_FormatAudioQuizDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
                                         <FontIcon x:Name="CheckTypeListeningQuiz" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                     </Grid>
@@ -171,22 +171,22 @@
                             VerticalAlignment="Stretch">
                         <StackPanel Spacing="16">
                             <StackPanel Spacing="2">
-                                <TextBlock Text="2. Test Configuration" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" FontSize="16" />
-                                <TextBlock Text="Configure question count, target exams, and scope" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Test_Configuration')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" FontSize="16" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Test_ConfigDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             </StackPanel>
 
                             <!-- Question Count Pills -->
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Number of Questions:" FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Test_QuestionCount')}" FontWeight="SemiBold" FontSize="13" />
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
                                     <Grid ColumnDefinitions="*,*,*,*">
-                                        <Button x:Name="BtnCount5" Grid.Column="0" Content="5 Questions" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
+                                        <Button x:Name="BtnCount5" Grid.Column="0" Content="5" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
                                                 Click="QuestionCountButton_Click" Tag="5" />
-                                        <Button x:Name="BtnCount10" Grid.Column="1" Content="10 Questions" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
+                                        <Button x:Name="BtnCount10" Grid.Column="1" Content="10" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
                                                 Click="QuestionCountButton_Click" Tag="10" />
-                                        <Button x:Name="BtnCount20" Grid.Column="2" Content="20 Questions" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
+                                        <Button x:Name="BtnCount20" Grid.Column="2" Content="20" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
                                                 Click="QuestionCountButton_Click" Tag="20" />
-                                        <Button x:Name="BtnCount30" Grid.Column="3" Content="30 Questions" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
+                                        <Button x:Name="BtnCount30" Grid.Column="3" Content="30" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
                                                 Click="QuestionCountButton_Click" Tag="30" />
                                     </Grid>
                                 </Border>
@@ -194,12 +194,12 @@
 
                             <!-- Mode Selector: Filters vs Custom List -->
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Question Source:" FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Test_QuestionSource')}" FontWeight="SemiBold" FontSize="13" />
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
                                     <Grid ColumnDefinitions="*,*">
-                                        <Button x:Name="BtnModeFilters" Grid.Column="0" Content="Filters &amp; Topics" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
+                                        <Button x:Name="BtnModeFilters" Grid.Column="0" Content="{x:Bind Loc.GetString('Test_FiltersAndTopics')}" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
                                                 Click="ModeFiltersButton_Click" />
-                                        <Button x:Name="BtnModeCustomList" Grid.Column="1" Content="Custom Word Selection" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
+                                        <Button x:Name="BtnModeCustomList" Grid.Column="1" Content="{x:Bind Loc.GetString('Test_CustomSelection')}" HorizontalAlignment="Stretch" CornerRadius="8" Padding="6,8"
                                                 Click="ModeCustomListButton_Click" />
                                     </Grid>
                                 </Border>
@@ -207,44 +207,98 @@
 
                             <!-- Option Area A: Regular Filters -->
                             <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsCustomListMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                                    <ComboBox PlaceholderText="All Exams" HorizontalAlignment="Stretch"
+                                <Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="8">
+                                    <ComboBox PlaceholderText="{x:Bind Loc.GetString('Test_AllExams')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.ExamTypes}"
                                               SelectedItem="{x:Bind ViewModel.SelectedExamType, Mode=TwoWay}" CornerRadius="8" />
-                                    <ComboBox Grid.Column="1" PlaceholderText="All Topics" HorizontalAlignment="Stretch"
+                                    <ComboBox Grid.Column="1" PlaceholderText="{x:Bind Loc.GetString('Test_AllTopics')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.Topics}"
-                                              SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}" CornerRadius="8" />
-                                    <ComboBox Grid.Column="2" PlaceholderText="All Levels" HorizontalAlignment="Stretch"
+                                              SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}" CornerRadius="8">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="dto:TopicDto">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <FontIcon Glyph="&#xE8EC;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <ComboBox Grid.Column="2" PlaceholderText="{x:Bind Loc.GetString('Test_AllLevels')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.CefrLevels}"
                                               SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}" CornerRadius="8" />
+                                    <Button Grid.Column="3" Command="{x:Bind ViewModel.ResetFiltersCommand}" CornerRadius="8" Padding="10,6"
+                                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_ResetFilters')}">
+                                        <FontIcon Glyph="&#xE777;" FontSize="12" />
+                                    </Button>
                                 </Grid>
 
                                 <!-- Weak Words Focus Toggle -->
-                                <ToggleSwitch Header="Target Weak Words Only"
+                                <ToggleSwitch Header="{x:Bind Loc.GetString('Test_TargetWeakOnly')}"
                                               IsOn="{x:Bind ViewModel.WeakWordsOnly, Mode=TwoWay}"
-                                              OffContent="Off (Include all words)"
-                                              OnContent="On (Focus on lapsed &amp; low-confidence words)" />
+                                              OffContent="{x:Bind Loc.GetString('Test_TargetWeakOff')}"
+                                              OnContent="{x:Bind Loc.GetString('Test_TargetWeakOn')}" />
                             </StackPanel>
 
                             <!-- Option Area B: Custom Word List Mode -->
                             <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsCustomListMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
                                     <TextBox x:Name="CustomWordSearchBox"
-                                             PlaceholderText="Search word pool..."
+                                             PlaceholderText="{x:Bind Loc.GetString('Test_SearchCustomPool')}"
                                              Text="{x:Bind ViewModel.CustomListSearchTerm, Mode=TwoWay}"
                                              TextChanged="CustomWordSearchBox_TextChanged"
                                              CornerRadius="8" />
-                                    <Button Grid.Column="1" Content="Select All" Click="SelectAllCustomWords_Click" CornerRadius="8" />
-                                    <Button Grid.Column="2" Content="Clear" Click="DeselectAllCustomWords_Click" CornerRadius="8" />
-                                    <Button Grid.Column="3" Content="⚡ Weak Words" Click="SelectWeakCustomWords_Click" CornerRadius="8" />
+                                    <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Test_SelectAll')}" Click="SelectAllCustomWords_Click" CornerRadius="8" />
+                                    <Button Grid.Column="2" Content="{x:Bind Loc.GetString('Test_ClearSelection')}" Click="DeselectAllCustomWords_Click" CornerRadius="8" />
+                                    <Button Grid.Column="3" Content="{x:Bind Loc.GetString('Test_WeakWordsFilter')}" Click="SelectWeakCustomWords_Click" CornerRadius="8" />
                                 </Grid>
+
+                                <!-- Optional: Paste Terms Expander -->
+                                <Expander Header="{x:Bind Loc.GetString('Test_PasteWordList')}" HorizontalAlignment="Stretch">
+                                    <StackPanel Spacing="8" Padding="6">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Test_PastePrompt')}" FontSize="12" TextWrapping="Wrap" />
+                                        <TextBox AcceptsReturn="True" Height="75" TextWrapping="Wrap"
+                                                 Text="{x:Bind ViewModel.CustomListPastedTerms, Mode=TwoWay}" CornerRadius="6" />
+                                        <Button Content="{x:Bind Loc.GetString('Test_ApplyPasted')}" Style="{ThemeResource AccentButtonStyle}"
+                                                HorizontalAlignment="Right" Click="ApplyPastedTermsButton_Click" CornerRadius="6" Padding="16,6" />
+                                    </StackPanel>
+                                </Expander>
 
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="10,6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="Selected:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Test_SelectedCount')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         <TextBlock Text="{x:Bind ViewModel.SelectedCustomWordsCount, Mode=OneWay}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="words for test" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Test_WordsForTest')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     </StackPanel>
+                                </Border>
+
+                                <!-- Custom Word Candidates Scrollable List -->
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="8" MaxHeight="250">
+                                    <ListView ItemsSource="{x:Bind ViewModel.FilteredCustomWordCandidates, Mode=OneWay}"
+                                              SelectionMode="None" Padding="4">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ColumnDefinitions="Auto,*,Auto" Padding="8,6" ColumnSpacing="10" VerticalAlignment="Center">
+                                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" MinWidth="32" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="{Binding Word.Term}" FontWeight="SemiBold" FontSize="14" />
+                                                            <TextBlock Text="{Binding Word.PhoneticUs}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Word.PrimaryPartOfSpeech}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding Word.PrimaryDefinition}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                    <Border Grid.Column="2" Background="{Binding Word.Level, Converter={StaticResource CefrToBrushConverter}}"
+                                                            CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Word.Level}" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                    </Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
                                 </Border>
                             </StackPanel>
                         </StackPanel>
@@ -262,8 +316,8 @@
                             <FontIcon Glyph="&#xE768;" FontSize="18" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                            <TextBlock Text="Ready to begin?" FontWeight="Bold" FontSize="16" />
-                            <TextBlock Text="Sharpen recall accuracy and log SM-2 metrics with your configured drill."
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_ReadyToBegin')}" FontWeight="Bold" FontSize="16" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_ReadyDesc')}"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                         </StackPanel>
                         <Button Grid.Column="2" Command="{x:Bind ViewModel.StartTestCommand}"
@@ -298,7 +352,7 @@
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" FontWeight="SemiBold" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="Shortcuts: 1-4: Select | Space: Audio | Enter: Next"
+                        <TextBlock Text="{x:Bind Loc.GetString('Test_ShortcutsHint')}"
                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" TextWrapping="Wrap" />
                     </StackPanel>
                 </Grid>
@@ -321,7 +375,7 @@
                                     CornerRadius="8" Padding="12,6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE767;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="Listen Audio" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Test_ListenAudio')}" />
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -411,7 +465,7 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Test_ResultTitle')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />
                             <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}"
                                        FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextWrapping="Wrap" />
-                            <TextBlock Text="Review your performance summary and follow the recommended Spaced Repetition study plan below."
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_ResultSubtitle')}"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
                         </StackPanel>
                     </Grid>
@@ -424,7 +478,7 @@
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Correct" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_Correct')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             <TextBlock Text="{x:Bind ViewModel.CorrectCount, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                         </StackPanel>
                     </Border>
@@ -432,7 +486,7 @@
                     <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Incorrect" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_Incorrect')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             <TextBlock Text="{x:Bind ViewModel.IncorrectCount, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                         </StackPanel>
                     </Border>
@@ -440,7 +494,7 @@
                     <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Accuracy" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_Accuracy')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             <TextBlock Text="{x:Bind ViewModel.ScorePercentage, Mode=OneWay}" FontSize="26" FontWeight="Bold" />
                         </StackPanel>
                     </Border>
@@ -448,7 +502,7 @@
                     <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Time Taken" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_TimeTaken')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             <TextBlock Text="{x:Bind ViewModel.TimeTakenText, Mode=OneWay}" FontSize="26" FontWeight="Bold" />
                         </StackPanel>
                     </Border>
@@ -464,7 +518,7 @@
                     <Button Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.ReviewWeakWordsInSpacedRepetitionCommand}" Padding="22,10" CornerRadius="8">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE895;" FontSize="15" />
-                            <TextBlock Text="Review in Spaced Repetition (SM-2)" FontWeight="Bold" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_ReviewInSm2')}" FontWeight="Bold" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -473,7 +527,7 @@
                 <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.WeakWordsList.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE7BA;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="18" />
-                        <TextBlock Text="Weak Words Requiring Review" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Test_WeakWordsSection')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
                     </StackPanel>
 
                     <ListView ItemsSource="{x:Bind ViewModel.WeakWordsList}" SelectionMode="None">
@@ -510,7 +564,7 @@
                 </StackPanel>
 
                 <!-- Detailed Questions Review -->
-                <Expander Header="Detailed Questions &amp; Answers Review" HorizontalAlignment="Stretch">
+                <Expander Header="{x:Bind Loc.GetString('Test_DetailedReview')}" HorizontalAlignment="Stretch">
                     <ListView ItemsSource="{x:Bind ViewModel.QuestionResultsList}" SelectionMode="None">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="dto:TestQuestionDto">

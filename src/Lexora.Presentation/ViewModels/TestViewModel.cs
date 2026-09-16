@@ -205,7 +205,7 @@ public partial class TestViewModel : ObservableObject
 
     public void UpdateSelectedCustomWordsCount()
     {
-        SelectedCustomWordsCount = CustomWordCandidates.Count(w => w.IsSelected);
+        SelectedCustomWordsCount = CustomWordCandidates.Count(w => w.IsSelected == true);
     }
 
     [RelayCommand]
@@ -282,6 +282,15 @@ public partial class TestViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void ResetFilters()
+    {
+        SelectedTopic = null;
+        SelectedExamType = null;
+        SelectedLevel = null;
+        WeakWordsOnly = false;
+    }
+
+    [RelayCommand]
     public void SwitchToFilterMode()
     {
         IsCustomListMode = false;
@@ -342,7 +351,7 @@ public partial class TestViewModel : ObservableObject
 
             if (IsCustomListMode)
             {
-                var selected = CustomWordCandidates.Where(c => c.IsSelected).Select(c => c.Word.Id).ToList();
+                var selected = CustomWordCandidates.Where(c => c.IsSelected == true).Select(c => c.Word.Id).ToList();
                 if (selected.Count == 0)
                 {
                     StatusMessage = "Vui lòng chọn ít nhất 1 từ trong danh sách để kiểm tra.";
