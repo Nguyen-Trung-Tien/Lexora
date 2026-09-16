@@ -108,27 +108,6 @@
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
 
-            <!-- 4. Cinematic Specular Light Sweep Across Logo Glass -->
-            <DoubleAnimation
-                Storyboard.TargetName="LightSweepTransform"
-                Storyboard.TargetProperty="X"
-                From="-160" To="160"
-                Duration="0:0:0.65"
-                BeginTime="0:0:0.40">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseInOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimationUsingKeyFrames
-                Storyboard.TargetName="LightSweep"
-                Storyboard.TargetProperty="Opacity"
-                BeginTime="0:0:0.40">
-                <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.18" Value="0.85" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.45" Value="0.85" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.65" Value="0.0" />
-            </DoubleAnimationUsingKeyFrames>
-
             <!-- 5. Horizontal Energy Divider Line Expand (ScaleX 0 -> 1) -->
             <DoubleAnimation
                 Storyboard.TargetName="DividerScale"
@@ -315,30 +294,6 @@
                         <ThemeShadow />
                     </Image.Shadow>
                 </Image>
-
-                <!-- Soft Glass Specular Light Sweep Highlight -->
-                <Border
-                    x:Name="LightSweep"
-                    Width="54"
-                    Height="200"
-                    Opacity="0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    IsHitTestVisible="False">
-                    <Border.RenderTransform>
-                        <TransformGroup>
-                            <RotateTransform Angle="28" />
-                            <TranslateTransform x:Name="LightSweepTransform" X="-160" Y="0" />
-                        </TransformGroup>
-                    </Border.RenderTransform>
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Color="#00FFFFFF" Offset="0" />
-                            <GradientStop Color="#90FFFFFF" Offset="0.5" />
-                            <GradientStop Color="#00FFFFFF" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                </Border>
             </Grid>
 
             <!-- 2. Wordmark & Tagline -->

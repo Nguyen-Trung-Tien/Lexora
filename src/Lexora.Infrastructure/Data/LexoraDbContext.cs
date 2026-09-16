@@ -36,6 +36,7 @@ public class LexoraDbContext : DbContext
             b.HasIndex(w => w.NormalizedTerm);
             b.HasIndex(w => w.Level);
             b.HasIndex(w => w.PrimaryPartOfSpeech);
+            b.HasIndex(w => new { w.NormalizedTerm, w.Level });
 
             b.HasMany(w => w.Meanings)
                 .WithOne(m => m.Word)
@@ -106,6 +107,7 @@ public class LexoraDbContext : DbContext
             b.HasKey(rc => rc.Id);
             b.HasIndex(rc => rc.NextReviewAt);
             b.HasIndex(rc => rc.Status);
+            b.HasIndex(rc => new { rc.NextReviewAt, rc.Status });
 
             b.HasMany(rc => rc.StudyLogs)
                 .WithOne(sl => sl.ReviewCard)

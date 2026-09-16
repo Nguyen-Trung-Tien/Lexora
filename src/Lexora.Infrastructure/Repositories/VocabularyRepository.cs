@@ -25,6 +25,23 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Word>> GetByIdsWithDetailsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0) return Array.Empty<Word>();
+
+        return await DbSet
+            .Include(w => w.Meanings)
+                .ThenInclude(m => m.Examples)
+            .Include(w => w.WordTopics)
+                .ThenInclude(wt => wt.Topic)
+            .Include(w => w.WordExamTags)
+                .ThenInclude(wet => wet.ExamTag)
+            .Include(w => w.ReviewCard)
+            .Where(w => idList.Contains(w.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Word?> GetByTermAsync(string term, CancellationToken cancellationToken = default)
     {
         var normalized = term.Trim().ToLowerInvariant();

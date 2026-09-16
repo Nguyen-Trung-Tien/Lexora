@@ -168,4 +168,40 @@ public class ReviewSessionTests
 
         _mockReviewRepo.Verify(r => r.UpdateStreakAsync(It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task UndoReviewAsync_ShouldRevertCardStateAndPersistChanges()
+    {
+        // Arrange
+        var cardId = Guid.NewGuid();
+        var card = new ReviewCard
+        {
+            Id = cardId,
+            Status = LearningStatus.Remembered,
+            IntervalDays = 4,
+            EaseFactor = 2.5,
+            Repetitions = 2,
+            Lapses = 0,
+            TotalReviews = 2,
+            CorrectReviews = 2
+        };
+
+        _mockReviewRepo.Setup(r => r.GetByIdAsync(cardId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(card);
+
+        // Act - Revert to previous state (Status: Learning, Interval: 1, EF: 2.5, Reps: 1, Lapses: 0)
+        var prevNextReview = DateTime.UtcNow.AddDays(1);
+        await _reviewService.UndoReviewAsync(cardId, LearningStatus.Learning, 1, 2.5, 1, 0, prevNextReview);
+
+        // Assert
+        card.Status.Should().Be(LearningStatus.Learning);
+        card.IntervalDays.Should().Be(1);
+        card.Repetitions.Should().Be(1);
+        card.Lapses.Should().Be(0);
+        card.TotalReviews.Should().Be(1);
+        card.NextReviewAt.Should().Be(prevNextReview);
+
+        _mockReviewRepo.Verify(r => r.UpdateAsync(card, It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

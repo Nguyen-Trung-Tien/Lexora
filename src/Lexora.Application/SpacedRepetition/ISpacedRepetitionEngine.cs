@@ -23,4 +23,5 @@ public interface ISpacedRepetitionEngine
 {
     SpacedRepetitionResult CalculateNextReview(ReviewCard card, ReviewRating rating, DateTime? reviewTimeUtc = null);
     IntervalPreviewDto GetIntervalPreview(ReviewCard card, DateTime? reviewTimeUtc = null);
+    double CalculateRetentionProbability(ReviewCard card, DateTime? asOfUtc = null);
 }

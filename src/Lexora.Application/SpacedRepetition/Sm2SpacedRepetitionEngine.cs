@@ -100,6 +100,33 @@ public class Sm2SpacedRepetitionEngine : ISpacedRepetitionEngine
         );
     }
 
+    public double CalculateRetentionProbability(ReviewCard card, DateTime? asOfUtc = null)
+    {
+        if (card.Status == LearningStatus.New || card.Repetitions == 0)
+        {
+            return 50.0; // Baseline initial retention prior to first successful review
+        }
+
+        var now = asOfUtc ?? DateTime.UtcNow;
+        var lastReview = card.LastReviewedAt ?? card.CreatedAt;
+        var elapsedDays = Math.Max(0.0, (now - lastReview).TotalDays);
+        var intervalDays = Math.Max(1.0, (double)card.IntervalDays);
+
+        // Ebbinghaus forgetting curve modeling: R(t) = 0.90^(t / I)
+        // At t = 0 -> R = 100%, at t = interval -> R = 90%
+        double retention = Math.Pow(0.90, elapsedDays / intervalDays);
+
+        // Adjust slightly based on EaseFactor (higher EF retains better over time)
+        if (card.EaseFactor > DefaultEaseFactor)
+        {
+            retention = Math.Min(1.0, retention * (1.0 + (card.EaseFactor - DefaultEaseFactor) * 0.05));
+        }
+
+        // Clamp between 5% and 100%
+        retention = Math.Clamp(retention, 0.05, 1.0);
+        return Math.Round(retention * 100.0, 1);
+    }
+
     private static string FormatInterval(int days)
     {
         return days switch

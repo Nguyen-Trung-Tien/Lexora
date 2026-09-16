@@ -17,9 +17,11 @@ public interface IReviewService
     Task<StudySessionDto> CompleteSessionAsync(Guid sessionId, int totalCards, int correctCount, int incorrectCount, CancellationToken cancellationToken = default);
 
     Task<ReviewEvaluationResultDto> SubmitReviewAsync(Guid reviewCardId, ReviewRating rating, int responseTimeMs = 0, Guid? sessionId = null, CancellationToken cancellationToken = default);
+    Task UndoReviewAsync(Guid reviewCardId, LearningStatus previousStatus, int previousInterval, double previousEaseFactor, int previousRepetitions, int previousLapses, DateTime previousNextReviewAt, CancellationToken cancellationToken = default);
     Task MarkStatusQuickAsync(Guid wordId, bool remembered, CancellationToken cancellationToken = default);
 
     IntervalPreviewDto GetCardIntervalPreview(ReviewCardDto card);
+    double GetRetentionProbability(ReviewCardDto card);
     Task<IReadOnlyList<StudySessionDto>> GetRecentSessionsAsync(int limit = 10, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StudyLogDto>> GetRecentLogsAsync(int limit = 20, CancellationToken cancellationToken = default);
 }

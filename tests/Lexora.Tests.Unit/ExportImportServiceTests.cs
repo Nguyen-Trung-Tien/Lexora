@@ -155,4 +155,41 @@ public class ExportImportServiceTests
         addedWord.Meanings.First().DefinitionVi.Should().Be("chăm chỉ, cần cù");
         addedWord.Meanings.First().Examples.Should().HaveCount(1);
     }
+
+    [Theory]
+    [InlineData("=cmd|' /C calc'!A0")]
+    [InlineData("+SUM(1+1)")]
+    [InlineData("-cmd")]
+    [InlineData("@evil")]
+    public async Task ExportToCsvAsync_WhenFieldStartsWithFormulaTriggers_ShouldPrependSingleQuoteToNeutralizeInjection(string maliciousInput)
+    {
+        // Arrange
+        var dangerousWord = new Word
+        {
+            Term = maliciousInput,
+            NormalizedTerm = maliciousInput.ToLowerInvariant(),
+            Level = CefrLevel.B2,
+            PrimaryPartOfSpeech = PartOfSpeech.Noun,
+            Meanings = new List<WordMeaning>
+            {
+                new WordMeaning
+                {
+                    DefinitionVi = "định nghĩa",
+                    PartOfSpeech = PartOfSpeech.Noun
+                }
+            }
+        };
+
+        _vocabRepoMock.Setup(r => r.SearchAsync(
+            null, null, null, null, null, null, 0, 100000, null, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Word> { dangerousWord });
+
+        // Act
+        var csv = await _service.ExportToCsvAsync();
+
+        // Assert
+        csv.Should().NotBeNullOrWhiteSpace();
+        // Malicious formula trigger MUST be neutralized with leading single quote
+        csv.Should().Contain($"\"'{maliciousInput}\"");
+    }
 }

@@ -123,6 +123,15 @@ public sealed partial class ReviewPage : Page
         }
     }
 
+    private void UndoAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ViewModel.CanUndo)
+        {
+            _ = ViewModel.UndoLastReviewAsync();
+            args.Handled = true;
+        }
+    }
+
     private void TypingInputBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Enter)

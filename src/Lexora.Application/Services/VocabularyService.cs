@@ -1,5 +1,6 @@
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
+using Lexora.Application.SpacedRepetition;
 using Lexora.Domain.Entities;
 using Lexora.Domain.Enums;
 using Lexora.Domain.Interfaces;
@@ -11,15 +12,18 @@ public class VocabularyService : IVocabularyService
     private readonly IVocabularyRepository _vocabRepo;
     private readonly IReviewRepository _reviewRepo;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISpacedRepetitionEngine _srEngine;
 
     public VocabularyService(
         IVocabularyRepository vocabRepo,
         IReviewRepository reviewRepo,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ISpacedRepetitionEngine? srEngine = null)
     {
         _vocabRepo = vocabRepo;
         _reviewRepo = reviewRepo;
         _unitOfWork = unitOfWork;
+        _srEngine = srEngine ?? new Sm2SpacedRepetitionEngine();
     }
 
     public async Task<WordDto?> GetWordByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -323,7 +327,7 @@ public class VocabularyService : IVocabularyService
         return result;
     }
 
-    private static WordDto MapToDto(Word w)
+    private WordDto MapToDto(Word w)
     {
         var meanings = w.Meanings
             .OrderBy(m => m.OrderIndex)
@@ -340,6 +344,9 @@ public class VocabularyService : IVocabularyService
         var topics = w.WordTopics.Select(wt => wt.Topic?.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToList();
         var examTags = w.WordExamTags.Select(et => et.ExamTag?.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToList();
 
+        var rc = w.ReviewCard;
+        double retention = rc != null ? _srEngine.CalculateRetentionProbability(rc) : 0.0;
+
         return new WordDto(
             w.Id,
             w.Term,
@@ -353,9 +360,15 @@ public class VocabularyService : IVocabularyService
             meanings,
             topics,
             examTags,
-            w.ReviewCard?.Status,
-            w.ReviewCard?.NextReviewAt,
-            w.ReviewCard?.Confidence ?? 0.0
+            rc?.Status,
+            rc?.NextReviewAt,
+            rc?.Confidence ?? 0.0,
+            rc?.IntervalDays ?? 0,
+            rc?.EaseFactor ?? 2.5,
+            rc?.Lapses ?? 0,
+            rc?.Repetitions ?? 0,
+            rc?.TotalReviews ?? 0,
+            retention
         );
     }
 }

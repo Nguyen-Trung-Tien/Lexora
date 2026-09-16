@@ -435,14 +435,21 @@ public class ExportImportService : IExportImportService
         return new ImportResult(imported, skipped, errors);
     }
 
+    private static readonly char[] CsvFormulaTriggers = { '=', '+', '-', '@', '\t', '\r' };
+
     private static string EscapeCsv(string field)
     {
         if (string.IsNullOrEmpty(field)) return "";
-        if (field.Contains(',') || field.Contains('"') || field.Contains('\n') || field.Contains('\r'))
+
+        // Mitigate CSV Formula Injection (CWE-1236)
+        bool isFormula = CsvFormulaTriggers.Contains(field[0]);
+        var safeField = isFormula ? "'" + field : field;
+
+        if (isFormula || safeField.Contains(',') || safeField.Contains('"') || safeField.Contains('\n') || safeField.Contains('\r'))
         {
-            return $"\"{field.Replace("\"", "\"\"")}\"";
+            return $"\"{safeField.Replace("\"", "\"\"")}\"";
         }
-        return field;
+        return safeField;
     }
 
     private static List<List<string>> ParseCsvRecords(string csvContent)

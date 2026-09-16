@@ -335,6 +335,30 @@ public class VocabularyCrudIntegrationTests : IDisposable
         generalUnit.Words.Any(w => w.Term == "serendipity").Should().BeTrue();
     }
 
+    [Fact]
+    public async Task GetByIdsWithDetailsAsync_ShouldReturnAllRequestedWordsInSingleBatch()
+    {
+        // Arrange
+        var w1 = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            null, "tenacious", "/təˈneɪ.ʃəs/", null, null, null, CefrLevel.C1, PartOfSpeech.Adjective, null,
+            new List<WordMeaningCreateDto> { new(PartOfSpeech.Adjective, "kiên trì, bền bỉ", null, null, new List<ExampleSentenceCreateDto>()) },
+            new List<Guid>(), new List<Guid>()));
+
+        var w2 = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            null, "meticulous", "/məˈtɪk.jə.ləs/", null, null, null, CefrLevel.C1, PartOfSpeech.Adjective, null,
+            new List<WordMeaningCreateDto> { new(PartOfSpeech.Adjective, "tỉ mỉ, kỹ lưỡng", null, null, new List<ExampleSentenceCreateDto>()) },
+            new List<Guid>(), new List<Guid>()));
+
+        // Act
+        var batchWords = await _vocabRepo.GetByIdsWithDetailsAsync(new[] { w1.Id, w2.Id });
+
+        // Assert
+        batchWords.Should().HaveCount(2);
+        batchWords.Select(w => w.Term).Should().Contain(new[] { "tenacious", "meticulous" });
+        batchWords.All(w => w.Meanings.Count > 0).Should().BeTrue();
+        batchWords.All(w => w.ReviewCard != null).Should().BeTrue();
+    }
+
     public void Dispose()
     {
         _context.Dispose();

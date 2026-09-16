@@ -23,27 +23,19 @@ public sealed partial class VocabularyPage : Page
 
         _isInitializing = true;
 
-        // Populate Level combo
-        var levels = new List<object> { "All Levels" };
-        levels.AddRange(Enum.GetValues<CefrLevel>().Cast<object>());
-        LevelFilterCombo.ItemsSource = levels;
-        LevelFilterCombo.SelectedIndex = 0;
+        PopulateFilterCombos();
 
-        // Populate POS combo
-        var posList = new List<object> { "All Parts of Speech" };
-        posList.AddRange(Enum.GetValues<PartOfSpeech>().Cast<object>());
-        PosFilterCombo.ItemsSource = posList;
-        PosFilterCombo.SelectedIndex = 0;
-
-        // Populate Status combo
-        var statuses = new List<object> { "All Statuses" };
-        statuses.AddRange(Enum.GetValues<LearningStatus>().Cast<object>());
-        StatusFilterCombo.ItemsSource = statuses;
-        StatusFilterCombo.SelectedIndex = 0;
-
-        // Populate Sort combo
-        SortCombo.ItemsSource = new List<string> { "Term (A-Z)", "Term (Z-A)", "CEFR Level (A1-C2)", "CEFR Level (C2-A1)", "Date Added (Newest)", "Date Added (Oldest)" };
-        SortCombo.SelectedIndex = 0;
+        Loc.LanguageChanged += (s, e) =>
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                var wasInit = _isInitializing;
+                _isInitializing = true;
+                PopulateFilterCombos();
+                PopulateTopicFilterCombo();
+                _isInitializing = wasInit;
+            });
+        };
 
         _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
         _searchDebounceTimer.Tick += async (s, e) =>
@@ -63,6 +55,44 @@ public sealed partial class VocabularyPage : Page
         };
     }
 
+    private void PopulateFilterCombos()
+    {
+        var prevLevelIdx = LevelFilterCombo.SelectedIndex >= 0 ? LevelFilterCombo.SelectedIndex : 0;
+        var prevPosIdx = PosFilterCombo.SelectedIndex >= 0 ? PosFilterCombo.SelectedIndex : 0;
+        var prevStatusIdx = StatusFilterCombo.SelectedIndex >= 0 ? StatusFilterCombo.SelectedIndex : 0;
+        var prevSortIdx = SortCombo.SelectedIndex >= 0 ? SortCombo.SelectedIndex : 0;
+
+        // Populate Level combo
+        var levels = new List<object> { Loc.GetString("Vocab_AllLevels") };
+        levels.AddRange(Enum.GetValues<CefrLevel>().Cast<object>());
+        LevelFilterCombo.ItemsSource = levels;
+        LevelFilterCombo.SelectedIndex = prevLevelIdx < levels.Count ? prevLevelIdx : 0;
+
+        // Populate POS combo
+        var posList = new List<object> { Loc.GetString("Vocab_AllPos") };
+        posList.AddRange(Enum.GetValues<PartOfSpeech>().Cast<object>());
+        PosFilterCombo.ItemsSource = posList;
+        PosFilterCombo.SelectedIndex = prevPosIdx < posList.Count ? prevPosIdx : 0;
+
+        // Populate Status combo
+        var statuses = new List<object> { Loc.GetString("Vocab_AllStatus") };
+        statuses.AddRange(Enum.GetValues<LearningStatus>().Cast<object>());
+        StatusFilterCombo.ItemsSource = statuses;
+        StatusFilterCombo.SelectedIndex = prevStatusIdx < statuses.Count ? prevStatusIdx : 0;
+
+        // Populate Sort combo
+        SortCombo.ItemsSource = new List<string>
+        {
+            Loc.GetString("Vocab_SortTermAsc"),
+            Loc.GetString("Vocab_SortTermDesc"),
+            Loc.GetString("Vocab_SortLevelAsc"),
+            Loc.GetString("Vocab_SortLevelDesc"),
+            Loc.GetString("Vocab_SortDateNewest"),
+            Loc.GetString("Vocab_SortDateOldest")
+        };
+        SortCombo.SelectedIndex = prevSortIdx < 6 ? prevSortIdx : 0;
+    }
+
     private void PopulateTopicFilterCombo()
     {
         var currentSelectedId = ViewModel.SelectedTopicId;
@@ -71,10 +101,10 @@ public sealed partial class VocabularyPage : Page
 
         var allItem = new ComboBoxItem
         {
-            Content = "Tất cả Unit / Chủ đề",
+            Content = Loc.GetString("Vocab_AllTopics"),
             Tag = null
         };
-        ToolTipService.SetToolTip(allItem, "Tất cả Unit / Chủ đề");
+        ToolTipService.SetToolTip(allItem, Loc.GetString("Vocab_AllTopics"));
         TopicFilterCombo.Items.Add(allItem);
 
         int selectedIndex = 0;
@@ -221,6 +251,40 @@ public sealed partial class VocabularyPage : Page
         PosFilterCombo.SelectedIndex = 0;
         StatusFilterCombo.SelectedIndex = 0;
         SortCombo.SelectedIndex = 0;
+        UpdateQuickFilterStyles("All");
+        _ = ViewModel.SelectQuickFilterAsync("All");
+    }
+
+    private async void QuickFilter_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is string filter)
+        {
+            await ViewModel.SelectQuickFilterAsync(filter);
+            UpdateQuickFilterStyles(filter);
+        }
+    }
+
+    private void UpdateQuickFilterStyles(string activeFilter)
+    {
+        SetChipStyle(ChipFilterAll, activeFilter == "All");
+        SetChipStyle(ChipFilterDueToday, activeFilter == "DueToday");
+        SetChipStyle(ChipFilterWeak, activeFilter == "Weak");
+        SetChipStyle(ChipFilterLearning, activeFilter == "Learning");
+        SetChipStyle(ChipFilterMastered, activeFilter == "Mastered");
+        SetChipStyle(ChipFilterNew, activeFilter == "New");
+    }
+
+    private void SetChipStyle(Button? btn, bool isActive)
+    {
+        if (btn == null) return;
+        if (isActive)
+        {
+            btn.Style = (Style)App.Current.Resources["AccentButtonStyle"];
+        }
+        else
+        {
+            btn.Style = (Style)App.Current.Resources["DefaultButtonStyle"];
+        }
     }
 
     private async void AddWordButton_Click(object sender, RoutedEventArgs e)

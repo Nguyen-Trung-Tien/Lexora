@@ -32,25 +32,15 @@ public class TestService : ITestService
 
         if (config.CustomWordIds != null && config.CustomWordIds.Count > 0)
         {
-            var loadedWords = new List<Word>();
-            foreach (var id in config.CustomWordIds)
-            {
-                var w = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken);
-                if (w != null) loadedWords.Add(w);
-            }
-            candidateWords = loadedWords;
+            candidateWords = await _vocabRepo.GetByIdsWithDetailsAsync(config.CustomWordIds, cancellationToken)
+                             ?? Array.Empty<Word>();
         }
         else if (config.WeakWordsOnly)
         {
             var difficultCards = await _reviewRepo.GetDifficultCardsAsync(50, cancellationToken);
             var weakWordIds = difficultCards.Select(c => c.WordId).ToList();
-
-            var loadedWords = new List<Word>();
-            foreach (var id in weakWordIds)
-            {
-                var w = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken);
-                if (w != null) loadedWords.Add(w);
-            }
+            var loadedWords = (await _vocabRepo.GetByIdsWithDetailsAsync(weakWordIds, cancellationToken)
+                               ?? Array.Empty<Word>()).ToList();
 
             candidateWords = loadedWords;
 

@@ -22,6 +22,22 @@ public partial class ReviewViewModel : ObservableObject
     private Guid? _currentSessionId;
     private int _initialQueueCount;
 
+    public record ReviewUndoState(
+        ReviewCardDto Card,
+        ReviewRating Rating,
+        int SessionCorrectCount,
+        int SessionIncorrectCount,
+        int CompletedCount,
+        int RemainingCount,
+        double ProgressPercent,
+        bool WasCompleted
+    );
+
+    private readonly Stack<ReviewUndoState> _undoStack = new();
+
+    [ObservableProperty]
+    public partial bool CanUndo { get; set; } = false;
+
     [ObservableProperty]
     public partial string WordScaffold { get; set; } = string.Empty;
 
@@ -241,6 +257,9 @@ public partial class ReviewViewModel : ObservableObject
                 ReviewQueue.Add(c);
             }
 
+            _undoStack.Clear();
+            CanUndo = false;
+
             _initialQueueCount = ReviewQueue.Count;
             TotalQueueCount = _initialQueueCount;
             RemainingCount = ReviewQueue.Count;
@@ -296,6 +315,19 @@ public partial class ReviewViewModel : ObservableObject
             _cardTimer.Stop();
             int responseTimeMs = (int)_cardTimer.ElapsedMilliseconds;
 
+            // Push current state to undo history before applying rating
+            _undoStack.Push(new ReviewUndoState(
+                CurrentCard,
+                rating,
+                SessionCorrectCount,
+                SessionIncorrectCount,
+                CompletedCount,
+                RemainingCount,
+                ProgressPercent,
+                IsCompleted
+            ));
+            CanUndo = true;
+
             if (rating >= ReviewRating.Good)
             {
                 SessionCorrectCount++;
@@ -341,6 +373,47 @@ public partial class ReviewViewModel : ObservableObject
                 await RefreshDueCountAsync();
                 await LoadHistoryAsync();
             }
+        }
+        finally
+        {
+            _isRatingInProgress = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task UndoLastReviewAsync()
+    {
+        if (_undoStack.Count == 0 || _isRatingInProgress) return;
+        _isRatingInProgress = true;
+
+        try
+        {
+            var state = _undoStack.Pop();
+            CanUndo = _undoStack.Count > 0;
+
+            await _reviewService.UndoReviewAsync(
+                state.Card.Id,
+                state.Card.Status,
+                state.Card.IntervalDays,
+                state.Card.EaseFactor,
+                state.Card.Repetitions,
+                state.Card.Lapses,
+                state.Card.NextReviewAt);
+
+            SessionCorrectCount = state.SessionCorrectCount;
+            SessionIncorrectCount = state.SessionIncorrectCount;
+            CompletedCount = state.CompletedCount;
+            RemainingCount = state.RemainingCount;
+            ProgressPercent = state.ProgressPercent;
+            IsCompleted = false;
+
+            // Prepend card back to queue
+            ReviewQueue.Insert(0, state.Card);
+            SetCurrentCard(state.Card);
+            IsAnswerVisible = true;
+
+            int totalReviewed = SessionCorrectCount + SessionIncorrectCount;
+            SessionAccuracyRate = totalReviewed == 0 ? 0.0 : Math.Round((double)SessionCorrectCount / totalReviewed * 100, 1);
         }
         finally
         {

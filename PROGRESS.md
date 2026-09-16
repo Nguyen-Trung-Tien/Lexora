@@ -1,6 +1,6 @@
 # 📊 Lexora — Tiến Độ Phát Triển Dự Án (Project Progress Tracker)
 
-> Cập nhật lần cuối: **12/09/2026** | Phiên bản hiện tại: **0.3.0-alpha**  
+> Cập nhật lần cuối: **16/09/2026** | Phiên bản hiện tại: **0.4.0-alpha (Senior Architecture & Quality Enhancement)**  
 > Nền tảng: **.NET 10** • **WinUI 3 (Windows App SDK)** • **SQLite / EF Core 10** • **Clean Architecture**
 
 ---
@@ -10,16 +10,18 @@
 | Giai Đoạn | Tên Module / Phase | Trạng Thái | Tiến Độ (%) | Kiểm Thử |
 |---|---|:---:|:---:|:---:|
 | **Phase 1** | **Foundation & Clean Architecture** | ✅ Hoàn thành | 100% | Đã verify |
-| **Phase 2** | **Vocabulary Management (CRUD, Audio, Import/Export)** | ✅ Hoàn thành | 100% | 10/10 tests pass |
-| **Phase 3** | **Learning & Spaced Repetition (SM-2 Algorithm)** | ✅ Hoàn thành | 100% | 9/9 tests pass |
+| **Phase 2** | **Vocabulary Management (CRUD, Audio, Import/Export)** | ✅ Hoàn thành | 100% | 11/11 tests pass |
+| **Phase 3** | **Learning & Spaced Repetition (SM-2 & Ebbinghaus)** | ✅ Hoàn thành | 100% | 13/13 tests pass |
 | **Phase 4** | **Vocabulary Test & Practice (Quiz, Dictation, Fill-in)** | ✅ Hoàn thành | 100% | 8/8 tests pass |
 | **Phase 5** | **Grammar & Sentence Structure** | ✅ Hoàn thành | 100% | 6/6 tests pass |
 | **Phase 6** | **Dashboard, Analytics & Retention Charts** | ✅ Hoàn thành | 100% | 4/4 tests pass |
-| **Phase 7** | **UI/UX Polish, Shortcuts & Accessibility** | ✅ Hoàn thành | 100% | Accelerators, Transitions, TTS |
-| **Phase 8** | **Backup, Packaging & Release** | ✅ Hoàn thành | 100% | 8/8 tests pass & Release Pipeline |
+| **Phase 7** | **UI/UX Polish, Shortcuts & Accessibility** | ✅ Hoàn thành | 100% | Dynamic i18n & Intervals |
+| **Phase 8** | **Backup, Packaging & Release** | ✅ Hoàn thành | 100% | Rollback & QuickCheck |
+| **Phase 9** | **Senior Architecture, Security & Smart Optimization** | ✅ Hoàn thành | 100% | Batch Load, CWE-1236, PRAGMAs |
 
-**Tổng tiến độ toàn diện toàn dự án: 100% (Hoàn thành 8/8 Phases)**  
-**Trạng thái Build & Test**: 45/45 Unit & Integration Tests **PASS** (0 errors, 0 warnings).
+**Tổng tiến độ toàn diện toàn dự án: 100% (Hoàn thành 9/9 Phases)**  
+**Trạng thái Build & Test**: 79/79 Unit & Integration Tests **PASS** (54 Unit + 25 Integration, 0 errors, 0 warnings).
+- **UI/UX Nâng Cấp Toàn Diện**: Quick Filter Chips (Pills) đa chiều, Ebbinghaus Memory Retention Gauge với ProgressBar màu thích ứng (`RetentionToBrushConverter`), Tính năng Hoàn tác ôn tập thẻ (Review Undo / `Ctrl+Z`).
 
 ---
 

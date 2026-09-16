@@ -43,6 +43,9 @@ public class TestServiceTests
         _mockVocabRepo.Setup(r => r.GetWithDetailsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Guid id, CancellationToken _) => _sampleWords.FirstOrDefault(w => w.Id == id));
 
+        _mockVocabRepo.Setup(r => r.GetByIdsWithDetailsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IEnumerable<Guid> ids, CancellationToken _) => _sampleWords.Where(w => ids.Contains(w.Id)).ToList());
+
         _mockReviewRepo.Setup(r => r.CreateStudySessionAsync(It.IsAny<StudySession>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((StudySession s, CancellationToken _) => s);
 

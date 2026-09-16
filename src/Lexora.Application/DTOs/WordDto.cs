@@ -17,10 +17,17 @@ public record WordDto(
     List<string> ExamTags,
     LearningStatus? LearningStatus,
     DateTime? NextReviewAt,
-    double Confidence
+    double Confidence,
+    int IntervalDays = 0,
+    double EaseFactor = 2.5,
+    int Lapses = 0,
+    int Repetitions = 0,
+    int TotalReviews = 0,
+    double RetentionRate = 100.0
 )
 {
     public string PrimaryDefinition => Meanings.FirstOrDefault()?.DefinitionVi ?? string.Empty;
+    public bool IsDueNow => NextReviewAt.HasValue && NextReviewAt.Value <= DateTime.UtcNow;
 }
 
 public record WordMeaningDto(

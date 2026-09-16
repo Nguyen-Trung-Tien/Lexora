@@ -137,4 +137,63 @@ public class Sm2SpacedRepetitionEngineTests
         result.NewRepetitions.Should().Be(5);
         result.NewStatus.Should().Be(LearningStatus.Mastered);
     }
+
+    [Fact]
+    public void CalculateRetentionProbability_WhenCardIsNew_ShouldReturnFiftyPercentBaseline()
+    {
+        var card = new ReviewCard { Status = LearningStatus.New, Repetitions = 0 };
+        var probability = _engine.CalculateRetentionProbability(card);
+        probability.Should().Be(50.0);
+    }
+
+    [Fact]
+    public void CalculateRetentionProbability_AtReviewMoment_ShouldBeAroundOneHundredPercent()
+    {
+        var now = DateTime.UtcNow;
+        var card = new ReviewCard
+        {
+            Status = LearningStatus.Remembered,
+            Repetitions = 2,
+            IntervalDays = 5,
+            EaseFactor = 2.5,
+            LastReviewedAt = now
+        };
+        var probability = _engine.CalculateRetentionProbability(card, now);
+        probability.Should().Be(100.0);
+    }
+
+    [Fact]
+    public void CalculateRetentionProbability_AtIntervalDueDate_ShouldBeAroundNinetyPercent()
+    {
+        var reviewedAt = new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc);
+        var card = new ReviewCard
+        {
+            Status = LearningStatus.Remembered,
+            Repetitions = 2,
+            IntervalDays = 10,
+            EaseFactor = 2.5,
+            LastReviewedAt = reviewedAt
+        };
+        var dueDate = reviewedAt.AddDays(10);
+        var probability = _engine.CalculateRetentionProbability(card, dueDate);
+        probability.Should().Be(90.0);
+    }
+
+    [Fact]
+    public void CalculateRetentionProbability_WhenOverdue_ShouldDeclineBelowNinetyPercent()
+    {
+        var reviewedAt = new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc);
+        var card = new ReviewCard
+        {
+            Status = LearningStatus.Remembered,
+            Repetitions = 2,
+            IntervalDays = 10,
+            EaseFactor = 2.5,
+            LastReviewedAt = reviewedAt
+        };
+        var overdueDate = reviewedAt.AddDays(20);
+        var probability = _engine.CalculateRetentionProbability(card, overdueDate);
+        probability.Should().BeLessThan(90.0);
+        probability.Should().BeGreaterThan(50.0);
+    }
 }

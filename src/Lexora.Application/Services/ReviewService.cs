@@ -149,6 +149,32 @@ public class ReviewService : IReviewService
         );
     }
 
+    public async Task UndoReviewAsync(
+        Guid reviewCardId,
+        LearningStatus previousStatus,
+        int previousInterval,
+        double previousEaseFactor,
+        int previousRepetitions,
+        int previousLapses,
+        DateTime previousNextReviewAt,
+        CancellationToken cancellationToken = default)
+    {
+        var card = await _reviewRepo.GetByIdAsync(reviewCardId, cancellationToken);
+        if (card == null) return;
+
+        card.Status = previousStatus;
+        card.IntervalDays = previousInterval;
+        card.EaseFactor = previousEaseFactor;
+        card.Repetitions = previousRepetitions;
+        card.Lapses = previousLapses;
+        card.NextReviewAt = previousNextReviewAt;
+        if (card.TotalReviews > 0) card.TotalReviews--;
+        card.UpdatedAt = DateTime.UtcNow;
+
+        await _reviewRepo.UpdateAsync(card, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task MarkStatusQuickAsync(Guid wordId, bool remembered, CancellationToken cancellationToken = default)
     {
         var card = await _reviewRepo.GetByWordIdAsync(wordId, cancellationToken);
@@ -201,6 +227,24 @@ public class ReviewService : IReviewService
         return _srEngine.GetIntervalPreview(dummyCard);
     }
 
+    public double GetRetentionProbability(ReviewCardDto card)
+    {
+        var dummyCard = new ReviewCard
+        {
+            Id = card.Id,
+            WordId = card.WordId,
+            Status = card.Status,
+            EaseFactor = card.EaseFactor,
+            IntervalDays = card.IntervalDays,
+            Repetitions = card.Repetitions,
+            Lapses = card.Lapses,
+            LastReviewedAt = card.LastReviewedAt,
+            NextReviewAt = card.NextReviewAt
+        };
+
+        return _srEngine.CalculateRetentionProbability(dummyCard);
+    }
+
     public async Task<IReadOnlyList<StudySessionDto>> GetRecentSessionsAsync(int limit = 10, CancellationToken cancellationToken = default)
     {
         var sessions = await _reviewRepo.GetRecentSessionsAsync(limit, cancellationToken);
@@ -237,13 +281,19 @@ public class ReviewService : IReviewService
         );
     }
 
-    private static ReviewCardDto MapToDto(ReviewCard c)
+    private ReviewCardDto MapToDto(ReviewCard c)
     {
         var word = c.Word;
         var primaryMeaning = word?.Meanings?.OrderBy(m => m.OrderIndex).FirstOrDefault();
         var examples = (primaryMeaning?.Examples ?? Enumerable.Empty<ExampleSentence>())
             .Select(e => new ExampleSentenceDto(e.Id, e.SentenceEn, e.SentenceVi, e.AudioPath))
             .ToList();
+
+        double confidence = c.Confidence > 0.0
+            ? c.Confidence
+            : (c.TotalReviews > 0
+                ? Math.Round((double)c.CorrectReviews / c.TotalReviews * 100, 1)
+                : _srEngine.CalculateRetentionProbability(c));
 
         return new ReviewCardDto(
             c.Id,
@@ -267,7 +317,7 @@ public class ReviewService : IReviewService
             c.NextReviewAt,
             c.TotalReviews,
             c.CorrectReviews,
-            c.Confidence
+            confidence
         );
     }
 }

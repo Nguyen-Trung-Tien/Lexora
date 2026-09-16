@@ -37,6 +37,22 @@ public partial class VocabularyViewModel : ObservableObject
     public partial LearningStatus? SelectedStatus { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFilterAllSelected))]
+    [NotifyPropertyChangedFor(nameof(IsFilterDueTodaySelected))]
+    [NotifyPropertyChangedFor(nameof(IsFilterWeakSelected))]
+    [NotifyPropertyChangedFor(nameof(IsFilterLearningSelected))]
+    [NotifyPropertyChangedFor(nameof(IsFilterMasteredSelected))]
+    [NotifyPropertyChangedFor(nameof(IsFilterNewSelected))]
+    public partial string SelectedQuickFilter { get; set; } = "All";
+
+    public bool IsFilterAllSelected => SelectedQuickFilter == "All";
+    public bool IsFilterDueTodaySelected => SelectedQuickFilter == "DueToday";
+    public bool IsFilterWeakSelected => SelectedQuickFilter == "Weak";
+    public bool IsFilterLearningSelected => SelectedQuickFilter == "Learning";
+    public bool IsFilterMasteredSelected => SelectedQuickFilter == "Mastered";
+    public bool IsFilterNewSelected => SelectedQuickFilter == "New";
+
+    [ObservableProperty]
     public partial string SortBy { get; set; } = "term";
 
     [ObservableProperty]
@@ -158,6 +174,31 @@ public partial class VocabularyViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    public async Task SelectQuickFilterAsync(string filter)
+    {
+        SelectedQuickFilter = filter;
+        switch (filter)
+        {
+            case "All":
+            case "DueToday":
+            case "Weak":
+                SelectedStatus = null;
+                break;
+            case "Learning":
+                SelectedStatus = LearningStatus.Learning;
+                break;
+            case "Mastered":
+                SelectedStatus = LearningStatus.Mastered;
+                break;
+            case "New":
+                SelectedStatus = LearningStatus.New;
+                break;
+        }
+
+        await LoadWordsAsync();
+    }
+
     private CancellationTokenSource? _loadCts;
 
     [RelayCommand]
@@ -178,15 +219,25 @@ public partial class VocabularyViewModel : ObservableObject
                 topicId: SelectedTopicId,
                 examType: SelectedExamType,
                 status: SelectedStatus,
-                sortBy: SortBy,
-                isAscending: IsAscending,
+                sortBy: SelectedQuickFilter == "DueToday" ? "nextreview" : SortBy,
+                isAscending: SelectedQuickFilter == "DueToday" || IsAscending,
                 pageSize: 200,
                 cancellationToken: ct);
 
             if (ct.IsCancellationRequested) return;
 
+            var filteredResults = results.AsEnumerable();
+            if (SelectedQuickFilter == "DueToday")
+            {
+                filteredResults = filteredResults.Where(w => w.IsDueNow);
+            }
+            else if (SelectedQuickFilter == "Weak")
+            {
+                filteredResults = filteredResults.Where(w => w.Lapses > 0 || w.LearningStatus == LearningStatus.NotRemembered);
+            }
+
             Words.Clear();
-            foreach (var w in results)
+            foreach (var w in filteredResults)
             {
                 Words.Add(w);
             }

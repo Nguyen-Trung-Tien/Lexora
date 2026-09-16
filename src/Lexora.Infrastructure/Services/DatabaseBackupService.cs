@@ -77,13 +77,50 @@ public class DatabaseBackupService : IDatabaseBackupService
             throw new InvalidOperationException("The specified file is not a valid SQLite database (invalid header).");
         }
 
+        // 3. If file is large enough to contain at least 1 page, run SQLite quick_check
+        if (fileInfo.Length >= 512)
+        {
+            try
+            {
+                using var checkConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={backupFilePath};Mode=ReadOnly");
+                await checkConn.OpenAsync(cancellationToken);
+                using var checkCmd = checkConn.CreateCommand();
+                checkCmd.CommandText = "PRAGMA quick_check(1);";
+                var checkResult = await checkCmd.ExecuteScalarAsync(cancellationToken);
+                if (checkResult != null && !string.Equals(checkResult.ToString(), "ok", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException($"The backup file failed SQLite quick integrity check: {checkResult}");
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex)
+            {
+                throw new InvalidOperationException($"The backup file is corrupt and failed SQLite integrity check: {ex.Message}", ex);
+            }
+        }
+
         _logger.LogWarning("Restoring database from {Backup} to {Target}", backupFilePath, _dbFilePath);
 
         var targetDir = Path.GetDirectoryName(_dbFilePath);
         if (!string.IsNullOrEmpty(targetDir))
             Directory.CreateDirectory(targetDir);
 
-        // 3. Remove stale WAL and SHM files to prevent state mismatch
+        // 4. Create pre-restore safety snapshot to allow rollback if copy fails
+        string? rollbackSnapshot = null;
+        if (File.Exists(_dbFilePath))
+        {
+            rollbackSnapshot = _dbFilePath + ".pre_restore";
+            try
+            {
+                File.Copy(_dbFilePath, rollbackSnapshot, true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not create pre-restore snapshot: {Message}", ex.Message);
+                rollbackSnapshot = null;
+            }
+        }
+
+        // 5. Remove stale WAL and SHM files to prevent state mismatch
         var walFile = _dbFilePath + "-wal";
         var shmFile = _dbFilePath + "-shm";
         if (File.Exists(walFile))
@@ -95,11 +132,37 @@ public class DatabaseBackupService : IDatabaseBackupService
             try { File.Delete(shmFile); } catch { /* best effort */ }
         }
 
-        // 4. Overwrite main database file
-        using (var sourceStream = new FileStream(backupFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-        using (var destStream = new FileStream(_dbFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+        // 6. Overwrite main database file with rollback safeguard
+        try
         {
-            await sourceStream.CopyToAsync(destStream, cancellationToken);
+            using (var sourceStream = new FileStream(backupFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var destStream = new FileStream(_dbFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await sourceStream.CopyToAsync(destStream, cancellationToken);
+            }
+
+            // Restore succeeded, cleanup safety snapshot
+            if (rollbackSnapshot != null && File.Exists(rollbackSnapshot))
+            {
+                try { File.Delete(rollbackSnapshot); } catch { /* best effort */ }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to restore database. Attempting rollback to pre-restore snapshot...");
+            if (rollbackSnapshot != null && File.Exists(rollbackSnapshot))
+            {
+                try
+                {
+                    File.Copy(rollbackSnapshot, _dbFilePath, true);
+                    _logger.LogInformation("Database successfully rolled back to pre-restore snapshot.");
+                }
+                catch (Exception rollbackEx)
+                {
+                    _logger.LogCritical(rollbackEx, "Failed to rollback database to pre-restore snapshot!");
+                }
+            }
+            throw;
         }
     }
 }
