@@ -38,9 +38,30 @@ public sealed partial class ShellPage : Page
         ContentFrame.Navigated += (s, args) =>
         {
             ViewModel.IsOnReviewPage = ContentFrame.Content is ReviewPage or TestPage;
+
+            switch (ContentFrame.Content)
+            {
+                case DashboardPage:
+                    NavView.SelectedItem = NavItemDashboard;
+                    break;
+                case VocabularyPage:
+                    NavView.SelectedItem = NavItemVocabulary;
+                    break;
+                case ReviewPage:
+                    NavView.SelectedItem = NavItemReview;
+                    break;
+                case TestPage:
+                    NavView.SelectedItem = NavItemTest;
+                    break;
+                case GrammarPage:
+                    NavView.SelectedItem = NavItemGrammar;
+                    break;
+                case SettingsPage:
+                    NavView.SelectedItem = NavView.SettingsItem;
+                    break;
+            }
         };
         _navigationService.Navigate(typeof(DashboardPage));
-        NavView.SelectedItem = NavItemDashboard;
         await ViewModel.CheckDueReviewsAsync();
     }
 

@@ -13,7 +13,7 @@
     </Page.KeyboardAccelerators>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="24,18" MaxWidth="1160" HorizontalAlignment="Center">
+        <Grid Padding="28,18" MaxWidth="1440" HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -166,7 +166,7 @@
 
                 <!-- ACTIVE FLASHCARD WORKSPACE (Responsive 2-Column or Centered) -->
                 <Grid Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                      ColumnDefinitions="*,240" ColumnSpacing="14">
+                      ColumnDefinitions="*,280" ColumnSpacing="18">
 
                     <!-- Left: Main Study Flashcard -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

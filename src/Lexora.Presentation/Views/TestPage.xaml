@@ -11,7 +11,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="24,20" MaxWidth="1200" HorizontalAlignment="Center">
+        <Grid Padding="28,20" MaxWidth="1440" HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -337,7 +337,7 @@
             <!-- ========================================== -->
             <StackPanel Grid.Row="1" Spacing="18"
                         Visibility="{x:Bind ViewModel.IsTestingMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                        MaxWidth="860" HorizontalAlignment="Center">
+                        MaxWidth="1160" HorizontalAlignment="Stretch">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
                         <EntranceThemeTransition FromVerticalOffset="20" />

@@ -10,7 +10,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="28,20">
-        <StackPanel Spacing="24" MaxWidth="1180" HorizontalAlignment="Center">
+        <StackPanel Spacing="24" MaxWidth="1440" HorizontalAlignment="Stretch">
             <StackPanel.ChildrenTransitions>
                 <TransitionCollection>
                     <EntranceThemeTransition FromVerticalOffset="20" />
