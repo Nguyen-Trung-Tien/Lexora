@@ -19,8 +19,9 @@
 | **Phase 8** | **Backup, Packaging & Release** | ✅ Hoàn thành | 100% | Rollback & QuickCheck |
 | **Phase 9** | **Senior Architecture, Security & Smart Optimization** | ✅ Hoàn thành | 100% | Batch Load, CWE-1236, PRAGMAs |
 | **Phase 10** | **Intelligence, Workload Forecast & Query Optimization** | ✅ Hoàn thành | 100% | 96/96 tests pass |
+| **Phase 11** | **Real-Time Dynamic i18n & Fluid Motion Transitions** | ✅ Hoàn thành | 100% | 96/96 tests pass |
 
-**Tổng tiến độ toàn diện toàn dự án: 100% (Hoàn thành 10/10 Phases)**  
+**Tổng tiến độ toàn diện toàn dự án: 100% (Hoàn thành 11/11 Phases)**  
 **Trạng thái Build & Test**: 96/96 Unit & Integration Tests **PASS** (70 Unit + 26 Integration, 0 errors, 0 warnings).
 - **Trí thông minh học tập**: Smart Learning Advisor (`IStudyAdvisorService`), 7-Day Spaced Repetition Workload Forecast (`WorkloadForecastDto`), Typo-Tolerant & Fuzzy Search Engine (`IFuzzySearchService` với Damerau-Levenshtein).
 - **Tối ưu hóa Database**: Zero-allocation `CountDueCardsAsync` và `GetDueForecastCountsAsync` trong `ReviewRepository` & `ReviewService`.
@@ -204,6 +205,21 @@
   - Triển khai `CountDueCardsAsync` và `GetDueForecastCountsAsync` zero-allocation trên `ReviewRepository`, cắt giảm 99% chi phí I/O và memory allocation so với việc nạp 1.000 thực thể vào bộ nhớ.
   - Tích hợp Debounce tìm kiếm bất đồng bộ kèm Token hủy tác vụ để tránh quá tải truy vấn khi gõ phím.
 - [x] **Bộ kiểm thử toàn diện**: 96/96 tests pass (70 Unit Tests + 26 Integration Tests, 0 errors, 0 warnings).
+
+---
+
+### ✅ Phase 11 — Tối Ưu Đa Ngôn Ngữ Tức Thời & Hiệu Ứng Mượt Mà (Real-Time i18n & Fluid Motion) — 100%
+- [x] **Tối ưu hóa Đa Ngôn Ngữ Tức Thời (Real-Time Dynamic i18n)**:
+  - Tự động nạp ngôn ngữ đã lưu (`LanguageCode`) từ `UserPreferencesService` ngay khi khởi động mà không làm chậm splash sequence.
+  - Sửa lỗi điều hướng trùng lặp trong `NavigationService` bằng cơ chế `force: true` và phương thức `Reload(new SuppressNavigationTransitionInfo())` giúp reload trang không giật lag.
+  - Kết nối lắng nghe sự kiện `LanguageChanged` trực tiếp tại tất cả các View (`SettingsPage`, `DashboardPage`, `VocabularyPage`, `ReviewPage`, `TestPage`, `GrammarPage`) và gọi `Bindings.Update()` tại chỗ — chuyển đổi ngôn ngữ mượt mà trong tích tắc mà không cần khởi động lại ứng dụng.
+- [x] **Tối ưu hóa Hiệu Ứng Chuyển Động Mượt Mà (Fluent Fluid Transitions)**:
+  - Tích hợp hiệu ứng chuyển cảnh trang tự nhiên (`SlideNavigationTransitionInfo` trượt từ phải sang trái) làm mặc định cho `NavigationService`.
+  - Bổ sung `ChildrenTransitions` với `EntranceThemeTransition (FromVerticalOffset="20")` vào các khu vực tương tác cốt lõi:
+    - **DashboardPage**: Toàn bộ nội dung Dashboard trượt lên mềm mại khi khởi động.
+    - **ReviewPage**: Khung đáp án/định nghĩa và 4 nút chấm điểm SM-2 trượt vào êm ái khi lật thẻ.
+    - **TestPage**: Hiệu ứng chuyển động mượt mà khi chuyển giữa chế độ Cấu hình (Setup), Thi trắc nghiệm (Testing) và Bảng tổng kết kết quả (Result).
+- [x] **Kiểm thử & Đảm bảo chất lượng**: Biên dịch 0 warnings, 0 errors, toàn bộ 96/96 Unit & Integration Tests đạt 100%.
 
 ---
 

@@ -1,11 +1,13 @@
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 
 namespace Lexora.Presentation.Services;
 
 public interface INavigationService
 {
     void Initialize(Frame frame);
-    bool Navigate(Type pageType, object? parameter = null, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo? transitionInfo = null);
+    bool Navigate(Type pageType, object? parameter = null, NavigationTransitionInfo? transitionInfo = null, bool force = false);
+    void Reload(NavigationTransitionInfo? transitionInfo = null);
     bool CanGoBack { get; }
     void GoBack();
     event EventHandler<Type>? Navigated;
@@ -29,13 +31,21 @@ public class NavigationService : INavigationService
         };
     }
 
-    public bool Navigate(Type pageType, object? parameter = null, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo? transitionInfo = null)
+    public bool Navigate(Type pageType, object? parameter = null, NavigationTransitionInfo? transitionInfo = null, bool force = false)
     {
         if (_frame == null) return false;
-        if (_frame.Content?.GetType() == pageType && parameter == null) return false;
+        if (!force && _frame.Content?.GetType() == pageType && parameter == null) return false;
 
-        transitionInfo ??= new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo();
+        transitionInfo ??= new SlideNavigationTransitionInfo { Effect = SlideNavigationTransitionEffect.FromRight };
         return _frame.Navigate(pageType, parameter, transitionInfo);
+    }
+
+    public void Reload(NavigationTransitionInfo? transitionInfo = null)
+    {
+        if (_frame?.Content is Page currentPage)
+        {
+            Navigate(currentPage.GetType(), force: true, transitionInfo: transitionInfo ?? new SuppressNavigationTransitionInfo());
+        }
     }
 
     public bool CanGoBack => _frame?.CanGoBack ?? false;

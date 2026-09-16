@@ -180,6 +180,8 @@ public partial class SettingsViewModel : ObservableObject
     {
         CurrentLanguage = langCode;
         _locService.SetLanguage(langCode);
+        var current = _preferencesService.GetPreferences();
+        _ = _preferencesService.SavePreferencesAsync(current with { LanguageCode = langCode });
     }
 
     [RelayCommand]

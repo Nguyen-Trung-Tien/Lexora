@@ -354,6 +354,11 @@
                             <StackPanel Grid.Row="1" Spacing="16"
                                         Visibility="{x:Bind ViewModel.IsAnswerVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                                         Margin="0,12,0,20">
+                                <StackPanel.ChildrenTransitions>
+                                    <TransitionCollection>
+                                        <EntranceThemeTransition FromVerticalOffset="20" />
+                                    </TransitionCollection>
+                                </StackPanel.ChildrenTransitions>
                                 <MenuFlyoutSeparator />
 
                                 <!-- Meaning Section -->
@@ -406,6 +411,11 @@
                                 <!-- 4 SM-2 Rating Buttons -->
                                 <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8"
                                       Visibility="{x:Bind ViewModel.IsAnswerVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Grid.ChildrenTransitions>
+                                        <TransitionCollection>
+                                            <EntranceThemeTransition FromVerticalOffset="15" />
+                                        </TransitionCollection>
+                                    </Grid.ChildrenTransitions>
 
                                     <!-- 1: Again -->
                                     <Button HorizontalAlignment="Stretch" Padding="6,10" CornerRadius="10" Click="AgainButton_Click"

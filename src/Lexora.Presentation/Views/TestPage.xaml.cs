@@ -21,6 +21,14 @@ public sealed partial class TestPage : Page
         ViewModel = App.Current.Services.GetRequiredService<TestViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         KeyDown += TestPage_KeyDown;
+
+        Loc.LanguageChanged += OnLanguageChanged;
+        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() => Bindings.Update());
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)

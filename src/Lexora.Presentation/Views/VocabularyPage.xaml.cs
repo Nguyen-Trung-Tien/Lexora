@@ -34,6 +34,7 @@ public sealed partial class VocabularyPage : Page
                 PopulateFilterCombos();
                 PopulateTopicFilterCombo();
                 _isInitializing = wasInit;
+                Bindings.Update();
             });
         };
 

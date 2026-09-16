@@ -28,6 +28,11 @@
             <!-- ========================================== -->
             <StackPanel Grid.Row="1" Spacing="20"
                         Visibility="{x:Bind ViewModel.IsSetupMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="20" />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
                 
                 <!-- Page Title Banner -->
                 <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
@@ -273,6 +278,11 @@
             <StackPanel Grid.Row="1" Spacing="18"
                         Visibility="{x:Bind ViewModel.IsTestingMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                         MaxWidth="860" HorizontalAlignment="Stretch">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="20" />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
                 
                 <!-- Progress Header -->
                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
@@ -368,6 +378,11 @@
             <StackPanel Grid.Row="1" Spacing="22"
                         Visibility="{x:Bind ViewModel.IsResultMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                         MaxWidth="960" HorizontalAlignment="Stretch">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="20" />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
                 
                 <!-- Score Summary Banner -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

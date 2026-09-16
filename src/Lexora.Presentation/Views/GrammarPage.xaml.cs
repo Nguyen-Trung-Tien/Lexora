@@ -17,12 +17,20 @@ public sealed partial class GrammarPage : Page
         ViewModel = App.Current.Services.GetRequiredService<GrammarViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
 
+        Loc.LanguageChanged += OnLanguageChanged;
+        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+
         _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
         _searchDebounceTimer.Tick += async (s, e) =>
         {
             _searchDebounceTimer.Stop();
             await ViewModel.LoadRulesAsync();
         };
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() => Bindings.Update());
     }
 
     private readonly DispatcherTimer _searchDebounceTimer;

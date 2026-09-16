@@ -16,6 +16,14 @@ public sealed partial class DashboardPage : Page
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<DashboardViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
+
+        Loc.LanguageChanged += OnLanguageChanged;
+        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() => Bindings.Update());
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)

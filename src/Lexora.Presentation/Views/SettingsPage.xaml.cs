@@ -16,6 +16,18 @@ public sealed partial class SettingsPage : Page
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<SettingsViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
+
+        Loc.LanguageChanged += OnLanguageChanged;
+        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            UpdateLanguageButtons();
+            Bindings.Update();
+        });
     }
 
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)

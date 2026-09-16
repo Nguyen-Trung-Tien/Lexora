@@ -10,7 +10,12 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20">
         <StackPanel Spacing="24" MaxWidth="1180" HorizontalAlignment="Center">
-            
+            <StackPanel.ChildrenTransitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition FromVerticalOffset="20" />
+                </TransitionCollection>
+            </StackPanel.ChildrenTransitions>
+
             <!-- Loading Ring Overlay -->
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                           Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"

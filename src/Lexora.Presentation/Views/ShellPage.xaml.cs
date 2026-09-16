@@ -28,12 +28,8 @@ public sealed partial class ShellPage : Page
     {
         UpdateNavigationLabels();
 
-        // Dynamically reload current page to reflect new language without restarting
-        if (ContentFrame.Content is Page currentPage)
-        {
-            var pageType = currentPage.GetType();
-            _navigationService.Navigate(pageType);
-        }
+        // Dynamically reload current page to reflect new language smoothly without restarting
+        _navigationService.Reload(new Microsoft.UI.Xaml.Media.Animation.SuppressNavigationTransitionInfo());
     }
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)

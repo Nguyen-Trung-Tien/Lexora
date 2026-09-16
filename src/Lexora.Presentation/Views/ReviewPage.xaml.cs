@@ -30,6 +30,14 @@ public sealed partial class ReviewPage : Page
         };
 
         KeyDown += ReviewPage_KeyDown;
+
+        Loc.LanguageChanged += OnLanguageChanged;
+        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() => Bindings.Update());
     }
 
     protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
