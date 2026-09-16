@@ -14,7 +14,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <Grid KeyboardAcceleratorPlacementMode="Hidden">
         <!-- Storyboard for Smooth Main Shell Reveal -->
         <Grid.Resources>
             <Storyboard x:Name="MainEntranceStoryboard">

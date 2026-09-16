@@ -6,13 +6,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
     <Page.KeyboardAccelerators>
         <KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="UndoAccelerator_Invoked" />
     </Page.KeyboardAccelerators>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Padding="24,16" MaxWidth="1320" HorizontalAlignment="Stretch">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Padding="24,18" MaxWidth="1160" HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -23,30 +24,30 @@
             <!-- 1. MODE SELECTOR & SETTINGS BAR -->
             <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                           HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled" Margin="0,0,0,16">
-                <Grid ColumnDefinitions="*,Auto" MinWidth="740">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button x:Name="ModeDueButton" Click="ModeDueButton_Click" CornerRadius="8" Padding="14,8">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE823;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_TodayDue')}" FontWeight="SemiBold" />
-                                <Border Background="{ThemeResource SystemFillColorCriticalBrush}" CornerRadius="10" Padding="6,1" Margin="2,0,0,0"
+                <Grid ColumnDefinitions="Auto,*,Auto" MinWidth="740">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button x:Name="ModeDueButton" Click="ModeDueButton_Click" CornerRadius="8" Padding="12,7">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE823;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_TodayDue')}" FontWeight="SemiBold" FontSize="13" />
+                                <Border Background="{ThemeResource SystemFillColorCriticalBrush}" CornerRadius="10" Padding="5,1" Margin="2,0,0,0"
                                         Visibility="{x:Bind ViewModel.DueCardsCount, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                                     <TextBlock Text="{x:Bind ViewModel.DueCardsCount, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
                                 </Border>
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="ModeNewButton" Click="ModeNewButton_Click" CornerRadius="8" Padding="14,8">
+                        <Button x:Name="ModeNewButton" Click="ModeNewButton_Click" CornerRadius="8" Padding="12,7">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE710;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_LearnNew')}" FontWeight="SemiBold" />
+                                <FontIcon Glyph="&#xE710;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_LearnNew')}" FontWeight="SemiBold" FontSize="13" />
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="ModeDifficultButton" Click="ModeDifficultButton_Click" CornerRadius="8" Padding="14,8">
+                        <Button x:Name="ModeDifficultButton" Click="ModeDifficultButton_Click" CornerRadius="8" Padding="12,7">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_Difficult')}" FontWeight="SemiBold" />
+                                <FontIcon Glyph="&#xE7BA;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_Difficult')}" FontWeight="SemiBold" FontSize="13" />
                             </StackPanel>
                         </Button>
 
@@ -56,23 +57,21 @@
                                   SelectionChanged="ReviewUnitCombo_SelectionChanged"
                                   ItemsSource="{x:Bind ViewModel.AvailableTopics, Mode=OneWay}"
                                   DisplayMemberPath="Name"
-                                  MinWidth="200" MaxWidth="280" CornerRadius="8"
+                                  MinWidth="130" MaxWidth="210" CornerRadius="8"
                                   ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TopicFilter')}" />
-
-
                     </StackPanel>
 
                     <!-- Top Right: Audio & Typing Controls -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <!-- Undo Last Review Button -->
                         <Button x:Name="UndoReviewButton"
                                 Command="{x:Bind ViewModel.UndoLastReviewCommand}"
                                 IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
-                                CornerRadius="8" Padding="12,7"
+                                CornerRadius="8" Padding="10,6"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_UndoTooltip')}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE7A7;" FontSize="13" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_Undo')}" FontWeight="SemiBold" />
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE7A7;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_Undo')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </Button>
 
@@ -80,19 +79,19 @@
                         <ToggleButton x:Name="TypingModeToggle"
                                       IsChecked="{x:Bind ViewModel.IsTypingPracticeEnabled, Mode=OneWay}"
                                       Click="TypingModeToggle_Click"
-                                      CornerRadius="8" Padding="12,7"
+                                      CornerRadius="8" Padding="10,6"
                                       ToolTipService.ToolTip="Toggle spelling typing recall practice">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE765;" FontSize="13" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_TypingDrill')}" FontWeight="SemiBold" />
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE765;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_TypingDrill')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </ToggleButton>
 
                         <!-- Speech Rate DropDown -->
-                        <DropDownButton ToolTipService.ToolTip="Pronunciation playback speed" CornerRadius="8" Padding="12,7">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE767;" FontSize="13" />
-                                <TextBlock Text="{x:Bind ViewModel.SpeechRateLabel, Mode=OneWay}" FontWeight="SemiBold" />
+                        <DropDownButton ToolTipService.ToolTip="Pronunciation playback speed" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE767;" FontSize="12" />
+                                <TextBlock Text="{x:Bind ViewModel.SpeechRateLabel, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                             <DropDownButton.Flyout>
                                 <MenuFlyout>
@@ -159,7 +158,7 @@
 
                 <!-- ACTIVE FLASHCARD WORKSPACE (Responsive 2-Column or Centered) -->
                 <Grid Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                      ColumnDefinitions="*,300" ColumnSpacing="16">
+                      ColumnDefinitions="*,240" ColumnSpacing="14">
 
                     <!-- Left: Main Study Flashcard -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -403,10 +402,17 @@
                             <!-- Rating & Action Area -->
                             <Grid Grid.Row="2" Margin="0,16,0,0">
                                 <!-- Show Meaning Button (Space) -->
-                                <Button Content="{x:Bind Loc.GetString('Review_ShowMeaning')}" HorizontalAlignment="Center" Style="{ThemeResource AccentButtonStyle}"
-                                        Padding="36,12" CornerRadius="10" FontSize="15" FontWeight="SemiBold"
+                                <Button HorizontalAlignment="Center" Style="{ThemeResource AccentButtonStyle}"
+                                        Padding="32,10" CornerRadius="10" FontSize="15" FontWeight="SemiBold"
                                         Visibility="{x:Bind ViewModel.IsShowMeaningButtonVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                        Click="ShowAnswerButton_Click" />
+                                        Click="ShowAnswerButton_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_ShowMeaning')}" VerticalAlignment="Center" />
+                                        <Border Background="{ThemeResource TextOnAccentFillColorPrimaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                            <TextBlock Text="Space" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                        </Border>
+                                    </StackPanel>
+                                </Button>
 
                                 <!-- 4 SM-2 Rating Buttons -->
                                 <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8"

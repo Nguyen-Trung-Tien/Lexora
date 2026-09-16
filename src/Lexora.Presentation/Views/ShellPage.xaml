@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
     <Page.KeyboardAccelerators>
@@ -16,12 +17,13 @@
         <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="SearchAccelerator_Invoked" />
     </Page.KeyboardAccelerators>
 
-    <Grid>
+    <Grid KeyboardAcceleratorPlacementMode="Hidden">
         <NavigationView
             x:Name="NavView"
             IsBackButtonVisible="Collapsed"
             PaneDisplayMode="Left"
             IsSettingsVisible="True"
+            KeyboardAcceleratorPlacementMode="Hidden"
             ItemInvoked="NavView_ItemInvoked"
             Loaded="NavView_Loaded">
             <NavigationView.MenuItems>

@@ -55,6 +55,11 @@
 
             <!-- Fallback Button Style -->
             <Style x:Key="DefaultButtonStyle" TargetType="Button" />
+
+            <!-- Globally hide keyboard accelerator visual badges on Pages -->
+            <Style TargetType="Page">
+                <Setter Property="KeyboardAcceleratorPlacementMode" Value="Hidden" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -173,4 +173,20 @@ public sealed partial class GrammarPage : Page
         PracticeButton_Click(this, new RoutedEventArgs());
         args.Handled = true;
     }
+
+    private void CopyStructureButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedRule == null || string.IsNullOrWhiteSpace(ViewModel.SelectedRule.Structure)) return;
+
+        try
+        {
+            var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
+            package.SetText(ViewModel.SelectedRule.Structure);
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+        }
+        catch
+        {
+            // Clipboard fallback
+        }
+    }
 }

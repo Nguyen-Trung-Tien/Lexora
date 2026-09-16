@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
     <Page.KeyboardAccelerators>
@@ -187,7 +188,7 @@
         <!-- ======================================================== -->
         <!-- MASTER-DETAIL CONTENT (Word List Mode: Non-Overlapping Layout) -->
         <!-- ======================================================== -->
-        <Grid Grid.Row="2" ColumnDefinitions="300,*" ColumnSpacing="16"
+        <Grid Grid.Row="2" ColumnDefinitions="340,*" ColumnSpacing="16"
               Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
             
             <!-- Left: Word List -->
@@ -231,12 +232,20 @@
                                 <DataTemplate x:DataType="dto:WordDto">
                                     <Grid Padding="10,8" ColumnDefinitions="Auto,*,Auto" Margin="0,2">
                                         <!-- Review Status Dot Indicator -->
-                                        <Ellipse Width="8" Height="8" Margin="0,0,12,0" VerticalAlignment="Center"
+                                        <Ellipse Width="8" Height="8" Margin="0,0,10,0" VerticalAlignment="Center"
                                                  Fill="{x:Bind LearningStatus, Converter={StaticResource StatusToBrushConverter}}" />
 
-                                        <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center" Margin="0,0,8,0">
-                                            <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{x:Bind PhoneticUk}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,8,0">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind PrimaryPartOfSpeech}" FontSize="10" FontWeight="SemiBold"
+                                                               Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Text="{x:Bind PrimaryDefinition}" FontSize="12"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
 
                                         <!-- Semantic CEFR Level Badge -->

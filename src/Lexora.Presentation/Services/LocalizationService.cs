@@ -39,6 +39,8 @@ public class LocalizationService : ILocalizationService
             ["Action_Reset"] = "Đặt lại",
             ["Action_Search"] = "Tìm kiếm",
             ["Action_Filter"] = "Bộ lọc",
+            ["Action_Copy"] = "Sao chép",
+            ["Action_Copied"] = "Đã chép",
 
             // Dashboard
             ["Dashboard_HeroTitle"] = "Ôn tập ngắt quãng (SM-2)",
@@ -420,6 +422,8 @@ public class LocalizationService : ILocalizationService
             ["Action_Reset"] = "Reset",
             ["Action_Search"] = "Search",
             ["Action_Filter"] = "Filters",
+            ["Action_Copy"] = "Copy",
+            ["Action_Copied"] = "Copied!",
 
             // Dashboard
             ["Dashboard_HeroTitle"] = "Spaced Repetition (SM-2)",

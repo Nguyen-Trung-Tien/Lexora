@@ -47,14 +47,42 @@ public sealed partial class SettingsPage : Page
     private void UpdateLanguageButtons()
     {
         bool isVi = Loc.CurrentLanguage == "vi-VN";
-        if (App.Current.Resources.TryGetValue(isVi ? "AccentButtonStyle" : "DefaultButtonStyle", out var viStyle) && viStyle is Style vs)
+        var res = App.Current.Resources;
+        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
+        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
+        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
+        var subtleText = res.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
+        var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+        void ApplyLangBtn(Button btn, bool isActive)
         {
-            LangViButton.Style = vs;
+            btn.Style = null;
+            if (isActive)
+            {
+                if (cardBg != null) btn.Background = cardBg;
+                if (cardStroke != null) btn.BorderBrush = cardStroke;
+                btn.BorderThickness = new Thickness(1);
+                if (accentText != null) btn.Foreground = accentText;
+                btn.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
+            }
+            else
+            {
+                btn.Background = transparent;
+                btn.BorderThickness = new Thickness(0);
+                if (subtleText != null) btn.Foreground = subtleText;
+                btn.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
+            }
         }
-        if (App.Current.Resources.TryGetValue(!isVi ? "AccentButtonStyle" : "DefaultButtonStyle", out var enStyle) && enStyle is Style es)
-        {
-            LangEnButton.Style = es;
-        }
+
+        ApplyLangBtn(LangViButton, isVi);
+        ApplyLangBtn(LangEnButton, !isVi);
+    }
+
+    private void CopyDbPath_Click(object sender, RoutedEventArgs e)
+    {
+        var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
+        package.SetText(ViewModel.DatabasePath);
+        Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
     }
 
     private async void SpeechRateCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)

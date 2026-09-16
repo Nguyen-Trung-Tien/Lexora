@@ -170,28 +170,35 @@ public sealed partial class TestPage : Page
 
     private void UpdateModeSelectorStyles(bool isCustomList)
     {
-        var accentStyle = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
+        var res = Microsoft.UI.Xaml.Application.Current.Resources;
+        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
+        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
+        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
+        var subtleText = res.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
         var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
-        var subtleText = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
 
-        if (isCustomList)
+        void ApplySegment(Button btn, bool isActive)
         {
-            BtnModeFilters.Style = null;
-            BtnModeFilters.Background = transparent;
-            BtnModeFilters.BorderThickness = new Thickness(0);
-            if (subtleText != null) BtnModeFilters.Foreground = subtleText;
-
-            BtnModeCustomList.Style = accentStyle;
+            btn.Style = null;
+            if (isActive)
+            {
+                if (cardBg != null) btn.Background = cardBg;
+                if (cardStroke != null) btn.BorderBrush = cardStroke;
+                btn.BorderThickness = new Thickness(1);
+                if (accentText != null) btn.Foreground = accentText;
+                btn.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
+            }
+            else
+            {
+                btn.Background = transparent;
+                btn.BorderThickness = new Thickness(0);
+                if (subtleText != null) btn.Foreground = subtleText;
+                btn.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
+            }
         }
-        else
-        {
-            BtnModeFilters.Style = accentStyle;
 
-            BtnModeCustomList.Style = null;
-            BtnModeCustomList.Background = transparent;
-            BtnModeCustomList.BorderThickness = new Thickness(0);
-            if (subtleText != null) BtnModeCustomList.Foreground = subtleText;
-        }
+        ApplySegment(BtnModeFilters, !isCustomList);
+        ApplySegment(BtnModeCustomList, isCustomList);
     }
 
     private async void WeakWordAudio_Click(object sender, RoutedEventArgs e)
@@ -249,22 +256,30 @@ public sealed partial class TestPage : Page
 
     private void UpdateCountButtonStyles(int count)
     {
-        var accent = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("AccentButtonStyle", out var a) ? (Style)a : null;
+        var res = Microsoft.UI.Xaml.Application.Current.Resources;
+        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
+        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
+        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
+        var subtleText = res.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
         var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
-        var subtleText = Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
 
         void ApplyPill(Button btn, bool isSelected)
         {
+            btn.Style = null;
             if (isSelected)
             {
-                btn.Style = accent;
+                if (cardBg != null) btn.Background = cardBg;
+                if (cardStroke != null) btn.BorderBrush = cardStroke;
+                btn.BorderThickness = new Thickness(1);
+                if (accentText != null) btn.Foreground = accentText;
+                btn.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
             }
             else
             {
-                btn.Style = null;
                 btn.Background = transparent;
                 btn.BorderThickness = new Thickness(0);
                 if (subtleText != null) btn.Foreground = subtleText;
+                btn.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
             }
         }
 
