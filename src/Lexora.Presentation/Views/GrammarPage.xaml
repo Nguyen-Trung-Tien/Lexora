@@ -199,11 +199,11 @@
                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                    TextWrapping="Wrap" />
                                     </StackPanel>
-                                    <Button Grid.Column="1" Click="CopyStructureButton_Click" VerticalAlignment="Center"
-                                            ToolTipService.ToolTip="Copy structure formula" CornerRadius="8" Padding="10,6">
+                                    <Button x:Name="BtnCopyStructure" Grid.Column="1" Click="CopyStructureButton_Click" VerticalAlignment="Center"
+                                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Copy')}" CornerRadius="8" Padding="10,6">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE8C8;" FontSize="12" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Action_Copy')}" FontSize="12" FontWeight="SemiBold" />
+                                            <FontIcon x:Name="IconCopyStructure" Glyph="&#xE8C8;" FontSize="12" />
+                                            <TextBlock x:Name="TextCopyStructure" Text="{x:Bind Loc.GetString('Action_Copy')}" FontSize="12" FontWeight="SemiBold" />
                                         </StackPanel>
                                     </Button>
                                 </Grid>

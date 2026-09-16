@@ -305,6 +305,44 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
+    private async void CopyWordButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWord == null) return;
+
+        try
+        {
+            var textToCopy = ViewModel.SelectedWord.Term;
+            if (!string.IsNullOrWhiteSpace(ViewModel.SelectedWord.PrimaryDefinition))
+            {
+                textToCopy += $" - {ViewModel.SelectedWord.PrimaryDefinition}";
+            }
+
+            var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
+            package.SetText(textToCopy);
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+
+            // Visual feedback: checkmark + "Đã sao chép!"
+            IconCopyWord.Glyph = "\uE73E";
+            if (App.Current.Resources.TryGetValue("SystemFillColorSuccessBrush", out var successBrush) && successBrush is Microsoft.UI.Xaml.Media.Brush bSuccess)
+            {
+                IconCopyWord.Foreground = bSuccess;
+                TextCopyWord.Foreground = bSuccess;
+            }
+            TextCopyWord.Text = Loc.GetString("Action_Copied");
+
+            await Task.Delay(1800);
+
+            IconCopyWord.Glyph = "\uE8C8";
+            IconCopyWord.ClearValue(FontIcon.ForegroundProperty);
+            TextCopyWord.Text = Loc.GetString("Action_Copy");
+            TextCopyWord.ClearValue(TextBlock.ForegroundProperty);
+        }
+        catch
+        {
+            // Clipboard fallback
+        }
+    }
+
     private async void EditWordButton_Click(object sender, RoutedEventArgs e)
     {
         if (ViewModel.SelectedWord == null) return;

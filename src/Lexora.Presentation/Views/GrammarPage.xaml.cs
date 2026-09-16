@@ -174,7 +174,7 @@ public sealed partial class GrammarPage : Page
         args.Handled = true;
     }
 
-    private void CopyStructureButton_Click(object sender, RoutedEventArgs e)
+    private async void CopyStructureButton_Click(object sender, RoutedEventArgs e)
     {
         if (ViewModel.SelectedRule == null || string.IsNullOrWhiteSpace(ViewModel.SelectedRule.Structure)) return;
 
@@ -183,6 +183,22 @@ public sealed partial class GrammarPage : Page
             var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
             package.SetText(ViewModel.SelectedRule.Structure);
             Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+
+            // Visual feedback: checkmark + "Đã sao chép!"
+            IconCopyStructure.Glyph = "\uE73E";
+            if (App.Current.Resources.TryGetValue("SystemFillColorSuccessBrush", out var successBrush) && successBrush is Microsoft.UI.Xaml.Media.Brush bSuccess)
+            {
+                IconCopyStructure.Foreground = bSuccess;
+                TextCopyStructure.Foreground = bSuccess;
+            }
+            TextCopyStructure.Text = Loc.GetString("Action_Copied");
+
+            await Task.Delay(1800);
+
+            IconCopyStructure.Glyph = "\uE8C8";
+            IconCopyStructure.ClearValue(FontIcon.ForegroundProperty);
+            TextCopyStructure.Text = Loc.GetString("Action_Copy");
+            TextCopyStructure.ClearValue(TextBlock.ForegroundProperty);
         }
         catch
         {

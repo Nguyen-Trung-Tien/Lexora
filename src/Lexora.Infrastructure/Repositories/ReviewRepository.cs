@@ -24,6 +24,7 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     public async Task<IReadOnlyList<ReviewCard>> GetDueCardsAsync(DateTime asOfUtc, int limit = 50, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsNoTracking()
             .Include(rc => rc.Word)
                 .ThenInclude(w => w.Meanings)
                     .ThenInclude(m => m.Examples)
@@ -36,6 +37,7 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     public async Task<IReadOnlyList<ReviewCard>> GetNewCardsAsync(int limit = 20, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsNoTracking()
             .Include(rc => rc.Word)
                 .ThenInclude(w => w.Meanings)
                     .ThenInclude(m => m.Examples)
@@ -48,6 +50,7 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     public async Task<IReadOnlyList<ReviewCard>> GetCardsByStatusAsync(LearningStatus status, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsNoTracking()
             .Include(rc => rc.Word)
             .Where(rc => rc.Status == status)
             .ToListAsync(cancellationToken);
@@ -129,6 +132,7 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     public async Task<IReadOnlyList<ReviewCard>> GetDifficultCardsAsync(int limit = 20, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsNoTracking()
             .Include(rc => rc.Word)
                 .ThenInclude(w => w.Meanings)
                     .ThenInclude(m => m.Examples)
@@ -174,6 +178,7 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     public async Task<IReadOnlyList<ReviewCard>> GetCardsByWordIdsAsync(IReadOnlyList<Guid> wordIds, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsNoTracking()
             .Include(rc => rc.Word)
                 .ThenInclude(w => w.Meanings)
                     .ThenInclude(m => m.Examples)
@@ -184,6 +189,7 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     public async Task<IReadOnlyList<ReviewCard>> GetCardsByTopicIdAsync(Guid topicId, int limit = 50, CancellationToken cancellationToken = default)
     {
         var query = DbSet
+            .AsNoTracking()
             .Include(rc => rc.Word)
                 .ThenInclude(w => w.Meanings)
                     .ThenInclude(m => m.Examples)

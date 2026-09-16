@@ -22,6 +22,7 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
     public async Task<IReadOnlyList<GrammarRule>> GetByLevelAsync(CefrLevel level, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsNoTracking()
             .Include(gr => gr.Examples)
             .Where(gr => gr.Level == level)
             .OrderBy(gr => gr.OrderIndex)
@@ -31,6 +32,7 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
     public async Task<IReadOnlyList<GrammarRule>> GetByExamTargetAsync(ExamType examType, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsNoTracking()
             .Include(gr => gr.Examples)
             .Where(gr => gr.ExamTarget == examType)
             .OrderBy(gr => gr.OrderIndex)
@@ -41,6 +43,7 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
     {
         var normalized = query.Trim().ToLowerInvariant();
         return await DbSet
+            .AsNoTracking()
             .Include(gr => gr.Examples)
             .Where(gr => gr.Title.ToLower().Contains(normalized) || gr.Structure.ToLower().Contains(normalized))
             .OrderBy(gr => gr.OrderIndex)
@@ -54,7 +57,7 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
         string? query = null,
         CancellationToken cancellationToken = default)
     {
-        var q = DbSet.Include(gr => gr.Examples).AsQueryable();
+        var q = DbSet.AsNoTracking().Include(gr => gr.Examples).AsQueryable();
 
         if (level.HasValue && level.Value != CefrLevel.None)
         {

@@ -341,6 +341,7 @@ public partial class TestViewModel : ObservableObject
     [RelayCommand]
     public async Task StartTestAsync()
     {
+        if (IsLoading) return;
         IsLoading = true;
         StatusMessage = "Preparing test questions...";
 

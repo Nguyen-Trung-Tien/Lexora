@@ -332,6 +332,12 @@
                                             <TextBlock Text="Test" FontSize="12" />
                                         </StackPanel>
                                     </Button>
+                                    <Button x:Name="BtnCopyWord" Click="CopyWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Copy')}" CornerRadius="8" Padding="8,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon x:Name="IconCopyWord" Glyph="&#xE8C8;" FontSize="13" />
+                                            <TextBlock x:Name="TextCopyWord" Text="{x:Bind Loc.GetString('Action_Copy')}" FontSize="12" />
+                                        </StackPanel>
+                                    </Button>
                                     <Button Click="EditWordButton_Click" ToolTipService.ToolTip="Edit word (Ctrl+E)" CornerRadius="8" Padding="8,6">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE70F;" FontSize="13" />

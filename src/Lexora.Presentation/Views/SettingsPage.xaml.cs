@@ -78,11 +78,27 @@ public sealed partial class SettingsPage : Page
         ApplyLangBtn(LangEnButton, !isVi);
     }
 
-    private void CopyDbPath_Click(object sender, RoutedEventArgs e)
+    private async void CopyDbPath_Click(object sender, RoutedEventArgs e)
     {
         var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
         package.SetText(ViewModel.DatabasePath);
         Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+
+        // Visual feedback: checkmark + "Đã sao chép!"
+        IconCopyDbPath.Glyph = "\uE73E";
+        if (App.Current.Resources.TryGetValue("SystemFillColorSuccessBrush", out var successBrush) && successBrush is Microsoft.UI.Xaml.Media.Brush bSuccess)
+        {
+            IconCopyDbPath.Foreground = bSuccess;
+            TextCopyDbPath.Foreground = bSuccess;
+        }
+        TextCopyDbPath.Text = Loc.GetString("Action_Copied");
+
+        await Task.Delay(1800);
+
+        IconCopyDbPath.Glyph = "\uE8C8";
+        IconCopyDbPath.ClearValue(FontIcon.ForegroundProperty);
+        TextCopyDbPath.Text = Loc.GetString("Action_Copy");
+        TextCopyDbPath.ClearValue(TextBlock.ForegroundProperty);
     }
 
     private async void SpeechRateCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
