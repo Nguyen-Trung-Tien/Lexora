@@ -159,7 +159,7 @@
 
                 <!-- ACTIVE FLASHCARD WORKSPACE (Responsive 2-Column or Centered) -->
                 <Grid Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                      ColumnDefinitions="*,260" ColumnSpacing="16">
+                      ColumnDefinitions="*,300" ColumnSpacing="16">
 
                     <!-- Left: Main Study Flashcard -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -537,26 +537,20 @@
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Text="Status:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                         <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
-                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.Status, Mode=OneWay}" FontWeight="SemiBold" FontSize="11" />
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.StatusLabel, Mode=OneWay}" FontWeight="SemiBold" FontSize="11" />
                                         </Border>
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Text="Retention:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
-                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.Confidence, Mode=OneWay}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" />
-                                            <TextBlock Text="%" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" />
-                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.ConfidenceText, Mode=OneWay}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" />
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Text="Interval:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
-                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.IntervalDays, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
-                                            <TextBlock Text="d" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.IntervalLabel, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Text="Ease Factor:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.EaseFactor, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.EaseFactorText, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Text="Lapses:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />

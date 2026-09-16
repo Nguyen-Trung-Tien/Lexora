@@ -25,7 +25,29 @@ public record ReviewCardDto(
     int TotalReviews,
     int CorrectReviews,
     double Confidence
-);
+)
+{
+    /// <summary>Friendly status label shown in SM-2 Insights panel.</summary>
+    public string StatusLabel => Status switch
+    {
+        LearningStatus.New           => "New",
+        LearningStatus.Learning      => "Learning",
+        LearningStatus.Remembered    => "Remembered",
+        LearningStatus.Mastered      => "Mastered",
+        LearningStatus.NotRemembered => "Forgotten",
+        _                            => Status.ToString()
+    };
+
+    /// <summary>Formatted confidence string, e.g. "50%".</summary>
+    public string ConfidenceText => $"{Confidence:F0}%";
+
+    /// <summary>Formatted ease factor, e.g. "2.50".</summary>
+    public string EaseFactorText => EaseFactor.ToString("F2");
+
+    /// <summary>Compact interval label, e.g. "< 1 d" or "6 d".</summary>
+    public string IntervalLabel => IntervalDays <= 0 ? "< 1 d" : $"{IntervalDays} d";
+}
+
 
 public record ReviewEvaluationResultDto(
     Guid ReviewCardId,
