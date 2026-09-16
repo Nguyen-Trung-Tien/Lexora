@@ -9,8 +9,8 @@
     Loaded="SettingsPage_Loaded"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="28,24">
-        <StackPanel Spacing="22" MaxWidth="920" HorizontalAlignment="Center">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="22" MaxWidth="1380" HorizontalAlignment="Stretch" Padding="32,24">
             <!-- Page Title -->
             <TextBlock Text="{x:Bind Loc.GetString('Settings_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />
 

@@ -65,9 +65,11 @@
                     <MenuFlyout>
                         <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportJson')}" Click="ExportJson_Click" />
                         <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportCsv')}" Click="ExportCsv_Click" />
+                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportTxt')}" Click="ExportTxt_Click" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportJson')}" Click="ImportJson_Click" />
                         <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportCsv')}" Click="ImportCsv_Click" />
+                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportTxt')}" Click="ImportTxt_Click" />
                     </MenuFlyout>
                 </DropDownButton.Flyout>
             </DropDownButton>

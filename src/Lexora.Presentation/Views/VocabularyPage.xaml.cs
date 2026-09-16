@@ -466,6 +466,20 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
+    private async void ExportTxt_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var txt = await ViewModel.ExportToTxtAsync();
+            var defaultName = $"lexora_export_{DateTime.Now:yyyyMMdd_HHmmss}";
+            await ExportFileAsync(txt, defaultName, ".txt", "TXT Vocabulary File");
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog("Export Failed", ex.Message);
+        }
+    }
+
     private async Task ExportFileAsync(string content, string defaultName, string extension, string fileTypeDescription)
     {
         string? savedPath = null;
@@ -518,18 +532,33 @@ public sealed partial class VocabularyPage : Page
 
     private async void ImportJson_Click(object sender, RoutedEventArgs e)
     {
-        await ShowImportDialogAsync(isJson: true);
+        await ShowImportDialogAsync("json");
     }
 
     private async void ImportCsv_Click(object sender, RoutedEventArgs e)
     {
-        await ShowImportDialogAsync(isJson: false);
+        await ShowImportDialogAsync("csv");
     }
 
-    private async Task ShowImportDialogAsync(bool isJson)
+    private async void ImportTxt_Click(object sender, RoutedEventArgs e)
     {
-        string fileExt = isJson ? ".json" : ".csv";
-        string filterName = isJson ? "JSON Files" : "CSV Files";
+        await ShowImportDialogAsync("txt");
+    }
+
+    private async Task ShowImportDialogAsync(string format)
+    {
+        string fileExt = format.ToLowerInvariant() switch
+        {
+            "json" => ".json",
+            "csv" => ".csv",
+            _ => ".txt"
+        };
+        string filterName = format.ToLowerInvariant() switch
+        {
+            "json" => "JSON Files",
+            "csv" => "CSV Files",
+            _ => "TXT Files"
+        };
         string? contentToImport = null;
 
         try
@@ -558,17 +587,31 @@ public sealed partial class VocabularyPage : Page
 
         if (string.IsNullOrEmpty(contentToImport))
         {
+            var placeholder = format.ToLowerInvariant() switch
+            {
+                "json" => "Or paste JSON array of vocabulary here...",
+                "csv" => "Or paste CSV content (with header line) here...",
+                _ => "Or paste TXT vocabulary lines here (e.g. term - definition or tab-delimited)..."
+            };
+
+            var dialogTitle = format.ToLowerInvariant() switch
+            {
+                "json" => "Import Vocabulary (JSON)",
+                "csv" => "Import Vocabulary (CSV)",
+                _ => "Import Vocabulary (TXT)"
+            };
+
             var textBox = new TextBox
             {
                 AcceptsReturn = true,
                 TextWrapping = TextWrapping.Wrap,
                 Height = 250,
-                PlaceholderText = isJson ? "Or paste JSON array of vocabulary here..." : "Or paste CSV content (with header line) here..."
+                PlaceholderText = placeholder
             };
 
             var dialog = new ContentDialog
             {
-                Title = isJson ? "Import Vocabulary (JSON)" : "Import Vocabulary (CSV)",
+                Title = dialogTitle,
                 Content = textBox,
                 PrimaryButtonText = "Import Content",
                 CloseButtonText = "Cancel",
@@ -585,7 +628,7 @@ public sealed partial class VocabularyPage : Page
 
         if (!string.IsNullOrWhiteSpace(contentToImport))
         {
-            var importResult = await ViewModel.ImportDataAsync(contentToImport, isJson);
+            var importResult = await ViewModel.ImportDataAsync(contentToImport, format);
             PopulateTopicFilterCombo();
             await Task.Yield();
             var summaryDialog = new ContentDialog

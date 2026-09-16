@@ -388,21 +388,28 @@ public partial class VocabularyViewModel : ObservableObject
         return await _exportImportService.ExportToCsvAsync();
     }
 
-    public async Task<ImportResult> ImportDataAsync(string content, bool isJson)
+    public async Task<string> ExportToTxtAsync()
     {
-        ImportResult result;
-        if (isJson)
+        return await _exportImportService.ExportToTxtAsync();
+    }
+
+    public async Task<ImportResult> ImportDataAsync(string content, string format)
+    {
+        ImportResult result = format.ToLowerInvariant() switch
         {
-            result = await _exportImportService.ImportFromJsonAsync(content);
-        }
-        else
-        {
-            result = await _exportImportService.ImportFromCsvAsync(content);
-        }
+            "json" => await _exportImportService.ImportFromJsonAsync(content),
+            "csv" => await _exportImportService.ImportFromCsvAsync(content),
+            _ => await _exportImportService.ImportFromTxtAsync(content)
+        };
 
         await LoadWordsAsync();
         _ = LoadContextUnitsAsync();
         return result;
+    }
+
+    public async Task<ImportResult> ImportDataAsync(string content, bool isJson)
+    {
+        return await ImportDataAsync(content, isJson ? "json" : "csv");
     }
 
     public void CheckTypoSuggestion()

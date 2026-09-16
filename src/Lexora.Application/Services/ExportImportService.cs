@@ -91,6 +91,33 @@ public class ExportImportService : IExportImportService
         return sb.ToString();
     }
 
+    public async Task<string> ExportToTxtAsync(CancellationToken cancellationToken = default)
+    {
+        var words = await _vocabRepo.SearchAsync(take: 100000, cancellationToken: cancellationToken);
+        var sb = new StringBuilder();
+
+        // Comments header
+        sb.AppendLine("# Lexora Vocabulary Export");
+        sb.AppendLine($"# Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+        sb.AppendLine("# Format: Term <tab> PrimaryDefinition <tab> PartOfSpeech <tab> Level <tab> PhoneticUk <tab> PhoneticUs <tab> Examples");
+        sb.AppendLine("# Note: Compatible with Lexora, Anki (TSV), and Quizlet.");
+        sb.AppendLine();
+
+        foreach (var w in words)
+        {
+            var primaryDef = w.Meanings.OrderBy(m => m.OrderIndex).FirstOrDefault()?.DefinitionVi ?? w.Term;
+            var pos = w.PrimaryPartOfSpeech.ToString();
+            var level = w.Level.ToString();
+            var uk = w.PhoneticUk ?? "";
+            var us = w.PhoneticUs ?? "";
+            var examples = string.Join(" | ", w.Meanings.SelectMany(m => m.Examples).Select(e => $"{e.SentenceEn} => {e.SentenceVi}"));
+
+            sb.AppendLine($"{w.Term}\t{primaryDef}\t{pos}\t{level}\t{uk}\t{us}\t{examples}");
+        }
+
+        return sb.ToString();
+    }
+
     private const int MaxImportPayloadLength = 20_000_000; // 20 MB safety limit
 
     public async Task<ImportResult> ImportFromJsonAsync(string jsonContent, CancellationToken cancellationToken = default)
@@ -430,6 +457,217 @@ public class ExportImportService : IExportImportService
         catch (Exception ex)
         {
             errors.Add($"Error parsing CSV: {ex.Message}");
+        }
+
+        return new ImportResult(imported, skipped, errors);
+    }
+
+    public async Task<ImportResult> ImportFromTxtAsync(string txtContent, CancellationToken cancellationToken = default)
+    {
+        int imported = 0;
+        int skipped = 0;
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(txtContent))
+        {
+            return new ImportResult(0, 0, new List<string> { "TXT content is empty" });
+        }
+
+        if (txtContent.Length > MaxImportPayloadLength)
+        {
+            return new ImportResult(0, 0, new List<string> { $"Payload exceeds maximum allowed size of {MaxImportPayloadLength / (1024 * 1024)} MB" });
+        }
+
+        try
+        {
+            using var reader = new StringReader(txtContent);
+            var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            string? line;
+            int lineNumber = 0;
+
+            while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
+            {
+                lineNumber++;
+                var trimmed = line.Trim();
+
+                // Skip empty lines or comments
+                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith('#') || trimmed.StartsWith("//"))
+                {
+                    continue;
+                }
+
+                string term = "";
+                string definition = "";
+                string? posStr = null;
+                string? levelStr = null;
+                string? phoneticUk = null;
+                string? phoneticUs = null;
+                string? examplesStr = null;
+
+                if (trimmed.Contains('\t'))
+                {
+                    // Tab-delimited (Lexora export / Anki / Quizlet)
+                    var parts = trimmed.Split('\t');
+                    term = parts[0].Trim();
+                    if (parts.Length > 1) definition = parts[1].Trim();
+                    if (parts.Length > 2) posStr = parts[2].Trim();
+                    if (parts.Length > 3) levelStr = parts[3].Trim();
+                    if (parts.Length > 4) phoneticUk = parts[4].Trim();
+                    if (parts.Length > 5) phoneticUs = parts[5].Trim();
+                    if (parts.Length > 6) examplesStr = parts[6].Trim();
+                }
+                else
+                {
+                    // Look for common delimiters: " - ", " : ", " | ", " = "
+                    string[] delimiters = { " - ", " : ", " | ", " = " };
+                    int foundDelimIdx = -1;
+                    string matchedDelim = "";
+
+                    foreach (var delim in delimiters)
+                    {
+                        var idx = trimmed.IndexOf(delim, StringComparison.Ordinal);
+                        if (idx > 0 && (foundDelimIdx == -1 || idx < foundDelimIdx))
+                        {
+                            foundDelimIdx = idx;
+                            matchedDelim = delim;
+                        }
+                    }
+
+                    if (foundDelimIdx > 0)
+                    {
+                        term = trimmed.Substring(0, foundDelimIdx).Trim();
+                        definition = trimmed.Substring(foundDelimIdx + matchedDelim.Length).Trim();
+                    }
+                    else if (trimmed.Contains(':'))
+                    {
+                        var idx = trimmed.IndexOf(':');
+                        term = trimmed.Substring(0, idx).Trim();
+                        definition = trimmed.Substring(idx + 1).Trim();
+                    }
+                    else if (trimmed.Contains('-'))
+                    {
+                        var idx = trimmed.IndexOf('-');
+                        term = trimmed.Substring(0, idx).Trim();
+                        definition = trimmed.Substring(idx + 1).Trim();
+                    }
+                    else
+                    {
+                        // Single word per line without definition
+                        term = trimmed;
+                        definition = trimmed;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(term))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                // If term contains phonetic like "abandon (/əˈbæn.dən/)", extract it
+                if (term.Contains('/') && phoneticUk == null)
+                {
+                    var slashStart = term.IndexOf('/');
+                    var slashEnd = term.LastIndexOf('/');
+                    if (slashEnd > slashStart)
+                    {
+                        phoneticUk = term.Substring(slashStart, slashEnd - slashStart + 1).Trim();
+                        phoneticUs = phoneticUk;
+                        term = term.Substring(0, slashStart).Trim().TrimEnd('(', '[').Trim();
+                    }
+                }
+
+                var normalized = term.ToLowerInvariant();
+
+                // Intra-file deduplication
+                if (!seenTerms.Add(normalized))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                // Database deduplication
+                var existing = await _vocabRepo.GetByTermAsync(normalized, cancellationToken);
+                if (existing != null)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                // Parse Part of Speech
+                var pos = PartOfSpeech.Noun;
+                if (!string.IsNullOrWhiteSpace(posStr) && Enum.TryParse<PartOfSpeech>(posStr, true, out var parsedPos))
+                {
+                    pos = parsedPos;
+                }
+
+                // Parse CEFR Level
+                var level = CefrLevel.None;
+                if (!string.IsNullOrWhiteSpace(levelStr) && Enum.TryParse<CefrLevel>(levelStr, true, out var parsedLevel))
+                {
+                    level = parsedLevel;
+                }
+
+                var word = new Word
+                {
+                    Term = term,
+                    NormalizedTerm = normalized,
+                    Level = level,
+                    PrimaryPartOfSpeech = pos,
+                    PhoneticUk = !string.IsNullOrWhiteSpace(phoneticUk) ? phoneticUk : null,
+                    PhoneticUs = !string.IsNullOrWhiteSpace(phoneticUs) ? phoneticUs : null
+                };
+
+                var primaryMeaning = new WordMeaning
+                {
+                    WordId = word.Id,
+                    PartOfSpeech = pos,
+                    DefinitionVi = !string.IsNullOrWhiteSpace(definition) ? definition : term,
+                    OrderIndex = 0
+                };
+
+                // Parse examples if present
+                if (!string.IsNullOrWhiteSpace(examplesStr))
+                {
+                    var exampleTokens = examplesStr.Split(new[] { " | " }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    foreach (var exToken in exampleTokens)
+                    {
+                        var arrowIdx = exToken.IndexOf("=>", StringComparison.Ordinal);
+                        string en = arrowIdx >= 0 ? exToken.Substring(0, arrowIdx).Trim() : exToken.Trim();
+                        string vi = arrowIdx >= 0 ? exToken.Substring(arrowIdx + 2).Trim() : "";
+                        if (!string.IsNullOrWhiteSpace(en))
+                        {
+                            primaryMeaning.Examples.Add(new ExampleSentence
+                            {
+                                WordMeaningId = primaryMeaning.Id,
+                                SentenceEn = en,
+                                SentenceVi = vi
+                            });
+                        }
+                    }
+                }
+
+                word.Meanings.Add(primaryMeaning);
+
+                word.ReviewCard = new ReviewCard
+                {
+                    WordId = word.Id,
+                    Status = LearningStatus.New,
+                    NextReviewAt = DateTime.UtcNow
+                };
+
+                await _vocabRepo.AddAsync(word, cancellationToken);
+                imported++;
+            }
+
+            if (imported > 0)
+            {
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add($"Error parsing TXT: {ex.Message}");
         }
 
         return new ImportResult(imported, skipped, errors);

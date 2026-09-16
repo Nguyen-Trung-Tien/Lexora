@@ -13,7 +13,7 @@
     </Page.KeyboardAccelerators>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="28,18" MaxWidth="1440" HorizontalAlignment="Stretch">
+        <Grid Padding="32,20" HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -166,7 +166,7 @@
 
                 <!-- ACTIVE FLASHCARD WORKSPACE (Responsive 2-Column or Centered) -->
                 <Grid Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                      ColumnDefinitions="*,280" ColumnSpacing="18">
+                      ColumnDefinitions="*,340" ColumnSpacing="20" HorizontalAlignment="Stretch">
 
                     <!-- Left: Main Study Flashcard -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -350,7 +350,7 @@
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1" CornerRadius="8" Padding="14,10"
-                                            HorizontalAlignment="Center" MaxWidth="580"
+                                            HorizontalAlignment="Center" MaxWidth="760"
                                             Visibility="{x:Bind ViewModel.HasClozeSentence, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <TextBlock Text="{x:Bind ViewModel.ClozeSentenceEn, Mode=OneWay}" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     </Border>
