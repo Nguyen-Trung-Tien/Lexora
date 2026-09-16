@@ -14,15 +14,21 @@
         <KeyboardAccelerator Key="Number4" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
         <KeyboardAccelerator Key="Number5" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
         <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="SearchAccelerator_Invoked" />
+        <KeyboardAccelerator Key="B" Modifiers="Control" Invoked="TogglePaneAccelerator_Invoked" />
     </Page.KeyboardAccelerators>
 
     <Grid>
         <NavigationView
             x:Name="NavView"
             IsBackButtonVisible="Collapsed"
-            PaneDisplayMode="Left"
+            PaneDisplayMode="Auto"
+            OpenPaneLength="250"
+            CompactPaneLength="48"
+            PaneTitle="Lexora"
             IsSettingsVisible="True"
             ItemInvoked="NavView_ItemInvoked"
+            PaneOpened="NavView_PaneOpened"
+            PaneClosed="NavView_PaneClosed"
             Loaded="NavView_Loaded">
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="NavItemDashboard" Content="Dashboard" Tag="Dashboard" ToolTipService.ToolTip="Dashboard (Ctrl+1)">
@@ -62,6 +68,12 @@
             </NavigationView.AutoSuggestBox>
 
             <Grid RowDefinitions="Auto,*">
+                <Grid.ChildrenTransitions>
+                    <TransitionCollection>
+                        <RepositionThemeTransition IsStaggeringEnabled="False" />
+                    </TransitionCollection>
+                </Grid.ChildrenTransitions>
+
                 <!-- Due Review Reminder InfoBar (Top, above content) -->
                 <InfoBar x:Name="DueReviewInfoBar"
                          Grid.Row="0"

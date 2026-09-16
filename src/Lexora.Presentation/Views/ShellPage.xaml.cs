@@ -11,6 +11,7 @@ public sealed partial class ShellPage : Page
     public ShellViewModel ViewModel { get; }
     private readonly INavigationService _navigationService;
     private readonly ILocalizationService _localizationService;
+    private readonly Lexora.Infrastructure.Services.IUserPreferencesService _preferencesService;
 
     public ShellPage()
     {
@@ -18,6 +19,7 @@ public sealed partial class ShellPage : Page
         ViewModel = App.Current.Services.GetRequiredService<ShellViewModel>();
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
         _localizationService = App.Current.Services.GetRequiredService<ILocalizationService>();
+        _preferencesService = App.Current.Services.GetRequiredService<Lexora.Infrastructure.Services.IUserPreferencesService>();
 
         UpdateNavigationLabels();
         _localizationService.LanguageChanged += OnLanguageChanged;
@@ -39,6 +41,11 @@ public sealed partial class ShellPage : Page
         {
             ViewModel.IsOnReviewPage = ContentFrame.Content is ReviewPage or TestPage;
         };
+
+        // Restore user's saved navigation pane preference (open vs compact)
+        var prefs = _preferencesService.GetPreferences();
+        NavView.IsPaneOpen = prefs.IsNavPaneOpen;
+
         _navigationService.Navigate(typeof(DashboardPage));
         NavView.SelectedItem = NavItemDashboard;
         await ViewModel.CheckDueReviewsAsync();
@@ -139,5 +146,30 @@ public sealed partial class ShellPage : Page
     {
         GlobalSearchBox.Focus(FocusState.Programmatic);
         args.Handled = true;
+    }
+
+    private void TogglePaneAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        NavView.IsPaneOpen = !NavView.IsPaneOpen;
+        args.Handled = true;
+    }
+
+    private void NavView_PaneOpened(NavigationView sender, object args)
+    {
+        SavePaneState(true);
+    }
+
+    private void NavView_PaneClosed(NavigationView sender, object args)
+    {
+        SavePaneState(false);
+    }
+
+    private void SavePaneState(bool isOpen)
+    {
+        var current = _preferencesService.GetPreferences();
+        if (current.IsNavPaneOpen != isOpen)
+        {
+            _ = _preferencesService.SavePreferencesAsync(current with { IsNavPaneOpen = isOpen });
+        }
     }
 }

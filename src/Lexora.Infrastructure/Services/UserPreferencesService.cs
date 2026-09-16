@@ -11,6 +11,7 @@ public record UserPreferences
     public bool EnableReviewReminder { get; init; } = true;
     public double SpeechRate { get; init; } = 1.0;
     public bool EnableTypingPractice { get; init; } = false;
+    public bool IsNavPaneOpen { get; init; } = true;
 }
 
 public interface IUserPreferencesService
