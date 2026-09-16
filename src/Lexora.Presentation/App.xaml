@@ -50,6 +50,8 @@
             <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
             <converters:RetentionToBrushConverter x:Key="RetentionToBrushConverter" />
             <converters:CefrToBrushConverter x:Key="CefrToBrushConverter" />
+            <converters:ReviewRatingToBrushConverter x:Key="ReviewRatingToBrushConverter" />
+            <converters:ReviewRatingToForegroundConverter x:Key="ReviewRatingToForegroundConverter" />
 
             <!-- Fallback Button Style -->
             <Style x:Key="DefaultButtonStyle" TargetType="Button" />

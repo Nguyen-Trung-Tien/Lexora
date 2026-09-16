@@ -1,11 +1,13 @@
 using System.IO;
 using System.Runtime.InteropServices;
+using Lexora.Infrastructure.Services;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Windows.Graphics;
 using WinRT.Interop;
 
 namespace Lexora.Presentation;
@@ -14,7 +16,12 @@ public sealed partial class MainWindow : Window
 {
     private readonly IStartupOrchestrator _startupOrchestrator;
     private readonly ILocalizationService _localizationService;
+    private readonly IUserPreferencesService _userPreferencesService;
     private CancellationTokenSource? _startupCts;
+
+    // Min window dimensions (prevents layout clipping on small screens)
+    private const int MinWindowWidth = 960;
+    private const int MinWindowHeight = 600;
 
     public MainWindow()
     {
@@ -37,6 +44,10 @@ public sealed partial class MainWindow : Window
 
         _startupOrchestrator = App.Current.Services.GetRequiredService<IStartupOrchestrator>();
         _localizationService = App.Current.Services.GetRequiredService<ILocalizationService>();
+        _userPreferencesService = App.Current.Services.GetRequiredService<IUserPreferencesService>();
+
+        // 3. Apply saved window size & position (or center on first run)
+        ApplyWindowPlacement();
 
         UpdateAppTitle();
         _localizationService.LanguageChanged += (s, e) => DispatcherQueue.TryEnqueue(UpdateAppTitle);
@@ -193,6 +204,9 @@ public sealed partial class MainWindow : Window
         _startupCts?.Dispose();
         _startupCts = null;
 
+        // Persist window placement for next launch
+        SaveWindowPlacement();
+
         if (_hIconSmall != IntPtr.Zero)
         {
             DestroyIcon(_hIconSmall);
@@ -203,6 +217,80 @@ public sealed partial class MainWindow : Window
         {
             DestroyIcon(_hIconBig);
             _hIconBig = IntPtr.Zero;
+        }
+    }
+
+    private void ApplyWindowPlacement()
+    {
+        var prefs = _userPreferencesService.GetPreferences();
+        var appWindow = AppWindow;
+
+        // Enforce minimum size
+        appWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+        var presenter = appWindow.Presenter as OverlappedPresenter;
+        if (presenter != null)
+        {
+            presenter.IsResizable = true;
+            presenter.IsMaximizable = true;
+            presenter.IsMinimizable = true;
+        }
+
+        var displayArea = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Nearest);
+        var workArea = displayArea.WorkArea;
+
+        // Clamp desired size to work area, respecting minimum dimensions
+        int desiredW = Math.Max(MinWindowWidth, Math.Min(prefs.WindowWidth, workArea.Width));
+        int desiredH = Math.Max(MinWindowHeight, Math.Min(prefs.WindowHeight, workArea.Height));
+
+        int posX, posY;
+        if (prefs.WindowX < 0 || prefs.WindowY < 0)
+        {
+            // First run: center window on the primary display work area
+            posX = workArea.X + (workArea.Width - desiredW) / 2;
+            posY = workArea.Y + (workArea.Height - desiredH) / 2;
+        }
+        else
+        {
+            // Restore previous position, but clamp so the window stays on screen
+            posX = Math.Max(workArea.X, Math.Min(prefs.WindowX, workArea.X + workArea.Width - desiredW));
+            posY = Math.Max(workArea.Y, Math.Min(prefs.WindowY, workArea.Y + workArea.Height - desiredH));
+        }
+
+        appWindow.MoveAndResize(new RectInt32(posX, posY, desiredW, desiredH));
+
+        if (prefs.IsMaximized && presenter != null)
+        {
+            presenter.Maximize();
+        }
+    }
+
+    private void SaveWindowPlacement()
+    {
+        try
+        {
+            var appWindow = AppWindow;
+            var presenter = appWindow.Presenter as OverlappedPresenter;
+            bool isMaximized = presenter?.State == OverlappedPresenterState.Maximized;
+
+            // Only save the restored (non-maximized) bounds
+            var bounds = appWindow.Position;
+            var size = appWindow.Size;
+
+            var prefs = _userPreferencesService.GetPreferences() with
+            {
+                WindowWidth = Math.Max(MinWindowWidth, size.Width),
+                WindowHeight = Math.Max(MinWindowHeight, size.Height),
+                WindowX = bounds.X,
+                WindowY = bounds.Y,
+                IsMaximized = isMaximized
+            };
+
+            // Fire-and-forget (window is closing, best effort)
+            _ = _userPreferencesService.SavePreferencesAsync(prefs);
+        }
+        catch
+        {
+            // Graceful fallback on close
         }
     }
 

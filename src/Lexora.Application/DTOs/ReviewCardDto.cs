@@ -71,4 +71,56 @@ public record StudyLogDto(
     LearningStatus ResultingStatus,
     int ResultingIntervalDays,
     DateTime CreatedAt
-);
+)
+{
+    /// <summary>Human-readable rating label shown on the badge.</summary>
+    public string RatingLabel => Rating switch
+    {
+        ReviewRating.Again => "Again",
+        ReviewRating.Hard  => "Hard",
+        ReviewRating.Good  => "Good",
+        ReviewRating.Easy  => "Easy",
+        _                  => Rating.ToString()
+    };
+
+    /// <summary>Segoe Fluent icon glyph per rating.</summary>
+    public string RatingIcon => Rating switch
+    {
+        ReviewRating.Again => "\uE711",  // Cancel / repeat
+        ReviewRating.Hard  => "\uE74E",  // Pause
+        ReviewRating.Good  => "\uE73E",  // Accept / check
+        ReviewRating.Easy  => "\uE735",  // FavoriteStar
+        _                  => "\uE7C1"
+    };
+
+    /// <summary>Human-readable status label (no raw enum name).</summary>
+    public string StatusLabel => ResultingStatus switch
+    {
+        LearningStatus.New          => "New",
+        LearningStatus.Learning     => "Learning",
+        LearningStatus.Remembered   => "Remembered",
+        LearningStatus.Mastered     => "Mastered",
+        LearningStatus.NotRemembered => "Forgotten",
+        _                           => ResultingStatus.ToString()
+    };
+
+    /// <summary>Concise next-interval label, e.g. "1 d" or "15 d".</summary>
+    public string IntervalLabel => ResultingIntervalDays <= 0
+        ? "< 1 d"
+        : $"{ResultingIntervalDays} d";
+
+    /// <summary>Relative human-readable timestamp, e.g. "2 min ago", "Yesterday".</summary>
+    public string RelativeTime
+    {
+        get
+        {
+            var diff = DateTime.UtcNow - CreatedAt.ToUniversalTime();
+            if (diff.TotalMinutes < 1)   return "Just now";
+            if (diff.TotalMinutes < 60)  return $"{(int)diff.TotalMinutes} min ago";
+            if (diff.TotalHours < 24)    return $"{(int)diff.TotalHours} h ago";
+            if (diff.TotalDays < 2)      return "Yesterday";
+            if (diff.TotalDays < 7)      return $"{(int)diff.TotalDays} days ago";
+            return CreatedAt.ToLocalTime().ToString("dd/MM HH:mm");
+        }
+    }
+};

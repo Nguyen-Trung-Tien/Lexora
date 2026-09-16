@@ -648,30 +648,80 @@
             </Grid>
 
             <!-- 4. RECENT STUDY HISTORY EXPANDER -->
-            <Expander Grid.Row="3" Header="Recent Study Activity" Margin="0,20,0,0" HorizontalAlignment="Stretch">
-                <StackPanel Spacing="10" Padding="12">
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.RecentLogs, Mode=OneWay}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="dto:StudyLogDto">
-                                <Border Margin="0,2" Padding="12,8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6">
-                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-                                        <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" />
-                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="16,0" VerticalAlignment="Center">
-                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
-                                                <TextBlock Text="{x:Bind Rating}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
-                                            </Border>
-                                            <TextBlock Text="{x:Bind ResultingStatus}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-                                            <TextBlock Text="Interval:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                                            <TextBlock Text="{x:Bind ResultingIntervalDays}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
-                                            <TextBlock Text="d" FontSize="12" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="3" Text="{x:Bind CreatedAt}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" VerticalAlignment="Center" />
-                                    </Grid>
+            <Expander Grid.Row="3"
+                      Margin="0,20,0,0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Stretch">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Padding="4,8">
+                        <FontIcon Glyph="&#xE81C;" FontSize="15"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Review_RecentActivityTitle')}"
+                                   FontWeight="SemiBold" FontSize="14"
+                                   VerticalAlignment="Center" />
+                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                CornerRadius="20" Padding="8,1" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind ViewModel.RecentLogs.Count, Mode=OneWay}"
+                                       Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                       FontSize="11" FontWeight="Bold" />
+                        </Border>
+                    </StackPanel>
+                </Expander.Header>
+
+                <ItemsControl ItemsSource="{x:Bind ViewModel.RecentLogs, Mode=OneWay}"
+                              Padding="4,8,4,12">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="dto:StudyLogDto">
+                            <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,5"
+                                  BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                  BorderThickness="0,0,0,1">
+
+                                <!-- Rating badge with icon + label -->
+                                <Border Grid.Column="0"
+                                        Background="{x:Bind Rating, Converter={StaticResource ReviewRatingToBrushConverter}}"
+                                        CornerRadius="6" Padding="8,4" Margin="0,0,14,0"
+                                        VerticalAlignment="Center" MinWidth="72">
+                                    <StackPanel Orientation="Horizontal" Spacing="5"
+                                                HorizontalAlignment="Center">
+                                        <FontIcon Glyph="{x:Bind RatingIcon}"
+                                                  FontSize="11"
+                                                  Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                        <TextBlock Text="{x:Bind RatingLabel}"
+                                                   Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                   FontSize="11" FontWeight="Bold" />
+                                    </StackPanel>
                                 </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
+
+                                <!-- Term + status row -->
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Term}"
+                                               FontWeight="SemiBold" FontSize="13"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{x:Bind StatusLabel}"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   FontSize="11" />
+                                        <TextBlock Text="·"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   FontSize="11" />
+                                        <FontIcon Glyph="&#xE916;" FontSize="10"
+                                                  Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{x:Bind IntervalLabel}"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   FontSize="11" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Relative timestamp -->
+                                <TextBlock Grid.Column="2"
+                                           Text="{x:Bind RelativeTime}"
+                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                           FontSize="11" VerticalAlignment="Center"
+                                           HorizontalAlignment="Right" Margin="12,0,0,0" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Expander>
         </Grid>
     </ScrollViewer>
