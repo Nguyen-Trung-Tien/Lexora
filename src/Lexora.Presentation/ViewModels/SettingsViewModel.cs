@@ -153,7 +153,7 @@ public partial class SettingsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            BackupStatusMessage = $"Failed to load stats: {ex.Message}";
+            BackupStatusMessage = string.Format(_locService.GetString("Settings_FailedLoadStatsFormat"), ex.Message);
         }
         finally
         {

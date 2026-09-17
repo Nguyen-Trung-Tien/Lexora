@@ -26,6 +26,7 @@ public sealed partial class ReviewPage : Page
         IsTabStop = true;
         Loaded += (s, e) =>
         {
+            UpdateSpeedFlyoutLabels();
             Focus(FocusState.Programmatic);
         };
 
@@ -35,10 +36,19 @@ public sealed partial class ReviewPage : Page
         Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
     }
 
+    private void UpdateSpeedFlyoutLabels()
+    {
+        if (FlyoutSpeedSlow != null) FlyoutSpeedSlow.Text = Loc.GetString("Settings_Speed_Slow");
+        if (FlyoutSpeedNormal != null) FlyoutSpeedNormal.Text = Loc.GetString("Settings_Speed_Normal");
+        if (FlyoutSpeedFast != null) FlyoutSpeedFast.Text = Loc.GetString("Settings_Speed_Fast");
+        if (FlyoutSpeedVeryFast != null) FlyoutSpeedVeryFast.Text = Loc.GetString("Settings_Speed_VeryFast");
+    }
+
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            UpdateSpeedFlyoutLabels();
             ViewModel.UpdateActiveSessionTitle();
             Bindings.Update();
         });

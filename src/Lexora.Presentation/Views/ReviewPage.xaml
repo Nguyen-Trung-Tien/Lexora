@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
+    xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
@@ -103,10 +104,10 @@
                             </StackPanel>
                             <DropDownButton.Flyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Text="0.75x (Slow)" Tag="0.75" Click="SpeedItem_Click" />
-                                    <MenuFlyoutItem Text="1.0x (Normal)" Tag="1.0" Click="SpeedItem_Click" />
-                                    <MenuFlyoutItem Text="1.25x (Fast)" Tag="1.25" Click="SpeedItem_Click" />
-                                    <MenuFlyoutItem Text="1.5x (Very Fast)" Tag="1.5" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem x:Name="FlyoutSpeedSlow" Text="0.75x" Tag="0.75" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem x:Name="FlyoutSpeedNormal" Text="1.0x" Tag="1.0" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem x:Name="FlyoutSpeedFast" Text="1.25x" Tag="1.25" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem x:Name="FlyoutSpeedVeryFast" Text="1.5x" Tag="1.5" Click="SpeedItem_Click" />
                                 </MenuFlyout>
                             </DropDownButton.Flyout>
                         </DropDownButton>
@@ -694,7 +695,7 @@
                                         <FontIcon Glyph="{x:Bind RatingIcon}"
                                                   FontSize="11"
                                                   Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                        <TextBlock Text="{x:Bind RatingLabel}"
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatRating(Rating)}"
                                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                                                    FontSize="11" FontWeight="Bold" />
                                     </StackPanel>
@@ -706,15 +707,15 @@
                                                FontWeight="SemiBold" FontSize="13"
                                                TextTrimming="CharacterEllipsis" />
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="{x:Bind StatusLabel}"
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatStatus(ResultingStatus)}"
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                    FontSize="11" />
                                         <TextBlock Text="·"
                                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                                    FontSize="11" />
                                         <FontIcon Glyph="&#xE916;" FontSize="10"
-                                                  Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                                        <TextBlock Text="{x:Bind IntervalLabel}"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatInterval(ResultingIntervalDays)}"
                                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                                    FontSize="11" />
                                     </StackPanel>
@@ -722,7 +723,7 @@
 
                                 <!-- Relative timestamp -->
                                 <TextBlock Grid.Column="2"
-                                           Text="{x:Bind RelativeTime}"
+                                           Text="{x:Bind services:LocalizationHelper.FormatRelativeTime(CreatedAt)}"
                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                            FontSize="11" VerticalAlignment="Center"
                                            HorizontalAlignment="Right" Margin="12,0,0,0" />

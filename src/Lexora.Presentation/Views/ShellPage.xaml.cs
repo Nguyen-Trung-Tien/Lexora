@@ -107,6 +107,13 @@ public sealed partial class ShellPage : Page
         {
             ReviewNowBtn.Content = _localizationService.GetString("Review_Now");
         }
+
+        ToolTipService.SetToolTip(NavItemDashboard, _localizationService.GetString("Shell_TooltipDashboard"));
+        ToolTipService.SetToolTip(NavItemVocabulary, _localizationService.GetString("Shell_TooltipVocabulary"));
+        ToolTipService.SetToolTip(NavItemReview, _localizationService.GetString("Shell_TooltipReview"));
+        ToolTipService.SetToolTip(NavItemTest, _localizationService.GetString("Shell_TooltipTest"));
+        ToolTipService.SetToolTip(NavItemGrammar, _localizationService.GetString("Shell_TooltipGrammar"));
+        ToolTipService.SetToolTip(GlobalSearchBox, _localizationService.GetString("Shell_SearchTooltip"));
     }
 
     private void GlobalSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

@@ -300,12 +300,14 @@ public partial class ReviewViewModel : ObservableObject
 
     public async Task StartUnitReviewAsync(ContextUnitDto unit)
     {
-        await StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: unit.Id, wordIds: null, customTitle: $"Unit: {unit.Name}");
+        var title = string.Format(_localizationService.GetString("Review_Session_ByTopicFormat"), unit.Name);
+        await StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: unit.Id, wordIds: null, customTitle: title);
     }
 
     public async Task StartCustomWordReviewAsync(IReadOnlyList<Guid> wordIds, string? title = null)
     {
-        await StartReviewWithFilterAsync(ReviewSessionMode.CustomSelection, topicId: null, wordIds: wordIds, customTitle: title ?? $"Ôn {wordIds.Count} từ đã chọn");
+        var defaultTitle = string.Format(_localizationService.GetString("Review_Session_SelectedCount"), wordIds.Count);
+        await StartReviewWithFilterAsync(ReviewSessionMode.CustomSelection, topicId: null, wordIds: wordIds, customTitle: title ?? defaultTitle);
     }
 
     [RelayCommand]
@@ -502,13 +504,13 @@ public partial class ReviewViewModel : ObservableObject
 
         if (isCorrect)
         {
-            TypingFeedbackMessage = "Chính xác! Hoàn hảo 👏";
+            TypingFeedbackMessage = _localizationService.GetString("Review_TypingFeedbackCorrect");
             IsAnswerVisible = true;
             _ = PlayUkAudioAsync();
         }
         else
         {
-            TypingFeedbackMessage = $"Chưa chính xác: \"{actual}\" ➔ Đáp án đúng: \"{CurrentCard.Term}\"";
+            TypingFeedbackMessage = string.Format(_localizationService.GetString("Review_TypingFeedbackIncorrectFormat"), actual, CurrentCard.Term);
             IsAnswerVisible = true;
         }
     }
@@ -584,7 +586,7 @@ public partial class ReviewViewModel : ObservableObject
         }
     }
 
-    private static string GenerateWordScaffold(string term)
+    private string GenerateWordScaffold(string term)
     {
         if (string.IsNullOrWhiteSpace(term)) return string.Empty;
         var words = term.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -607,6 +609,7 @@ public partial class ReviewViewModel : ObservableObject
             }
         }
 
-        return $"{string.Join("   ", parts)}  ({totalLetters} ký tự)";
+        var countLabel = string.Format(_localizationService.GetString("Review_LettersCountFormat"), totalLetters);
+        return $"{string.Join("   ", parts)}  ({countLabel})";
     }
 }

@@ -410,6 +410,8 @@ public class LocalizationService : ILocalizationService
             ["Settings_TypingPractice"] = "Chế độ gõ từ (Active Recall Drill)",
             ["Settings_TypingPractice_On"] = "Bật (Yêu cầu gõ chính xác từ vựng để rèn trí nhớ chủ động)",
             ["Settings_TypingPractice_Off"] = "Tắt (Lật thẻ ôn tập tiêu chuẩn)",
+            ["Settings_Toggle_On"] = "Bật",
+            ["Settings_Toggle_Off"] = "Tắt",
 
             // Settings - Database & Backup Management
             ["Settings_DatabaseManagement"] = "Quản lý Cơ sở Dữ liệu & Sao lưu",
@@ -480,7 +482,6 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_Correct"] = "Chính xác:",
             ["Dashboard_Total"] = "Tổng",
             ["Dashboard_Learning"] = "Đang học",
-            ["Dashboard_Mastered"] = "Đã thuộc",
 
             // Shell & Reminders
             ["Review_Reminder_Msg"] = "Bạn có {0} từ vựng đã đến hạn ôn tập ngắt quãng (SM-2).",
@@ -583,7 +584,97 @@ public class LocalizationService : ILocalizationService
 
             // Additional Test
             ["Test_MetricTotalQuestions"] = "Tổng câu hỏi",
-            ["Test_MetricTimeElapsed"] = "Thời gian"
+            ["Test_MetricTimeElapsed"] = "Thời gian",
+
+            // Newly Added Common Actions
+            ["Action_View"] = "Xem",
+            ["Action_Review"] = "Ôn tập",
+            ["Action_Quiz"] = "Thi thử",
+
+            // Newly Added Dashboard
+            ["Dashboard_HeroBadge"] = "SPACED REPETITION (SM-2)",
+            ["Dashboard_DailyConsistency"] = "Thói quen hàng ngày",
+            ["Dashboard_Subtitle"] = "Chinh phục từ vựng tiếng Anh khoa học với phương pháp lặp lại ngắt quãng, truy xuất chủ động và theo dõi kỳ thi.",
+            ["Dashboard_StatActive"] = "Đang học",
+            ["Dashboard_StatUrgent"] = "Cần ôn",
+            ["Dashboard_StatRetention"] = "Ghi nhớ",
+            ["Dashboard_StatHabit"] = "Thói quen",
+            ["Dashboard_StatDays"] = "ngày",
+            ["Dashboard_TooltipTotalWords"] = "Xem tất cả từ vựng trong kho",
+            ["Dashboard_TooltipDueToday"] = "Bắt đầu ôn tập các từ đến hạn",
+            ["Dashboard_TooltipMastered"] = "Xem các từ vựng đã thành thạo",
+            ["Dashboard_TooltipStreak"] = "Ôn tập mỗi ngày để duy trì chuỗi học",
+            ["Dashboard_GreetingMorning"] = "Chào buổi sáng, bạn học!",
+            ["Dashboard_GreetingAfternoon"] = "Chào buổi chiều, bạn học!",
+            ["Dashboard_GreetingEvening"] = "Chào buổi tối, bạn học!",
+
+            // Newly Added Vocabulary
+            ["Vocab_MasteredLower"] = "đã thuộc",
+            ["Vocab_LearningLower"] = "đang học",
+            ["Vocab_AddWordShort"] = "+ Từ",
+            ["Vocab_TooltipAddWord"] = "Thêm từ mới (Ctrl+N)",
+            ["Vocab_TooltipEditWord"] = "Chỉnh sửa từ (Ctrl+E)",
+            ["Vocab_TooltipDeleteWord"] = "Xóa từ (Delete)",
+            ["Vocab_TooltipViewUnitWords"] = "Xem tất cả từ trong chủ đề này",
+            ["Vocab_TooltipAddWordToUnit"] = "Thêm từ mới vào chủ đề này",
+            ["Vocab_TooltipReviewUnit"] = "Ôn tập ngắt quãng (SM-2) cho chủ đề này",
+            ["Vocab_TooltipQuizUnit"] = "Luyện thi & trắc nghiệm chủ đề này",
+            ["Vocab_ErrorMarkStatus"] = "Lỗi đánh dấu từ",
+            ["Vocab_ExportFailed"] = "Xuất dữ liệu thất bại",
+            ["Vocab_ImportSummaryFormat"] = "Đã nhập: {0} từ\nBỏ qua: {1} từ\nLỗi: {2}",
+            ["Vocab_NoWordsInUnitTitle"] = "Chưa có từ vựng",
+            ["Vocab_NoWordsInUnitTestMsg"] = "Chủ đề '{0}' chưa có từ vựng nào để làm bài kiểm tra.",
+            ["Vocab_NoWordsInUnitReviewMsg"] = "Chủ đề '{0}' chưa có từ vựng nào để luyện ngắt quãng.",
+            ["Vocab_CreateTopicFailed"] = "Tạo chủ đề thất bại",
+
+            // Newly Added Review
+            ["Review_TypingFeedbackCorrect"] = "Chính xác! Hoàn hảo 👏",
+            ["Review_TypingFeedbackIncorrectFormat"] = "Chưa chính xác: \"{0}\" ➔ Đáp án đúng: \"{1}\"",
+            ["Review_LettersCountFormat"] = "{0} ký tự",
+            ["Review_UnitPrefix"] = "Chủ đề",
+            ["Review_Session_ByTopicFormat"] = "Chủ đề: {0}",
+
+            // Newly Added Test
+            ["Test_ErrorFormat"] = "Lỗi tạo bài thi: {0}",
+            ["Test_FinalizeErrorFormat"] = "Không thể hoàn thành bài thi: {0}",
+            ["Test_QuestionOfFormat"] = "Câu hỏi {0} / {1}",
+
+            // Newly Added Settings
+            ["Settings_AutoPlayAudioSubtitle"] = "Tự động phát âm chuẩn khi lật mở nghĩa của thẻ",
+            ["Settings_DueReminderSubtitle"] = "Nhận thông báo khi có flashcard đến hạn lặp lại ngắt quãng SM-2",
+            ["Settings_TypingPracticeSubtitle"] = "Yêu cầu gõ chính tả từ vựng trước khi lật thẻ ghi nhớ",
+            ["Settings_FailedLoadStatsFormat"] = "Không thể tải số liệu sao lưu: {0}",
+
+            // Newly Added Splash Screen
+            ["Splash_Tagline"] = "HỌC TỪ VỰNG THÔNG MINH & LẶP LẠI NGẮT QUÃNG",
+            ["Splash_InitFailed"] = "Không thể khởi tạo Lexora",
+            ["Splash_InitFailedDesc"] = "Đã có lỗi xảy ra khi tải cơ sở dữ liệu SQLite hoặc cấu hình ứng dụng.",
+            ["Splash_Retry"] = "Thử lại",
+            ["Splash_Exit"] = "Đóng ứng dụng",
+            ["Splash_StatusStarting"] = "Đang khởi tạo...",
+            ["Splash_StatusBooting"] = "Khởi động Lexora...",
+            ["Splash_StatusCheckingDb"] = "Đang kiểm tra cơ sở dữ liệu...",
+            ["Splash_StatusLoadingData"] = "Đang tải dữ liệu học tập & cài đặt...",
+            ["Splash_StatusReady"] = "Sẵn sàng khởi động!",
+            ["Splash_StatusErrorFormat"] = "Lỗi khởi tạo: {0}",
+
+            // Newly Added Time & Relative Formatting
+            ["Time_JustNow"] = "Vừa xong",
+            ["Time_MinutesAgoFormat"] = "{0} phút trước",
+            ["Time_HoursAgoFormat"] = "{0} giờ trước",
+            ["Time_Yesterday"] = "Hôm qua",
+            ["Time_DaysAgoFormat"] = "{0} ngày trước",
+            ["Time_DaysShortFormat"] = "{0} ngày",
+            ["Time_LessThanOneDay"] = "< 1 ngày",
+
+            // Newly Added Shell Navigation & Tooltips
+            ["Shell_SearchPlaceholder"] = "Tìm kiếm từ vựng, ngữ pháp... (Ctrl+F)",
+            ["Shell_SearchTooltip"] = "Tìm kiếm Lexora (Ctrl+F)",
+            ["Shell_TooltipDashboard"] = "Tổng quan (Ctrl+1)",
+            ["Shell_TooltipVocabulary"] = "Kho từ vựng (Ctrl+2)",
+            ["Shell_TooltipReview"] = "Ôn tập ngắt quãng (Ctrl+3)",
+            ["Shell_TooltipTest"] = "Luyện tập & Thi (Ctrl+4)",
+            ["Shell_TooltipGrammar"] = "Cẩm nang ngữ pháp (Ctrl+5)"
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -870,10 +961,6 @@ public class LocalizationService : ILocalizationService
             ["WordEditor_PlaceholderTerm"] = "e.g. collaborate",
             ["WordEditor_HeaderPos"] = "Primary Part of Speech",
             ["WordEditor_HeaderLevel"] = "CEFR Level",
-            ["WordEditor_HeaderTerm"] = "Word / Term *",
-            ["WordEditor_PlaceholderTerm"] = "e.g. collaborate",
-            ["WordEditor_HeaderPos"] = "Primary POS",
-            ["WordEditor_HeaderLevel"] = "CEFR Level",
             ["WordEditor_HeaderPhoneticUk"] = "Phonetic UK",
             ["WordEditor_PlaceholderPhoneticUk"] = "e.g. /kəˈlæb.ə.reɪt/",
             ["WordEditor_HeaderPhoneticUs"] = "Phonetic US",
@@ -984,6 +1071,8 @@ public class LocalizationService : ILocalizationService
             ["Settings_TypingPractice"] = "Typing Practice (Active Recall Drill)",
             ["Settings_TypingPractice_On"] = "On (Type word to drill active spelling recall)",
             ["Settings_TypingPractice_Off"] = "Off (Standard card flip)",
+            ["Settings_Toggle_On"] = "On",
+            ["Settings_Toggle_Off"] = "Off",
 
             // Settings - Database & Backup Management
             ["Settings_DatabaseManagement"] = "Database & Backup Management",
@@ -1054,7 +1143,6 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_Correct"] = "Correct:",
             ["Dashboard_Total"] = "Total",
             ["Dashboard_Learning"] = "Learning",
-            ["Dashboard_Mastered"] = "Mastered",
 
             // Shell & Reminders
             ["Review_Reminder_Msg"] = "You have {0} word{1} ready for spaced repetition review.",
@@ -1157,7 +1245,97 @@ public class LocalizationService : ILocalizationService
 
             // Additional Test
             ["Test_MetricTotalQuestions"] = "Total Questions",
-            ["Test_MetricTimeElapsed"] = "Time Elapsed"
+            ["Test_MetricTimeElapsed"] = "Time Elapsed",
+
+            // Newly Added Common Actions
+            ["Action_View"] = "View",
+            ["Action_Review"] = "Review",
+            ["Action_Quiz"] = "Quiz",
+
+            // Newly Added Dashboard
+            ["Dashboard_HeroBadge"] = "SPACED REPETITION (SM-2)",
+            ["Dashboard_DailyConsistency"] = "Daily Consistency",
+            ["Dashboard_Subtitle"] = "Master English vocabulary scientifically with active recall drills, spaced repetition, and exam readiness tracking.",
+            ["Dashboard_StatActive"] = "Active",
+            ["Dashboard_StatUrgent"] = "Urgent",
+            ["Dashboard_StatRetention"] = "Retention",
+            ["Dashboard_StatHabit"] = "Habit",
+            ["Dashboard_StatDays"] = "days",
+            ["Dashboard_TooltipTotalWords"] = "View all vocabulary words",
+            ["Dashboard_TooltipDueToday"] = "Start review session for due words",
+            ["Dashboard_TooltipMastered"] = "View mastered words",
+            ["Dashboard_TooltipStreak"] = "Review daily to keep your streak alive",
+            ["Dashboard_GreetingMorning"] = "Good morning, Learner!",
+            ["Dashboard_GreetingAfternoon"] = "Good afternoon, Learner!",
+            ["Dashboard_GreetingEvening"] = "Good evening, Learner!",
+
+            // Newly Added Vocabulary
+            ["Vocab_MasteredLower"] = "mastered",
+            ["Vocab_LearningLower"] = "learning",
+            ["Vocab_AddWordShort"] = "+ Word",
+            ["Vocab_TooltipAddWord"] = "Add New Word (Ctrl+N)",
+            ["Vocab_TooltipEditWord"] = "Edit word (Ctrl+E)",
+            ["Vocab_TooltipDeleteWord"] = "Delete word (Delete)",
+            ["Vocab_TooltipViewUnitWords"] = "View all words in this unit",
+            ["Vocab_TooltipAddWordToUnit"] = "Add a new word directly into this unit",
+            ["Vocab_TooltipReviewUnit"] = "Spaced review (SM-2) for this unit",
+            ["Vocab_TooltipQuizUnit"] = "Quiz on words in this unit",
+            ["Vocab_ErrorMarkStatus"] = "Failed to update word status",
+            ["Vocab_ExportFailed"] = "Export Failed",
+            ["Vocab_ImportSummaryFormat"] = "Imported: {0} words\nSkipped: {1} words\nErrors: {2}",
+            ["Vocab_NoWordsInUnitTitle"] = "No Vocabulary Words",
+            ["Vocab_NoWordsInUnitTestMsg"] = "Unit '{0}' does not have any vocabulary words for a test.",
+            ["Vocab_NoWordsInUnitReviewMsg"] = "Unit '{0}' does not have any vocabulary words for spaced review.",
+            ["Vocab_CreateTopicFailed"] = "Failed to create topic",
+
+            // Newly Added Review
+            ["Review_TypingFeedbackCorrect"] = "Correct! Well done 👏",
+            ["Review_TypingFeedbackIncorrectFormat"] = "Incorrect: \"{0}\" ➔ Correct answer: \"{1}\"",
+            ["Review_LettersCountFormat"] = "{0} letters",
+            ["Review_UnitPrefix"] = "Unit",
+            ["Review_Session_ByTopicFormat"] = "Unit: {0}",
+
+            // Newly Added Test
+            ["Test_ErrorFormat"] = "Error creating test: {0}",
+            ["Test_FinalizeErrorFormat"] = "Failed to finalize test: {0}",
+            ["Test_QuestionOfFormat"] = "Question {0} of {1}",
+
+            // Newly Added Settings
+            ["Settings_AutoPlayAudioSubtitle"] = "Play native pronunciation automatically when card meaning is revealed",
+            ["Settings_DueReminderSubtitle"] = "Receive notifications when flashcards are due for SM-2 repetition",
+            ["Settings_TypingPracticeSubtitle"] = "Require typing spelling recall before flipping flashcards",
+            ["Settings_FailedLoadStatsFormat"] = "Failed to load backup stats: {0}",
+
+            // Newly Added Splash Screen
+            ["Splash_Tagline"] = "INTELLIGENT VOCABULARY & SPACED REPETITION",
+            ["Splash_InitFailed"] = "Could not initialize Lexora",
+            ["Splash_InitFailedDesc"] = "An error occurred while loading the SQLite database or configuration.",
+            ["Splash_Retry"] = "Retry",
+            ["Splash_Exit"] = "Exit App",
+            ["Splash_StatusStarting"] = "Initializing...",
+            ["Splash_StatusBooting"] = "Starting Lexora...",
+            ["Splash_StatusCheckingDb"] = "Checking database...",
+            ["Splash_StatusLoadingData"] = "Loading study data & settings...",
+            ["Splash_StatusReady"] = "Ready to launch!",
+            ["Splash_StatusErrorFormat"] = "Initialization error: {0}",
+
+            // Newly Added Time & Relative Formatting
+            ["Time_JustNow"] = "Just now",
+            ["Time_MinutesAgoFormat"] = "{0} min ago",
+            ["Time_HoursAgoFormat"] = "{0} h ago",
+            ["Time_Yesterday"] = "Yesterday",
+            ["Time_DaysAgoFormat"] = "{0} d ago",
+            ["Time_DaysShortFormat"] = "{0} d",
+            ["Time_LessThanOneDay"] = "< 1 d",
+
+            // Newly Added Shell Navigation & Tooltips
+            ["Shell_SearchPlaceholder"] = "Search words, grammar... (Ctrl+F)",
+            ["Shell_SearchTooltip"] = "Search Lexora (Ctrl+F)",
+            ["Shell_TooltipDashboard"] = "Dashboard (Ctrl+1)",
+            ["Shell_TooltipVocabulary"] = "Vocabulary (Ctrl+2)",
+            ["Shell_TooltipReview"] = "Spaced Review (Ctrl+3)",
+            ["Shell_TooltipTest"] = "Practice & Test (Ctrl+4)",
+            ["Shell_TooltipGrammar"] = "Grammar (Ctrl+5)"
         }
     };
 

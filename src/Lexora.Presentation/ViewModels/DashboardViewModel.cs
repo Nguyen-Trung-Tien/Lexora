@@ -97,13 +97,12 @@ public partial class DashboardViewModel : ObservableObject
     private void UpdateGreeting()
     {
         int hour = DateTime.Now.Hour;
-        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
         if (hour < 12)
-            GreetingText = isVi ? "Chào buổi sáng, bạn học!" : "Good morning, Learner!";
+            GreetingText = _localizationService.GetString("Dashboard_GreetingMorning");
         else if (hour < 18)
-            GreetingText = isVi ? "Chào buổi chiều, bạn học!" : "Good afternoon, Learner!";
+            GreetingText = _localizationService.GetString("Dashboard_GreetingAfternoon");
         else
-            GreetingText = isVi ? "Chào buổi tối, bạn học!" : "Good evening, Learner!";
+            GreetingText = _localizationService.GetString("Dashboard_GreetingEvening");
     }
 
     private void UpdateAdviceDisplay()

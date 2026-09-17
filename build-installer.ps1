@@ -247,7 +247,7 @@ $requiredFiles = @(
     "Lexora.Presentation.exe",
     "Microsoft.ui.xaml.dll",
     "Microsoft.WindowsAppRuntime.dll",
-    "resources.pri",
+    "Microsoft.WindowsAppRuntime.pri",
     "Lexora.Domain.dll",
     "Lexora.Application.dll",
     "Lexora.Infrastructure.dll"

@@ -71,7 +71,7 @@ public sealed partial class MainWindow : Window
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     var errorMsg = _startupOrchestrator.LastError?.Message
-                        ?? "Không thể khởi tạo cơ sở dữ liệu SQLite hoặc cấu hình ứng dụng.";
+                        ?? _localizationService.GetString("Splash_InitFailedDesc");
                     SplashOverlay.ShowError(errorMsg);
                 });
             }

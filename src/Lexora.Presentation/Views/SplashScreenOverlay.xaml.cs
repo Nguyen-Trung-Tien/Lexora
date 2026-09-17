@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.UI.ViewManagement;
+using Lexora.Presentation.Services;
 
 namespace Lexora.Presentation.Views;
 
@@ -18,6 +19,7 @@ public sealed partial class SplashScreenOverlay : UserControl
     public SplashScreenOverlay()
     {
         InitializeComponent();
+        UpdateLocalizedText();
 
         EntranceStoryboard.Completed += (s, e) => _entranceTcs?.TrySetResult(true);
         ExitStoryboard.Completed += (s, e) =>
@@ -26,6 +28,16 @@ public sealed partial class SplashScreenOverlay : UserControl
             _exitTcs?.TrySetResult(true);
         };
         ReducedMotionEntrance.Completed += (s, e) => _entranceTcs?.TrySetResult(true);
+    }
+
+    public void UpdateLocalizedText()
+    {
+        TaglineTextBlock.Text = LocalizationHelper.GetString("Splash_Tagline");
+        StatusTextBlock.Text = LocalizationHelper.GetString("Splash_StatusStarting");
+        ErrorTitleTextBlock.Text = LocalizationHelper.GetString("Splash_InitFailed");
+        ErrorDetailsTextBlock.Text = LocalizationHelper.GetString("Splash_InitFailedDesc");
+        RetryButton.Content = LocalizationHelper.GetString("Splash_Retry");
+        ExitButton.Content = LocalizationHelper.GetString("Splash_Exit");
     }
 
     public async Task PlayEntranceAsync()
@@ -76,7 +88,9 @@ public sealed partial class SplashScreenOverlay : UserControl
     public void ShowError(string errorMessage)
     {
         LoadingContainer.Visibility = Visibility.Collapsed;
-        ErrorDetailsTextBlock.Text = errorMessage;
+        ErrorDetailsTextBlock.Text = string.IsNullOrWhiteSpace(errorMessage)
+            ? LocalizationHelper.GetString("Splash_InitFailedDesc")
+            : errorMessage;
         ErrorCard.Visibility = Visibility.Visible;
     }
 

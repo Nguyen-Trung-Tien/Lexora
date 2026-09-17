@@ -419,7 +419,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog("Lỗi đánh dấu từ", ex.Message);
+            ShowErrorDialog(Loc.GetString("Vocab_ErrorMarkStatus"), ex.Message);
         }
         finally
         {
@@ -437,7 +437,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog("Lỗi đánh dấu từ", ex.Message);
+            ShowErrorDialog(Loc.GetString("Vocab_ErrorMarkStatus"), ex.Message);
         }
         finally
         {
@@ -455,7 +455,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog("Export Failed", ex.Message);
+            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
 
@@ -469,7 +469,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog("Export Failed", ex.Message);
+            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
 
@@ -483,7 +483,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog("Export Failed", ex.Message);
+            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
 
@@ -641,7 +641,7 @@ public sealed partial class VocabularyPage : Page
             var summaryDialog = new ContentDialog
             {
                 Title = Loc.GetString("Vocab_ImportExport"),
-                Content = $"Imported: {importResult.TotalImported} words\nSkipped: {importResult.TotalSkipped} words\nErrors: {importResult.Errors.Count}",
+                Content = string.Format(Loc.GetString("Vocab_ImportSummaryFormat"), importResult.TotalImported, importResult.TotalSkipped, importResult.Errors.Count),
                 CloseButtonText = Loc.GetString("Action_Close"),
                 XamlRoot = this.XamlRoot
             };
@@ -655,7 +655,7 @@ public sealed partial class VocabularyPage : Page
         {
             Title = title,
             Content = message,
-            CloseButtonText = "OK",
+            CloseButtonText = Loc.GetString("Action_Close"),
             XamlRoot = this.XamlRoot
         };
         await dialog.ShowAsync();
@@ -784,7 +784,7 @@ public sealed partial class VocabularyPage : Page
             }
             else
             {
-                ShowErrorDialog("Chưa có từ vựng", $"Unit '{unit.Name}' chưa có từ vựng nào để làm bài kiểm tra.");
+                ShowErrorDialog(Loc.GetString("Vocab_NoWordsInUnitTitle"), string.Format(Loc.GetString("Vocab_NoWordsInUnitTestMsg"), unit.Name));
             }
         }
     }
@@ -800,7 +800,7 @@ public sealed partial class VocabularyPage : Page
             }
             else
             {
-                ShowErrorDialog("Chưa có từ vựng", $"Unit '{unit.Name}' chưa có từ vựng nào để luyện ngắt quãng.");
+                ShowErrorDialog(Loc.GetString("Vocab_NoWordsInUnitTitle"), string.Format(Loc.GetString("Vocab_NoWordsInUnitReviewMsg"), unit.Name));
             }
         }
     }
@@ -824,7 +824,7 @@ public sealed partial class VocabularyPage : Page
             }
             catch (Exception ex)
             {
-                ShowErrorDialog("Tạo chủ đề thất bại", ex.Message);
+                ShowErrorDialog(Loc.GetString("Vocab_CreateTopicFailed"), ex.Message);
             }
         }
     }

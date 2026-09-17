@@ -89,7 +89,7 @@ public partial class TestViewModel : ObservableObject
     public partial int TotalQuestions { get; set; } = 0;
 
     [ObservableProperty]
-    public partial string ProgressText { get; set; } = "Question 1 of 10";
+    public partial string ProgressText { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial double ProgressPercent { get; set; } = 0.0;
@@ -400,7 +400,7 @@ public partial class TestViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error: {ex.Message}";
+            StatusMessage = string.Format(_localizationService.GetString("Test_ErrorFormat"), ex.Message);
         }
         finally
         {
@@ -548,7 +548,7 @@ public partial class TestViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Failed to finalize test: {ex.Message}";
+            StatusMessage = string.Format(_localizationService.GetString("Test_FinalizeErrorFormat"), ex.Message);
         }
         finally
         {

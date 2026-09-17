@@ -10,22 +10,23 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Spacing="22" MaxWidth="1380" HorizontalAlignment="Stretch" Padding="32,24">
-            <!-- Page Title -->
-            <TextBlock Text="{x:Bind Loc.GetString('Settings_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />
+        <Grid Padding="28,24" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="22" MaxWidth="1100" HorizontalAlignment="Stretch">
+                <!-- Page Title -->
+                <TextBlock Text="{x:Bind Loc.GetString('Settings_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />
 
-            <!-- Appearance Theme Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
-                <StackPanel Spacing="16">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                        <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
-                            <FontIcon Glyph="&#xE790;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind Loc.GetString('Settings_Theme')}" FontWeight="Bold" FontSize="16" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Settings_ThemeSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                        </StackPanel>
-                    </Grid>
+                <!-- Appearance Theme Card -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+                    <StackPanel Spacing="16">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE790;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_Theme')}" FontWeight="Bold" FontSize="16" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_ThemeSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
 
                     <RadioButtons SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=TwoWay}" SelectionChanged="ThemeRadioButtons_SelectionChanged">
                         <RadioButton Content="{x:Bind Loc.GetString('Settings_Theme_System')}" />
@@ -44,7 +45,7 @@
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_Language')}" FontWeight="Bold" FontSize="16" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Settings_LanguageSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_LanguageSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                     </Grid>
 
@@ -66,47 +67,51 @@
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_StudyExperience')}" FontWeight="Bold" FontSize="16" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Settings_StudyExperienceSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_StudyExperienceSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                     </Grid>
 
                     <!-- Setting Row 1: Auto Play Audio -->
                     <Grid ColumnDefinitions="*,Auto" Margin="0,2">
-                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_AutoPlayAudio')}" FontWeight="SemiBold" FontSize="14" />
-                            <TextBlock Text="Play native pronunciation automatically when card meaning is revealed" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_AutoPlayAudioSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                         <ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
                                       IsOn="{x:Bind ViewModel.AutoPlayAudio, Mode=OneWay}"
                                       Toggled="AutoPlayToggle_Toggled"
-                                      OffContent="{x:Bind Loc.GetString('Settings_AutoPlayAudio_Off')}"
-                                      OnContent="{x:Bind Loc.GetString('Settings_AutoPlayAudio_On')}" />
+                                      OffContent="{x:Bind Loc.GetString('Settings_Toggle_Off')}"
+                                      OnContent="{x:Bind Loc.GetString('Settings_Toggle_On')}"
+                                      MinWidth="76"
+                                      HorizontalAlignment="Right" />
                     </Grid>
 
                     <MenuFlyoutSeparator />
 
                     <!-- Setting Row 2: Due Reminder -->
                     <Grid ColumnDefinitions="*,Auto" Margin="0,2">
-                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_DueReminder')}" FontWeight="SemiBold" FontSize="14" />
-                            <TextBlock Text="Receive notifications when flashcards are due for SM-2 repetition" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_DueReminderSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                         <ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
                                       IsOn="{x:Bind ViewModel.EnableReviewReminder, Mode=OneWay}"
                                       Toggled="ReminderToggle_Toggled"
-                                      OffContent="{x:Bind Loc.GetString('Settings_DueReminder_Off')}"
-                                      OnContent="{x:Bind Loc.GetString('Settings_DueReminder_On')}" />
+                                      OffContent="{x:Bind Loc.GetString('Settings_Toggle_Off')}"
+                                      OnContent="{x:Bind Loc.GetString('Settings_Toggle_On')}"
+                                      MinWidth="76"
+                                      HorizontalAlignment="Right" />
                     </Grid>
 
                     <MenuFlyoutSeparator />
 
                     <!-- Setting Row 3: Speech Playback Speed -->
                     <Grid ColumnDefinitions="*,Auto" Margin="0,2">
-                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_SpeechRate')}" FontWeight="SemiBold" FontSize="14" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Settings_SpeechRateSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_SpeechRateSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
-                        <ComboBox Grid.Column="1" x:Name="SpeechRateCombo" Width="200" VerticalAlignment="Center" SelectionChanged="SpeechRateCombo_SelectionChanged" CornerRadius="8">
+                        <ComboBox Grid.Column="1" x:Name="SpeechRateCombo" Width="160" VerticalAlignment="Center" HorizontalAlignment="Right" SelectionChanged="SpeechRateCombo_SelectionChanged" CornerRadius="8">
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Speed_Slow')}" Tag="0.75" />
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Speed_Normal')}" Tag="1.0" />
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Speed_Fast')}" Tag="1.25" />
@@ -118,15 +123,17 @@
 
                     <!-- Setting Row 4: Typing Practice Drill -->
                     <Grid ColumnDefinitions="*,Auto" Margin="0,2">
-                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_TypingPractice')}" FontWeight="SemiBold" FontSize="14" />
-                            <TextBlock Text="Require typing spelling recall before flipping flashcards" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_TypingPracticeSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                         <ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
                                       IsOn="{x:Bind ViewModel.EnableTypingPractice, Mode=OneWay}"
                                       Toggled="TypingPracticeToggle_Toggled"
-                                      OffContent="{x:Bind Loc.GetString('Settings_TypingPractice_Off')}"
-                                      OnContent="{x:Bind Loc.GetString('Settings_TypingPractice_On')}" />
+                                      OffContent="{x:Bind Loc.GetString('Settings_Toggle_Off')}"
+                                      OnContent="{x:Bind Loc.GetString('Settings_Toggle_On')}"
+                                      MinWidth="76"
+                                      HorizontalAlignment="Right" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -140,7 +147,7 @@
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_DatabaseManagement')}" FontWeight="Bold" FontSize="16" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Settings_DatabaseManagementSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_DatabaseManagementSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                         <Button Grid.Column="2" Content="{x:Bind Loc.GetString('Settings_RefreshStats')}" Click="RefreshStatsButton_Click" CornerRadius="8" />
                     </Grid>
@@ -207,7 +214,7 @@
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_TtsTitle')}" FontWeight="Bold" FontSize="16" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Settings_TtsSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_TtsSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                     </Grid>
 
@@ -238,64 +245,64 @@
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_ShortcutsTitle')}" FontWeight="Bold" FontSize="16" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Settings_ShortcutsSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_ShortcutsSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                     </Grid>
 
-                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="220,*" RowSpacing="12">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="16" RowSpacing="12">
                         <!-- Ctrl + 1-5 -->
                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="Ctrl + 1 / 2 / 3 / 4 / 5" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Nav')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Nav')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
                         <!-- Ctrl + F -->
                         <Border Grid.Row="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="Ctrl + F" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Search')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Search')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
                         <!-- Ctrl + N -->
                         <Border Grid.Row="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="Ctrl + N" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_AddWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_AddWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
                         <!-- Ctrl + E -->
                         <Border Grid.Row="3" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="Ctrl + E" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_EditWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_EditWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
                         <!-- Delete -->
                         <Border Grid.Row="4" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="Delete" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_DeleteWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_DeleteWord')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
                         <!-- Space -->
                         <Border Grid.Row="5" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="Space" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Flip')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Flip')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
                         <!-- 1, 2, 3, 4 -->
                         <Border Grid.Row="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="1, 2, 3, 4" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Rate')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Rate')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
                         <!-- U / S -->
                         <Border Grid.Row="7" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="U / S" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Audio')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Audio')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
                         <!-- Enter -->
                         <Border Grid.Row="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
                             <TextBlock Text="Enter" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
-                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Enter')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Enter')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -313,11 +320,12 @@
                                 <TextBlock Text="v1.0.0" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="{x:Bind Loc.GetString('Settings_AboutSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
-                        <TextBlock Text="{x:Bind Loc.GetString('Settings_AboutTech')}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,2,0,0" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Settings_AboutSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Settings_AboutTech')}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap" />
                     </StackPanel>
                 </Grid>
             </Border>
         </StackPanel>
-    </ScrollViewer>
+    </Grid>
+</ScrollViewer>
 </Page>
