@@ -44,23 +44,11 @@ public class OptionStateToBrushConverter : IValueConverter
             _ => "CardStrokeColorDefaultBrush"
         };
 
-        if (XamlApplication.Current?.Resources != null)
+        var rootElement = (XamlApplication.Current as App)?.MainWindow?.Content as FrameworkElement;
+        var themeBrush = Services.ThemeResourceHelper.GetThemeBrush(rootElement, brushKey);
+        if (themeBrush != null)
         {
-            var rootElement = (XamlApplication.Current as App)?.MainWindow?.Content as FrameworkElement;
-            var themeKey = (rootElement?.ActualTheme == ElementTheme.Light) ? "Light" : "Default";
-
-            if (XamlApplication.Current.Resources.ThemeDictionaries.TryGetValue(themeKey, out var dictObj) &&
-                dictObj is ResourceDictionary themeDict &&
-                themeDict.TryGetValue(brushKey, out var bObj) &&
-                bObj is Brush themeBrush)
-            {
-                return themeBrush;
-            }
-
-            if (XamlApplication.Current.Resources.TryGetValue(brushKey, out var res) && res is Brush brush)
-            {
-                return brush;
-            }
+            return themeBrush;
         }
 
         return new SolidColorBrush(Microsoft.UI.Colors.Transparent);

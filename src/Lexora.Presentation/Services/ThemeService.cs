@@ -65,5 +65,10 @@ public class ThemeService : IThemeService
         {
             rootElement.RequestedTheme = theme;
         }
+
+        if (_window is MainWindow mainWindow)
+        {
+            mainWindow.UpdateTitleBarButtons();
+        }
     }
 }

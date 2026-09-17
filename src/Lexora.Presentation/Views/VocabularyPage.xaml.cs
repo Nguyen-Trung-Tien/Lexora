@@ -48,6 +48,8 @@ public sealed partial class VocabularyPage : Page
             UpdateViewModeButtons();
             _isInitializing = false;
         };
+
+        ActualThemeChanged += (s, e) => UpdateViewModeButtons();
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
@@ -715,13 +717,17 @@ public sealed partial class VocabularyPage : Page
         UpdateViewModeButtons();
     }
 
+    private Microsoft.UI.Xaml.Media.Brush? GetThemeBrush(string key)
+    {
+        return Services.ThemeResourceHelper.GetThemeBrush(this, key);
+    }
+
     private void UpdateViewModeButtons()
     {
-        var res = Microsoft.UI.Xaml.Application.Current.Resources;
-        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
-        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
-        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
-        var secondaryText = res.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
+        var cardBg = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+        var cardStroke = GetThemeBrush("CardStrokeColorDefaultBrush");
+        var accentText = GetThemeBrush("AccentTextFillColorPrimaryBrush");
+        var secondaryText = GetThemeBrush("TextFillColorSecondaryBrush");
         var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
         void ApplySegment(Button btn, bool isActive)

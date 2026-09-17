@@ -19,6 +19,7 @@ public sealed partial class SettingsPage : Page
 
         Loc.LanguageChanged += OnLanguageChanged;
         Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+        ActualThemeChanged += (s, e) => UpdateLanguageButtons();
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
@@ -46,21 +47,7 @@ public sealed partial class SettingsPage : Page
 
     private Microsoft.UI.Xaml.Media.Brush? GetThemeBrush(string key)
     {
-        var themeKey = ActualTheme == ElementTheme.Light ? "Light" : "Default";
-        if (App.Current.Resources.ThemeDictionaries.TryGetValue(themeKey, out var dictObj) &&
-            dictObj is ResourceDictionary themeDict &&
-            themeDict.TryGetValue(key, out var bObj) &&
-            bObj is Microsoft.UI.Xaml.Media.Brush themeBrush)
-        {
-            return themeBrush;
-        }
-
-        if (App.Current.Resources.TryGetValue(key, out var res) && res is Microsoft.UI.Xaml.Media.Brush brush)
-        {
-            return brush;
-        }
-
-        return null;
+        return Services.ThemeResourceHelper.GetThemeBrush(this, key);
     }
 
     private void UpdateLanguageButtons()

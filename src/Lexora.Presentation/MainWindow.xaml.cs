@@ -32,12 +32,17 @@ public sealed partial class MainWindow : Window
         {
             var titleBar = AppWindow.TitleBar;
             titleBar.ExtendsContentIntoTitleBar = true;
-            titleBar.ButtonBackgroundColor = Colors.Transparent;
-            titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+            UpdateTitleBarButtons();
         }
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
+
+        if (Content is FrameworkElement root)
+        {
+            root.Loaded += (s, e) => UpdateTitleBarButtons();
+            root.ActualThemeChanged += (s, e) => UpdateTitleBarButtons();
+        }
 
         // 2. Set Taskbar and Window Icon
         SetWindowAndTaskbarIcon();
@@ -76,6 +81,44 @@ public sealed partial class MainWindow : Window
                 });
             }
         };
+    }
+
+    public void UpdateTitleBarButtons()
+    {
+        if (!AppWindowTitleBar.IsCustomizationSupported()) return;
+
+        var titleBar = AppWindow.TitleBar;
+        titleBar.ButtonBackgroundColor = Colors.Transparent;
+        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+
+        bool isDark = false;
+        if (Content is FrameworkElement root)
+        {
+            isDark = root.ActualTheme == ElementTheme.Dark;
+        }
+        else
+        {
+            isDark = App.Current.RequestedTheme == ApplicationTheme.Dark;
+        }
+
+        if (isDark)
+        {
+            titleBar.ButtonForegroundColor = Colors.White;
+            titleBar.ButtonHoverForegroundColor = Colors.White;
+            titleBar.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(30, 255, 255, 255);
+            titleBar.ButtonPressedForegroundColor = Colors.White;
+            titleBar.ButtonPressedBackgroundColor = Windows.UI.Color.FromArgb(50, 255, 255, 255);
+            titleBar.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(255, 128, 128, 128);
+        }
+        else
+        {
+            titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 24, 24, 24);
+            titleBar.ButtonHoverForegroundColor = Colors.Black;
+            titleBar.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(25, 0, 0, 0);
+            titleBar.ButtonPressedForegroundColor = Colors.Black;
+            titleBar.ButtonPressedBackgroundColor = Windows.UI.Color.FromArgb(45, 0, 0, 0);
+            titleBar.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(255, 140, 140, 140);
+        }
     }
 
     private void SetWindowAndTaskbarIcon()
