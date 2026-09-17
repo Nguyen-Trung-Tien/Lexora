@@ -79,12 +79,15 @@
                          Grid.Row="0"
                          IsOpen="{x:Bind ViewModel.IsReminderVisible, Mode=OneWay}"
                          Severity="Informational"
-                         Title="Review Reminder"
+                         Title="{x:Bind ViewModel.ReminderTitle, Mode=OneWay}"
                          Message="{x:Bind ViewModel.DueReviewMessage, Mode=OneWay}"
                          Margin="28,10,28,0"
                          CornerRadius="8">
                     <InfoBar.ActionButton>
-                        <Button x:Name="ReviewNowBtn" Content="Review Now" Style="{ThemeResource AccentButtonStyle}" Click="ReviewNowButton_Click" />
+                        <Button x:Name="ReviewNowBtn"
+                                Content="{x:Bind ViewModel.ReminderActionText, Mode=OneWay}"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                Click="ReviewNowButton_Click" />
                     </InfoBar.ActionButton>
                 </InfoBar>
 

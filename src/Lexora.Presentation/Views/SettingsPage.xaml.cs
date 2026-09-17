@@ -44,17 +44,35 @@ public sealed partial class SettingsPage : Page
         };
     }
 
+    private Microsoft.UI.Xaml.Media.Brush? GetThemeBrush(string key)
+    {
+        var themeKey = ActualTheme == ElementTheme.Light ? "Light" : "Default";
+        if (App.Current.Resources.ThemeDictionaries.TryGetValue(themeKey, out var dictObj) &&
+            dictObj is ResourceDictionary themeDict &&
+            themeDict.TryGetValue(key, out var bObj) &&
+            bObj is Microsoft.UI.Xaml.Media.Brush themeBrush)
+        {
+            return themeBrush;
+        }
+
+        if (App.Current.Resources.TryGetValue(key, out var res) && res is Microsoft.UI.Xaml.Media.Brush brush)
+        {
+            return brush;
+        }
+
+        return null;
+    }
+
     private void UpdateLanguageButtons()
     {
         bool isVi = Loc.CurrentLanguage == "vi-VN";
-        var res = App.Current.Resources;
-        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
-        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
-        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
-        var subtleText = res.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
+        var cardBg = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+        var cardStroke = GetThemeBrush("CardStrokeColorDefaultBrush");
+        var accentText = GetThemeBrush("AccentTextFillColorPrimaryBrush");
+        var subtleText = GetThemeBrush("TextFillColorSecondaryBrush");
         var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
-        void ApplyLangBtn(Button btn, bool isActive)
+        void ApplyLangBtn(Button btn, TextBlock text, FontIcon check, bool isActive)
         {
             btn.Style = null;
             if (isActive)
@@ -62,20 +80,22 @@ public sealed partial class SettingsPage : Page
                 if (cardBg != null) btn.Background = cardBg;
                 if (cardStroke != null) btn.BorderBrush = cardStroke;
                 btn.BorderThickness = new Thickness(1);
-                if (accentText != null) btn.Foreground = accentText;
+                if (accentText != null) text.Foreground = accentText;
                 btn.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
+                check.Visibility = Visibility.Visible;
             }
             else
             {
                 btn.Background = transparent;
                 btn.BorderThickness = new Thickness(0);
-                if (subtleText != null) btn.Foreground = subtleText;
+                if (subtleText != null) text.Foreground = subtleText;
                 btn.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
+                check.Visibility = Visibility.Collapsed;
             }
         }
 
-        ApplyLangBtn(LangViButton, isVi);
-        ApplyLangBtn(LangEnButton, !isVi);
+        ApplyLangBtn(LangViButton, TextLangVi, CheckLangVi, isVi);
+        ApplyLangBtn(LangEnButton, TextLangEn, CheckLangEn, !isVi);
     }
 
     private async void CopyDbPath_Click(object sender, RoutedEventArgs e)

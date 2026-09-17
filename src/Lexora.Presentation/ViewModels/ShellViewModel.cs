@@ -29,6 +29,12 @@ public partial class ShellViewModel : ObservableObject
     public partial string DueReviewMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial string ReminderTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ReminderActionText { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial int DueCardsCount { get; set; } = 0;
 
     public ShellViewModel(
@@ -42,10 +48,10 @@ public partial class ShellViewModel : ObservableObject
         _reviewService = reviewService;
         _preferencesService = preferencesService;
 
-        UpdateTitle();
+        UpdateLocalizedTexts();
         _localizationService.LanguageChanged += async (s, e) =>
         {
-            UpdateTitle();
+            UpdateLocalizedTexts();
             await CheckDueReviewsAsync();
         };
         _preferencesService.PreferencesChanged += async (s, prefs) => await CheckDueReviewsAsync();
@@ -76,9 +82,11 @@ public partial class ShellViewModel : ObservableObject
         }
     }
 
-    private void UpdateTitle()
+    private void UpdateLocalizedTexts()
     {
         Title = _localizationService.GetString("AppTitle");
+        ReminderTitle = _localizationService.GetString("Review_Reminder_Title");
+        ReminderActionText = _localizationService.GetString("Review_Now");
     }
 
     [RelayCommand]

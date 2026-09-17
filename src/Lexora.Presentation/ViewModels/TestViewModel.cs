@@ -115,7 +115,7 @@ public partial class TestViewModel : ObservableObject
     [ObservableProperty]
     public partial bool HasAudio { get; set; } = false;
 
-    public ObservableCollection<string> CurrentOptions { get; } = new();
+    public ObservableCollection<TestOptionItem> CurrentOptions { get; } = new();
 
     // Result State
     [ObservableProperty]
@@ -420,7 +420,12 @@ public partial class TestViewModel : ObservableObject
         CurrentOptions.Clear();
         foreach (var opt in CurrentQuestion.Options)
         {
-            CurrentOptions.Add(opt);
+            CurrentOptions.Add(new TestOptionItem
+            {
+                Text = opt,
+                State = TestOptionState.Default,
+                Glyph = "\uE739"
+            });
         }
 
         SelectedOption = null;
@@ -461,6 +466,36 @@ public partial class TestViewModel : ObservableObject
         IsAnswerSubmitted = true;
         IsAnswerCorrect = string.Equals(answer.Trim(), CurrentQuestion.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
         ExplanationText = CurrentQuestion.Explanation;
+
+        foreach (var optItem in CurrentOptions)
+        {
+            bool isThisSelected = string.Equals(optItem.Text.Trim(), answer.Trim(), StringComparison.OrdinalIgnoreCase);
+            bool isThisCorrect = string.Equals(optItem.Text.Trim(), CurrentQuestion.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
+
+            if (isThisSelected)
+            {
+                if (isThisCorrect)
+                {
+                    optItem.State = TestOptionState.SelectedCorrect;
+                    optItem.Glyph = "\uE73E";
+                }
+                else
+                {
+                    optItem.State = TestOptionState.SelectedIncorrect;
+                    optItem.Glyph = "\uE711";
+                }
+            }
+            else if (isThisCorrect)
+            {
+                optItem.State = TestOptionState.RevealedCorrect;
+                optItem.Glyph = "\uE73E";
+            }
+            else
+            {
+                optItem.State = TestOptionState.Default;
+                optItem.Glyph = "\uE739";
+            }
+        }
 
         _userAnswers.Add(new TestAnswerSubmissionDto(
             CurrentQuestion.WordId,

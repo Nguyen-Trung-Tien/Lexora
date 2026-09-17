@@ -98,7 +98,7 @@ public sealed partial class TestPage : Page
     {
         if (index >= 0 && index < ViewModel.CurrentOptions.Count)
         {
-            ViewModel.SelectOption(ViewModel.CurrentOptions[index]);
+            ViewModel.SelectOption(ViewModel.CurrentOptions[index].Text);
         }
     }
 
@@ -181,13 +181,31 @@ public sealed partial class TestPage : Page
         BtnCount30.Content = Loc.GetString("Test_Count30");
     }
 
+    private Microsoft.UI.Xaml.Media.Brush? GetThemeBrush(string key)
+    {
+        var themeKey = ActualTheme == ElementTheme.Light ? "Light" : "Default";
+        if (App.Current.Resources.ThemeDictionaries.TryGetValue(themeKey, out var dictObj) &&
+            dictObj is ResourceDictionary themeDict &&
+            themeDict.TryGetValue(key, out var bObj) &&
+            bObj is Microsoft.UI.Xaml.Media.Brush themeBrush)
+        {
+            return themeBrush;
+        }
+
+        if (App.Current.Resources.TryGetValue(key, out var res) && res is Microsoft.UI.Xaml.Media.Brush brush)
+        {
+            return brush;
+        }
+
+        return null;
+    }
+
     private void UpdateModeSelectorStyles(bool isCustomList)
     {
-        var res = App.Current.Resources;
-        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
-        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
-        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
-        var subtleText = res.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
+        var cardBg = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+        var cardStroke = GetThemeBrush("CardStrokeColorDefaultBrush");
+        var accentText = GetThemeBrush("AccentTextFillColorPrimaryBrush");
+        var subtleText = GetThemeBrush("TextFillColorSecondaryBrush");
         var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
         void ApplySegment(Button btn, bool isActive)
@@ -224,15 +242,14 @@ public sealed partial class TestPage : Page
 
     private void UpdateTypeButtonStyles(TestType selected)
     {
-        var res = App.Current.Resources;
-        var accentBrush = res.TryGetValue("AccentFillColorDefaultBrush", out var ab) && ab is Microsoft.UI.Xaml.Media.Brush bAb ? bAb : null;
-        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
-        var subtleBg = res.TryGetValue("SubtleFillColorSecondaryBrush", out var sb) && sb is Microsoft.UI.Xaml.Media.Brush bSb ? bSb : null;
-        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
-        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
-        var primaryText = res.TryGetValue("TextFillColorPrimaryBrush", out var pt) && pt is Microsoft.UI.Xaml.Media.Brush bPt ? bPt : null;
+        var accentBrush = GetThemeBrush("AccentFillColorDefaultBrush");
+        var cardStroke = GetThemeBrush("CardStrokeColorDefaultBrush");
+        var subtleBg = GetThemeBrush("SubtleFillColorSecondaryBrush");
+        var cardBg = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+        var accentText = GetThemeBrush("AccentTextFillColorPrimaryBrush");
+        var primaryText = GetThemeBrush("TextFillColorPrimaryBrush");
 
-        void ApplyCard(Button btn, FontIcon icon, TextBlock title, FontIcon check, bool isSelected)
+        void ApplyCard(Button btn, FontIcon icon, TextBlock title, Border checkBadge, bool isSelected)
         {
             btn.BorderThickness = new Thickness(isSelected ? 2 : 1);
             if (isSelected)
@@ -244,7 +261,7 @@ public sealed partial class TestPage : Page
                     icon.Foreground = accentText;
                     title.Foreground = accentText;
                 }
-                check.Visibility = Visibility.Visible;
+                checkBadge.Visibility = Visibility.Visible;
             }
             else
             {
@@ -255,25 +272,24 @@ public sealed partial class TestPage : Page
                     icon.Foreground = primaryText;
                     title.Foreground = primaryText;
                 }
-                check.Visibility = Visibility.Collapsed;
+                checkBadge.Visibility = Visibility.Collapsed;
             }
         }
 
-        ApplyCard(BtnTypeMixed, IconTypeMixed, TitleTypeMixed, CheckTypeMixed, selected == TestType.Mixed);
-        ApplyCard(BtnTypeWordToMeaning, IconTypeWordToMeaning, TitleTypeWordToMeaning, CheckTypeWordToMeaning, selected == TestType.WordToMeaning);
-        ApplyCard(BtnTypeMeaningToWord, IconTypeMeaningToWord, TitleTypeMeaningToWord, CheckTypeMeaningToWord, selected == TestType.MeaningToWord);
-        ApplyCard(BtnTypeFillInTheBlank, IconTypeFillInTheBlank, TitleTypeFillInTheBlank, CheckTypeFillInTheBlank, selected == TestType.FillInTheBlank);
-        ApplyCard(BtnTypePartOfSpeech, IconTypePartOfSpeech, TitleTypePartOfSpeech, CheckTypePartOfSpeech, selected == TestType.PartOfSpeech);
-        ApplyCard(BtnTypeListeningQuiz, IconTypeListeningQuiz, TitleTypeListeningQuiz, CheckTypeListeningQuiz, selected == TestType.ListeningQuiz);
+        ApplyCard(BtnTypeMixed, IconTypeMixed, TitleTypeMixed, CheckBadgeTypeMixed, selected == TestType.Mixed);
+        ApplyCard(BtnTypeWordToMeaning, IconTypeWordToMeaning, TitleTypeWordToMeaning, CheckBadgeTypeWordToMeaning, selected == TestType.WordToMeaning);
+        ApplyCard(BtnTypeMeaningToWord, IconTypeMeaningToWord, TitleTypeMeaningToWord, CheckBadgeTypeMeaningToWord, selected == TestType.MeaningToWord);
+        ApplyCard(BtnTypeFillInTheBlank, IconTypeFillInTheBlank, TitleTypeFillInTheBlank, CheckBadgeTypeFillInTheBlank, selected == TestType.FillInTheBlank);
+        ApplyCard(BtnTypePartOfSpeech, IconTypePartOfSpeech, TitleTypePartOfSpeech, CheckBadgeTypePartOfSpeech, selected == TestType.PartOfSpeech);
+        ApplyCard(BtnTypeListeningQuiz, IconTypeListeningQuiz, TitleTypeListeningQuiz, CheckBadgeTypeListeningQuiz, selected == TestType.ListeningQuiz);
     }
 
     private void UpdateCountButtonStyles(int count)
     {
-        var res = App.Current.Resources;
-        var cardBg = res.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cb) && cb is Microsoft.UI.Xaml.Media.Brush bCb ? bCb : null;
-        var cardStroke = res.TryGetValue("CardStrokeColorDefaultBrush", out var cs) && cs is Microsoft.UI.Xaml.Media.Brush bCs ? bCs : null;
-        var accentText = res.TryGetValue("AccentTextFillColorPrimaryBrush", out var at) && at is Microsoft.UI.Xaml.Media.Brush bAt ? bAt : null;
-        var subtleText = res.TryGetValue("TextFillColorSecondaryBrush", out var st) && st is Microsoft.UI.Xaml.Media.Brush bSt ? bSt : null;
+        var cardBg = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+        var cardStroke = GetThemeBrush("CardStrokeColorDefaultBrush");
+        var accentText = GetThemeBrush("AccentTextFillColorPrimaryBrush");
+        var subtleText = GetThemeBrush("TextFillColorSecondaryBrush");
         var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
         void ApplyPill(Button btn, bool isSelected)

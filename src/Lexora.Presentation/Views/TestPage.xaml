@@ -83,7 +83,10 @@
                                             <TextBlock x:Name="TitleTypeMixed" Text="{x:Bind Loc.GetString('Test_FormatMixed')}" FontWeight="SemiBold" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Test_FormatMixedDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <FontIcon x:Name="CheckTypeMixed" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                        <Border x:Name="CheckBadgeTypeMixed" Grid.Column="2" Width="22" Height="22" CornerRadius="11"
+                                                Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
                                     </Grid>
                                 </Button>
 
@@ -98,7 +101,10 @@
                                             <TextBlock x:Name="TitleTypeWordToMeaning" Text="{x:Bind Loc.GetString('Test_FormatWordToMeaning')}" FontWeight="SemiBold" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Test_FormatWordToMeaningDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <FontIcon x:Name="CheckTypeWordToMeaning" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                        <Border x:Name="CheckBadgeTypeWordToMeaning" Grid.Column="2" Width="22" Height="22" CornerRadius="11"
+                                                Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
                                     </Grid>
                                 </Button>
 
@@ -113,7 +119,10 @@
                                             <TextBlock x:Name="TitleTypeMeaningToWord" Text="{x:Bind Loc.GetString('Test_FormatMeaningToWord')}" FontWeight="SemiBold" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Test_FormatMeaningToWordDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <FontIcon x:Name="CheckTypeMeaningToWord" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                        <Border x:Name="CheckBadgeTypeMeaningToWord" Grid.Column="2" Width="22" Height="22" CornerRadius="11"
+                                                Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
                                     </Grid>
                                 </Button>
 
@@ -128,7 +137,10 @@
                                             <TextBlock x:Name="TitleTypeFillInTheBlank" Text="{x:Bind Loc.GetString('Test_FormatFillBlank')}" FontWeight="SemiBold" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Test_FormatFillBlankDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <FontIcon x:Name="CheckTypeFillInTheBlank" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                        <Border x:Name="CheckBadgeTypeFillInTheBlank" Grid.Column="2" Width="22" Height="22" CornerRadius="11"
+                                                Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
                                     </Grid>
                                 </Button>
 
@@ -143,7 +155,10 @@
                                             <TextBlock x:Name="TitleTypePartOfSpeech" Text="{x:Bind Loc.GetString('Test_FormatPartOfSpeech')}" FontWeight="SemiBold" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Test_FormatPartOfSpeechDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <FontIcon x:Name="CheckTypePartOfSpeech" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                        <Border x:Name="CheckBadgeTypePartOfSpeech" Grid.Column="2" Width="22" Height="22" CornerRadius="11"
+                                                Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
                                     </Grid>
                                 </Button>
 
@@ -158,7 +173,10 @@
                                             <TextBlock x:Name="TitleTypeListeningQuiz" Text="{x:Bind Loc.GetString('Test_FormatAudioQuiz')}" FontWeight="SemiBold" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Test_FormatAudioQuizDesc')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <FontIcon x:Name="CheckTypeListeningQuiz" Grid.Column="2" Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                        <Border x:Name="CheckBadgeTypeListeningQuiz" Grid.Column="2" Width="22" Height="22" CornerRadius="11"
+                                                Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
                                     </Grid>
                                 </Button>
                             </Grid>
@@ -395,16 +413,20 @@
                         <!-- 4 Interactive Choice Cards -->
                         <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentOptions}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="x:String">
+                                <DataTemplate x:DataType="vm:TestOptionItem">
                                     <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                             Margin="0,0,0,10" Padding="16,14" CornerRadius="10"
-                                            Click="OptionButton_Click" Tag="{x:Bind}">
+                                            BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
+                                            BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"
+                                            Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBackground}"
+                                            Click="OptionButton_Click" Tag="{x:Bind Text}">
                                         <Grid ColumnDefinitions="Auto,*">
-                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6"
-                                                    Width="28" Height="28" Margin="0,0,14,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <FontIcon Glyph="&#xE739;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <Border Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Background}"
+                                                    CornerRadius="6" Width="28" Height="28" Margin="0,0,14,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <FontIcon Glyph="{x:Bind Glyph, Mode=OneWay}" FontSize="12"
+                                                          Foreground="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Foreground}" />
                                             </Border>
-                                            <TextBlock Grid.Column="1" Text="{x:Bind}" FontSize="15" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind Text}" FontSize="15" VerticalAlignment="Center" TextWrapping="Wrap" />
                                         </Grid>
                                     </Button>
                                 </DataTemplate>

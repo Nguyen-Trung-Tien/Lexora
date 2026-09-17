@@ -27,6 +27,7 @@ public sealed partial class ShellPage : Page
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         UpdateNavigationLabels();
+        Bindings.Update();
     }
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)
