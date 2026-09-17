@@ -19,26 +19,31 @@ public class OptionStateToBrushConverter : IValueConverter
         string param = parameter as string ?? "Background";
         string brushKey = param switch
         {
+            // Icon badge background: use the solid semantic fill so the checkmark/x is clearly visible
             "Background" => state switch
             {
                 TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect => "SystemFillColorSuccessBrush",
                 TestOptionState.SelectedIncorrect => "SystemFillColorCriticalBrush",
                 _ => "SubtleFillColorSecondaryBrush"
             },
+            // Icon badge foreground: white on colored badge, secondary on subtle
             "Foreground" => state switch
             {
                 TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect or TestOptionState.SelectedIncorrect => "TextOnAccentFillColorPrimaryBrush",
                 _ => "TextFillColorSecondaryBrush"
             },
+            // Button outer border
             "CardBorder" => state switch
             {
                 TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect => "SystemFillColorSuccessBrush",
                 TestOptionState.SelectedIncorrect => "SystemFillColorCriticalBrush",
                 _ => "CardStrokeColorDefaultBrush"
             },
+            // Button card background: tinted semantic fill for clear state feedback in both themes
             "CardBackground" => state switch
             {
-                TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect or TestOptionState.SelectedIncorrect => "SubtleFillColorSecondaryBrush",
+                TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect => "SystemFillColorSuccessBackgroundBrush",
+                TestOptionState.SelectedIncorrect => "SystemFillColorCriticalBackgroundBrush",
                 _ => "CardBackgroundFillColorDefaultBrush"
             },
             _ => "CardStrokeColorDefaultBrush"

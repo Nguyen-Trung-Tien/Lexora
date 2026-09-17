@@ -11,7 +11,8 @@ public class HeatmapLevelToForegroundConverter : IValueConverter
 {
     private static readonly SolidColorBrush WhiteBrush = new(Color.FromArgb(255, 255, 255, 255));
     private static readonly SolidColorBrush DarkTextBrush = new(Color.FromArgb(255, 27, 31, 36));
-    private static readonly SolidColorBrush MutedLightText = new(Color.FromArgb(255, 101, 109, 118));
+    // Neutral gray achieves ~4.6:1 on LightL0 (#EBEEF2) — passes WCAG AA
+    private static readonly SolidColorBrush MutedLightText = new(Color.FromArgb(255, 100, 100, 100));
     private static readonly SolidColorBrush MutedDarkText = new(Color.FromArgb(255, 139, 148, 158));
 
     public object Convert(object? value, Type targetType, object parameter, string language)

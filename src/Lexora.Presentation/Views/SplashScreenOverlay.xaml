@@ -38,7 +38,7 @@
             <DoubleAnimation
                 Storyboard.TargetName="AuroraGlow"
                 Storyboard.TargetProperty="Opacity"
-                From="0.0" To="0.75"
+                From="0.0" To="0.55"
                 Duration="0:0:0.6"
                 BeginTime="0:0:0.0">
                 <DoubleAnimation.EasingFunction>
@@ -240,7 +240,7 @@
             <Border.Background>
                 <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
                     <GradientStop Color="{ThemeResource SystemAccentColorLight2}" Offset="0" />
-                    <GradientStop Color="{ThemeResource SystemAccentColorDark1}" Offset="0.45" />
+                    <GradientStop Color="{ThemeResource SystemAccentColorLight1}" Offset="0.45" />
                     <GradientStop Color="#00000000" Offset="1" />
                 </RadialGradientBrush>
             </Border.Background>

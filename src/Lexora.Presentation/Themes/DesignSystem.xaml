@@ -7,6 +7,28 @@
     <!-- Strictly follows WinUI 3 ThemeResource guidelines & zero hardcode -->
     <!-- ================================================================= -->
 
+    <!-- Light / Dark surface depth tokens -->
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <!-- Hero card border: soft accent-tinted stroke for depth vs Mica in light mode -->
+            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColorLight1}" Opacity="0.4" />
+            <!-- Metric stat card border same as system card stroke -->
+            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemAccentColorLight1}" Opacity="0.2" />
+            <!-- Advisor card accent border -->
+            <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.7" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.5" />
+            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.5" />
+            <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.6" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
     <!-- Radii Tokens -->
     <CornerRadius x:Key="RadiusSmall">6</CornerRadius>
     <CornerRadius x:Key="RadiusMedium">10</CornerRadius>

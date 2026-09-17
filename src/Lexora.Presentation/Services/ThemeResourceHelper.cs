@@ -14,6 +14,10 @@ public static class ThemeResourceHelper
     private static readonly Brush LightCardBackground = new SolidColorBrush(Colors.White);
     private static readonly Brush LightCardStroke = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0));
     private static readonly Brush LightSubtleBackground = new SolidColorBrush(Color.FromArgb(14, 0, 0, 0));
+    // Semantic background fills — light mode: very light tinted fills (WinUI 3 system values)
+    private static readonly Brush LightSuccessBackground = new SolidColorBrush(Color.FromArgb(255, 223, 246, 221)); // #DFF6DD
+    private static readonly Brush LightCriticalBackground = new SolidColorBrush(Color.FromArgb(255, 253, 231, 233)); // #FDE7E9
+    private static readonly Brush LightCautionBackground = new SolidColorBrush(Color.FromArgb(255, 255, 244, 206)); // #FFF4CE
 
     private static readonly Brush DarkPrimaryText = new SolidColorBrush(Colors.White);
     private static readonly Brush DarkSecondaryText = new SolidColorBrush(Color.FromArgb(255, 197, 197, 197));
@@ -21,6 +25,10 @@ public static class ThemeResourceHelper
     private static readonly Brush DarkCardBackground = new SolidColorBrush(Color.FromArgb(255, 43, 43, 43));
     private static readonly Brush DarkCardStroke = new SolidColorBrush(Color.FromArgb(25, 255, 255, 255));
     private static readonly Brush DarkSubtleBackground = new SolidColorBrush(Color.FromArgb(16, 255, 255, 255));
+    // Semantic background fills — dark mode: dark muted tinted fills (WinUI 3 dark theme values)
+    private static readonly Brush DarkSuccessBackground = new SolidColorBrush(Color.FromArgb(255, 57, 61, 27));  // #393D1B olive-green
+    private static readonly Brush DarkCriticalBackground = new SolidColorBrush(Color.FromArgb(255, 68, 39, 38)); // #442726 dark-red
+    private static readonly Brush DarkCautionBackground = new SolidColorBrush(Color.FromArgb(255, 67, 53, 25));  // #433519 dark-amber
 
     public static Brush GetThemeBrush(FrameworkElement? element, string key)
     {
@@ -38,7 +46,7 @@ public static class ThemeResourceHelper
             isLight = (App.Current?.RequestedTheme == ApplicationTheme.Light);
         }
 
-        string themeKey = isLight ? "Light" : "Default";
+        string themeKey = isLight ? "Light" : "Dark";
 
         // 1. Search merged dictionaries (contains XamlControlsResources with system Light/Default dictionaries)
         if (Microsoft.UI.Xaml.Application.Current?.Resources?.MergedDictionaries != null)
@@ -82,7 +90,11 @@ public static class ThemeResourceHelper
             "CardStrokeColorDefaultBrush" => isLight ? LightCardStroke : DarkCardStroke,
             "SubtleFillColorSecondaryBrush" => isLight ? LightSubtleBackground : DarkSubtleBackground,
             "AccentFillColorDefaultBrush" => isLight ? LightAccentText : DarkAccentText,
-            _ => isLight ? LightPrimaryText : DarkPrimaryText
+            // Semantic state background fills
+            "SystemFillColorSuccessBackgroundBrush" => isLight ? LightSuccessBackground : DarkSuccessBackground,
+            "SystemFillColorCriticalBackgroundBrush" => isLight ? LightCriticalBackground : DarkCriticalBackground,
+            "SystemFillColorCautionBackgroundBrush" => isLight ? LightCautionBackground : DarkCautionBackground,
+            _ => isLight ? LightCardBackground : DarkCardBackground
         };
     }
 }

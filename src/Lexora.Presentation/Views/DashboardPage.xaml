@@ -25,7 +25,7 @@
 
             <!-- HERO BANNER: Elegant Fluent Surface Card with 1-Click Quick Actions -->
             <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
                     BorderThickness="1" CornerRadius="16" Padding="28,24">
                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                     <StackPanel Spacing="8" VerticalAlignment="Center">
@@ -166,7 +166,7 @@
 
             <!-- SMART STUDY ADVISOR: Adaptive Recommendation Hero Card -->
             <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource LexoraAdvisorBorderBrush}"
                     BorderThickness="1" CornerRadius="16" Padding="22,18">
                 <Grid ColumnDefinitions="*,Auto" RowSpacing="12">
                     <StackPanel Spacing="8" VerticalAlignment="Center">
