@@ -674,7 +674,8 @@ public class LocalizationService : ILocalizationService
             ["Shell_TooltipVocabulary"] = "Kho từ vựng (Ctrl+2)",
             ["Shell_TooltipReview"] = "Ôn tập ngắt quãng (Ctrl+3)",
             ["Shell_TooltipTest"] = "Luyện tập & Thi (Ctrl+4)",
-            ["Shell_TooltipGrammar"] = "Cẩm nang ngữ pháp (Ctrl+5)"
+            ["Shell_TooltipGrammar"] = "Cẩm nang ngữ pháp (Ctrl+5)",
+            ["Shell_TooltipSettings"] = "Cài đặt hệ thống"
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -1335,7 +1336,8 @@ public class LocalizationService : ILocalizationService
             ["Shell_TooltipVocabulary"] = "Vocabulary (Ctrl+2)",
             ["Shell_TooltipReview"] = "Spaced Review (Ctrl+3)",
             ["Shell_TooltipTest"] = "Practice & Test (Ctrl+4)",
-            ["Shell_TooltipGrammar"] = "Grammar (Ctrl+5)"
+            ["Shell_TooltipGrammar"] = "Grammar (Ctrl+5)",
+            ["Shell_TooltipSettings"] = "Settings"
         }
     };
 

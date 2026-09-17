@@ -25,7 +25,7 @@
             PaneDisplayMode="Auto"
             OpenPaneLength="260"
             CompactPaneLength="48"
-            IsSettingsVisible="True"
+            IsSettingsVisible="False"
             KeyboardAcceleratorPlacementMode="Hidden"
             ItemInvoked="NavView_ItemInvoked"
             Loaded="NavView_Loaded">
@@ -61,6 +61,13 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="NavItemSettings" Content="Settings" Tag="Settings" ToolTipService.ToolTip="Settings">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Setting" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
 
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox x:Name="GlobalSearchBox" PlaceholderText="Search Lexora..." ToolTipService.ToolTip="Search Lexora (Ctrl+F)" QuerySubmitted="GlobalSearchBox_QuerySubmitted" />
