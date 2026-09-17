@@ -136,5 +136,7 @@ public class StudyAdvisorServiceTests
         forecast.PeakDayDueCount.Should().Be(12);
         forecast.Days[0].IsToday.Should().BeTrue();
         forecast.Days[0].DueCount.Should().Be(5);
+        forecast.Days[0].DayLabel.Should().Be("Today");
+        forecast.Days[1].DayLabel.Should().Be("Tomorrow");
     }
 }

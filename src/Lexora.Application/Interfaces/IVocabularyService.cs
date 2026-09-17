@@ -6,6 +6,7 @@ namespace Lexora.Application.Interfaces;
 public interface IVocabularyService
 {
     Task<WordDto?> GetWordByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<WordDto>> GetWordsByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<WordDto>> SearchWordsAsync(
         string? search = null,
         CefrLevel? level = null,

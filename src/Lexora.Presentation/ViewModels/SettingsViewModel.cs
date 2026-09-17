@@ -42,7 +42,7 @@ public partial class SettingsViewModel : ObservableObject
     public partial string DatabasePath { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string DatabaseSizeFormatted { get; set; } = "Calculating...";
+    public partial string DatabaseSizeFormatted { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial int TotalWordsCount { get; set; }
@@ -144,7 +144,7 @@ public partial class SettingsViewModel : ObservableObject
             }
             else
             {
-                DatabaseSizeFormatted = "Not created yet";
+                DatabaseSizeFormatted = _locService.GetString("Settings_DbNotCreatedYet");
             }
 
             TotalWordsCount = await _vocabService.CountWordsAsync();
@@ -191,12 +191,12 @@ public partial class SettingsViewModel : ObservableObject
         {
             var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             var backupPath = await _backupService.CreateBackupAsync(desktop);
-            BackupStatusMessage = $"Backup created successfully at: {backupPath}";
+            BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupSuccess"), backupPath);
             await LoadDatabaseStatsAsync();
         }
         catch (Exception ex)
         {
-            BackupStatusMessage = $"Backup failed: {ex.Message}";
+            BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupFailed"), ex.Message);
         }
     }
 
@@ -205,13 +205,13 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             await _backupService.RestoreBackupAsync(backupFilePath);
-            BackupStatusMessage = $"Database restored successfully from: {Path.GetFileName(backupFilePath)}";
+            BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreSuccessStatus"), Path.GetFileName(backupFilePath));
             await LoadDatabaseStatsAsync();
             return true;
         }
         catch (Exception ex)
         {
-            BackupStatusMessage = $"Restore failed: {ex.Message}";
+            BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreFailedStatus"), ex.Message);
             return false;
         }
     }

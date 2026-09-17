@@ -454,7 +454,136 @@ public class LocalizationService : ILocalizationService
             ["Settings_DlgRestoreConfirmMsg"] = "Bạn có chắc chắn muốn khôi phục cơ sở dữ liệu từ:\n{0}\n\nCẢNH BÁO: Toàn bộ dữ liệu hiện tại trên máy sẽ bị thay thế bằng bản sao lưu này!",
             ["Settings_DlgRestoreConfirmBtn"] = "Khôi phục ngay",
             ["Settings_DlgRestoreSuccessTitle"] = "Khôi Phục Thành Công",
-            ["Settings_DlgRestoreSuccessMsg"] = "Cơ sở dữ liệu đã được khôi phục thành công. Khuyến nghị khởi động lại ứng dụng để tải lại toàn bộ bộ nhớ đệm."
+            ["Settings_DlgRestoreSuccessMsg"] = "Cơ sở dữ liệu đã được khôi phục thành công. Khuyến nghị khởi động lại ứng dụng để tải lại toàn bộ bộ nhớ đệm.",
+
+            // Statuses
+            ["Status_Mastered"] = "Đã thành thạo",
+            ["Status_Remembered"] = "Đã nhớ",
+            ["Status_Learning"] = "Đang học",
+            ["Status_Review"] = "Cần ôn tập",
+            ["Status_NotRemembered"] = "Chưa nhớ",
+            ["Status_New"] = "Từ mới",
+
+            // Calendar Days
+            ["Day_Today"] = "Hôm nay",
+            ["Day_Tomorrow"] = "Ngày mai",
+            ["Day_Mon"] = "T2",
+            ["Day_Tue"] = "T3",
+            ["Day_Wed"] = "T4",
+            ["Day_Thu"] = "T5",
+            ["Day_Fri"] = "T6",
+            ["Day_Sat"] = "T7",
+            ["Day_Sun"] = "CN",
+
+            // Dashboard Analytics & Cards
+            ["Dashboard_Cards"] = "Số thẻ:",
+            ["Dashboard_Correct"] = "Chính xác:",
+            ["Dashboard_Total"] = "Tổng",
+            ["Dashboard_Learning"] = "Đang học",
+            ["Dashboard_Mastered"] = "Đã thuộc",
+
+            // Shell & Reminders
+            ["Review_Reminder_Msg"] = "Bạn có {0} từ vựng đã đến hạn ôn tập ngắt quãng (SM-2).",
+
+            // Review Active Session Titles
+            ["Review_Session_LearnNew"] = "Học từ vựng mới",
+            ["Review_Session_Difficult"] = "Từ vựng khó & Hay quên",
+            ["Review_Session_ByTopic"] = "Ôn tập theo Unit ngữ cảnh",
+            ["Review_Session_CustomSelection"] = "Ôn tập danh sách từ chọn lọc",
+            ["Review_Session_TodayDue"] = "Ôn tập đến hạn hôm nay",
+            ["Review_Session_SelectedCount"] = "Ôn {0} từ đã chọn",
+
+            // Vocabulary Status Notifications
+            ["Vocab_Status_MarkedRemembered"] = "✓ Đã đánh dấu '{0}' là Đã nhớ.",
+            ["Vocab_Status_MarkedNotRemembered"] = "✕ Đã đánh dấu '{0}' là Chưa nhớ.",
+            ["Vocab_Status_WordAdded"] = "Đã thêm từ '{0}' thành công.",
+            ["Vocab_Status_WordUpdated"] = "Đã cập nhật từ '{0}' thành công.",
+            ["Vocab_Status_WordDeleted"] = "Đã xóa từ '{0}'.",
+            ["Vocab_Status_TopicCreated"] = "Đã tạo chủ đề '{0}'.",
+
+            // Test & Quiz Dynamic Messages
+            ["Quiz_ProgressFormat"] = "Câu {0} / {1}",
+            ["Test_Status_Preparing"] = "Đang chuẩn bị câu hỏi kiểm tra...",
+            ["Test_Status_SelectAtLeastOne"] = "Vui lòng chọn ít nhất 1 từ trong danh sách để kiểm tra.",
+            ["Test_Status_NoQuestions"] = "Không thể sinh câu hỏi. Vui lòng thêm từ vựng trước.",
+            ["Test_Status_PastedMatched"] = "Đã tìm thấy và chọn {0} từ từ danh sách dán.",
+            ["Test_Status_PastedNoMatch"] = "Không tìm thấy từ nào phù hợp trong kho từ vựng.",
+            ["Test_Result_Excellent"] = "Xuất sắc! Khả năng ghi nhớ tuyệt vời!",
+            ["Test_Result_Good"] = "Làm tốt lắm! Tiếp tục duy trì và cải thiện!",
+            ["Test_Result_NeedsPractice"] = "Cần luyện tập thêm. Hãy ôn tập lại các từ bị quên!",
+
+            // Settings Messages
+            ["Settings_DbNotCreatedYet"] = "Chưa khởi tạo",
+            ["Settings_BackupSuccess"] = "Đã tạo bản sao lưu thành công tại: {0}",
+            ["Settings_BackupFailed"] = "Sao lưu thất bại: {0}",
+            ["Settings_RestoreSuccessStatus"] = "Khôi phục cơ sở dữ liệu thành công từ: {0}",
+            ["Settings_RestoreFailedStatus"] = "Khôi phục thất bại: {0}",
+
+            // Additional Review Workspace
+            ["Review_Progress"] = "Tiến độ: ",
+            ["Review_SpellingDrill"] = "Luyện gõ chính tả",
+            ["Review_ExampleContext"] = "Ví dụ ngữ cảnh:",
+            ["Review_PatternHint"] = "Gợi ý mẫu:",
+            ["Review_TypePlaceholder"] = "Nhập từ tiếng Anh...",
+            ["Review_BtnCheck"] = "Kiểm tra",
+            ["Review_BtnHint"] = "💡 Gợi ý",
+            ["Review_BtnShowAnswer"] = "Hiện đáp án",
+            ["Review_AudioUk"] = "Phát âm (UK)",
+            ["Review_AudioUs"] = "Phát âm (US)",
+            ["Review_DefinitionSection"] = "Định nghĩa & Ý nghĩa",
+            ["Review_Accuracy"] = "Độ chính xác",
+            ["Review_Sm2Insights"] = "Thông số ghi nhớ SM-2",
+            ["Review_StatusLabel"] = "Trạng thái:",
+            ["Review_IntervalLabel"] = "Khoảng cách ôn:",
+            ["Review_EaseFactorLabel"] = "Hệ số dễ (EF):",
+            ["Review_LapsesLabel"] = "Số lần quên:",
+            ["Review_HotkeysTitle"] = "Phím tắt thao tác",
+            ["Review_HotkeyFlip"] = "Phím cách: Lật thẻ",
+            ["Review_HotkeyRate"] = "1 - 4: Đánh giá độ nhớ",
+            ["Review_SessionCompletedTitle"] = "Hoàn thành phiên học! 🎉",
+            ["Review_SessionCompletedDesc"] = "Bạn đã ôn tập xuất sắc tất cả các thẻ trong phiên này!",
+            ["Review_TotalStudied"] = "Tổng số thẻ đã học",
+            ["Review_CorrectCount"] = "Số câu nhớ đúng",
+            ["Review_BtnMoreCards"] = "Ôn thêm thẻ khác",
+            ["Review_BtnLearnNew"] = "Học từ vựng mới",
+
+            // Additional Vocabulary Hub
+            ["Vocab_BtnReview"] = "Ôn tập",
+            ["Vocab_BtnTest"] = "Thi",
+            ["Vocab_DefinitionsSection"] = "Định nghĩa & Giải thích",
+            ["Vocab_ContextualExamples"] = "Ví dụ theo ngữ cảnh:",
+            ["Vocab_WordsSuffix"] = "từ",
+            ["Vocab_MasteryLevel"] = "Mức độ thành thạo",
+            ["Vocab_StatusMasteredCount"] = "thành thạo",
+            ["Vocab_StatusLearningCount"] = "đang học",
+            ["Vocab_BtnViewUnit"] = "Xem chi tiết",
+            ["Vocab_BtnAddWordToUnit"] = "+ Thêm từ",
+            ["Vocab_BtnReviewUnit"] = "Ôn tập",
+            ["Vocab_BtnQuizUnit"] = "Kiểm tra",
+            ["Vocab_DeleteTitle"] = "Xóa từ vựng",
+            ["Vocab_DeleteConfirm"] = "Bạn có chắc chắn muốn xóa từ '{0}'? Hành động này không thể hoàn tác.",
+            ["Vocab_ExportCompleteTitle"] = "Xuất dữ liệu hoàn tất",
+            ["Vocab_ExportCompleteMsg"] = "Đã xuất {0} từ vựng sang {1} thành công.",
+            ["Vocab_ImportJsonTitle"] = "Nhập từ vựng (JSON)",
+            ["Vocab_ImportCsvTitle"] = "Nhập từ vựng (CSV)",
+            ["Vocab_ImportTxtTitle"] = "Nhập từ vựng (TXT)",
+            ["Vocab_ImportPastePlaceholderJson"] = "Dán nội dung JSON vào đây hoặc để trống để chọn tệp...",
+            ["Vocab_ImportPastePlaceholderCsv"] = "Dán nội dung CSV vào đây hoặc để trống để chọn tệp...",
+            ["Vocab_ImportPastePlaceholderTxt"] = "Dán nội dung TXT vào đây hoặc để trống để chọn tệp...",
+            ["Vocab_ExportFailedTitle"] = "Lỗi xuất dữ liệu",
+            ["Vocab_ImportFailedTitle"] = "Lỗi nhập dữ liệu",
+
+            // Additional Grammar
+            ["Grammar_DeleteTitle"] = "Xóa quy tắc ngữ pháp",
+            ["Grammar_DeleteConfirm"] = "Bạn có chắc chắn muốn xóa quy tắc ngữ pháp '{0}' không?",
+            ["Grammar_TooltipAdd"] = "Thêm quy tắc mới (Ctrl+N)",
+            ["Grammar_TooltipPractice"] = "Luyện tập ngữ pháp (Ctrl+P)",
+            ["Grammar_TooltipEdit"] = "Chỉnh sửa quy tắc (Ctrl+E)",
+            ["Grammar_TooltipDelete"] = "Xóa quy tắc (Del)",
+
+            // Additional Test
+            ["Test_MetricTotalQuestions"] = "Tổng câu hỏi",
+            ["Test_MetricTimeElapsed"] = "Thời gian"
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -899,7 +1028,136 @@ public class LocalizationService : ILocalizationService
             ["Settings_DlgRestoreConfirmMsg"] = "Are you sure you want to restore database from:\n{0}\n\nWARNING: All current local data will be replaced by the backup copy!",
             ["Settings_DlgRestoreConfirmBtn"] = "Restore Now",
             ["Settings_DlgRestoreSuccessTitle"] = "Restore Completed",
-            ["Settings_DlgRestoreSuccessMsg"] = "Database has been restored successfully. It is recommended to restart the application to reload all active caches."
+            ["Settings_DlgRestoreSuccessMsg"] = "Database has been restored successfully. It is recommended to restart the application to reload all active caches.",
+
+            // Statuses
+            ["Status_Mastered"] = "Mastered",
+            ["Status_Remembered"] = "Remembered",
+            ["Status_Learning"] = "Learning",
+            ["Status_Review"] = "Review Due",
+            ["Status_NotRemembered"] = "Not Remembered",
+            ["Status_New"] = "New",
+
+            // Calendar Days
+            ["Day_Today"] = "Today",
+            ["Day_Tomorrow"] = "Tomorrow",
+            ["Day_Mon"] = "Mon",
+            ["Day_Tue"] = "Tue",
+            ["Day_Wed"] = "Wed",
+            ["Day_Thu"] = "Thu",
+            ["Day_Fri"] = "Fri",
+            ["Day_Sat"] = "Sat",
+            ["Day_Sun"] = "Sun",
+
+            // Dashboard Analytics & Cards
+            ["Dashboard_Cards"] = "Cards:",
+            ["Dashboard_Correct"] = "Correct:",
+            ["Dashboard_Total"] = "Total",
+            ["Dashboard_Learning"] = "Learning",
+            ["Dashboard_Mastered"] = "Mastered",
+
+            // Shell & Reminders
+            ["Review_Reminder_Msg"] = "You have {0} word{1} ready for spaced repetition review.",
+
+            // Review Active Session Titles
+            ["Review_Session_LearnNew"] = "Learn New Words",
+            ["Review_Session_Difficult"] = "Challenging & Lapsed Words",
+            ["Review_Session_ByTopic"] = "Context Unit Review",
+            ["Review_Session_CustomSelection"] = "Custom Selected Words",
+            ["Review_Session_TodayDue"] = "Today's Due Reviews",
+            ["Review_Session_SelectedCount"] = "Review {0} Selected Words",
+
+            // Vocabulary Status Notifications
+            ["Vocab_Status_MarkedRemembered"] = "✓ Marked '{0}' as Remembered.",
+            ["Vocab_Status_MarkedNotRemembered"] = "✕ Marked '{0}' as Not Remembered.",
+            ["Vocab_Status_WordAdded"] = "Added '{0}' successfully.",
+            ["Vocab_Status_WordUpdated"] = "Updated '{0}' successfully.",
+            ["Vocab_Status_WordDeleted"] = "Deleted '{0}'.",
+            ["Vocab_Status_TopicCreated"] = "Created topic '{0}'.",
+
+            // Test & Quiz Dynamic Messages
+            ["Quiz_ProgressFormat"] = "Question {0} of {1}",
+            ["Test_Status_Preparing"] = "Preparing test questions...",
+            ["Test_Status_SelectAtLeastOne"] = "Please select at least 1 word from the list to test.",
+            ["Test_Status_NoQuestions"] = "No questions could be generated. Please add more vocabulary first.",
+            ["Test_Status_PastedMatched"] = "Found and selected {0} words from pasted list.",
+            ["Test_Status_PastedNoMatch"] = "No matching words found in vocabulary pool.",
+            ["Test_Result_Excellent"] = "Excellent! Outstanding mastery!",
+            ["Test_Result_Good"] = "Good job! Keep reviewing to improve!",
+            ["Test_Result_NeedsPractice"] = "Needs practice. Let's review the weak words!",
+
+            // Settings Messages
+            ["Settings_DbNotCreatedYet"] = "Not created yet",
+            ["Settings_BackupSuccess"] = "Backup created successfully at: {0}",
+            ["Settings_BackupFailed"] = "Backup failed: {0}",
+            ["Settings_RestoreSuccessStatus"] = "Database restored successfully from: {0}",
+            ["Settings_RestoreFailedStatus"] = "Restore failed: {0}",
+
+            // Additional Review Workspace
+            ["Review_Progress"] = "Progress: ",
+            ["Review_SpellingDrill"] = "Spelling Drill",
+            ["Review_ExampleContext"] = "Example Context:",
+            ["Review_PatternHint"] = "Pattern hint:",
+            ["Review_TypePlaceholder"] = "Type the English term...",
+            ["Review_BtnCheck"] = "Check",
+            ["Review_BtnHint"] = "💡 Hint",
+            ["Review_BtnShowAnswer"] = "Show Answer",
+            ["Review_AudioUk"] = "Audio (UK)",
+            ["Review_AudioUs"] = "Audio (US)",
+            ["Review_DefinitionSection"] = "Definition & Meaning",
+            ["Review_Accuracy"] = "Accuracy",
+            ["Review_Sm2Insights"] = "SM-2 Memory Insights",
+            ["Review_StatusLabel"] = "Status:",
+            ["Review_IntervalLabel"] = "Interval:",
+            ["Review_EaseFactorLabel"] = "Ease Factor:",
+            ["Review_LapsesLabel"] = "Lapses:",
+            ["Review_HotkeysTitle"] = "Hotkeys",
+            ["Review_HotkeyFlip"] = "Space: Flip card",
+            ["Review_HotkeyRate"] = "1 - 4: Rate recall",
+            ["Review_SessionCompletedTitle"] = "Session Completed! 🎉",
+            ["Review_SessionCompletedDesc"] = "You've successfully reviewed all cards in this session!",
+            ["Review_TotalStudied"] = "Total Studied",
+            ["Review_CorrectCount"] = "Correct",
+            ["Review_BtnMoreCards"] = "Review More Cards",
+            ["Review_BtnLearnNew"] = "Learn New Words",
+
+            // Additional Vocabulary Hub
+            ["Vocab_BtnReview"] = "Review",
+            ["Vocab_BtnTest"] = "Test",
+            ["Vocab_DefinitionsSection"] = "Definitions & Explanations",
+            ["Vocab_ContextualExamples"] = "Contextual Examples:",
+            ["Vocab_WordsSuffix"] = "words",
+            ["Vocab_MasteryLevel"] = "Mastery Level",
+            ["Vocab_StatusMasteredCount"] = "mastered",
+            ["Vocab_StatusLearningCount"] = "learning",
+            ["Vocab_BtnViewUnit"] = "View",
+            ["Vocab_BtnAddWordToUnit"] = "+ Word",
+            ["Vocab_BtnReviewUnit"] = "Review",
+            ["Vocab_BtnQuizUnit"] = "Quiz",
+            ["Vocab_DeleteTitle"] = "Delete Word",
+            ["Vocab_DeleteConfirm"] = "Are you sure you want to delete '{0}'? This action cannot be undone.",
+            ["Vocab_ExportCompleteTitle"] = "Export Complete",
+            ["Vocab_ExportCompleteMsg"] = "Successfully exported {0} words to {1}.",
+            ["Vocab_ImportJsonTitle"] = "Import Vocabulary (JSON)",
+            ["Vocab_ImportCsvTitle"] = "Import Vocabulary (CSV)",
+            ["Vocab_ImportTxtTitle"] = "Import Vocabulary (TXT)",
+            ["Vocab_ImportPastePlaceholderJson"] = "Paste JSON content here or leave empty to choose file...",
+            ["Vocab_ImportPastePlaceholderCsv"] = "Paste CSV content here or leave empty to choose file...",
+            ["Vocab_ImportPastePlaceholderTxt"] = "Paste TXT content here or leave empty to choose file...",
+            ["Vocab_ExportFailedTitle"] = "Export Failed",
+            ["Vocab_ImportFailedTitle"] = "Import Failed",
+
+            // Additional Grammar
+            ["Grammar_DeleteTitle"] = "Delete Grammar Rule",
+            ["Grammar_DeleteConfirm"] = "Are you sure you want to delete grammar rule '{0}'?",
+            ["Grammar_TooltipAdd"] = "Add Rule (Ctrl+N)",
+            ["Grammar_TooltipPractice"] = "Practice (Ctrl+P)",
+            ["Grammar_TooltipEdit"] = "Edit Grammar Rule (Ctrl+E)",
+            ["Grammar_TooltipDelete"] = "Delete Rule (Del)",
+
+            // Additional Test
+            ["Test_MetricTotalQuestions"] = "Total Questions",
+            ["Test_MetricTimeElapsed"] = "Time Elapsed"
         }
     };
 

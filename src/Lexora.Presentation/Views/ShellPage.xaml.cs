@@ -27,9 +27,6 @@ public sealed partial class ShellPage : Page
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         UpdateNavigationLabels();
-
-        // Dynamically reload current page to reflect new language smoothly without restarting
-        _navigationService.Reload(new Microsoft.UI.Xaml.Media.Animation.SuppressNavigationTransitionInfo());
     }
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)

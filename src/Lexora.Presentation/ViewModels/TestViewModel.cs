@@ -16,6 +16,7 @@ public partial class TestViewModel : ObservableObject
     private readonly IReviewService _reviewService;
     private readonly IAudioPlayerService _audioPlayer;
     private readonly INavigationService _navService;
+    private readonly ILocalizationService _localizationService;
 
     private Guid _sessionId;
     private List<TestQuestionDto> _allQuestions = new();
@@ -146,13 +147,15 @@ public partial class TestViewModel : ObservableObject
         IVocabularyService vocabService,
         IReviewService reviewService,
         IAudioPlayerService audioPlayer,
-        INavigationService navService)
+        INavigationService navService,
+        ILocalizationService localizationService)
     {
         _testService = testService;
         _vocabService = vocabService;
         _reviewService = reviewService;
         _audioPlayer = audioPlayer;
         _navService = navService;
+        _localizationService = localizationService;
     }
 
     [RelayCommand]
@@ -277,8 +280,8 @@ public partial class TestViewModel : ObservableObject
 
         UpdateSelectedCustomWordsCount();
         StatusMessage = matchedCount > 0
-            ? $"Đã tìm thấy và chọn {matchedCount} từ từ danh sách dán."
-            : "Không tìm thấy từ nào phù hợp trong kho từ vựng.";
+            ? string.Format(_localizationService.GetString("Test_Status_PastedMatched"), matchedCount)
+            : _localizationService.GetString("Test_Status_PastedNoMatch");
     }
 
     [RelayCommand]
@@ -308,23 +311,23 @@ public partial class TestViewModel : ObservableObject
         await LoadCustomWordCandidatesAsync();
         var set = wordIds.ToHashSet();
 
-        foreach (var id in set)
+        var existingIds = CustomWordCandidates.Select(c => c.Word.Id).ToHashSet();
+        var missingIds = set.Where(id => !existingIds.Contains(id)).ToList();
+
+        if (missingIds.Count > 0)
         {
-            if (!CustomWordCandidates.Any(c => c.Word.Id == id))
+            var loadedWords = await _vocabService.GetWordsByIdsAsync(missingIds);
+            foreach (var word in loadedWords)
             {
-                var word = await _vocabService.GetWordByIdAsync(id);
-                if (word != null)
+                var newItem = new SelectableWordItem(word);
+                newItem.PropertyChanged += (s, e) =>
                 {
-                    var newItem = new SelectableWordItem(word);
-                    newItem.PropertyChanged += (s, e) =>
+                    if (e.PropertyName == nameof(SelectableWordItem.IsSelected))
                     {
-                        if (e.PropertyName == nameof(SelectableWordItem.IsSelected))
-                        {
-                            UpdateSelectedCustomWordsCount();
-                        }
-                    };
-                    CustomWordCandidates.Insert(0, newItem);
-                }
+                        UpdateSelectedCustomWordsCount();
+                    }
+                };
+                CustomWordCandidates.Insert(0, newItem);
             }
         }
 
@@ -343,7 +346,7 @@ public partial class TestViewModel : ObservableObject
     {
         if (IsLoading) return;
         IsLoading = true;
-        StatusMessage = "Preparing test questions...";
+        StatusMessage = _localizationService.GetString("Test_Status_Preparing");
 
         try
         {
@@ -355,7 +358,7 @@ public partial class TestViewModel : ObservableObject
                 var selected = CustomWordCandidates.Where(c => c.IsSelected == true).Select(c => c.Word.Id).ToList();
                 if (selected.Count == 0)
                 {
-                    StatusMessage = "Vui lòng chọn ít nhất 1 từ trong danh sách để kiểm tra.";
+                    StatusMessage = _localizationService.GetString("Test_Status_SelectAtLeastOne");
                     IsLoading = false;
                     return;
                 }
@@ -380,7 +383,7 @@ public partial class TestViewModel : ObservableObject
 
             if (_allQuestions.Count == 0)
             {
-                StatusMessage = "No questions could be generated. Please add more vocabulary first.";
+                StatusMessage = _localizationService.GetString("Test_Status_NoQuestions");
                 IsLoading = false;
                 return;
             }
@@ -411,7 +414,7 @@ public partial class TestViewModel : ObservableObject
 
         CurrentQuestionIndex = index;
         CurrentQuestion = _allQuestions[index];
-        ProgressText = $"Question {index + 1} of {TotalQuestions}";
+        ProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), index + 1, TotalQuestions);
         ProgressPercent = (double)(index + 1) / TotalQuestions * 100.0;
 
         CurrentOptions.Clear();
@@ -516,15 +519,15 @@ public partial class TestViewModel : ObservableObject
 
             if (ScorePercentage >= 85.0)
             {
-                ResultMessage = "Excellent! Outstanding mastery!";
+                ResultMessage = _localizationService.GetString("Test_Result_Excellent");
             }
             else if (ScorePercentage >= 60.0)
             {
-                ResultMessage = "Good job! Keep reviewing to improve!";
+                ResultMessage = _localizationService.GetString("Test_Result_Good");
             }
             else
             {
-                ResultMessage = "Needs practice. Let's review the weak words!";
+                ResultMessage = _localizationService.GetString("Test_Result_NeedsPractice");
             }
 
             WeakWordsList.Clear();

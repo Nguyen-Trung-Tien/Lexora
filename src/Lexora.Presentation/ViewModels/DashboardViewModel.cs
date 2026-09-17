@@ -85,11 +85,13 @@ public partial class DashboardViewModel : ObservableObject
         _advisorService = advisorService;
 
         UpdateGreeting();
-        _localizationService.LanguageChanged += (s, e) =>
-        {
-            UpdateGreeting();
-            UpdateAdviceDisplay();
-        };
+    }
+
+    public void UpdateLanguageState()
+    {
+        UpdateGreeting();
+        UpdateAdviceDisplay();
+        UpdateForecastDisplay();
     }
 
     private void UpdateGreeting()
@@ -113,30 +115,48 @@ public partial class DashboardViewModel : ObservableObject
         AdviceButtonText = isVi ? DailyAdvice.ActionButtonTextVi : DailyAdvice.ActionButtonTextEn;
     }
 
+    private string GetLocalizedDayLabel(string dayLabel)
+    {
+        return dayLabel switch
+        {
+            "Today" => _localizationService.GetString("Day_Today"),
+            "Tomorrow" => _localizationService.GetString("Day_Tomorrow"),
+            "Mon" => _localizationService.GetString("Day_Mon"),
+            "Tue" => _localizationService.GetString("Day_Tue"),
+            "Wed" => _localizationService.GetString("Day_Wed"),
+            "Thu" => _localizationService.GetString("Day_Thu"),
+            "Fri" => _localizationService.GetString("Day_Fri"),
+            "Sat" => _localizationService.GetString("Day_Sat"),
+            "Sun" => _localizationService.GetString("Day_Sun"),
+            _ => dayLabel
+        };
+    }
+
+    private void UpdateForecastDisplay()
+    {
+        ForecastDaysList.Clear();
+        if (WorkloadForecast != null)
+        {
+            TotalForecastNext7Days = WorkloadForecast.TotalDueNext7Days;
+            foreach (var d in WorkloadForecast.Days)
+            {
+                ForecastDaysList.Add(d with { DayLabel = GetLocalizedDayLabel(d.DayLabel) });
+            }
+        }
+    }
+
     [RelayCommand]
     public async Task LoadDashboardAsync()
     {
         IsLoading = true;
         try
         {
-            var analyticsTask = _statsService.GetDetailedAnalyticsAsync();
-            var adviceTask = _advisorService.GetDailyAdviceAsync();
-            var forecastTask = _advisorService.Get7DayForecastAsync();
-
-            await Task.WhenAll(analyticsTask, adviceTask, forecastTask);
-
-            var analytics = await analyticsTask;
-            DailyAdvice = await adviceTask;
-            WorkloadForecast = await forecastTask;
+            var analytics = await _statsService.GetDetailedAnalyticsAsync();
+            DailyAdvice = await _advisorService.GetDailyAdviceAsync();
+            WorkloadForecast = await _advisorService.Get7DayForecastAsync();
 
             UpdateAdviceDisplay();
-
-            ForecastDaysList.Clear();
-            if (WorkloadForecast != null)
-            {
-                TotalForecastNext7Days = WorkloadForecast.TotalDueNext7Days;
-                foreach (var d in WorkloadForecast.Days) ForecastDaysList.Add(d);
-            }
+            UpdateForecastDisplay();
 
             var summary = analytics.Summary;
 

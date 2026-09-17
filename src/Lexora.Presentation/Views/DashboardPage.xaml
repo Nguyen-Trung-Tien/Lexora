@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
+    xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
@@ -320,15 +321,15 @@
 
                                     <Grid ColumnDefinitions="*,*,*">
                                         <StackPanel>
-                                            <TextBlock Text="Total" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                            <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Total')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
                                             <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="15" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="1">
-                                            <TextBlock Text="Learning" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                            <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Learning')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
                                             <TextBlock Text="{x:Bind LearningWords}" FontWeight="Bold" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="2">
-                                            <TextBlock Text="Mastered" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                            <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Mastered')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
                                             <TextBlock Text="{x:Bind MasteredWords}" FontWeight="Bold" FontSize="15" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                         </StackPanel>
                                     </Grid>
@@ -478,9 +479,9 @@
                                         <TextBlock Text="{x:Bind StartedAtText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                        <TextBlock Text="Cards:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Cards')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                         <TextBlock Text="{x:Bind TotalCards}" FontWeight="Bold" FontSize="12" />
-                                        <TextBlock Text="Correct:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Correct')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                         <TextBlock Text="{x:Bind CorrectCards}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                     </StackPanel>
                                     <Border Grid.Column="2" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="8,2" Margin="0,0,12,0" VerticalAlignment="Center">

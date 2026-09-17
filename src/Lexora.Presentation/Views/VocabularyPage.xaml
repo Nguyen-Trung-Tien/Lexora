@@ -322,16 +322,16 @@
                                     <Border Background="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay, Converter={StaticResource CefrToBrushConverter}}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="12" />
                                     </Border>
-                                    <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="Spaced Review (SM-2)" CornerRadius="8" Padding="8,6">
+                                    <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_BtnReview')}" CornerRadius="8" Padding="8,6">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE823;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                            <TextBlock Text="Review" FontSize="12" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_BtnReview')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Click="TestThisWordButton_Click" ToolTipService.ToolTip="Practice test" CornerRadius="8" Padding="8,6">
+                                    <Button Click="TestThisWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_BtnTest')}" CornerRadius="8" Padding="8,6">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE765;" FontSize="13" />
-                                            <TextBlock Text="Test" FontSize="12" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_BtnTest')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
                                     <Button x:Name="BtnCopyWord" Click="CopyWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Copy')}" CornerRadius="8" Padding="8,6">
@@ -462,7 +462,7 @@
                             <MenuFlyoutSeparator />
 
                             <!-- Meanings List -->
-                            <TextBlock Text="Definitions &amp; Explanations" FontWeight="Bold" FontSize="16" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_DefinitionsSection')}" FontWeight="Bold" FontSize="16" />
                             <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedWord.Meanings, Mode=OneWay}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="dto:WordMeaningDto">
@@ -580,7 +580,7 @@
                     <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredContextUnits, Mode=OneWay}"
                                    Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                         <ItemsRepeater.Layout>
-                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="280" MinColumnSpacing="14" MinRowSpacing="14" ItemsStretch="Fill" />
+                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="320" MinColumnSpacing="14" MinRowSpacing="14" ItemsStretch="Fill" />
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate x:DataType="dto:ContextUnitDto">

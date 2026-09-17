@@ -32,6 +32,12 @@ public class VocabularyService : IVocabularyService
         return word == null ? null : MapToDto(word);
     }
 
+    public async Task<IReadOnlyList<WordDto>> GetWordsByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var words = await _vocabRepo.GetByIdsWithDetailsAsync(ids, cancellationToken);
+        return words.Select(MapToDto).ToList();
+    }
+
     public async Task<IReadOnlyList<WordDto>> SearchWordsAsync(
         string? search = null,
         CefrLevel? level = null,

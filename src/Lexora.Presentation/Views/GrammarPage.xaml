@@ -55,7 +55,7 @@
 
 
                 <!-- Add Rule Primary Button -->
-                <Button Grid.Column="3" Click="AddRuleButton_Click" ToolTipService.ToolTip="Add Rule (Ctrl+N)" Style="{ThemeResource AccentButtonStyle}" Padding="16,8" CornerRadius="10">
+                <Button Grid.Column="3" Click="AddRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipAdd')}" Style="{ThemeResource AccentButtonStyle}" Padding="16,8" CornerRadius="10">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE710;" FontSize="14" />
                         <TextBlock Text="{x:Bind Loc.GetString('Grammar_AddRule')}" FontWeight="Bold" />
@@ -63,7 +63,7 @@
                 </Button>
 
                 <!-- Practice Secondary Button -->
-                <Button Grid.Column="4" Click="PracticeButton_Click" ToolTipService.ToolTip="Practice (Ctrl+P)" Padding="16,8" CornerRadius="10">
+                <Button Grid.Column="4" Click="PracticeButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipPractice')}" Padding="16,8" CornerRadius="10">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                         <TextBlock Text="{x:Bind Loc.GetString('Grammar_Practice')}" FontWeight="SemiBold" />
@@ -158,13 +158,13 @@
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
-                                    <Button Click="EditRuleButton_Click" ToolTipService.ToolTip="Edit Grammar Rule (Ctrl+E)" Padding="10,6" CornerRadius="8">
+                                    <Button Click="EditRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipEdit')}" Padding="10,6" CornerRadius="8">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE70F;" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Action_Edit')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Click="DeleteRuleButton_Click" ToolTipService.ToolTip="Delete Rule (Del)" Padding="10,6" CornerRadius="8">
+                                    <Button Click="DeleteRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipDelete')}" Padding="10,6" CornerRadius="8">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE74D;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Action_Delete')}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="12" />

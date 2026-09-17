@@ -39,7 +39,7 @@ public class StatisticsServiceTests
         _mockReviewRepo.Setup(r => r.CountDueCardsAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(2);
         _mockReviewRepo.Setup(r => r.GetUserStreakAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new UserStreak { CurrentStreak = 5, LongestStreak = 12 });
+            .ReturnsAsync(new UserStreak { CurrentStreak = 5, LongestStreak = 12, LastActiveDate = DateOnly.FromDateTime(DateTime.UtcNow) });
 
         var logs = new List<StudyLog>
         {
@@ -64,6 +64,33 @@ public class StatisticsServiceTests
         summary.LongestStreakDays.Should().Be(12);
         summary.AccuracyRate.Should().Be(75.0); // 3 of 4 Good/Easy
         summary.StudiedTodayCount.Should().Be(4);
+    }
+
+    [Fact]
+    public async Task GetDashboardSummaryAsync_WhenLastActiveDateIsOld_ShouldResetCurrentStreakToZero()
+    {
+        // Arrange
+        _mockVocabRepo.Setup(v => v.CountAsync(null, It.IsAny<CancellationToken>())).ReturnsAsync(10);
+        _mockReviewRepo.Setup(r => r.GetCardCountsByStatusAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<LearningStatus, int>());
+        _mockReviewRepo.Setup(r => r.CountDueCardsAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+        _mockReviewRepo.Setup(r => r.GetUserStreakAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UserStreak
+            {
+                CurrentStreak = 10,
+                LongestStreak = 15,
+                LastActiveDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-3) // Inactive for 3 days
+            });
+        _mockReviewRepo.Setup(r => r.GetRecentLogsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<StudyLog>());
+
+        // Act
+        var summary = await _statsService.GetDashboardSummaryAsync();
+
+        // Assert
+        summary.CurrentStreakDays.Should().Be(0);
+        summary.LongestStreakDays.Should().Be(15);
     }
 
     [Fact]

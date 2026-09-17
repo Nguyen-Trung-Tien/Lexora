@@ -114,38 +114,32 @@ public partial class TopicIconOption : CommunityToolkit.Mvvm.ComponentModel.Obse
 
     public Thickness BorderThickness => IsSelected ? new Thickness(2) : new Thickness(1);
 
-    public Microsoft.UI.Xaml.Media.Brush BackgroundBrush
+    private static readonly Microsoft.UI.Xaml.Media.SolidColorBrush _fallbackTransparent = new(Microsoft.UI.Colors.Transparent);
+
+    private static Microsoft.UI.Xaml.Media.Brush GetResourceBrush(string key)
     {
-        get
+        try
         {
-            var res = App.Current.Resources;
-            return IsSelected
-                ? (Microsoft.UI.Xaml.Media.Brush)res["AccentFillColorDefaultBrush"]
-                : (Microsoft.UI.Xaml.Media.Brush)res["SubtleFillColorSecondaryBrush"];
+            if (App.Current?.Resources?.TryGetValue(key, out var resource) == true && resource is Microsoft.UI.Xaml.Media.Brush brush)
+            {
+                return brush;
+            }
         }
+        catch { /* Fallback */ }
+        return _fallbackTransparent;
     }
 
-    public Microsoft.UI.Xaml.Media.Brush BorderBrush
-    {
-        get
-        {
-            var res = App.Current.Resources;
-            return IsSelected
-                ? (Microsoft.UI.Xaml.Media.Brush)res["AccentFillColorDefaultBrush"]
-                : (Microsoft.UI.Xaml.Media.Brush)res["CardStrokeColorDefaultBrush"];
-        }
-    }
+    public Microsoft.UI.Xaml.Media.Brush BackgroundBrush => IsSelected
+        ? GetResourceBrush("AccentFillColorDefaultBrush")
+        : GetResourceBrush("SubtleFillColorSecondaryBrush");
 
-    public Microsoft.UI.Xaml.Media.Brush ForegroundBrush
-    {
-        get
-        {
-            var res = App.Current.Resources;
-            return IsSelected
-                ? (Microsoft.UI.Xaml.Media.Brush)res["TextOnAccentFillColorPrimaryBrush"]
-                : (Microsoft.UI.Xaml.Media.Brush)res["AccentTextFillColorPrimaryBrush"];
-        }
-    }
+    public Microsoft.UI.Xaml.Media.Brush BorderBrush => IsSelected
+        ? GetResourceBrush("AccentFillColorDefaultBrush")
+        : GetResourceBrush("CardStrokeColorDefaultBrush");
+
+    public Microsoft.UI.Xaml.Media.Brush ForegroundBrush => IsSelected
+        ? GetResourceBrush("TextOnAccentFillColorPrimaryBrush")
+        : GetResourceBrush("AccentTextFillColorPrimaryBrush");
 
 
     public Visibility BadgeVisibility => IsSelected ? Visibility.Visible : Visibility.Collapsed;

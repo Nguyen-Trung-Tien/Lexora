@@ -10,16 +10,14 @@ public class StudyAdvisorService : IStudyAdvisorService
 {
     private readonly IReviewRepository _reviewRepo;
     private readonly IVocabularyRepository _vocabRepo;
-    private readonly ISpacedRepetitionEngine _srEngine;
 
     public StudyAdvisorService(
         IReviewRepository reviewRepo,
         IVocabularyRepository vocabRepo,
-        ISpacedRepetitionEngine srEngine)
+        ISpacedRepetitionEngine? srEngine = null)
     {
         _reviewRepo = reviewRepo;
         _vocabRepo = vocabRepo;
-        _srEngine = srEngine;
     }
 
     public async Task<StudyAdviceSummaryDto> GetDailyAdviceAsync(CancellationToken cancellationToken = default)
@@ -124,17 +122,17 @@ public class StudyAdvisorService : IStudyAdvisorService
 
             string dayLabel = i switch
             {
-                0 => "Hôm nay",
-                1 => "Ngày mai",
+                0 => "Today",
+                1 => "Tomorrow",
                 _ => date.DayOfWeek switch
                 {
-                    DayOfWeek.Monday => "T2",
-                    DayOfWeek.Tuesday => "T3",
-                    DayOfWeek.Wednesday => "T4",
-                    DayOfWeek.Thursday => "T5",
-                    DayOfWeek.Friday => "T6",
-                    DayOfWeek.Saturday => "T7",
-                    DayOfWeek.Sunday => "CN",
+                    DayOfWeek.Monday => "Mon",
+                    DayOfWeek.Tuesday => "Tue",
+                    DayOfWeek.Wednesday => "Wed",
+                    DayOfWeek.Thursday => "Thu",
+                    DayOfWeek.Friday => "Fri",
+                    DayOfWeek.Saturday => "Sat",
+                    DayOfWeek.Sunday => "Sun",
                     _ => date.ToString("dd/MM")
                 }
             };

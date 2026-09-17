@@ -52,7 +52,7 @@ PrivilegesRequiredOverridesAllowed=commandline dialog
 
 ; Close running instance of Lexora before upgrade/uninstall
 CloseApplications=yes
-CloseApplicationsFilter=*.exe
+CloseApplicationsFilter=Lexora.Presentation.exe,Lexora.exe
 
 ; Add/Remove Programs metadata
 UninstallDisplayIcon={app}\{#MyAppExeName}
@@ -65,7 +65,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#MyAppSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyAppSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.pdb"
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -84,12 +84,16 @@ var
 begin
   if CurUninstallStep = usPostUninstall then
   begin
-    DataDir := ExpandConstant('{localappdata}\Lexora');
-    if DirExists(DataDir) then
+    // Do not prompt modal dialog if running silent uninstallation (e.g. automated CI/CD or upgrade)
+    if not UninstallSilent then
     begin
-      if MsgBox('Do you want to delete your study data, vocabulary, and streak history stored in ' + DataDir + '?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+      DataDir := ExpandConstant('{localappdata}\Lexora');
+      if DirExists(DataDir) then
       begin
-        DelTree(DataDir, True, True, True);
+        if MsgBox('Do you want to delete your study data, vocabulary, and streak history stored in ' + DataDir + '?'#13#10'(Choose "No" to keep your data for future reinstalls)', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+        begin
+          DelTree(DataDir, True, True, True);
+        end;
       end;
     end;
   end;

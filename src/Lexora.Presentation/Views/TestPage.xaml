@@ -371,7 +371,7 @@
 
                             <Button Grid.Column="1" Command="{x:Bind ViewModel.PlayAudioCommand}"
                                     Visibility="{x:Bind ViewModel.HasAudio, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    ToolTipService.ToolTip="Play Audio (Space)"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_ListenAudio')}"
                                     CornerRadius="8" Padding="12,6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE767;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />

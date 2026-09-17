@@ -23,7 +23,11 @@ public sealed partial class DashboardPage : Page
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
-        DispatcherQueue.TryEnqueue(() => Bindings.Update());
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            ViewModel.UpdateLanguageState();
+            Bindings.Update();
+        });
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)

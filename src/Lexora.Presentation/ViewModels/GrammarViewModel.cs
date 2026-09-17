@@ -10,6 +10,7 @@ namespace Lexora.Presentation.ViewModels;
 public partial class GrammarViewModel : ObservableObject
 {
     private readonly IGrammarService _grammarService;
+    private readonly Services.ILocalizationService _localizationService;
     private readonly List<GrammarQuizSubmissionDto> _practiceSubmissions = new();
 
     [ObservableProperty]
@@ -63,7 +64,7 @@ public partial class GrammarViewModel : ObservableObject
     public partial string ExplanationText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string PracticeProgressText { get; set; } = "Question 1 of 5";
+    public partial string PracticeProgressText { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial double PracticeProgressPercent { get; set; } = 0.0;
@@ -78,9 +79,12 @@ public partial class GrammarViewModel : ObservableObject
     public ObservableCollection<string> CurrentPracticeOptions { get; } = new();
     public ObservableCollection<GrammarQuizQuestionDto> PracticeQuestions { get; } = new();
 
-    public GrammarViewModel(IGrammarService grammarService)
+    public GrammarViewModel(
+        IGrammarService grammarService,
+        Services.ILocalizationService localizationService)
     {
         _grammarService = grammarService;
+        _localizationService = localizationService;
     }
 
     [RelayCommand]
@@ -229,7 +233,7 @@ public partial class GrammarViewModel : ObservableObject
 
         CurrentQuestionIndex = index;
         CurrentPracticeQuestion = PracticeQuestions[index];
-        PracticeProgressText = $"Question {index + 1} of {TotalPracticeQuestions}";
+        PracticeProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), index + 1, TotalPracticeQuestions);
         PracticeProgressPercent = (double)(index + 1) / TotalPracticeQuestions * 100.0;
 
         CurrentPracticeOptions.Clear();

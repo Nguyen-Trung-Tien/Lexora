@@ -88,6 +88,7 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
     public async Task<IReadOnlyList<string>> GetAllTopicsAsync(CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsNoTracking()
             .Where(gr => !string.IsNullOrEmpty(gr.Topic))
             .Select(gr => gr.Topic!)
             .Distinct()

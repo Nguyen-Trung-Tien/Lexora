@@ -43,7 +43,11 @@ public partial class ShellViewModel : ObservableObject
         _preferencesService = preferencesService;
 
         UpdateTitle();
-        _localizationService.LanguageChanged += (s, e) => UpdateTitle();
+        _localizationService.LanguageChanged += async (s, e) =>
+        {
+            UpdateTitle();
+            await CheckDueReviewsAsync();
+        };
         _preferencesService.PreferencesChanged += async (s, prefs) => await CheckDueReviewsAsync();
     }
 
@@ -62,7 +66,9 @@ public partial class ShellViewModel : ObservableObject
             int count = await _reviewService.GetDueCardsCountAsync();
             DueCardsCount = count;
             HasDueReviews = count > 0;
-            DueReviewMessage = count > 0 ? $"You have {count} word{(count > 1 ? "s" : "")} ready for spaced repetition review." : string.Empty;
+            DueReviewMessage = count > 0 
+                ? string.Format(_localizationService.GetString("Review_Reminder_Msg"), count) 
+                : string.Empty;
         }
         catch
         {

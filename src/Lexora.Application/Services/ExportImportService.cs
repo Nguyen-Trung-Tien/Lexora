@@ -673,7 +673,7 @@ public class ExportImportService : IExportImportService
         return new ImportResult(imported, skipped, errors);
     }
 
-    private static readonly char[] CsvFormulaTriggers = { '=', '+', '-', '@', '\t', '\r' };
+    private static readonly System.Buffers.SearchValues<char> CsvFormulaTriggers = System.Buffers.SearchValues.Create("=+-@\t\r");
 
     private static string EscapeCsv(string field)
     {

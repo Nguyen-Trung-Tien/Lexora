@@ -17,10 +17,24 @@ public partial class ReviewViewModel : ObservableObject
     private readonly IAudioPlayerService _audioPlayer;
     private readonly IUserPreferencesService _preferencesService;
     private readonly IVocabularyService _vocabService;
+    private readonly ILocalizationService _localizationService;
     private readonly Stopwatch _cardTimer = new();
 
     private Guid? _currentSessionId;
     private int _initialQueueCount;
+    private string? _customTitle;
+
+    public void UpdateActiveSessionTitle()
+    {
+        ActiveSessionTitle = _customTitle ?? CurrentMode switch
+        {
+            ReviewSessionMode.LearnNew => _localizationService.GetString("Review_Session_LearnNew"),
+            ReviewSessionMode.Difficult => _localizationService.GetString("Review_Session_Difficult"),
+            ReviewSessionMode.ByTopic => _localizationService.GetString("Review_Session_ByTopic"),
+            ReviewSessionMode.CustomSelection => _localizationService.GetString("Review_Session_CustomSelection"),
+            _ => _localizationService.GetString("Review_Session_TodayDue")
+        };
+    }
 
     public record ReviewUndoState(
         ReviewCardDto Card,
@@ -42,7 +56,7 @@ public partial class ReviewViewModel : ObservableObject
     public partial string WordScaffold { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string ActiveSessionTitle { get; set; } = "Ôn tập đến hạn hôm nay";
+    public partial string ActiveSessionTitle { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SpeechRateLabel))]
@@ -163,12 +177,16 @@ public partial class ReviewViewModel : ObservableObject
         IReviewService reviewService,
         IAudioPlayerService audioPlayer,
         IUserPreferencesService preferencesService,
-        IVocabularyService vocabService)
+        IVocabularyService vocabService,
+        ILocalizationService localizationService)
     {
         _reviewService = reviewService;
         _audioPlayer = audioPlayer;
         _preferencesService = preferencesService;
         _vocabService = vocabService;
+        _localizationService = localizationService;
+
+        UpdateActiveSessionTitle();
 
         var prefs = _preferencesService.GetPreferences();
         SpeechRate = prefs.SpeechRate;
@@ -225,14 +243,8 @@ public partial class ReviewViewModel : ObservableObject
         SessionAccuracyRate = 0.0;
         CompletedCount = 0;
 
-        ActiveSessionTitle = customTitle ?? mode switch
-        {
-            ReviewSessionMode.LearnNew => "Học từ vựng mới",
-            ReviewSessionMode.Difficult => "Từ vựng khó & Hay quên",
-            ReviewSessionMode.ByTopic => "Ôn tập theo Unit ngữ cảnh",
-            ReviewSessionMode.CustomSelection => "Ôn tập danh sách từ chọn lọc",
-            _ => "Ôn tập đến hạn hôm nay"
-        };
+        _customTitle = customTitle;
+        UpdateActiveSessionTitle();
 
         try
         {

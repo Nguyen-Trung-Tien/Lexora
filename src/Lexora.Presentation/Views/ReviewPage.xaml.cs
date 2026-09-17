@@ -37,7 +37,11 @@ public sealed partial class ReviewPage : Page
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
-        DispatcherQueue.TryEnqueue(() => Bindings.Update());
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            ViewModel.UpdateActiveSessionTitle();
+            Bindings.Update();
+        });
     }
 
     protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)

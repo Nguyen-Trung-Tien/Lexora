@@ -94,10 +94,10 @@ public sealed partial class GrammarPage : Page
 
         var confirmDialog = new ContentDialog
         {
-            Title = "Delete Grammar Rule",
-            Content = $"Are you sure you want to permanently delete \"{ViewModel.SelectedRule.Title}\"?",
-            PrimaryButtonText = "Delete",
-            CloseButtonText = "Cancel",
+            Title = Loc.GetString("Grammar_DeleteTitle"),
+            Content = string.Format(Loc.GetString("Grammar_DeleteConfirm"), ViewModel.SelectedRule.Title),
+            PrimaryButtonText = Loc.GetString("Action_Delete"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = XamlRoot
         };

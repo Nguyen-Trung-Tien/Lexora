@@ -25,17 +25,11 @@ public sealed partial class VocabularyPage : Page
 
         PopulateFilterCombos();
 
-        Loc.LanguageChanged += (s, e) =>
+        Loc.LanguageChanged += OnLanguageChanged;
+        Unloaded += (s, e) =>
         {
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                var wasInit = _isInitializing;
-                _isInitializing = true;
-                PopulateFilterCombos();
-                PopulateTopicFilterCombo();
-                _isInitializing = wasInit;
-                Bindings.Update();
-            });
+            Loc.LanguageChanged -= OnLanguageChanged;
+            _searchDebounceTimer?.Stop();
         };
 
         _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
@@ -54,6 +48,19 @@ public sealed partial class VocabularyPage : Page
             UpdateViewModeButtons();
             _isInitializing = false;
         };
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            var wasInit = _isInitializing;
+            _isInitializing = true;
+            PopulateFilterCombos();
+            PopulateTopicFilterCombo();
+            _isInitializing = wasInit;
+            Bindings.Update();
+        });
     }
 
     private void PopulateFilterCombos()
@@ -368,10 +375,10 @@ public sealed partial class VocabularyPage : Page
 
         var confirmDialog = new ContentDialog
         {
-            Title = "Delete Word",
-            Content = $"Are you sure you want to permanently delete '{ViewModel.SelectedWord.Term}'? All associated review progress will also be deleted.",
-            PrimaryButtonText = "Delete",
-            CloseButtonText = "Cancel",
+            Title = Loc.GetString("Vocab_DeleteTitle"),
+            Content = string.Format(Loc.GetString("Vocab_DeleteConfirm"), ViewModel.SelectedWord.Term),
+            PrimaryButtonText = Loc.GetString("Action_Delete"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = this.XamlRoot
         };
@@ -521,9 +528,9 @@ public sealed partial class VocabularyPage : Page
         {
             var dialog = new ContentDialog
             {
-                Title = "Export Complete",
-                Content = $"Vocabulary exported successfully to:\n{savedPath}",
-                CloseButtonText = "OK",
+                Title = Loc.GetString("Vocab_ExportCompleteTitle"),
+                Content = string.Format(Loc.GetString("Vocab_ExportCompleteMsg"), ViewModel.Words.Count, savedPath),
+                CloseButtonText = Loc.GetString("Action_Close"),
                 XamlRoot = this.XamlRoot
             };
             await dialog.ShowAsync();
@@ -589,16 +596,16 @@ public sealed partial class VocabularyPage : Page
         {
             var placeholder = format.ToLowerInvariant() switch
             {
-                "json" => "Or paste JSON array of vocabulary here...",
-                "csv" => "Or paste CSV content (with header line) here...",
-                _ => "Or paste TXT vocabulary lines here (e.g. term - definition or tab-delimited)..."
+                "json" => Loc.GetString("Vocab_ImportPastePlaceholderJson"),
+                "csv" => Loc.GetString("Vocab_ImportPastePlaceholderCsv"),
+                _ => Loc.GetString("Vocab_ImportPastePlaceholderTxt")
             };
 
             var dialogTitle = format.ToLowerInvariant() switch
             {
-                "json" => "Import Vocabulary (JSON)",
-                "csv" => "Import Vocabulary (CSV)",
-                _ => "Import Vocabulary (TXT)"
+                "json" => Loc.GetString("Vocab_ImportJsonTitle"),
+                "csv" => Loc.GetString("Vocab_ImportCsvTitle"),
+                _ => Loc.GetString("Vocab_ImportTxtTitle")
             };
 
             var textBox = new TextBox
@@ -613,8 +620,8 @@ public sealed partial class VocabularyPage : Page
             {
                 Title = dialogTitle,
                 Content = textBox,
-                PrimaryButtonText = "Import Content",
-                CloseButtonText = "Cancel",
+                PrimaryButtonText = Loc.GetString("Vocab_ImportExport"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Primary,
                 XamlRoot = this.XamlRoot
             };
@@ -633,9 +640,9 @@ public sealed partial class VocabularyPage : Page
             await Task.Yield();
             var summaryDialog = new ContentDialog
             {
-                Title = "Import Results",
+                Title = Loc.GetString("Vocab_ImportExport"),
                 Content = $"Imported: {importResult.TotalImported} words\nSkipped: {importResult.TotalSkipped} words\nErrors: {importResult.Errors.Count}",
-                CloseButtonText = "Close",
+                CloseButtonText = Loc.GetString("Action_Close"),
                 XamlRoot = this.XamlRoot
             };
             await summaryDialog.ShowAsync();

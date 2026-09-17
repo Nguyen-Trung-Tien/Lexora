@@ -15,6 +15,7 @@ public partial class VocabularyViewModel : ObservableObject
     private readonly IExportImportService _exportImportService;
     private readonly IAudioPlayerService _audioPlayer;
     private readonly IFuzzySearchService _fuzzySearchService;
+    private readonly ILocalizationService _localizationService;
     private readonly List<string> _knownTerms = new();
 
     [ObservableProperty]
@@ -86,13 +87,15 @@ public partial class VocabularyViewModel : ObservableObject
         IReviewService reviewService,
         IExportImportService exportImportService,
         IAudioPlayerService audioPlayer,
-        IFuzzySearchService fuzzySearchService)
+        IFuzzySearchService fuzzySearchService,
+        ILocalizationService localizationService)
     {
         _vocabService = vocabService;
         _reviewService = reviewService;
         _exportImportService = exportImportService;
         _audioPlayer = audioPlayer;
         _fuzzySearchService = fuzzySearchService;
+        _localizationService = localizationService;
     }
 
     [RelayCommand]
@@ -129,9 +132,9 @@ public partial class VocabularyViewModel : ObservableObject
         var list = string.IsNullOrEmpty(query)
             ? ContextUnits
             : ContextUnits.Where(u =>
-                u.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                (u.Description != null && u.Description.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                u.Words.Any(w => w.Term.Contains(query, StringComparison.OrdinalIgnoreCase)));
+                (!string.IsNullOrEmpty(u.Name) && u.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(u.Description) && u.Description.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                (u.Words != null && u.Words.Any(w => !string.IsNullOrEmpty(w.Term) && w.Term.Contains(query, StringComparison.OrdinalIgnoreCase))));
 
         foreach (var unit in list)
         {
@@ -291,12 +294,12 @@ public partial class VocabularyViewModel : ObservableObject
         if (dto.Id == null)
         {
             var created = await _vocabService.CreateWordAsync(dto);
-            StatusMessage = $"Added '{created.Term}' successfully.";
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordAdded"), created.Term);
         }
         else
         {
             var updated = await _vocabService.UpdateWordAsync(dto);
-            StatusMessage = $"Updated '{updated.Term}' successfully.";
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordUpdated"), updated.Term);
         }
 
         await LoadWordsAsync();
@@ -310,7 +313,7 @@ public partial class VocabularyViewModel : ObservableObject
         var created = await _vocabService.CreateTopicAsync(dto);
         await LoadFiltersAsync();
         await LoadContextUnitsAsync();
-        StatusMessage = $"Created topic '{created.Name}'.";
+        StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_TopicCreated"), created.Name);
         return created;
     }
 
@@ -322,7 +325,7 @@ public partial class VocabularyViewModel : ObservableObject
         if (word != null)
         {
             await _vocabService.DeleteWordAsync(id);
-            StatusMessage = $"Deleted '{word.Term}'.";
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordDeleted"), word.Term);
             await LoadWordsAsync();
             _ = LoadContextUnitsAsync();
         }
@@ -362,8 +365,8 @@ public partial class VocabularyViewModel : ObservableObject
             _ = LoadContextUnitsAsync();
 
             StatusMessage = remembered
-                ? $"✓ Đã đánh dấu '{term}' là Nhớ rồi."
-                : $"✕ Đã đánh dấu '{term}' là Chưa nhớ.";
+                ? string.Format(_localizationService.GetString("Vocab_Status_MarkedRemembered"), term)
+                : string.Format(_localizationService.GetString("Vocab_Status_MarkedNotRemembered"), term);
         }
         finally
         {

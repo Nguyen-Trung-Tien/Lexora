@@ -25,6 +25,16 @@ public class StatisticsService : IStatisticsService
         var streak = await _reviewRepo.GetUserStreakAsync(cancellationToken);
         var recentLogs = await _reviewRepo.GetRecentLogsAsync(200, cancellationToken);
 
+        return BuildSummary(totalWords, statusCounts, dueCount, streak, recentLogs);
+    }
+
+    private static DashboardSummaryDto BuildSummary(
+        int totalWords,
+        Dictionary<LearningStatus, int> statusCounts,
+        int dueCount,
+        UserStreak? streak,
+        IReadOnlyList<StudyLog> recentLogs)
+    {
         int remembered = statusCounts.GetValueOrDefault(LearningStatus.Remembered, 0);
         int notRemembered = statusCounts.GetValueOrDefault(LearningStatus.NotRemembered, 0);
         int learning = statusCounts.GetValueOrDefault(LearningStatus.Learning, 0);
@@ -35,7 +45,17 @@ public class StatisticsService : IStatisticsService
         double accuracy = totalReviews == 0 ? 0.0 : Math.Round((double)correctReviews / totalReviews * 100, 1);
 
         var today = DateTime.Today;
+        var todayDate = DateOnly.FromDateTime(today);
         int studiedToday = recentLogs.Count(l => l.CreatedAt.ToLocalTime().Date == today);
+
+        int activeStreak = 0;
+        if (streak != null && streak.LastActiveDate.HasValue)
+        {
+            if (streak.LastActiveDate.Value == todayDate || streak.LastActiveDate.Value == todayDate.AddDays(-1))
+            {
+                activeStreak = streak.CurrentStreak;
+            }
+        }
 
         return new DashboardSummaryDto(
             TotalWords: totalWords,
@@ -44,7 +64,7 @@ public class StatisticsService : IStatisticsService
             TotalLearning: learning,
             TotalMastered: mastered,
             DueReviewsToday: dueCount,
-            CurrentStreakDays: streak?.CurrentStreak ?? 0,
+            CurrentStreakDays: activeStreak,
             LongestStreakDays: streak?.LongestStreak ?? 0,
             AccuracyRate: accuracy,
             StudiedTodayCount: studiedToday
@@ -53,11 +73,16 @@ public class StatisticsService : IStatisticsService
 
     public async Task<DetailedAnalyticsDto> GetDetailedAnalyticsAsync(CancellationToken cancellationToken = default)
     {
-        var summary = await GetDashboardSummaryAsync(cancellationToken);
+        int totalWords = await _vocabRepo.CountAsync(cancellationToken: cancellationToken);
+        var statusCounts = await _reviewRepo.GetCardCountsByStatusAsync(cancellationToken);
+        var dueCount = await _reviewRepo.CountDueCardsAsync(DateTime.UtcNow, cancellationToken);
+        var streak = await _reviewRepo.GetUserStreakAsync(cancellationToken);
+        var recentLogs = await _reviewRepo.GetRecentLogsAsync(500, cancellationToken);
+
+        var summary = BuildSummary(totalWords, statusCounts, dueCount, streak, recentLogs);
+
         var allWords = await _vocabRepo.GetWordsForAnalyticsAsync(cancellationToken)
             ?? await _vocabRepo.SearchAsync(take: 5000, cancellationToken: cancellationToken);
-        var statusCounts = await _reviewRepo.GetCardCountsByStatusAsync(cancellationToken);
-        var recentLogs = await _reviewRepo.GetRecentLogsAsync(500, cancellationToken);
         var recentSessions = await _reviewRepo.GetRecentSessionsAsync(6, cancellationToken);
         var allTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
 
@@ -80,7 +105,7 @@ public class StatisticsService : IStatisticsService
                 "#FFB900", "Review Due"),
             new(LearningStatus.NotRemembered, statusCounts.GetValueOrDefault(LearningStatus.NotRemembered, 0),
                 Math.Round((double)statusCounts.GetValueOrDefault(LearningStatus.NotRemembered, 0) / total * 100, 1),
-                "#D83B01", "Chưa nhớ"),
+                "#D83B01", "Not Remembered"),
             new(LearningStatus.New, statusCounts.GetValueOrDefault(LearningStatus.New, 0),
                 Math.Round((double)statusCounts.GetValueOrDefault(LearningStatus.New, 0) / total * 100, 1),
                 "#8A8886", "New")
@@ -134,13 +159,18 @@ public class StatisticsService : IStatisticsService
             }
         }
 
-        // 5. Topic Progress
+        // 5. Topic Progress (Pre-indexed by TopicId to avoid repeated linear scans)
+        var wordsByTopic = allWords
+            .SelectMany(w => w.WordTopics.Select(wt => new { wt.TopicId, Word = w }))
+            .GroupBy(x => x.TopicId)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Word).ToList());
+
         var topicProgress = new List<TopicProgressDto>();
         foreach (var t in allTopics)
         {
-            var topicWords = allWords.Where(w => w.WordTopics.Any(wt => wt.TopicId == t.Id)).ToList();
-            int tTotal = topicWords.Count;
-            int tMastered = topicWords.Count(w => w.ReviewCard?.Status == LearningStatus.Mastered);
+            wordsByTopic.TryGetValue(t.Id, out var topicWords);
+            int tTotal = topicWords?.Count ?? 0;
+            int tMastered = topicWords?.Count(w => w.ReviewCard?.Status == LearningStatus.Mastered) ?? 0;
             double pct = tTotal > 0 ? Math.Round((double)tMastered / tTotal * 100, 1) : 0.0;
             topicProgress.Add(new TopicProgressDto(t.Name, t.IconGlyph, t.ColorHex, tTotal, tMastered, pct));
         }

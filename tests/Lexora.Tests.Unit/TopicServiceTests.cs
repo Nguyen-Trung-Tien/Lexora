@@ -123,4 +123,28 @@ public class TopicServiceTests
         _mockVocabRepo.Verify(r => r.DeleteTopic(It.IsAny<Topic>()), Times.Never);
         _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    [Fact]
+    public async Task GetWordsByIdsAsync_ShouldReturnMappedDtos()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+        var words = new List<Word>
+        {
+            new() { Id = id1, Term = "Apple", NormalizedTerm = "apple" },
+            new() { Id = id2, Term = "Banana", NormalizedTerm = "banana" }
+        };
+
+        _mockVocabRepo.Setup(r => r.GetByIdsWithDetailsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(words);
+
+        // Act
+        var result = await _vocabService.GetWordsByIdsAsync(new[] { id1, id2 });
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Select(w => w.Term).Should().Contain(new[] { "Apple", "Banana" });
+        _mockVocabRepo.Verify(r => r.GetByIdsWithDetailsAsync(It.Is<IEnumerable<Guid>>(ids => ids.Contains(id1) && ids.Contains(id2)), It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
