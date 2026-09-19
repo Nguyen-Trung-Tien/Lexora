@@ -1,3 +1,5 @@
+using Lexora.Presentation.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -9,6 +11,13 @@ public sealed partial class OperationProgressDialog : ContentDialog
     {
         InitializeComponent();
         Loaded += OnLoaded;
+
+        // Inherit the current app theme (Light / Dark) so the dialog
+        // renders correctly in both modes, matching the rest of the UI.
+        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService)
+        {
+            RequestedTheme = themeService.CurrentTheme;
+        }
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)

@@ -479,10 +479,12 @@ public sealed partial class VocabularyPage : Page
 
     private async Task PerformExportAsync(string format, string fileTypeDesc, string extension, Func<IProgress<ProgressReport>, Task<string>> exportFunc)
     {
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var progressDialog = new OperationProgressDialog
         {
             Title = Loc.GetString("Progress_ExportingTitle"),
-            XamlRoot = this.XamlRoot
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
         };
         progressDialog.SetIndeterminate(Loc.GetString("Progress_PreparingExport"), Loc.GetString("Progress_PleaseWait"));
         _ = progressDialog.ShowAsync();
@@ -551,12 +553,14 @@ public sealed partial class VocabularyPage : Page
 
         if (!string.IsNullOrEmpty(savedPath))
         {
+            var exportCompleteTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
             var dialog = new ContentDialog
             {
                 Title = Loc.GetString("Vocab_ExportCompleteTitle"),
                 Content = string.Format(Loc.GetString("Vocab_ExportCompleteMsg"), ViewModel.Words.Count, savedPath),
                 CloseButtonText = Loc.GetString("Action_Close"),
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = exportCompleteTheme
             };
             await dialog.ShowAsync();
         }
@@ -662,10 +666,12 @@ public sealed partial class VocabularyPage : Page
         {
             await Task.Yield();
 
+            var importTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
             var progressDialog = new OperationProgressDialog
             {
                 Title = Loc.GetString("Progress_ImportingTitle"),
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = importTheme
             };
             progressDialog.SetDeterminate(0, Loc.GetString("Progress_ReadingFile"), Loc.GetString("Progress_PleaseWait"));
             _ = progressDialog.ShowAsync();

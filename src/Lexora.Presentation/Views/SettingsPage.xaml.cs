@@ -216,10 +216,12 @@ public sealed partial class SettingsPage : Page
 
     private async void BackupButton_Click(object sender, RoutedEventArgs e)
     {
+        var backupTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var progressDialog = new OperationProgressDialog
         {
             Title = Loc.GetString("Progress_BackupTitle"),
-            XamlRoot = this.XamlRoot
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = backupTheme
         };
         progressDialog.SetDeterminate(10, Loc.GetString("Progress_BackupFlushing"), Loc.GetString("Progress_PleaseWait"));
         _ = progressDialog.ShowAsync();
@@ -284,6 +286,7 @@ public sealed partial class SettingsPage : Page
                 HorizontalAlignment = HorizontalAlignment.Stretch
             };
 
+            var pathPromptTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
             var promptDialog = new ContentDialog
             {
                 Title = Loc.GetString("Settings_DlgRestorePathTitle"),
@@ -291,7 +294,8 @@ public sealed partial class SettingsPage : Page
                 PrimaryButtonText = Loc.GetString("Settings_DlgRestorePathSelect"),
                 CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Primary,
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = pathPromptTheme
             };
 
             var promptRes = await promptDialog.ShowAsync();
@@ -304,6 +308,7 @@ public sealed partial class SettingsPage : Page
         if (!string.IsNullOrEmpty(selectedFilePath) && File.Exists(selectedFilePath))
         {
             await Task.Yield();
+            var confirmTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
             var confirmDialog = new ContentDialog
             {
                 Title = Loc.GetString("Settings_DlgRestoreConfirmTitle"),
@@ -311,7 +316,8 @@ public sealed partial class SettingsPage : Page
                 PrimaryButtonText = Loc.GetString("Settings_DlgRestoreConfirmBtn"),
                 CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Close,
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = confirmTheme
             };
 
             var result = await confirmDialog.ShowAsync();
@@ -319,10 +325,12 @@ public sealed partial class SettingsPage : Page
             {
                 await Task.Yield();
 
+                var restoreTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
                 var progressDialog = new OperationProgressDialog
                 {
                     Title = Loc.GetString("Progress_RestoreTitle"),
-                    XamlRoot = this.XamlRoot
+                    XamlRoot = this.XamlRoot,
+                    RequestedTheme = restoreTheme
                 };
                 progressDialog.SetDeterminate(15, Loc.GetString("Progress_RestoreVerifying"), Loc.GetString("Progress_PleaseWait"));
                 _ = progressDialog.ShowAsync();
