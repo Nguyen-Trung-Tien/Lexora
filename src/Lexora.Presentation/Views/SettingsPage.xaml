@@ -28,11 +28,180 @@
                             </StackPanel>
                         </Grid>
 
-                    <RadioButtons SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=TwoWay}" SelectionChanged="ThemeRadioButtons_SelectionChanged">
-                        <RadioButton Content="{x:Bind Loc.GetString('Settings_Theme_System')}" />
-                        <RadioButton Content="{x:Bind Loc.GetString('Settings_Theme_Light')}" />
-                        <RadioButton Content="{x:Bind Loc.GetString('Settings_Theme_Dark')}" />
-                    </RadioButtons>
+                        <!-- Visual Theme Selector Cards -->
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16" Margin="0,4,0,0">
+                            <!-- 1. System Theme Card -->
+                            <Button x:Name="ThemeSystemButton"
+                                    Click="ThemeSystemButton_Click"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    Padding="0"
+                                    CornerRadius="12"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    BorderThickness="1"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                <Grid Padding="14">
+                                    <StackPanel Spacing="10">
+                                        <!-- Mini Window Mockup System (Dual split Light/Dark) -->
+                                        <Border Height="95" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                            <Grid ColumnDefinitions="*,*">
+                                                <!-- Left half: Light -->
+                                                <Grid Background="{StaticResource LexoraMockupLightWindowBrush}">
+                                                    <Grid ColumnDefinitions="24,*">
+                                                        <Border Background="{StaticResource LexoraMockupLightSidebarBrush}">
+                                                            <StackPanel Spacing="4" Margin="4,8,4,4">
+                                                                <Border Height="3" CornerRadius="1.5" Background="{StaticResource LexoraMockupLightAccentBrush}" />
+                                                                <Border Height="3" CornerRadius="1.5" Background="{StaticResource LexoraMockupLightBarBrush}" Opacity="0.6" />
+                                                                <Border Height="3" CornerRadius="1.5" Background="{StaticResource LexoraMockupLightBarBrush}" Opacity="0.4" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" Margin="6,8,4,4" Spacing="5">
+                                                            <Border Height="4" Width="28" HorizontalAlignment="Left" CornerRadius="2" Background="{StaticResource LexoraMockupLightBarBrush}" />
+                                                            <Border Background="{StaticResource LexoraMockupLightCardBrush}" BorderThickness="1" BorderBrush="{StaticResource LexoraMockupLightStrokeBrush}" CornerRadius="4" Padding="4">
+                                                                <StackPanel Spacing="3">
+                                                                    <Border Height="3" Width="36" HorizontalAlignment="Left" CornerRadius="1.5" Background="{StaticResource LexoraMockupLightAccentBrush}" />
+                                                                    <Border Height="2" Width="24" HorizontalAlignment="Left" CornerRadius="1" Background="{StaticResource LexoraMockupLightBarBrush}" Opacity="0.5" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Grid>
+                                                <!-- Right half: Dark -->
+                                                <Grid Grid.Column="1" Background="{StaticResource LexoraMockupDarkWindowBrush}">
+                                                    <Grid ColumnDefinitions="24,*">
+                                                        <Border Background="{StaticResource LexoraMockupDarkSidebarBrush}">
+                                                            <StackPanel Spacing="4" Margin="4,8,4,4">
+                                                                <Border Height="3" CornerRadius="1.5" Background="{StaticResource LexoraMockupDarkAccentBrush}" />
+                                                                <Border Height="3" CornerRadius="1.5" Background="{StaticResource LexoraMockupDarkBarBrush}" Opacity="0.6" />
+                                                                <Border Height="3" CornerRadius="1.5" Background="{StaticResource LexoraMockupDarkBarBrush}" Opacity="0.4" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" Margin="6,8,4,4" Spacing="5">
+                                                            <Border Height="4" Width="28" HorizontalAlignment="Left" CornerRadius="2" Background="{StaticResource LexoraMockupDarkBarBrush}" />
+                                                            <Border Background="{StaticResource LexoraMockupDarkCardBrush}" BorderThickness="1" BorderBrush="{StaticResource LexoraMockupDarkStrokeBrush}" CornerRadius="4" Padding="4">
+                                                                <StackPanel Spacing="3">
+                                                                    <Border Height="3" Width="36" HorizontalAlignment="Left" CornerRadius="1.5" Background="{StaticResource LexoraMockupDarkAccentBrush}" />
+                                                                    <Border Height="2" Width="24" HorizontalAlignment="Left" CornerRadius="1" Background="{StaticResource LexoraMockupDarkBarBrush}" Opacity="0.5" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Label & Selection Badge -->
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Settings_Theme_System')}" FontWeight="SemiBold" FontSize="14" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Settings_Theme_SystemDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <Border x:Name="ThemeSystemCheck" Grid.Column="1" Width="22" Height="22" CornerRadius="11" Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Top" Visibility="Collapsed">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+
+                            <!-- 2. Light Theme Card -->
+                            <Button x:Name="ThemeLightButton"
+                                    Grid.Column="1"
+                                    Click="ThemeLightButton_Click"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    Padding="0"
+                                    CornerRadius="12"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    BorderThickness="1"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                <Grid Padding="14">
+                                    <StackPanel Spacing="10">
+                                        <!-- Mini Window Mockup Light -->
+                                        <Border Height="95" CornerRadius="8" BorderThickness="1" BorderBrush="{StaticResource LexoraMockupLightStrokeBrush}" Background="{StaticResource LexoraMockupLightWindowBrush}">
+                                            <Grid ColumnDefinitions="32,*">
+                                                <Border Background="{StaticResource LexoraMockupLightSidebarBrush}" BorderThickness="0,0,1,0" BorderBrush="{StaticResource LexoraMockupLightStrokeBrush}">
+                                                    <StackPanel Spacing="5" Margin="6,10,6,6">
+                                                        <Border Height="4" CornerRadius="2" Background="{StaticResource LexoraMockupLightAccentBrush}" />
+                                                        <Border Height="4" CornerRadius="2" Background="{StaticResource LexoraMockupLightBarBrush}" Opacity="0.6" />
+                                                        <Border Height="4" CornerRadius="2" Background="{StaticResource LexoraMockupLightBarBrush}" Opacity="0.4" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Margin="10,8,8,6" Spacing="6">
+                                                    <Border Height="5" Width="55" HorizontalAlignment="Left" CornerRadius="2.5" Background="{StaticResource LexoraMockupLightBarBrush}" />
+                                                    <Border Background="{StaticResource LexoraMockupLightCardBrush}" BorderThickness="1" BorderBrush="{StaticResource LexoraMockupLightStrokeBrush}" CornerRadius="6" Padding="6">
+                                                        <StackPanel Spacing="4">
+                                                            <Border Height="4" Width="70" HorizontalAlignment="Left" CornerRadius="2" Background="{StaticResource LexoraMockupLightAccentBrush}" />
+                                                            <Border Height="3" Width="48" HorizontalAlignment="Left" CornerRadius="1.5" Background="{StaticResource LexoraMockupLightBarBrush}" Opacity="0.5" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Label & Selection Badge -->
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Settings_Theme_Light')}" FontWeight="SemiBold" FontSize="14" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Settings_Theme_LightDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <Border x:Name="ThemeLightCheck" Grid.Column="1" Width="22" Height="22" CornerRadius="11" Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Top" Visibility="Collapsed">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+
+                            <!-- 3. Dark Theme Card -->
+                            <Button x:Name="ThemeDarkButton"
+                                    Grid.Column="2"
+                                    Click="ThemeDarkButton_Click"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    Padding="0"
+                                    CornerRadius="12"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    BorderThickness="1"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                <Grid Padding="14">
+                                    <StackPanel Spacing="10">
+                                        <!-- Mini Window Mockup Dark -->
+                                        <Border Height="95" CornerRadius="8" BorderThickness="1" BorderBrush="{StaticResource LexoraMockupDarkStrokeBrush}" Background="{StaticResource LexoraMockupDarkWindowBrush}">
+                                            <Grid ColumnDefinitions="32,*">
+                                                <Border Background="{StaticResource LexoraMockupDarkSidebarBrush}" BorderThickness="0,0,1,0" BorderBrush="{StaticResource LexoraMockupDarkStrokeBrush}">
+                                                    <StackPanel Spacing="5" Margin="6,10,6,6">
+                                                        <Border Height="4" CornerRadius="2" Background="{StaticResource LexoraMockupDarkAccentBrush}" />
+                                                        <Border Height="4" CornerRadius="2" Background="{StaticResource LexoraMockupDarkBarBrush}" Opacity="0.6" />
+                                                        <Border Height="4" CornerRadius="2" Background="{StaticResource LexoraMockupDarkBarBrush}" Opacity="0.4" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Margin="10,8,8,6" Spacing="6">
+                                                    <Border Height="5" Width="55" HorizontalAlignment="Left" CornerRadius="2.5" Background="{StaticResource LexoraMockupDarkBarBrush}" />
+                                                    <Border Background="{StaticResource LexoraMockupDarkCardBrush}" BorderThickness="1" BorderBrush="{StaticResource LexoraMockupDarkStrokeBrush}" CornerRadius="6" Padding="6">
+                                                        <StackPanel Spacing="4">
+                                                            <Border Height="4" Width="70" HorizontalAlignment="Left" CornerRadius="2" Background="{StaticResource LexoraMockupDarkAccentBrush}" />
+                                                            <Border Height="3" Width="48" HorizontalAlignment="Left" CornerRadius="1.5" Background="{StaticResource LexoraMockupDarkBarBrush}" Opacity="0.5" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Label & Selection Badge -->
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Settings_Theme_Dark')}" FontWeight="SemiBold" FontSize="14" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Settings_Theme_DarkDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <Border x:Name="ThemeDarkCheck" Grid.Column="1" Width="22" Height="22" CornerRadius="11" Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Top" Visibility="Collapsed">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                        </Grid>
                 </StackPanel>
             </Border>
 

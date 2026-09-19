@@ -15,16 +15,30 @@ public sealed class ReviewRatingToBrushConverter : IValueConverter
     {
         if (value is ReviewRating rating)
         {
-            return rating switch
+            string brushKey = rating switch
             {
-                ReviewRating.Again => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 196, 43,  28)),  // red
-                ReviewRating.Hard  => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 157, 93,   0)),  // amber
-                ReviewRating.Good  => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 16,  124, 65)),  // green
-                ReviewRating.Easy  => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0,   103, 192)), // blue
-                _                  => new SolidColorBrush(Colors.Gray)
+                ReviewRating.Again => "SystemFillColorCriticalBrush",
+                ReviewRating.Hard  => "SystemFillColorCautionBrush",
+                ReviewRating.Good  => "SystemFillColorSuccessBrush",
+                ReviewRating.Easy  => "AccentFillColorDefaultBrush",
+                _                  => "SubtleFillColorSecondaryBrush"
             };
+
+            var rootElement = (Microsoft.UI.Xaml.Application.Current as App)?.MainWindow?.Content as Microsoft.UI.Xaml.FrameworkElement;
+            var themeBrush = Services.ThemeResourceHelper.GetThemeBrush(rootElement, brushKey);
+            if (themeBrush != null)
+            {
+                return themeBrush;
+            }
+
+            if (Microsoft.UI.Xaml.Application.Current?.Resources != null &&
+                Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue(brushKey, out var res) &&
+                res is Brush brush)
+            {
+                return brush;
+            }
         }
-        return new SolidColorBrush(Colors.Gray);
+        return new SolidColorBrush(Colors.Transparent);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -32,12 +46,20 @@ public sealed class ReviewRatingToBrushConverter : IValueConverter
 }
 
 /// <summary>
-/// Maps a <see cref="ReviewRating"/> to a foreground <see cref="Brush"/> (always white for readability).
+/// Maps a <see cref="ReviewRating"/> to a foreground <see cref="Brush"/> (guaranteeing high contrast against badge backgrounds).
 /// </summary>
 public sealed class ReviewRatingToForegroundConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
-        => new SolidColorBrush(Colors.White);
+    {
+        var rootElement = (Microsoft.UI.Xaml.Application.Current as App)?.MainWindow?.Content as Microsoft.UI.Xaml.FrameworkElement;
+        var brush = Services.ThemeResourceHelper.GetThemeBrush(rootElement, "TextOnAccentFillColorPrimaryBrush");
+        if (brush != null)
+        {
+            return brush;
+        }
+        return new SolidColorBrush(Colors.White);
+    }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
         => throw new NotImplementedException();

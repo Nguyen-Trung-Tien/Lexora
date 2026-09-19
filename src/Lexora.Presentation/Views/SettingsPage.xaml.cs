@@ -19,7 +19,11 @@ public sealed partial class SettingsPage : Page
 
         Loc.LanguageChanged += OnLanguageChanged;
         Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
-        ActualThemeChanged += (s, e) => UpdateLanguageButtons();
+        ActualThemeChanged += (s, e) =>
+        {
+            UpdateLanguageButtons();
+            UpdateThemeButtons();
+        };
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
@@ -27,6 +31,7 @@ public sealed partial class SettingsPage : Page
         DispatcherQueue.TryEnqueue(() =>
         {
             UpdateLanguageButtons();
+            UpdateThemeButtons();
             Bindings.Update();
         });
     }
@@ -35,6 +40,7 @@ public sealed partial class SettingsPage : Page
     {
         await ViewModel.InitializeAsync();
         UpdateLanguageButtons();
+        UpdateThemeButtons();
 
         SpeechRateCombo.SelectedIndex = ViewModel.SpeechRate switch
         {
@@ -126,12 +132,53 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private void ThemeRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void ThemeSystemButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is RadioButtons rb)
+        ViewModel.ChangeTheme(0);
+        UpdateThemeButtons();
+    }
+
+    private void ThemeLightButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ChangeTheme(1);
+        UpdateThemeButtons();
+    }
+
+    private void ThemeDarkButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ChangeTheme(2);
+        UpdateThemeButtons();
+    }
+
+    private void UpdateThemeButtons()
+    {
+        int index = ViewModel.SelectedThemeIndex;
+        var selectedBorder = GetThemeBrush("LexoraThemeCardSelectedBorderBrush") ?? GetThemeBrush("AccentFillColorDefaultBrush");
+        var defaultBorder = GetThemeBrush("CardStrokeColorDefaultBrush");
+        var cardBg = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+        var subtleBg = GetThemeBrush("SubtleFillColorSecondaryBrush");
+
+        void ApplyThemeBtn(Button btn, Border check, bool isSelected)
         {
-            ViewModel.ChangeTheme(rb.SelectedIndex);
+            if (isSelected)
+            {
+                if (selectedBorder != null) btn.BorderBrush = selectedBorder;
+                if (cardBg != null) btn.Background = cardBg;
+                btn.BorderThickness = new Thickness(2);
+                check.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                if (defaultBorder != null) btn.BorderBrush = defaultBorder;
+                if (subtleBg != null) btn.Background = subtleBg;
+                btn.BorderThickness = new Thickness(1);
+                check.Visibility = Visibility.Collapsed;
+            }
         }
+
+        if (ThemeSystemButton != null && ThemeSystemCheck != null) ApplyThemeBtn(ThemeSystemButton, ThemeSystemCheck, index == 0);
+        if (ThemeLightButton != null && ThemeLightCheck != null) ApplyThemeBtn(ThemeLightButton, ThemeLightCheck, index == 1);
+        if (ThemeDarkButton != null && ThemeDarkCheck != null) ApplyThemeBtn(ThemeDarkButton, ThemeDarkCheck, index == 2);
     }
 
     private void LangViButton_Click(object sender, RoutedEventArgs e)

@@ -11,6 +11,7 @@ public partial class GrammarViewModel : ObservableObject
 {
     private readonly IGrammarService _grammarService;
     private readonly Services.ILocalizationService _localizationService;
+    private readonly Services.ISoundFeedbackService? _soundFeedback;
     private readonly List<GrammarQuizSubmissionDto> _practiceSubmissions = new();
 
     [ObservableProperty]
@@ -70,21 +71,35 @@ public partial class GrammarViewModel : ObservableObject
     public partial double PracticeProgressPercent { get; set; } = 0.0;
 
     [ObservableProperty]
+    public partial string PracticeStepBadge { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PracticeStatusTip { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string NextButtonText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ResultSummaryMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial GrammarPracticeResultDto? PracticeResult { get; set; }
 
     public ObservableCollection<GrammarRuleDto> Rules { get; } = new();
     public ObservableCollection<CefrLevel> CefrLevels { get; } = new();
     public ObservableCollection<ExamType> ExamTypes { get; } = new();
     public ObservableCollection<string> Topics { get; } = new();
-    public ObservableCollection<string> CurrentPracticeOptions { get; } = new();
+    public ObservableCollection<TestOptionItem> CurrentPracticeOptions { get; } = new();
     public ObservableCollection<GrammarQuizQuestionDto> PracticeQuestions { get; } = new();
 
     public GrammarViewModel(
         IGrammarService grammarService,
-        Services.ILocalizationService localizationService)
+        Services.ILocalizationService localizationService,
+        Services.ISoundFeedbackService? soundFeedback = null)
     {
         _grammarService = grammarService;
         _localizationService = localizationService;
+        _soundFeedback = soundFeedback;
     }
 
     [RelayCommand]
@@ -235,17 +250,28 @@ public partial class GrammarViewModel : ObservableObject
         CurrentPracticeQuestion = PracticeQuestions[index];
         PracticeProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), index + 1, TotalPracticeQuestions);
         PracticeProgressPercent = (double)(index + 1) / TotalPracticeQuestions * 100.0;
+        PracticeStepBadge = $"{_localizationService.GetString("Test_Question").ToUpperInvariant()} {index + 1} / {TotalPracticeQuestions}";
 
         CurrentPracticeOptions.Clear();
-        foreach (var opt in CurrentPracticeQuestion.Options)
+        for (int i = 0; i < CurrentPracticeQuestion.Options.Count; i++)
         {
-            CurrentPracticeOptions.Add(opt);
+            char letter = (char)('A' + i);
+            CurrentPracticeOptions.Add(new TestOptionItem
+            {
+                Text = CurrentPracticeQuestion.Options[i],
+                State = TestOptionState.Default,
+                Glyph = "\uE739",
+                Letter = letter.ToString()
+            });
         }
 
         SelectedOption = null;
         IsAnswerSubmitted = false;
         IsAnswerCorrect = false;
         ExplanationText = string.Empty;
+
+        UpdatePracticeStatusTip();
+        UpdateNextButtonText();
     }
 
     [RelayCommand]
@@ -258,11 +284,51 @@ public partial class GrammarViewModel : ObservableObject
         IsAnswerCorrect = string.Equals(option.Trim(), CurrentPracticeQuestion.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
         ExplanationText = CurrentPracticeQuestion.Explanation;
 
+        if (IsAnswerCorrect)
+        {
+            _soundFeedback?.PlayStreakSound();
+        }
+        else
+        {
+            _soundFeedback?.PlaySoftTapSound();
+        }
+
+        foreach (var optItem in CurrentPracticeOptions)
+        {
+            bool isThisSelected = string.Equals(optItem.Text.Trim(), option.Trim(), StringComparison.OrdinalIgnoreCase);
+            bool isThisCorrect = string.Equals(optItem.Text.Trim(), CurrentPracticeQuestion.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
+
+            if (isThisSelected)
+            {
+                if (isThisCorrect)
+                {
+                    optItem.State = TestOptionState.SelectedCorrect;
+                    optItem.Glyph = "\uE73E";
+                }
+                else
+                {
+                    optItem.State = TestOptionState.SelectedIncorrect;
+                    optItem.Glyph = "\uE711";
+                }
+            }
+            else if (isThisCorrect)
+            {
+                optItem.State = TestOptionState.RevealedCorrect;
+                optItem.Glyph = "\uE73E";
+            }
+            else
+            {
+                optItem.State = TestOptionState.Default;
+            }
+        }
+
         _practiceSubmissions.Add(new GrammarQuizSubmissionDto(
             CurrentPracticeQuestion.RuleId,
             CurrentPracticeQuestion.QuestionNumber,
             option
         ));
+
+        UpdatePracticeStatusTip();
     }
 
     [RelayCommand]
@@ -283,8 +349,43 @@ public partial class GrammarViewModel : ObservableObject
         var result = _grammarService.EvaluateQuiz(PracticeQuestions.ToList(), _practiceSubmissions);
         PracticeResult = result;
 
+        if (_localizationService.CurrentLanguage == "vi-VN")
+        {
+            ResultSummaryMessage = $"Bạn đã hoàn thành bài luyện tập với {result.CorrectCount}/{result.TotalQuestions} câu trả lời chính xác (Đạt {result.ScorePercentage:F0}%).";
+        }
+        else
+        {
+            ResultSummaryMessage = $"You completed the practice with {result.CorrectCount}/{result.TotalQuestions} correct answers ({result.ScorePercentage:F0}% score).";
+        }
+
+        _soundFeedback?.PlayReviewCompleteSound();
+
         IsPracticeMode = false;
         IsPracticeResultMode = true;
+    }
+
+    private void UpdatePracticeStatusTip()
+    {
+        if (!IsAnswerSubmitted)
+        {
+            PracticeStatusTip = _localizationService.CurrentLanguage == "vi-VN"
+                ? "Chọn một phương án để kiểm tra cấu trúc"
+                : "Select an option to check structure formula";
+        }
+        else
+        {
+            PracticeStatusTip = _localizationService.CurrentLanguage == "vi-VN"
+                ? "Nhấn 'Câu tiếp theo' để tiếp tục"
+                : "Click 'Next Question' to continue";
+        }
+    }
+
+    private void UpdateNextButtonText()
+    {
+        bool isLast = CurrentQuestionIndex + 1 >= TotalPracticeQuestions;
+        NextButtonText = isLast
+            ? _localizationService.GetString("Test_FinishTest")
+            : _localizationService.GetString("Test_NextQuestion");
     }
 
     [RelayCommand]

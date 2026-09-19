@@ -18,6 +18,7 @@ public partial class ReviewViewModel : ObservableObject
     private readonly IUserPreferencesService _preferencesService;
     private readonly IVocabularyService _vocabService;
     private readonly ILocalizationService _localizationService;
+    private readonly ISoundFeedbackService? _soundFeedback;
     private readonly Stopwatch _cardTimer = new();
 
     private Guid? _currentSessionId;
@@ -44,7 +45,7 @@ public partial class ReviewViewModel : ObservableObject
         int CompletedCount,
         int RemainingCount,
         double ProgressPercent,
-        bool WasCompleted
+        bool IsCompleted
     );
 
     private readonly Stack<ReviewUndoState> _undoStack = new();
@@ -178,13 +179,15 @@ public partial class ReviewViewModel : ObservableObject
         IAudioPlayerService audioPlayer,
         IUserPreferencesService preferencesService,
         IVocabularyService vocabService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        ISoundFeedbackService? soundFeedback = null)
     {
         _reviewService = reviewService;
         _audioPlayer = audioPlayer;
         _preferencesService = preferencesService;
         _vocabService = vocabService;
         _localizationService = localizationService;
+        _soundFeedback = soundFeedback;
 
         UpdateActiveSessionTitle();
 
@@ -314,6 +317,7 @@ public partial class ReviewViewModel : ObservableObject
     public void RevealAnswer()
     {
         IsAnswerVisible = true;
+        _soundFeedback?.PlayCardFlipSound();
     }
 
     private bool _isRatingInProgress;
@@ -382,6 +386,16 @@ public partial class ReviewViewModel : ObservableObject
                         _initialQueueCount,
                         SessionCorrectCount,
                         SessionIncorrectCount);
+                }
+
+                // Fluent Sound Feedback: Triumphant streak chime if user performed well, or calming accomplishment chime
+                if (SessionCorrectCount > 0 && SessionCorrectCount >= SessionIncorrectCount)
+                {
+                    _soundFeedback?.PlayStreakSound();
+                }
+                else
+                {
+                    _soundFeedback?.PlayReviewCompleteSound();
                 }
 
                 await RefreshDueCountAsync();

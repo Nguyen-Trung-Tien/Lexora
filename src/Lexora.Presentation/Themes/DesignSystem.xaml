@@ -11,21 +11,48 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
             <!-- Hero card border: soft accent-tinted stroke for depth vs Mica in light mode -->
-            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColorLight1}" Opacity="0.4" />
-            <!-- Metric stat card border same as system card stroke -->
-            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemAccentColorLight1}" Opacity="0.2" />
+            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.28" />
+            <!-- Metric stat card border: crisp edge so cards pop against light Mica -->
+            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.32" />
             <!-- Advisor card accent border -->
-            <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.7" />
+            <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.65" />
+            <!-- Subtle card stroke token -->
+            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.3" />
+            <!-- Input background & border tokens for crisp contrast -->
+            <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="#FAFAFA" />
+            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.4" />
+            <!-- Flashcard crisp border for tactile elevation in light mode -->
+            <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.45" />
+            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.38" />
+            <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColor}" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.5" />
-            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.5" />
-            <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.6" />
+            <!-- Hero card border: glowing accent stroke for depth in dark mode -->
+            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.42" />
+            <!-- Metric stat card border: luminous edge so cards don't dissolve in dark background -->
+            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
+            <!-- Advisor card accent border -->
+            <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.65" />
+            <!-- Subtle card stroke token -->
+            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.5" />
+            <!-- Input background & border tokens for dark mode -->
+            <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="#242424" />
+            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.55" />
+            <!-- Flashcard glowing border for tactile elevation in dark mode -->
+            <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.7" />
+            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
+            <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
@@ -200,5 +227,78 @@
         <Setter Property="Padding" Value="40,32" />
         <Setter Property="MinHeight" Value="320" />
     </Style>
+
+    <!-- Standard Lexora Button Styles -->
+    <Style x:Key="LexoraStandardButtonStyle" TargetType="Button">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="Padding" Value="14,7" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style x:Key="LexoraAccentButtonStyle" TargetType="Button">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style x:Key="LexoraSubtleButtonStyle" TargetType="Button">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- Standard Lexora Input Styles -->
+    <Style x:Key="LexoraTextBoxStyle" TargetType="TextBox">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="Padding" Value="12,7" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style x:Key="LexoraComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- Specialized Typography Tokens -->
+    <Style x:Key="LexoraDisplayTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="LexoraMetricNumberStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    </Style>
+
+    <!-- Theme Selector Visual Mockup Brushes -->
+    <SolidColorBrush x:Key="LexoraMockupLightWindowBrush" Color="#F2F3F5" />
+    <SolidColorBrush x:Key="LexoraMockupLightSidebarBrush" Color="#E5E7EB" />
+    <SolidColorBrush x:Key="LexoraMockupLightCardBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="LexoraMockupLightStrokeBrush" Color="#D1D5DB" />
+    <SolidColorBrush x:Key="LexoraMockupLightBarBrush" Color="#9CA3AF" />
+    <SolidColorBrush x:Key="LexoraMockupLightAccentBrush" Color="#0078D4" />
+
+    <SolidColorBrush x:Key="LexoraMockupDarkWindowBrush" Color="#18191B" />
+    <SolidColorBrush x:Key="LexoraMockupDarkSidebarBrush" Color="#222428" />
+    <SolidColorBrush x:Key="LexoraMockupDarkCardBrush" Color="#2C2E33" />
+    <SolidColorBrush x:Key="LexoraMockupDarkStrokeBrush" Color="#3F4248" />
+    <SolidColorBrush x:Key="LexoraMockupDarkBarBrush" Color="#6B7280" />
+    <SolidColorBrush x:Key="LexoraMockupDarkAccentBrush" Color="#60CDFF" />
 
 </ResourceDictionary>

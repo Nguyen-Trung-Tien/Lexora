@@ -98,6 +98,7 @@ public sealed partial class WordEditorDialog : ContentDialog
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
 
         InitializeComponent();
+        Loaded += (s, e) => DialogEntranceStoryboard.Begin();
 
         if (App.Current?.Services?.GetService<IThemeService>() is { } themeService)
         {

@@ -17,6 +17,54 @@
     </Page.KeyboardAccelerators>
 
     <Grid RowDefinitions="Auto,Auto,*" Padding="24,18" RowSpacing="14">
+        <Grid.Resources>
+            <!-- Connected Morph Pre-Launch Storyboard -->
+            <Storyboard x:Name="CardMorphStoryboard">
+                <DoubleAnimation
+                    Storyboard.TargetName="WordDetailScaleTransform"
+                    Storyboard.TargetProperty="ScaleX"
+                    From="1.0" To="1.02"
+                    AutoReverse="True"
+                    Duration="0:0:0.18">
+                    <DoubleAnimation.EasingFunction>
+                        <CubicEase EasingMode="EaseInOut" />
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+                <DoubleAnimation
+                    Storyboard.TargetName="WordDetailScaleTransform"
+                    Storyboard.TargetProperty="ScaleY"
+                    From="1.0" To="1.02"
+                    AutoReverse="True"
+                    Duration="0:0:0.18">
+                    <DoubleAnimation.EasingFunction>
+                        <CubicEase EasingMode="EaseInOut" />
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+            </Storyboard>
+
+            <!-- Card Save / Update Fluid Return Storyboard -->
+            <Storyboard x:Name="CardSaveSuccessStoryboard">
+                <DoubleAnimation
+                    Storyboard.TargetName="WordDetailScaleTransform"
+                    Storyboard.TargetProperty="ScaleX"
+                    From="0.97" To="1.0"
+                    Duration="0:0:0.25">
+                    <DoubleAnimation.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.25" />
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+                <DoubleAnimation
+                    Storyboard.TargetName="WordDetailScaleTransform"
+                    Storyboard.TargetProperty="ScaleY"
+                    From="0.97" To="1.0"
+                    Duration="0:0:0.25">
+                    <DoubleAnimation.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.25" />
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+            </Storyboard>
+        </Grid.Resources>
+
         <!-- ========================================================= -->
         <!-- TOP COMMAND BAR: Segmented Mode, Search, Actions          -->
         <!-- ========================================================= -->
@@ -328,9 +376,13 @@
             </Border>
 
             <!-- Right: Word Detail (Oxford / Cambridge Dictionary Style) -->
-            <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            <Border x:Name="WordDetailPaneBorder" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="28">
+                    BorderThickness="1" CornerRadius="12" Padding="28"
+                    RenderTransformOrigin="0.5,0.3">
+                <Border.RenderTransform>
+                    <ScaleTransform x:Name="WordDetailScaleTransform" ScaleX="1.0" ScaleY="1.0" />
+                </Border.RenderTransform>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid>
                         <!-- Empty State (No word selected) -->

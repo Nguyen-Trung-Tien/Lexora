@@ -2,6 +2,7 @@ using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 
 namespace Lexora.Presentation.Views;
@@ -142,6 +143,26 @@ public sealed partial class GrammarPage : Page
         return isCorrect 
             ? (Loc.CurrentLanguage == "vi-VN" ? "Chính xác! 🎉" : "Correct! 🎉")
             : (Loc.CurrentLanguage == "vi-VN" ? "Chưa chính xác!" : "Incorrect!");
+    }
+
+    public Brush GetQuestionReviewBrush(bool? isCorrect)
+    {
+        string brushKey = isCorrect == true ? "SystemFillColorSuccessBrush" : "SystemFillColorCriticalBrush";
+        return Services.ThemeResourceHelper.GetThemeBrush(this, brushKey) ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+    }
+
+    public string GetQuestionReviewGlyph(bool? isCorrect)
+    {
+        return isCorrect == true ? "\uE73E" : "\uE711";
+    }
+
+    public string GetQuestionReviewStatusText(bool? isCorrect)
+    {
+        if (isCorrect == true)
+        {
+            return Loc.CurrentLanguage == "vi-VN" ? "Chính xác" : "Correct";
+        }
+        return Loc.CurrentLanguage == "vi-VN" ? "Chưa đúng" : "Incorrect";
     }
 
     private void AddRuleAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)

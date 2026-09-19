@@ -154,6 +154,53 @@ public sealed partial class ReviewPage : Page
         }
     }
 
+    private void SpaceAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ViewModel.IsTypingRecallActive) return;
+
+        if (ViewModel.IsCardActive && !ViewModel.IsAnswerVisible)
+        {
+            ShowAnswerButton_Click(this, new RoutedEventArgs());
+            args.Handled = true;
+        }
+    }
+
+    private void Rate1Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ViewModel.IsCardActive && ViewModel.IsAnswerVisible)
+        {
+            AgainButton_Click(this, new RoutedEventArgs());
+            args.Handled = true;
+        }
+    }
+
+    private void Rate2Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ViewModel.IsCardActive && ViewModel.IsAnswerVisible)
+        {
+            HardButton_Click(this, new RoutedEventArgs());
+            args.Handled = true;
+        }
+    }
+
+    private void Rate3Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ViewModel.IsCardActive && ViewModel.IsAnswerVisible)
+        {
+            GoodButton_Click(this, new RoutedEventArgs());
+            args.Handled = true;
+        }
+    }
+
+    private void Rate4Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ViewModel.IsCardActive && ViewModel.IsAnswerVisible)
+        {
+            EasyButton_Click(this, new RoutedEventArgs());
+            args.Handled = true;
+        }
+    }
+
     private void TypingInputBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Enter)

@@ -143,7 +143,7 @@
                     <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="20,18"
-                            Tapped="DueTodayCard_Tapped"
+                            Tapped="StreakCard_Tapped"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Dashboard_TooltipStreak')}">
                         <StackPanel Spacing="10">
                             <Grid ColumnDefinitions="*,Auto">

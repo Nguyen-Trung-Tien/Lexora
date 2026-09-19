@@ -90,6 +90,11 @@ public static class ThemeResourceHelper
             "CardStrokeColorDefaultBrush" => isLight ? LightCardStroke : DarkCardStroke,
             "SubtleFillColorSecondaryBrush" => isLight ? LightSubtleBackground : DarkSubtleBackground,
             "AccentFillColorDefaultBrush" => isLight ? LightAccentText : DarkAccentText,
+            "TextOnAccentFillColorPrimaryBrush" => new SolidColorBrush(Colors.White),
+            // Semantic state solid fills (High contrast AA standard)
+            "SystemFillColorSuccessBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 16, 124, 65)) : new SolidColorBrush(Color.FromArgb(255, 108, 203, 95)),
+            "SystemFillColorCriticalBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 196, 43, 28)) : new SolidColorBrush(Color.FromArgb(255, 255, 153, 164)),
+            "SystemFillColorCautionBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 157, 93, 0)) : new SolidColorBrush(Color.FromArgb(255, 255, 213, 128)),
             // Semantic state background fills
             "SystemFillColorSuccessBackgroundBrush" => isLight ? LightSuccessBackground : DarkSuccessBackground,
             "SystemFillColorCriticalBackgroundBrush" => isLight ? LightCriticalBackground : DarkCriticalBackground,

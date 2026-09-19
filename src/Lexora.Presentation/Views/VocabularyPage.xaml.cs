@@ -299,6 +299,9 @@ public sealed partial class VocabularyPage : Page
 
     private async void AddWordButton_Click(object sender, RoutedEventArgs e)
     {
+        var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
+        soundFeedback?.PlaySoftTapSound();
+
         var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var dialog = new WordEditorDialog(null, ViewModel.AvailableTopics, ViewModel.AvailableExamTags)
         {
@@ -311,6 +314,9 @@ public sealed partial class VocabularyPage : Page
         {
             await ViewModel.SaveWordAsync(dialog.ResultDto);
             PopulateTopicFilterCombo();
+
+            CardSaveSuccessStoryboard.Begin();
+            soundFeedback?.PlayCardFlipSound();
         }
     }
 
@@ -356,6 +362,11 @@ public sealed partial class VocabularyPage : Page
     {
         if (ViewModel.SelectedWord == null) return;
 
+        // Smooth connected pre-launch card spring
+        CardMorphStoryboard.Begin();
+        var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
+        soundFeedback?.PlaySoftTapSound();
+
         var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var dialog = new WordEditorDialog(ViewModel.SelectedWord, ViewModel.AvailableTopics, ViewModel.AvailableExamTags)
         {
@@ -368,6 +379,10 @@ public sealed partial class VocabularyPage : Page
         {
             await ViewModel.SaveWordAsync(dialog.ResultDto);
             PopulateTopicFilterCombo();
+
+            // Smooth return bounce + pleasant completion feedback
+            CardSaveSuccessStoryboard.Begin();
+            soundFeedback?.PlayCardFlipSound();
         }
     }
 
@@ -847,11 +862,17 @@ public sealed partial class VocabularyPage : Page
                 RequestedTheme = activeTheme
             };
 
+            var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
+            soundFeedback?.PlaySoftTapSound();
+
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
             {
                 await ViewModel.SaveWordAsync(dialog.ResultDto);
                 PopulateTopicFilterCombo();
+
+                CardSaveSuccessStoryboard.Begin();
+                soundFeedback?.PlayCardFlipSound();
             }
         }
     }

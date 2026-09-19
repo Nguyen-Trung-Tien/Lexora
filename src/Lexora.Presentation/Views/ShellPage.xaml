@@ -15,6 +15,7 @@
         <KeyboardAccelerator Key="Number4" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
         <KeyboardAccelerator Key="Number5" Modifiers="Control" Invoked="NavigateAccelerator_Invoked" />
         <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="SearchAccelerator_Invoked" />
+        <KeyboardAccelerator Key="K" Modifiers="Control" Invoked="SearchAccelerator_Invoked" />
     </Page.KeyboardAccelerators>
 
     <Grid KeyboardAcceleratorPlacementMode="Hidden">
@@ -70,7 +71,27 @@
             </NavigationView.FooterMenuItems>
 
             <NavigationView.AutoSuggestBox>
-                <AutoSuggestBox x:Name="GlobalSearchBox" PlaceholderText="Search Lexora..." ToolTipService.ToolTip="Search Lexora (Ctrl+F)" QuerySubmitted="GlobalSearchBox_QuerySubmitted" />
+                <AutoSuggestBox x:Name="GlobalSearchBox"
+                                PlaceholderText="Search Lexora... (Ctrl+K)"
+                                ToolTipService.ToolTip="Smart Search (Ctrl+K, Ctrl+F)"
+                                QueryIcon="Find"
+                                TextChanged="GlobalSearchBox_TextChanged"
+                                SuggestionChosen="GlobalSearchBox_SuggestionChosen"
+                                QuerySubmitted="GlobalSearchBox_QuerySubmitted">
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="4,4">
+                                <Border Width="26" Height="26" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                    <FontIcon Glyph="{Binding Glyph}" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" />
+                                    <TextBlock Text="{Binding Subtitle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
+                </AutoSuggestBox>
             </NavigationView.AutoSuggestBox>
 
             <Grid RowDefinitions="Auto,*">

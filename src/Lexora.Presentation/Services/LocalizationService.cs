@@ -26,7 +26,7 @@ public class LocalizationService : ILocalizationService
             ["Nav_Test"] = "Luyện tập & Thi",
             ["Nav_Grammar"] = "Ngữ pháp",
             ["Nav_Settings"] = "Cài đặt",
-            ["Search_Placeholder"] = "Tìm kiếm từ vựng, ngữ pháp... (Ctrl+F)",
+            ["Search_Placeholder"] = "Tìm kiếm thông minh (Ctrl+K)...",
             ["Review_Reminder_Title"] = "Nhắc nhở ôn tập",
             ["Review_Now"] = "Ôn tập ngay",
 
@@ -267,6 +267,10 @@ public class LocalizationService : ILocalizationService
             ["Grammar_Incorrect"] = "Chưa đúng",
             ["Grammar_PracticeAgain"] = "Luyện tập tiếp",
             ["Grammar_BackToRules"] = "Quay lại cẩm nang",
+            ["Grammar_PracticeTitle"] = "Luyện tập cấu trúc ngữ pháp",
+            ["Grammar_ReviewQuestions"] = "Chi tiết các câu hỏi luyện tập",
+            ["Grammar_YourAnswer"] = "Lựa chọn của bạn",
+            ["Grammar_CorrectAnswer"] = "Công thức đúng",
 
 
 
@@ -275,8 +279,17 @@ public class LocalizationService : ILocalizationService
             ["Settings_Theme"] = "Giao diện hiển thị",
             ["Settings_ThemeSubtitle"] = "Tùy chỉnh chế độ sáng, tối hoặc theo cài đặt hệ điều hành Windows.",
             ["Settings_Theme_System"] = "Theo hệ thống Windows",
+            ["Settings_Theme_SystemDesc"] = "Tự động đồng bộ theo giao diện Windows",
             ["Settings_Theme_Light"] = "Chế độ Sáng (Light)",
+            ["Settings_Theme_LightDesc"] = "Giao diện thanh lịch, tương phản tươi sáng",
             ["Settings_Theme_Dark"] = "Chế độ Tối (Dark)",
+            ["Settings_Theme_DarkDesc"] = "Dịu mắt, tối ưu tập trung khi học ban đêm",
+            ["Search_SmartNav_Dashboard"] = "Trang chủ & Bảng tổng quan",
+            ["Search_SmartNav_Vocab"] = "Kho từ vựng & Tra cứu chi tiết",
+            ["Search_SmartNav_Review"] = "Ôn tập Flashcard ngắt quãng SM-2",
+            ["Search_SmartNav_Test"] = "Kiểm tra trắc nghiệm & Luyện tập",
+            ["Search_SmartNav_Grammar"] = "Sổ tay & Cấu trúc ngữ pháp",
+            ["Search_SmartNav_Settings"] = "Cài đặt hệ thống & Tùy chọn",
             ["Settings_Language"] = "Ngôn ngữ ứng dụng",
             ["Settings_LanguageSubtitle"] = "Lựa chọn ngôn ngữ giao diện hiển thị cho toàn bộ ứng dụng Lexora.",
             ["Settings_Audio"] = "Giọng đọc & Phát âm",
@@ -668,8 +681,8 @@ public class LocalizationService : ILocalizationService
             ["Time_LessThanOneDay"] = "< 1 ngày",
 
             // Newly Added Shell Navigation & Tooltips
-            ["Shell_SearchPlaceholder"] = "Tìm kiếm từ vựng, ngữ pháp... (Ctrl+F)",
-            ["Shell_SearchTooltip"] = "Tìm kiếm Lexora (Ctrl+F)",
+            ["Shell_SearchPlaceholder"] = "Tìm kiếm thông minh (Ctrl+K)...",
+            ["Shell_SearchTooltip"] = "Tìm kiếm thông minh (Ctrl+K, Ctrl+F)",
             ["Shell_TooltipDashboard"] = "Tổng quan (Ctrl+1)",
             ["Shell_TooltipVocabulary"] = "Kho từ vựng (Ctrl+2)",
             ["Shell_TooltipReview"] = "Ôn tập ngắt quãng (Ctrl+3)",
@@ -687,7 +700,7 @@ public class LocalizationService : ILocalizationService
             ["Nav_Test"] = "Practice & Test",
             ["Nav_Grammar"] = "Grammar",
             ["Nav_Settings"] = "Settings",
-            ["Search_Placeholder"] = "Search words, grammar... (Ctrl+F)",
+            ["Search_Placeholder"] = "Smart search (Ctrl+K)...",
             ["Review_Reminder_Title"] = "Review Reminder",
             ["Review_Now"] = "Review Now",
 
@@ -929,6 +942,10 @@ public class LocalizationService : ILocalizationService
             ["Grammar_Incorrect"] = "Incorrect",
             ["Grammar_PracticeAgain"] = "Try Another Practice",
             ["Grammar_BackToRules"] = "Back to Rules",
+            ["Grammar_PracticeTitle"] = "Grammar Structure Practice",
+            ["Grammar_ReviewQuestions"] = "Practice Questions Review",
+            ["Grammar_YourAnswer"] = "Your answer",
+            ["Grammar_CorrectAnswer"] = "Correct formula",
 
 
             // Settings
@@ -936,8 +953,17 @@ public class LocalizationService : ILocalizationService
             ["Settings_Theme"] = "Appearance Theme",
             ["Settings_ThemeSubtitle"] = "Choose light, dark or follow your Windows operating system setting.",
             ["Settings_Theme_System"] = "Use system setting",
+            ["Settings_Theme_SystemDesc"] = "Automatically matches your Windows mode",
             ["Settings_Theme_Light"] = "Light Mode",
+            ["Settings_Theme_LightDesc"] = "Clean, crisp & high contrast appearance",
             ["Settings_Theme_Dark"] = "Dark Mode",
+            ["Settings_Theme_DarkDesc"] = "Gentle on the eyes, night-study optimized",
+            ["Search_SmartNav_Dashboard"] = "Home & Dashboard Overview",
+            ["Search_SmartNav_Vocab"] = "Vocabulary Repository & Search",
+            ["Search_SmartNav_Review"] = "Spaced Repetition Review (SM-2)",
+            ["Search_SmartNav_Test"] = "Quiz & Knowledge Practice",
+            ["Search_SmartNav_Grammar"] = "Grammar Handbook & Structures",
+            ["Search_SmartNav_Settings"] = "System Settings & Preferences",
             ["Settings_Language"] = "App Language",
             ["Settings_LanguageSubtitle"] = "Select the interface display language for Lexora application.",
             ["Settings_Audio"] = "Audio & Speech",
@@ -1330,8 +1356,8 @@ public class LocalizationService : ILocalizationService
             ["Time_LessThanOneDay"] = "< 1 d",
 
             // Newly Added Shell Navigation & Tooltips
-            ["Shell_SearchPlaceholder"] = "Search words, grammar... (Ctrl+F)",
-            ["Shell_SearchTooltip"] = "Search Lexora (Ctrl+F)",
+            ["Shell_SearchPlaceholder"] = "Smart search (Ctrl+K)...",
+            ["Shell_SearchTooltip"] = "Smart search (Ctrl+K, Ctrl+F)",
             ["Shell_TooltipDashboard"] = "Dashboard (Ctrl+1)",
             ["Shell_TooltipVocabulary"] = "Vocabulary (Ctrl+2)",
             ["Shell_TooltipReview"] = "Spaced Review (Ctrl+3)",
