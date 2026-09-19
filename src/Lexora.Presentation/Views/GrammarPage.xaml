@@ -33,7 +33,7 @@
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                       HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled"
                       Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="10" MinWidth="720">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" MinWidth="720">
                 
                 <!-- Search Box with Live Debounce -->
                 <TextBox MinWidth="160"
@@ -71,8 +71,47 @@
                         <TextBlock Text="{x:Bind Loc.GetString('Grammar_Practice')}" FontWeight="SemiBold" />
                     </StackPanel>
                 </Button>
+
+                <!-- Import / Export Dropdown -->
+                <DropDownButton Grid.Column="5" Padding="12,8" CornerRadius="10"
+                                ToolTipService.ToolTip="Import / Export">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE8B5;" FontSize="14" />
+                        <TextBlock Text="I/O" FontWeight="SemiBold" />
+                    </StackPanel>
+                    <DropDownButton.Flyout>
+                        <MenuFlyout Placement="Bottom">
+                            <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Export')}">
+                                <MenuFlyoutItem x:Name="ExportJsonMenuItem"
+                                               Text="{x:Bind Loc.GetString('Grammar_ExportJson')}"
+                                               Click="ExportJson_Click">
+                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8A5;" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="ExportCsvMenuItem"
+                                               Text="{x:Bind Loc.GetString('Grammar_ExportCsv')}"
+                                               Click="ExportCsv_Click">
+                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8A5;" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Import')}">
+                                <MenuFlyoutItem x:Name="ImportJsonMenuItem"
+                                               Text="{x:Bind Loc.GetString('Grammar_ImportJson')}"
+                                               Click="ImportJson_Click">
+                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="ImportCsvMenuItem"
+                                               Text="{x:Bind Loc.GetString('Grammar_ImportCsv')}"
+                                               Click="ImportCsv_Click">
+                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyoutSubItem>
+                        </MenuFlyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
             </Grid>
         </ScrollViewer>
+
 
         <!-- ========================================== -->
         <!-- 1. MASTER-DETAIL VIEW (Main Mode)          -->

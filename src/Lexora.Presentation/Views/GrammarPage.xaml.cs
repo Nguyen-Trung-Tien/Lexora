@@ -1,9 +1,12 @@
+using Lexora.Application.DTOs;
+using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
@@ -225,5 +228,241 @@ public sealed partial class GrammarPage : Page
         {
             // Clipboard fallback
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Export Handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private async void ExportJson_Click(object sender, RoutedEventArgs e)
+        => await PerformExportAsync("json", "Grammar JSON File", ".json",
+               progress => ViewModel.ExportToJsonAsync(progress));
+
+    private async void ExportCsv_Click(object sender, RoutedEventArgs e)
+        => await PerformExportAsync("csv", "Grammar CSV File", ".csv",
+               progress => ViewModel.ExportToCsvAsync(progress));
+
+    private async Task PerformExportAsync(
+        string format, string fileTypeDesc, string extension,
+        Func<IProgress<ProgressReport>, Task<string>> exportFunc)
+    {
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
+            ? ElementTheme.Dark : ElementTheme.Light;
+
+        var progressDialog = new OperationProgressDialog
+        {
+            Title = Loc.GetString("Progress_ExportingTitle"),
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
+        };
+        progressDialog.SetIndeterminate(Loc.GetString("Progress_PreparingExport"), Loc.GetString("Progress_PleaseWait"));
+        _ = progressDialog.ShowAsync();
+
+        try
+        {
+            var progress = new Progress<ProgressReport>(report =>
+                DispatcherQueue.TryEnqueue(() =>
+                    progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail)));
+
+            var content = await exportFunc(progress);
+            progressDialog.Hide();
+            await Task.Yield();
+
+            var defaultName = $"lexora_grammar_{DateTime.Now:yyyyMMdd_HHmmss}";
+            await SaveExportFileAsync(content, defaultName, extension, fileTypeDesc);
+        }
+        catch (Exception ex)
+        {
+            progressDialog.Hide();
+            await Task.Yield();
+            await ShowErrorDialogAsync(Loc.GetString("Grammar_ExportFailed"), ex.Message);
+        }
+    }
+
+    private async Task SaveExportFileAsync(
+        string content, string defaultName, string extension, string fileTypeDescription)
+    {
+        string? savedPath = null;
+        try
+        {
+            var savePicker = new FileSavePicker();
+            savePicker.SuggestedStartLocation = PickerLocationId.Desktop;
+            savePicker.FileTypeChoices.Add(fileTypeDescription, [extension]);
+            savePicker.SuggestedFileName = defaultName;
+
+            var mainWindow = App.Current.MainWindow;
+            if (mainWindow != null)
+            {
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(mainWindow);
+                WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
+            }
+
+            var file = await savePicker.PickSaveFileAsync();
+            if (file != null)
+            {
+                await Windows.Storage.FileIO.WriteTextAsync(file, content);
+                savedPath = file.Path;
+            }
+            else return; // User cancelled
+        }
+        catch
+        {
+            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            savedPath = Path.Combine(desktop, $"{defaultName}{extension}");
+            await File.WriteAllTextAsync(savedPath, content);
+        }
+
+        if (!string.IsNullOrEmpty(savedPath))
+        {
+            var exportTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
+                ? ElementTheme.Dark : ElementTheme.Light;
+            var dialog = new ContentDialog
+            {
+                Title = Loc.GetString("Grammar_ExportCompleteTitle"),
+                Content = string.Format(Loc.GetString("Grammar_ExportCompleteMsg"),
+                    ViewModel.Rules.Count, savedPath),
+                CloseButtonText = Loc.GetString("Action_Close"),
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = exportTheme
+            };
+            await dialog.ShowAsync();
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Import Handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private async void ImportJson_Click(object sender, RoutedEventArgs e)
+        => await ShowImportDialogAsync("json");
+
+    private async void ImportCsv_Click(object sender, RoutedEventArgs e)
+        => await ShowImportDialogAsync("csv");
+
+    private async Task ShowImportDialogAsync(string format)
+    {
+        string dialogTitle = format == "json"
+            ? Loc.GetString("Grammar_ImportJsonTitle")
+            : Loc.GetString("Grammar_ImportCsvTitle");
+
+        string placeholder = format == "json"
+            ? Loc.GetString("Grammar_ImportPastePlaceholderJson")
+            : Loc.GetString("Grammar_ImportPastePlaceholderCsv");
+
+        string? contentToImport = null;
+
+        // Try file picker first
+        try
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(format == "json" ? ".json" : ".csv");
+
+            var mainWindow = App.Current.MainWindow;
+            if (mainWindow != null)
+            {
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(mainWindow);
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSingleFileAsync();
+            if (file != null)
+                contentToImport = await Windows.Storage.FileIO.ReadTextAsync(file);
+        }
+        catch
+        {
+            // Fallback to paste dialog
+        }
+
+        if (contentToImport == null)
+        {
+            var importThemePrompt = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
+                ? ElementTheme.Dark : ElementTheme.Light;
+
+            var textBox = new TextBox
+            {
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                Height = 200,
+                PlaceholderText = placeholder
+            };
+
+            var pasteDialog = new ContentDialog
+            {
+                Title = dialogTitle,
+                Content = textBox,
+                PrimaryButtonText = Loc.GetString("Vocab_ImportExport"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = importThemePrompt
+            };
+
+            var res = await pasteDialog.ShowAsync();
+            if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(textBox.Text))
+                contentToImport = textBox.Text;
+        }
+
+        if (!string.IsNullOrWhiteSpace(contentToImport))
+        {
+            await Task.Yield();
+
+            var importTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
+                ? ElementTheme.Dark : ElementTheme.Light;
+
+            var progressDialog = new OperationProgressDialog
+            {
+                Title = Loc.GetString("Progress_ImportingTitle"),
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = importTheme
+            };
+            progressDialog.SetDeterminate(0, Loc.GetString("Progress_ReadingFile"), Loc.GetString("Progress_PleaseWait"));
+            _ = progressDialog.ShowAsync();
+
+            var progress = new Progress<ProgressReport>(report =>
+                DispatcherQueue.TryEnqueue(() =>
+                    progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail)));
+
+            try
+            {
+                var importResult = await ViewModel.ImportDataAsync(contentToImport, format, progress);
+                await ViewModel.RefreshAfterImportAsync();
+
+                var summary = string.Format(
+                    Loc.GetString("Progress_SummaryFormat"),
+                    importResult.TotalImported,
+                    importResult.TotalSkipped,
+                    importResult.Errors.Count);
+
+                progressDialog.SetCompleted(
+                    Loc.GetString("Progress_CompletedTitle"),
+                    summary,
+                    importResult.TotalImported,
+                    importResult.TotalSkipped,
+                    importResult.Errors.Count,
+                    Loc.GetString("Action_Close"));
+            }
+            catch (Exception ex)
+            {
+                progressDialog.SetError(
+                    Loc.GetString("Grammar_ImportFailed"),
+                    ex.Message,
+                    Loc.GetString("Action_Close"));
+            }
+        }
+    }
+
+    private async Task ShowErrorDialogAsync(string title, string message)
+    {
+        var errTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
+            ? ElementTheme.Dark : ElementTheme.Light;
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            CloseButtonText = Loc.GetString("Action_Close"),
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = errTheme
+        };
+        await dialog.ShowAsync();
     }
 }

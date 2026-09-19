@@ -10,6 +10,7 @@ namespace Lexora.Presentation.ViewModels;
 public partial class GrammarViewModel : ObservableObject
 {
     private readonly IGrammarService _grammarService;
+    private readonly IGrammarExportImportService _grammarExportImportService;
     private readonly Services.ILocalizationService _localizationService;
     private readonly Services.ISoundFeedbackService? _soundFeedback;
     private readonly List<GrammarQuizSubmissionDto> _practiceSubmissions = new();
@@ -94,10 +95,12 @@ public partial class GrammarViewModel : ObservableObject
 
     public GrammarViewModel(
         IGrammarService grammarService,
+        IGrammarExportImportService grammarExportImportService,
         Services.ILocalizationService localizationService,
         Services.ISoundFeedbackService? soundFeedback = null)
     {
         _grammarService = grammarService;
+        _grammarExportImportService = grammarExportImportService;
         _localizationService = localizationService;
         _soundFeedback = soundFeedback;
     }
@@ -393,5 +396,30 @@ public partial class GrammarViewModel : ObservableObject
     {
         IsPracticeMode = false;
         IsPracticeResultMode = false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Import / Export
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public Task<string> ExportToJsonAsync(IProgress<ProgressReport>? progress = null)
+        => _grammarExportImportService.ExportToJsonAsync(progress: progress);
+
+    public Task<string> ExportToCsvAsync(IProgress<ProgressReport>? progress = null)
+        => _grammarExportImportService.ExportToCsvAsync(progress: progress);
+
+    public Task<ImportResult> ImportDataAsync(string content, string format, IProgress<ProgressReport>? progress = null)
+        => format switch
+        {
+            "json" => _grammarExportImportService.ImportFromJsonAsync(content, progress: progress),
+            "csv"  => _grammarExportImportService.ImportFromCsvAsync(content, progress: progress),
+            _      => Task.FromResult(new ImportResult(0, 0, [$"Unsupported format: {format}"]))
+        };
+
+    /// <summary>Refreshes the rule list after a successful import.</summary>
+    public async Task RefreshAfterImportAsync()
+    {
+        await LoadTopicsAsync();
+        await LoadRulesAsync();
     }
 }
