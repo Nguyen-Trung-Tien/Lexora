@@ -10,7 +10,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="28,24" HorizontalAlignment="Stretch">
+        <Grid Padding="28,20" HorizontalAlignment="Stretch">
             <StackPanel Spacing="22" MaxWidth="1100" HorizontalAlignment="Stretch">
                 <!-- Page Title -->
                 <TextBlock Text="{x:Bind Loc.GetString('Settings_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />

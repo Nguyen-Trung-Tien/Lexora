@@ -45,7 +45,21 @@ public partial class DashboardViewModel : ObservableObject
     public partial int TotalWords { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasDueReviews))]
+    [NotifyPropertyChangedFor(nameof(DueReviewMessage))]
     public partial int DueToday { get; set; }
+
+    public bool HasDueReviews => DueToday > 0;
+
+    public string DueReviewMessage
+    {
+        get
+        {
+            if (DueToday <= 0) return string.Empty;
+            var template = _localizationService.GetString("Review_Reminder_Msg");
+            return template.Contains("{0}") ? string.Format(template, DueToday) : $"{template} {DueToday}";
+        }
+    }
 
     [ObservableProperty]
     public partial int Mastered { get; set; }
@@ -92,6 +106,7 @@ public partial class DashboardViewModel : ObservableObject
         UpdateGreeting();
         UpdateAdviceDisplay();
         UpdateForecastDisplay();
+        OnPropertyChanged(nameof(DueReviewMessage));
     }
 
     private void UpdateGreeting()

@@ -10,11 +10,11 @@
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="32,24">
-        <StackPanel Spacing="24" MaxWidth="1560" HorizontalAlignment="Stretch">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="28,20">
+        <StackPanel Spacing="20" MaxWidth="1560" HorizontalAlignment="Stretch">
             <StackPanel.ChildrenTransitions>
                 <TransitionCollection>
-                    <EntranceThemeTransition FromVerticalOffset="20" />
+                    <EntranceThemeTransition FromVerticalOffset="0" />
                 </TransitionCollection>
             </StackPanel.ChildrenTransitions>
 
@@ -22,6 +22,21 @@
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                           Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                           Width="36" Height="36" HorizontalAlignment="Center" />
+
+            <!-- Due Review Reminder Banner -->
+            <InfoBar x:Name="DueReviewInfoBar"
+                     IsOpen="{x:Bind ViewModel.HasDueReviews, Mode=OneWay}"
+                     Severity="Informational"
+                     Title="{x:Bind Loc.GetString('Review_Reminder_Title')}"
+                     Message="{x:Bind ViewModel.DueReviewMessage, Mode=OneWay}"
+                     CornerRadius="12"
+                     IsClosable="True">
+                <InfoBar.ActionButton>
+                    <Button Content="{x:Bind Loc.GetString('Review_Now')}"
+                            Style="{ThemeResource AccentButtonStyle}"
+                            Click="StartReviewButton_Click" />
+                </InfoBar.ActionButton>
+            </InfoBar>
 
             <!-- HERO BANNER: Elegant Fluent Surface Card with 1-Click Quick Actions -->
             <Border Background="{ThemeResource LayerFillColorDefaultBrush}"

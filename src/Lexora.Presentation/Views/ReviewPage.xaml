@@ -20,7 +20,7 @@
     </Page.KeyboardAccelerators>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="32,20" HorizontalAlignment="Stretch">
+        <Grid Padding="28,20" HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -370,7 +370,7 @@
                                         Margin="0,12,0,20">
                                 <StackPanel.ChildrenTransitions>
                                     <TransitionCollection>
-                                        <EntranceThemeTransition FromVerticalOffset="20" />
+                                        <EntranceThemeTransition FromVerticalOffset="0" />
                                     </TransitionCollection>
                                 </StackPanel.ChildrenTransitions>
                                 <MenuFlyoutSeparator />
@@ -434,7 +434,7 @@
                                       Visibility="{x:Bind ViewModel.IsAnswerVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <Grid.ChildrenTransitions>
                                         <TransitionCollection>
-                                            <EntranceThemeTransition FromVerticalOffset="15" />
+                                            <EntranceThemeTransition FromVerticalOffset="0" />
                                         </TransitionCollection>
                                     </Grid.ChildrenTransitions>
 

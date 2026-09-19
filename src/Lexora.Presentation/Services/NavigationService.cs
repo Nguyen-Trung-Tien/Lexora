@@ -36,7 +36,7 @@ public class NavigationService : INavigationService
         if (_frame == null) return false;
         if (!force && _frame.Content?.GetType() == pageType && parameter == null) return false;
 
-        transitionInfo ??= new SlideNavigationTransitionInfo { Effect = SlideNavigationTransitionEffect.FromRight };
+        transitionInfo ??= new EntranceNavigationTransitionInfo();
         return _frame.Navigate(pageType, parameter, transitionInfo);
     }
 

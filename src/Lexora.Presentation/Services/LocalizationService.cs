@@ -1172,7 +1172,7 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_Learning"] = "Learning",
 
             // Shell & Reminders
-            ["Review_Reminder_Msg"] = "You have {0} word{1} ready for spaced repetition review.",
+            ["Review_Reminder_Msg"] = "You have {0} word(s) ready for spaced repetition review (SM-2).",
 
             // Review Active Session Titles
             ["Review_Session_LearnNew"] = "Learn New Words",

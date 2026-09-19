@@ -26,8 +26,12 @@ public sealed partial class ShellPage : Page
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
-        UpdateNavigationLabels();
-        Bindings.Update();
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            UpdateNavigationLabels();
+            ViewModel.UpdateLocalizedTexts();
+            Bindings.Update();
+        });
     }
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)
@@ -35,8 +39,6 @@ public sealed partial class ShellPage : Page
         _navigationService.Initialize(ContentFrame);
         ContentFrame.Navigated += (s, args) =>
         {
-            ViewModel.IsOnReviewPage = ContentFrame.Content is ReviewPage or TestPage;
-
             switch (ContentFrame.Content)
             {
                 case DashboardPage:
@@ -108,11 +110,6 @@ public sealed partial class ShellPage : Page
         NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
         NavItemSettings.Content = _localizationService.GetString("Nav_Settings");
         GlobalSearchBox.PlaceholderText = _localizationService.GetString("Search_Placeholder");
-        DueReviewInfoBar.Title = _localizationService.GetString("Review_Reminder_Title");
-        if (ReviewNowBtn != null)
-        {
-            ReviewNowBtn.Content = _localizationService.GetString("Review_Now");
-        }
 
         ToolTipService.SetToolTip(NavItemDashboard, _localizationService.GetString("Shell_TooltipDashboard"));
         ToolTipService.SetToolTip(NavItemVocabulary, _localizationService.GetString("Shell_TooltipVocabulary"));

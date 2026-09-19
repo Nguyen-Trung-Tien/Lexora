@@ -94,27 +94,8 @@
                 </AutoSuggestBox>
             </NavigationView.AutoSuggestBox>
 
-            <Grid RowDefinitions="Auto,*">
-                <!-- Due Review Reminder InfoBar (Top, above content) -->
-                <InfoBar x:Name="DueReviewInfoBar"
-                         Grid.Row="0"
-                         IsOpen="{x:Bind ViewModel.IsReminderVisible, Mode=OneWay}"
-                         Severity="Informational"
-                         Title="{x:Bind ViewModel.ReminderTitle, Mode=OneWay}"
-                         Message="{x:Bind ViewModel.DueReviewMessage, Mode=OneWay}"
-                         Margin="28,10,28,0"
-                         CornerRadius="8">
-                    <InfoBar.ActionButton>
-                        <Button x:Name="ReviewNowBtn"
-                                Content="{x:Bind ViewModel.ReminderActionText, Mode=OneWay}"
-                                Style="{ThemeResource AccentButtonStyle}"
-                                Click="ReviewNowButton_Click" />
-                    </InfoBar.ActionButton>
-                </InfoBar>
-
-                <!-- Page Content Frame -->
-                <Frame x:Name="ContentFrame" Grid.Row="1" />
-            </Grid>
+            <!-- Page Content Frame (Rock-solid baseline, zero vertical layout shift) -->
+            <Frame x:Name="ContentFrame" />
         </NavigationView>
     </Grid>
 </Page>

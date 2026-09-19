@@ -16,7 +16,7 @@
         <KeyboardAccelerator Key="Delete" Invoked="DeleteWordAccelerator_Invoked" />
     </Page.KeyboardAccelerators>
 
-    <Grid RowDefinitions="Auto,Auto,*" Padding="24,18" RowSpacing="14">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="28,20" RowSpacing="14">
         <Grid.Resources>
             <!-- Connected Morph Pre-Launch Storyboard -->
             <Storyboard x:Name="CardMorphStoryboard">

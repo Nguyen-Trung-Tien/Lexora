@@ -72,8 +72,9 @@ public partial class ShellViewModel : ObservableObject
             int count = await _reviewService.GetDueCardsCountAsync();
             DueCardsCount = count;
             HasDueReviews = count > 0;
+            var template = _localizationService.GetString("Review_Reminder_Msg");
             DueReviewMessage = count > 0 
-                ? string.Format(_localizationService.GetString("Review_Reminder_Msg"), count) 
+                ? (template.Contains("{0}") ? string.Format(template, count) : $"{template} {count}") 
                 : string.Empty;
         }
         catch
@@ -82,11 +83,16 @@ public partial class ShellViewModel : ObservableObject
         }
     }
 
-    private void UpdateLocalizedTexts()
+    public void UpdateLocalizedTexts()
     {
         Title = _localizationService.GetString("AppTitle");
         ReminderTitle = _localizationService.GetString("Review_Reminder_Title");
         ReminderActionText = _localizationService.GetString("Review_Now");
+        if (HasDueReviews && DueCardsCount > 0)
+        {
+            var template = _localizationService.GetString("Review_Reminder_Msg");
+            DueReviewMessage = template.Contains("{0}") ? string.Format(template, DueCardsCount) : $"{template} {DueCardsCount}";
+        }
     }
 
     [RelayCommand]
