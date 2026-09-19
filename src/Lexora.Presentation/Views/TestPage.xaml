@@ -470,24 +470,28 @@
                 <!-- Score Summary Banner -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="16" Padding="32">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="28">
+                        BorderThickness="1" CornerRadius="16" Padding="28,24">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="24">
                         <!-- Score Circle -->
-                        <Border Width="110" Height="110" CornerRadius="55"
+                        <Border Width="96" Height="96" CornerRadius="48"
                                 Background="{x:Bind ViewModel.ResultScoreTier, Mode=OneWay, Converter={StaticResource ScoreTierToBrushConverter}}"
                                 HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock Text="{x:Bind ViewModel.ScorePercentage, Mode=OneWay}"
-                                           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" />
-                                <TextBlock Text="%" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="14" HorizontalAlignment="Center" />
+                                           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                           FontSize="32" FontWeight="Bold" />
+                                <TextBlock Text="%"
+                                           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                           FontSize="18" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" Margin="2,4,0,0" />
                             </StackPanel>
                         </Border>
 
                         <!-- Feedback Message -->
-                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_ResultTitle')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />
+                        <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_ResultTitle')}" FontSize="24" FontWeight="Bold" />
                             <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}"
-                                       FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextWrapping="Wrap" />
+                                       FontSize="15" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextWrapping="Wrap" />
                             <TextBlock Text="{x:Bind Loc.GetString('Test_ResultSubtitle')}"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
                         </StackPanel>
@@ -518,7 +522,10 @@
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
                         <StackPanel Spacing="4">
                             <TextBlock Text="{x:Bind Loc.GetString('Test_Accuracy')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                            <TextBlock Text="{x:Bind ViewModel.ScorePercentage, Mode=OneWay}" FontSize="26" FontWeight="Bold" />
+                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                <TextBlock Text="{x:Bind ViewModel.ScorePercentage, Mode=OneWay}" FontSize="26" FontWeight="Bold" />
+                                <TextBlock Text="%" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="1,2,0,0" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 
