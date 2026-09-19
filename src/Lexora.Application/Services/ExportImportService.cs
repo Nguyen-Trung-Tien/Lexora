@@ -28,10 +28,12 @@ public class ExportImportService : IExportImportService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<string> ExportToJsonAsync(CancellationToken cancellationToken = default)
+    public async Task<string> ExportToJsonAsync(CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null)
     {
+        progress?.Report(new ProgressReport(10, 0, 0, "Trích xuất dữ liệu từ vựng...", "Querying database..."));
         var words = await _vocabRepo.SearchAsync(take: 100000, cancellationToken: cancellationToken);
 
+        progress?.Report(new ProgressReport(50, words.Count, words.Count, "Đang định dạng cấu trúc JSON...", "Serializing models..."));
         var exportData = words.Select(w => new WordExportModel
         {
             Term = w.Term,
@@ -56,19 +58,32 @@ public class ExportImportService : IExportImportService
             ExamTags = w.WordExamTags.Select(wet => wet.ExamTag.Name).ToList()
         }).ToList();
 
-        return JsonSerializer.Serialize(exportData, JsonOptions);
+        progress?.Report(new ProgressReport(85, words.Count, words.Count, "Đang tạo dữ liệu xuất...", "Writing JSON buffer..."));
+        var json = JsonSerializer.Serialize(exportData, JsonOptions);
+        progress?.Report(new ProgressReport(100, words.Count, words.Count, "Xuất dữ liệu hoàn tất!", "Done."));
+        return json;
     }
 
-    public async Task<string> ExportToCsvAsync(CancellationToken cancellationToken = default)
+    public async Task<string> ExportToCsvAsync(CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null)
     {
+        progress?.Report(new ProgressReport(10, 0, 0, "Trích xuất dữ liệu từ vựng...", "Querying database..."));
         var words = await _vocabRepo.SearchAsync(take: 100000, cancellationToken: cancellationToken);
         var sb = new StringBuilder();
 
         // Header
         sb.AppendLine("Term,Level,PartOfSpeech,PhoneticUk,PhoneticUs,MeaningsVi,Examples,Topics,ExamTags,Notes");
 
+        int current = 0;
+        int total = words.Count;
         foreach (var w in words)
         {
+            current++;
+            if (current % 25 == 0 || current == total)
+            {
+                int pct = (int)((double)current / total * 75) + 20;
+                progress?.Report(new ProgressReport(pct, current, total, $"Đang định dạng CSV ({current}/{total})...", w.Term));
+            }
+
             var meaningsJoined = string.Join(" | ", w.Meanings.Select(m => $"[{m.PartOfSpeech}] {m.DefinitionVi}"));
             var examplesJoined = string.Join(" | ", w.Meanings.SelectMany(m => m.Examples).Select(e => $"{e.SentenceEn} => {e.SentenceVi}"));
             var topicsJoined = string.Join(";", w.WordTopics.Select(wt => wt.Topic.Name));
@@ -88,11 +103,13 @@ public class ExportImportService : IExportImportService
             ));
         }
 
+        progress?.Report(new ProgressReport(100, total, total, "Xuất CSV hoàn tất!", "Done."));
         return sb.ToString();
     }
 
-    public async Task<string> ExportToTxtAsync(CancellationToken cancellationToken = default)
+    public async Task<string> ExportToTxtAsync(CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null)
     {
+        progress?.Report(new ProgressReport(10, 0, 0, "Trích xuất dữ liệu từ vựng...", "Querying database..."));
         var words = await _vocabRepo.SearchAsync(take: 100000, cancellationToken: cancellationToken);
         var sb = new StringBuilder();
 
@@ -103,8 +120,17 @@ public class ExportImportService : IExportImportService
         sb.AppendLine("# Note: Compatible with Lexora, Anki (TSV), and Quizlet.");
         sb.AppendLine();
 
+        int current = 0;
+        int total = words.Count;
         foreach (var w in words)
         {
+            current++;
+            if (current % 25 == 0 || current == total)
+            {
+                int pct = (int)((double)current / total * 75) + 20;
+                progress?.Report(new ProgressReport(pct, current, total, $"Đang định dạng văn bản ({current}/{total})...", w.Term));
+            }
+
             var primaryDef = w.Meanings.OrderBy(m => m.OrderIndex).FirstOrDefault()?.DefinitionVi ?? w.Term;
             var pos = w.PrimaryPartOfSpeech.ToString();
             var level = w.Level.ToString();
@@ -115,12 +141,13 @@ public class ExportImportService : IExportImportService
             sb.AppendLine($"{w.Term}\t{primaryDef}\t{pos}\t{level}\t{uk}\t{us}\t{examples}");
         }
 
+        progress?.Report(new ProgressReport(100, total, total, "Xuất TXT hoàn tất!", "Done."));
         return sb.ToString();
     }
 
     private const int MaxImportPayloadLength = 20_000_000; // 20 MB safety limit
 
-    public async Task<ImportResult> ImportFromJsonAsync(string jsonContent, CancellationToken cancellationToken = default)
+    public async Task<ImportResult> ImportFromJsonAsync(string jsonContent, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null)
     {
         int imported = 0;
         int skipped = 0;
@@ -138,11 +165,15 @@ public class ExportImportService : IExportImportService
 
         try
         {
+            progress?.Report(new ProgressReport(5, 0, 0, "Đang phân tích cấu trúc JSON...", "Parsing JSON buffer..."));
             var list = JsonSerializer.Deserialize<List<WordExportModel>>(jsonContent, JsonOptions);
             if (list == null || list.Count == 0)
             {
                 return new ImportResult(0, 0, new List<string> { "JSON data is empty or invalid" });
             }
+
+            int total = list.Count;
+            progress?.Report(new ProgressReport(10, 0, total, $"Đã tìm thấy {total} từ vựng. Đang chuẩn bị cơ sở dữ liệu...", "Querying metadata..."));
 
             var rawTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
             var allTopics = rawTopics != null ? rawTopics.ToDictionary(t => t.Name.ToLowerInvariant()) : new Dictionary<string, Topic>();
@@ -152,8 +183,16 @@ public class ExportImportService : IExportImportService
 
             var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+            int current = 0;
             foreach (var item in list)
             {
+                current++;
+                if (current % 5 == 0 || current == total)
+                {
+                    int pct = (int)((double)current / total * 75) + 15;
+                    progress?.Report(new ProgressReport(pct, current, total, $"Đang xử lý: {current} / {total}", item.Term));
+                }
+
                 if (string.IsNullOrWhiteSpace(item.Term))
                 {
                     skipped++;
@@ -255,7 +294,9 @@ public class ExportImportService : IExportImportService
                 imported++;
             }
 
+            progress?.Report(new ProgressReport(95, total, total, "Đang ghi dữ liệu vào cơ sở dữ liệu...", "Committing transaction..."));
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            progress?.Report(new ProgressReport(100, total, total, "Nhập dữ liệu hoàn tất!", "Complete."));
         }
         catch (Exception ex)
         {
@@ -265,7 +306,7 @@ public class ExportImportService : IExportImportService
         return new ImportResult(imported, skipped, errors);
     }
 
-    public async Task<ImportResult> ImportFromCsvAsync(string csvContent, CancellationToken cancellationToken = default)
+    public async Task<ImportResult> ImportFromCsvAsync(string csvContent, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null)
     {
         int imported = 0;
         int skipped = 0;
@@ -283,11 +324,15 @@ public class ExportImportService : IExportImportService
 
         try
         {
+            progress?.Report(new ProgressReport(5, 0, 0, "Đang phân tích cấu trúc CSV...", "Parsing CSV rows..."));
             var records = ParseCsvRecords(csvContent);
             if (records.Count <= 1)
             {
                 return new ImportResult(0, 0, new List<string> { "CSV content has no data rows" });
             }
+
+            int total = records.Count - 1;
+            progress?.Report(new ProgressReport(10, 0, total, $"Đã tìm thấy {total} dòng từ vựng...", "Querying metadata..."));
 
             var rawTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
             var allTopics = rawTopics != null ? rawTopics.ToDictionary(t => t.Name.ToLowerInvariant()) : new Dictionary<string, Topic>();
@@ -297,9 +342,14 @@ public class ExportImportService : IExportImportService
 
             var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // Skip row 0 (header)
             for (int r = 1; r < records.Count; r++)
             {
+                if (r % 5 == 0 || r == records.Count - 1)
+                {
+                    int pct = (int)((double)r / total * 75) + 15;
+                    progress?.Report(new ProgressReport(pct, r, total, $"Đang xử lý CSV: {r} / {total}", records[r].Count > 0 ? records[r][0] : null));
+                }
+
                 var columns = records[r];
                 if (columns.Count == 0 || string.IsNullOrWhiteSpace(columns[0]))
                 {
@@ -452,7 +502,9 @@ public class ExportImportService : IExportImportService
                 imported++;
             }
 
+            progress?.Report(new ProgressReport(95, total, total, "Đang ghi dữ liệu vào cơ sở dữ liệu...", "Committing transaction..."));
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            progress?.Report(new ProgressReport(100, total, total, "Nhập CSV hoàn tất!", "Complete."));
         }
         catch (Exception ex)
         {
@@ -462,7 +514,7 @@ public class ExportImportService : IExportImportService
         return new ImportResult(imported, skipped, errors);
     }
 
-    public async Task<ImportResult> ImportFromTxtAsync(string txtContent, CancellationToken cancellationToken = default)
+    public async Task<ImportResult> ImportFromTxtAsync(string txtContent, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null)
     {
         int imported = 0;
         int skipped = 0;
@@ -480,6 +532,7 @@ public class ExportImportService : IExportImportService
 
         try
         {
+            progress?.Report(new ProgressReport(5, 0, 0, "Đang phân tích cấu trúc văn bản TXT...", "Parsing TXT lines..."));
             using var reader = new StringReader(txtContent);
             var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             string? line;
@@ -494,6 +547,11 @@ public class ExportImportService : IExportImportService
                 if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith('#') || trimmed.StartsWith("//"))
                 {
                     continue;
+                }
+
+                if (lineNumber % 5 == 0)
+                {
+                    progress?.Report(new ProgressReport(Math.Min(85, lineNumber), lineNumber, 0, $"Đang xử lý dòng {lineNumber}...", trimmed));
                 }
 
                 string term = "";
@@ -662,8 +720,10 @@ public class ExportImportService : IExportImportService
 
             if (imported > 0)
             {
+                progress?.Report(new ProgressReport(95, imported, imported, "Đang lưu vào cơ sở dữ liệu...", "Committing transaction..."));
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
+            progress?.Report(new ProgressReport(100, imported, imported, "Nhập TXT hoàn tất!", "Complete."));
         }
         catch (Exception ex)
         {

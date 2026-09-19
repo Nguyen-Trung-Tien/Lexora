@@ -22,6 +22,19 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     public App()
     {
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        {
+            LogCrash("AppDomain.UnhandledException", e.ExceptionObject as Exception, e.ExceptionObject?.ToString());
+        };
+        TaskScheduler.UnobservedTaskException += (s, e) =>
+        {
+            LogCrash("TaskScheduler.UnobservedTaskException", e.Exception);
+        };
+        UnhandledException += (s, e) =>
+        {
+            LogCrash("Xaml.UnhandledException", e.Exception, e.Message);
+        };
+
         InitializeComponent();
 
         _host = Host.CreateDefaultBuilder()
@@ -84,5 +97,20 @@ public partial class App : Microsoft.UI.Xaml.Application
         {
             _ = mainWindow.StartStartupSequenceAsync();
         }
+    }
+
+    private static void LogCrash(string source, Exception? ex, string? extra = null)
+    {
+        try
+        {
+            var logPath = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Lexora",
+                "crash.log");
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logPath)!);
+            var text = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{source}] {extra}\n{ex?.GetType().FullName}: {ex?.Message}\nStackTrace:\n{ex?.StackTrace}\nInnerException: {ex?.InnerException}\n\n";
+            System.IO.File.AppendAllText(logPath, text);
+        }
+        catch { }
     }
 }

@@ -381,28 +381,28 @@ public partial class VocabularyViewModel : ObservableObject
         await _audioPlayer.PlayPronunciationAsync(SelectedWord.Term, accent);
     }
 
-    public async Task<string> ExportToJsonAsync()
+    public async Task<string> ExportToJsonAsync(IProgress<ProgressReport>? progress = null)
     {
-        return await _exportImportService.ExportToJsonAsync();
+        return await _exportImportService.ExportToJsonAsync(progress: progress);
     }
 
-    public async Task<string> ExportToCsvAsync()
+    public async Task<string> ExportToCsvAsync(IProgress<ProgressReport>? progress = null)
     {
-        return await _exportImportService.ExportToCsvAsync();
+        return await _exportImportService.ExportToCsvAsync(progress: progress);
     }
 
-    public async Task<string> ExportToTxtAsync()
+    public async Task<string> ExportToTxtAsync(IProgress<ProgressReport>? progress = null)
     {
-        return await _exportImportService.ExportToTxtAsync();
+        return await _exportImportService.ExportToTxtAsync(progress: progress);
     }
 
-    public async Task<ImportResult> ImportDataAsync(string content, string format)
+    public async Task<ImportResult> ImportDataAsync(string content, string format, IProgress<ProgressReport>? progress = null)
     {
         ImportResult result = format.ToLowerInvariant() switch
         {
-            "json" => await _exportImportService.ImportFromJsonAsync(content),
-            "csv" => await _exportImportService.ImportFromCsvAsync(content),
-            _ => await _exportImportService.ImportFromTxtAsync(content)
+            "json" => await _exportImportService.ImportFromJsonAsync(content, progress: progress),
+            "csv" => await _exportImportService.ImportFromCsvAsync(content, progress: progress),
+            _ => await _exportImportService.ImportFromTxtAsync(content, progress: progress)
         };
 
         await LoadWordsAsync();
@@ -410,9 +410,9 @@ public partial class VocabularyViewModel : ObservableObject
         return result;
     }
 
-    public async Task<ImportResult> ImportDataAsync(string content, bool isJson)
+    public async Task<ImportResult> ImportDataAsync(string content, bool isJson, IProgress<ProgressReport>? progress = null)
     {
-        return await ImportDataAsync(content, isJson ? "json" : "csv");
+        return await ImportDataAsync(content, isJson ? "json" : "csv", progress);
     }
 
     public void CheckTypoSuggestion()

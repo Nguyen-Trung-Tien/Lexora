@@ -220,12 +220,26 @@ if (-not $SkipPublish) {
         -r $Runtime `
         --self-contained true `
         -p:WindowsAppSDKSelfContained=true `
-        -p:PublishReadyToRun=true `
+        -p:PublishReadyToRun=false `
         -o "$publishDir"
 
     if ($LASTEXITCODE -ne 0) {
         Write-Err "dotnet publish failed with exit code $LASTEXITCODE."
         exit $LASTEXITCODE
+    }
+
+    # Ensure WinUI 3 compiled XAML resources (.pri, .xbf, Themes, Views, Assets) are synchronized
+    $binDir = Join-Path $ScriptRoot "src\Lexora.Presentation\bin\$Configuration\net10.0-windows10.0.26100.0\$Runtime"
+    if (Test-Path $binDir) {
+        Write-Info "Synchronizing WinUI 3 XAML resources and PRI maps..."
+        Get-ChildItem -Path $binDir -Filter "*.pri" | Copy-Item -Destination $publishDir -Force
+        Get-ChildItem -Path $binDir -Filter "*.xbf" | Copy-Item -Destination $publishDir -Force
+        foreach ($subDir in @("Assets", "Themes", "Views")) {
+            $srcSub = Join-Path $binDir $subDir
+            if (Test-Path $srcSub) {
+                Copy-Item -Path $srcSub -Destination $publishDir -Recurse -Force
+            }
+        }
     }
 
     # Clean debug symbols from published output to reduce installer payload
@@ -245,12 +259,18 @@ if (-not $SkipPublish) {
 Write-Step "Validating published dependency bundle..."
 $requiredFiles = @(
     "Lexora.Presentation.exe",
+    "Lexora.Presentation.pri",
     "Microsoft.ui.xaml.dll",
     "Microsoft.WindowsAppRuntime.dll",
     "Microsoft.WindowsAppRuntime.pri",
     "Lexora.Domain.dll",
     "Lexora.Application.dll",
-    "Lexora.Infrastructure.dll"
+    "Lexora.Infrastructure.dll",
+    "App.xbf",
+    "MainWindow.xbf",
+    "Themes\DesignSystem.xbf",
+    "Views\ShellPage.xbf",
+    "Assets\AppIcon.ico"
 )
 
 foreach ($file in $requiredFiles) {
@@ -354,9 +374,9 @@ if ($TestInstall) {
         Write-Success "Installed application files and uninstaller verified."
 
         # 3. Launch Smoke Test
-        Write-Info "Launching application smoke test (5-second execution test)..."
+        Write-Info "Launching application smoke test (8-second execution test)..."
         $appProc = Start-Process -FilePath $installedExe -PassThru
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 8
 
         if ($appProc.HasExited -and $appProc.ExitCode -ne 0) {
             Write-Err "Application crashed immediately on startup with exit code $($appProc.ExitCode)!"

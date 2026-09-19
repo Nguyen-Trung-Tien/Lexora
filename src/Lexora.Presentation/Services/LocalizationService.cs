@@ -688,7 +688,32 @@ public class LocalizationService : ILocalizationService
             ["Shell_TooltipReview"] = "Ôn tập ngắt quãng (Ctrl+3)",
             ["Shell_TooltipTest"] = "Luyện tập & Thi (Ctrl+4)",
             ["Shell_TooltipGrammar"] = "Cẩm nang ngữ pháp (Ctrl+5)",
-            ["Shell_TooltipSettings"] = "Cài đặt hệ thống"
+            ["Shell_TooltipSettings"] = "Cài đặt hệ thống",
+
+            // Operation Progress & Loading
+            ["Progress_ImportingTitle"] = "Đang nhập dữ liệu từ vựng",
+            ["Progress_ExportingTitle"] = "Đang xuất dữ liệu từ vựng",
+            ["Progress_BackupTitle"] = "Đang tạo bản sao lưu cơ sở dữ liệu",
+            ["Progress_RestoreTitle"] = "Đang khôi phục dữ liệu",
+            ["Progress_GeneratingTestTitle"] = "Đang khởi tạo bài kiểm tra",
+            ["Progress_ProcessingCount"] = "Đang xử lý: {0} / {1}",
+            ["Progress_CompletedTitle"] = "Hoàn tất thành công!",
+            ["Progress_ItemsCountFormat"] = "{0} / {1} mục",
+            ["Progress_SummaryFormat"] = "Đã nhập: {0} • Bỏ qua: {1} • Lỗi: {2}",
+            ["Progress_ReadingFile"] = "Đang đọc và phân tích tệp tin...",
+            ["Progress_ValidatingWords"] = "Đang kiểm tra và nhập từ vựng...",
+            ["Progress_SavingToDb"] = "Đang ghi vào cơ sở dữ liệu...",
+            ["Progress_PreparingExport"] = "Đang trích xuất dữ liệu từ vựng...",
+            ["Progress_Serializing"] = "Đang định dạng tệp tin...",
+            ["Progress_BackupFlushing"] = "Đang dọn dẹp bộ nhớ đệm WAL...",
+            ["Progress_BackupCopying"] = "Đang tạo bản sao lưu an toàn...",
+            ["Progress_BackupVerifying"] = "Đang kiểm tra tính toàn vẹn cơ sở dữ liệu...",
+            ["Progress_RestoreVerifying"] = "Đang xác thực cấu trúc tệp sao lưu...",
+            ["Progress_RestoreApplying"] = "Đang khôi phục cơ sở dữ liệu...",
+            ["Progress_GeneratingQuestions"] = "Đang tổng hợp các dạng câu hỏi...",
+            ["Progress_ShufflingOptions"] = "Đang tạo phương án lựa chọn và đảo ngẫu nhiên...",
+            ["Progress_LoadingData"] = "Đang tải dữ liệu...",
+            ["Progress_PleaseWait"] = "Vui lòng đợi trong giây lát..."
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -1363,7 +1388,32 @@ public class LocalizationService : ILocalizationService
             ["Shell_TooltipReview"] = "Spaced Review (Ctrl+3)",
             ["Shell_TooltipTest"] = "Practice & Test (Ctrl+4)",
             ["Shell_TooltipGrammar"] = "Grammar (Ctrl+5)",
-            ["Shell_TooltipSettings"] = "Settings"
+            ["Shell_TooltipSettings"] = "Settings",
+
+            // Operation Progress & Loading
+            ["Progress_ImportingTitle"] = "Importing Vocabulary Data",
+            ["Progress_ExportingTitle"] = "Exporting Vocabulary Data",
+            ["Progress_BackupTitle"] = "Creating Database Backup",
+            ["Progress_RestoreTitle"] = "Restoring Database",
+            ["Progress_GeneratingTestTitle"] = "Generating Practice Test",
+            ["Progress_ProcessingCount"] = "Processing: {0} / {1}",
+            ["Progress_CompletedTitle"] = "Completed Successfully!",
+            ["Progress_ItemsCountFormat"] = "{0} / {1} items",
+            ["Progress_SummaryFormat"] = "Imported: {0} • Skipped: {1} • Errors: {2}",
+            ["Progress_ReadingFile"] = "Reading and parsing file...",
+            ["Progress_ValidatingWords"] = "Validating and importing terms...",
+            ["Progress_SavingToDb"] = "Writing to database...",
+            ["Progress_PreparingExport"] = "Extracting vocabulary records...",
+            ["Progress_Serializing"] = "Formatting export payload...",
+            ["Progress_BackupFlushing"] = "Flushing database memory pools...",
+            ["Progress_BackupCopying"] = "Creating secure database snapshot...",
+            ["Progress_BackupVerifying"] = "Verifying database integrity...",
+            ["Progress_RestoreVerifying"] = "Verifying backup header integrity...",
+            ["Progress_RestoreApplying"] = "Restoring database state...",
+            ["Progress_GeneratingQuestions"] = "Compiling test question types...",
+            ["Progress_ShufflingOptions"] = "Generating and shuffling answer options...",
+            ["Progress_LoadingData"] = "Loading data...",
+            ["Progress_PleaseWait"] = "Please wait a moment..."
         }
     };
 

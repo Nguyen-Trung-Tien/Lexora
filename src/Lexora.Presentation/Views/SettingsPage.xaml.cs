@@ -216,7 +216,36 @@ public sealed partial class SettingsPage : Page
 
     private async void BackupButton_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.CreateBackupAsync();
+        var progressDialog = new OperationProgressDialog
+        {
+            Title = Loc.GetString("Progress_BackupTitle"),
+            XamlRoot = this.XamlRoot
+        };
+        progressDialog.SetDeterminate(10, Loc.GetString("Progress_BackupFlushing"), Loc.GetString("Progress_PleaseWait"));
+        _ = progressDialog.ShowAsync();
+
+        try
+        {
+            await Task.Delay(250);
+            progressDialog.SetDeterminate(40, Loc.GetString("Progress_BackupCopying"), Loc.GetString("Progress_PleaseWait"));
+            
+            await ViewModel.CreateBackupAsync();
+            
+            progressDialog.SetDeterminate(85, Loc.GetString("Progress_BackupVerifying"), Loc.GetString("Progress_PleaseWait"));
+            await Task.Delay(200);
+
+            progressDialog.SetCompleted(
+                Loc.GetString("Progress_CompletedTitle"),
+                ViewModel.BackupStatusMessage,
+                closeButtonText: Loc.GetString("Action_Close"));
+        }
+        catch (Exception ex)
+        {
+            progressDialog.SetError(
+                Loc.GetString("Settings_BackupFailed"),
+                ex.Message,
+                Loc.GetString("Action_Close"));
+        }
     }
 
     private async void RestoreButton_Click(object sender, RoutedEventArgs e)
@@ -288,18 +317,43 @@ public sealed partial class SettingsPage : Page
             var result = await confirmDialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
-                var restored = await ViewModel.RestoreBackupAsync(selectedFilePath);
-                if (restored)
+                await Task.Yield();
+
+                var progressDialog = new OperationProgressDialog
                 {
-                    await Task.Yield();
-                    var doneDialog = new ContentDialog
+                    Title = Loc.GetString("Progress_RestoreTitle"),
+                    XamlRoot = this.XamlRoot
+                };
+                progressDialog.SetDeterminate(15, Loc.GetString("Progress_RestoreVerifying"), Loc.GetString("Progress_PleaseWait"));
+                _ = progressDialog.ShowAsync();
+
+                try
+                {
+                    await Task.Delay(250);
+                    progressDialog.SetDeterminate(60, Loc.GetString("Progress_RestoreApplying"), Loc.GetString("Progress_PleaseWait"));
+
+                    var restored = await ViewModel.RestoreBackupAsync(selectedFilePath);
+                    if (restored)
                     {
-                        Title = Loc.GetString("Settings_DlgRestoreSuccessTitle"),
-                        Content = Loc.GetString("Settings_DlgRestoreSuccessMsg"),
-                        CloseButtonText = Loc.GetString("Action_Close"),
-                        XamlRoot = this.XamlRoot
-                    };
-                    await doneDialog.ShowAsync();
+                        progressDialog.SetCompleted(
+                            Loc.GetString("Progress_CompletedTitle"),
+                            Loc.GetString("Settings_DlgRestoreSuccessMsg"),
+                            closeButtonText: Loc.GetString("Action_Close"));
+                    }
+                    else
+                    {
+                        progressDialog.SetError(
+                            Loc.GetString("Settings_BackupFailed"),
+                            ViewModel.BackupStatusMessage,
+                            Loc.GetString("Action_Close"));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    progressDialog.SetError(
+                        Loc.GetString("Settings_BackupFailed"),
+                        ex.Message,
+                        Loc.GetString("Action_Close"));
                 }
             }
         }

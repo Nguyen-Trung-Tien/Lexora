@@ -18,12 +18,47 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Loading Ring Overlay -->
-            <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-                          Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                          Width="44" Height="44"
-                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                          Grid.RowSpan="2" Canvas.ZIndex="10" />
+            <!-- Modern Fluent 2 Glass Loading Card Overlay -->
+            <Grid Grid.RowSpan="2" Canvas.ZIndex="20"
+                  Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <!-- Dimming Layer -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" Opacity="0.65" />
+
+                <!-- Elevated Card -->
+                <Border Width="280" Padding="24" CornerRadius="16"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel Spacing="14" HorizontalAlignment="Center">
+                        <!-- Dual Progress Spinner -->
+                        <Grid HorizontalAlignment="Center" Width="52" Height="52">
+                            <ProgressRing IsIndeterminate="False" Value="100"
+                                          Width="52" Height="52" Opacity="0.15"
+                                          Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                            <ProgressRing IsActive="True" IsIndeterminate="True"
+                                          Width="52" Height="52"
+                                          Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                        </Grid>
+
+                        <StackPanel Spacing="4" HorizontalAlignment="Center">
+                            <TextBlock Text="{x:Bind Loc.GetString('Progress_GeneratingTestTitle')}"
+                                       FontWeight="Bold" FontSize="14"
+                                       TextAlignment="Center" TextWrapping="Wrap"
+                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Progress_PleaseWait')}"
+                                       FontSize="12" TextAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <!-- Sleek Momentum Bar -->
+                        <ProgressBar IsIndeterminate="True" Height="3" CornerRadius="1.5"
+                                     HorizontalAlignment="Stretch"
+                                     Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
 
             <!-- ========================================== -->
             <!-- 1. SETUP VIEW                              -->

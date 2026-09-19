@@ -464,42 +464,50 @@ public sealed partial class VocabularyPage : Page
 
     private async void ExportJson_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            var json = await ViewModel.ExportToJsonAsync();
-            var defaultName = $"lexora_export_{DateTime.Now:yyyyMMdd_HHmmss}";
-            await ExportFileAsync(json, defaultName, ".json", "JSON Vocabulary File");
-        }
-        catch (Exception ex)
-        {
-            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
-        }
+        await PerformExportAsync("json", "JSON Vocabulary File", ".json", (p) => ViewModel.ExportToJsonAsync(p));
     }
 
     private async void ExportCsv_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            var csv = await ViewModel.ExportToCsvAsync();
-            var defaultName = $"lexora_export_{DateTime.Now:yyyyMMdd_HHmmss}";
-            await ExportFileAsync(csv, defaultName, ".csv", "CSV Vocabulary File");
-        }
-        catch (Exception ex)
-        {
-            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
-        }
+        await PerformExportAsync("csv", "CSV Vocabulary File", ".csv", (p) => ViewModel.ExportToCsvAsync(p));
     }
 
     private async void ExportTxt_Click(object sender, RoutedEventArgs e)
     {
+        await PerformExportAsync("txt", "TXT Vocabulary File", ".txt", (p) => ViewModel.ExportToTxtAsync(p));
+    }
+
+    private async Task PerformExportAsync(string format, string fileTypeDesc, string extension, Func<IProgress<ProgressReport>, Task<string>> exportFunc)
+    {
+        var progressDialog = new OperationProgressDialog
+        {
+            Title = Loc.GetString("Progress_ExportingTitle"),
+            XamlRoot = this.XamlRoot
+        };
+        progressDialog.SetIndeterminate(Loc.GetString("Progress_PreparingExport"), Loc.GetString("Progress_PleaseWait"));
+        _ = progressDialog.ShowAsync();
+
         try
         {
-            var txt = await ViewModel.ExportToTxtAsync();
+            var progress = new Progress<ProgressReport>(report =>
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail);
+                });
+            });
+
+            var content = await exportFunc(progress);
+            progressDialog.Hide();
+            await Task.Yield();
+
             var defaultName = $"lexora_export_{DateTime.Now:yyyyMMdd_HHmmss}";
-            await ExportFileAsync(txt, defaultName, ".txt", "TXT Vocabulary File");
+            await ExportFileAsync(content, defaultName, extension, fileTypeDesc);
         }
         catch (Exception ex)
         {
+            progressDialog.Hide();
+            await Task.Yield();
             ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
@@ -652,17 +660,50 @@ public sealed partial class VocabularyPage : Page
 
         if (!string.IsNullOrWhiteSpace(contentToImport))
         {
-            var importResult = await ViewModel.ImportDataAsync(contentToImport, format);
-            PopulateTopicFilterCombo();
             await Task.Yield();
-            var summaryDialog = new ContentDialog
+
+            var progressDialog = new OperationProgressDialog
             {
-                Title = Loc.GetString("Vocab_ImportExport"),
-                Content = string.Format(Loc.GetString("Vocab_ImportSummaryFormat"), importResult.TotalImported, importResult.TotalSkipped, importResult.Errors.Count),
-                CloseButtonText = Loc.GetString("Action_Close"),
+                Title = Loc.GetString("Progress_ImportingTitle"),
                 XamlRoot = this.XamlRoot
             };
-            await summaryDialog.ShowAsync();
+            progressDialog.SetDeterminate(0, Loc.GetString("Progress_ReadingFile"), Loc.GetString("Progress_PleaseWait"));
+            _ = progressDialog.ShowAsync();
+
+            var progress = new Progress<ProgressReport>(report =>
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail);
+                });
+            });
+
+            try
+            {
+                var importResult = await ViewModel.ImportDataAsync(contentToImport, format, progress);
+                PopulateTopicFilterCombo();
+
+                var summary = string.Format(
+                    Loc.GetString("Progress_SummaryFormat"),
+                    importResult.TotalImported,
+                    importResult.TotalSkipped,
+                    importResult.Errors.Count);
+
+                progressDialog.SetCompleted(
+                    Loc.GetString("Progress_CompletedTitle"),
+                    summary,
+                    importResult.TotalImported,
+                    importResult.TotalSkipped,
+                    importResult.Errors.Count,
+                    Loc.GetString("Action_Close"));
+            }
+            catch (Exception ex)
+            {
+                progressDialog.SetError(
+                    Loc.GetString("Vocab_ImportFailed"),
+                    ex.Message,
+                    Loc.GetString("Action_Close"));
+            }
         }
     }
 

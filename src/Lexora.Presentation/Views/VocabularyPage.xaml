@@ -317,10 +317,17 @@
                     </Grid>
 
                     <Grid Grid.Row="1">
+                        <!-- Slim modern Progress Bar at top of list -->
+                        <ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                                     Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                     Height="3" VerticalAlignment="Top"
+                                     HorizontalAlignment="Stretch" Canvas.ZIndex="5"
+                                     Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+
                         <!-- ProgressRing Loading State -->
                         <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                                       Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                      Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                      Width="36" Height="36" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
                         <!-- Empty State -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Margin="24"
