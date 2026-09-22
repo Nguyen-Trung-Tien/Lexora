@@ -12,9 +12,12 @@ public sealed partial class OperationProgressDialog : ContentDialog
         InitializeComponent();
         Loaded += OnLoaded;
 
-        // Inherit the current app theme (Light / Dark) so the dialog
-        // renders correctly in both modes, matching the rest of the UI.
-        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService)
+        var actualTheme = (App.Current?.MainWindow?.Content as FrameworkElement)?.ActualTheme;
+        if (actualTheme is ElementTheme.Light or ElementTheme.Dark)
+        {
+            RequestedTheme = actualTheme.Value;
+        }
+        else if (App.Current?.Services?.GetService<IThemeService>() is { } themeService && themeService.CurrentTheme != ElementTheme.Default)
         {
             RequestedTheme = themeService.CurrentTheme;
         }
@@ -106,6 +109,12 @@ public sealed partial class OperationProgressDialog : ContentDialog
         ActiveProgressPanel.Visibility = Visibility.Collapsed;
         CompletedPanel.Visibility = Visibility.Visible;
 
+        // Visual badge: Green success checkmark
+        StatusBadgeBorder.Background = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBackgroundBrush");
+        StatusBadgeBorder.BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
+        StatusBadgeIcon.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
+        StatusBadgeIcon.Glyph = "\uE73E";
+
         CompletedTitleText.Text = title;
         CompletedSummaryText.Text = summary;
 
@@ -139,6 +148,12 @@ public sealed partial class OperationProgressDialog : ContentDialog
 
         ActiveProgressPanel.Visibility = Visibility.Collapsed;
         CompletedPanel.Visibility = Visibility.Visible;
+
+        // Visual badge: Red critical cross icon
+        StatusBadgeBorder.Background = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBackgroundBrush");
+        StatusBadgeBorder.BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+        StatusBadgeIcon.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+        StatusBadgeIcon.Glyph = "\uEA39";
 
         CompletedTitleText.Text = title;
         CompletedSummaryText.Text = errorMessage;

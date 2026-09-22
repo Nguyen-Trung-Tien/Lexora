@@ -266,20 +266,32 @@ public partial class GrammarViewModel : ObservableObject
         OnPropertyChanged(nameof(HasSelection));
     }
 
+    private bool _isDeletingRules = false;
+
     public async Task<int> DeleteSelectedRulesAsync()
     {
-        if (SelectedRuleIds.Count == 0) return 0;
+        if (SelectedRuleIds.Count == 0 || _isDeletingRules) return 0;
+        _isDeletingRules = true;
+        IsLoading = true;
 
-        var idsToDelete = SelectedRuleIds.ToList();
-        int count = await _grammarService.DeleteRulesAsync(idsToDelete);
-        SelectedRuleIds.Clear();
-        IsSelectionMode = false;
-        OnPropertyChanged(nameof(SelectedCount));
-        OnPropertyChanged(nameof(HasSelection));
+        try
+        {
+            var idsToDelete = SelectedRuleIds.ToList();
+            int count = await _grammarService.DeleteRulesAsync(idsToDelete);
+            SelectedRuleIds.Clear();
+            IsSelectionMode = false;
+            OnPropertyChanged(nameof(SelectedCount));
+            OnPropertyChanged(nameof(HasSelection));
 
-        await LoadTopicsAsync();
-        await LoadRulesAsync();
-        return count;
+            await LoadTopicsAsync();
+            await LoadRulesAsync();
+            return count;
+        }
+        finally
+        {
+            _isDeletingRules = false;
+            IsLoading = false;
+        }
     }
 
     // ==========================================
@@ -474,19 +486,41 @@ public partial class GrammarViewModel : ObservableObject
     // Import / Export
     // ─────────────────────────────────────────────────────────────────────────
 
-    public Task<string> ExportToJsonAsync(IProgress<ProgressReport>? progress = null)
-        => _grammarExportImportService.ExportToJsonAsync(progress: progress);
+    public Task<string> ExportToJsonAsync(IEnumerable<Guid>? ruleIds = null, IProgress<ProgressReport>? progress = null)
+        => _grammarExportImportService.ExportToJsonAsync(ruleIds, progress: progress);
 
-    public Task<string> ExportToCsvAsync(IProgress<ProgressReport>? progress = null)
-        => _grammarExportImportService.ExportToCsvAsync(progress: progress);
+    public Task<string> ExportToCsvAsync(IEnumerable<Guid>? ruleIds = null, IProgress<ProgressReport>? progress = null)
+        => _grammarExportImportService.ExportToCsvAsync(ruleIds, progress: progress);
 
-    public Task<ImportResult> ImportDataAsync(string content, string format, IProgress<ProgressReport>? progress = null)
-        => format switch
+    public Task<string> ExportToTxtAsync(IEnumerable<Guid>? ruleIds = null, IProgress<ProgressReport>? progress = null)
+        => _grammarExportImportService.ExportToTxtAsync(ruleIds, progress: progress);
+
+    public async Task<ImportResult> ImportSmartAsync(
+        string content,
+        string? fileNameHint = null,
+        ImportConflictResolution conflictResolution = ImportConflictResolution.Skip,
+        IProgress<ProgressReport>? progress = null)
+    {
+        var result = await _grammarExportImportService.ImportSmartAsync(content, fileNameHint, conflictResolution, progress: progress);
+        await RefreshAfterImportAsync();
+        return result;
+    }
+
+    public Task<ImportResult> ImportDataAsync(
+        string content,
+        string format,
+        ImportConflictResolution conflictResolution = ImportConflictResolution.Skip,
+        IProgress<ProgressReport>? progress = null)
+        => format.ToLowerInvariant() switch
         {
-            "json" => _grammarExportImportService.ImportFromJsonAsync(content, progress: progress),
-            "csv"  => _grammarExportImportService.ImportFromCsvAsync(content, progress: progress),
-            _      => Task.FromResult(new ImportResult(0, 0, [$"Unsupported format: {format}"]))
+            "json" => _grammarExportImportService.ImportFromJsonAsync(content, conflictResolution, progress: progress),
+            "csv"  => _grammarExportImportService.ImportFromCsvAsync(content, conflictResolution, progress: progress),
+            "txt"  => _grammarExportImportService.ImportFromTxtAsync(content, conflictResolution, progress: progress),
+            _      => Task.FromResult(new ImportResult(0, 0, [$"Unsupported format: {format}"], 0))
         };
+
+    public string GetSampleTemplate(string format)
+        => _grammarExportImportService.GetSampleTemplate(format);
 
     /// <summary>Refreshes the rule list after a successful import.</summary>
     public async Task RefreshAfterImportAsync()

@@ -30,6 +30,8 @@ public static class ThemeResourceHelper
     private static readonly Brush DarkCriticalBackground = new SolidColorBrush(Color.FromArgb(255, 68, 39, 38)); // #442726 dark-red
     private static readonly Brush DarkCautionBackground = new SolidColorBrush(Color.FromArgb(255, 67, 53, 25));  // #433519 dark-amber
 
+    public static Brush GetThemeBrush(string key) => GetThemeBrush(null, key);
+
     public static Brush GetThemeBrush(FrameworkElement? element, string key)
     {
         bool isLight = false;

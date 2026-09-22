@@ -151,8 +151,11 @@ public class GrammarService : IGrammarService
     public async Task<int> DeleteRulesAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0) return 0;
+
         int deletedCount = 0;
-        foreach (var id in ids)
+        foreach (var id in idList)
         {
             var rule = await _grammarRepo.GetByIdAsync(id, cancellationToken);
             if (rule != null)

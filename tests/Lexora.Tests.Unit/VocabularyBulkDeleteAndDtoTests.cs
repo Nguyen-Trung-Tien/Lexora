@@ -49,6 +49,24 @@ public class VocabularyBulkDeleteAndDtoTests
     }
 
     [Fact]
+    public async Task DeleteWordsAsync_WithDuplicateIds_ShouldDeduplicateAndCommitOnce()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var word1 = new Word { Term = "test", Level = CefrLevel.B1 };
+
+        _mockVocabRepo.Setup(r => r.GetByIdAsync(id1, It.IsAny<CancellationToken>())).ReturnsAsync(word1);
+
+        // Act
+        var deletedCount = await _vocabService.DeleteWordsAsync([id1, id1, id1]);
+
+        // Assert
+        deletedCount.Should().Be(1);
+        _mockVocabRepo.Verify(r => r.DeleteAsync(word1, It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
     public async Task DeleteWordsAsync_WithEmptyList_ShouldReturnZeroWithoutCommit()
     {
         // Act

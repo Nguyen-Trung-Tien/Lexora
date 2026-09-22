@@ -32,6 +32,13 @@ public class ScoreTierToBrushConverter : IValueConverter
             };
         }
 
+        var rootElement = (XamlApplication.Current as App)?.MainWindow?.Content as Microsoft.UI.Xaml.FrameworkElement;
+        var themeBrush = Services.ThemeResourceHelper.GetThemeBrush(rootElement, brushKey);
+        if (themeBrush != null)
+        {
+            return themeBrush;
+        }
+
         if (XamlApplication.Current?.Resources != null &&
             XamlApplication.Current.Resources.TryGetValue(brushKey, out var res) &&
             res is Brush brush)

@@ -223,8 +223,11 @@ public class VocabularyService : IVocabularyService
     public async Task<int> DeleteWordsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0) return 0;
+
         int deletedCount = 0;
-        foreach (var id in ids)
+        foreach (var id in idList)
         {
             var word = await _vocabRepo.GetByIdAsync(id, cancellationToken);
             if (word != null)

@@ -24,7 +24,10 @@
             <!-- Flashcard crisp border for tactile elevation in light mode -->
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.45" />
             <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.38" />
-            <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColor}" />
+            <!-- Semantic state background fills -->
+            <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#DFF6DD" />
+            <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#FDE7E9" />
+            <SolidColorBrush x:Key="SystemFillColorCautionBackgroundBrush" Color="#FFF4CE" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <!-- Hero card border: glowing accent stroke for depth in dark mode -->
@@ -42,6 +45,10 @@
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.7" />
             <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
             <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+            <!-- Semantic state background fills -->
+            <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#393D1B" />
+            <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#442726" />
+            <SolidColorBrush x:Key="SystemFillColorCautionBackgroundBrush" Color="#433519" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
@@ -53,6 +60,10 @@
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <!-- Semantic state background fills -->
+            <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="SystemFillColorCautionBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

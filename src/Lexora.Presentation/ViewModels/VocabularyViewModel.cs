@@ -400,20 +400,32 @@ public partial class VocabularyViewModel : ObservableObject
         OnPropertyChanged(nameof(HasSelection));
     }
 
+    private bool _isDeletingWords = false;
+
     public async Task<int> DeleteSelectedWordsAsync()
     {
-        if (SelectedWordIds.Count == 0) return 0;
+        if (SelectedWordIds.Count == 0 || _isDeletingWords) return 0;
+        _isDeletingWords = true;
+        IsLoading = true;
 
-        var idsToDelete = SelectedWordIds.ToList();
-        int count = await _vocabService.DeleteWordsAsync(idsToDelete);
-        SelectedWordIds.Clear();
-        IsSelectionMode = false;
-        OnPropertyChanged(nameof(SelectedCount));
-        OnPropertyChanged(nameof(HasSelection));
+        try
+        {
+            var idsToDelete = SelectedWordIds.ToList();
+            int count = await _vocabService.DeleteWordsAsync(idsToDelete);
+            SelectedWordIds.Clear();
+            IsSelectionMode = false;
+            OnPropertyChanged(nameof(SelectedCount));
+            OnPropertyChanged(nameof(HasSelection));
 
-        await LoadWordsAsync();
-        _ = LoadContextUnitsAsync();
-        return count;
+            await LoadWordsAsync();
+            _ = LoadContextUnitsAsync();
+            return count;
+        }
+        finally
+        {
+            _isDeletingWords = false;
+            IsLoading = false;
+        }
     }
 
     private bool _isMarkingStatus = false;
@@ -466,28 +478,44 @@ public partial class VocabularyViewModel : ObservableObject
         await _audioPlayer.PlayPronunciationAsync(SelectedWord.Term, accent);
     }
 
-    public async Task<string> ExportToJsonAsync(IProgress<ProgressReport>? progress = null)
+    public async Task<string> ExportToJsonAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
     {
-        return await _exportImportService.ExportToJsonAsync(progress: progress);
+        return await _exportImportService.ExportToJsonAsync(wordIds, progress: progress);
     }
 
-    public async Task<string> ExportToCsvAsync(IProgress<ProgressReport>? progress = null)
+    public async Task<string> ExportToCsvAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
     {
-        return await _exportImportService.ExportToCsvAsync(progress: progress);
+        return await _exportImportService.ExportToCsvAsync(wordIds, progress: progress);
     }
 
-    public async Task<string> ExportToTxtAsync(IProgress<ProgressReport>? progress = null)
+    public async Task<string> ExportToTxtAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
     {
-        return await _exportImportService.ExportToTxtAsync(progress: progress);
+        return await _exportImportService.ExportToTxtAsync(wordIds, progress: progress);
     }
 
-    public async Task<ImportResult> ImportDataAsync(string content, string format, IProgress<ProgressReport>? progress = null)
+    public async Task<ImportResult> ImportSmartAsync(
+        string content,
+        string? fileNameHint = null,
+        ImportConflictResolution conflictResolution = ImportConflictResolution.Skip,
+        IProgress<ProgressReport>? progress = null)
+    {
+        var result = await _exportImportService.ImportSmartAsync(content, fileNameHint, conflictResolution, progress: progress);
+        await LoadWordsAsync();
+        _ = LoadContextUnitsAsync();
+        return result;
+    }
+
+    public async Task<ImportResult> ImportDataAsync(
+        string content,
+        string format,
+        ImportConflictResolution conflictResolution = ImportConflictResolution.Skip,
+        IProgress<ProgressReport>? progress = null)
     {
         ImportResult result = format.ToLowerInvariant() switch
         {
-            "json" => await _exportImportService.ImportFromJsonAsync(content, progress: progress),
-            "csv" => await _exportImportService.ImportFromCsvAsync(content, progress: progress),
-            _ => await _exportImportService.ImportFromTxtAsync(content, progress: progress)
+            "json" => await _exportImportService.ImportFromJsonAsync(content, conflictResolution, progress: progress),
+            "csv" => await _exportImportService.ImportFromCsvAsync(content, conflictResolution, progress: progress),
+            _ => await _exportImportService.ImportFromTxtAsync(content, conflictResolution, progress: progress)
         };
 
         await LoadWordsAsync();
@@ -497,7 +525,12 @@ public partial class VocabularyViewModel : ObservableObject
 
     public async Task<ImportResult> ImportDataAsync(string content, bool isJson, IProgress<ProgressReport>? progress = null)
     {
-        return await ImportDataAsync(content, isJson ? "json" : "csv", progress);
+        return await ImportDataAsync(content, isJson ? "json" : "csv", ImportConflictResolution.Skip, progress);
+    }
+
+    public string GetSampleTemplate(string format)
+    {
+        return _exportImportService.GetSampleTemplate(format);
     }
 
     public void CheckTypoSuggestion()

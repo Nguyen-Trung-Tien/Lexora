@@ -149,13 +149,13 @@
 
             <!-- Success / Completed State View -->
             <StackPanel x:Name="CompletedPanel" Spacing="16" Visibility="Collapsed" HorizontalAlignment="Stretch">
-                <!-- Checkmark Icon Area -->
-                <Border Width="64" Height="64" CornerRadius="32"
+                <!-- Status Badge Icon Area -->
+                <Border x:Name="StatusBadgeBorder" Width="64" Height="64" CornerRadius="32"
                         Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
                         BorderBrush="{ThemeResource SystemFillColorSuccessBrush}"
                         BorderThickness="1.5"
                         HorizontalAlignment="Center">
-                    <FontIcon Glyph="&#xE73E;" FontSize="28"
+                    <FontIcon x:Name="StatusBadgeIcon" Glyph="&#xE73E;" FontSize="28"
                               Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                               HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>

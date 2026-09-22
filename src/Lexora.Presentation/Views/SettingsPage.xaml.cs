@@ -100,7 +100,8 @@ public sealed partial class SettingsPage : Page
 
         // Visual feedback: checkmark + "Đã sao chép!"
         IconCopyDbPath.Glyph = "\uE73E";
-        if (App.Current.Resources.TryGetValue("SystemFillColorSuccessBrush", out var successBrush) && successBrush is Microsoft.UI.Xaml.Media.Brush bSuccess)
+        var bSuccess = GetThemeBrush("SystemFillColorSuccessBrush");
+        if (bSuccess != null)
         {
             IconCopyDbPath.Foreground = bSuccess;
             TextCopyDbPath.Foreground = bSuccess;

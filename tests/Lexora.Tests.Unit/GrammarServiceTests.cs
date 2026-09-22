@@ -235,4 +235,22 @@ public class GrammarServiceTests
         _mockGrammarRepo.Verify(r => r.DeleteAsync(rule2, It.IsAny<CancellationToken>()), Times.Once);
         _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task DeleteRulesAsync_WithDuplicateIds_ShouldDeduplicateAndCommitOnce()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var rule1 = new GrammarRule { Title = "Rule 1", Structure = "S + V", ExplanationVi = "Ex Vi" };
+
+        _mockGrammarRepo.Setup(r => r.GetByIdAsync(id1, It.IsAny<CancellationToken>())).ReturnsAsync(rule1);
+
+        // Act
+        var deletedCount = await _grammarService.DeleteRulesAsync([id1, id1, id1]);
+
+        // Assert
+        deletedCount.Should().Be(1);
+        _mockGrammarRepo.Verify(r => r.DeleteAsync(rule1, It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

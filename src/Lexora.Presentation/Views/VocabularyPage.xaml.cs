@@ -1,4 +1,5 @@
 using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
@@ -376,9 +377,29 @@ public sealed partial class VocabularyPage : Page
         var result = await confirmDialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            await Task.Yield();
-            await ViewModel.DeleteSelectedWordsAsync();
-            UpdateSelectionModeUI();
+            try
+            {
+                BtnDeleteSelectedWords.IsEnabled = false;
+                BtnSelectMode.IsEnabled = false;
+
+                // WinUI 3 stability fix: Clear ListView selection and revert to Single selection mode
+                // BEFORE modifying or reloading backing collection to prevent fatal NullReferenceException
+                WordsListView.SelectedItems.Clear();
+                WordsListView.SelectionMode = ListViewSelectionMode.Single;
+                ViewModel.IsSelectionMode = false;
+
+                await Task.Yield();
+                await ViewModel.DeleteSelectedWordsAsync();
+            }
+            catch (Exception ex)
+            {
+                ShowErrorDialog(Loc.GetString("Action_Delete"), ex.Message);
+            }
+            finally
+            {
+                BtnSelectMode.IsEnabled = true;
+                UpdateSelectionModeUI();
+            }
         }
     }
 
@@ -507,6 +528,7 @@ public sealed partial class VocabularyPage : Page
     {
         if (ViewModel.SelectedWord == null) return;
 
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var confirmDialog = new ContentDialog
         {
             Title = Loc.GetString("Vocab_DeleteTitle"),
@@ -514,13 +536,22 @@ public sealed partial class VocabularyPage : Page
             PrimaryButtonText = Loc.GetString("Action_Delete"),
             CloseButtonText = Loc.GetString("Action_Cancel"),
             DefaultButton = ContentDialogButton.Close,
-            XamlRoot = this.XamlRoot
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
         };
 
         var result = await confirmDialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            await ViewModel.DeleteWordAsync(ViewModel.SelectedWord.Id);
+            try
+            {
+                await Task.Yield();
+                await ViewModel.DeleteWordAsync(ViewModel.SelectedWord.Id);
+            }
+            catch (Exception ex)
+            {
+                ShowErrorDialog(Loc.GetString("Action_Delete"), ex.Message);
+            }
         }
     }
 
@@ -581,17 +612,17 @@ public sealed partial class VocabularyPage : Page
 
     private async void ExportJson_Click(object sender, RoutedEventArgs e)
     {
-        await PerformExportAsync("json", "JSON Vocabulary File", ".json", (p) => ViewModel.ExportToJsonAsync(p));
+        await PerformExportAsync("json", "JSON Vocabulary File", ".json", (p) => ViewModel.ExportToJsonAsync(progress: p));
     }
 
     private async void ExportCsv_Click(object sender, RoutedEventArgs e)
     {
-        await PerformExportAsync("csv", "CSV Vocabulary File", ".csv", (p) => ViewModel.ExportToCsvAsync(p));
+        await PerformExportAsync("csv", "CSV Vocabulary File", ".csv", (p) => ViewModel.ExportToCsvAsync(progress: p));
     }
 
     private async void ExportTxt_Click(object sender, RoutedEventArgs e)
     {
-        await PerformExportAsync("txt", "TXT Vocabulary File", ".txt", (p) => ViewModel.ExportToTxtAsync(p));
+        await PerformExportAsync("txt", "TXT Vocabulary File", ".txt", (p) => ViewModel.ExportToTxtAsync(progress: p));
     }
 
     private async Task PerformExportAsync(string format, string fileTypeDesc, string extension, Func<IProgress<ProgressReport>, Task<string>> exportFunc)
@@ -676,11 +707,88 @@ public sealed partial class VocabularyPage : Page
             {
                 Title = Loc.GetString("Vocab_ExportCompleteTitle"),
                 Content = string.Format(Loc.GetString("Vocab_ExportCompleteMsg"), ViewModel.Words.Count, savedPath),
+                PrimaryButtonText = Loc.GetString("Export_OpenFile"),
+                SecondaryButtonText = Loc.GetString("Export_OpenFolder"),
                 CloseButtonText = Loc.GetString("Action_Close"),
+                DefaultButton = ContentDialogButton.Primary,
                 XamlRoot = this.XamlRoot,
                 RequestedTheme = exportCompleteTheme
             };
-            await dialog.ShowAsync();
+
+            var res = await dialog.ShowAsync();
+            if (res == ContentDialogResult.Primary)
+            {
+                try
+                {
+                    var fileUri = new Uri(savedPath);
+                    _ = Windows.System.Launcher.LaunchUriAsync(fileUri);
+                }
+                catch
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(savedPath) { UseShellExecute = true });
+                }
+            }
+            else if (res == ContentDialogResult.Secondary)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "explorer.exe",
+                        Arguments = $"/select,\"{savedPath}\"",
+                        UseShellExecute = true
+                    });
+                }
+                catch
+                {
+                    // Explorer launch fallback
+                }
+            }
+        }
+    }
+
+    private void ExportImportFlyout_Opening(object sender, object e)
+    {
+        var count = WordsListView?.SelectedItems?.Count ?? 0;
+        if (ExportSelectedMenuItem != null)
+        {
+            ExportSelectedMenuItem.IsEnabled = count > 0;
+            ExportSelectedMenuItem.Text = string.Format(Loc.GetString("Vocab_ExportSelected"), count);
+        }
+    }
+
+    private async void ExportSelected_Click(object sender, RoutedEventArgs e)
+    {
+        var selectedWords = WordsListView?.SelectedItems?.OfType<WordDto>().ToList();
+        if (selectedWords == null || selectedWords.Count == 0) return;
+
+        var selectedIds = selectedWords.Select(w => w.Id).ToList();
+        await PerformExportAsync(
+            "csv",
+            "CSV Vocabulary File",
+            ".csv",
+            (progress) => ViewModel.ExportToCsvAsync(selectedIds, progress));
+    }
+
+    private async void SmartImport_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await Task.Yield();
+            var dialog = new SmartImportDialog(format => ViewModel.GetSampleTemplate(format))
+            {
+                XamlRoot = this.XamlRoot
+            };
+
+            var res = await dialog.ShowAsync();
+            if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
+            {
+                await ExecuteImportOperationAsync(dialog.ContentToImport, dialog.FileNameHint, dialog.ConflictResolution);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(Loc.GetString("Vocab_ImportFailed"), ex.Message);
         }
     }
 
@@ -714,6 +822,7 @@ public sealed partial class VocabularyPage : Page
             _ => "TXT Files"
         };
         string? contentToImport = null;
+        string? fileName = null;
 
         try
         {
@@ -732,103 +841,88 @@ public sealed partial class VocabularyPage : Page
             await DispatcherQueue.EnsureOnUIThreadAsync();
             if (file != null)
             {
+                fileName = file.Name;
                 contentToImport = await Windows.Storage.FileIO.ReadTextAsync(file);
+            }
+            else
+            {
+                return; // User cancelled file picker cleanly
             }
         }
         catch
         {
-            // Fallback to text prompt
-        }
-
-        if (string.IsNullOrEmpty(contentToImport))
-        {
-            var placeholder = format.ToLowerInvariant() switch
-            {
-                "json" => Loc.GetString("Vocab_ImportPastePlaceholderJson"),
-                "csv" => Loc.GetString("Vocab_ImportPastePlaceholderCsv"),
-                _ => Loc.GetString("Vocab_ImportPastePlaceholderTxt")
-            };
-
-            var dialogTitle = format.ToLowerInvariant() switch
-            {
-                "json" => Loc.GetString("Vocab_ImportJsonTitle"),
-                "csv" => Loc.GetString("Vocab_ImportCsvTitle"),
-                _ => Loc.GetString("Vocab_ImportTxtTitle")
-            };
-
-            var textBox = new TextBox
-            {
-                AcceptsReturn = true,
-                TextWrapping = TextWrapping.Wrap,
-                Height = 250,
-                PlaceholderText = placeholder
-            };
-
-            var dialog = new ContentDialog
-            {
-                Title = dialogTitle,
-                Content = textBox,
-                PrimaryButtonText = Loc.GetString("Vocab_ImportExport"),
-                CloseButtonText = Loc.GetString("Action_Cancel"),
-                DefaultButton = ContentDialogButton.Primary,
-                XamlRoot = this.XamlRoot
-            };
-
-            var res = await dialog.ShowAsync();
-            if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(textBox.Text))
-            {
-                contentToImport = textBox.Text;
-            }
+            return;
         }
 
         if (!string.IsNullOrWhiteSpace(contentToImport))
         {
-            await Task.Yield();
+            await ExecuteImportOperationAsync(contentToImport, fileName, ImportConflictResolution.Skip);
+        }
+    }
 
-            var importTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-            var progressDialog = new OperationProgressDialog
-            {
-                Title = Loc.GetString("Progress_ImportingTitle"),
-                XamlRoot = this.XamlRoot,
-                RequestedTheme = importTheme
-            };
-            progressDialog.SetDeterminate(0, Loc.GetString("Progress_ReadingFile"), Loc.GetString("Progress_PleaseWait"));
-            _ = progressDialog.ShowAsync();
+    private async Task ExecuteImportOperationAsync(
+        string contentToImport,
+        string? fileNameHint,
+        ImportConflictResolution conflictResolution)
+    {
+        await Task.Yield();
 
-            var progress = new Progress<ProgressReport>(report =>
+        var importTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+        var progressDialog = new OperationProgressDialog
+        {
+            Title = Loc.GetString("Progress_ImportingTitle"),
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = importTheme
+        };
+        progressDialog.SetDeterminate(0, Loc.GetString("Progress_ReadingFile"), Loc.GetString("Progress_PleaseWait"));
+        _ = progressDialog.ShowAsync();
+
+        var progress = new Progress<ProgressReport>(report =>
+        {
+            DispatcherQueue.TryEnqueue(() =>
             {
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail);
-                });
+                progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail);
             });
+        });
 
-            try
+        try
+        {
+            var importResult = await ViewModel.ImportSmartAsync(contentToImport, fileNameHint, conflictResolution, progress);
+            PopulateTopicFilterCombo();
+
+            string summary;
+            if (importResult.TotalUpdated > 0)
             {
-                var importResult = await ViewModel.ImportDataAsync(contentToImport, format, progress);
-                PopulateTopicFilterCombo();
-
-                var summary = string.Format(
+                summary = string.Format(
+                    Loc.GetString("Progress_SummaryFormatWithUpdated"),
+                    importResult.TotalImported,
+                    importResult.TotalUpdated,
+                    importResult.TotalSkipped,
+                    importResult.Errors.Count);
+            }
+            else
+            {
+                summary = string.Format(
                     Loc.GetString("Progress_SummaryFormat"),
                     importResult.TotalImported,
                     importResult.TotalSkipped,
                     importResult.Errors.Count);
+            }
 
-                progressDialog.SetCompleted(
-                    Loc.GetString("Progress_CompletedTitle"),
-                    summary,
-                    importResult.TotalImported,
-                    importResult.TotalSkipped,
-                    importResult.Errors.Count,
-                    Loc.GetString("Action_Close"));
-            }
-            catch (Exception ex)
-            {
-                progressDialog.SetError(
-                    Loc.GetString("Vocab_ImportFailed"),
-                    ex.Message,
-                    Loc.GetString("Action_Close"));
-            }
+            progressDialog.SetCompleted(
+                Loc.GetString("Progress_CompletedTitle"),
+                summary,
+                importResult.TotalImported + importResult.TotalUpdated,
+                importResult.TotalSkipped,
+                importResult.Errors.Count,
+                Loc.GetString("Action_Close"));
+        }
+        catch (Exception ex)
+        {
+            progressDialog.SetError(
+                Loc.GetString("Vocab_ImportFailed"),
+                ex.Message,
+                Loc.GetString("Action_Close"));
         }
     }
 

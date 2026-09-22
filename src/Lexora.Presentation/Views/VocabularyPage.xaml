@@ -123,14 +123,30 @@
                     <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontWeight="SemiBold" />
                 </StackPanel>
                 <DropDownButton.Flyout>
-                    <MenuFlyout>
-                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportJson')}" Click="ExportJson_Click" />
-                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportCsv')}" Click="ExportCsv_Click" />
-                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportTxt')}" Click="ExportTxt_Click" />
+                    <MenuFlyout Opening="ExportImportFlyout_Opening">
+                        <!-- Smart Import Option (Primary) -->
+                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_SmartImport')}" Click="SmartImport_Click">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon Glyph="&#xE8B5;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
                         <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportJson')}" Click="ImportJson_Click" />
-                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportCsv')}" Click="ImportCsv_Click" />
-                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportTxt')}" Click="ImportTxt_Click" />
+
+                        <!-- Export Options -->
+                        <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Export')}">
+                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportJson')}" Click="ExportJson_Click" />
+                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportCsv')}" Click="ExportCsv_Click" />
+                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportTxt')}" Click="ExportTxt_Click" />
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem x:Name="ExportSelectedMenuItem" Click="ExportSelected_Click" IsEnabled="False" />
+                        </MenuFlyoutSubItem>
+
+                        <!-- Traditional / Manual Import Options -->
+                        <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Import')}">
+                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportJson')}" Click="ImportJson_Click" />
+                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportCsv')}" Click="ImportCsv_Click" />
+                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportTxt')}" Click="ImportTxt_Click" />
+                        </MenuFlyoutSubItem>
                     </MenuFlyout>
                 </DropDownButton.Flyout>
             </DropDownButton>

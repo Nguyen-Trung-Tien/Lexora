@@ -89,7 +89,14 @@
                         <TextBlock Text="I/O" FontWeight="SemiBold" />
                     </StackPanel>
                     <DropDownButton.Flyout>
-                        <MenuFlyout Placement="Bottom">
+                        <MenuFlyout Placement="Bottom" Opening="ExportImportFlyout_Opening">
+                            <!-- Smart Import (Primary) -->
+                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Grammar_SmartImport')}" Click="SmartImport_Click">
+                                <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" /></MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator />
+
+                            <!-- Export SubItem -->
                             <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Export')}">
                                 <MenuFlyoutItem x:Name="ExportJsonMenuItem"
                                                Text="{x:Bind Loc.GetString('Grammar_ExportJson')}"
@@ -101,8 +108,17 @@
                                                Click="ExportCsv_Click">
                                     <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8A5;" /></MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="ExportTxtMenuItem"
+                                               Text="{x:Bind Loc.GetString('Grammar_ExportTxt')}"
+                                               Click="ExportTxt_Click">
+                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8A5;" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem x:Name="ExportSelectedMenuItem" Click="ExportSelected_Click" IsEnabled="False" />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSeparator />
+
+                            <!-- Manual Import SubItem -->
                             <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Import')}">
                                 <MenuFlyoutItem x:Name="ImportJsonMenuItem"
                                                Text="{x:Bind Loc.GetString('Grammar_ImportJson')}"
@@ -112,6 +128,11 @@
                                 <MenuFlyoutItem x:Name="ImportCsvMenuItem"
                                                Text="{x:Bind Loc.GetString('Grammar_ImportCsv')}"
                                                Click="ImportCsv_Click">
+                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="ImportTxtMenuItem"
+                                               Text="{x:Bind Loc.GetString('Grammar_ImportTxt')}"
+                                               Click="ImportTxt_Click">
                                     <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" /></MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                             </MenuFlyoutSubItem>
