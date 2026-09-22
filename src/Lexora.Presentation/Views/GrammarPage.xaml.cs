@@ -29,7 +29,14 @@ public sealed partial class GrammarPage : Page
         _searchDebounceTimer.Tick += async (s, e) =>
         {
             _searchDebounceTimer.Stop();
-            await ViewModel.LoadRulesAsync();
+            try
+            {
+                await ViewModel.LoadRulesAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[GrammarPage] Debounce load error: {ex.Message}");
+            }
         };
     }
 
@@ -47,7 +54,14 @@ public sealed partial class GrammarPage : Page
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
-        await ViewModel.InitializeAsync();
+        try
+        {
+            await ViewModel.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarPage] OnNavigatedTo error: {ex.Message}");
+        }
     }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -56,9 +70,16 @@ public sealed partial class GrammarPage : Page
         _searchDebounceTimer.Start();
     }
 
-    private void FilterChanged(object sender, SelectionChangedEventArgs e)
+    private async void FilterChanged(object sender, SelectionChangedEventArgs e)
     {
-        _ = ViewModel.LoadRulesAsync();
+        try
+        {
+            await ViewModel.LoadRulesAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarPage] FilterChanged error: {ex.Message}");
+        }
     }
 
     private void BtnSelectMode_Click(object sender, RoutedEventArgs e)
@@ -138,7 +159,7 @@ public sealed partial class GrammarPage : Page
             RequestedTheme = activeTheme
         };
 
-        var result = await confirmDialog.ShowAsync();
+        var result = await confirmDialog.ShowAsyncSafe();
         if (result == ContentDialogResult.Primary)
         {
             try
@@ -169,18 +190,25 @@ public sealed partial class GrammarPage : Page
 
     private async void AddRuleButton_Click(object sender, RoutedEventArgs e)
     {
-        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        var dialog = new GrammarEditorDialog
+        try
         {
-            XamlRoot = XamlRoot,
-            RequestedTheme = activeTheme
-        };
-        dialog.InitializeForCreate();
+            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var dialog = new GrammarEditorDialog
+            {
+                XamlRoot = XamlRoot,
+                RequestedTheme = activeTheme
+            };
+            dialog.InitializeForCreate();
 
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            var result = await dialog.ShowAsyncSafe();
+            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            {
+                await ViewModel.AddRuleAsync(dialog.ResultDto);
+            }
+        }
+        catch (Exception ex)
         {
-            await ViewModel.AddRuleAsync(dialog.ResultDto);
+            await ShowErrorDialogAsync(Loc.GetString("Action_Add"), ex.Message);
         }
     }
 
@@ -188,18 +216,25 @@ public sealed partial class GrammarPage : Page
     {
         if (ViewModel.SelectedRule == null) return;
 
-        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        var dialog = new GrammarEditorDialog
+        try
         {
-            XamlRoot = XamlRoot,
-            RequestedTheme = activeTheme
-        };
-        dialog.InitializeForEdit(ViewModel.SelectedRule);
+            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var dialog = new GrammarEditorDialog
+            {
+                XamlRoot = XamlRoot,
+                RequestedTheme = activeTheme
+            };
+            dialog.InitializeForEdit(ViewModel.SelectedRule);
 
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            var result = await dialog.ShowAsyncSafe();
+            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            {
+                await ViewModel.UpdateRuleAsync(dialog.ResultDto);
+            }
+        }
+        catch (Exception ex)
         {
-            await ViewModel.UpdateRuleAsync(dialog.ResultDto);
+            await ShowErrorDialogAsync(Loc.GetString("Action_Edit"), ex.Message);
         }
     }
 
@@ -207,30 +242,37 @@ public sealed partial class GrammarPage : Page
     {
         if (ViewModel.SelectedRule == null) return;
 
-        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        var confirmDialog = new ContentDialog
+        try
         {
-            Title = Loc.GetString("Grammar_DeleteTitle"),
-            Content = string.Format(Loc.GetString("Grammar_DeleteConfirm"), ViewModel.SelectedRule.Title),
-            PrimaryButtonText = Loc.GetString("Action_Delete"),
-            CloseButtonText = Loc.GetString("Action_Cancel"),
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = XamlRoot,
-            RequestedTheme = activeTheme
-        };
+            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var confirmDialog = new ContentDialog
+            {
+                Title = Loc.GetString("Grammar_DeleteTitle"),
+                Content = string.Format(Loc.GetString("Grammar_DeleteConfirm"), ViewModel.SelectedRule.Title),
+                PrimaryButtonText = Loc.GetString("Action_Delete"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = XamlRoot,
+                RequestedTheme = activeTheme
+            };
 
-        var result = await confirmDialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
+            var result = await confirmDialog.ShowAsyncSafe();
+            if (result == ContentDialogResult.Primary)
+            {
+                try
+                {
+                    await Task.Yield();
+                    await ViewModel.DeleteRuleAsync(ViewModel.SelectedRule.Id);
+                }
+                catch (Exception ex)
+                {
+                    await ShowErrorDialogAsync(Loc.GetString("Action_Delete"), ex.Message);
+                }
+            }
+        }
+        catch (Exception ex)
         {
-            try
-            {
-                await Task.Yield();
-                await ViewModel.DeleteRuleAsync(ViewModel.SelectedRule.Id);
-            }
-            catch (Exception ex)
-            {
-                await ShowErrorDialogAsync(Loc.GetString("Action_Delete"), ex.Message);
-            }
+            System.Diagnostics.Debug.WriteLine($"[GrammarPage] DeleteRule error: {ex.Message}");
         }
     }
 
@@ -356,16 +398,43 @@ public sealed partial class GrammarPage : Page
     // ─────────────────────────────────────────────────────────────────────────
 
     private async void ExportJson_Click(object sender, RoutedEventArgs e)
-        => await PerformExportAsync("json", "Grammar JSON File", ".json",
-               progress => ViewModel.ExportToJsonAsync(null, progress));
+    {
+        try
+        {
+            await PerformExportAsync("json", "Grammar JSON File", ".json",
+                   progress => ViewModel.ExportToJsonAsync(null, progress));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Grammar_ExportFailed"), ex.Message);
+        }
+    }
 
     private async void ExportCsv_Click(object sender, RoutedEventArgs e)
-        => await PerformExportAsync("csv", "Grammar CSV File", ".csv",
-               progress => ViewModel.ExportToCsvAsync(null, progress));
+    {
+        try
+        {
+            await PerformExportAsync("csv", "Grammar CSV File", ".csv",
+                   progress => ViewModel.ExportToCsvAsync(null, progress));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Grammar_ExportFailed"), ex.Message);
+        }
+    }
 
     private async void ExportTxt_Click(object sender, RoutedEventArgs e)
-        => await PerformExportAsync("txt", "Grammar TXT/Markdown File", ".txt",
-               progress => ViewModel.ExportToTxtAsync(null, progress));
+    {
+        try
+        {
+            await PerformExportAsync("txt", "Grammar TXT/Markdown File", ".txt",
+                   progress => ViewModel.ExportToTxtAsync(null, progress));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Grammar_ExportFailed"), ex.Message);
+        }
+    }
 
     private void ExportImportFlyout_Opening(object sender, object e)
     {
@@ -379,12 +448,19 @@ public sealed partial class GrammarPage : Page
 
     private async void ExportSelected_Click(object sender, RoutedEventArgs e)
     {
-        var selectedRules = RulesListView.SelectedItems.OfType<GrammarRuleDto>().ToList();
-        if (selectedRules.Count == 0) return;
+        try
+        {
+            var selectedRules = RulesListView.SelectedItems.OfType<GrammarRuleDto>().ToList();
+            if (selectedRules.Count == 0) return;
 
-        var selectedIds = selectedRules.Select(r => r.Id).ToList();
-        await PerformExportAsync("csv", "Grammar CSV File", ".csv",
-            progress => ViewModel.ExportToCsvAsync(selectedIds, progress));
+            var selectedIds = selectedRules.Select(r => r.Id).ToList();
+            await PerformExportAsync("csv", "Grammar CSV File", ".csv",
+                progress => ViewModel.ExportToCsvAsync(selectedIds, progress));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Grammar_ExportFailed"), ex.Message);
+        }
     }
 
     private async Task PerformExportAsync(
@@ -401,7 +477,7 @@ public sealed partial class GrammarPage : Page
             RequestedTheme = activeTheme
         };
         progressDialog.SetIndeterminate(Loc.GetString("Progress_PreparingExport"), Loc.GetString("Progress_PleaseWait"));
-        _ = progressDialog.ShowAsync();
+        _ = progressDialog.ShowAsyncSafe();
 
         try
         {
@@ -410,7 +486,7 @@ public sealed partial class GrammarPage : Page
                     progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail)));
 
             var content = await exportFunc(progress);
-            progressDialog.Hide();
+            progressDialog.HideSafe();
             await Task.Yield();
 
             var defaultName = $"lexora_grammar_{DateTime.Now:yyyyMMdd_HHmmss}";
@@ -418,7 +494,7 @@ public sealed partial class GrammarPage : Page
         }
         catch (Exception ex)
         {
-            progressDialog.Hide();
+            progressDialog.HideSafe();
             await Task.Yield();
             await ShowErrorDialogAsync(Loc.GetString("Grammar_ExportFailed"), ex.Message);
         }
@@ -475,7 +551,7 @@ public sealed partial class GrammarPage : Page
                 RequestedTheme = exportTheme
             };
 
-            var res = await dialog.ShowAsync();
+            var res = await dialog.ShowAsyncSafe();
             if (res == ContentDialogResult.Primary)
             {
                 try
@@ -521,7 +597,7 @@ public sealed partial class GrammarPage : Page
                 XamlRoot = this.XamlRoot
             };
 
-            var res = await dialog.ShowAsync();
+            var res = await dialog.ShowAsyncSafe();
             if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
             {
                 await ExecuteImportOperationAsync(dialog.ContentToImport, dialog.FileNameHint, dialog.ConflictResolution);
@@ -534,13 +610,40 @@ public sealed partial class GrammarPage : Page
     }
 
     private async void ImportJson_Click(object sender, RoutedEventArgs e)
-        => await ShowImportDialogAsync("json");
+    {
+        try
+        {
+            await ShowImportDialogAsync("json");
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Grammar_ImportFailed"), ex.Message);
+        }
+    }
 
     private async void ImportCsv_Click(object sender, RoutedEventArgs e)
-        => await ShowImportDialogAsync("csv");
+    {
+        try
+        {
+            await ShowImportDialogAsync("csv");
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Grammar_ImportFailed"), ex.Message);
+        }
+    }
 
     private async void ImportTxt_Click(object sender, RoutedEventArgs e)
-        => await ShowImportDialogAsync("txt");
+    {
+        try
+        {
+            await ShowImportDialogAsync("txt");
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Grammar_ImportFailed"), ex.Message);
+        }
+    }
 
     private async Task ShowImportDialogAsync(string format)
     {
@@ -605,7 +708,7 @@ public sealed partial class GrammarPage : Page
             RequestedTheme = importTheme
         };
         progressDialog.SetDeterminate(0, Loc.GetString("Progress_ReadingFile"), Loc.GetString("Progress_PleaseWait"));
-        _ = progressDialog.ShowAsync();
+        _ = progressDialog.ShowAsyncSafe();
 
         var progress = new Progress<ProgressReport>(report =>
             DispatcherQueue.TryEnqueue(() =>
@@ -667,11 +770,11 @@ public sealed partial class GrammarPage : Page
                 XamlRoot = this.XamlRoot,
                 RequestedTheme = errTheme
             };
-            await dialog.ShowAsync();
+            await dialog.ShowAsyncSafe();
         }
-        catch (InvalidOperationException)
+        catch (Exception ex)
         {
-            // Another dialog is already visible; avoid unhandled exception crash
+            System.Diagnostics.Debug.WriteLine($"[GrammarPage] ShowErrorDialog error: {ex.Message}");
         }
     }
 }

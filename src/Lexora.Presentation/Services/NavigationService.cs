@@ -36,8 +36,16 @@ public class NavigationService : INavigationService
         if (_frame == null) return false;
         if (!force && _frame.Content?.GetType() == pageType && parameter == null) return false;
 
-        transitionInfo ??= new EntranceNavigationTransitionInfo();
-        return _frame.Navigate(pageType, parameter, transitionInfo);
+        try
+        {
+            transitionInfo ??= new EntranceNavigationTransitionInfo();
+            return _frame.Navigate(pageType, parameter, transitionInfo);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[NavigationService] Navigation failed to {pageType.Name}: {ex.Message}");
+            return false;
+        }
     }
 
     public void Reload(NavigationTransitionInfo? transitionInfo = null)
@@ -52,9 +60,16 @@ public class NavigationService : INavigationService
 
     public void GoBack()
     {
-        if (CanGoBack)
+        try
         {
-            _frame?.GoBack();
+            if (CanGoBack)
+            {
+                _frame?.GoBack();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[NavigationService] GoBack failed: {ex.Message}");
         }
     }
 }

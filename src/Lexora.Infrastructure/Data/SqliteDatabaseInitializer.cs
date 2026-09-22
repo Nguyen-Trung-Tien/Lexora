@@ -23,9 +23,9 @@ public class SqliteDatabaseInitializer
             _logger.LogInformation("Ensuring SQLite database is created...");
             await _context.Database.EnsureCreatedAsync(cancellationToken);
 
-            // Configure optimal client SQLite PRAGMAs for high performance
+            // Configure optimal client SQLite PRAGMAs for high performance and lock resilience
             await _context.Database.ExecuteSqlRawAsync(
-                "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON; PRAGMA cache_size = -8000; PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 30000000;",
+                "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 15000; PRAGMA cache_size = -8000; PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 30000000;",
                 cancellationToken);
 
             await EnsureSchemaCompatibilityAsync(cancellationToken);

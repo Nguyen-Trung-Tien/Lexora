@@ -45,19 +45,26 @@ public sealed partial class TestPage : Page
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
-        UpdateCountButtonLabels();
-        UpdateTypeButtonStyles(ViewModel.SelectedTestType);
-        UpdateCountButtonStyles(ViewModel.QuestionCount);
-        await ViewModel.InitializeAsync();
+        try
+        {
+            UpdateCountButtonLabels();
+            UpdateTypeButtonStyles(ViewModel.SelectedTestType);
+            UpdateCountButtonStyles(ViewModel.QuestionCount);
+            await ViewModel.InitializeAsync();
 
-        if (e.Parameter is IEnumerable<Guid> wordIds)
-        {
-            await ViewModel.SetCustomWordSelectionAsync(wordIds);
-            UpdateModeSelectorStyles(true);
+            if (e.Parameter is IEnumerable<Guid> wordIds)
+            {
+                await ViewModel.SetCustomWordSelectionAsync(wordIds);
+                UpdateModeSelectorStyles(true);
+            }
+            else
+            {
+                UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
+            System.Diagnostics.Debug.WriteLine($"[TestPage] OnNavigatedTo error: {ex.Message}");
         }
     }
 
@@ -151,8 +158,15 @@ public sealed partial class TestPage : Page
 
     private async void ModeCustomListButton_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.SwitchToCustomListModeAsync();
-        UpdateModeSelectorStyles(true);
+        try
+        {
+            await ViewModel.SwitchToCustomListModeAsync();
+            UpdateModeSelectorStyles(true);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TestPage] ModeCustomList error: {ex.Message}");
+        }
     }
 
     private void CustomWordSearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -227,9 +241,16 @@ public sealed partial class TestPage : Page
 
     private async void WeakWordAudio_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is WordDto word)
+        try
         {
-            await ViewModel.PlayWordAudioAsync(word);
+            if (sender is Button btn && btn.Tag is WordDto word)
+            {
+                await ViewModel.PlayWordAudioAsync(word);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TestPage] WeakWordAudio error: {ex.Message}");
         }
     }
 

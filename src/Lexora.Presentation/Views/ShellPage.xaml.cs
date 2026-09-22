@@ -38,50 +38,57 @@ public sealed partial class ShellPage : Page
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)
     {
-        if (!_isNavInitialized)
+        try
         {
-            _isNavInitialized = true;
-            _navigationService.Initialize(ContentFrame);
-
-            NavView.BackRequested += (s, args) =>
+            if (!_isNavInitialized)
             {
-                if (_navigationService.CanGoBack)
-                {
-                    _navigationService.GoBack();
-                }
-            };
+                _isNavInitialized = true;
+                _navigationService.Initialize(ContentFrame);
 
-            ContentFrame.Navigated += (s, args) =>
-            {
-                NavView.IsBackEnabled = _navigationService.CanGoBack;
-                switch (ContentFrame.Content)
+                NavView.BackRequested += (s, args) =>
                 {
-                    case DashboardPage:
-                        NavView.SelectedItem = NavItemDashboard;
-                        break;
-                    case VocabularyPage:
-                        NavView.SelectedItem = NavItemVocabulary;
-                        break;
-                    case ReviewPage:
-                        NavView.SelectedItem = NavItemReview;
-                        break;
-                    case TestPage:
-                        NavView.SelectedItem = NavItemTest;
-                        break;
-                    case GrammarPage:
-                        NavView.SelectedItem = NavItemGrammar;
-                        break;
-                    case SettingsPage:
-                        NavView.SelectedItem = NavItemSettings;
-                        break;
-                }
-            };
+                    if (_navigationService.CanGoBack)
+                    {
+                        _navigationService.GoBack();
+                    }
+                };
 
-            _navigationService.Navigate(typeof(DashboardPage));
+                ContentFrame.Navigated += (s, args) =>
+                {
+                    NavView.IsBackEnabled = _navigationService.CanGoBack;
+                    switch (ContentFrame.Content)
+                    {
+                        case DashboardPage:
+                            NavView.SelectedItem = NavItemDashboard;
+                            break;
+                        case VocabularyPage:
+                            NavView.SelectedItem = NavItemVocabulary;
+                            break;
+                        case ReviewPage:
+                            NavView.SelectedItem = NavItemReview;
+                            break;
+                        case TestPage:
+                            NavView.SelectedItem = NavItemTest;
+                            break;
+                        case GrammarPage:
+                            NavView.SelectedItem = NavItemGrammar;
+                            break;
+                        case SettingsPage:
+                            NavView.SelectedItem = NavItemSettings;
+                            break;
+                    }
+                };
+
+                _navigationService.Navigate(typeof(DashboardPage));
+            }
+
+            UpdateNavigationLabels();
+            await ViewModel.CheckDueReviewsAsync();
         }
-
-        UpdateNavigationLabels();
-        await ViewModel.CheckDueReviewsAsync();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ShellPage] NavView_Loaded error: {ex.Message}");
+        }
     }
 
     private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)

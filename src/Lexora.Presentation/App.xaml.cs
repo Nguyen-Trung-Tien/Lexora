@@ -29,10 +29,12 @@ public partial class App : Microsoft.UI.Xaml.Application
         TaskScheduler.UnobservedTaskException += (s, e) =>
         {
             LogCrash("TaskScheduler.UnobservedTaskException", e.Exception);
+            e.SetObserved();
         };
         UnhandledException += (s, e) =>
         {
             LogCrash("Xaml.UnhandledException", e.Exception, e.Message);
+            e.Handled = true;
         };
 
         InitializeComponent();
@@ -103,11 +105,20 @@ public partial class App : Microsoft.UI.Xaml.Application
     {
         try
         {
-            var logPath = System.IO.Path.Combine(
+            var logDir = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Lexora",
-                "crash.log");
-            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logPath)!);
+                "Lexora");
+            System.IO.Directory.CreateDirectory(logDir);
+            var logPath = System.IO.Path.Combine(logDir, "crash.log");
+
+            var fileInfo = new System.IO.FileInfo(logPath);
+            if (fileInfo.Exists && fileInfo.Length > 2 * 1024 * 1024)
+            {
+                var backupPath = System.IO.Path.Combine(logDir, "crash.old.log");
+                if (System.IO.File.Exists(backupPath)) System.IO.File.Delete(backupPath);
+                System.IO.File.Move(logPath, backupPath);
+            }
+
             var text = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{source}] {extra}\n{ex?.GetType().FullName}: {ex?.Message}\nStackTrace:\n{ex?.StackTrace}\nInnerException: {ex?.InnerException}\n\n";
             System.IO.File.AppendAllText(logPath, text);
         }

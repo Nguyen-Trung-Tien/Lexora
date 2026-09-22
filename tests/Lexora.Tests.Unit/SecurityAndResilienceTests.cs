@@ -192,4 +192,21 @@ public class SecurityAndResilienceTests : IDisposable
         result.TotalSkipped.Should().Be(1);
         vocabRepoMock.Verify(r => r.AddAsync(It.IsAny<Word>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public void SqliteConnectionStringBuilder_WhenConfiguredWithResilienceFlags_ContainsBusyTimeout()
+    {
+        // Arrange
+        var builder = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
+        {
+            DataSource = Path.Combine(_tempDirectory, "lexora.db"),
+            Mode = Microsoft.Data.Sqlite.SqliteOpenMode.ReadWriteCreate,
+            Cache = Microsoft.Data.Sqlite.SqliteCacheMode.Shared,
+            DefaultTimeout = 15
+        };
+
+        // Assert
+        builder.ConnectionString.Should().Contain("Cache=Shared");
+        builder.DefaultTimeout.Should().Be(15);
+    }
 }

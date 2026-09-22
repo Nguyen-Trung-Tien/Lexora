@@ -226,7 +226,14 @@ public partial class ReviewViewModel : ObservableObject
     [RelayCommand]
     public async Task RefreshDueCountAsync()
     {
-        DueCardsCount = await _reviewService.GetDueCardsCountAsync();
+        try
+        {
+            DueCardsCount = await _reviewService.GetDueCardsCountAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ReviewViewModel] RefreshDueCount error: {ex.Message}");
+        }
     }
 
     [RelayCommand]
@@ -294,6 +301,10 @@ public partial class ReviewViewModel : ObservableObject
                 _currentSessionId = null;
                 IsCompleted = false;
             }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ReviewViewModel] StartReview error: {ex.Message}");
         }
         finally
         {
@@ -402,6 +413,10 @@ public partial class ReviewViewModel : ObservableObject
                 await LoadHistoryAsync();
             }
         }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ReviewViewModel] SubmitRatingAsync error: {ex.Message}");
+        }
         finally
         {
             _isRatingInProgress = false;
@@ -442,6 +457,10 @@ public partial class ReviewViewModel : ObservableObject
 
             int totalReviewed = SessionCorrectCount + SessionIncorrectCount;
             SessionAccuracyRate = totalReviewed == 0 ? 0.0 : Math.Round((double)SessionCorrectCount / totalReviewed * 100, 1);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ReviewViewModel] UndoLastReviewAsync error: {ex.Message}");
         }
         finally
         {

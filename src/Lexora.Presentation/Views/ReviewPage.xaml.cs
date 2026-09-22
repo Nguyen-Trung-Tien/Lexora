@@ -59,38 +59,45 @@ public sealed partial class ReviewPage : Page
         base.OnNavigatedTo(e);
         Focus(FocusState.Programmatic);
 
-        if (e.Parameter is ContextUnitDto unit)
+        try
         {
-            await ViewModel.LoadAvailableTopicsAsync();
-            var prefs = _preferencesService.GetPreferences();
-            ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
-            ViewModel.SpeechRate = prefs.SpeechRate;
-            UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
-            await ViewModel.StartUnitReviewAsync(unit);
+            if (e.Parameter is ContextUnitDto unit)
+            {
+                await ViewModel.LoadAvailableTopicsAsync();
+                var prefs = _preferencesService.GetPreferences();
+                ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
+                ViewModel.SpeechRate = prefs.SpeechRate;
+                UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
+                await ViewModel.StartUnitReviewAsync(unit);
+            }
+            else if (e.Parameter is IEnumerable<Guid> wordIds)
+            {
+                var idList = wordIds.ToList();
+                await ViewModel.LoadAvailableTopicsAsync();
+                var prefs = _preferencesService.GetPreferences();
+                ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
+                ViewModel.SpeechRate = prefs.SpeechRate;
+                UpdateModeButtonStyles(ReviewSessionMode.CustomSelection);
+                await ViewModel.StartCustomWordReviewAsync(idList, $"Từ vựng chọn lọc ({idList.Count})");
+            }
+            else if (e.Parameter is TopicDto topic)
+            {
+                await ViewModel.LoadAvailableTopicsAsync();
+                var prefs = _preferencesService.GetPreferences();
+                ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
+                ViewModel.SpeechRate = prefs.SpeechRate;
+                UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
+                await ViewModel.StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: topic.Id, customTitle: $"Unit: {topic.Name}");
+            }
+            else
+            {
+                await ViewModel.InitializeAsync();
+                UpdateModeButtonStyles(ViewModel.CurrentMode);
+            }
         }
-        else if (e.Parameter is IEnumerable<Guid> wordIds)
+        catch (Exception ex)
         {
-            var idList = wordIds.ToList();
-            await ViewModel.LoadAvailableTopicsAsync();
-            var prefs = _preferencesService.GetPreferences();
-            ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
-            ViewModel.SpeechRate = prefs.SpeechRate;
-            UpdateModeButtonStyles(ReviewSessionMode.CustomSelection);
-            await ViewModel.StartCustomWordReviewAsync(idList, $"Từ vựng chọn lọc ({idList.Count})");
-        }
-        else if (e.Parameter is TopicDto topic)
-        {
-            await ViewModel.LoadAvailableTopicsAsync();
-            var prefs = _preferencesService.GetPreferences();
-            ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
-            ViewModel.SpeechRate = prefs.SpeechRate;
-            UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
-            await ViewModel.StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: topic.Id, customTitle: $"Unit: {topic.Name}");
-        }
-        else
-        {
-            await ViewModel.InitializeAsync();
-            UpdateModeButtonStyles(ViewModel.CurrentMode);
+            System.Diagnostics.Debug.WriteLine($"[ReviewPage] OnNavigatedTo error: {ex.Message}");
         }
     }
 

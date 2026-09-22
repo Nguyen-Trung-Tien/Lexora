@@ -71,13 +71,7 @@ public sealed class SoundFeedbackService : ISoundFeedbackService, IDisposable
     {
         try
         {
-            var stream = new InMemoryRandomAccessStream();
-            using (var writer = new DataWriter(stream.GetOutputStreamAt(0)))
-            {
-                writer.WriteBytes(wavBytes);
-                writer.StoreAsync().AsTask().GetAwaiter().GetResult();
-            }
-            stream.Seek(0);
+            var stream = new MemoryStream(wavBytes).AsRandomAccessStream();
             _mediaPlayer.Source = MediaSource.CreateFromStream(stream, "audio/wav");
             _mediaPlayer.Play();
         }

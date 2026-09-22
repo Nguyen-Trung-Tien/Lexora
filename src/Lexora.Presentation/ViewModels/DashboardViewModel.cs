@@ -204,6 +204,10 @@ public partial class DashboardViewModel : ObservableObject
             RecentSessionsList.Clear();
             foreach (var rs in analytics.RecentSessions) RecentSessionsList.Add(rs);
         }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadDashboardAsync error: {ex.Message}");
+        }
         finally
         {
             IsLoading = false;

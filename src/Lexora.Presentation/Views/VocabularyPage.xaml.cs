@@ -37,18 +37,35 @@ public sealed partial class VocabularyPage : Page
         _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
         _searchDebounceTimer.Tick += async (s, e) =>
         {
-            _searchDebounceTimer.Stop();
-            await ViewModel.LoadWordsAsync();
-            ViewModel.ApplyUnitFilter();
+            try
+            {
+                _searchDebounceTimer.Stop();
+                await ViewModel.LoadWordsAsync();
+                ViewModel.ApplyUnitFilter();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[VocabularyPage] SearchDebounce error: {ex.Message}");
+            }
         };
 
         Loaded += async (s, e) =>
         {
-            _isInitializing = true;
-            await ViewModel.InitializeAsync();
-            PopulateTopicFilterCombo();
-            UpdateViewModeButtons();
-            _isInitializing = false;
+            try
+            {
+                _isInitializing = true;
+                await ViewModel.InitializeAsync();
+                PopulateTopicFilterCombo();
+                UpdateViewModeButtons();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[VocabularyPage] Loaded error: {ex.Message}");
+            }
+            finally
+            {
+                _isInitializing = false;
+            }
         };
 
         ActualThemeChanged += (s, e) => UpdateViewModeButtons();
@@ -174,116 +191,158 @@ public sealed partial class VocabularyPage : Page
 
     private async void TopicFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_isInitializing) return;
-        if (TopicFilterCombo.SelectedItem is ComboBoxItem cbi)
+        try
         {
-            ToolTipService.SetToolTip(TopicFilterCombo, cbi.Content?.ToString());
-            ViewModel.SelectedTopicId = cbi.Tag as Guid?;
+            if (_isInitializing) return;
+            if (TopicFilterCombo.SelectedItem is ComboBoxItem cbi)
+            {
+                ToolTipService.SetToolTip(TopicFilterCombo, cbi.Content?.ToString());
+                ViewModel.SelectedTopicId = cbi.Tag as Guid?;
+            }
+            else
+            {
+                ViewModel.SelectedTopicId = null;
+                ToolTipService.SetToolTip(TopicFilterCombo, null);
+            }
+            await ViewModel.LoadWordsAsync();
         }
-        else
+        catch (Exception ex)
         {
-            ViewModel.SelectedTopicId = null;
-            ToolTipService.SetToolTip(TopicFilterCombo, null);
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] TopicFilterCombo_SelectionChanged error: {ex.Message}");
         }
-        await ViewModel.LoadWordsAsync();
     }
 
 
     private async void LevelFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_isInitializing) return;
-        if (LevelFilterCombo.SelectedItem is CefrLevel level)
+        try
         {
-            ViewModel.SelectedLevel = level;
+            if (_isInitializing) return;
+            if (LevelFilterCombo.SelectedItem is CefrLevel level)
+            {
+                ViewModel.SelectedLevel = level;
+            }
+            else
+            {
+                ViewModel.SelectedLevel = null;
+            }
+            await ViewModel.LoadWordsAsync();
         }
-        else
+        catch (Exception ex)
         {
-            ViewModel.SelectedLevel = null;
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] LevelFilterCombo_SelectionChanged error: {ex.Message}");
         }
-        await ViewModel.LoadWordsAsync();
     }
 
     private async void PosFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_isInitializing) return;
-        if (PosFilterCombo.SelectedItem is PartOfSpeech pos)
+        try
         {
-            ViewModel.SelectedPartOfSpeech = pos;
+            if (_isInitializing) return;
+            if (PosFilterCombo.SelectedItem is PartOfSpeech pos)
+            {
+                ViewModel.SelectedPartOfSpeech = pos;
+            }
+            else
+            {
+                ViewModel.SelectedPartOfSpeech = null;
+            }
+            await ViewModel.LoadWordsAsync();
         }
-        else
+        catch (Exception ex)
         {
-            ViewModel.SelectedPartOfSpeech = null;
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] PosFilterCombo_SelectionChanged error: {ex.Message}");
         }
-        await ViewModel.LoadWordsAsync();
     }
 
     private async void StatusFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_isInitializing) return;
-        if (StatusFilterCombo.SelectedItem is LearningStatus status)
+        try
         {
-            ViewModel.SelectedStatus = status;
+            if (_isInitializing) return;
+            if (StatusFilterCombo.SelectedItem is LearningStatus status)
+            {
+                ViewModel.SelectedStatus = status;
+            }
+            else
+            {
+                ViewModel.SelectedStatus = null;
+            }
+            await ViewModel.LoadWordsAsync();
         }
-        else
+        catch (Exception ex)
         {
-            ViewModel.SelectedStatus = null;
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] StatusFilterCombo_SelectionChanged error: {ex.Message}");
         }
-        await ViewModel.LoadWordsAsync();
     }
 
     private async void ExamFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_isInitializing) return;
-        if (ExamFilterCombo.SelectedItem is ExamType exam)
+        try
         {
-            ViewModel.SelectedExamType = exam;
+            if (_isInitializing) return;
+            if (ExamFilterCombo.SelectedItem is ExamType exam)
+            {
+                ViewModel.SelectedExamType = exam;
+            }
+            else
+            {
+                ViewModel.SelectedExamType = null;
+            }
+            await ViewModel.LoadWordsAsync();
         }
-        else
+        catch (Exception ex)
         {
-            ViewModel.SelectedExamType = null;
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] ExamFilterCombo_SelectionChanged error: {ex.Message}");
         }
-        await ViewModel.LoadWordsAsync();
     }
 
     private async void SortCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_isInitializing) return;
-        switch (SortCombo.SelectedIndex)
+        try
         {
-            case 0: // Term A-Z
-                ViewModel.SortBy = "term";
-                ViewModel.IsAscending = true;
-                break;
-            case 1: // Term Z-A
-                ViewModel.SortBy = "term";
-                ViewModel.IsAscending = false;
-                break;
-            case 2: // Level low-high
-                ViewModel.SortBy = "level";
-                ViewModel.IsAscending = true;
-                break;
-            case 3: // Level high-low
-                ViewModel.SortBy = "level";
-                ViewModel.IsAscending = false;
-                break;
-            case 4: // Date newest
-                ViewModel.SortBy = "createdat";
-                ViewModel.IsAscending = false;
-                break;
-            case 5: // Date oldest
-                ViewModel.SortBy = "createdat";
-                ViewModel.IsAscending = true;
-                break;
-            case 6: // Part of speech
-                ViewModel.SortBy = "pos";
-                ViewModel.IsAscending = true;
-                break;
-            case 7: // Multi-POS first
-                ViewModel.SortBy = "multipos";
-                ViewModel.IsAscending = false;
-                break;
+            if (_isInitializing) return;
+            switch (SortCombo.SelectedIndex)
+            {
+                case 0: // Term A-Z
+                    ViewModel.SortBy = "term";
+                    ViewModel.IsAscending = true;
+                    break;
+                case 1: // Term Z-A
+                    ViewModel.SortBy = "term";
+                    ViewModel.IsAscending = false;
+                    break;
+                case 2: // Level low-high
+                    ViewModel.SortBy = "level";
+                    ViewModel.IsAscending = true;
+                    break;
+                case 3: // Level high-low
+                    ViewModel.SortBy = "level";
+                    ViewModel.IsAscending = false;
+                    break;
+                case 4: // Date newest
+                    ViewModel.SortBy = "createdat";
+                    ViewModel.IsAscending = false;
+                    break;
+                case 5: // Date oldest
+                    ViewModel.SortBy = "createdat";
+                    ViewModel.IsAscending = true;
+                    break;
+                case 6: // Part of speech
+                    ViewModel.SortBy = "pos";
+                    ViewModel.IsAscending = true;
+                    break;
+                case 7: // Multi-POS first
+                    ViewModel.SortBy = "multipos";
+                    ViewModel.IsAscending = false;
+                    break;
+            }
+            await ViewModel.LoadWordsAsync();
         }
-        await ViewModel.LoadWordsAsync();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] SortCombo_SelectionChanged error: {ex.Message}");
+        }
     }
 
     private void ResetFiltersButton_Click(object sender, RoutedEventArgs e)
@@ -374,7 +433,7 @@ public sealed partial class VocabularyPage : Page
             RequestedTheme = theme
         };
 
-        var result = await confirmDialog.ShowAsync();
+        var result = await confirmDialog.ShowAsyncSafe();
         if (result == ContentDialogResult.Primary)
         {
             try
@@ -407,8 +466,15 @@ public sealed partial class VocabularyPage : Page
     {
         if (sender is Button btn && btn.Tag is string filter)
         {
-            await ViewModel.SelectQuickFilterAsync(filter);
-            UpdateQuickFilterStyles(filter);
+            try
+            {
+                await ViewModel.SelectQuickFilterAsync(filter);
+                UpdateQuickFilterStyles(filter);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[VocabularyPage] QuickFilter error: {ex.Message}");
+            }
         }
     }
 
@@ -437,24 +503,31 @@ public sealed partial class VocabularyPage : Page
 
     private async void AddWordButton_Click(object sender, RoutedEventArgs e)
     {
-        var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
-        soundFeedback?.PlaySoftTapSound();
-
-        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        var dialog = new WordEditorDialog(null, ViewModel.AvailableTopics, ViewModel.AvailableExamTags)
+        try
         {
-            XamlRoot = this.XamlRoot,
-            RequestedTheme = activeTheme
-        };
+            var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
+            soundFeedback?.PlaySoftTapSound();
 
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var dialog = new WordEditorDialog(null, ViewModel.AvailableTopics, ViewModel.AvailableExamTags)
+            {
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = activeTheme
+            };
+
+            var result = await dialog.ShowAsyncSafe();
+            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            {
+                await ViewModel.SaveWordAsync(dialog.ResultDto);
+                PopulateTopicFilterCombo();
+
+                CardSaveSuccessStoryboard.Begin();
+                soundFeedback?.PlayCardFlipSound();
+            }
+        }
+        catch (Exception ex)
         {
-            await ViewModel.SaveWordAsync(dialog.ResultDto);
-            PopulateTopicFilterCombo();
-
-            CardSaveSuccessStoryboard.Begin();
-            soundFeedback?.PlayCardFlipSound();
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] AddWord error: {ex.Message}");
         }
     }
 
@@ -500,27 +573,34 @@ public sealed partial class VocabularyPage : Page
     {
         if (ViewModel.SelectedWord == null) return;
 
-        // Smooth connected pre-launch card spring
-        CardMorphStoryboard.Begin();
-        var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
-        soundFeedback?.PlaySoftTapSound();
-
-        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        var dialog = new WordEditorDialog(ViewModel.SelectedWord, ViewModel.AvailableTopics, ViewModel.AvailableExamTags)
+        try
         {
-            XamlRoot = this.XamlRoot,
-            RequestedTheme = activeTheme
-        };
+            // Smooth connected pre-launch card spring
+            CardMorphStoryboard.Begin();
+            var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
+            soundFeedback?.PlaySoftTapSound();
 
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var dialog = new WordEditorDialog(ViewModel.SelectedWord, ViewModel.AvailableTopics, ViewModel.AvailableExamTags)
+            {
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = activeTheme
+            };
+
+            var result = await dialog.ShowAsyncSafe();
+            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            {
+                await ViewModel.SaveWordAsync(dialog.ResultDto);
+                PopulateTopicFilterCombo();
+
+                // Smooth return bounce + pleasant completion feedback
+                CardSaveSuccessStoryboard.Begin();
+                soundFeedback?.PlayCardFlipSound();
+            }
+        }
+        catch (Exception ex)
         {
-            await ViewModel.SaveWordAsync(dialog.ResultDto);
-            PopulateTopicFilterCombo();
-
-            // Smooth return bounce + pleasant completion feedback
-            CardSaveSuccessStoryboard.Begin();
-            soundFeedback?.PlayCardFlipSound();
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] EditWord error: {ex.Message}");
         }
     }
 
@@ -528,49 +608,77 @@ public sealed partial class VocabularyPage : Page
     {
         if (ViewModel.SelectedWord == null) return;
 
-        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        var confirmDialog = new ContentDialog
+        try
         {
-            Title = Loc.GetString("Vocab_DeleteTitle"),
-            Content = string.Format(Loc.GetString("Vocab_DeleteConfirm"), ViewModel.SelectedWord.Term),
-            PrimaryButtonText = Loc.GetString("Action_Delete"),
-            CloseButtonText = Loc.GetString("Action_Cancel"),
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = this.XamlRoot,
-            RequestedTheme = activeTheme
-        };
+            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var confirmDialog = new ContentDialog
+            {
+                Title = Loc.GetString("Vocab_DeleteTitle"),
+                Content = string.Format(Loc.GetString("Vocab_DeleteConfirm"), ViewModel.SelectedWord.Term),
+                PrimaryButtonText = Loc.GetString("Action_Delete"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = activeTheme
+            };
 
-        var result = await confirmDialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
+            var result = await confirmDialog.ShowAsyncSafe();
+            if (result == ContentDialogResult.Primary)
+            {
+                try
+                {
+                    await Task.Yield();
+                    await ViewModel.DeleteWordAsync(ViewModel.SelectedWord.Id);
+                }
+                catch (Exception ex)
+                {
+                    ShowErrorDialog(Loc.GetString("Action_Delete"), ex.Message);
+                }
+            }
+        }
+        catch (Exception ex)
         {
-            try
-            {
-                await Task.Yield();
-                await ViewModel.DeleteWordAsync(ViewModel.SelectedWord.Id);
-            }
-            catch (Exception ex)
-            {
-                ShowErrorDialog(Loc.GetString("Action_Delete"), ex.Message);
-            }
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] DeleteWord error: {ex.Message}");
         }
     }
 
     private async void PlayUkAudio_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.PlayPronunciationAsync("uk");
+        try
+        {
+            await ViewModel.PlayPronunciationAsync("uk");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] PlayUkAudio error: {ex.Message}");
+        }
     }
 
     private async void PlayUsAudio_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.PlayPronunciationAsync("us");
+        try
+        {
+            await ViewModel.PlayPronunciationAsync("us");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] PlayUsAudio error: {ex.Message}");
+        }
     }
 
     private async void QuickListenButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.DataContext is WordDto w)
+        try
         {
-            var audioService = App.Current.Services.GetRequiredService<Services.IAudioPlayerService>();
-            await audioService.PlayPronunciationAsync(w.Term, "uk");
+            if (sender is Button btn && btn.DataContext is WordDto w)
+            {
+                var audioService = App.Current.Services.GetRequiredService<Services.IAudioPlayerService>();
+                await audioService.PlayPronunciationAsync(w.Term, "uk");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] QuickListen error: {ex.Message}");
         }
     }
 
@@ -612,17 +720,38 @@ public sealed partial class VocabularyPage : Page
 
     private async void ExportJson_Click(object sender, RoutedEventArgs e)
     {
-        await PerformExportAsync("json", "JSON Vocabulary File", ".json", (p) => ViewModel.ExportToJsonAsync(progress: p));
+        try
+        {
+            await PerformExportAsync("json", "JSON Vocabulary File", ".json", (p) => ViewModel.ExportToJsonAsync(progress: p));
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
     }
 
     private async void ExportCsv_Click(object sender, RoutedEventArgs e)
     {
-        await PerformExportAsync("csv", "CSV Vocabulary File", ".csv", (p) => ViewModel.ExportToCsvAsync(progress: p));
+        try
+        {
+            await PerformExportAsync("csv", "CSV Vocabulary File", ".csv", (p) => ViewModel.ExportToCsvAsync(progress: p));
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
     }
 
     private async void ExportTxt_Click(object sender, RoutedEventArgs e)
     {
-        await PerformExportAsync("txt", "TXT Vocabulary File", ".txt", (p) => ViewModel.ExportToTxtAsync(progress: p));
+        try
+        {
+            await PerformExportAsync("txt", "TXT Vocabulary File", ".txt", (p) => ViewModel.ExportToTxtAsync(progress: p));
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
     }
 
     private async Task PerformExportAsync(string format, string fileTypeDesc, string extension, Func<IProgress<ProgressReport>, Task<string>> exportFunc)
@@ -635,7 +764,7 @@ public sealed partial class VocabularyPage : Page
             RequestedTheme = activeTheme
         };
         progressDialog.SetIndeterminate(Loc.GetString("Progress_PreparingExport"), Loc.GetString("Progress_PleaseWait"));
-        _ = progressDialog.ShowAsync();
+        _ = progressDialog.ShowAsyncSafe();
 
         try
         {
@@ -648,7 +777,7 @@ public sealed partial class VocabularyPage : Page
             });
 
             var content = await exportFunc(progress);
-            progressDialog.Hide();
+            progressDialog.HideSafe();
             await Task.Yield();
 
             var defaultName = $"lexora_export_{DateTime.Now:yyyyMMdd_HHmmss}";
@@ -656,7 +785,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            progressDialog.Hide();
+            progressDialog.HideSafe();
             await Task.Yield();
             ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
@@ -715,7 +844,7 @@ public sealed partial class VocabularyPage : Page
                 RequestedTheme = exportCompleteTheme
             };
 
-            var res = await dialog.ShowAsync();
+            var res = await dialog.ShowAsyncSafe();
             if (res == ContentDialogResult.Primary)
             {
                 try
@@ -759,15 +888,22 @@ public sealed partial class VocabularyPage : Page
 
     private async void ExportSelected_Click(object sender, RoutedEventArgs e)
     {
-        var selectedWords = WordsListView?.SelectedItems?.OfType<WordDto>().ToList();
-        if (selectedWords == null || selectedWords.Count == 0) return;
+        try
+        {
+            var selectedWords = WordsListView?.SelectedItems?.OfType<WordDto>().ToList();
+            if (selectedWords == null || selectedWords.Count == 0) return;
 
-        var selectedIds = selectedWords.Select(w => w.Id).ToList();
-        await PerformExportAsync(
-            "csv",
-            "CSV Vocabulary File",
-            ".csv",
-            (progress) => ViewModel.ExportToCsvAsync(selectedIds, progress));
+            var selectedIds = selectedWords.Select(w => w.Id).ToList();
+            await PerformExportAsync(
+                "csv",
+                "CSV Vocabulary File",
+                ".csv",
+                (progress) => ViewModel.ExportToCsvAsync(selectedIds, progress));
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
     }
 
     private async void SmartImport_Click(object sender, RoutedEventArgs e)
@@ -780,7 +916,7 @@ public sealed partial class VocabularyPage : Page
                 XamlRoot = this.XamlRoot
             };
 
-            var res = await dialog.ShowAsync();
+            var res = await dialog.ShowAsyncSafe();
             if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
             {
                 await ExecuteImportOperationAsync(dialog.ContentToImport, dialog.FileNameHint, dialog.ConflictResolution);
@@ -794,17 +930,38 @@ public sealed partial class VocabularyPage : Page
 
     private async void ImportJson_Click(object sender, RoutedEventArgs e)
     {
-        await ShowImportDialogAsync("json");
+        try
+        {
+            await ShowImportDialogAsync("json");
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(Loc.GetString("Vocab_ImportFailed"), ex.Message);
+        }
     }
 
     private async void ImportCsv_Click(object sender, RoutedEventArgs e)
     {
-        await ShowImportDialogAsync("csv");
+        try
+        {
+            await ShowImportDialogAsync("csv");
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(Loc.GetString("Vocab_ImportFailed"), ex.Message);
+        }
     }
 
     private async void ImportTxt_Click(object sender, RoutedEventArgs e)
     {
-        await ShowImportDialogAsync("txt");
+        try
+        {
+            await ShowImportDialogAsync("txt");
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(Loc.GetString("Vocab_ImportFailed"), ex.Message);
+        }
     }
 
     private async Task ShowImportDialogAsync(string format)
@@ -875,7 +1032,7 @@ public sealed partial class VocabularyPage : Page
             RequestedTheme = importTheme
         };
         progressDialog.SetDeterminate(0, Loc.GetString("Progress_ReadingFile"), Loc.GetString("Progress_PleaseWait"));
-        _ = progressDialog.ShowAsync();
+        _ = progressDialog.ShowAsyncSafe();
 
         var progress = new Progress<ProgressReport>(report =>
         {
@@ -941,11 +1098,11 @@ public sealed partial class VocabularyPage : Page
                 XamlRoot = this.XamlRoot,
                 RequestedTheme = theme
             };
-            await dialog.ShowAsync();
+            await dialog.ShowAsyncSafe();
         }
-        catch (InvalidOperationException)
+        catch (Exception ex)
         {
-            // Another dialog is already visible; avoid unhandled exception crash
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] ShowErrorDialog error: {ex.Message}");
         }
     }
 
@@ -1099,52 +1256,66 @@ public sealed partial class VocabularyPage : Page
 
     private async void AddTopicButton_Click(object sender, RoutedEventArgs e)
     {
-        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        var dialog = new TopicEditorDialog
-        {
-            XamlRoot = this.XamlRoot,
-            RequestedTheme = activeTheme
-        };
-
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
-        {
-            try
-            {
-                var created = await ViewModel.CreateTopicAsync(dialog.ResultDto);
-                PopulateTopicFilterCombo();
-            }
-            catch (Exception ex)
-            {
-                ShowErrorDialog(Loc.GetString("Vocab_CreateTopicFailed"), ex.Message);
-            }
-        }
-    }
-
-    private async void AddWordToUnit_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is FrameworkElement fe && (fe.Tag as ContextUnitDto ?? fe.DataContext as ContextUnitDto) is ContextUnitDto unit)
+        try
         {
             var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-            var targetTopicId = unit.Id == Guid.Empty ? (Guid?)null : unit.Id;
-            var dialog = new WordEditorDialog(null, ViewModel.AvailableTopics, ViewModel.AvailableExamTags, preselectedTopicId: targetTopicId)
+            var dialog = new TopicEditorDialog
             {
                 XamlRoot = this.XamlRoot,
                 RequestedTheme = activeTheme
             };
 
-            var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
-            soundFeedback?.PlaySoftTapSound();
-
-            var result = await dialog.ShowAsync();
+            var result = await dialog.ShowAsyncSafe();
             if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
             {
-                await ViewModel.SaveWordAsync(dialog.ResultDto);
-                PopulateTopicFilterCombo();
-
-                CardSaveSuccessStoryboard.Begin();
-                soundFeedback?.PlayCardFlipSound();
+                try
+                {
+                    var created = await ViewModel.CreateTopicAsync(dialog.ResultDto);
+                    PopulateTopicFilterCombo();
+                }
+                catch (Exception ex)
+                {
+                    ShowErrorDialog(Loc.GetString("Vocab_CreateTopicFailed"), ex.Message);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] AddTopic error: {ex.Message}");
+        }
+    }
+
+    private async void AddWordToUnit_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is FrameworkElement fe && (fe.Tag as ContextUnitDto ?? fe.DataContext as ContextUnitDto) is ContextUnitDto unit)
+            {
+                var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+                var targetTopicId = unit.Id == Guid.Empty ? (Guid?)null : unit.Id;
+                var dialog = new WordEditorDialog(null, ViewModel.AvailableTopics, ViewModel.AvailableExamTags, preselectedTopicId: targetTopicId)
+                {
+                    XamlRoot = this.XamlRoot,
+                    RequestedTheme = activeTheme
+                };
+
+                var soundFeedback = App.Current.Services.GetService<Lexora.Presentation.Services.ISoundFeedbackService>();
+                soundFeedback?.PlaySoftTapSound();
+
+                var result = await dialog.ShowAsyncSafe();
+                if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+                {
+                    await ViewModel.SaveWordAsync(dialog.ResultDto);
+                    PopulateTopicFilterCombo();
+
+                    CardSaveSuccessStoryboard.Begin();
+                    soundFeedback?.PlayCardFlipSound();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] AddWordToUnit error: {ex.Message}");
         }
     }
 }

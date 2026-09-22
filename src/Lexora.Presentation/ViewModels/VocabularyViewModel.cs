@@ -182,44 +182,58 @@ public partial class VocabularyViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadFiltersAsync()
     {
-        var topics = await _vocabService.GetAllTopicsAsync();
-        AvailableTopics.Clear();
-        foreach (var t in topics)
+        try
         {
-            AvailableTopics.Add(t);
-        }
+            var topics = await _vocabService.GetAllTopicsAsync();
+            AvailableTopics.Clear();
+            foreach (var t in topics)
+            {
+                AvailableTopics.Add(t);
+            }
 
-        var tags = await _vocabService.GetAllExamTagsAsync();
-        AvailableExamTags.Clear();
-        foreach (var et in tags)
+            var tags = await _vocabService.GetAllExamTagsAsync();
+            AvailableExamTags.Clear();
+            foreach (var et in tags)
+            {
+                AvailableExamTags.Add(et);
+            }
+        }
+        catch (Exception ex)
         {
-            AvailableExamTags.Add(et);
+            System.Diagnostics.Debug.WriteLine($"[VocabularyViewModel] LoadFiltersAsync error: {ex.Message}");
         }
     }
 
     [RelayCommand]
     public async Task SelectQuickFilterAsync(string filter)
     {
-        SelectedQuickFilter = filter;
-        switch (filter)
+        try
         {
-            case "All":
-            case "DueToday":
-            case "Weak":
-                SelectedStatus = null;
-                break;
-            case "Learning":
-                SelectedStatus = LearningStatus.Learning;
-                break;
-            case "Mastered":
-                SelectedStatus = LearningStatus.Mastered;
-                break;
-            case "New":
-                SelectedStatus = LearningStatus.New;
-                break;
-        }
+            SelectedQuickFilter = filter;
+            switch (filter)
+            {
+                case "All":
+                case "DueToday":
+                case "Weak":
+                    SelectedStatus = null;
+                    break;
+                case "Learning":
+                    SelectedStatus = LearningStatus.Learning;
+                    break;
+                case "Mastered":
+                    SelectedStatus = LearningStatus.Mastered;
+                    break;
+                case "New":
+                    SelectedStatus = LearningStatus.New;
+                    break;
+            }
 
-        await LoadWordsAsync();
+            await LoadWordsAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyViewModel] SelectQuickFilter error: {ex.Message}");
+        }
     }
 
     private CancellationTokenSource? _loadCts;
@@ -301,6 +315,10 @@ public partial class VocabularyViewModel : ObservableObject
         catch (OperationCanceledException)
         {
             // Ignore cancelled queries
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyViewModel] LoadWordsAsync error: {ex.Message}");
         }
         finally
         {

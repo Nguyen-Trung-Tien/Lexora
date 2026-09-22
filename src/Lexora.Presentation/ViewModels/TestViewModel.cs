@@ -161,49 +161,63 @@ public partial class TestViewModel : ObservableObject
     [RelayCommand]
     public async Task InitializeAsync()
     {
-        if (Topics.Count == 0)
+        try
         {
-            var loadedTopics = await _vocabService.GetAllTopicsAsync();
-            Topics.Clear();
-            foreach (var t in loadedTopics) Topics.Add(t);
-        }
+            if (Topics.Count == 0)
+            {
+                var loadedTopics = await _vocabService.GetAllTopicsAsync();
+                Topics.Clear();
+                foreach (var t in loadedTopics) Topics.Add(t);
+            }
 
-        if (ExamTypes.Count == 0)
+            if (ExamTypes.Count == 0)
+            {
+                ExamTypes.Clear();
+                foreach (var et in Enum.GetValues<ExamType>()) ExamTypes.Add(et);
+            }
+
+            if (CefrLevels.Count == 0)
+            {
+                CefrLevels.Clear();
+                foreach (var cl in Enum.GetValues<CefrLevel>()) CefrLevels.Add(cl);
+            }
+
+            await LoadCustomWordCandidatesAsync();
+        }
+        catch (Exception ex)
         {
-            ExamTypes.Clear();
-            foreach (var et in Enum.GetValues<ExamType>()) ExamTypes.Add(et);
+            System.Diagnostics.Debug.WriteLine($"[TestViewModel] Initialize error: {ex.Message}");
         }
-
-        if (CefrLevels.Count == 0)
-        {
-            CefrLevels.Clear();
-            foreach (var cl in Enum.GetValues<CefrLevel>()) CefrLevels.Add(cl);
-        }
-
-        await LoadCustomWordCandidatesAsync();
     }
 
     [RelayCommand]
     public async Task LoadCustomWordCandidatesAsync()
     {
-        if (CustomWordCandidates.Count == 0)
+        try
         {
-            var words = await _vocabService.SearchWordsAsync(pageSize: 300);
-            CustomWordCandidates.Clear();
-            foreach (var w in words)
+            if (CustomWordCandidates.Count == 0)
             {
-                var item = new SelectableWordItem(w);
-                item.PropertyChanged += (s, e) =>
+                var words = await _vocabService.SearchWordsAsync(pageSize: 300);
+                CustomWordCandidates.Clear();
+                foreach (var w in words)
                 {
-                    if (e.PropertyName == nameof(SelectableWordItem.IsSelected))
+                    var item = new SelectableWordItem(w);
+                    item.PropertyChanged += (s, e) =>
                     {
-                        UpdateSelectedCustomWordsCount();
-                    }
-                };
-                CustomWordCandidates.Add(item);
+                        if (e.PropertyName == nameof(SelectableWordItem.IsSelected))
+                        {
+                            UpdateSelectedCustomWordsCount();
+                        }
+                    };
+                    CustomWordCandidates.Add(item);
+                }
             }
+            ApplyCustomWordFilter();
         }
-        ApplyCustomWordFilter();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TestViewModel] LoadCustomWordCandidates error: {ex.Message}");
+        }
     }
 
     public void UpdateSelectedCustomWordsCount()

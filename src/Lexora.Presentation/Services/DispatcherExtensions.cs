@@ -16,7 +16,10 @@ public static class DispatcherExtensions
         }
 
         var tcs = new TaskCompletionSource();
-        dispatcherQueue.TryEnqueue(() => tcs.SetResult());
+        if (!dispatcherQueue.TryEnqueue(() => tcs.TrySetResult()))
+        {
+            tcs.TrySetCanceled();
+        }
         return tcs.Task;
     }
 }

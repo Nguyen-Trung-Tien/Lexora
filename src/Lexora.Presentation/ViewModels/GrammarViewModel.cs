@@ -135,9 +135,16 @@ public partial class GrammarViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadTopicsAsync()
     {
-        var topics = await _grammarService.GetAllTopicsAsync();
-        Topics.Clear();
-        foreach (var t in topics) Topics.Add(t);
+        try
+        {
+            var topics = await _grammarService.GetAllTopicsAsync();
+            Topics.Clear();
+            foreach (var t in topics) Topics.Add(t);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarViewModel] LoadTopicsAsync error: {ex.Message}");
+        }
     }
 
     private CancellationTokenSource? _loadCts;
@@ -184,6 +191,10 @@ public partial class GrammarViewModel : ObservableObject
         catch (OperationCanceledException)
         {
             // Ignore cancelled queries
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarViewModel] LoadRulesAsync error: {ex.Message}");
         }
         finally
         {
