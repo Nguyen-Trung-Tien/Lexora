@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:Lexora.Presentation.Views"
     DefaultButton="Primary"
     mc:Ignorable="d">
 
@@ -83,18 +84,59 @@
                         <TextBlock Text="{x:Bind Loc.GetString('Vocab_Title')}" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                     </StackPanel>
 
-                    <Grid ColumnDefinitions="2*,*,*" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="2*,*" ColumnSpacing="12">
                         <TextBox x:Name="TermTextBox"
                                  Header="{x:Bind Loc.GetString('WordEditor_HeaderTerm')}"
                                  PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderTerm')}"
                                  FontWeight="SemiBold" />
-                        <ComboBox Grid.Column="1" x:Name="PosComboBox"
-                                  Header="{x:Bind Loc.GetString('WordEditor_HeaderPos')}"
-                                  HorizontalAlignment="Stretch" />
-                        <ComboBox Grid.Column="2" x:Name="LevelComboBox"
+                        <ComboBox Grid.Column="1" x:Name="LevelComboBox"
                                   Header="{x:Bind Loc.GetString('WordEditor_HeaderLevel')}"
                                   HorizontalAlignment="Stretch" />
                     </Grid>
+
+                    <!-- Multi-POS (Các góc từ / Loại từ) Section -->
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="12">
+                        <StackPanel Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <FontIcon Glyph="&#xE8D2;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('WordEditor_HeaderMultiPos')}" FontWeight="SemiBold" FontSize="13" />
+                                    </StackPanel>
+                                    <TextBlock Text="{x:Bind Loc.GetString('WordEditor_MultiPosHint')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Loc.GetString('WordEditor_PrimaryPosLabel')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                    <ComboBox x:Name="PosComboBox" MinWidth="130" SelectionChanged="PosComboBox_SelectionChanged" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Chips Grid for Parts of Speech -->
+                            <ItemsRepeater x:Name="PosChipsRepeater">
+                                <ItemsRepeater.Layout>
+                                    <UniformGridLayout Orientation="Horizontal" MinItemWidth="135" MinColumnSpacing="8" MinRowSpacing="8" ItemsStretch="Fill" />
+                                </ItemsRepeater.Layout>
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="views:PosChipItem">
+                                        <ToggleButton IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                      Click="PosChip_Click"
+                                                      HorizontalAlignment="Stretch"
+                                                      CornerRadius="6" Padding="10,6">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind ShortAbbr}" FontWeight="Bold" FontSize="10" />
+                                                </Border>
+                                                <TextBlock Grid.Column="1" Text="{x:Bind DisplayName}" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </ToggleButton>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </StackPanel>
+                    </Border>
 
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                         <TextBox x:Name="IpaUkTextBox"

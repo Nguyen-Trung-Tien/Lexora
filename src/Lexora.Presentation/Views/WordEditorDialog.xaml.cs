@@ -6,8 +6,27 @@ using Lexora.Presentation.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace Lexora.Presentation.Views;
+
+public partial class PosChipItem : ObservableObject
+{
+    public PartOfSpeech PartOfSpeech { get; }
+    public string DisplayName { get; }
+    public string ShortAbbr { get; }
+
+    [ObservableProperty]
+    public partial bool IsSelected { get; set; }
+
+    public PosChipItem(PartOfSpeech pos, string displayName, string shortAbbr, bool isSelected = false)
+    {
+        PartOfSpeech = pos;
+        DisplayName = displayName;
+        ShortAbbr = shortAbbr;
+        IsSelected = isSelected;
+    }
+}
 
 public sealed partial class WordEditorDialog : ContentDialog
 {
@@ -22,6 +41,13 @@ public sealed partial class WordEditorDialog : ContentDialog
 
         [ObservableProperty]
         public partial PartOfSpeech PartOfSpeech { get; set; } = PartOfSpeech.Noun;
+
+        public event EventHandler? PartOfSpeechChanged;
+
+        partial void OnPartOfSpeechChanged(PartOfSpeech value)
+        {
+            PartOfSpeechChanged?.Invoke(this, EventArgs.Empty);
+        }
 
         [ObservableProperty]
         public partial string DefinitionVi { get; set; } = string.Empty;
@@ -83,6 +109,7 @@ public sealed partial class WordEditorDialog : ContentDialog
 
     public ILocalizationService Loc { get; }
     public ObservableCollection<EditableMeaning> Meanings { get; } = new();
+    public ObservableCollection<PosChipItem> PosChips { get; } = new();
     public WordCreateOrUpdateDto? ResultDto { get; private set; }
 
     private readonly Guid? _editingWordId;
@@ -113,7 +140,10 @@ public sealed partial class WordEditorDialog : ContentDialog
         _allExamTags = allExamTags.ToList();
         _editingWordId = existingWord?.Id;
 
-        // Populate Combos
+        // Initialize POS Chips & Combos
+        InitializePosChips();
+        PosChipsRepeater.ItemsSource = PosChips;
+
         PosComboBox.ItemsSource = Enum.GetValues<PartOfSpeech>();
         PosComboBox.SelectedItem = existingWord?.PrimaryPartOfSpeech ?? PartOfSpeech.Noun;
 
@@ -145,6 +175,7 @@ public sealed partial class WordEditorDialog : ContentDialog
                     DefinitionEn = m.DefinitionEn,
                     Explanation = m.Explanation
                 };
+                editableMeaning.PartOfSpeechChanged += Meaning_PartOfSpeechChanged;
 
                 foreach (var ex in m.Examples)
                 {
@@ -158,6 +189,17 @@ public sealed partial class WordEditorDialog : ContentDialog
                 RefreshExampleIndices(editableMeaning);
                 Meanings.Add(editableMeaning);
             }
+
+            // Sync all POS from existing word
+            foreach (var pos in existingWord.AllPartsOfSpeech)
+            {
+                var chip = PosChips.FirstOrDefault(c => c.PartOfSpeech == pos);
+                if (chip != null) chip.IsSelected = true;
+            }
+            var primaryChip = PosChips.FirstOrDefault(c => c.PartOfSpeech == existingWord.PrimaryPartOfSpeech);
+            if (primaryChip != null) primaryChip.IsSelected = true;
+
+            PosComboBox.SelectedItem = existingWord.PrimaryPartOfSpeech;
 
             // Select topics
             foreach (var t in _allTopics)
@@ -181,8 +223,13 @@ public sealed partial class WordEditorDialog : ContentDialog
         {
             Title = Loc.GetString("WordEditor_TitleAdd");
             var defaultMeaning = new EditableMeaning { PartOfSpeech = PartOfSpeech.Noun };
+            defaultMeaning.PartOfSpeechChanged += Meaning_PartOfSpeechChanged;
             defaultMeaning.Examples.Add(new EditableExample());
             Meanings.Add(defaultMeaning);
+
+            var defaultChip = PosChips.FirstOrDefault(c => c.PartOfSpeech == PartOfSpeech.Noun);
+            if (defaultChip != null) defaultChip.IsSelected = true;
+            PosComboBox.SelectedItem = PartOfSpeech.Noun;
 
             if (preselectedTopicId.HasValue)
             {
@@ -196,6 +243,121 @@ public sealed partial class WordEditorDialog : ContentDialog
 
         RefreshMeaningIndices();
         PrimaryButtonClick += WordEditorDialog_PrimaryButtonClick;
+    }
+
+    private void InitializePosChips()
+    {
+        PosChips.Clear();
+        PosChips.Add(new PosChipItem(PartOfSpeech.Noun, Loc.GetString("WordEditor_PosNoun"), "n."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.Verb, Loc.GetString("WordEditor_PosVerb"), "v."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.Adjective, Loc.GetString("WordEditor_PosAdj"), "adj."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.Adverb, Loc.GetString("WordEditor_PosAdv"), "adv."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.PhrasalVerb, Loc.GetString("WordEditor_PosPhrasalVerb"), "phr. v."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.Idiom, Loc.GetString("WordEditor_PosIdiom"), "idiom"));
+        PosChips.Add(new PosChipItem(PartOfSpeech.NounPhrase, Loc.GetString("WordEditor_PosNounPhrase"), "n. phr."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.Preposition, Loc.GetString("WordEditor_PosPreposition"), "prep."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.Conjunction, Loc.GetString("WordEditor_PosConjunction"), "conj."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.Interjection, Loc.GetString("WordEditor_PosInterjection"), "interj."));
+    }
+
+    private void Meaning_PartOfSpeechChanged(object? sender, EventArgs e)
+    {
+        SyncChipsFromMeanings();
+    }
+
+    private void SyncChipsFromMeanings()
+    {
+        var posInMeanings = Meanings.Select(m => m.PartOfSpeech).ToHashSet();
+        foreach (var chip in PosChips)
+        {
+            if (posInMeanings.Contains(chip.PartOfSpeech))
+            {
+                chip.IsSelected = true;
+            }
+        }
+    }
+
+    private void PosChip_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleButton tb && tb.DataContext is PosChipItem chip)
+        {
+            bool isChecked = tb.IsChecked == true;
+            chip.IsSelected = isChecked;
+
+            if (isChecked)
+            {
+                var existingMeaning = Meanings.FirstOrDefault(m => m.PartOfSpeech == chip.PartOfSpeech);
+                if (existingMeaning == null)
+                {
+                    if (Meanings.Count == 1 && string.IsNullOrWhiteSpace(Meanings[0].DefinitionVi))
+                    {
+                        var firstPosChip = PosChips.FirstOrDefault(c => c.PartOfSpeech == Meanings[0].PartOfSpeech);
+                        if (firstPosChip != null && !firstPosChip.IsSelected)
+                        {
+                            Meanings[0].PartOfSpeech = chip.PartOfSpeech;
+                        }
+                        else
+                        {
+                            var newMeaning = new EditableMeaning { PartOfSpeech = chip.PartOfSpeech };
+                            newMeaning.PartOfSpeechChanged += Meaning_PartOfSpeechChanged;
+                            newMeaning.Examples.Add(new EditableExample());
+                            Meanings.Add(newMeaning);
+                        }
+                    }
+                    else
+                    {
+                        var newMeaning = new EditableMeaning { PartOfSpeech = chip.PartOfSpeech };
+                        newMeaning.PartOfSpeechChanged += Meaning_PartOfSpeechChanged;
+                        newMeaning.Examples.Add(new EditableExample());
+                        Meanings.Add(newMeaning);
+                    }
+                    RefreshMeaningIndices();
+                }
+
+                if (PosComboBox.SelectedItem == null)
+                {
+                    PosComboBox.SelectedItem = chip.PartOfSpeech;
+                }
+            }
+            else
+            {
+                if (!PosChips.Any(c => c.IsSelected))
+                {
+                    chip.IsSelected = true;
+                    tb.IsChecked = true;
+                    return;
+                }
+
+                if (PosComboBox.SelectedItem is PartOfSpeech primary && primary == chip.PartOfSpeech)
+                {
+                    var nextSelected = PosChips.FirstOrDefault(c => c.IsSelected);
+                    if (nextSelected != null)
+                    {
+                        PosComboBox.SelectedItem = nextSelected.PartOfSpeech;
+                    }
+                }
+
+                var emptyMeaning = Meanings.FirstOrDefault(m => m.PartOfSpeech == chip.PartOfSpeech && string.IsNullOrWhiteSpace(m.DefinitionVi));
+                if (emptyMeaning != null && Meanings.Count > 1)
+                {
+                    emptyMeaning.PartOfSpeechChanged -= Meaning_PartOfSpeechChanged;
+                    Meanings.Remove(emptyMeaning);
+                    RefreshMeaningIndices();
+                }
+            }
+        }
+    }
+
+    private void PosComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (PosComboBox.SelectedItem is PartOfSpeech p)
+        {
+            var chip = PosChips.FirstOrDefault(c => c.PartOfSpeech == p);
+            if (chip != null && !chip.IsSelected)
+            {
+                chip.IsSelected = true;
+            }
+        }
     }
 
 
@@ -220,17 +382,21 @@ public sealed partial class WordEditorDialog : ContentDialog
     {
         var defaultPos = PosComboBox.SelectedItem is PartOfSpeech p ? p : PartOfSpeech.Noun;
         var newMeaning = new EditableMeaning { PartOfSpeech = defaultPos };
+        newMeaning.PartOfSpeechChanged += Meaning_PartOfSpeechChanged;
         newMeaning.Examples.Add(new EditableExample());
         Meanings.Add(newMeaning);
         RefreshMeaningIndices();
+        SyncChipsFromMeanings();
     }
 
     private void DeleteMeaningButton_Click(object sender, RoutedEventArgs e)
     {
         if (Meanings.Count > 1 && sender is Button btn && btn.DataContext is EditableMeaning m)
         {
+            m.PartOfSpeechChanged -= Meaning_PartOfSpeechChanged;
             Meanings.Remove(m);
             RefreshMeaningIndices();
+            SyncChipsFromMeanings();
         }
     }
 
@@ -329,7 +495,7 @@ public sealed partial class WordEditorDialog : ContentDialog
             return;
         }
 
-        var pos = PosComboBox.SelectedItem is PartOfSpeech p ? p : PartOfSpeech.Noun;
+        var pos = PosComboBox.SelectedItem is PartOfSpeech p ? p : (PosChips.FirstOrDefault(c => c.IsSelected)?.PartOfSpeech ?? PartOfSpeech.Noun);
         var level = LevelComboBox.SelectedItem is CefrLevel l ? l : CefrLevel.None;
 
         var meaningDtos = Meanings.Select(m => new WordMeaningCreateDto(
