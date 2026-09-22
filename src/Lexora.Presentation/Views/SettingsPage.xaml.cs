@@ -1,3 +1,4 @@
+using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -232,6 +233,8 @@ public sealed partial class SettingsPage : Page
             }
 
             var file = await savePicker.PickSaveFileAsync();
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+
             if (file != null)
             {
                 targetFilePath = file.Path;
@@ -244,8 +247,12 @@ public sealed partial class SettingsPage : Page
         }
         catch
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             // Picker fallback: targetFilePath remains null -> ViewModel defaults to Desktop / AppData
         }
+
+        await DispatcherQueue.EnsureOnUIThreadAsync();
+        if (this.XamlRoot == null) return;
 
         var backupTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var progressDialog = new OperationProgressDialog
@@ -294,6 +301,7 @@ public sealed partial class SettingsPage : Page
     private async void RestoreButton_Click(object sender, RoutedEventArgs e)
     {
         string? selectedFilePath = null;
+        bool pickerCancelled = false;
 
         try
         {
@@ -310,15 +318,30 @@ public sealed partial class SettingsPage : Page
             }
 
             var file = await picker.PickSingleFileAsync();
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+
             if (file != null)
             {
                 selectedFilePath = file.Path;
             }
+            else
+            {
+                pickerCancelled = true;
+            }
         }
         catch
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             // Fallback to text path prompt if picker encounters WinRT uninitialized handle
         }
+
+        if (pickerCancelled)
+        {
+            return;
+        }
+
+        await DispatcherQueue.EnsureOnUIThreadAsync();
+        if (this.XamlRoot == null) return;
 
         if (string.IsNullOrEmpty(selectedFilePath))
         {
@@ -346,14 +369,25 @@ public sealed partial class SettingsPage : Page
             {
                 selectedFilePath = pathBox.Text.Trim();
             }
+            else
+            {
+                return;
+            }
         }
 
-        if (!string.IsNullOrEmpty(selectedFilePath) && File.Exists(selectedFilePath))
+        if (string.IsNullOrEmpty(selectedFilePath) || !File.Exists(selectedFilePath))
+        {
+            return;
+        }
+
+        try
         {
             // 1. Inspect backup file metadata and structural integrity
             var metadata = await ViewModel.GetBackupMetadataAsync(selectedFilePath);
 
-            await Task.Yield();
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            if (this.XamlRoot == null) return;
+
             var currentTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
 
             if (!metadata.IsValid)
@@ -450,57 +484,84 @@ public sealed partial class SettingsPage : Page
                 RequestedTheme = currentTheme
             };
 
+            var closedTcs = new TaskCompletionSource();
+            confirmDialog.Closed += (s, args) => closedTcs.TrySetResult();
+
             var result = await confirmDialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
+            if (result != ContentDialogResult.Primary)
             {
-                await Task.Yield();
+                return;
+            }
 
-                var restoreTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-                var progressDialog = new OperationProgressDialog
-                {
-                    Title = Loc.GetString("Progress_RestoreTitle"),
-                    XamlRoot = this.XamlRoot,
-                    RequestedTheme = restoreTheme
-                };
-                progressDialog.SetDeterminate(10, Loc.GetString("Progress_RestoreVerifying"), metadata.FileName);
-                _ = progressDialog.ShowAsync();
+            // Wait for confirmDialog to completely close and detach from XamlRoot
+            await closedTcs.Task;
+            await Task.Delay(150);
 
-                var progressReporter = new Progress<(int Percent, string StepMessage, string? Detail)>(report =>
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            if (this.XamlRoot == null) return;
+
+            var restoreTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var progressDialog = new OperationProgressDialog
+            {
+                Title = Loc.GetString("Progress_RestoreTitle"),
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = restoreTheme
+            };
+            progressDialog.SetDeterminate(10, Loc.GetString("Progress_RestoreVerifying"), metadata.FileName);
+            _ = progressDialog.ShowAsync();
+
+            var progressReporter = new Progress<(int Percent, string StepMessage, string? Detail)>(report =>
+            {
+                DispatcherQueue.TryEnqueue(() =>
                 {
-                    DispatcherQueue.TryEnqueue(() =>
-                    {
-                        progressDialog.SetDeterminate(report.Percent, report.StepMessage, report.Detail);
-                    });
+                    progressDialog.SetDeterminate(report.Percent, report.StepMessage, report.Detail);
                 });
+            });
 
-                try
+            try
+            {
+                var restored = await ViewModel.RestoreBackupAsync(selectedFilePath, progressReporter);
+                if (restored)
                 {
-                    var restored = await ViewModel.RestoreBackupAsync(selectedFilePath, progressReporter);
-                    if (restored)
-                    {
-                        progressDialog.SetCompleted(
-                            Loc.GetString("Progress_CompletedTitle"),
-                            Loc.GetString("Settings_DlgRestoreSuccessMsg"),
-                            imported: metadata.WordCount,
-                            skipped: 0,
-                            errors: 0,
-                            closeButtonText: Loc.GetString("Action_Close"));
-                    }
-                    else
-                    {
-                        progressDialog.SetError(
-                            Loc.GetString("Settings_BackupFailed"),
-                            ViewModel.BackupStatusMessage,
-                            Loc.GetString("Action_Close"));
-                    }
+                    progressDialog.SetCompleted(
+                        Loc.GetString("Progress_CompletedTitle"),
+                        Loc.GetString("Settings_DlgRestoreSuccessMsg"),
+                        imported: metadata.WordCount,
+                        skipped: 0,
+                        errors: 0,
+                        closeButtonText: Loc.GetString("Action_Close"));
                 }
-                catch (Exception ex)
+                else
                 {
                     progressDialog.SetError(
                         Loc.GetString("Settings_BackupFailed"),
-                        ex.Message,
+                        ViewModel.BackupStatusMessage,
                         Loc.GetString("Action_Close"));
                 }
+            }
+            catch (Exception ex)
+            {
+                progressDialog.SetError(
+                    Loc.GetString("Settings_BackupFailed"),
+                    ex.Message,
+                    Loc.GetString("Action_Close"));
+            }
+        }
+        catch (Exception ex)
+        {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            if (this.XamlRoot != null)
+            {
+                var fallbackTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+                var errDlg = new ContentDialog
+                {
+                    Title = Loc.GetString("Settings_BackupFailed"),
+                    Content = ex.Message,
+                    CloseButtonText = Loc.GetString("Action_Close"),
+                    XamlRoot = this.XamlRoot,
+                    RequestedTheme = fallbackTheme
+                };
+                await errDlg.ShowAsync();
             }
         }
     }

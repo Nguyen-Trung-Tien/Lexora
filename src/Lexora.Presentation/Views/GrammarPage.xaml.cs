@@ -389,6 +389,7 @@ public sealed partial class GrammarPage : Page
             }
 
             var file = await savePicker.PickSaveFileAsync();
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             if (file != null)
             {
                 await Windows.Storage.FileIO.WriteTextAsync(file, content);
@@ -456,6 +457,7 @@ public sealed partial class GrammarPage : Page
             }
 
             var file = await picker.PickSingleFileAsync();
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             if (file != null)
                 contentToImport = await Windows.Storage.FileIO.ReadTextAsync(file);
         }

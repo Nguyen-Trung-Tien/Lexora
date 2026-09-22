@@ -1,5 +1,6 @@
 using Lexora.Application.DTOs;
 using Lexora.Domain.Enums;
+using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -648,6 +649,7 @@ public sealed partial class VocabularyPage : Page
             }
 
             var file = await savePicker.PickSaveFileAsync();
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             if (file != null)
             {
                 await Windows.Storage.FileIO.WriteTextAsync(file, content);
@@ -727,6 +729,7 @@ public sealed partial class VocabularyPage : Page
             }
 
             var file = await picker.PickSingleFileAsync();
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             if (file != null)
             {
                 contentToImport = await Windows.Storage.FileIO.ReadTextAsync(file);

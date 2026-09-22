@@ -69,7 +69,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             using var walConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadWrite;Pooling=False");
             await walConn.OpenAsync(cancellationToken);
             using var walCmd = walConn.CreateCommand();
-            walCmd.CommandText = "PRAGMA wal_checkpoint(PASSIVE);";
+            walCmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
             await walCmd.ExecuteNonQueryAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -77,13 +77,62 @@ public class DatabaseBackupService : IDatabaseBackupService
             _logger.LogWarning(ex, "WAL checkpoint before backup encountered non-critical notice: {Message}", ex.Message);
         }
 
-        // 2. Use SQLite Online Backup API to ensure atomic, WAL-checkpointed snapshot
-        using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadOnly;Pooling=False"))
-        using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={targetFilePath};Pooling=False"))
+        Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+
+        // 2. Clean up target placeholder if 0 bytes (e.g. created by FileSavePicker) or stale WAL/SHM
+        var targetWal = targetFilePath + "-wal";
+        var targetShm = targetFilePath + "-shm";
+        if (File.Exists(targetWal)) try { File.Delete(targetWal); } catch { }
+        if (File.Exists(targetShm)) try { File.Delete(targetShm); } catch { }
+        if (File.Exists(targetFilePath) && new FileInfo(targetFilePath).Length == 0)
         {
-            await sourceConn.OpenAsync(cancellationToken);
-            await destConn.OpenAsync(cancellationToken);
-            sourceConn.BackupDatabase(destConn);
+            try { File.Delete(targetFilePath); } catch { }
+        }
+
+        bool backupSucceeded = false;
+
+        // 3. Try SQLite Online Backup API first
+        try
+        {
+            using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadOnly;Pooling=False"))
+            using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={targetFilePath};Mode=ReadWriteCreate;Pooling=False"))
+            {
+                await sourceConn.OpenAsync(cancellationToken);
+                await destConn.OpenAsync(cancellationToken);
+                sourceConn.BackupDatabase(destConn);
+            }
+            backupSucceeded = true;
+        }
+        catch (Exception onlineEx)
+        {
+            _logger.LogWarning(onlineEx, "Online Backup API backup failed, falling back to direct safe stream copy: {Message}", onlineEx.Message);
+            backupSucceeded = false;
+        }
+
+        // Fallback: Safe file stream copy if online backup could not acquire locks
+        if (!backupSucceeded)
+        {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            int attempts = 0;
+            while (attempts < 3)
+            {
+                attempts++;
+                try
+                {
+                    using (var sourceStream = new FileStream(_dbFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (var destStream = new FileStream(targetFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        await sourceStream.CopyToAsync(destStream, cancellationToken);
+                    }
+                    backupSucceeded = true;
+                    break;
+                }
+                catch (IOException) when (attempts < 3)
+                {
+                    Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+                    await Task.Delay(100 * attempts, cancellationToken);
+                }
+            }
         }
 
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
@@ -374,13 +423,13 @@ public class DatabaseBackupService : IDatabaseBackupService
 
         if (File.Exists(_dbFilePath))
         {
-            // First passive checkpoint on current db to flush pending dirty pages
+            // First truncate checkpoint on current db to flush pending dirty pages into main db
             try
             {
                 using var flushConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadWrite;Pooling=False");
                 await flushConn.OpenAsync(cancellationToken);
                 using var flushCmd = flushConn.CreateCommand();
-                flushCmd.CommandText = "PRAGMA wal_checkpoint(PASSIVE);";
+                flushCmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
                 await flushCmd.ExecuteNonQueryAsync(cancellationToken);
             }
             catch { /* non-critical best effort */ }
@@ -413,11 +462,17 @@ public class DatabaseBackupService : IDatabaseBackupService
             }
         }
 
-        // Step 3: Clear all connection pools and garbage collect lingering unmanaged handles
+        // Step 3: Clear all connection pools, collect unmanaged handles, and delete stale WAL/SHM
         progress?.Report((50, "Đang giải phóng các kết nối cơ sở dữ liệu...", null));
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
         GC.Collect();
         GC.WaitForPendingFinalizers();
+
+        // Remove stale WAL and SHM files to ensure restored database starts clean
+        var walFile = _dbFilePath + "-wal";
+        var shmFile = _dbFilePath + "-shm";
+        if (File.Exists(walFile)) try { File.Delete(walFile); } catch { }
+        if (File.Exists(shmFile)) try { File.Delete(shmFile); } catch { }
 
         // Step 4: Overwrite / restore database pages
         progress?.Report((65, "Đang tiến hành khôi phục các trang dữ liệu...", $"{metadata.FileSizeFormatted} - {metadata.WordCount} từ vựng"));
@@ -448,9 +503,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             {
                 Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
-                // Remove stale WAL and SHM files to avoid state mismatch
-                var walFile = _dbFilePath + "-wal";
-                var shmFile = _dbFilePath + "-shm";
+                // Ensure WAL and SHM files remain cleared for stream copy
                 if (File.Exists(walFile)) try { File.Delete(walFile); } catch { }
                 if (File.Exists(shmFile)) try { File.Delete(shmFile); } catch { }
 
@@ -519,6 +572,7 @@ public class DatabaseBackupService : IDatabaseBackupService
                 try { File.Delete(rollbackWalSnapshot); } catch { /* best effort */ }
             }
 
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             _logger.LogInformation("Database restored and verified successfully from {Backup}", backupFilePath);
         }
         catch (Exception ex)

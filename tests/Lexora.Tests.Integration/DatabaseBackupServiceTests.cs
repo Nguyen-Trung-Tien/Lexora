@@ -77,6 +77,67 @@ public class DatabaseBackupServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateBackupToFileAsync_ShouldSucceed_WhenTargetAlreadyExistsAsZeroByteFile()
+    {
+        // Arrange - mimics Windows FileSavePicker behavior which pre-creates a 0-byte file
+        var pickerPrecreatedTarget = Path.Combine(_tempDirectory, "picker_precreated.db");
+        using (File.Create(pickerPrecreatedTarget)) { }
+        new FileInfo(pickerPrecreatedTarget).Length.Should().Be(0);
+
+        // Act
+        var resultPath = await _backupService.CreateBackupToFileAsync(pickerPrecreatedTarget);
+
+        // Assert
+        resultPath.Should().Be(pickerPrecreatedTarget);
+        File.Exists(pickerPrecreatedTarget).Should().BeTrue();
+        new FileInfo(pickerPrecreatedTarget).Length.Should().BeGreaterThan(0);
+
+        using (var backupConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={pickerPrecreatedTarget};Mode=ReadOnly;Pooling=False;"))
+        {
+            await backupConn.OpenAsync();
+            using var cmd = backupConn.CreateCommand();
+            cmd.CommandText = "SELECT Name FROM TestTable WHERE Id = 1;";
+            var name = (string?)await cmd.ExecuteScalarAsync();
+            name.Should().Be("Lexora");
+        }
+    }
+
+    [Fact]
+    public async Task RestoreBackupAsync_ShouldSucceed_WhenSourceDatabaseHasActiveWalFile()
+    {
+        // Arrange - put active database into WAL mode with dirty pages in -wal
+        using (var walConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_mockDbPath};Pooling=False;"))
+        {
+            walConn.Open();
+            using var cmd = walConn.CreateCommand();
+            cmd.CommandText = "PRAGMA journal_mode=WAL; INSERT INTO TestTable VALUES (99, 'DirtyPage');";
+            cmd.ExecuteNonQuery();
+        }
+
+        var customBackupPath = Path.Combine(_tempDirectory, "wal_restore_test.db");
+        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={customBackupPath};Pooling=False;"))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "CREATE TABLE CleanRestored (Val TEXT); INSERT INTO CleanRestored VALUES ('RestoredFromWalTest');";
+            cmd.ExecuteNonQuery();
+        }
+
+        // Act
+        await _backupService.RestoreBackupAsync(customBackupPath);
+
+        // Assert
+        using (var checkConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_mockDbPath};Mode=ReadOnly;Pooling=False;"))
+        {
+            await checkConn.OpenAsync();
+            using var cmd = checkConn.CreateCommand();
+            cmd.CommandText = "SELECT Val FROM CleanRestored;";
+            var val = (string?)await cmd.ExecuteScalarAsync();
+            val.Should().Be("RestoredFromWalTest");
+        }
+    }
+
+    [Fact]
     public async Task CreateBackupAsync_ShouldThrowFileNotFoundException_WhenSourceDbMissing()
     {
         // Arrange
