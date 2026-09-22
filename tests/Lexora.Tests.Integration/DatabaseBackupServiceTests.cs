@@ -65,6 +65,8 @@ public class DatabaseBackupServiceTests : IDisposable
         // Assert
         resultPath.Should().Be(customTarget);
         File.Exists(customTarget).Should().BeTrue();
+        File.Exists(customTarget + "-wal").Should().BeFalse();
+        File.Exists(customTarget + "-shm").Should().BeFalse();
 
         using (var backupConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={customTarget};Mode=ReadOnly;Pooling=False;"))
         {
@@ -73,6 +75,40 @@ public class DatabaseBackupServiceTests : IDisposable
             cmd.CommandText = "SELECT Name FROM TestTable WHERE Id = 1;";
             var name = (string?)await cmd.ExecuteScalarAsync();
             name.Should().Be("Lexora");
+        }
+    }
+
+    [Fact]
+    public async Task CreateBackupToFileAsync_ShouldProduceConsolidatedSingleFile_WhenOriginalDatabaseIsInWalMode()
+    {
+        // Arrange - Ensure source database is in WAL mode with active WAL file
+        using (var walConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_mockDbPath};Pooling=False;"))
+        {
+            walConn.Open();
+            using var cmd = walConn.CreateCommand();
+            cmd.CommandText = "PRAGMA journal_mode=WAL; INSERT INTO TestTable VALUES (2, 'WAL_Entry');";
+            cmd.ExecuteNonQuery();
+        }
+
+        var consolidatedTarget = Path.Combine(_tempDirectory, "single_consolidated.db");
+
+        // Act
+        var result = await _backupService.CreateBackupToFileAsync(consolidatedTarget);
+
+        // Assert - Only the .db file must exist, with 0 companion -wal or -shm files
+        result.Should().Be(consolidatedTarget);
+        File.Exists(consolidatedTarget).Should().BeTrue();
+        File.Exists(consolidatedTarget + "-wal").Should().BeFalse();
+        File.Exists(consolidatedTarget + "-shm").Should().BeFalse();
+
+        // Verify data integrity
+        using (var verifyConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={consolidatedTarget};Mode=ReadOnly;Pooling=False;"))
+        {
+            await verifyConn.OpenAsync();
+            using var cmd = verifyConn.CreateCommand();
+            cmd.CommandText = "SELECT Name FROM TestTable WHERE Id = 2;";
+            var val = (string?)await cmd.ExecuteScalarAsync();
+            val.Should().Be("WAL_Entry");
         }
     }
 

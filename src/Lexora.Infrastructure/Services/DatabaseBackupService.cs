@@ -135,9 +135,29 @@ public class DatabaseBackupService : IDatabaseBackupService
             }
         }
 
+        // 4. Consolidate backup into a standalone single .db file (switch journal_mode from WAL to DELETE)
+        try
+        {
+            using (var convertConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={targetFilePath};Mode=ReadWrite;Pooling=False"))
+            {
+                await convertConn.OpenAsync(cancellationToken);
+                using var modeCmd = convertConn.CreateCommand();
+                modeCmd.CommandText = "PRAGMA journal_mode=DELETE; PRAGMA wal_checkpoint(TRUNCATE);";
+                await modeCmd.ExecuteNonQueryAsync(cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Consolidation of backup into single file encountered notice: {Message}", ex.Message);
+        }
+
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
-        // 3. Post-backup integrity verification to guarantee 100% healthy backup
+        // 5. Clean up any companion -wal and -shm files so ONLY the single .db backup file remains
+        if (File.Exists(targetWal)) try { File.Delete(targetWal); } catch { }
+        if (File.Exists(targetShm)) try { File.Delete(targetShm); } catch { }
+
+        // 6. Post-backup integrity verification to guarantee 100% healthy backup
         var fileInfo = new FileInfo(targetFilePath);
         if (!fileInfo.Exists || fileInfo.Length < 16)
         {
