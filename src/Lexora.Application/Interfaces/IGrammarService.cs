@@ -14,6 +14,7 @@ public interface IGrammarService
     Task<GrammarRuleDto> CreateRuleAsync(GrammarRuleCreateOrUpdateDto dto, CancellationToken cancellationToken = default);
     Task<GrammarRuleDto> UpdateRuleAsync(GrammarRuleCreateOrUpdateDto dto, CancellationToken cancellationToken = default);
     Task DeleteRuleAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<int> DeleteRulesAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<GrammarQuizQuestionDto>> GenerateGrammarQuizAsync(int count = 10, CefrLevel? level = null, ExamType? examType = null, CancellationToken cancellationToken = default);
     GrammarPracticeResultDto EvaluateQuiz(List<GrammarQuizQuestionDto> questions, List<GrammarQuizSubmissionDto> answers);
 }

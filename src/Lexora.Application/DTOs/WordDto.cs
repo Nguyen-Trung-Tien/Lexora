@@ -28,6 +28,54 @@ public record WordDto(
 {
     public string PrimaryDefinition => Meanings.FirstOrDefault()?.DefinitionVi ?? string.Empty;
     public bool IsDueNow => NextReviewAt.HasValue && NextReviewAt.Value <= DateTime.UtcNow;
+
+    public IReadOnlyList<PartOfSpeech> AllPartsOfSpeech
+    {
+        get
+        {
+            var list = new List<PartOfSpeech> { PrimaryPartOfSpeech };
+            if (Meanings != null)
+            {
+                foreach (var m in Meanings)
+                {
+                    if (!list.Contains(m.PartOfSpeech))
+                    {
+                        list.Add(m.PartOfSpeech);
+                    }
+                }
+            }
+            return list;
+        }
+    }
+
+    public bool HasMultiplePartsOfSpeech => AllPartsOfSpeech.Count > 1;
+
+    public bool IsIdiomOrPhrase => AllPartsOfSpeech.Any(p =>
+        p is PartOfSpeech.Idiom or PartOfSpeech.NounPhrase or PartOfSpeech.PhrasalVerb);
+
+    public string PartsOfSpeechDisplay
+    {
+        get
+        {
+            var abbreviations = AllPartsOfSpeech.Select(GetAbbreviation);
+            return string.Join(" • ", abbreviations);
+        }
+    }
+
+    public static string GetAbbreviation(PartOfSpeech pos) => pos switch
+    {
+        PartOfSpeech.Noun => "n.",
+        PartOfSpeech.Verb => "v.",
+        PartOfSpeech.Adjective => "adj.",
+        PartOfSpeech.Adverb => "adv.",
+        PartOfSpeech.PhrasalVerb => "phr. v.",
+        PartOfSpeech.NounPhrase => "n. phr.",
+        PartOfSpeech.Idiom => "idiom",
+        PartOfSpeech.Preposition => "prep.",
+        PartOfSpeech.Conjunction => "conj.",
+        PartOfSpeech.Interjection => "interj.",
+        _ => pos.ToString().ToLowerInvariant()
+    };
 }
 
 public record WordMeaningDto(

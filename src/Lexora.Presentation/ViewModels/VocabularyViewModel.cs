@@ -76,6 +76,16 @@ public partial class VocabularyViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsUnitViewMode { get; set; } = false;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedCount))]
+    [NotifyPropertyChangedFor(nameof(HasSelection))]
+    public partial bool IsSelectionMode { get; set; } = false;
+
+    public ObservableCollection<Guid> SelectedWordIds { get; } = new();
+
+    public int SelectedCount => SelectedWordIds.Count;
+    public bool HasSelection => SelectedWordIds.Count > 0;
+
     public ObservableCollection<WordDto> Words { get; } = new();
     public ObservableCollection<TopicDto> AvailableTopics { get; } = new();
     public ObservableCollection<ExamTagDto> AvailableExamTags { get; } = new();
@@ -249,6 +259,19 @@ public partial class VocabularyViewModel : ObservableObject
                 filteredResults = filteredResults.Where(w => w.Lapses > 0 || w.LearningStatus == LearningStatus.NotRemembered);
             }
 
+            if (SortBy == "pos")
+            {
+                filteredResults = IsAscending
+                    ? filteredResults.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
+                    : filteredResults.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term);
+            }
+            else if (SortBy == "multipos")
+            {
+                filteredResults = filteredResults
+                    .OrderByDescending(w => w.AllPartsOfSpeech.Count)
+                    .ThenBy(w => w.Term);
+            }
+
             Words.Clear();
             foreach (var w in filteredResults)
             {
@@ -329,6 +352,68 @@ public partial class VocabularyViewModel : ObservableObject
             await LoadWordsAsync();
             _ = LoadContextUnitsAsync();
         }
+    }
+
+    [RelayCommand]
+    public void ToggleSelectionMode()
+    {
+        IsSelectionMode = !IsSelectionMode;
+        if (!IsSelectionMode)
+        {
+            SelectedWordIds.Clear();
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    [RelayCommand]
+    public void SelectAllWords()
+    {
+        SelectedWordIds.Clear();
+        foreach (var word in Words)
+        {
+            SelectedWordIds.Add(word.Id);
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    [RelayCommand]
+    public void ClearSelection()
+    {
+        SelectedWordIds.Clear();
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    public void ToggleWordSelection(Guid id)
+    {
+        if (SelectedWordIds.Contains(id))
+        {
+            SelectedWordIds.Remove(id);
+        }
+        else
+        {
+            SelectedWordIds.Add(id);
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    public async Task<int> DeleteSelectedWordsAsync()
+    {
+        if (SelectedWordIds.Count == 0) return 0;
+
+        var idsToDelete = SelectedWordIds.ToList();
+        int count = await _vocabService.DeleteWordsAsync(idsToDelete);
+        SelectedWordIds.Clear();
+        IsSelectionMode = false;
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+
+        await LoadWordsAsync();
+        _ = LoadContextUnitsAsync();
+        return count;
     }
 
     private bool _isMarkingStatus = false;

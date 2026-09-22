@@ -34,7 +34,11 @@ public sealed partial class GrammarPage : Page
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
-        DispatcherQueue.TryEnqueue(() => Bindings.Update());
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            Bindings.Update();
+            UpdateSelectionModeUI();
+        });
     }
 
     private readonly DispatcherTimer _searchDebounceTimer;
@@ -54,6 +58,93 @@ public sealed partial class GrammarPage : Page
     private void FilterChanged(object sender, SelectionChangedEventArgs e)
     {
         _ = ViewModel.LoadRulesAsync();
+    }
+
+    private void BtnSelectMode_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ToggleSelectionMode();
+        UpdateSelectionModeUI();
+    }
+
+    private void UpdateSelectionModeUI()
+    {
+        if (ViewModel.IsSelectionMode)
+        {
+            BtnSelectMode.Style = (Style)App.Current.Resources["AccentButtonStyle"];
+            IconSelectMode.Glyph = "\uE711";
+            TextSelectMode.Text = Loc.GetString("Action_CancelSelection");
+            RulesListView.SelectionMode = ListViewSelectionMode.Multiple;
+            UpdateDeleteSelectedButtonText();
+        }
+        else
+        {
+            BtnSelectMode.Style = (Style)App.Current.Resources["DefaultButtonStyle"];
+            IconSelectMode.Glyph = "\uE762";
+            TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
+            RulesListView.SelectionMode = ListViewSelectionMode.Single;
+            RulesListView.SelectedItems.Clear();
+            ViewModel.ClearSelection();
+        }
+    }
+
+    private void UpdateDeleteSelectedButtonText()
+    {
+        TextDeleteSelected.Text = string.Format(Loc.GetString("Action_DeleteSelected"), ViewModel.SelectedRuleIds.Count);
+        BtnDeleteSelectedRules.IsEnabled = ViewModel.SelectedRuleIds.Count > 0;
+    }
+
+    private void RulesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!ViewModel.IsSelectionMode) return;
+
+        ViewModel.SelectedRuleIds.Clear();
+        foreach (var item in RulesListView.SelectedItems)
+        {
+            if (item is GrammarRuleDto rule)
+            {
+                ViewModel.SelectedRuleIds.Add(rule.Id);
+            }
+        }
+        UpdateDeleteSelectedButtonText();
+    }
+
+    private void SelectAllRules_Click(object sender, RoutedEventArgs e)
+    {
+        RulesListView.SelectAll();
+    }
+
+    private void DeselectAllRules_Click(object sender, RoutedEventArgs e)
+    {
+        RulesListView.SelectedItems.Clear();
+        ViewModel.ClearSelection();
+        UpdateDeleteSelectedButtonText();
+    }
+
+    private async void DeleteSelectedRules_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedRuleIds.Count == 0) return;
+
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+        var count = ViewModel.SelectedRuleIds.Count;
+        var confirmDialog = new ContentDialog
+        {
+            Title = Loc.GetString("Grammar_ConfirmBulkDeleteTitle"),
+            Content = string.Format(Loc.GetString("Grammar_ConfirmBulkDeleteMsg"), count),
+            PrimaryButtonText = Loc.GetString("Action_Delete"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot,
+            RequestedTheme = activeTheme
+        };
+
+        var result = await confirmDialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            await Task.Yield();
+            await ViewModel.DeleteSelectedRulesAsync();
+            RulesListView.SelectedItems.Clear();
+            UpdateSelectionModeUI();
+        }
     }
 
     private async void AddRuleButton_Click(object sender, RoutedEventArgs e)

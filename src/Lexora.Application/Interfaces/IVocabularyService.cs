@@ -32,6 +32,7 @@ public interface IVocabularyService
     Task<WordDto> CreateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default);
     Task<WordDto> UpdateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default);
     Task DeleteWordAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<int> DeleteWordsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<TopicDto>> GetAllTopicsAsync(CancellationToken cancellationToken = default);
     Task<TopicDto> CreateTopicAsync(TopicCreateOrUpdateDto dto, CancellationToken cancellationToken = default);
     Task DeleteTopicAsync(Guid id, CancellationToken cancellationToken = default);

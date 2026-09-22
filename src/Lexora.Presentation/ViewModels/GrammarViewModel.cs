@@ -86,6 +86,16 @@ public partial class GrammarViewModel : ObservableObject
     [ObservableProperty]
     public partial GrammarPracticeResultDto? PracticeResult { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedCount))]
+    [NotifyPropertyChangedFor(nameof(HasSelection))]
+    public partial bool IsSelectionMode { get; set; } = false;
+
+    public ObservableCollection<Guid> SelectedRuleIds { get; } = new();
+
+    public int SelectedCount => SelectedRuleIds.Count;
+    public bool HasSelection => SelectedRuleIds.Count > 0;
+
     public ObservableCollection<GrammarRuleDto> Rules { get; } = new();
     public ObservableCollection<CefrLevel> CefrLevels { get; } = new();
     public ObservableCollection<ExamType> ExamTypes { get; } = new();
@@ -208,6 +218,68 @@ public partial class GrammarViewModel : ObservableObject
         await _grammarService.DeleteRuleAsync(id);
         await LoadTopicsAsync();
         await LoadRulesAsync();
+    }
+
+    [RelayCommand]
+    public void ToggleSelectionMode()
+    {
+        IsSelectionMode = !IsSelectionMode;
+        if (!IsSelectionMode)
+        {
+            SelectedRuleIds.Clear();
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    [RelayCommand]
+    public void SelectAllRules()
+    {
+        SelectedRuleIds.Clear();
+        foreach (var rule in Rules)
+        {
+            SelectedRuleIds.Add(rule.Id);
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    [RelayCommand]
+    public void ClearSelection()
+    {
+        SelectedRuleIds.Clear();
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    public void ToggleRuleSelection(Guid id)
+    {
+        if (SelectedRuleIds.Contains(id))
+        {
+            SelectedRuleIds.Remove(id);
+        }
+        else
+        {
+            SelectedRuleIds.Add(id);
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    public async Task<int> DeleteSelectedRulesAsync()
+    {
+        if (SelectedRuleIds.Count == 0) return 0;
+
+        var idsToDelete = SelectedRuleIds.ToList();
+        int count = await _grammarService.DeleteRulesAsync(idsToDelete);
+        SelectedRuleIds.Clear();
+        IsSelectionMode = false;
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+
+        await LoadTopicsAsync();
+        await LoadRulesAsync();
+        return count;
     }
 
     // ==========================================

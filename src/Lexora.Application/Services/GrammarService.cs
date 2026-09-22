@@ -148,6 +148,28 @@ public class GrammarService : IGrammarService
         }
     }
 
+    public async Task<int> DeleteRulesAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+        int deletedCount = 0;
+        foreach (var id in ids)
+        {
+            var rule = await _grammarRepo.GetByIdAsync(id, cancellationToken);
+            if (rule != null)
+            {
+                await _grammarRepo.DeleteAsync(rule, cancellationToken);
+                deletedCount++;
+            }
+        }
+
+        if (deletedCount > 0)
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        return deletedCount;
+    }
+
     public async Task<IReadOnlyList<GrammarQuizQuestionDto>> GenerateGrammarQuizAsync(
         int count = 10,
         CefrLevel? level = null,

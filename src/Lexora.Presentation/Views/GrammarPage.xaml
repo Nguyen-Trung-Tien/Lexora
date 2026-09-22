@@ -33,7 +33,7 @@
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                       HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled"
                       Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
                 
                 <!-- Search Box with Live Debounce -->
                 <TextBox MinWidth="160"
@@ -54,8 +54,6 @@
                           SelectedItem="{x:Bind ViewModel.SelectedExamTarget, Mode=TwoWay}"
                           SelectionChanged="FilterChanged" />
 
-
-
                 <!-- Add Rule Primary Button -->
                 <Button Grid.Column="3" Click="AddRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipAdd')}" Style="{ThemeResource AccentButtonStyle}" Padding="16,8" CornerRadius="10">
                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -72,8 +70,19 @@
                     </StackPanel>
                 </Button>
 
+                <!-- Multi-Select Toggle Button -->
+                <Button Grid.Column="5" x:Name="BtnSelectMode"
+                        Click="BtnSelectMode_Click"
+                        CornerRadius="10" Padding="14,8"
+                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="14" />
+                        <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Button>
+
                 <!-- Import / Export Dropdown -->
-                <DropDownButton Grid.Column="5" Padding="12,8" CornerRadius="10"
+                <DropDownButton Grid.Column="6" Padding="12,8" CornerRadius="10"
                                 ToolTipService.ToolTip="Import / Export">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE8B5;" FontSize="14" />
@@ -123,7 +132,7 @@
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="12">
-                <Grid RowDefinitions="Auto,*">
+                <Grid RowDefinitions="Auto,Auto,*">
                     <Grid Padding="16,14" ColumnDefinitions="*,Auto" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                         <TextBlock Text="{x:Bind Loc.GetString('Grammar_Structures')}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" />
                         <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,2">
@@ -132,7 +141,30 @@
                         </Border>
                     </Grid>
 
-                    <Grid Grid.Row="1">
+                    <!-- Multi-Selection Action Bar -->
+                    <Border Grid.Row="1" x:Name="SelectionActionBar"
+                            Visibility="{x:Bind ViewModel.IsSelectionMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1" Padding="12,8">
+                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                            <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllRules_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
+                            <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllRules_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
+                            <Button Grid.Column="3" x:Name="BtnDeleteSelectedRules"
+                                    Click="DeleteSelectedRules_Click"
+                                    IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+                                    Background="{ThemeResource SystemFillColorCriticalBrush}"
+                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                    CornerRadius="6" Padding="10,4" FontSize="12" FontWeight="Bold">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="11" />
+                                    <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="2">
                         <!-- Empty State -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="24"
                                     Visibility="{x:Bind ViewModel.Rules.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
@@ -141,8 +173,10 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Grammar_EmptySubtitle')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
                         </StackPanel>
 
-                        <ListView ItemsSource="{x:Bind ViewModel.Rules, Mode=OneWay}"
+                        <ListView x:Name="RulesListView"
+                                  ItemsSource="{x:Bind ViewModel.Rules, Mode=OneWay}"
                                   SelectedItem="{x:Bind ViewModel.SelectedRule, Mode=TwoWay}"
+                                  SelectionChanged="RulesListView_SelectionChanged"
                                   Visibility="{x:Bind ViewModel.Rules.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}"
                                   Padding="6">
                             <ListView.ItemTemplate>

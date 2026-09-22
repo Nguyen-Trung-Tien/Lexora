@@ -220,6 +220,28 @@ public class VocabularyService : IVocabularyService
         }
     }
 
+    public async Task<int> DeleteWordsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+        int deletedCount = 0;
+        foreach (var id in ids)
+        {
+            var word = await _vocabRepo.GetByIdAsync(id, cancellationToken);
+            if (word != null)
+            {
+                await _vocabRepo.DeleteAsync(word, cancellationToken);
+                deletedCount++;
+            }
+        }
+
+        if (deletedCount > 0)
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        return deletedCount;
+    }
+
     public async Task<IReadOnlyList<TopicDto>> GetAllTopicsAsync(CancellationToken cancellationToken = default)
     {
         var topics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);

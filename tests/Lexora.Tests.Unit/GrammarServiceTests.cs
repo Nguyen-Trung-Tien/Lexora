@@ -213,4 +213,26 @@ public class GrammarServiceTests
         result.Questions[0].IsCorrect.Should().BeTrue();
         result.Questions[1].IsCorrect.Should().BeFalse();
     }
+
+    [Fact]
+    public async Task DeleteRulesAsync_ShouldDeleteMultipleRulesAndCommitOnce()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+        var rule1 = new GrammarRule { Title = "Rule 1", Structure = "S + V", ExplanationVi = "Ex Vi", ExplanationEn = "Ex En", CommonMistakes = "Mistake", Level = CefrLevel.A1, ExamTarget = ExamType.Ielts, Topic = "Grammar" };
+        var rule2 = new GrammarRule { Title = "Rule 2", Structure = "S + V2", ExplanationVi = "Ex Vi", ExplanationEn = "Ex En", CommonMistakes = "Mistake", Level = CefrLevel.A2, ExamTarget = ExamType.Ielts, Topic = "Grammar" };
+
+        _mockGrammarRepo.Setup(r => r.GetByIdAsync(id1, It.IsAny<CancellationToken>())).ReturnsAsync(rule1);
+        _mockGrammarRepo.Setup(r => r.GetByIdAsync(id2, It.IsAny<CancellationToken>())).ReturnsAsync(rule2);
+
+        // Act
+        var deletedCount = await _grammarService.DeleteRulesAsync([id1, id2]);
+
+        // Assert
+        deletedCount.Should().Be(2);
+        _mockGrammarRepo.Verify(r => r.DeleteAsync(rule1, It.IsAny<CancellationToken>()), Times.Once);
+        _mockGrammarRepo.Verify(r => r.DeleteAsync(rule2, It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

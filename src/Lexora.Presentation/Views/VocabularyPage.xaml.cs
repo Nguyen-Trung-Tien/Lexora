@@ -105,9 +105,11 @@ public sealed partial class VocabularyPage : Page
             Loc.GetString("Vocab_SortLevelAsc"),
             Loc.GetString("Vocab_SortLevelDesc"),
             Loc.GetString("Vocab_SortDateNewest"),
-            Loc.GetString("Vocab_SortDateOldest")
+            Loc.GetString("Vocab_SortDateOldest"),
+            Loc.GetString("Vocab_SortPosAsc"),
+            Loc.GetString("Vocab_SortMultiPos")
         };
-        SortCombo.SelectedIndex = prevSortIdx < 6 ? prevSortIdx : 0;
+        SortCombo.SelectedIndex = prevSortIdx < 8 ? prevSortIdx : 0;
     }
 
     private void PopulateTopicFilterCombo()
@@ -270,6 +272,14 @@ public sealed partial class VocabularyPage : Page
                 ViewModel.SortBy = "createdat";
                 ViewModel.IsAscending = true;
                 break;
+            case 6: // Part of speech
+                ViewModel.SortBy = "pos";
+                ViewModel.IsAscending = true;
+                break;
+            case 7: // Multi-POS first
+                ViewModel.SortBy = "multipos";
+                ViewModel.IsAscending = false;
+                break;
         }
         await ViewModel.LoadWordsAsync();
     }
@@ -285,6 +295,90 @@ public sealed partial class VocabularyPage : Page
         SortCombo.SelectedIndex = 0;
         UpdateQuickFilterStyles("All");
         _ = ViewModel.SelectQuickFilterAsync("All");
+    }
+
+    private void BtnSelectMode_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ToggleSelectionMode();
+        UpdateSelectionModeUI();
+    }
+
+    private void UpdateSelectionModeUI()
+    {
+        if (ViewModel.IsSelectionMode)
+        {
+            WordsListView.SelectionMode = ListViewSelectionMode.Multiple;
+            TextSelectMode.Text = Loc.GetString("Action_CancelSelection");
+            IconSelectMode.Glyph = "\uE711";
+            UpdateDeleteSelectedButtonText();
+        }
+        else
+        {
+            WordsListView.SelectionMode = ListViewSelectionMode.Single;
+            TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
+            IconSelectMode.Glyph = "\uE762";
+            ViewModel.SelectedWordIds.Clear();
+        }
+    }
+
+    private void WordsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!ViewModel.IsSelectionMode)
+        {
+            return;
+        }
+
+        ViewModel.SelectedWordIds.Clear();
+        foreach (var item in WordsListView.SelectedItems)
+        {
+            if (item is WordDto word)
+            {
+                ViewModel.SelectedWordIds.Add(word.Id);
+            }
+        }
+        UpdateDeleteSelectedButtonText();
+    }
+
+    private void SelectAllWords_Click(object sender, RoutedEventArgs e)
+    {
+        WordsListView.SelectAll();
+    }
+
+    private void DeselectAllWords_Click(object sender, RoutedEventArgs e)
+    {
+        WordsListView.SelectedItems.Clear();
+    }
+
+    private void UpdateDeleteSelectedButtonText()
+    {
+        TextDeleteSelected.Text = string.Format(Loc.GetString("Action_DeleteSelected"), ViewModel.SelectedWordIds.Count);
+        BtnDeleteSelectedWords.IsEnabled = ViewModel.SelectedWordIds.Count > 0;
+    }
+
+    private async void DeleteSelectedWords_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWordIds.Count == 0) return;
+
+        var count = ViewModel.SelectedWordIds.Count;
+        var theme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+        var confirmDialog = new ContentDialog
+        {
+            Title = Loc.GetString("Vocab_ConfirmBulkDeleteTitle"),
+            Content = string.Format(Loc.GetString("Vocab_ConfirmBulkDeleteMsg"), count),
+            PrimaryButtonText = Loc.GetString("Action_Delete"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = theme
+        };
+
+        var result = await confirmDialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            await Task.Yield();
+            await ViewModel.DeleteSelectedWordsAsync();
+            UpdateSelectionModeUI();
+        }
     }
 
     private async void QuickFilter_Click(object sender, RoutedEventArgs e)

@@ -41,6 +41,11 @@ public class LocalizationService : ILocalizationService
             ["Action_Filter"] = "Bộ lọc",
             ["Action_Copy"] = "Sao chép",
             ["Action_Copied"] = "Đã sao chép!",
+            ["Action_SelectMultiple"] = "Chọn nhiều",
+            ["Action_SelectAll"] = "Chọn tất cả",
+            ["Action_DeselectAll"] = "Bỏ chọn",
+            ["Action_DeleteSelected"] = "Xóa đã chọn ({0})",
+            ["Action_CancelSelection"] = "Hủy chọn",
 
             // Dashboard
             ["Dashboard_HeroTitle"] = "Ôn tập ngắt quãng (SM-2)",
@@ -114,6 +119,15 @@ public class LocalizationService : ILocalizationService
             ["Vocab_SortLevelDesc"] = "Trình độ CEFR (C2 - A1)",
             ["Vocab_SortDateNewest"] = "Ngày thêm (Mới nhất)",
             ["Vocab_SortDateOldest"] = "Ngày thêm (Cũ nhất)",
+            ["Vocab_SortPosAsc"] = "Từ loại (Danh từ, Động từ...)",
+            ["Vocab_SortMultiPos"] = "Từ đa dạng (Đa từ loại trước)",
+            ["Vocab_TagIdiom"] = "Thành ngữ (Idiom)",
+            ["Vocab_TagPhrasalVerb"] = "Cụm động từ",
+            ["Vocab_TagNounPhrase"] = "Cụm danh từ",
+            ["Vocab_MultiPosBadge"] = "Đa từ loại",
+            ["Vocab_AllPartsOfSpeechTitle"] = "Các góc từ loại của mục từ này:",
+            ["Vocab_ConfirmBulkDeleteTitle"] = "Xác nhận xóa hàng loạt",
+            ["Vocab_ConfirmBulkDeleteMsg"] = "Bạn có chắc chắn muốn xóa {0} từ vựng đã chọn? Hành động này sẽ xóa vĩnh viễn dữ liệu học và không thể hoàn tác.",
             ["Vocab_AllTopics"] = "Tất cả chủ đề",
             ["Vocab_AllLevels"] = "Tất cả trình độ",
             ["Vocab_AllPos"] = "Tất cả từ loại",
@@ -276,6 +290,10 @@ public class LocalizationService : ILocalizationService
             ["Grammar_ReviewQuestions"] = "Chi tiết các câu hỏi luyện tập",
             ["Grammar_YourAnswer"] = "Lựa chọn của bạn",
             ["Grammar_CorrectAnswer"] = "Công thức đúng",
+            ["Grammar_CategoryFilter"] = "Chuyên đề ngữ pháp",
+            ["Grammar_AllCategories"] = "Tất cả chuyên đề",
+            ["Grammar_ConfirmBulkDeleteTitle"] = "Xác nhận xóa quy tắc",
+            ["Grammar_ConfirmBulkDeleteMsg"] = "Bạn có chắc chắn muốn xóa {0} quy tắc ngữ pháp đã chọn? Hành động này không thể hoàn tác.",
 
 
 
@@ -757,6 +775,11 @@ public class LocalizationService : ILocalizationService
             ["Action_Filter"] = "Filters",
             ["Action_Copy"] = "Copy",
             ["Action_Copied"] = "Copied!",
+            ["Action_SelectMultiple"] = "Select Multiple",
+            ["Action_SelectAll"] = "Select All",
+            ["Action_DeselectAll"] = "Deselect All",
+            ["Action_DeleteSelected"] = "Delete Selected ({0})",
+            ["Action_CancelSelection"] = "Cancel Selection",
 
             // Dashboard
             ["Dashboard_HeroTitle"] = "Spaced Repetition (SM-2)",
@@ -830,6 +853,15 @@ public class LocalizationService : ILocalizationService
             ["Vocab_SortLevelDesc"] = "CEFR Level (C2 - A1)",
             ["Vocab_SortDateNewest"] = "Date Added (Newest)",
             ["Vocab_SortDateOldest"] = "Date Added (Oldest)",
+            ["Vocab_SortPosAsc"] = "Part of Speech (Noun, Verb...)",
+            ["Vocab_SortMultiPos"] = "Multi-Category Words First",
+            ["Vocab_TagIdiom"] = "Idiom",
+            ["Vocab_TagPhrasalVerb"] = "Phrasal Verb",
+            ["Vocab_TagNounPhrase"] = "Noun Phrase",
+            ["Vocab_MultiPosBadge"] = "Multi-POS",
+            ["Vocab_AllPartsOfSpeechTitle"] = "Parts of speech for this entry:",
+            ["Vocab_ConfirmBulkDeleteTitle"] = "Confirm Bulk Deletion",
+            ["Vocab_ConfirmBulkDeleteMsg"] = "Are you sure you want to delete {0} selected vocabulary words? This will permanently delete their learning progress and cannot be undone.",
             ["Vocab_AllTopics"] = "All Topics",
             ["Vocab_AllLevels"] = "All CEFR Levels",
             ["Vocab_AllPos"] = "All Parts of Speech",
@@ -993,6 +1025,10 @@ public class LocalizationService : ILocalizationService
             ["Grammar_ReviewQuestions"] = "Practice Questions Review",
             ["Grammar_YourAnswer"] = "Your answer",
             ["Grammar_CorrectAnswer"] = "Correct formula",
+            ["Grammar_CategoryFilter"] = "Grammar Category",
+            ["Grammar_AllCategories"] = "All Categories",
+            ["Grammar_ConfirmBulkDeleteTitle"] = "Confirm Rule Deletion",
+            ["Grammar_ConfirmBulkDeleteMsg"] = "Are you sure you want to delete {0} selected grammar rules? This action cannot be undone.",
 
 
             // Settings
