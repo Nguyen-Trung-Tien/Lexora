@@ -267,12 +267,15 @@ public sealed partial class SettingsPage : Page
         try
         {
             await Task.Delay(200);
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             progressDialog.SetDeterminate(40, Loc.GetString("Progress_BackupCopying"), Loc.GetString("Progress_PleaseWait"));
 
             var backupPath = await ViewModel.CreateBackupAsync(targetFilePath);
+            await DispatcherQueue.EnsureOnUIThreadAsync();
 
             progressDialog.SetDeterminate(85, Loc.GetString("Progress_BackupVerifying"), Loc.GetString("Progress_PleaseWait"));
             await Task.Delay(200);
+            await DispatcherQueue.EnsureOnUIThreadAsync();
 
             if (!string.IsNullOrEmpty(backupPath))
             {
@@ -291,6 +294,7 @@ public sealed partial class SettingsPage : Page
         }
         catch (Exception ex)
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             progressDialog.SetError(
                 Loc.GetString("Settings_BackupFailed"),
                 ex.Message,
@@ -521,6 +525,8 @@ public sealed partial class SettingsPage : Page
             try
             {
                 var restored = await ViewModel.RestoreBackupAsync(selectedFilePath, progressReporter);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+
                 if (restored)
                 {
                     progressDialog.SetCompleted(
@@ -541,6 +547,7 @@ public sealed partial class SettingsPage : Page
             }
             catch (Exception ex)
             {
+                await DispatcherQueue.EnsureOnUIThreadAsync();
                 progressDialog.SetError(
                     Loc.GetString("Settings_BackupFailed"),
                     ex.Message,

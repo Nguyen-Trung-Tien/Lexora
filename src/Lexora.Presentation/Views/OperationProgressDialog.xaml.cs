@@ -30,6 +30,12 @@ public sealed partial class OperationProgressDialog : ContentDialog
     /// </summary>
     public void SetDeterminate(int percent, string message, string? detail = null)
     {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(() => SetDeterminate(percent, message, detail));
+            return;
+        }
+
         percent = Math.Clamp(percent, 0, 100);
 
         ActiveProgressPanel.Visibility = Visibility.Visible;
@@ -60,6 +66,12 @@ public sealed partial class OperationProgressDialog : ContentDialog
     /// </summary>
     public void SetIndeterminate(string message, string? detail = null)
     {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(() => SetIndeterminate(message, detail));
+            return;
+        }
+
         ActiveProgressPanel.Visibility = Visibility.Visible;
         CompletedPanel.Visibility = Visibility.Collapsed;
 
@@ -85,6 +97,12 @@ public sealed partial class OperationProgressDialog : ContentDialog
     /// </summary>
     public void SetCompleted(string title, string summary, int imported = 0, int skipped = 0, int errors = 0, string closeButtonText = "Đóng")
     {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(() => SetCompleted(title, summary, imported, skipped, errors, closeButtonText));
+            return;
+        }
+
         ActiveProgressPanel.Visibility = Visibility.Collapsed;
         CompletedPanel.Visibility = Visibility.Visible;
 
@@ -113,6 +131,12 @@ public sealed partial class OperationProgressDialog : ContentDialog
     /// </summary>
     public void SetError(string title, string errorMessage, string closeButtonText = "Đóng")
     {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(() => SetError(title, errorMessage, closeButtonText));
+            return;
+        }
+
         ActiveProgressPanel.Visibility = Visibility.Collapsed;
         CompletedPanel.Visibility = Visibility.Visible;
 

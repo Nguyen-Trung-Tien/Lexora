@@ -138,6 +138,21 @@ public class DatabaseBackupServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateBackupFromFile_WhenUsingActualAppDataDatabase_ShouldSucceed()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var realDbPath = Path.Combine(appData, "Lexora", "data", "lexora.db");
+        if (!File.Exists(realDbPath)) return;
+
+        var service = new DatabaseBackupService(realDbPath, NullLogger<DatabaseBackupService>.Instance);
+        var targetPath = Path.Combine(_tempDirectory, "real_lexora_backup.db");
+        var result = await service.CreateBackupToFileAsync(targetPath);
+
+        File.Exists(result).Should().BeTrue();
+        new FileInfo(result).Length.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
     public async Task CreateBackupAsync_ShouldThrowFileNotFoundException_WhenSourceDbMissing()
     {
         // Arrange
