@@ -192,15 +192,18 @@ public sealed partial class GrammarPage : Page
     {
         try
         {
-            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var xamlRoot = (sender as FrameworkElement)?.XamlRoot ?? this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot;
+            var themeService = App.Current.Services.GetService<IThemeService>();
+            var activeTheme = themeService?.CurrentTheme ?? ElementTheme.Default;
+
             var dialog = new GrammarEditorDialog
             {
-                XamlRoot = XamlRoot,
+                XamlRoot = xamlRoot,
                 RequestedTheme = activeTheme
             };
             dialog.InitializeForCreate();
 
-            var result = await dialog.ShowAsyncSafe();
+            var result = await dialog.ShowAsyncSafe(xamlRoot);
             if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
             {
                 await ViewModel.AddRuleAsync(dialog.ResultDto);
@@ -218,15 +221,18 @@ public sealed partial class GrammarPage : Page
 
         try
         {
-            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var xamlRoot = (sender as FrameworkElement)?.XamlRoot ?? this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot;
+            var themeService = App.Current.Services.GetService<IThemeService>();
+            var activeTheme = themeService?.CurrentTheme ?? ElementTheme.Default;
+
             var dialog = new GrammarEditorDialog
             {
-                XamlRoot = XamlRoot,
+                XamlRoot = xamlRoot,
                 RequestedTheme = activeTheme
             };
             dialog.InitializeForEdit(ViewModel.SelectedRule);
 
-            var result = await dialog.ShowAsyncSafe();
+            var result = await dialog.ShowAsyncSafe(xamlRoot);
             if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
             {
                 await ViewModel.UpdateRuleAsync(dialog.ResultDto);
@@ -758,19 +764,19 @@ public sealed partial class GrammarPage : Page
     {
         try
         {
-            if (this.XamlRoot == null) return;
-            await Task.Yield();
-            var errTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
-                ? ElementTheme.Dark : ElementTheme.Light;
+            var xamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot;
+            if (xamlRoot == null) return;
+            var themeService = App.Current.Services.GetService<IThemeService>();
+            var errTheme = themeService?.CurrentTheme ?? ElementTheme.Default;
             var dialog = new ContentDialog
             {
                 Title = title,
                 Content = message,
                 CloseButtonText = Loc.GetString("Action_Close"),
-                XamlRoot = this.XamlRoot,
+                XamlRoot = xamlRoot,
                 RequestedTheme = errTheme
             };
-            await dialog.ShowAsyncSafe();
+            await dialog.ShowAsyncSafe(xamlRoot);
         }
         catch (Exception ex)
         {

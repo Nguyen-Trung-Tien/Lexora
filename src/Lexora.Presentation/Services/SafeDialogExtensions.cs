@@ -20,22 +20,45 @@ public static class SafeDialogExtensions
     {
         ArgumentNullException.ThrowIfNull(dialog);
 
-        // Wait to acquire the dialog semaphore
+        var dispatcher = dialog.DispatcherQueue 
+            ?? (preferredRoot?.Content as FrameworkElement)?.DispatcherQueue 
+            ?? App.Current.MainWindow?.DispatcherQueue;
+
+        if (dispatcher != null && !dispatcher.HasThreadAccess)
+        {
+            await dispatcher.EnsureOnUIThreadAsync();
+        }
+
         await _dialogSemaphore.WaitAsync();
         try
         {
-            // Ensure any previous dialog had time to detach from the visual tree
-            await Task.Yield();
+            if (dispatcher != null && !dispatcher.HasThreadAccess)
+            {
+                await dispatcher.EnsureOnUIThreadAsync();
+            }
+
+            // If a previous dialog is still recorded as active, safely hide it
+            if (_currentlyActiveDialog != null && _currentlyActiveDialog != dialog)
+            {
+                _currentlyActiveDialog.HideSafe();
+                await Task.Delay(50);
+                if (dispatcher != null && !dispatcher.HasThreadAccess)
+                {
+                    await dispatcher.EnsureOnUIThreadAsync();
+                }
+            }
 
             // Resolve XamlRoot
             if (dialog.XamlRoot == null)
             {
-                dialog.XamlRoot = preferredRoot ?? App.Current.MainWindow?.Content?.XamlRoot;
+                dialog.XamlRoot = preferredRoot 
+                    ?? App.Current.MainWindow?.Content?.XamlRoot;
             }
 
             if (dialog.XamlRoot == null)
             {
                 System.Diagnostics.Debug.WriteLine("[SafeDialog] Warning: XamlRoot is null; dialog display skipped to prevent crash.");
+                LogDialogCrash(dialog.GetType().Name, new InvalidOperationException("XamlRoot could not be resolved when displaying ContentDialog."));
                 return ContentDialogResult.None;
             }
 
@@ -46,15 +69,29 @@ public static class SafeDialogExtensions
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[SafeDialog] Exception during ShowAsync: {ex.Message}");
+            LogDialogCrash(dialog.GetType().Name, ex);
             return ContentDialogResult.None;
         }
         finally
         {
             _currentlyActiveDialog = null;
-            // Allow visual tree cleanup before next dialog can acquire lock
-            await Task.Yield();
             _dialogSemaphore.Release();
         }
+    }
+
+    private static void LogDialogCrash(string dialogName, Exception ex)
+    {
+        try
+        {
+            var logDir = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Lexora");
+            System.IO.Directory.CreateDirectory(logDir);
+            var logPath = System.IO.Path.Combine(logDir, "crash.log");
+            var text = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [SafeDialog] Failed to show {dialogName}\n{ex.GetType().FullName}: {ex.Message}\nStackTrace:\n{ex.StackTrace}\nInnerException: {ex.InnerException}\n\n";
+            System.IO.File.AppendAllText(logPath, text);
+        }
+        catch { }
     }
 
     /// <summary>
