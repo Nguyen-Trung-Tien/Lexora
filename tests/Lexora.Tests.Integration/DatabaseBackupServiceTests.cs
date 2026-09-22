@@ -54,6 +54,29 @@ public class DatabaseBackupServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateBackupToFileAsync_ShouldCreateSpecifiedFile_WhenDbExists()
+    {
+        // Arrange
+        var customTarget = Path.Combine(_tempDirectory, "custom_named_backup.db");
+
+        // Act
+        var resultPath = await _backupService.CreateBackupToFileAsync(customTarget);
+
+        // Assert
+        resultPath.Should().Be(customTarget);
+        File.Exists(customTarget).Should().BeTrue();
+
+        using (var backupConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={customTarget};Mode=ReadOnly;Pooling=False;"))
+        {
+            await backupConn.OpenAsync();
+            using var cmd = backupConn.CreateCommand();
+            cmd.CommandText = "SELECT Name FROM TestTable WHERE Id = 1;";
+            var name = (string?)await cmd.ExecuteScalarAsync();
+            name.Should().Be("Lexora");
+        }
+    }
+
+    [Fact]
     public async Task CreateBackupAsync_ShouldThrowFileNotFoundException_WhenSourceDbMissing()
     {
         // Arrange

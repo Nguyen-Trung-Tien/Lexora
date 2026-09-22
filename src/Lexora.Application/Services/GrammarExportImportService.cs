@@ -234,24 +234,24 @@ public class GrammarExportImportService : IGrammarExportImportService
         if (csvContent.Length > MaxImportPayloadLength)
             return new ImportResult(0, 0, [$"Payload exceeds maximum allowed size of {MaxImportPayloadLength / 1_048_576} MB."]);
 
-        var lines = csvContent.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        if (lines.Length < 2)
+        var records = ParseCsvRecords(csvContent);
+        if (records.Count < 2)
             return new ImportResult(0, 0, ["CSV content has no data rows."]);
 
-        progress?.Report(new ProgressReport(5, 0, lines.Length - 1, "Đang phân tích CSV...", "Parsing header..."));
+        progress?.Report(new ProgressReport(5, 0, records.Count - 1, "Đang phân tích CSV...", "Parsing header..."));
 
         // Parse header
-        var header = ParseCsvLine(lines[0]);
-        int idxTitle = Array.FindIndex(header, h => h.Equals("Title", StringComparison.OrdinalIgnoreCase));
-        int idxStructure = Array.FindIndex(header, h => h.Equals("Structure", StringComparison.OrdinalIgnoreCase));
-        int idxExplVi = Array.FindIndex(header, h => h.Equals("ExplanationVi", StringComparison.OrdinalIgnoreCase));
-        int idxExplEn = Array.FindIndex(header, h => h.Equals("ExplanationEn", StringComparison.OrdinalIgnoreCase));
-        int idxMistakes = Array.FindIndex(header, h => h.Equals("CommonMistakes", StringComparison.OrdinalIgnoreCase));
-        int idxLevel = Array.FindIndex(header, h => h.Equals("Level", StringComparison.OrdinalIgnoreCase));
-        int idxExam = Array.FindIndex(header, h => h.Equals("ExamTarget", StringComparison.OrdinalIgnoreCase));
-        int idxTopic = Array.FindIndex(header, h => h.Equals("Topic", StringComparison.OrdinalIgnoreCase));
-        int idxExamplesEn = Array.FindIndex(header, h => h.Equals("ExamplesEn", StringComparison.OrdinalIgnoreCase));
-        int idxExamplesVi = Array.FindIndex(header, h => h.Equals("ExamplesVi", StringComparison.OrdinalIgnoreCase));
+        var header = records[0];
+        int idxTitle = header.FindIndex(h => h.Equals("Title", StringComparison.OrdinalIgnoreCase));
+        int idxStructure = header.FindIndex(h => h.Equals("Structure", StringComparison.OrdinalIgnoreCase));
+        int idxExplVi = header.FindIndex(h => h.Equals("ExplanationVi", StringComparison.OrdinalIgnoreCase));
+        int idxExplEn = header.FindIndex(h => h.Equals("ExplanationEn", StringComparison.OrdinalIgnoreCase));
+        int idxMistakes = header.FindIndex(h => h.Equals("CommonMistakes", StringComparison.OrdinalIgnoreCase));
+        int idxLevel = header.FindIndex(h => h.Equals("Level", StringComparison.OrdinalIgnoreCase));
+        int idxExam = header.FindIndex(h => h.Equals("ExamTarget", StringComparison.OrdinalIgnoreCase));
+        int idxTopic = header.FindIndex(h => h.Equals("Topic", StringComparison.OrdinalIgnoreCase));
+        int idxExamplesEn = header.FindIndex(h => h.Equals("ExamplesEn", StringComparison.OrdinalIgnoreCase));
+        int idxExamplesVi = header.FindIndex(h => h.Equals("ExamplesVi", StringComparison.OrdinalIgnoreCase));
 
         if (idxTitle < 0)
             return new ImportResult(0, 0, ["CSV missing required 'Title' column."]);
@@ -261,16 +261,16 @@ public class GrammarExportImportService : IGrammarExportImportService
             .Select(r => r.Title.Trim().ToLowerInvariant())
             .ToHashSet();
 
-        int dataLines = lines.Length - 1;
+        int dataLines = records.Count - 1;
         var newRules = new List<GrammarRule>();
 
-        for (int i = 1; i < lines.Length; i++)
+        for (int i = 1; i < records.Count; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             int pct = (int)(10.0 + 80.0 * (i - 1) / Math.Max(1, dataLines));
-            var cols = ParseCsvLine(lines[i]);
+            var cols = records[i];
 
-            string title = idxTitle < cols.Length ? cols[idxTitle].Trim() : string.Empty;
+            string title = idxTitle < cols.Count ? cols[idxTitle].Trim() : string.Empty;
             if (string.IsNullOrWhiteSpace(title))
             {
                 skipped++;
@@ -286,20 +286,18 @@ public class GrammarExportImportService : IGrammarExportImportService
                 continue;
             }
 
-            string structure = idxStructure >= 0 && idxStructure < cols.Length ? cols[idxStructure].Trim() : string.Empty;
-            string explVi = idxExplVi >= 0 && idxExplVi < cols.Length ? cols[idxExplVi].Trim() : string.Empty;
-            string explEn = idxExplEn >= 0 && idxExplEn < cols.Length ? cols[idxExplEn].Trim() : string.Empty;
-            string mistakes = idxMistakes >= 0 && idxMistakes < cols.Length ? cols[idxMistakes].Trim() : string.Empty;
-            string levelStr = idxLevel >= 0 && idxLevel < cols.Length ? cols[idxLevel].Trim() : string.Empty;
-            string examStr = idxExam >= 0 && idxExam < cols.Length ? cols[idxExam].Trim() : string.Empty;
-            string topic = idxTopic >= 0 && idxTopic < cols.Length ? cols[idxTopic].Trim() : string.Empty;
-            string examplesEn = idxExamplesEn >= 0 && idxExamplesEn < cols.Length ? cols[idxExamplesEn].Trim() : string.Empty;
-            string examplesVi = idxExamplesVi >= 0 && idxExamplesVi < cols.Length ? cols[idxExamplesVi].Trim() : string.Empty;
+            string structure = idxStructure >= 0 && idxStructure < cols.Count ? cols[idxStructure].Trim() : string.Empty;
+            string explVi = idxExplVi >= 0 && idxExplVi < cols.Count ? cols[idxExplVi].Trim() : string.Empty;
+            string explEn = idxExplEn >= 0 && idxExplEn < cols.Count ? cols[idxExplEn].Trim() : string.Empty;
+            string mistakes = idxMistakes >= 0 && idxMistakes < cols.Count ? cols[idxMistakes].Trim() : string.Empty;
+            string levelStr = idxLevel >= 0 && idxLevel < cols.Count ? cols[idxLevel].Trim() : string.Empty;
+            string examStr = idxExam >= 0 && idxExam < cols.Count ? cols[idxExam].Trim() : string.Empty;
+            string topic = idxTopic >= 0 && idxTopic < cols.Count ? cols[idxTopic].Trim() : string.Empty;
+            string examplesEn = idxExamplesEn >= 0 && idxExamplesEn < cols.Count ? cols[idxExamplesEn].Trim() : string.Empty;
+            string examplesVi = idxExamplesVi >= 0 && idxExamplesVi < cols.Count ? cols[idxExamplesVi].Trim() : string.Empty;
 
-            if (!Enum.TryParse<CefrLevel>(levelStr, ignoreCase: true, out var level))
-                level = CefrLevel.B1;
-            if (!Enum.TryParse<ExamType>(examStr, ignoreCase: true, out var examTarget))
-                examTarget = ExamType.General;
+            var level = ParseCefrLevel(levelStr, CefrLevel.B1);
+            var examTarget = ParseExamType(examStr, ExamType.General);
 
             var rule = new GrammarRule
             {
@@ -349,37 +347,114 @@ public class GrammarExportImportService : IGrammarExportImportService
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
 
+    private static readonly System.Buffers.SearchValues<char> CsvFormulaTriggers = System.Buffers.SearchValues.Create("=+-@\t\r");
+
     private static string CsvQuote(string value)
     {
-        if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
-            return $"\"{value.Replace("\"", "\"\"")}\"";
-        return value;
+        if (string.IsNullOrEmpty(value)) return "";
+
+        // Mitigate CSV Formula Injection (CWE-1236)
+        bool isFormula = CsvFormulaTriggers.Contains(value[0]);
+        var safeField = isFormula ? "'" + value : value;
+
+        if (isFormula || safeField.Contains(',') || safeField.Contains('"') || safeField.Contains('\n') || safeField.Contains('\r'))
+        {
+            return $"\"{safeField.Replace("\"", "\"\"")}\"";
+        }
+        return safeField;
     }
 
-    private static string[] ParseCsvLine(string line)
+    private static CefrLevel ParseCefrLevel(string? input, CefrLevel defaultLevel = CefrLevel.B1)
     {
-        var result = new List<string>();
-        bool inQuotes = false;
-        var current = new StringBuilder();
-
-        foreach (char c in line)
+        if (string.IsNullOrWhiteSpace(input)) return defaultLevel;
+        var clean = input.Trim().ToLowerInvariant();
+        if (Enum.TryParse<CefrLevel>(clean, ignoreCase: true, out var exact)) return exact;
+        return clean switch
         {
+            "a1" or "beginner" => CefrLevel.A1,
+            "a2" or "elementary" => CefrLevel.A2,
+            "b1" or "intermediate" => CefrLevel.B1,
+            "b2" or "upper intermediate" or "upper-intermediate" or "upperintermediate" => CefrLevel.B2,
+            "c1" or "advanced" => CefrLevel.C1,
+            "c2" or "mastery" or "proficiency" => CefrLevel.C2,
+            _ => defaultLevel
+        };
+    }
+
+    private static ExamType ParseExamType(string? input, ExamType defaultTarget = ExamType.General)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return defaultTarget;
+        var clean = input.Trim().ToLowerInvariant();
+        if (Enum.TryParse<ExamType>(clean, ignoreCase: true, out var exact)) return exact;
+        return clean switch
+        {
+            "ielts" => ExamType.Ielts,
+            "toeic" => ExamType.Toeic,
+            "vstep" => ExamType.Vstep,
+            _ => defaultTarget
+        };
+    }
+
+    private static List<List<string>> ParseCsvRecords(string csvContent)
+    {
+        var records = new List<List<string>>();
+        var currentRecord = new List<string>();
+        var currentField = new StringBuilder();
+        bool inQuotes = false;
+
+        for (int i = 0; i < csvContent.Length; i++)
+        {
+            char c = csvContent[i];
+
             if (c == '"')
             {
-                inQuotes = !inQuotes;
+                if (inQuotes && i + 1 < csvContent.Length && csvContent[i + 1] == '"')
+                {
+                    currentField.Append('"');
+                    i++; // skip escaped quote
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
             }
             else if (c == ',' && !inQuotes)
             {
-                result.Add(current.ToString().Trim());
-                current.Clear();
+                currentRecord.Add(currentField.ToString());
+                currentField.Clear();
+            }
+            else if ((c == '\r' || c == '\n') && !inQuotes)
+            {
+                if (c == '\r' && i + 1 < csvContent.Length && csvContent[i + 1] == '\n')
+                {
+                    i++;
+                }
+
+                currentRecord.Add(currentField.ToString());
+                currentField.Clear();
+
+                if (currentRecord.Any(f => !string.IsNullOrWhiteSpace(f)))
+                {
+                    records.Add(currentRecord);
+                }
+                currentRecord = new List<string>();
             }
             else
             {
-                current.Append(c);
+                currentField.Append(c);
             }
         }
-        result.Add(current.ToString().Trim());
-        return [.. result];
+
+        if (currentField.Length > 0 || currentRecord.Count > 0)
+        {
+            currentRecord.Add(currentField.ToString());
+            if (currentRecord.Any(f => !string.IsNullOrWhiteSpace(f)))
+            {
+                records.Add(currentRecord);
+            }
+        }
+
+        return records;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

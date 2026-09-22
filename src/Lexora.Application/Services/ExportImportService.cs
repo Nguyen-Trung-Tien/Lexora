@@ -34,28 +34,35 @@ public class ExportImportService : IExportImportService
         var words = await _vocabRepo.SearchAsync(take: 100000, cancellationToken: cancellationToken);
 
         progress?.Report(new ProgressReport(50, words.Count, words.Count, "Đang định dạng cấu trúc JSON...", "Serializing models..."));
-        var exportData = words.Select(w => new WordExportModel
+        var exportData = words.Select(w =>
         {
-            Term = w.Term,
-            PhoneticUk = w.PhoneticUk,
-            PhoneticUs = w.PhoneticUs,
-            Level = w.Level,
-            PrimaryPartOfSpeech = w.PrimaryPartOfSpeech,
-            Notes = w.Notes,
-            Meanings = w.Meanings.OrderBy(m => m.OrderIndex).Select(m => new MeaningExportModel
+            var distinctPos = w.Meanings.Select(m => m.PartOfSpeech).Distinct().ToList();
+            if (distinctPos.Count == 0) distinctPos.Add(w.PrimaryPartOfSpeech);
+
+            return new WordExportModel
             {
-                PartOfSpeech = m.PartOfSpeech,
-                DefinitionVi = m.DefinitionVi,
-                DefinitionEn = m.DefinitionEn,
-                Explanation = m.Explanation,
-                Examples = m.Examples.Select(e => new ExampleExportModel
+                Term = w.Term,
+                PhoneticUk = w.PhoneticUk,
+                PhoneticUs = w.PhoneticUs,
+                Level = w.Level,
+                PrimaryPartOfSpeech = w.PrimaryPartOfSpeech,
+                AllPartsOfSpeech = distinctPos,
+                Notes = w.Notes,
+                Meanings = w.Meanings.OrderBy(m => m.OrderIndex).Select(m => new MeaningExportModel
                 {
-                    SentenceEn = e.SentenceEn,
-                    SentenceVi = e.SentenceVi
-                }).ToList()
-            }).ToList(),
-            Topics = w.WordTopics.Select(wt => wt.Topic.Name).ToList(),
-            ExamTags = w.WordExamTags.Select(wet => wet.ExamTag.Name).ToList()
+                    PartOfSpeech = m.PartOfSpeech,
+                    DefinitionVi = m.DefinitionVi,
+                    DefinitionEn = m.DefinitionEn,
+                    Explanation = m.Explanation,
+                    Examples = m.Examples.Select(e => new ExampleExportModel
+                    {
+                        SentenceEn = e.SentenceEn,
+                        SentenceVi = e.SentenceVi
+                    }).ToList()
+                }).ToList(),
+                Topics = w.WordTopics.Select(wt => wt.Topic.Name).ToList(),
+                ExamTags = w.WordExamTags.Select(wet => wet.ExamTag.Name).ToList()
+            };
         }).ToList();
 
         progress?.Report(new ProgressReport(85, words.Count, words.Count, "Đang tạo dữ liệu xuất...", "Writing JSON buffer..."));
@@ -84,7 +91,25 @@ public class ExportImportService : IExportImportService
                 progress?.Report(new ProgressReport(pct, current, total, $"Đang định dạng CSV ({current}/{total})...", w.Term));
             }
 
-            var meaningsJoined = string.Join(" | ", w.Meanings.Select(m => $"[{m.PartOfSpeech}] {m.DefinitionVi}"));
+            var distinctPos = w.Meanings.Select(m => m.PartOfSpeech).Distinct().ToList();
+            var posDisplay = distinctPos.Count > 1
+                ? string.Join("; ", distinctPos.Select(p => p.ToString()))
+                : w.PrimaryPartOfSpeech.ToString();
+
+            var meaningsJoined = string.Join(" | ", w.Meanings.Select(m =>
+            {
+                var text = $"[{m.PartOfSpeech}] {m.DefinitionVi}";
+                if (!string.IsNullOrWhiteSpace(m.DefinitionEn))
+                {
+                    text += $" = {m.DefinitionEn}";
+                }
+                if (!string.IsNullOrWhiteSpace(m.Explanation))
+                {
+                    text += $" ({m.Explanation})";
+                }
+                return text;
+            }));
+
             var examplesJoined = string.Join(" | ", w.Meanings.SelectMany(m => m.Examples).Select(e => $"{e.SentenceEn} => {e.SentenceVi}"));
             var topicsJoined = string.Join(";", w.WordTopics.Select(wt => wt.Topic.Name));
             var examTagsJoined = string.Join(";", w.WordExamTags.Select(wet => wet.ExamTag.Name));
@@ -92,7 +117,7 @@ public class ExportImportService : IExportImportService
             sb.AppendLine(string.Join(",",
                 EscapeCsv(w.Term),
                 w.Level.ToString(),
-                w.PrimaryPartOfSpeech.ToString(),
+                posDisplay,
                 EscapeCsv(w.PhoneticUk ?? ""),
                 EscapeCsv(w.PhoneticUs ?? ""),
                 EscapeCsv(meaningsJoined),
@@ -132,13 +157,17 @@ public class ExportImportService : IExportImportService
             }
 
             var primaryDef = w.Meanings.OrderBy(m => m.OrderIndex).FirstOrDefault()?.DefinitionVi ?? w.Term;
-            var pos = w.PrimaryPartOfSpeech.ToString();
+            var distinctPos = w.Meanings.Select(m => m.PartOfSpeech).Distinct().ToList();
+            var posDisplay = distinctPos.Count > 1
+                ? string.Join(" / ", distinctPos.Select(p => p.ToString()))
+                : w.PrimaryPartOfSpeech.ToString();
+
             var level = w.Level.ToString();
             var uk = w.PhoneticUk ?? "";
             var us = w.PhoneticUs ?? "";
             var examples = string.Join(" | ", w.Meanings.SelectMany(m => m.Examples).Select(e => $"{e.SentenceEn} => {e.SentenceVi}"));
 
-            sb.AppendLine($"{w.Term}\t{primaryDef}\t{pos}\t{level}\t{uk}\t{us}\t{examples}");
+            sb.AppendLine($"{w.Term}\t{primaryDef}\t{posDisplay}\t{level}\t{uk}\t{us}\t{examples}");
         }
 
         progress?.Report(new ProgressReport(100, total, total, "Xuất TXT hoàn tất!", "Done."));
@@ -215,6 +244,10 @@ public class ExportImportService : IExportImportService
                     continue;
                 }
 
+                var primaryPos = item.PrimaryPartOfSpeech != 0
+                    ? item.PrimaryPartOfSpeech
+                    : (item.Meanings.FirstOrDefault(m => m.PartOfSpeech != 0)?.PartOfSpeech ?? PartOfSpeech.Noun);
+
                 var word = new Word
                 {
                     Term = item.Term.Trim(),
@@ -222,17 +255,18 @@ public class ExportImportService : IExportImportService
                     PhoneticUk = item.PhoneticUk,
                     PhoneticUs = item.PhoneticUs,
                     Level = item.Level,
-                    PrimaryPartOfSpeech = item.PrimaryPartOfSpeech,
+                    PrimaryPartOfSpeech = primaryPos,
                     Notes = item.Notes
                 };
 
                 int idx = 0;
                 foreach (var m in item.Meanings)
                 {
+                    var meaningPos = m.PartOfSpeech != 0 ? m.PartOfSpeech : primaryPos;
                     var meaning = new WordMeaning
                     {
                         WordId = word.Id,
-                        PartOfSpeech = m.PartOfSpeech,
+                        PartOfSpeech = meaningPos,
                         DefinitionVi = m.DefinitionVi,
                         DefinitionEn = m.DefinitionEn,
                         Explanation = m.Explanation,
@@ -376,17 +410,16 @@ public class ExportImportService : IExportImportService
 
                 // Parse Level
                 CefrLevel level = CefrLevel.None;
-                if (columns.Count > 1 && Enum.TryParse<CefrLevel>(columns[1].Trim(), true, out var parsedLevel))
+                if (columns.Count > 1)
                 {
-                    level = parsedLevel;
+                    level = ParseCefrLevel(columns[1].Trim(), CefrLevel.None);
                 }
 
                 // Parse POS
-                PartOfSpeech pos = PartOfSpeech.Noun;
-                if (columns.Count > 2 && Enum.TryParse<PartOfSpeech>(columns[2].Trim(), true, out var parsedPos))
-                {
-                    pos = parsedPos;
-                }
+                var posList = columns.Count > 2
+                    ? ParseMultiplePartsOfSpeech(columns[2].Trim(), PartOfSpeech.Noun)
+                    : new List<PartOfSpeech> { PartOfSpeech.Noun };
+                var primaryPos = posList.Count > 0 ? posList[0] : PartOfSpeech.Noun;
 
                 string? phoneticUk = columns.Count > 3 && !string.IsNullOrWhiteSpace(columns[3]) ? columns[3].Trim() : null;
                 string? phoneticUs = columns.Count > 4 && !string.IsNullOrWhiteSpace(columns[4]) ? columns[4].Trim() : null;
@@ -401,14 +434,14 @@ public class ExportImportService : IExportImportService
                     Term = term,
                     NormalizedTerm = normalized,
                     Level = level,
-                    PrimaryPartOfSpeech = pos,
+                    PrimaryPartOfSpeech = primaryPos,
                     PhoneticUk = phoneticUk,
                     PhoneticUs = phoneticUs,
                     Notes = notes
                 };
 
-                // Parse meanings: e.g. "[Verb] hợp tác | [Noun] sự hợp tác"
-                var meaningTokens = meaningsVi.Split(new[] { " | " }, StringSplitOptions.RemoveEmptyEntries);
+                // Parse meanings: e.g. "[Verb] hợp tác = collaborate (note) | [Noun] sự hợp tác"
+                var meaningTokens = meaningsVi.Split(new[] { " | ", " // ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 if (meaningTokens.Length == 0)
                 {
                     meaningTokens = new[] { meaningsVi };
@@ -417,7 +450,7 @@ public class ExportImportService : IExportImportService
                 int idx = 0;
                 foreach (var mToken in meaningTokens)
                 {
-                    var meaningPos = pos;
+                    var meaningPos = idx < posList.Count ? posList[idx] : primaryPos;
                     var defVi = mToken.Trim();
 
                     // Check for [PartOfSpeech] prefix
@@ -425,11 +458,32 @@ public class ExportImportService : IExportImportService
                     {
                         var closeIdx = defVi.IndexOf(']');
                         var posStr = defVi.Substring(1, closeIdx - 1);
-                        if (Enum.TryParse<PartOfSpeech>(posStr, true, out var extractedPos))
-                        {
-                            meaningPos = extractedPos;
-                        }
+                        meaningPos = ParsePartOfSpeech(posStr, meaningPos);
                         defVi = defVi.Substring(closeIdx + 1).Trim();
+                    }
+
+                    // Check for optional " = DefinitionEn"
+                    string? defEn = null;
+                    var equalsIdx = defVi.IndexOf(" = ", StringComparison.Ordinal);
+                    if (equalsIdx > 0)
+                    {
+                        defEn = defVi.Substring(equalsIdx + 3).Trim();
+                        defVi = defVi.Substring(0, equalsIdx).Trim();
+                    }
+
+                    // Check for optional "(Explanation)" at end
+                    string? explanation = null;
+                    if (defEn != null && defEn.EndsWith(')') && defEn.Contains('('))
+                    {
+                        var openIdx = defEn.LastIndexOf('(');
+                        explanation = defEn.Substring(openIdx + 1, defEn.Length - openIdx - 2).Trim();
+                        defEn = defEn.Substring(0, openIdx).Trim();
+                    }
+                    else if (defVi.EndsWith(')') && defVi.Contains('('))
+                    {
+                        var openIdx = defVi.LastIndexOf('(');
+                        explanation = defVi.Substring(openIdx + 1, defVi.Length - openIdx - 2).Trim();
+                        defVi = defVi.Substring(0, openIdx).Trim();
                     }
 
                     var wordMeaning = new WordMeaning
@@ -437,6 +491,8 @@ public class ExportImportService : IExportImportService
                         WordId = word.Id,
                         PartOfSpeech = meaningPos,
                         DefinitionVi = string.IsNullOrWhiteSpace(defVi) ? term : defVi,
+                        DefinitionEn = defEn,
+                        Explanation = explanation,
                         OrderIndex = idx++
                     };
 
@@ -653,18 +709,10 @@ public class ExportImportService : IExportImportService
                 }
 
                 // Parse Part of Speech
-                var pos = PartOfSpeech.Noun;
-                if (!string.IsNullOrWhiteSpace(posStr) && Enum.TryParse<PartOfSpeech>(posStr, true, out var parsedPos))
-                {
-                    pos = parsedPos;
-                }
+                var pos = ParsePartOfSpeech(posStr, PartOfSpeech.Noun);
 
                 // Parse CEFR Level
-                var level = CefrLevel.None;
-                if (!string.IsNullOrWhiteSpace(levelStr) && Enum.TryParse<CefrLevel>(levelStr, true, out var parsedLevel))
-                {
-                    level = parsedLevel;
-                }
+                var level = ParseCefrLevel(levelStr, CefrLevel.None);
 
                 var word = new Word
                 {
@@ -731,6 +779,75 @@ public class ExportImportService : IExportImportService
         }
 
         return new ImportResult(imported, skipped, errors);
+    }
+
+    public static PartOfSpeech ParsePartOfSpeech(string? input, PartOfSpeech defaultPos = PartOfSpeech.Noun)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return defaultPos;
+
+        var clean = input.Trim().ToLowerInvariant().TrimEnd('.', ',');
+
+        if (Enum.TryParse<PartOfSpeech>(clean, ignoreCase: true, out var exact))
+            return exact;
+
+        return clean switch
+        {
+            "n" or "noun" or "danh từ" or "danh tu" => PartOfSpeech.Noun,
+            "v" or "verb" or "động từ" or "dong tu" => PartOfSpeech.Verb,
+            "adj" or "a" or "adjective" or "tính từ" or "tinh tu" => PartOfSpeech.Adjective,
+            "adv" or "adverb" or "trạng từ" or "phó từ" or "trang tu" or "pho tu" => PartOfSpeech.Adverb,
+            "prep" or "preposition" or "giới từ" or "gioi tu" => PartOfSpeech.Preposition,
+            "conj" or "conjunction" or "liên từ" or "lien tu" => PartOfSpeech.Conjunction,
+            "pron" or "pronoun" or "đại từ" or "dai tu" => PartOfSpeech.Noun,
+            "int" or "interj" or "interjection" or "thán từ" or "than tu" => PartOfSpeech.Interjection,
+            "idm" or "idiom" or "thành ngữ" or "thanh ngu" => PartOfSpeech.Idiom,
+            "phrv" or "phr v" or "phrasal verb" or "phrasal_verb" or "cụm động từ" or "cum dong tu" => PartOfSpeech.PhrasalVerb,
+            "np" or "noun phrase" or "noun_phrase" or "cụm danh từ" or "cum danh tu" => PartOfSpeech.NounPhrase,
+            _ => defaultPos
+        };
+    }
+
+    public static List<PartOfSpeech> ParseMultiplePartsOfSpeech(string? input, PartOfSpeech fallback = PartOfSpeech.Noun)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return [fallback];
+
+        var tokens = input.Split(new[] { ';', ',', '/', '&', '|' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var result = new List<PartOfSpeech>();
+        var seen = new HashSet<PartOfSpeech>();
+
+        foreach (var token in tokens)
+        {
+            var parsed = ParsePartOfSpeech(token, fallback);
+            if (seen.Add(parsed))
+            {
+                result.Add(parsed);
+            }
+        }
+
+        return result.Count > 0 ? result : [fallback];
+    }
+
+    public static CefrLevel ParseCefrLevel(string? input, CefrLevel defaultLevel = CefrLevel.None)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return defaultLevel;
+
+        var clean = input.Trim().ToLowerInvariant();
+        if (Enum.TryParse<CefrLevel>(clean, ignoreCase: true, out var exact))
+            return exact;
+
+        return clean switch
+        {
+            "a1" or "beginner" => CefrLevel.A1,
+            "a2" or "elementary" => CefrLevel.A2,
+            "b1" or "intermediate" => CefrLevel.B1,
+            "b2" or "upper intermediate" or "upper-intermediate" or "upperintermediate" => CefrLevel.B2,
+            "c1" or "advanced" => CefrLevel.C1,
+            "c2" or "mastery" or "proficiency" => CefrLevel.C2,
+            _ => defaultLevel
+        };
     }
 
     private static readonly System.Buffers.SearchValues<char> CsvFormulaTriggers = System.Buffers.SearchValues.Create("=+-@\t\r");
@@ -819,6 +936,7 @@ public class ExportImportService : IExportImportService
         public string? PhoneticUs { get; set; }
         public CefrLevel Level { get; set; }
         public PartOfSpeech PrimaryPartOfSpeech { get; set; }
+        public List<PartOfSpeech> AllPartsOfSpeech { get; set; } = new();
         public string? Notes { get; set; }
         public List<MeaningExportModel> Meanings { get; set; } = new();
         public List<string> Topics { get; set; } = new();

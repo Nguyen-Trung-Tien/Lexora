@@ -216,6 +216,37 @@ public sealed partial class SettingsPage : Page
 
     private async void BackupButton_Click(object sender, RoutedEventArgs e)
     {
+        string? targetFilePath = null;
+        try
+        {
+            var savePicker = new FileSavePicker();
+            savePicker.SuggestedStartLocation = PickerLocationId.Desktop;
+            savePicker.FileTypeChoices.Add("SQLite Database Backup (*.db)", new List<string> { ".db" });
+            savePicker.SuggestedFileName = $"lexora_backup_{DateTime.Now:yyyyMMdd_HHmmss}.db";
+
+            var mainWindow = App.Current.MainWindow;
+            if (mainWindow != null)
+            {
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(mainWindow);
+                WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
+            }
+
+            var file = await savePicker.PickSaveFileAsync();
+            if (file != null)
+            {
+                targetFilePath = file.Path;
+            }
+            else
+            {
+                // User explicitly cancelled save dialog
+                return;
+            }
+        }
+        catch
+        {
+            // Picker fallback: targetFilePath remains null -> ViewModel defaults to Desktop / AppData
+        }
+
         var backupTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
         var progressDialog = new OperationProgressDialog
         {
@@ -228,18 +259,28 @@ public sealed partial class SettingsPage : Page
 
         try
         {
-            await Task.Delay(250);
+            await Task.Delay(200);
             progressDialog.SetDeterminate(40, Loc.GetString("Progress_BackupCopying"), Loc.GetString("Progress_PleaseWait"));
-            
-            await ViewModel.CreateBackupAsync();
-            
+
+            var backupPath = await ViewModel.CreateBackupAsync(targetFilePath);
+
             progressDialog.SetDeterminate(85, Loc.GetString("Progress_BackupVerifying"), Loc.GetString("Progress_PleaseWait"));
             await Task.Delay(200);
 
-            progressDialog.SetCompleted(
-                Loc.GetString("Progress_CompletedTitle"),
-                ViewModel.BackupStatusMessage,
-                closeButtonText: Loc.GetString("Action_Close"));
+            if (!string.IsNullOrEmpty(backupPath))
+            {
+                progressDialog.SetCompleted(
+                    Loc.GetString("Progress_CompletedTitle"),
+                    ViewModel.BackupStatusMessage,
+                    closeButtonText: Loc.GetString("Action_Close"));
+            }
+            else
+            {
+                progressDialog.SetError(
+                    Loc.GetString("Settings_BackupFailed"),
+                    ViewModel.BackupStatusMessage,
+                    Loc.GetString("Action_Close"));
+            }
         }
         catch (Exception ex)
         {

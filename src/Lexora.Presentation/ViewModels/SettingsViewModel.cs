@@ -185,18 +185,33 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task CreateBackupAsync()
+    public async Task<string?> CreateBackupAsync(string? targetFilePath = null)
     {
         try
         {
-            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            var backupPath = await _backupService.CreateBackupAsync(desktop);
+            string backupPath;
+            if (!string.IsNullOrWhiteSpace(targetFilePath))
+            {
+                backupPath = await _backupService.CreateBackupToFileAsync(targetFilePath);
+            }
+            else
+            {
+                var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                if (string.IsNullOrWhiteSpace(desktop) || !Directory.Exists(desktop))
+                {
+                    desktop = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Lexora", "backups");
+                }
+                backupPath = await _backupService.CreateBackupAsync(desktop);
+            }
+
             BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupSuccess"), backupPath);
             await LoadDatabaseStatsAsync();
+            return backupPath;
         }
         catch (Exception ex)
         {
             BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupFailed"), ex.Message);
+            return null;
         }
     }
 

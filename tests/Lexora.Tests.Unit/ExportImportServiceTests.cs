@@ -192,4 +192,104 @@ public class ExportImportServiceTests
         // Malicious formula trigger MUST be neutralized with leading single quote
         csv.Should().Contain($"\"'{maliciousInput}\"");
     }
+
+    [Fact]
+    public async Task ExportToJsonAsync_WhenWordHasMultiplePartsOfSpeech_ShouldExportAllPartsOfSpeech()
+    {
+        // Arrange
+        var multiPosWord = new Word
+        {
+            Term = "run",
+            NormalizedTerm = "run",
+            Level = CefrLevel.A1,
+            PrimaryPartOfSpeech = PartOfSpeech.Verb,
+            Meanings = new List<WordMeaning>
+            {
+                new WordMeaning
+                {
+                    PartOfSpeech = PartOfSpeech.Verb,
+                    DefinitionVi = "chạy",
+                    OrderIndex = 0
+                },
+                new WordMeaning
+                {
+                    PartOfSpeech = PartOfSpeech.Noun,
+                    DefinitionVi = "chuyến chạy, quãng đường",
+                    OrderIndex = 1
+                }
+            }
+        };
+
+        _vocabRepoMock.Setup(r => r.SearchAsync(
+            null, null, null, null, null, null, 0, 100000, null, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Word> { multiPosWord });
+
+        // Act
+        var json = await _service.ExportToJsonAsync();
+
+        // Assert
+        json.Should().Contain("run");
+        json.Should().Contain("Verb");
+        json.Should().Contain("Noun");
+        json.Should().Contain("allPartsOfSpeech");
+    }
+
+    [Fact]
+    public async Task ImportFromCsvAsync_WithMultiPosAndAbbreviations_ShouldParseCorrectly()
+    {
+        // Arrange
+        var csv = """
+        Term,Level,PartOfSpeech,PhoneticUk,PhoneticUs,MeaningsVi,Examples,Topics,ExamTags,Notes
+        "collaborate","upper intermediate","v, n","/kəˈlæb.ə.reɪt/","","[Verb] hợp tác = collaborate (trong dự án) | [Noun] sự hợp tác","We collaborate. => Chúng tôi hợp tác.","Business","TOEIC",""
+        """;
+
+        _vocabRepoMock.Setup(r => r.GetByTermAsync("collaborate", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word?)null);
+
+        Word? addedWord = null;
+        _vocabRepoMock.Setup(r => r.AddAsync(It.IsAny<Word>(), It.IsAny<CancellationToken>()))
+            .Callback<Word, CancellationToken>((w, ct) => addedWord = w)
+            .ReturnsAsync((Word w, CancellationToken ct) => w);
+
+        // Act
+        var result = await _service.ImportFromCsvAsync(csv);
+
+        // Assert
+        result.TotalImported.Should().Be(1);
+        addedWord.Should().NotBeNull();
+        addedWord!.Term.Should().Be("collaborate");
+        addedWord.Level.Should().Be(CefrLevel.B2); // "upper intermediate" -> B2
+        addedWord.PrimaryPartOfSpeech.Should().Be(PartOfSpeech.Verb);
+        addedWord.Meanings.Should().HaveCount(2);
+
+        // Meaning 1: Verb with English definition and explanation
+        var m1 = addedWord.Meanings.ElementAt(0);
+        m1.PartOfSpeech.Should().Be(PartOfSpeech.Verb);
+        m1.DefinitionVi.Should().Be("hợp tác");
+        m1.DefinitionEn.Should().Be("collaborate");
+        m1.Explanation.Should().Be("trong dự án");
+
+        // Meaning 2: Noun
+        var m2 = addedWord.Meanings.ElementAt(1);
+        m2.PartOfSpeech.Should().Be(PartOfSpeech.Noun);
+        m2.DefinitionVi.Should().Be("sự hợp tác");
+    }
+
+    [Theory]
+    [InlineData("n", PartOfSpeech.Noun)]
+    [InlineData("v", PartOfSpeech.Verb)]
+    [InlineData("adj", PartOfSpeech.Adjective)]
+    [InlineData("adv", PartOfSpeech.Adverb)]
+    [InlineData("prep", PartOfSpeech.Preposition)]
+    [InlineData("conj", PartOfSpeech.Conjunction)]
+    [InlineData("idiom", PartOfSpeech.Idiom)]
+    [InlineData("phrasal verb", PartOfSpeech.PhrasalVerb)]
+    [InlineData("noun phrase", PartOfSpeech.NounPhrase)]
+    [InlineData("thành ngữ", PartOfSpeech.Idiom)]
+    [InlineData("cụm động từ", PartOfSpeech.PhrasalVerb)]
+    public void ParsePartOfSpeech_ShouldRecognizeStandardAbbreviationsAndTerms(string input, PartOfSpeech expected)
+    {
+        var result = ExportImportService.ParsePartOfSpeech(input);
+        result.Should().Be(expected);
+    }
 }
