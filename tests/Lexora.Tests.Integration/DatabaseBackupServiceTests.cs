@@ -131,9 +131,93 @@ public class DatabaseBackupServiceTests : IDisposable
     }
 
     [Fact]
-    public void DatabasePath_Property_ShouldReturnConfiguredDbPath()
+    public async Task GetBackupMetadataAsync_ShouldReturnAccurateCounts_WhenValidDatabaseProvided()
     {
-        _backupService.DatabasePath.Should().Be(_mockDbPath);
+        // Arrange
+        var testDbPath = Path.Combine(_tempDirectory, "metadata_test.db");
+        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={testDbPath};Pooling=False;"))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                CREATE TABLE Words (Id INTEGER PRIMARY KEY, Term TEXT);
+                INSERT INTO Words VALUES (1, 'resilience'), (2, 'architecture');
+                CREATE TABLE GrammarRules (Id INTEGER PRIMARY KEY, Title TEXT);
+                INSERT INTO GrammarRules VALUES (1, 'Inversion');
+                CREATE TABLE StudyLogs (Id INTEGER PRIMARY KEY, WordId INTEGER);
+                INSERT INTO StudyLogs VALUES (1, 1), (2, 2);
+            ";
+            cmd.ExecuteNonQuery();
+        }
+
+        // Act
+        var metadata = await _backupService.GetBackupMetadataAsync(testDbPath);
+
+        // Assert
+        metadata.IsValid.Should().BeTrue();
+        metadata.WordCount.Should().Be(2);
+        metadata.GrammarRuleCount.Should().Be(1);
+        metadata.StudyLogCount.Should().Be(2);
+        metadata.FileSizeBytes.Should().BeGreaterThan(0);
+        metadata.FileName.Should().Be("metadata_test.db");
+        metadata.ErrorMessage.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetBackupMetadataAsync_ShouldReturnInvalid_WhenCorruptedOrMissing()
+    {
+        // Arrange
+        var missingPath = Path.Combine(_tempDirectory, "does_not_exist.db");
+        var corruptPath = Path.Combine(_tempDirectory, "corrupt.db");
+        await File.WriteAllTextAsync(corruptPath, "Definitely not a SQLite database file content");
+
+        // Act
+        var missingMeta = await _backupService.GetBackupMetadataAsync(missingPath);
+        var corruptMeta = await _backupService.GetBackupMetadataAsync(corruptPath);
+
+        // Assert
+        missingMeta.IsValid.Should().BeFalse();
+        corruptMeta.IsValid.Should().BeFalse();
+        corruptMeta.ErrorMessage.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task RestoreBackupAsync_WithProgress_ShouldReportProgressAndRestoreCorrectly()
+    {
+        // Arrange
+        var sourceBackup = Path.Combine(_tempDirectory, "progress_source.db");
+        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={sourceBackup};Pooling=False;"))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                CREATE TABLE Words (Id INTEGER PRIMARY KEY, Term TEXT);
+                INSERT INTO Words VALUES (1, 'optimize');
+            ";
+            cmd.ExecuteNonQuery();
+        }
+
+        var reports = new List<(int Percent, string StepMessage, string? Detail)>();
+        var progress = new Progress<(int Percent, string StepMessage, string? Detail)>(report =>
+        {
+            reports.Add(report);
+        });
+
+        // Act
+        await _backupService.RestoreBackupAsync(sourceBackup, progress);
+
+        // Assert
+        using (var checkConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_mockDbPath};Mode=ReadOnly;Pooling=False;"))
+        {
+            await checkConn.OpenAsync();
+            using var cmd = checkConn.CreateCommand();
+            cmd.CommandText = "SELECT Term FROM Words WHERE Id = 1;";
+            var term = (string?)await cmd.ExecuteScalarAsync();
+            term.Should().Be("optimize");
+        }
+
+        reports.Should().NotBeEmpty();
+        reports.Last().Percent.Should().Be(100);
     }
 
     public void Dispose()

@@ -215,11 +215,18 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
-    public async Task<bool> RestoreBackupAsync(string backupFilePath)
+    public async Task<BackupMetadata> GetBackupMetadataAsync(string backupFilePath)
+    {
+        return await _backupService.GetBackupMetadataAsync(backupFilePath);
+    }
+
+    public async Task<bool> RestoreBackupAsync(
+        string backupFilePath,
+        IProgress<(int Percent, string StepMessage, string? Detail)>? progress = null)
     {
         try
         {
-            await _backupService.RestoreBackupAsync(backupFilePath);
+            await _backupService.RestoreBackupAsync(backupFilePath, progress);
             BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreSuccessStatus"), Path.GetFileName(backupFilePath));
             await LoadDatabaseStatsAsync();
             return true;

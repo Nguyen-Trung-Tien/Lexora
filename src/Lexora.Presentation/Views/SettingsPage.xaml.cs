@@ -299,6 +299,8 @@ public sealed partial class SettingsPage : Page
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".db");
+            picker.FileTypeFilter.Add(".sqlite");
+            picker.FileTypeFilter.Add(".sqlite3");
 
             var mainWindow = App.Current.MainWindow;
             if (mainWindow != null)
@@ -348,17 +350,104 @@ public sealed partial class SettingsPage : Page
 
         if (!string.IsNullOrEmpty(selectedFilePath) && File.Exists(selectedFilePath))
         {
+            // 1. Inspect backup file metadata and structural integrity
+            var metadata = await ViewModel.GetBackupMetadataAsync(selectedFilePath);
+
             await Task.Yield();
-            var confirmTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var currentTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+
+            if (!metadata.IsValid)
+            {
+                var errorDialog = new ContentDialog
+                {
+                    Title = Loc.GetString("Settings_BackupFailed"),
+                    Content = string.Format(Loc.GetString("Settings_DlgRestoreInvalidFile"), metadata.ErrorMessage),
+                    CloseButtonText = Loc.GetString("Action_Close"),
+                    XamlRoot = this.XamlRoot,
+                    RequestedTheme = currentTheme
+                };
+                await errorDialog.ShowAsync();
+                return;
+            }
+
+            // 2. Build high-fidelity Fluent 2 preview confirmation layout
+            var previewXaml = $@"
+<StackPanel xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
+            Spacing=""14"" MaxWidth=""460"">
+    <Border Background=""{{ThemeResource SubtleFillColorSecondaryBrush}}""
+            BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
+            BorderThickness=""1"" CornerRadius=""10"" Padding=""14,12"">
+        <Grid ColumnDefinitions=""Auto,*"" ColumnSpacing=""12"">
+            <Border Width=""38"" Height=""38"" CornerRadius=""8""
+                    Background=""{{ThemeResource LayerFillColorDefaultBrush}}""
+                    BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
+                    BorderThickness=""1"">
+                <FontIcon Glyph=""&#xE896;"" FontSize=""18"" Foreground=""{{ThemeResource AccentTextFillColorPrimaryBrush}}""
+                          HorizontalAlignment=""Center"" VerticalAlignment=""Center""/>
+            </Border>
+            <StackPanel Grid.Column=""1"" Spacing=""2"" VerticalAlignment=""Center"">
+                <TextBlock Text=""{System.Security.SecurityElement.Escape(metadata.FileName)}"" FontWeight=""SemiBold"" FontSize=""14""
+                           TextTrimming=""CharacterEllipsis"" Foreground=""{{ThemeResource TextFillColorPrimaryBrush}}""/>
+                <TextBlock Text=""{System.Security.SecurityElement.Escape(metadata.FileSizeFormatted)} • {metadata.LastModified:g}""
+                           FontSize=""12"" Foreground=""{{ThemeResource TextFillColorSecondaryBrush}}""/>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+    <Grid ColumnDefinitions=""*,*"" ColumnSpacing=""10"">
+        <Border Background=""{{ThemeResource SubtleFillColorSecondaryBrush}}""
+                BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
+                BorderThickness=""1"" CornerRadius=""10"" Padding=""12,10"">
+            <StackPanel Spacing=""2"">
+                <TextBlock Text=""{System.Security.SecurityElement.Escape(Loc.GetString("Settings_DlgRestoreCurrentStats"))}""
+                           FontSize=""11"" Foreground=""{{ThemeResource TextFillColorSecondaryBrush}}""/>
+                <TextBlock Text=""{ViewModel.TotalWordsCount} {System.Security.SecurityElement.Escape(Loc.GetString("Vocab_NavTab").ToLower())} • {ViewModel.TotalGrammarCount} {System.Security.SecurityElement.Escape(Loc.GetString("Grammar_NavTab").ToLower())}""
+                           FontSize=""13"" FontWeight=""Bold"" Foreground=""{{ThemeResource TextFillColorPrimaryBrush}}""/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column=""1"" Background=""{{ThemeResource SubtleFillColorSecondaryBrush}}""
+                BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
+                BorderThickness=""1"" CornerRadius=""10"" Padding=""12,10"">
+            <StackPanel Spacing=""2"">
+                <TextBlock Text=""{System.Security.SecurityElement.Escape(Loc.GetString("Settings_DlgRestoreBackupStats"))}""
+                           FontSize=""11"" Foreground=""{{ThemeResource AccentTextFillColorPrimaryBrush}}""/>
+                <TextBlock Text=""{metadata.WordCount} {System.Security.SecurityElement.Escape(Loc.GetString("Vocab_NavTab").ToLower())} • {metadata.GrammarRuleCount} {System.Security.SecurityElement.Escape(Loc.GetString("Grammar_NavTab").ToLower())}""
+                           FontSize=""13"" FontWeight=""Bold"" Foreground=""{{ThemeResource AccentTextFillColorPrimaryBrush}}""/>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+    <Border Background=""{{ThemeResource SubtleFillColorSecondaryBrush}}""
+            BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
+            BorderThickness=""1"" CornerRadius=""10"" Padding=""12,10"">
+        <TextBlock Text=""{System.Security.SecurityElement.Escape(string.Format(Loc.GetString("Settings_DlgRestoreStatsFormat"), metadata.WordCount, metadata.GrammarRuleCount, metadata.StudyLogCount))}""
+                   FontSize=""12"" Foreground=""{{ThemeResource TextFillColorSecondaryBrush}}"" TextWrapping=""Wrap""/>
+    </Border>
+
+    <Border Background=""{{ThemeResource SystemFillColorCautionBackgroundBrush}}""
+            BorderBrush=""{{ThemeResource SystemFillColorCautionBrush}}""
+            BorderThickness=""1"" CornerRadius=""10"" Padding=""12,10"">
+        <StackPanel Spacing=""4"">
+            <TextBlock Text=""{System.Security.SecurityElement.Escape(Loc.GetString("Settings_DlgRestoreConfirmTitle"))}""
+                       FontWeight=""SemiBold"" FontSize=""12"" Foreground=""{{ThemeResource TextFillColorPrimaryBrush}}""/>
+            <TextBlock Text=""{System.Security.SecurityElement.Escape(Loc.GetString("Settings_DlgRestoreWarningNote"))}""
+                       FontSize=""11"" Foreground=""{{ThemeResource TextFillColorSecondaryBrush}}"" TextWrapping=""Wrap""/>
+        </StackPanel>
+    </Border>
+</StackPanel>";
+
+            var previewContent = (UIElement)Microsoft.UI.Xaml.Markup.XamlReader.Load(previewXaml);
+
             var confirmDialog = new ContentDialog
             {
-                Title = Loc.GetString("Settings_DlgRestoreConfirmTitle"),
-                Content = string.Format(Loc.GetString("Settings_DlgRestoreConfirmMsg"), selectedFilePath),
+                Title = Loc.GetString("Settings_DlgRestorePreviewInfo"),
+                Content = previewContent,
                 PrimaryButtonText = Loc.GetString("Settings_DlgRestoreConfirmBtn"),
                 CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Close,
                 XamlRoot = this.XamlRoot,
-                RequestedTheme = confirmTheme
+                RequestedTheme = currentTheme
             };
 
             var result = await confirmDialog.ShowAsync();
@@ -373,20 +462,28 @@ public sealed partial class SettingsPage : Page
                     XamlRoot = this.XamlRoot,
                     RequestedTheme = restoreTheme
                 };
-                progressDialog.SetDeterminate(15, Loc.GetString("Progress_RestoreVerifying"), Loc.GetString("Progress_PleaseWait"));
+                progressDialog.SetDeterminate(10, Loc.GetString("Progress_RestoreVerifying"), metadata.FileName);
                 _ = progressDialog.ShowAsync();
+
+                var progressReporter = new Progress<(int Percent, string StepMessage, string? Detail)>(report =>
+                {
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        progressDialog.SetDeterminate(report.Percent, report.StepMessage, report.Detail);
+                    });
+                });
 
                 try
                 {
-                    await Task.Delay(250);
-                    progressDialog.SetDeterminate(60, Loc.GetString("Progress_RestoreApplying"), Loc.GetString("Progress_PleaseWait"));
-
-                    var restored = await ViewModel.RestoreBackupAsync(selectedFilePath);
+                    var restored = await ViewModel.RestoreBackupAsync(selectedFilePath, progressReporter);
                     if (restored)
                     {
                         progressDialog.SetCompleted(
                             Loc.GetString("Progress_CompletedTitle"),
                             Loc.GetString("Settings_DlgRestoreSuccessMsg"),
+                            imported: metadata.WordCount,
+                            skipped: 0,
+                            errors: 0,
                             closeButtonText: Loc.GetString("Action_Close"));
                     }
                     else
