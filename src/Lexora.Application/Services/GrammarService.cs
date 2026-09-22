@@ -129,6 +129,11 @@ public class GrammarService : IGrammarService
                 Note = ex.Note?.Trim()
             }).ToList();
 
+            foreach (var ex in newExamples)
+            {
+                rule.Examples.Add(ex);
+            }
+
             _grammarRepo.AddExamples(newExamples);
         }
 

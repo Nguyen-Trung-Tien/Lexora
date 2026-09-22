@@ -113,6 +113,8 @@ public sealed partial class WordEditorDialog : ContentDialog
     public WordCreateOrUpdateDto? ResultDto { get; private set; }
 
     private readonly Guid? _editingWordId;
+    private readonly string? _existingAudioUkPath;
+    private readonly string? _existingAudioUsPath;
     private readonly List<TopicDto> _allTopics;
     private readonly List<ExamTagDto> _allExamTags;
 
@@ -139,6 +141,8 @@ public sealed partial class WordEditorDialog : ContentDialog
         _allTopics = allTopics.ToList();
         _allExamTags = allExamTags.ToList();
         _editingWordId = existingWord?.Id;
+        _existingAudioUkPath = existingWord?.AudioUkPath;
+        _existingAudioUsPath = existingWord?.AudioUsPath;
 
         // Initialize POS Chips & Combos
         InitializePosChips();
@@ -188,6 +192,14 @@ public sealed partial class WordEditorDialog : ContentDialog
 
                 RefreshExampleIndices(editableMeaning);
                 Meanings.Add(editableMeaning);
+            }
+
+            if (Meanings.Count == 0)
+            {
+                var defaultMeaning = new EditableMeaning { PartOfSpeech = existingWord.PrimaryPartOfSpeech };
+                defaultMeaning.PartOfSpeechChanged += Meaning_PartOfSpeechChanged;
+                defaultMeaning.Examples.Add(new EditableExample());
+                Meanings.Add(defaultMeaning);
             }
 
             // Sync all POS from existing word
@@ -456,10 +468,17 @@ public sealed partial class WordEditorDialog : ContentDialog
                 ColorHex: "#0078D4"
             ));
 
+            var selectedTopicIds = TopicsListView.SelectedItems.OfType<TopicDto>().Select(t => t.Id).ToHashSet();
             _allTopics.Add(newTopic);
             TopicsListView.ItemsSource = null;
             TopicsListView.ItemsSource = _allTopics;
-            TopicsListView.SelectedItems.Add(newTopic);
+            foreach (var t in _allTopics)
+            {
+                if (selectedTopicIds.Contains(t.Id) || t.Id == newTopic.Id)
+                {
+                    TopicsListView.SelectedItems.Add(t);
+                }
+            }
             EmptyTopicsTextBlock.Visibility = Visibility.Collapsed;
 
             NewTopicNameTextBox.Text = string.Empty;
@@ -474,7 +493,6 @@ public sealed partial class WordEditorDialog : ContentDialog
     }
 
     private void WordEditorDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-
     {
         DialogInfoBar.IsOpen = false;
 
@@ -487,7 +505,8 @@ public sealed partial class WordEditorDialog : ContentDialog
             return;
         }
 
-        if (Meanings.Count == 0 || string.IsNullOrWhiteSpace(Meanings[0].DefinitionVi))
+        var validMeanings = Meanings.Where(m => !string.IsNullOrWhiteSpace(m.DefinitionVi)).ToList();
+        if (validMeanings.Count == 0)
         {
             DialogInfoBar.Message = Loc.GetString("WordEditor_ErrMeaningRequired");
             DialogInfoBar.IsOpen = true;
@@ -498,7 +517,7 @@ public sealed partial class WordEditorDialog : ContentDialog
         var pos = PosComboBox.SelectedItem is PartOfSpeech p ? p : (PosChips.FirstOrDefault(c => c.IsSelected)?.PartOfSpeech ?? PartOfSpeech.Noun);
         var level = LevelComboBox.SelectedItem is CefrLevel l ? l : CefrLevel.None;
 
-        var meaningDtos = Meanings.Select(m => new WordMeaningCreateDto(
+        var meaningDtos = validMeanings.Select(m => new WordMeaningCreateDto(
             m.PartOfSpeech,
             m.DefinitionVi.Trim(),
             string.IsNullOrWhiteSpace(m.DefinitionEn) ? null : m.DefinitionEn.Trim(),
@@ -510,22 +529,22 @@ public sealed partial class WordEditorDialog : ContentDialog
             )).ToList()
         )).ToList();
 
-        var selectedTopicIds = TopicsListView.SelectedItems.Cast<TopicDto>().Select(t => t.Id).ToList();
-        var selectedExamTagIds = ExamTagsListView.SelectedItems.Cast<ExamTagDto>().Select(et => et.Id).ToList();
+        var selectedTopics = TopicsListView.SelectedItems.OfType<TopicDto>().Select(t => t.Id).ToList();
+        var selectedExamTags = ExamTagsListView.SelectedItems.OfType<ExamTagDto>().Select(et => et.Id).ToList();
 
         ResultDto = new WordCreateOrUpdateDto(
             _editingWordId,
             term,
             string.IsNullOrWhiteSpace(IpaUkTextBox.Text) ? null : IpaUkTextBox.Text.Trim(),
             string.IsNullOrWhiteSpace(IpaUsTextBox.Text) ? null : IpaUsTextBox.Text.Trim(),
-            null,
-            null,
+            _existingAudioUkPath,
+            _existingAudioUsPath,
             level,
             pos,
             string.IsNullOrWhiteSpace(NotesTextBox.Text) ? null : NotesTextBox.Text.Trim(),
             meaningDtos,
-            selectedTopicIds,
-            selectedExamTagIds
+            selectedTopics,
+            selectedExamTags
         );
     }
 }

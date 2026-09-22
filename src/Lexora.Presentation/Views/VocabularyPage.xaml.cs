@@ -528,6 +528,7 @@ public sealed partial class VocabularyPage : Page
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] AddWord error: {ex.Message}");
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_AddWord"), ex.Message);
         }
     }
 
@@ -601,6 +602,7 @@ public sealed partial class VocabularyPage : Page
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] EditWord error: {ex.Message}");
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_EditWord"), ex.Message);
         }
     }
 
@@ -1316,6 +1318,31 @@ public sealed partial class VocabularyPage : Page
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] AddWordToUnit error: {ex.Message}");
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_AddWord"), ex.Message);
+        }
+    }
+
+    private async Task ShowErrorDialogAsync(string title, string message)
+    {
+        try
+        {
+            if (this.XamlRoot == null) return;
+            await Task.Yield();
+            var errTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
+                ? ElementTheme.Dark : ElementTheme.Light;
+            var dialog = new ContentDialog
+            {
+                Title = title,
+                Content = message,
+                CloseButtonText = Loc.GetString("Action_Close"),
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = errTheme
+            };
+            await dialog.ShowAsyncSafe();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] ShowErrorDialog error: {ex.Message}");
         }
     }
 }

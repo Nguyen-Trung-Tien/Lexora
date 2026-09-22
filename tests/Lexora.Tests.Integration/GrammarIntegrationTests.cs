@@ -111,6 +111,83 @@ public class GrammarIntegrationTests : IDisposable
         deleted.Should().BeNull();
     }
 
+    [Fact]
+    public async Task GrammarUpdate_ConsecutiveUpdates_ShouldRetainAndSyncExamples()
+    {
+        // 1. Create rule with 2 examples
+        var rule = await _grammarService.CreateRuleAsync(new GrammarRuleCreateOrUpdateDto(
+            Id: null,
+            Title: "First Conditional",
+            Structure: "If + present simple, ... will + infinitive",
+            ExplanationVi: "Câu điều kiện loại 1",
+            ExplanationEn: "Possible real condition in the future",
+            CommonMistakes: "Using 'will' in the if-clause",
+            Level: CefrLevel.A2,
+            ExamTarget: ExamType.Toeic,
+            Topic: "Conditionals",
+            Examples:
+            [
+                new("If it rains, we will stay at home.", "Nếu trời mưa, chúng tôi sẽ ở nhà.", null),
+                new("If you study hard, you will pass.", "Nếu bạn học chăm, bạn sẽ đỗ.", null)
+            ]
+        ));
+
+        rule.Examples.Should().HaveCount(2);
+
+        // 2. First update: change to 3 examples
+        var update1 = await _grammarService.UpdateRuleAsync(new GrammarRuleCreateOrUpdateDto(
+            Id: rule.Id,
+            Title: "First Conditional (Updated 1)",
+            Structure: rule.Structure,
+            ExplanationVi: rule.ExplanationVi,
+            ExplanationEn: rule.ExplanationEn,
+            CommonMistakes: rule.CommonMistakes,
+            Level: CefrLevel.B1,
+            ExamTarget: ExamType.Toeic,
+            Topic: "Conditionals",
+            Examples:
+            [
+                new("If she calls, tell her I am busy.", "Nếu cô ấy gọi, hãy bảo tôi bận.", null),
+                new("If you eat too much, you will feel sick.", "Nếu bạn ăn quá nhiều, bạn sẽ thấy khó chịu.", null),
+                new("If they arrive late, we will start without them.", "Nếu họ đến muộn, chúng ta sẽ bắt đầu trước.", null)
+            ]
+        ));
+
+        update1.Title.Should().Be("First Conditional (Updated 1)");
+        update1.Examples.Should().HaveCount(3);
+
+        // Verify direct from repository query
+        var dbFetch1 = await _grammarService.GetRuleByIdAsync(rule.Id);
+        dbFetch1.Should().NotBeNull();
+        dbFetch1!.Examples.Should().HaveCount(3);
+
+        // 3. Second consecutive update: change to 1 example
+        var update2 = await _grammarService.UpdateRuleAsync(new GrammarRuleCreateOrUpdateDto(
+            Id: rule.Id,
+            Title: "First Conditional (Updated 2)",
+            Structure: rule.Structure,
+            ExplanationVi: rule.ExplanationVi,
+            ExplanationEn: rule.ExplanationEn,
+            CommonMistakes: rule.CommonMistakes,
+            Level: CefrLevel.B2,
+            ExamTarget: ExamType.Ielts,
+            Topic: "Conditionals",
+            Examples:
+            [
+                new("If we hurry, we can still catch the train.", "Nếu chúng ta nhanh lên, chúng ta vẫn kịp tàu.", "Modal variation")
+            ]
+        ));
+
+        update2.Title.Should().Be("First Conditional (Updated 2)");
+        update2.Examples.Should().HaveCount(1);
+        update2.Examples[0].Note.Should().Be("Modal variation");
+
+        var dbFetch2 = await _grammarService.GetRuleByIdAsync(rule.Id);
+        dbFetch2.Should().NotBeNull();
+        dbFetch2!.Examples.Should().HaveCount(1);
+        dbFetch2.Examples[0].SentenceEn.Should().Be("If we hurry, we can still catch the train.");
+    }
+
     public void Dispose()
     {
         _context.Dispose();

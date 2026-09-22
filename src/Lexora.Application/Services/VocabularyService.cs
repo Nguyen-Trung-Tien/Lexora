@@ -193,14 +193,26 @@ public class VocabularyService : IVocabularyService
             newMeanings.Add(meaning);
         }
 
+        foreach (var meaning in newMeanings)
+        {
+            word.Meanings.Add(meaning);
+        }
         _vocabRepo.AddMeanings(newMeanings);
 
         // Update Topics
         var newTopics = dto.TopicIds.Select(tid => new WordTopic { WordId = word.Id, TopicId = tid }).ToList();
+        foreach (var topic in newTopics)
+        {
+            word.WordTopics.Add(topic);
+        }
         _vocabRepo.AddWordTopics(newTopics);
 
         // Update Exam Tags
         var newTags = dto.ExamTagIds.Select(etid => new WordExamTag { WordId = word.Id, ExamTagId = etid }).ToList();
+        foreach (var tag in newTags)
+        {
+            word.WordExamTags.Add(tag);
+        }
         _vocabRepo.AddWordExamTags(newTags);
 
         await _vocabRepo.UpdateAsync(word, cancellationToken);

@@ -206,12 +206,27 @@ public partial class GrammarViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void ResetFilters()
+    {
+        SearchQuery = string.Empty;
+        SelectedLevel = null;
+        SelectedExamTarget = null;
+        SelectedTopic = null;
+    }
+
+    [RelayCommand]
     public async Task AddRuleAsync(GrammarRuleCreateOrUpdateDto dto)
     {
         var created = await _grammarService.CreateRuleAsync(dto);
         await LoadTopicsAsync();
         await LoadRulesAsync();
         SelectedRule = Rules.FirstOrDefault(r => r.Id == created.Id);
+        if (SelectedRule == null)
+        {
+            ResetFilters();
+            await LoadRulesAsync();
+            SelectedRule = Rules.FirstOrDefault(r => r.Id == created.Id);
+        }
     }
 
     [RelayCommand]
@@ -221,6 +236,12 @@ public partial class GrammarViewModel : ObservableObject
         await LoadTopicsAsync();
         await LoadRulesAsync();
         SelectedRule = Rules.FirstOrDefault(r => r.Id == updated.Id);
+        if (SelectedRule == null)
+        {
+            ResetFilters();
+            await LoadRulesAsync();
+            SelectedRule = Rules.FirstOrDefault(r => r.Id == updated.Id);
+        }
     }
 
     [RelayCommand]

@@ -359,6 +359,130 @@ public class VocabularyCrudIntegrationTests : IDisposable
         batchWords.All(w => w.ReviewCard != null).Should().BeTrue();
     }
 
+    [Fact]
+    public async Task VocabularyUpdate_ConsecutiveUpdates_ShouldRetainAudioAndSyncChildren()
+    {
+        // 1. Arrange topics and exam tags
+        var topic1 = await _vocabService.CreateTopicAsync(new TopicCreateOrUpdateDto("Business", "Corporate vocabulary", "\uE8EC", "#0078D4"));
+        var topic2 = await _vocabService.CreateTopicAsync(new TopicCreateOrUpdateDto("Tech", "IT vocabulary", "\uE8EC", "#107C41"));
+
+        // 2. Create word with audio and initial meaning
+        var created = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "lucrative",
+            PhoneticUk: "/ˈluː.krə.tɪv/",
+            PhoneticUs: "/ˈluː.krə.t̬ɪv/",
+            AudioUkPath: "audio/cache/uk_lucrative.mp3",
+            AudioUsPath: "audio/cache/us_lucrative.mp3",
+            Level: CefrLevel.C1,
+            PrimaryPartOfSpeech: PartOfSpeech.Adjective,
+            Notes: "Initial note",
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(
+                    PartOfSpeech: PartOfSpeech.Adjective,
+                    DefinitionVi: "sinh lợi, có nhiều lợi nhuận",
+                    DefinitionEn: "producing a great deal of profit",
+                    Explanation: null,
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("A lucrative contract.", "Một hợp đồng béo bở.", null)
+                    }
+                )
+            },
+            TopicIds: new List<Guid> { topic1.Id },
+            ExamTagIds: new List<Guid>()
+        ));
+
+        created.AudioUkPath.Should().Be("audio/cache/uk_lucrative.mp3");
+        created.AudioUsPath.Should().Be("audio/cache/us_lucrative.mp3");
+        created.Meanings.Should().HaveCount(1);
+        created.Topics.Should().Contain("Business");
+
+        // 3. First update: preserve audio, update topic to Tech, add second meaning
+        var update1 = await _vocabService.UpdateWordAsync(new WordCreateOrUpdateDto(
+            Id: created.Id,
+            Term: "lucrative",
+            PhoneticUk: created.PhoneticUk,
+            PhoneticUs: created.PhoneticUs,
+            AudioUkPath: created.AudioUkPath,
+            AudioUsPath: created.AudioUsPath,
+            Level: CefrLevel.C1,
+            PrimaryPartOfSpeech: PartOfSpeech.Adjective,
+            Notes: "Updated note 1",
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(
+                    PartOfSpeech: PartOfSpeech.Adjective,
+                    DefinitionVi: "sinh lời, béo bở",
+                    DefinitionEn: "profitable",
+                    Explanation: "Used for business ventures",
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("Software development is a lucrative career.", "Phát triển phần mềm là một nghề sinh lời.", null)
+                    }
+                ),
+                new(
+                    PartOfSpeech: PartOfSpeech.Noun,
+                    DefinitionVi: "sự sinh lợi (nghĩa hiếm)",
+                    DefinitionEn: null,
+                    Explanation: null,
+                    Examples: new List<ExampleSentenceCreateDto>()
+                )
+            },
+            TopicIds: new List<Guid> { topic2.Id },
+            ExamTagIds: new List<Guid>()
+        ));
+
+        update1.AudioUkPath.Should().Be("audio/cache/uk_lucrative.mp3");
+        update1.AudioUsPath.Should().Be("audio/cache/us_lucrative.mp3");
+        update1.Meanings.Should().HaveCount(2);
+        update1.Topics.Should().Contain("Tech");
+
+        // Verify direct from DB query
+        var dbFetch1 = await _vocabService.GetWordByIdAsync(created.Id);
+        dbFetch1.Should().NotBeNull();
+        dbFetch1!.Meanings.Should().HaveCount(2);
+        dbFetch1.Topics.Should().Contain("Tech");
+        dbFetch1.AudioUkPath.Should().Be("audio/cache/uk_lucrative.mp3");
+
+        // 4. Second update: remove second meaning, switch back to topic1
+        var update2 = await _vocabService.UpdateWordAsync(new WordCreateOrUpdateDto(
+            Id: created.Id,
+            Term: "lucrative",
+            PhoneticUk: created.PhoneticUk,
+            PhoneticUs: created.PhoneticUs,
+            AudioUkPath: created.AudioUkPath,
+            AudioUsPath: created.AudioUsPath,
+            Level: CefrLevel.C2,
+            PrimaryPartOfSpeech: PartOfSpeech.Adjective,
+            Notes: "Final note",
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(
+                    PartOfSpeech: PartOfSpeech.Adjective,
+                    DefinitionVi: "sinh lời cao",
+                    DefinitionEn: "highly profitable",
+                    Explanation: null,
+                    Examples: new List<ExampleSentenceCreateDto>()
+                )
+            },
+            TopicIds: new List<Guid> { topic1.Id },
+            ExamTagIds: new List<Guid>()
+        ));
+
+        update2.Level.Should().Be(CefrLevel.C2);
+        update2.Meanings.Should().HaveCount(1);
+        update2.Meanings[0].DefinitionVi.Should().Be("sinh lời cao");
+        update2.Topics.Should().Contain("Business");
+        update2.AudioUkPath.Should().Be("audio/cache/uk_lucrative.mp3");
+
+        var dbFetch2 = await _vocabService.GetWordByIdAsync(created.Id);
+        dbFetch2.Should().NotBeNull();
+        dbFetch2!.Meanings.Should().HaveCount(1);
+        dbFetch2.Topics.Should().Contain("Business");
+    }
+
     public void Dispose()
     {
         _context.Dispose();

@@ -330,22 +330,41 @@ public partial class VocabularyViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void ResetFilters()
+    {
+        SearchTerm = string.Empty;
+        SelectedLevel = null;
+        SelectedPartOfSpeech = null;
+        SelectedTopicId = null;
+        SelectedExamType = null;
+        SelectedStatus = null;
+        SelectedQuickFilter = "All";
+    }
+
+    [RelayCommand]
     public async Task SaveWordAsync(WordCreateOrUpdateDto dto)
     {
+        WordDto saved;
         if (dto.Id == null)
         {
-            var created = await _vocabService.CreateWordAsync(dto);
-            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordAdded"), created.Term);
+            saved = await _vocabService.CreateWordAsync(dto);
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordAdded"), saved.Term);
         }
         else
         {
-            var updated = await _vocabService.UpdateWordAsync(dto);
-            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordUpdated"), updated.Term);
+            saved = await _vocabService.UpdateWordAsync(dto);
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordUpdated"), saved.Term);
         }
 
         await LoadWordsAsync();
         _ = LoadContextUnitsAsync();
-        SelectedWord = Words.FirstOrDefault(w => w.Term.Equals(dto.Term, StringComparison.OrdinalIgnoreCase));
+        SelectedWord = Words.FirstOrDefault(w => w.Id == saved.Id);
+        if (SelectedWord == null)
+        {
+            ResetFilters();
+            await LoadWordsAsync();
+            SelectedWord = Words.FirstOrDefault(w => w.Id == saved.Id);
+        }
     }
 
     [RelayCommand]

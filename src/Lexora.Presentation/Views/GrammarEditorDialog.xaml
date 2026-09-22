@@ -144,17 +144,17 @@
 
                                     <!-- English Sentence -->
                                     <TextBox Header="{Binding HeaderSentenceEn}"
-                                             Text="{Binding SentenceEn, Mode=TwoWay}"
+                                             Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              PlaceholderText="{Binding PlaceholderSentenceEn}" />
 
                                     <!-- Vietnamese Translation & Grammar Note -->
                                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                         <TextBox Header="{Binding HeaderSentenceVi}"
-                                                 Text="{Binding SentenceVi, Mode=TwoWay}"
+                                                 Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                  PlaceholderText="{Binding PlaceholderSentenceVi}" />
                                         <TextBox Grid.Column="1"
                                                  Header="{Binding HeaderNote}"
-                                                 Text="{Binding Note, Mode=TwoWay}"
+                                                 Text="{Binding Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                  PlaceholderText="{Binding PlaceholderNote}" />
                                     </Grid>
                                 </StackPanel>

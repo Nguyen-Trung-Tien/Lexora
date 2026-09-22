@@ -63,7 +63,7 @@
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <Grid x:Name="DialogContentRoot" RenderTransformOrigin="0.5,0.3" Opacity="0">
+    <Grid x:Name="DialogContentRoot" RenderTransformOrigin="0.5,0.3" Opacity="1">
         <Grid.RenderTransform>
             <TransformGroup>
                 <ScaleTransform x:Name="DialogScaleTransform" ScaleX="0.95" ScaleY="0.95" />
@@ -203,18 +203,18 @@
 
                                     <!-- Vietnamese Definition -->
                                     <TextBox Header="{Binding HeaderDefinitionVi}"
-                                             Text="{Binding DefinitionVi, Mode=TwoWay}"
+                                             Text="{Binding DefinitionVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              PlaceholderText="{Binding PlaceholderDefinitionVi}"
                                              FontWeight="Medium" />
 
                                     <!-- English Definition & Context Nuance -->
                                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                         <TextBox Header="{Binding HeaderDefinitionEn}"
-                                                 Text="{Binding DefinitionEn, Mode=TwoWay}"
+                                                 Text="{Binding DefinitionEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                  PlaceholderText="{Binding PlaceholderDefinitionEn}" />
                                         <TextBox Grid.Column="1"
                                                  Header="{Binding HeaderExplanation}"
-                                                 Text="{Binding Explanation, Mode=TwoWay}"
+                                                 Text="{Binding Explanation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                  PlaceholderText="{Binding PlaceholderExplanation}" />
                                     </Grid>
 
@@ -231,10 +231,10 @@
                                                         </Border>
                                                         <TextBox Grid.Column="1"
                                                                  PlaceholderText="{Binding PlaceholderExampleEn}"
-                                                                 Text="{Binding SentenceEn, Mode=TwoWay}" />
+                                                                 Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                         <TextBox Grid.Column="2"
                                                                  PlaceholderText="{Binding PlaceholderExampleVi}"
-                                                                 Text="{Binding SentenceVi, Mode=TwoWay}" />
+                                                                 Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                         <Button Grid.Column="3"
                                                                 ToolTipService.ToolTip="{Binding TooltipDeleteExample}"
                                                                 Click="DeleteExampleButton_Click"
