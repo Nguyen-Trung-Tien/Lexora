@@ -55,7 +55,7 @@ public class StartupOrchestrator : IStartupOrchestrator
 
             // Step 3: Load Settings & Environment
             SetStatus(loc?.GetString("Splash_StatusLoadingData") ?? "Đang tải dữ liệu học tập & cài đặt...");
-            await Task.Delay(150, cancellationToken); // brief async yield for UI refresh
+            await Task.Yield(); // brief async yield for UI refresh
 
             // Step 4: Ready
             SetStatus(loc?.GetString("Splash_StatusReady") ?? "Sẵn sàng khởi động!");

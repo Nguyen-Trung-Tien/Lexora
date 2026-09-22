@@ -21,7 +21,7 @@
     <Grid KeyboardAcceleratorPlacementMode="Hidden">
         <NavigationView
             x:Name="NavView"
-            IsBackButtonVisible="Collapsed"
+            IsBackButtonVisible="Auto"
             AlwaysShowHeader="False"
             PaneDisplayMode="Auto"
             OpenPaneLength="260"

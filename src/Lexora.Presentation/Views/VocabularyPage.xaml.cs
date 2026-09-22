@@ -70,6 +70,7 @@ public sealed partial class VocabularyPage : Page
         var prevLevelIdx = LevelFilterCombo.SelectedIndex >= 0 ? LevelFilterCombo.SelectedIndex : 0;
         var prevPosIdx = PosFilterCombo.SelectedIndex >= 0 ? PosFilterCombo.SelectedIndex : 0;
         var prevStatusIdx = StatusFilterCombo.SelectedIndex >= 0 ? StatusFilterCombo.SelectedIndex : 0;
+        var prevExamIdx = ExamFilterCombo.SelectedIndex >= 0 ? ExamFilterCombo.SelectedIndex : 0;
         var prevSortIdx = SortCombo.SelectedIndex >= 0 ? SortCombo.SelectedIndex : 0;
 
         // Populate Level combo
@@ -89,6 +90,12 @@ public sealed partial class VocabularyPage : Page
         statuses.AddRange(Enum.GetValues<LearningStatus>().Cast<object>());
         StatusFilterCombo.ItemsSource = statuses;
         StatusFilterCombo.SelectedIndex = prevStatusIdx < statuses.Count ? prevStatusIdx : 0;
+
+        // Populate Exam combo
+        var exams = new List<object> { Loc.GetString("Vocab_AllExams") };
+        exams.AddRange(Enum.GetValues<ExamType>().Cast<object>());
+        ExamFilterCombo.ItemsSource = exams;
+        ExamFilterCombo.SelectedIndex = prevExamIdx < exams.Count ? prevExamIdx : 0;
 
         // Populate Sort combo
         SortCombo.ItemsSource = new List<string>
@@ -220,6 +227,20 @@ public sealed partial class VocabularyPage : Page
         await ViewModel.LoadWordsAsync();
     }
 
+    private async void ExamFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        if (ExamFilterCombo.SelectedItem is ExamType exam)
+        {
+            ViewModel.SelectedExamType = exam;
+        }
+        else
+        {
+            ViewModel.SelectedExamType = null;
+        }
+        await ViewModel.LoadWordsAsync();
+    }
+
     private async void SortCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_isInitializing) return;
@@ -260,6 +281,7 @@ public sealed partial class VocabularyPage : Page
         LevelFilterCombo.SelectedIndex = 0;
         PosFilterCombo.SelectedIndex = 0;
         StatusFilterCombo.SelectedIndex = 0;
+        ExamFilterCombo.SelectedIndex = 0;
         SortCombo.SelectedIndex = 0;
         UpdateQuickFilterStyles("All");
         _ = ViewModel.SelectQuickFilterAsync("All");
@@ -715,14 +737,25 @@ public sealed partial class VocabularyPage : Page
 
     private async void ShowErrorDialog(string title, string message)
     {
-        var dialog = new ContentDialog
+        try
         {
-            Title = title,
-            Content = message,
-            CloseButtonText = Loc.GetString("Action_Close"),
-            XamlRoot = this.XamlRoot
-        };
-        await dialog.ShowAsync();
+            if (this.XamlRoot == null) return;
+            await Task.Yield();
+            var theme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var dialog = new ContentDialog
+            {
+                Title = title,
+                Content = message,
+                CloseButtonText = Loc.GetString("Action_Close"),
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = theme
+            };
+            await dialog.ShowAsync();
+        }
+        catch (InvalidOperationException)
+        {
+            // Another dialog is already visible; avoid unhandled exception crash
+        }
     }
 
     private void AddWordAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)

@@ -20,18 +20,31 @@ public class StudyAdvisorService : IStudyAdvisorService
         _vocabRepo = vocabRepo;
     }
 
-    public async Task<StudyAdviceSummaryDto> GetDailyAdviceAsync(CancellationToken cancellationToken = default)
+    public async Task<StudyAdviceSummaryDto> GetDailyAdviceAsync(DashboardSummaryDto? existingSummary = null, CancellationToken cancellationToken = default)
     {
-        int dueCount = await _reviewRepo.CountDueCardsAsync(DateTime.UtcNow, cancellationToken);
+        int dueCount = existingSummary?.DueReviewsToday ?? await _reviewRepo.CountDueCardsAsync(DateTime.UtcNow, cancellationToken);
         var difficultCards = await _reviewRepo.GetDifficultCardsAsync(30, cancellationToken);
-        var statusCounts = await _reviewRepo.GetCardCountsByStatusAsync(cancellationToken);
-        int totalWords = await _vocabRepo.CountAsync(cancellationToken: cancellationToken);
+        int totalWords = existingSummary?.TotalWords ?? await _vocabRepo.CountAsync(cancellationToken: cancellationToken);
 
-        int mastered = statusCounts.GetValueOrDefault(LearningStatus.Mastered, 0);
-        int remembered = statusCounts.GetValueOrDefault(LearningStatus.Remembered, 0);
-        int notRemembered = statusCounts.GetValueOrDefault(LearningStatus.NotRemembered, 0);
+        int mastered;
+        int remembered;
+        int notRemembered;
+
+        if (existingSummary != null)
+        {
+            mastered = existingSummary.TotalMastered;
+            remembered = existingSummary.TotalRemembered;
+            notRemembered = existingSummary.TotalNotRemembered;
+        }
+        else
+        {
+            var statusCounts = await _reviewRepo.GetCardCountsByStatusAsync(cancellationToken);
+            mastered = statusCounts.GetValueOrDefault(LearningStatus.Mastered, 0);
+            remembered = statusCounts.GetValueOrDefault(LearningStatus.Remembered, 0);
+            notRemembered = statusCounts.GetValueOrDefault(LearningStatus.NotRemembered, 0);
+        }
+
         int totalActive = Math.Max(mastered + remembered + notRemembered, 1);
-
         double overallRetentionScore = Math.Round((double)(mastered + remembered) / totalActive * 100, 1);
         int weakCount = difficultCards.Count;
 

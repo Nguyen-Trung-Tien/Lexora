@@ -139,4 +139,39 @@ public class StudyAdvisorServiceTests
         forecast.Days[0].DayLabel.Should().Be("Today");
         forecast.Days[1].DayLabel.Should().Be("Tomorrow");
     }
+
+    [Fact]
+    public async Task GetDailyAdviceAsync_WithExistingSummary_ShouldUseSummaryAndSkipDuplicateRepoQueries()
+    {
+        // Arrange
+        var existingSummary = new DashboardSummaryDto(
+            TotalWords: 50,
+            TotalRemembered: 30,
+            TotalNotRemembered: 5,
+            TotalLearning: 5,
+            TotalMastered: 10,
+            DueReviewsToday: 0,
+            CurrentStreakDays: 3,
+            LongestStreakDays: 5,
+            AccuracyRate: 85.0,
+            StudiedTodayCount: 15
+        );
+
+        _mockReviewRepo.Setup(r => r.GetDifficultCardsAsync(30, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ReviewCard>());
+
+        // Act
+        var advice = await _advisorService.GetDailyAdviceAsync(existingSummary);
+
+        // Assert
+        advice.Should().NotBeNull();
+        advice.RecommendedAction.Should().Be(StudyAdviceActionType.DailyMaintenance);
+        advice.UrgentReviewCount.Should().Be(0);
+
+        // Verify duplicate repository queries were skipped
+        _mockReviewRepo.Verify(r => r.CountDueCardsAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockReviewRepo.Verify(r => r.GetCardCountsByStatusAsync(It.IsAny<CancellationToken>()), Times.Never);
+        _mockVocabRepo.Verify(v => v.CountAsync(null, It.IsAny<CancellationToken>()), Times.Never);
+        _mockReviewRepo.Verify(r => r.GetDifficultCardsAsync(30, It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

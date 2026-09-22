@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
@@ -14,7 +15,7 @@ public class TestService : ITestService
     private readonly IUnitOfWork _unitOfWork;
 
     private record ActiveSessionEntry(DateTime CreatedAt, List<TestQuestionDto> Questions);
-    private static readonly Dictionary<Guid, ActiveSessionEntry> ActiveTestSessions = new();
+    private static readonly ConcurrentDictionary<Guid, ActiveSessionEntry> ActiveTestSessions = new();
 
     public TestService(
         IVocabularyRepository vocabRepo,
@@ -140,17 +141,16 @@ public class TestService : ITestService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Cache session in memory for submission validation, pruning stale sessions (> 2 hours)
-        lock (ActiveTestSessions)
+        var cutoff = DateTime.UtcNow.AddHours(-2);
+        foreach (var kvp in ActiveTestSessions)
         {
-            var cutoff = DateTime.UtcNow.AddHours(-2);
-            var staleKeys = ActiveTestSessions.Where(kvp => kvp.Value.CreatedAt < cutoff).Select(kvp => kvp.Key).ToList();
-            foreach (var key in staleKeys)
+            if (kvp.Value.CreatedAt < cutoff)
             {
-                ActiveTestSessions.Remove(key);
+                ActiveTestSessions.TryRemove(kvp.Key, out _);
             }
-
-            ActiveTestSessions[createdSession.Id] = new ActiveSessionEntry(DateTime.UtcNow, questions);
         }
+
+        ActiveTestSessions[createdSession.Id] = new ActiveSessionEntry(DateTime.UtcNow, questions);
 
         return new TestSessionDto(
             createdSession.Id,
@@ -162,14 +162,8 @@ public class TestService : ITestService
 
     public async Task<TestResultDto> SubmitTestAsync(Guid sessionId, List<TestAnswerSubmissionDto> answers, CancellationToken cancellationToken = default)
     {
-        List<TestQuestionDto>? cachedQuestions = null;
-        lock (ActiveTestSessions)
-        {
-            if (ActiveTestSessions.TryGetValue(sessionId, out var entry))
-            {
-                cachedQuestions = entry.Questions;
-            }
-        }
+        ActiveTestSessions.TryGetValue(sessionId, out var entry);
+        var cachedQuestions = entry?.Questions;
 
         var session = await _reviewRepo.GetStudySessionByIdAsync(sessionId, cancellationToken);
         var completedAt = DateTime.UtcNow;
@@ -255,10 +249,7 @@ public class TestService : ITestService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Clean up cache
-        lock (ActiveTestSessions)
-        {
-            ActiveTestSessions.Remove(sessionId);
-        }
+        ActiveTestSessions.TryRemove(sessionId, out _);
 
         var startedAt = session?.StartedAt ?? completedAt;
         var timeTaken = completedAt - startedAt;

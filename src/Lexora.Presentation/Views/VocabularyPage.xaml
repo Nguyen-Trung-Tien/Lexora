@@ -261,6 +261,18 @@
                                       Width="136" Height="34" CornerRadius="8" FontSize="13" />
                         </StackPanel>
 
+                        <!-- Exam Target Filter -->
+                        <StackPanel Spacing="3">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE7BE;" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_ExamFilter')}" FontSize="10"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <ComboBox x:Name="ExamFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_ExamFilter')}"
+                                      SelectionChanged="ExamFilterCombo_SelectionChanged"
+                                      Width="130" Height="34" CornerRadius="8" FontSize="13" />
+                        </StackPanel>
+
                         <!-- Divider -->
                         <Border Width="1" Height="36" Background="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
 

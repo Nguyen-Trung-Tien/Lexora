@@ -166,7 +166,7 @@ public partial class DashboardViewModel : ObservableObject
         try
         {
             var analytics = await _statsService.GetDetailedAnalyticsAsync();
-            DailyAdvice = await _advisorService.GetDailyAdviceAsync();
+            DailyAdvice = await _advisorService.GetDailyAdviceAsync(analytics.Summary);
             WorkloadForecast = await _advisorService.Get7DayForecastAsync();
 
             UpdateAdviceDisplay();

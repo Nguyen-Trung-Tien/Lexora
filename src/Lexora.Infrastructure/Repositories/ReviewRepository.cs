@@ -107,6 +107,10 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
                 streak.LastActiveDate = date;
                 streak.TotalDaysLearned = 1;
             }
+            else if (date < streak.LastActiveDate.Value)
+            {
+                // Clock skew, timezone shift, or earlier event — do not overwrite or break streak
+            }
             else if (streak.LastActiveDate == date)
             {
                 // Already studied today, streak stays the same
@@ -251,5 +255,19 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     public void AddStudyLog(StudyLog log)
     {
         Context.StudyLogs.Add(log);
+    }
+
+    public async Task<StudyLog?> GetLastStudyLogAsync(Guid reviewCardId, CancellationToken cancellationToken = default)
+    {
+        return await Context.StudyLogs
+            .Where(l => l.ReviewCardId == reviewCardId)
+            .OrderByDescending(l => l.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public Task DeleteStudyLogAsync(StudyLog log, CancellationToken cancellationToken = default)
+    {
+        Context.StudyLogs.Remove(log);
+        return Task.CompletedTask;
     }
 }

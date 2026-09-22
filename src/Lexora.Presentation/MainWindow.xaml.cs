@@ -189,6 +189,39 @@ public sealed partial class MainWindow : Window
         return IntPtr.Size == 8 ? SetClassLongPtr64(hWnd, nIndex, dwNewLong) : SetClassLong32(hWnd, nIndex, dwNewLong);
     }
 
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool BringWindowToTop(IntPtr hWnd);
+
+    public void BringToForeground()
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            var hwnd = WindowNative.GetWindowHandle(this);
+            if (hwnd != IntPtr.Zero)
+            {
+                var presenter = AppWindow.Presenter as OverlappedPresenter;
+                if (presenter?.State == OverlappedPresenterState.Minimized)
+                {
+                    presenter.Restore();
+                }
+
+                ShowWindow(hwnd, 9 /* SW_RESTORE */);
+                SetForegroundWindow(hwnd);
+                BringWindowToTop(hwnd);
+            }
+            Activate();
+        });
+    }
+
     public async Task StartStartupSequenceAsync()
     {
         _startupCts?.Cancel();
@@ -202,7 +235,7 @@ public sealed partial class MainWindow : Window
 
             // Run entrance animation and backend initialization concurrently
             var entranceTask = SplashOverlay.PlayEntranceAsync();
-            var minDisplayTask = Task.Delay(1350, ct);
+            var minDisplayTask = Task.Delay(250, ct);
             var initTask = _startupOrchestrator.InitializeAppAsync(ct);
 
             // Wait for backend initialization

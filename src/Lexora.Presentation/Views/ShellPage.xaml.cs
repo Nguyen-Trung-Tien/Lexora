@@ -34,35 +34,53 @@ public sealed partial class ShellPage : Page
         });
     }
 
+    private bool _isNavInitialized;
+
     private async void NavView_Loaded(object sender, RoutedEventArgs e)
     {
-        _navigationService.Initialize(ContentFrame);
-        ContentFrame.Navigated += (s, args) =>
+        if (!_isNavInitialized)
         {
-            switch (ContentFrame.Content)
+            _isNavInitialized = true;
+            _navigationService.Initialize(ContentFrame);
+
+            NavView.BackRequested += (s, args) =>
             {
-                case DashboardPage:
-                    NavView.SelectedItem = NavItemDashboard;
-                    break;
-                case VocabularyPage:
-                    NavView.SelectedItem = NavItemVocabulary;
-                    break;
-                case ReviewPage:
-                    NavView.SelectedItem = NavItemReview;
-                    break;
-                case TestPage:
-                    NavView.SelectedItem = NavItemTest;
-                    break;
-                case GrammarPage:
-                    NavView.SelectedItem = NavItemGrammar;
-                    break;
-                case SettingsPage:
-                    NavView.SelectedItem = NavItemSettings;
-                    break;
-            }
-        };
+                if (_navigationService.CanGoBack)
+                {
+                    _navigationService.GoBack();
+                }
+            };
+
+            ContentFrame.Navigated += (s, args) =>
+            {
+                NavView.IsBackEnabled = _navigationService.CanGoBack;
+                switch (ContentFrame.Content)
+                {
+                    case DashboardPage:
+                        NavView.SelectedItem = NavItemDashboard;
+                        break;
+                    case VocabularyPage:
+                        NavView.SelectedItem = NavItemVocabulary;
+                        break;
+                    case ReviewPage:
+                        NavView.SelectedItem = NavItemReview;
+                        break;
+                    case TestPage:
+                        NavView.SelectedItem = NavItemTest;
+                        break;
+                    case GrammarPage:
+                        NavView.SelectedItem = NavItemGrammar;
+                        break;
+                    case SettingsPage:
+                        NavView.SelectedItem = NavItemSettings;
+                        break;
+                }
+            };
+
+            _navigationService.Navigate(typeof(DashboardPage));
+        }
+
         UpdateNavigationLabels();
-        _navigationService.Navigate(typeof(DashboardPage));
         await ViewModel.CheckDueReviewsAsync();
     }
 
@@ -120,15 +138,32 @@ public sealed partial class ShellPage : Page
         ToolTipService.SetToolTip(GlobalSearchBox, _localizationService.GetString("Shell_SearchTooltip"));
     }
 
+    private CancellationTokenSource? _searchCts;
+
     private async void GlobalSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
             return;
 
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+        _searchCts = new CancellationTokenSource();
+        var ct = _searchCts.Token;
+
         var query = sender.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(query))
         {
             sender.ItemsSource = null;
+            return;
+        }
+
+        try
+        {
+            // Debounce delay to prevent flooding SQLite/EF Core on every keystroke
+            await Task.Delay(250, ct);
+        }
+        catch (OperationCanceledException)
+        {
             return;
         }
 
@@ -167,7 +202,9 @@ public sealed partial class ShellPage : Page
         {
             using var scope = App.Current.Services.CreateScope();
             var vocabService = scope.ServiceProvider.GetRequiredService<Lexora.Application.Interfaces.IVocabularyService>();
-            var matchingWords = await vocabService.SearchWordsAsync(query, pageSize: 5);
+            var matchingWords = await vocabService.SearchWordsAsync(query, pageSize: 5, cancellationToken: ct);
+
+            if (ct.IsCancellationRequested) return;
 
             foreach (var word in matchingWords)
             {
@@ -180,12 +217,19 @@ public sealed partial class ShellPage : Page
                 });
             }
         }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
         catch
         {
             // Suppress search preview errors
         }
 
-        sender.ItemsSource = suggestions;
+        if (!ct.IsCancellationRequested)
+        {
+            sender.ItemsSource = suggestions;
+        }
     }
 
     private void GlobalSearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)

@@ -23,4 +23,6 @@ public interface IReviewRepository : IRepository<ReviewCard>
     Task<int> CountDueCardsAsync(DateTime asOfUtc, CancellationToken cancellationToken = default);
     Task<Dictionary<DateOnly, int>> GetDueForecastCountsAsync(DateTime startUtc, int days, CancellationToken cancellationToken = default);
     void AddStudyLog(StudyLog log);
+    Task<StudyLog?> GetLastStudyLogAsync(Guid reviewCardId, CancellationToken cancellationToken = default);
+    Task DeleteStudyLogAsync(StudyLog log, CancellationToken cancellationToken = default);
 }

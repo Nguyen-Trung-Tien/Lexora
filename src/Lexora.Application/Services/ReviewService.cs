@@ -161,6 +161,17 @@ public class ReviewService : IReviewService
         var card = await _reviewRepo.GetByIdAsync(reviewCardId, cancellationToken);
         if (card == null) return;
 
+        // Retrieve the last study log to accurately roll back metrics
+        var lastLog = await _reviewRepo.GetLastStudyLogAsync(reviewCardId, cancellationToken);
+        if (lastLog != null)
+        {
+            if (lastLog.Rating >= ReviewRating.Good && card.CorrectReviews > 0)
+            {
+                card.CorrectReviews--;
+            }
+            await _reviewRepo.DeleteStudyLogAsync(lastLog, cancellationToken);
+        }
+
         card.Status = previousStatus;
         card.IntervalDays = previousInterval;
         card.EaseFactor = previousEaseFactor;
