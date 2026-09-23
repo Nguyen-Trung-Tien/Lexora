@@ -466,32 +466,44 @@ public sealed partial class VocabularyPage : Page
         var result = await confirmDialog.ShowAsyncSafe();
         if (result == ContentDialogResult.Primary)
         {
+            // Disable buttons and clear ListView selection BEFORE the async DB delete
+            // so stale COM SelectedItems references cannot cause ArgumentOutOfRangeException.
+            BtnDeleteSelectedWords.IsEnabled = false;
+            BtnSelectMode.IsEnabled = false;
             try
             {
-                BtnDeleteSelectedWords.IsEnabled = false;
-                BtnSelectMode.IsEnabled = false;
+                WordsListView.SelectedItems.Clear();
+                WordsListView.SelectionMode = ListViewSelectionMode.Single;
+            }
+            catch { }
+            ViewModel.IsSelectionMode = false;
 
-                try
-                {
-                    WordsListView.SelectedItems.Clear();
-                    WordsListView.SelectionMode = ListViewSelectionMode.Single;
-                }
-                catch { }
-                ViewModel.IsSelectionMode = false;
-
+            int deletedCount = 0;
+            Exception? deleteError = null;
+            try
+            {
                 await Task.Yield();
-                var deletedCount = await ViewModel.DeleteSelectedWordsAsync();
-                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_BulkDeleteSuccess"), deletedCount));
+                deletedCount = await ViewModel.DeleteSelectedWordsAsync();
             }
             catch (Exception ex)
             {
-                ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), ex.Message);
+                deleteError = ex;
             }
-            finally
+
+            // All post-await UI writes must be marshalled to the UI thread.
+            DispatcherQueue.TryEnqueue(() =>
             {
                 BtnSelectMode.IsEnabled = true;
                 UpdateSelectionModeUI();
-            }
+                if (deleteError != null)
+                {
+                    ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), deleteError.Message);
+                }
+                else
+                {
+                    ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_BulkDeleteSuccess"), deletedCount));
+                }
+            });
         }
     }
 
@@ -671,8 +683,8 @@ public sealed partial class VocabularyPage : Page
             {
                 try
                 {
-                    await Task.Yield();
-                    ViewModel.Words.Remove(wordToDelete);
+                    // Delete from DB first, then let LoadWordsAsync reload the list.
+                    // Do NOT remove optimistically — if DB throws, the item must remain visible.
                     await ViewModel.DeleteWordAsync(wordId);
                     ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_Status_WordDeleted"), wordTerm));
                 }

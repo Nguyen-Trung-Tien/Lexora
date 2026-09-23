@@ -5,6 +5,7 @@ using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
+using Microsoft.UI.Dispatching;
 
 namespace Lexora.Presentation.ViewModels;
 
@@ -17,6 +18,8 @@ public partial class VocabularyViewModel : ObservableObject
     private readonly IFuzzySearchService _fuzzySearchService;
     private readonly ILocalizationService _localizationService;
     private readonly List<string> _knownTerms = new();
+    // Captured on the UI thread so post-await mutations can be safely marshalled back.
+    private readonly DispatcherQueue _dispatcherQueue;
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
@@ -106,6 +109,9 @@ public partial class VocabularyViewModel : ObservableObject
         _audioPlayer = audioPlayer;
         _fuzzySearchService = fuzzySearchService;
         _localizationService = localizationService;
+        // Must be captured on the UI thread (constructor is always called from UI thread).
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
+            ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
     }
 
     [RelayCommand]
@@ -449,10 +455,16 @@ public partial class VocabularyViewModel : ObservableObject
         {
             var idsToDelete = SelectedWordIds.ToList();
             int count = await _vocabService.DeleteWordsAsync(idsToDelete);
-            SelectedWordIds.Clear();
-            IsSelectionMode = false;
-            OnPropertyChanged(nameof(SelectedCount));
-            OnPropertyChanged(nameof(HasSelection));
+
+            // Marshal all observable collection / property changes back to the UI thread.
+            // PropertyChanged raised off the UI thread causes COMException (0x8001010E).
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                SelectedWordIds.Clear();
+                IsSelectionMode = false;
+                OnPropertyChanged(nameof(SelectedCount));
+                OnPropertyChanged(nameof(HasSelection));
+            });
 
             await LoadWordsAsync();
             _ = LoadContextUnitsAsync();
@@ -461,7 +473,11 @@ public partial class VocabularyViewModel : ObservableObject
         finally
         {
             _isDeletingWords = false;
-            IsLoading = false;
+            // IsLoading = false is handled inside LoadWordsAsync; only reset here on early exit.
+            if (IsLoading)
+            {
+                _dispatcherQueue.TryEnqueue(() => IsLoading = false);
+            }
         }
     }
 

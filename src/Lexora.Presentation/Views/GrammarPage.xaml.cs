@@ -191,34 +191,45 @@ public sealed partial class GrammarPage : Page
         var result = await confirmDialog.ShowAsyncSafe();
         if (result == ContentDialogResult.Primary)
         {
+            // Disable buttons and reset ListView selection BEFORE the async DB delete.
+            // Clearing SelectedItems after LoadRulesAsync runs causes ArgumentOutOfRangeException
+            // because the underlying items are replaced and the COM proxies become stale.
+            BtnDeleteSelectedRules.IsEnabled = false;
+            BtnSelectMode.IsEnabled = false;
             try
             {
-                BtnDeleteSelectedRules.IsEnabled = false;
-                BtnSelectMode.IsEnabled = false;
+                RulesListView.SelectedItems.Clear();
+                RulesListView.SelectionMode = ListViewSelectionMode.Single;
+            }
+            catch { }
+            ViewModel.IsSelectionMode = false;
 
-                // WinUI 3 stability fix: Clear ListView selection and revert to Single selection mode
-                // BEFORE modifying or reloading backing collection to prevent fatal NullReferenceException
-                try
-                {
-                    RulesListView.SelectedItems.Clear();
-                    RulesListView.SelectionMode = ListViewSelectionMode.Single;
-                }
-                catch { }
-                ViewModel.IsSelectionMode = false;
-
+            int deletedCount = 0;
+            Exception? deleteError = null;
+            try
+            {
                 await Task.Yield();
-                var deletedCount = await ViewModel.DeleteSelectedRulesAsync();
-                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Grammar_BulkDeleteSuccess"), deletedCount));
+                deletedCount = await ViewModel.DeleteSelectedRulesAsync();
             }
             catch (Exception ex)
             {
-                ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), ex.Message);
+                deleteError = ex;
             }
-            finally
+
+            // All post-await UI writes must be marshalled to the UI thread.
+            DispatcherQueue.TryEnqueue(() =>
             {
                 BtnSelectMode.IsEnabled = true;
                 UpdateSelectionModeUI();
-            }
+                if (deleteError != null)
+                {
+                    ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), deleteError.Message);
+                }
+                else
+                {
+                    ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Grammar_BulkDeleteSuccess"), deletedCount));
+                }
+            });
         }
     }
 
@@ -304,8 +315,8 @@ public sealed partial class GrammarPage : Page
             {
                 try
                 {
-                    await Task.Yield();
-                    ViewModel.Rules.Remove(ruleToDelete);
+                    // Delete from DB first, then let LoadRulesAsync reload the list.
+                    // Do NOT remove optimistically — if DB throws, the item must remain visible.
                     await ViewModel.DeleteRuleAsync(ruleId);
                     ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Grammar_Status_RuleDeleted"), ruleTitle));
                 }
