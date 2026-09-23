@@ -959,16 +959,21 @@ public sealed partial class VocabularyPage : Page
         try
         {
             await Task.Yield();
+            var xamlRoot = this.XamlRoot 
+                ?? (sender as FrameworkElement)?.XamlRoot 
+                ?? App.Current.MainWindow?.Content?.XamlRoot;
+
             var dialog = new SmartImportDialog(format => ViewModel.GetSampleTemplate(format))
             {
-                XamlRoot = this.XamlRoot
+                XamlRoot = xamlRoot
             };
 
-            var res = await dialog.ShowAsyncSafe();
+            var res = await dialog.ShowAsyncSafe(xamlRoot);
             if (dialog.WasCommitted)
             {
                 await ViewModel.LoadWordsAsync();
                 PopulateTopicFilterCombo();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
             }
             else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
             {
@@ -977,7 +982,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ImportFailed"), ex.Message);
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Vocab_ImportFailed"), ex.Message);
         }
     }
 

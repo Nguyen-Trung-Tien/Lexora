@@ -40,6 +40,11 @@ public partial class App : Microsoft.UI.Xaml.Application
         InitializeComponent();
 
         _host = Host.CreateDefaultBuilder()
+            .UseDefaultServiceProvider(options =>
+            {
+                options.ValidateScopes = false;
+                options.ValidateOnBuild = false;
+            })
             .ConfigureLogging(logging =>
             {
                 logging.ClearProviders();

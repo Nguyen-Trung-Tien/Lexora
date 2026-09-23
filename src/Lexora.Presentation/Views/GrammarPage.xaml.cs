@@ -639,12 +639,16 @@ public sealed partial class GrammarPage : Page
         try
         {
             await Task.Yield();
+            var xamlRoot = this.XamlRoot 
+                ?? (sender as FrameworkElement)?.XamlRoot 
+                ?? App.Current.MainWindow?.Content?.XamlRoot;
+
             var dialog = new SmartImportDialog(format => ViewModel.GetSampleTemplate(format), isGrammarMode: true)
             {
-                XamlRoot = this.XamlRoot
+                XamlRoot = xamlRoot
             };
 
-            var res = await dialog.ShowAsyncSafe();
+            var res = await dialog.ShowAsyncSafe(xamlRoot);
             if (dialog.WasCommitted)
             {
                 await ViewModel.LoadRulesAsync();

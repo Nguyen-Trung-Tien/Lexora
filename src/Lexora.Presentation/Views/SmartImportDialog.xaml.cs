@@ -48,6 +48,7 @@ public class SmartImportPreviewItem : CommunityToolkit.Mvvm.ComponentModel.Obser
 
 public sealed partial class SmartImportDialog : ContentDialog
 {
+    private readonly IServiceScope? _scope;
     private readonly Func<string, string>? _sampleProvider;
     private readonly bool _isGrammarMode;
     private readonly ILocalizationService _loc;
@@ -72,9 +73,22 @@ public sealed partial class SmartImportDialog : ContentDialog
         InitializeComponent();
         _sampleProvider = sampleProvider;
         _isGrammarMode = isGrammarMode;
-        _loc = App.Current.Services.GetRequiredService<ILocalizationService>();
-        _exportImportService = App.Current.Services.GetRequiredService<IExportImportService>();
-        _grammarExportImportService = App.Current.Services.GetService<IGrammarExportImportService>();
+
+        try
+        {
+            _scope = App.Current.Services.CreateScope();
+            _loc = _scope.ServiceProvider.GetRequiredService<ILocalizationService>();
+            _exportImportService = _scope.ServiceProvider.GetRequiredService<IExportImportService>();
+            _grammarExportImportService = _scope.ServiceProvider.GetService<IGrammarExportImportService>();
+        }
+        catch
+        {
+            _loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+            _exportImportService = App.Current.Services.GetRequiredService<IExportImportService>();
+            _grammarExportImportService = App.Current.Services.GetService<IGrammarExportImportService>();
+        }
+
+        Unloaded += (s, e) => _scope?.Dispose();
 
         var rootTheme = (App.Current.MainWindow?.Content as FrameworkElement)?.ActualTheme;
         if (rootTheme.HasValue)
@@ -88,6 +102,22 @@ public sealed partial class SmartImportDialog : ContentDialog
         UpdateMode(true);
         UpdateDetectionBadge();
         GoToStep(1);
+    }
+
+    private static Style? GetResourceStyle(string key)
+    {
+        if (App.Current.Resources.TryGetValue(key, out var res) && res is Style style)
+        {
+            return style;
+        }
+        foreach (var md in App.Current.Resources.MergedDictionaries)
+        {
+            if (md.TryGetValue(key, out var mdRes) && mdRes is Style mdStyle)
+            {
+                return mdStyle;
+            }
+        }
+        return null;
     }
 
     private void ApplyLocalization()
@@ -155,19 +185,22 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     private void UpdateMode(bool isFileMode)
     {
+        var accentStyle = GetResourceStyle("AccentButtonStyle") ?? GetResourceStyle("LexoraAccentButtonStyle");
+        var defaultStyle = GetResourceStyle("DefaultButtonStyle");
+
         if (isFileMode)
         {
             PanelFile.Visibility = Visibility.Visible;
             PanelPaste.Visibility = Visibility.Collapsed;
-            BtnModeFile.Style = App.Current.Resources["AccentButtonStyle"] as Style;
-            BtnModePaste.Style = App.Current.Resources["DefaultButtonStyle"] as Style;
+            if (accentStyle != null) BtnModeFile.Style = accentStyle;
+            if (defaultStyle != null) BtnModePaste.Style = defaultStyle;
         }
         else
         {
             PanelFile.Visibility = Visibility.Collapsed;
             PanelPaste.Visibility = Visibility.Visible;
-            BtnModeFile.Style = App.Current.Resources["DefaultButtonStyle"] as Style;
-            BtnModePaste.Style = App.Current.Resources["AccentButtonStyle"] as Style;
+            if (defaultStyle != null) BtnModeFile.Style = defaultStyle;
+            if (accentStyle != null) BtnModePaste.Style = accentStyle;
         }
         EvaluateContent();
     }
