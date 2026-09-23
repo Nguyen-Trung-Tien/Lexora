@@ -9,6 +9,7 @@ public interface IAudioPlayerService
 {
     double PlaybackRate { get; set; }
     Task PlayPronunciationAsync(string term, string accent = "uk", double? rate = null);
+    void Stop();
 }
 
 public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
@@ -93,6 +94,18 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         catch
         {
             // Fail silently or log if sound device not available
+        }
+    }
+
+    public void Stop()
+    {
+        try
+        {
+            _mediaPlayer.Pause();
+            _mediaPlayer.Source = null;
+        }
+        catch
+        {
         }
     }
 

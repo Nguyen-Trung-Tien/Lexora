@@ -28,11 +28,17 @@
                       Grid.RowSpan="2" Canvas.ZIndex="10" />
 
         <!-- ======================================================== -->
-        <!-- TOP STREAMLINED TOOLBAR (Unified Search, Filters, & Actions) -->
+        <!-- TOP STREAMLINED TOOLBAR & NOTIFICATION                   -->
         <!-- ======================================================== -->
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                      HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled"
-                      Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+        <StackPanel Grid.Row="0" Spacing="8">
+            <InfoBar x:Name="PageNotificationInfoBar"
+                     IsOpen="False"
+                     IsClosable="True"
+                     CornerRadius="8" />
+
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled"
+                          Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
                 
                 <!-- Search Box with Live Debounce -->
@@ -141,6 +147,7 @@
                 </DropDownButton>
             </Grid>
         </ScrollViewer>
+        </StackPanel>
 
 
         <!-- ========================================== -->

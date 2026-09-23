@@ -29,6 +29,16 @@ public interface IExportImportService
     Task<ImportResult> ImportSmartAsync(string content, string? fileNameHint = null, ImportConflictResolution conflictResolution = ImportConflictResolution.Skip, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
 
     /// <summary>
+    /// Analyzes content, detects schema/columns, checks for duplicates, and produces preview records for user verification.
+    /// </summary>
+    Task<SmartImportAnalysisResultDto> AnalyzeSmartImportAsync(string content, string? fileNameHint = null, IReadOnlyList<SmartImportColumnMappingDto>? columnMappings = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Commits the validated and user-selected preview items to the database atomically with conflict resolution.
+    /// </summary>
+    Task<SmartImportCommitResultDto> CommitSmartImportAsync(SmartImportCommitRequestDto request, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
+
+    /// <summary>
     /// Generates a ready-to-use sample template string in JSON, CSV, or TXT format.
     /// </summary>
     string GetSampleTemplate(string format);

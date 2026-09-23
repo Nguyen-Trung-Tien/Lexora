@@ -21,7 +21,7 @@ public static class DependencyInjection
             dbPath = Path.Combine(lexoraDir, "lexora.db");
         }
 
-        var connectionString = $"Data Source={dbPath};Default Timeout=15;Cache=Shared;";
+        var connectionString = $"Data Source={dbPath};Default Timeout=15;Cache=Shared;Foreign Keys=True;";
 
         services.AddDbContext<LexoraDbContext>(options =>
         {

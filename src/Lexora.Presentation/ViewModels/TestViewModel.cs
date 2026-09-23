@@ -640,9 +640,17 @@ public partial class TestViewModel : ObservableObject
     [RelayCommand]
     public void RestartSetup()
     {
+        CleanupSession();
         IsResultMode = false;
         IsTestingMode = false;
         IsSetupMode = true;
         WeakWordsOnly = false;
+    }
+
+    public void CleanupSession()
+    {
+        _questionTimer.Stop();
+        _totalTestTimer.Stop();
+        _audioPlayer.Stop();
     }
 }

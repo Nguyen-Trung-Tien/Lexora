@@ -263,6 +263,7 @@ public sealed partial class WordEditorDialog : ContentDialog
         PosChips.Add(new PosChipItem(PartOfSpeech.Verb, Loc.GetString("WordEditor_PosVerb"), "v."));
         PosChips.Add(new PosChipItem(PartOfSpeech.Adjective, Loc.GetString("WordEditor_PosAdj"), "adj."));
         PosChips.Add(new PosChipItem(PartOfSpeech.Adverb, Loc.GetString("WordEditor_PosAdv"), "adv."));
+        PosChips.Add(new PosChipItem(PartOfSpeech.Phrase, Loc.GetString("WordEditor_PosPhrase"), "phr."));
         PosChips.Add(new PosChipItem(PartOfSpeech.PhrasalVerb, Loc.GetString("WordEditor_PosPhrasalVerb"), "phr. v."));
         PosChips.Add(new PosChipItem(PartOfSpeech.Idiom, Loc.GetString("WordEditor_PosIdiom"), "idiom"));
         PosChips.Add(new PosChipItem(PartOfSpeech.NounPhrase, Loc.GetString("WordEditor_PosNounPhrase"), "n. phr."));
@@ -297,63 +298,38 @@ public sealed partial class WordEditorDialog : ContentDialog
 
             if (isChecked)
             {
-                var existingMeaning = Meanings.FirstOrDefault(m => m.PartOfSpeech == chip.PartOfSpeech);
-                if (existingMeaning == null)
-                {
-                    if (Meanings.Count == 1 && string.IsNullOrWhiteSpace(Meanings[0].DefinitionVi))
-                    {
-                        var firstPosChip = PosChips.FirstOrDefault(c => c.PartOfSpeech == Meanings[0].PartOfSpeech);
-                        if (firstPosChip != null && !firstPosChip.IsSelected)
-                        {
-                            Meanings[0].PartOfSpeech = chip.PartOfSpeech;
-                        }
-                        else
-                        {
-                            var newMeaning = new EditableMeaning { PartOfSpeech = chip.PartOfSpeech };
-                            newMeaning.PartOfSpeechChanged += Meaning_PartOfSpeechChanged;
-                            newMeaning.Examples.Add(new EditableExample());
-                            Meanings.Add(newMeaning);
-                        }
-                    }
-                    else
-                    {
-                        var newMeaning = new EditableMeaning { PartOfSpeech = chip.PartOfSpeech };
-                        newMeaning.PartOfSpeechChanged += Meaning_PartOfSpeechChanged;
-                        newMeaning.Examples.Add(new EditableExample());
-                        Meanings.Add(newMeaning);
-                    }
-                    RefreshMeaningIndices();
-                }
+                // Instantly sync Primary POS dropdown to this clicked chip
+                PosComboBox.SelectedItem = chip.PartOfSpeech;
 
-                if (PosComboBox.SelectedItem == null)
+                // If only 1 meaning exists, sync that meaning's POS too so user doesn't have to change both
+                if (Meanings.Count == 1)
                 {
-                    PosComboBox.SelectedItem = chip.PartOfSpeech;
+                    Meanings[0].PartOfSpeech = chip.PartOfSpeech;
                 }
             }
             else
             {
+                // Ensure at least one POS remains selected
                 if (!PosChips.Any(c => c.IsSelected))
                 {
                     chip.IsSelected = true;
                     tb.IsChecked = true;
+                    PosComboBox.SelectedItem = chip.PartOfSpeech;
                     return;
                 }
 
+                // If unchecked chip was primary, switch primary to another selected chip
                 if (PosComboBox.SelectedItem is PartOfSpeech primary && primary == chip.PartOfSpeech)
                 {
                     var nextSelected = PosChips.FirstOrDefault(c => c.IsSelected);
                     if (nextSelected != null)
                     {
                         PosComboBox.SelectedItem = nextSelected.PartOfSpeech;
+                        if (Meanings.Count == 1)
+                        {
+                            Meanings[0].PartOfSpeech = nextSelected.PartOfSpeech;
+                        }
                     }
-                }
-
-                var emptyMeaning = Meanings.FirstOrDefault(m => m.PartOfSpeech == chip.PartOfSpeech && string.IsNullOrWhiteSpace(m.DefinitionVi));
-                if (emptyMeaning != null && Meanings.Count > 1)
-                {
-                    emptyMeaning.PartOfSpeechChanged -= Meaning_PartOfSpeechChanged;
-                    Meanings.Remove(emptyMeaning);
-                    RefreshMeaningIndices();
                 }
             }
         }

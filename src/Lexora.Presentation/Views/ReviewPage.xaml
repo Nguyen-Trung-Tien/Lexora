@@ -440,6 +440,7 @@
 
                                     <!-- 1: Again -->
                                     <Button HorizontalAlignment="Stretch" Padding="8,12" CornerRadius="12" Click="AgainButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}"
                                             BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1.5"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                                          <StackPanel HorizontalAlignment="Center" Spacing="6">
@@ -458,6 +459,7 @@
 
                                      <!-- 2: Hard -->
                                      <Button Grid.Column="1" HorizontalAlignment="Stretch" Padding="8,12" CornerRadius="12" Click="HardButton_Click"
+                                             IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}"
                                              BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1.5"
                                              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                                          <StackPanel HorizontalAlignment="Center" Spacing="6">
@@ -476,6 +478,7 @@
 
                                      <!-- 3: Good -->
                                      <Button Grid.Column="2" HorizontalAlignment="Stretch" Padding="8,12" CornerRadius="12" Click="GoodButton_Click"
+                                             IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}"
                                              BorderBrush="{ThemeResource AccentFillColorDefaultBrush}" BorderThickness="1.5"
                                              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                                          <StackPanel HorizontalAlignment="Center" Spacing="6">
@@ -494,6 +497,7 @@
 
                                      <!-- 4: Easy -->
                                      <Button Grid.Column="3" HorizontalAlignment="Stretch" Padding="8,12" CornerRadius="12" Click="EasyButton_Click"
+                                             IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}"
                                              BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1.5"
                                              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                                          <StackPanel HorizontalAlignment="Center" Spacing="6">

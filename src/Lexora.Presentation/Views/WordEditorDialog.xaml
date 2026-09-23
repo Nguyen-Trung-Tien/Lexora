@@ -71,19 +71,20 @@
                             <!-- Chips Grid for Parts of Speech -->
                             <ItemsRepeater x:Name="PosChipsRepeater">
                                 <ItemsRepeater.Layout>
-                                    <UniformGridLayout Orientation="Horizontal" MinItemWidth="135" MinColumnSpacing="8" MinRowSpacing="8" ItemsStretch="Fill" />
+                                    <UniformGridLayout Orientation="Horizontal" MinItemWidth="160" MinColumnSpacing="8" MinRowSpacing="8" ItemsStretch="Fill" />
                                 </ItemsRepeater.Layout>
                                 <ItemsRepeater.ItemTemplate>
                                     <DataTemplate x:DataType="views:PosChipItem">
                                         <ToggleButton IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
                                                       Click="PosChip_Click"
                                                       HorizontalAlignment="Stretch"
+                                                      ToolTipService.ToolTip="{x:Bind DisplayName}"
                                                       CornerRadius="6" Padding="10,6">
                                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                                                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
                                                     <TextBlock Text="{x:Bind ShortAbbr}" FontWeight="Bold" FontSize="10" />
                                                 </Border>
-                                                <TextBlock Grid.Column="1" Text="{x:Bind DisplayName}" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{x:Bind DisplayName}" FontSize="12" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                             </Grid>
                                         </ToggleButton>
                                     </DataTemplate>

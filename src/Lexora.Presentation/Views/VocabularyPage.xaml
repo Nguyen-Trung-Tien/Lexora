@@ -67,9 +67,15 @@
         </Grid.Resources>
 
         <!-- ========================================================= -->
-        <!-- TOP COMMAND BAR: Segmented Mode, Search, Actions          -->
+        <!-- TOP COMMAND BAR & NOTIFICATION: Segmented Mode, Search, Actions -->
         <!-- ========================================================= -->
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
+        <StackPanel Grid.Row="0" Spacing="8">
+            <InfoBar x:Name="PageNotificationInfoBar"
+                     IsOpen="False"
+                     IsClosable="True"
+                     CornerRadius="8" />
+
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
             <!-- Segmented View Mode Switcher -->
             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
                 <StackPanel Orientation="Horizontal" Spacing="4">
@@ -151,6 +157,7 @@
                 </DropDownButton.Flyout>
             </DropDownButton>
         </Grid>
+        </StackPanel>
 
         <!-- ========================================================= -->
         <!-- FILTERS & SORTING BAR (Clean, non-overflowing Row 1)      -->
@@ -526,12 +533,22 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <Border Visibility="{x:Bind ViewModel.SelectedWord.IsIdiomOrPhrase, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        <Border Visibility="{x:Bind ViewModel.SelectedWord.IsIdiom, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                                                 Background="{ThemeResource SystemFillColorCautionBrush}"
                                                 CornerRadius="6" Padding="8,3">
                                             <StackPanel Orientation="Horizontal" Spacing="4">
                                                 <FontIcon Glyph="&#xE734;" FontSize="10" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" VerticalAlignment="Center" />
                                                 <TextBlock Text="{x:Bind Loc.GetString('Vocab_TagIdiom')}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border Visibility="{x:Bind ViewModel.SelectedWord.IsPhrasalVerb, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1" CornerRadius="6" Padding="8,3">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <FontIcon Glyph="&#xE71E;" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_TagPhrasalVerb')}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>

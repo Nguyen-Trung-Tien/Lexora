@@ -217,6 +217,479 @@ public class ExportImportService : IExportImportService
         };
     }
 
+    public async Task<SmartImportAnalysisResultDto> AnalyzeSmartImportAsync(
+        string content,
+        string? fileNameHint = null,
+        IReadOnlyList<SmartImportColumnMappingDto>? columnMappings = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return new SmartImportAnalysisResultDto(
+                DataFormat.Unknown,
+                Array.Empty<string>(),
+                Array.Empty<SmartImportColumnMappingDto>(),
+                Array.Empty<SmartImportItemDto>(),
+                0, 0, 0, 0);
+        }
+
+        if (content.Length > MaxImportPayloadLength)
+        {
+            throw new ArgumentException($"Payload exceeds maximum allowed size of {MaxImportPayloadLength / (1024 * 1024)} MB");
+        }
+
+        var format = SmartContentDetector.DetectFormat(content, fileNameHint);
+        var previewItems = new List<SmartImportItemDto>();
+        var headers = new List<string>();
+        var mappings = new List<SmartImportColumnMappingDto>();
+
+        // Cache existing terms for fast duplicate detection
+        var existingList = await _vocabRepo.SearchAsync(take: 100000, cancellationToken: cancellationToken)
+            ?? (IReadOnlyList<Word>)Array.Empty<Word>();
+        var existingTerms = existingList
+            .Select(w => !string.IsNullOrEmpty(w.NormalizedTerm) ? w.NormalizedTerm : w.Term.Trim().ToLowerInvariant())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (format == DataFormat.Json)
+        {
+            headers.AddRange(["term", "level", "primaryPartOfSpeech", "meanings", "phoneticUk", "phoneticUs", "topics", "examTags", "notes"]);
+            mappings.AddRange([
+                new("term", SmartImportField.Term),
+                new("level", SmartImportField.Level),
+                new("primaryPartOfSpeech", SmartImportField.PartOfSpeech),
+                new("meanings", SmartImportField.DefinitionVi),
+                new("phoneticUk", SmartImportField.PhoneticUk),
+                new("phoneticUs", SmartImportField.PhoneticUs),
+                new("topics", SmartImportField.Topics),
+                new("examTags", SmartImportField.ExamTags),
+                new("notes", SmartImportField.Notes)
+            ]);
+
+            try
+            {
+                var jsonWords = JsonSerializer.Deserialize<List<WordExportModel>>(content, JsonOptions) ?? new();
+                int rowIdx = 0;
+                foreach (var jw in jsonWords)
+                {
+                    rowIdx++;
+                    bool isTermValid = !string.IsNullOrWhiteSpace(jw.Term);
+                    string term = jw.Term?.Trim() ?? string.Empty;
+                    string normalized = term.ToLowerInvariant();
+                    bool isDuplicate = existingTerms.Contains(normalized);
+
+                    var firstMeaning = jw.Meanings?.FirstOrDefault();
+                    string defVi = firstMeaning?.DefinitionVi ?? string.Empty;
+                    string? defEn = firstMeaning?.DefinitionEn;
+                    var pos = jw.PrimaryPartOfSpeech != 0 ? jw.PrimaryPartOfSpeech : (firstMeaning?.PartOfSpeech != 0 ? firstMeaning!.PartOfSpeech : PartOfSpeech.Noun);
+
+                    var allExamples = jw.Meanings?.SelectMany(m => m.Examples ?? []).Select(ex => ex.SentenceEn).Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+                    string? exText = allExamples != null && allExamples.Count > 0 ? string.Join(" | ", allExamples) : null;
+                    string? topicsText = jw.Topics != null && jw.Topics.Count > 0 ? string.Join("; ", jw.Topics) : null;
+                    string? examsText = jw.ExamTags != null && jw.ExamTags.Count > 0 ? string.Join("; ", jw.ExamTags) : null;
+
+                    string? validationMsg = null;
+                    if (!isTermValid) validationMsg = "Thuật ngữ không được để trống / Term is required.";
+                    else if (string.IsNullOrWhiteSpace(defVi)) validationMsg = "Chưa có định nghĩa tiếng Việt / Missing Vietnamese definition.";
+
+                    previewItems.Add(new SmartImportItemDto(
+                        RowIndex: rowIdx,
+                        Term: term,
+                        Level: jw.Level,
+                        PartOfSpeech: pos,
+                        DefinitionVi: defVi,
+                        DefinitionEn: defEn,
+                        PhoneticUk: jw.PhoneticUk,
+                        PhoneticUs: jw.PhoneticUs,
+                        Examples: exText,
+                        Topics: topicsText,
+                        ExamTags: examsText,
+                        Notes: jw.Notes,
+                        IsDuplicate: isDuplicate,
+                        IsValid: isTermValid && !string.IsNullOrWhiteSpace(defVi),
+                        ValidationMessage: validationMsg
+                    ));
+                }
+            }
+            catch
+            {
+                format = DataFormat.Txt;
+            }
+        }
+
+        if (format == DataFormat.Csv)
+        {
+            var lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (lines.Length > 0)
+            {
+                char sep = lines[0].Contains(';') ? ';' : ',';
+                var headerLine = lines[0];
+                var rawHeaders = ParseCsvLine(headerLine, sep);
+                headers.AddRange(rawHeaders);
+
+                // Auto-detect or use user mappings
+                if (columnMappings != null && columnMappings.Count > 0)
+                {
+                    mappings.AddRange(columnMappings);
+                }
+                else
+                {
+                    for (int i = 0; i < rawHeaders.Count; i++)
+                    {
+                        var h = rawHeaders[i].Trim().ToLowerInvariant();
+                        var target = SmartImportField.Ignore;
+                        if (h.Contains("term") || h.Contains("word") || h == "từ" || h == "tu") target = SmartImportField.Term;
+                        else if (h.Contains("level") || h.Contains("cefr")) target = SmartImportField.Level;
+                        else if (h.Contains("part of speech") || h.Contains("partofspeech") || h.Contains("pos") || h.Contains("từ loại") || h.Contains("loại từ") || h.Contains("tu loai")) target = SmartImportField.PartOfSpeech;
+                        else if (h.Contains("meaning") || h.Contains("definition") || h.Contains("nghĩa") || h.Contains("dịch") || h == "định nghĩa") target = SmartImportField.DefinitionVi;
+                        else if (h.Contains("definitionen") || h.Contains("english")) target = SmartImportField.DefinitionEn;
+                        else if (h.Contains("phonetic") || h.Contains("pronunciation") || h.Contains("phát âm") || h.Contains("ipa") || h == "uk") target = SmartImportField.PhoneticUk;
+                        else if (h == "us" || h.Contains("phoneticus")) target = SmartImportField.PhoneticUs;
+                        else if (h.Contains("example") || h.Contains("ví dụ") || h == "vd") target = SmartImportField.Examples;
+                        else if (h.Contains("topic") || h.Contains("chủ đề")) target = SmartImportField.Topics;
+                        else if (h.Contains("exam") || h.Contains("tag")) target = SmartImportField.ExamTags;
+                        else if (h.Contains("note") || h.Contains("ghi chú")) target = SmartImportField.Notes;
+
+                        mappings.Add(new SmartImportColumnMappingDto(rawHeaders[i], target));
+                    }
+                }
+
+                // Parse records
+                for (int rowIdx = 1; rowIdx < lines.Length; rowIdx++)
+                {
+                    var line = lines[rowIdx];
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#')) continue;
+
+                    var cols = ParseCsvLine(line, sep);
+                    string term = "";
+                    CefrLevel level = CefrLevel.None;
+                    PartOfSpeech pos = PartOfSpeech.Noun;
+                    string defVi = "";
+                    string? defEn = null;
+                    string? ipaUk = null;
+                    string? ipaUs = null;
+                    string? examples = null;
+                    string? topics = null;
+                    string? examTags = null;
+                    string? notes = null;
+
+                    for (int c = 0; c < Math.Min(cols.Count, mappings.Count); c++)
+                    {
+                        var val = cols[c].Trim();
+                        switch (mappings[c].TargetField)
+                        {
+                            case SmartImportField.Term: term = val; break;
+                            case SmartImportField.Level: level = ParseCefrLevel(val); break;
+                            case SmartImportField.PartOfSpeech: pos = ParsePartOfSpeech(val); break;
+                            case SmartImportField.DefinitionVi: defVi = val; break;
+                            case SmartImportField.DefinitionEn: defEn = string.IsNullOrWhiteSpace(val) ? null : val; break;
+                            case SmartImportField.PhoneticUk: ipaUk = string.IsNullOrWhiteSpace(val) ? null : val; break;
+                            case SmartImportField.PhoneticUs: ipaUs = string.IsNullOrWhiteSpace(val) ? null : val; break;
+                            case SmartImportField.Examples: examples = string.IsNullOrWhiteSpace(val) ? null : val; break;
+                            case SmartImportField.Topics: topics = string.IsNullOrWhiteSpace(val) ? null : val; break;
+                            case SmartImportField.ExamTags: examTags = string.IsNullOrWhiteSpace(val) ? null : val; break;
+                            case SmartImportField.Notes: notes = string.IsNullOrWhiteSpace(val) ? null : val; break;
+                        }
+                    }
+
+                    bool isTermValid = !string.IsNullOrWhiteSpace(term);
+                    string normalized = term.ToLowerInvariant();
+                    bool isDuplicate = isTermValid && existingTerms.Contains(normalized);
+
+                    string? validationMsg = null;
+                    if (!isTermValid) validationMsg = "Thiếu thuật ngữ / Missing term.";
+                    else if (string.IsNullOrWhiteSpace(defVi)) validationMsg = "Thiếu định nghĩa tiếng Việt / Missing Vietnamese definition.";
+
+                    previewItems.Add(new SmartImportItemDto(
+                        RowIndex: rowIdx,
+                        Term: term,
+                        Level: level,
+                        PartOfSpeech: pos,
+                        DefinitionVi: defVi,
+                        DefinitionEn: defEn,
+                        PhoneticUk: ipaUk,
+                        PhoneticUs: ipaUs,
+                        Examples: examples,
+                        Topics: topics,
+                        ExamTags: examTags,
+                        Notes: notes,
+                        IsDuplicate: isDuplicate,
+                        IsValid: isTermValid && !string.IsNullOrWhiteSpace(defVi),
+                        ValidationMessage: validationMsg
+                    ));
+                }
+            }
+        }
+
+        if (format == DataFormat.Txt)
+        {
+            headers.AddRange(["Term", "DefinitionVi", "PartOfSpeech / Level", "Examples"]);
+            mappings.AddRange([
+                new("Col 1", SmartImportField.Term),
+                new("Col 2", SmartImportField.DefinitionVi),
+                new("Col 3", SmartImportField.PartOfSpeech),
+                new("Col 4", SmartImportField.Examples)
+            ]);
+
+            var lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            int rowIdx = 0;
+            foreach (var rawLine in lines)
+            {
+                if (string.IsNullOrWhiteSpace(rawLine) || rawLine.StartsWith('#') || rawLine.StartsWith("//")) continue;
+                rowIdx++;
+
+                string term = "";
+                string defVi = "";
+                PartOfSpeech pos = PartOfSpeech.Noun;
+                CefrLevel level = CefrLevel.None;
+                string? examples = null;
+
+                if (rawLine.Contains('\t'))
+                {
+                    var parts = rawLine.Split('\t', StringSplitOptions.TrimEntries);
+                    if (parts.Length > 0) term = parts[0];
+                    if (parts.Length > 1) defVi = parts[1];
+                    if (parts.Length > 2)
+                    {
+                        pos = ParsePartOfSpeech(parts[2]);
+                        level = ParseCefrLevel(parts[2]);
+                    }
+                    if (parts.Length > 3) examples = parts[3];
+                }
+                else if (rawLine.Contains(" - "))
+                {
+                    var parts = rawLine.Split(new[] { " - " }, StringSplitOptions.TrimEntries);
+                    if (parts.Length > 0) term = parts[0];
+                    if (parts.Length > 1) defVi = parts[1];
+                    if (parts.Length > 2) examples = parts[2];
+                }
+                else if (rawLine.Contains(':'))
+                {
+                    int colonIdx = rawLine.IndexOf(':');
+                    term = rawLine.Substring(0, colonIdx).Trim();
+                    defVi = rawLine.Substring(colonIdx + 1).Trim();
+                }
+                else
+                {
+                    term = rawLine.Trim();
+                }
+
+                // If term contains parenthetical POS e.g. "abundant (adj)", extract it
+                if (term.Contains('(') && term.Contains(')'))
+                {
+                    int start = term.IndexOf('(');
+                    int end = term.IndexOf(')', start);
+                    if (end > start)
+                    {
+                        var inside = term.Substring(start + 1, end - start - 1);
+                        var detectedPos = ParsePartOfSpeech(inside);
+                        if (detectedPos != PartOfSpeech.Noun || inside.Equals("n", StringComparison.OrdinalIgnoreCase))
+                        {
+                            pos = detectedPos;
+                            term = (term.Substring(0, start) + term.Substring(end + 1)).Trim();
+                        }
+                    }
+                }
+
+                bool isTermValid = !string.IsNullOrWhiteSpace(term);
+                string normalized = term.ToLowerInvariant();
+                bool isDuplicate = isTermValid && existingTerms.Contains(normalized);
+
+                string? validationMsg = null;
+                if (!isTermValid) validationMsg = "Thiếu thuật ngữ / Missing term.";
+                else if (string.IsNullOrWhiteSpace(defVi)) validationMsg = "Thiếu định nghĩa / Missing definition.";
+
+                previewItems.Add(new SmartImportItemDto(
+                    RowIndex: rowIdx,
+                    Term: term,
+                    Level: level,
+                    PartOfSpeech: pos,
+                    DefinitionVi: defVi,
+                    DefinitionEn: null,
+                    PhoneticUk: null,
+                    PhoneticUs: null,
+                    Examples: examples,
+                    Topics: null,
+                    ExamTags: null,
+                    Notes: null,
+                    IsDuplicate: isDuplicate,
+                    IsValid: isTermValid && !string.IsNullOrWhiteSpace(defVi),
+                    ValidationMessage: validationMsg
+                ));
+            }
+        }
+
+        int total = previewItems.Count;
+        int valid = previewItems.Count(p => p.IsValid && !p.IsDuplicate);
+        int duplicate = previewItems.Count(p => p.IsDuplicate);
+        int invalid = previewItems.Count(p => !p.IsValid);
+
+        return new SmartImportAnalysisResultDto(
+            DetectedFormat: format,
+            AvailableHeaders: headers,
+            ColumnMappings: mappings,
+            PreviewItems: previewItems,
+            TotalParsed: total,
+            ValidCount: valid,
+            DuplicateCount: duplicate,
+            InvalidCount: invalid
+        );
+    }
+
+    public async Task<SmartImportCommitResultDto> CommitSmartImportAsync(
+        SmartImportCommitRequestDto request,
+        CancellationToken cancellationToken = default,
+        IProgress<ProgressReport>? progress = null)
+    {
+        int imported = 0;
+        int updated = 0;
+        int skipped = 0;
+        var errors = new List<string>();
+
+        var selectedItems = request.Items.Where(i => i.IsSelected && i.IsValid).ToList();
+        int total = selectedItems.Count;
+
+        if (total == 0)
+        {
+            return new SmartImportCommitResultDto(0, 0, 0, new List<string> { "Không có mục hợp lệ nào được chọn / No valid items selected." });
+        }
+
+        var rawTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
+        var allTopics = rawTopics != null ? rawTopics.ToDictionary(t => t.Name.ToLowerInvariant()) : new Dictionary<string, Topic>();
+
+        var rawTags = await _vocabRepo.GetAllExamTagsAsync(cancellationToken);
+        var allExamTags = rawTags != null ? rawTags.ToDictionary(et => et.Name.ToLowerInvariant()) : new Dictionary<string, ExamTag>();
+
+        int current = 0;
+        foreach (var item in selectedItems)
+        {
+            current++;
+            if (current % 10 == 0 || current == total)
+            {
+                int pct = (int)((double)current / total * 80) + 10;
+                progress?.Report(new ProgressReport(pct, current, total, $"Đang nhập: {current} / {total}", item.Term));
+            }
+
+            var normalized = item.Term.Trim().ToLowerInvariant();
+            var existing = await _vocabRepo.GetByTermAsync(normalized, cancellationToken);
+
+            if (existing != null)
+            {
+                if (request.ConflictResolution == ImportConflictResolution.Overwrite)
+                {
+                    if (item.Level != CefrLevel.None) existing.Level = item.Level;
+                    if (!string.IsNullOrWhiteSpace(item.PhoneticUk)) existing.PhoneticUk = item.PhoneticUk;
+                    if (!string.IsNullOrWhiteSpace(item.PhoneticUs)) existing.PhoneticUs = item.PhoneticUs;
+                    if (!string.IsNullOrWhiteSpace(item.Notes)) existing.Notes = item.Notes;
+
+                    // Merge meaning if not existing
+                    bool hasMeaning = existing.Meanings.Any(m => string.Equals(m.DefinitionVi.Trim(), item.DefinitionVi.Trim(), StringComparison.OrdinalIgnoreCase));
+                    if (!hasMeaning && !string.IsNullOrWhiteSpace(item.DefinitionVi))
+                    {
+                        var newM = new WordMeaning
+                        {
+                            WordId = existing.Id,
+                            PartOfSpeech = item.PartOfSpeech,
+                            DefinitionVi = item.DefinitionVi.Trim(),
+                            DefinitionEn = item.DefinitionEn?.Trim(),
+                            OrderIndex = existing.Meanings.Count
+                        };
+                        if (!string.IsNullOrWhiteSpace(item.Examples))
+                        {
+                            var exTokens = item.Examples.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                            foreach (var ex in exTokens)
+                            {
+                                newM.Examples.Add(new ExampleSentence { WordMeaningId = newM.Id, SentenceEn = ex.Trim() });
+                            }
+                        }
+                        existing.Meanings.Add(newM);
+                    }
+
+                    await _vocabRepo.UpdateAsync(existing, cancellationToken);
+                    updated++;
+                }
+                else
+                {
+                    skipped++;
+                }
+                continue;
+            }
+
+            // New word
+            var word = new Word
+            {
+                Term = item.Term.Trim(),
+                NormalizedTerm = normalized,
+                PhoneticUk = string.IsNullOrWhiteSpace(item.PhoneticUk) ? null : item.PhoneticUk.Trim(),
+                PhoneticUs = string.IsNullOrWhiteSpace(item.PhoneticUs) ? null : item.PhoneticUs.Trim(),
+                Level = item.Level,
+                PrimaryPartOfSpeech = item.PartOfSpeech,
+                Notes = string.IsNullOrWhiteSpace(item.Notes) ? null : item.Notes.Trim(),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var meaning = new WordMeaning
+            {
+                WordId = word.Id,
+                PartOfSpeech = item.PartOfSpeech,
+                DefinitionVi = item.DefinitionVi.Trim(),
+                DefinitionEn = string.IsNullOrWhiteSpace(item.DefinitionEn) ? null : item.DefinitionEn.Trim(),
+                OrderIndex = 0
+            };
+
+            if (!string.IsNullOrWhiteSpace(item.Examples))
+            {
+                var exTokens = item.Examples.Split(new[] { '|', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                foreach (var ex in exTokens)
+                {
+                    meaning.Examples.Add(new ExampleSentence { WordMeaningId = meaning.Id, SentenceEn = ex.Trim() });
+                }
+            }
+            word.Meanings.Add(meaning);
+
+            // Link topics
+            if (!string.IsNullOrWhiteSpace(item.Topics))
+            {
+                var tTokens = item.Topics.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                foreach (var tname in tTokens)
+                {
+                    if (allTopics.TryGetValue(tname.ToLowerInvariant(), out var top))
+                    {
+                        word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = top.Id });
+                    }
+                }
+            }
+
+            // Link exam tags
+            if (!string.IsNullOrWhiteSpace(item.ExamTags))
+            {
+                var etTokens = item.ExamTags.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                foreach (var etname in etTokens)
+                {
+                    if (allExamTags.TryGetValue(etname.ToLowerInvariant(), out var et))
+                    {
+                        word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = et.Id });
+                    }
+                }
+            }
+
+            word.ReviewCard = new ReviewCard
+            {
+                WordId = word.Id,
+                Status = LearningStatus.New,
+                NextReviewAt = DateTime.UtcNow
+            };
+
+            await _vocabRepo.AddAsync(word, cancellationToken);
+            imported++;
+        }
+
+        progress?.Report(new ProgressReport(95, total, total, "Đang lưu thay đổi vào cơ sở dữ liệu...", "Saving transaction..."));
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        progress?.Report(new ProgressReport(100, total, total, "Hoàn tất nhập dữ liệu!", "Import complete."));
+
+        return new SmartImportCommitResultDto(imported, updated, skipped, errors);
+    }
+
     public async Task<ImportResult> ImportFromJsonAsync(
         string jsonContent,
         ImportConflictResolution conflictResolution = ImportConflictResolution.Skip,
@@ -1077,6 +1550,7 @@ public class ExportImportService : IExportImportService
             "idm" or "idiom" or "thành ngữ" or "thanh ngu" => PartOfSpeech.Idiom,
             "phrv" or "phr v" or "phrasal verb" or "phrasal_verb" or "cụm động từ" or "cum dong tu" => PartOfSpeech.PhrasalVerb,
             "np" or "noun phrase" or "noun_phrase" or "cụm danh từ" or "cum danh tu" => PartOfSpeech.NounPhrase,
+            "phrase" or "phr" or "cụm từ" or "cum tu" => PartOfSpeech.Phrase,
             _ => defaultPos
         };
     }
@@ -1229,5 +1703,42 @@ public class ExportImportService : IExportImportService
     {
         public string SentenceEn { get; set; } = string.Empty;
         public string SentenceVi { get; set; } = string.Empty;
+    }
+
+    private static List<string> ParseCsvLine(string line, char delimiter)
+    {
+        var result = new List<string>();
+        if (string.IsNullOrEmpty(line)) return result;
+
+        var sb = new StringBuilder();
+        bool inQuotes = false;
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    sb.Append('"');
+                    i++; // skip escaped quote
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == delimiter && !inQuotes)
+            {
+                result.Add(sb.ToString().Trim());
+                sb.Clear();
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+        result.Add(sb.ToString().Trim());
+        return result;
     }
 }

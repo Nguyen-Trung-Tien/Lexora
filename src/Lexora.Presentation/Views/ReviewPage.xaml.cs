@@ -30,6 +30,7 @@ public sealed partial class ReviewPage : Page
             Focus(FocusState.Programmatic);
         };
 
+        PreviewKeyDown += ReviewPage_PreviewKeyDown;
         KeyDown += ReviewPage_KeyDown;
 
         Loc.LanguageChanged += OnLanguageChanged;
@@ -98,6 +99,24 @@ public sealed partial class ReviewPage : Page
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[ReviewPage] OnNavigatedTo error: {ex.Message}");
+        }
+    }
+
+    private void ReviewPage_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (ViewModel.IsCompleted || ViewModel.IsLoading) return;
+
+        // Guard against hotkeys when typing in a text box
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+
+        if (e.Key == VirtualKey.Space && !ViewModel.IsAnswerVisible && !ViewModel.IsTypingRecallActive)
+        {
+            e.Handled = true;
+            ViewModel.RevealAnswer();
+            if (_preferencesService.GetPreferences().AutoPlayAudio)
+            {
+                _ = ViewModel.PlayUkAudioAsync();
+            }
         }
     }
 

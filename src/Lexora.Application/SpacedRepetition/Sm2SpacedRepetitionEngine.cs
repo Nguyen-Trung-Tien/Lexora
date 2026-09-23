@@ -44,7 +44,7 @@ public class Sm2SpacedRepetitionEngine : ISpacedRepetitionEngine
                 if (reps == 0)
                     interval = 1;
                 else if (reps == 1)
-                    interval = 4;
+                    interval = 6;
                 else
                     interval = Math.Max(1, (int)Math.Round(card.IntervalDays * ef));
 

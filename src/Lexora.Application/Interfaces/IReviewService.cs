@@ -7,6 +7,7 @@ namespace Lexora.Application.Interfaces;
 public interface IReviewService
 {
     Task<IReadOnlyList<ReviewCardDto>> GetDueCardsAsync(int limit = 50, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ReviewCardDto>> GetBalancedReviewQueueAsync(int limit = 30, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ReviewCardDto>> GetNewCardsAsync(int limit = 20, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ReviewCardDto>> GetDifficultCardsAsync(int limit = 20, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ReviewCardDto>> GetCardsByTopicIdAsync(Guid topicId, int limit = 50, CancellationToken cancellationToken = default);

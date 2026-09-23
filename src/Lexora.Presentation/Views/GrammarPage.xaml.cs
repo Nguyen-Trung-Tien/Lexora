@@ -103,10 +103,39 @@ public sealed partial class GrammarPage : Page
             BtnSelectMode.Style = (Style)App.Current.Resources["DefaultButtonStyle"];
             IconSelectMode.Glyph = "\uE762";
             TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
-            RulesListView.SelectionMode = ListViewSelectionMode.Single;
-            RulesListView.SelectedItems.Clear();
+            try
+            {
+                RulesListView.SelectedItems.Clear();
+                RulesListView.SelectionMode = ListViewSelectionMode.Single;
+            }
+            catch { }
             ViewModel.ClearSelection();
         }
+    }
+
+    private DispatcherTimer? _notificationTimer;
+
+    private void ShowNotification(InfoBarSeverity severity, string title, string message, int autoCloseMs = 5000)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            _notificationTimer?.Stop();
+            PageNotificationInfoBar.Severity = severity;
+            PageNotificationInfoBar.Title = title;
+            PageNotificationInfoBar.Message = message;
+            PageNotificationInfoBar.IsOpen = true;
+
+            if (autoCloseMs > 0)
+            {
+                _notificationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(autoCloseMs) };
+                _notificationTimer.Tick += (s, e) =>
+                {
+                    _notificationTimer.Stop();
+                    PageNotificationInfoBar.IsOpen = false;
+                };
+                _notificationTimer.Start();
+            }
+        });
     }
 
     private void UpdateDeleteSelectedButtonText()
@@ -169,16 +198,21 @@ public sealed partial class GrammarPage : Page
 
                 // WinUI 3 stability fix: Clear ListView selection and revert to Single selection mode
                 // BEFORE modifying or reloading backing collection to prevent fatal NullReferenceException
-                RulesListView.SelectedItems.Clear();
-                RulesListView.SelectionMode = ListViewSelectionMode.Single;
+                try
+                {
+                    RulesListView.SelectedItems.Clear();
+                    RulesListView.SelectionMode = ListViewSelectionMode.Single;
+                }
+                catch { }
                 ViewModel.IsSelectionMode = false;
 
                 await Task.Yield();
-                await ViewModel.DeleteSelectedRulesAsync();
+                var deletedCount = await ViewModel.DeleteSelectedRulesAsync();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Grammar_BulkDeleteSuccess"), deletedCount));
             }
             catch (Exception ex)
             {
-                await ShowErrorDialogAsync(Loc.GetString("Action_Delete"), ex.Message);
+                ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), ex.Message);
             }
             finally
             {
@@ -246,7 +280,10 @@ public sealed partial class GrammarPage : Page
 
     private async void DeleteRuleButton_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.SelectedRule == null) return;
+        var ruleToDelete = ViewModel.SelectedRule;
+        if (ruleToDelete == null) return;
+        var ruleId = ruleToDelete.Id;
+        var ruleTitle = ruleToDelete.Title;
 
         try
         {
@@ -254,7 +291,7 @@ public sealed partial class GrammarPage : Page
             var confirmDialog = new ContentDialog
             {
                 Title = Loc.GetString("Grammar_DeleteTitle"),
-                Content = string.Format(Loc.GetString("Grammar_DeleteConfirm"), ViewModel.SelectedRule.Title),
+                Content = string.Format(Loc.GetString("Grammar_DeleteConfirm"), ruleTitle),
                 PrimaryButtonText = Loc.GetString("Action_Delete"),
                 CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Close,
@@ -268,11 +305,13 @@ public sealed partial class GrammarPage : Page
                 try
                 {
                     await Task.Yield();
-                    await ViewModel.DeleteRuleAsync(ViewModel.SelectedRule.Id);
+                    ViewModel.Rules.Remove(ruleToDelete);
+                    await ViewModel.DeleteRuleAsync(ruleId);
+                    ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Grammar_Status_RuleDeleted"), ruleTitle));
                 }
                 catch (Exception ex)
                 {
-                    await ShowErrorDialogAsync(Loc.GetString("Action_Delete"), ex.Message);
+                    ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), ex.Message);
                 }
             }
         }
@@ -542,6 +581,8 @@ public sealed partial class GrammarPage : Page
 
         if (!string.IsNullOrEmpty(savedPath))
         {
+            ShowNotification(InfoBarSeverity.Success, Loc.GetString("Grammar_ExportCompleteTitle"), string.Format(Loc.GetString("Grammar_ExportCompleteMsg"), ViewModel.Rules.Count, Path.GetFileName(savedPath)));
+
             var exportTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
                 ? ElementTheme.Dark : ElementTheme.Light;
             var dialog = new ContentDialog
@@ -598,20 +639,26 @@ public sealed partial class GrammarPage : Page
         try
         {
             await Task.Yield();
-            var dialog = new SmartImportDialog(format => ViewModel.GetSampleTemplate(format))
+            var dialog = new SmartImportDialog(format => ViewModel.GetSampleTemplate(format), isGrammarMode: true)
             {
                 XamlRoot = this.XamlRoot
             };
 
             var res = await dialog.ShowAsyncSafe();
-            if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
+            if (dialog.WasCommitted)
+            {
+                await ViewModel.LoadRulesAsync();
+                await ViewModel.LoadTopicsAsync();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
+            }
+            else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
             {
                 await ExecuteImportOperationAsync(dialog.ContentToImport, dialog.FileNameHint, dialog.ConflictResolution);
             }
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(Loc.GetString("Grammar_ImportFailed"), ex.Message);
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Grammar_ImportFailed"), ex.Message);
         }
     }
 
@@ -750,6 +797,11 @@ public sealed partial class GrammarPage : Page
                 importResult.TotalSkipped,
                 importResult.Errors.Count,
                 Loc.GetString("Action_Close"));
+
+            ShowNotification(
+                importResult.Errors.Count > 0 ? InfoBarSeverity.Warning : InfoBarSeverity.Success,
+                Loc.GetString("Progress_CompletedTitle"),
+                summary);
         }
         catch (Exception ex)
         {
@@ -757,6 +809,8 @@ public sealed partial class GrammarPage : Page
                 Loc.GetString("Grammar_ImportFailed"),
                 ex.Message,
                 Loc.GetString("Action_Close"));
+
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Grammar_ImportFailed"), ex.Message);
         }
     }
 

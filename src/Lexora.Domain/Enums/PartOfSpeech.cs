@@ -11,5 +11,6 @@ public enum PartOfSpeech
     Preposition = 7,   // prep
     Conjunction = 8,   // conj
     Idiom = 9,         // idiom
-    Interjection = 10  // interj
+    Interjection = 10, // interj
+    Phrase = 11        // phrase
 }

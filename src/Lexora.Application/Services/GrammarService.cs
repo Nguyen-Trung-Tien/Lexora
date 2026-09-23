@@ -145,7 +145,8 @@ public class GrammarService : IGrammarService
 
     public async Task DeleteRuleAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var rule = await _grammarRepo.GetByIdAsync(id, cancellationToken);
+        var rule = await _grammarRepo.GetWithExamplesAsync(id, cancellationToken)
+                   ?? await _grammarRepo.GetByIdAsync(id, cancellationToken);
         if (rule != null)
         {
             await _grammarRepo.DeleteAsync(rule, cancellationToken);
@@ -162,7 +163,8 @@ public class GrammarService : IGrammarService
         int deletedCount = 0;
         foreach (var id in idList)
         {
-            var rule = await _grammarRepo.GetByIdAsync(id, cancellationToken);
+            var rule = await _grammarRepo.GetWithExamplesAsync(id, cancellationToken)
+                       ?? await _grammarRepo.GetByIdAsync(id, cancellationToken);
             if (rule != null)
             {
                 await _grammarRepo.DeleteAsync(rule, cancellationToken);

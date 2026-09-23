@@ -77,7 +77,7 @@ public class Sm2SpacedRepetitionEngineTests
     }
 
     [Fact]
-    public void CalculateNextReview_WhenSecondGoodReview_ShouldSetIntervalToFour()
+    public void CalculateNextReview_WhenSecondGoodReview_ShouldSetIntervalToSix()
     {
         // Arrange
         var card = new ReviewCard
@@ -93,7 +93,7 @@ public class Sm2SpacedRepetitionEngineTests
 
         // Assert
         result.NewRepetitions.Should().Be(2);
-        result.NewIntervalDays.Should().Be(4);
+        result.NewIntervalDays.Should().Be(6);
         result.NewStatus.Should().Be(LearningStatus.Remembered);
     }
 

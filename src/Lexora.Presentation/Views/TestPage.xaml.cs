@@ -23,7 +23,11 @@ public sealed partial class TestPage : Page
         KeyDown += TestPage_KeyDown;
 
         Loc.LanguageChanged += OnLanguageChanged;
-        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+        Unloaded += (s, e) =>
+        {
+            Loc.LanguageChanged -= OnLanguageChanged;
+            ViewModel.CleanupSession();
+        };
 
         ActualThemeChanged += (s, e) =>
         {
@@ -66,6 +70,12 @@ public sealed partial class TestPage : Page
         {
             System.Diagnostics.Debug.WriteLine($"[TestPage] OnNavigatedTo error: {ex.Message}");
         }
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        ViewModel.CleanupSession();
     }
 
     private async void TestPage_KeyDown(object sender, KeyRoutedEventArgs e)

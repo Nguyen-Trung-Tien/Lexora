@@ -142,6 +142,8 @@ public class VocabularyBulkDeleteAndDtoTests
 
         // Assert
         dto.IsIdiomOrPhrase.Should().BeTrue();
+        dto.IsIdiom.Should().BeTrue();
+        dto.IsPhrasalVerb.Should().BeFalse();
         dto.HasMultiplePartsOfSpeech.Should().BeFalse();
         dto.PartsOfSpeechDisplay.Should().Be("idiom");
     }
@@ -175,6 +177,8 @@ public class VocabularyBulkDeleteAndDtoTests
 
         // Assert
         dto.IsIdiomOrPhrase.Should().BeTrue();
+        dto.IsIdiom.Should().BeFalse();
+        dto.IsPhrasalVerb.Should().BeTrue();
         dto.PartsOfSpeechDisplay.Should().Be("phr. v.");
     }
 }

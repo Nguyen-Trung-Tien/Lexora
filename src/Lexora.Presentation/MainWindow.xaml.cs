@@ -262,6 +262,12 @@ public sealed partial class MainWindow : Window
                 }
 
                 await SplashOverlay.PlayExitAsync();
+
+                if (Program.PendingActivation)
+                {
+                    Program.PendingActivation = false;
+                    BringToForeground();
+                }
             }
         }
         catch (OperationCanceledException)

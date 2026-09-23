@@ -375,11 +375,41 @@ public sealed partial class VocabularyPage : Page
         }
         else
         {
-            WordsListView.SelectionMode = ListViewSelectionMode.Single;
+            try
+            {
+                WordsListView.SelectedItems.Clear();
+                WordsListView.SelectionMode = ListViewSelectionMode.Single;
+            }
+            catch { }
             TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
             IconSelectMode.Glyph = "\uE762";
             ViewModel.SelectedWordIds.Clear();
         }
+    }
+
+    private DispatcherTimer? _notificationTimer;
+
+    private void ShowNotification(InfoBarSeverity severity, string title, string message, int autoCloseMs = 5000)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            _notificationTimer?.Stop();
+            PageNotificationInfoBar.Severity = severity;
+            PageNotificationInfoBar.Title = title;
+            PageNotificationInfoBar.Message = message;
+            PageNotificationInfoBar.IsOpen = true;
+
+            if (autoCloseMs > 0)
+            {
+                _notificationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(autoCloseMs) };
+                _notificationTimer.Tick += (s, e) =>
+                {
+                    _notificationTimer.Stop();
+                    PageNotificationInfoBar.IsOpen = false;
+                };
+                _notificationTimer.Start();
+            }
+        });
     }
 
     private void WordsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -441,18 +471,21 @@ public sealed partial class VocabularyPage : Page
                 BtnDeleteSelectedWords.IsEnabled = false;
                 BtnSelectMode.IsEnabled = false;
 
-                // WinUI 3 stability fix: Clear ListView selection and revert to Single selection mode
-                // BEFORE modifying or reloading backing collection to prevent fatal NullReferenceException
-                WordsListView.SelectedItems.Clear();
-                WordsListView.SelectionMode = ListViewSelectionMode.Single;
+                try
+                {
+                    WordsListView.SelectedItems.Clear();
+                    WordsListView.SelectionMode = ListViewSelectionMode.Single;
+                }
+                catch { }
                 ViewModel.IsSelectionMode = false;
 
                 await Task.Yield();
-                await ViewModel.DeleteSelectedWordsAsync();
+                var deletedCount = await ViewModel.DeleteSelectedWordsAsync();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_BulkDeleteSuccess"), deletedCount));
             }
             catch (Exception ex)
             {
-                ShowErrorDialog(Loc.GetString("Action_Delete"), ex.Message);
+                ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), ex.Message);
             }
             finally
             {
@@ -614,7 +647,10 @@ public sealed partial class VocabularyPage : Page
 
     private async void DeleteWordButton_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.SelectedWord == null) return;
+        var wordToDelete = ViewModel.SelectedWord;
+        if (wordToDelete == null) return;
+        var wordId = wordToDelete.Id;
+        var wordTerm = wordToDelete.Term;
 
         try
         {
@@ -622,7 +658,7 @@ public sealed partial class VocabularyPage : Page
             var confirmDialog = new ContentDialog
             {
                 Title = Loc.GetString("Vocab_DeleteTitle"),
-                Content = string.Format(Loc.GetString("Vocab_DeleteConfirm"), ViewModel.SelectedWord.Term),
+                Content = string.Format(Loc.GetString("Vocab_DeleteConfirm"), wordTerm),
                 PrimaryButtonText = Loc.GetString("Action_Delete"),
                 CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Close,
@@ -636,11 +672,13 @@ public sealed partial class VocabularyPage : Page
                 try
                 {
                     await Task.Yield();
-                    await ViewModel.DeleteWordAsync(ViewModel.SelectedWord.Id);
+                    ViewModel.Words.Remove(wordToDelete);
+                    await ViewModel.DeleteWordAsync(wordId);
+                    ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_Status_WordDeleted"), wordTerm));
                 }
                 catch (Exception ex)
                 {
-                    ShowErrorDialog(Loc.GetString("Action_Delete"), ex.Message);
+                    ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), ex.Message);
                 }
             }
         }
@@ -839,6 +877,8 @@ public sealed partial class VocabularyPage : Page
 
         if (!string.IsNullOrEmpty(savedPath))
         {
+            ShowNotification(InfoBarSeverity.Success, Loc.GetString("Vocab_ExportCompleteTitle"), string.Format(Loc.GetString("Vocab_ExportCompleteMsg"), ViewModel.Words.Count, Path.GetFileName(savedPath)));
+
             var exportCompleteTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
             var dialog = new ContentDialog
             {
@@ -925,7 +965,12 @@ public sealed partial class VocabularyPage : Page
             };
 
             var res = await dialog.ShowAsyncSafe();
-            if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
+            if (dialog.WasCommitted)
+            {
+                await ViewModel.LoadWordsAsync();
+                PopulateTopicFilterCombo();
+            }
+            else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
             {
                 await ExecuteImportOperationAsync(dialog.ContentToImport, dialog.FileNameHint, dialog.ConflictResolution);
             }
@@ -1081,6 +1126,11 @@ public sealed partial class VocabularyPage : Page
                 importResult.TotalSkipped,
                 importResult.Errors.Count,
                 Loc.GetString("Action_Close"));
+
+            ShowNotification(
+                importResult.Errors.Count > 0 ? InfoBarSeverity.Warning : InfoBarSeverity.Success,
+                Loc.GetString("Progress_CompletedTitle"),
+                summary);
         }
         catch (Exception ex)
         {
@@ -1088,6 +1138,8 @@ public sealed partial class VocabularyPage : Page
                 Loc.GetString("Vocab_ImportFailed"),
                 ex.Message,
                 Loc.GetString("Action_Close"));
+
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Vocab_ImportFailed"), ex.Message);
         }
     }
 

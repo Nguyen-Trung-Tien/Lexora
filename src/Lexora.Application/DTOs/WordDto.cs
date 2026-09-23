@@ -50,8 +50,14 @@ public record WordDto(
 
     public bool HasMultiplePartsOfSpeech => AllPartsOfSpeech.Count > 1;
 
+    public bool IsIdiom => AllPartsOfSpeech.Contains(PartOfSpeech.Idiom);
+
+    public bool IsPhrasalVerb => AllPartsOfSpeech.Contains(PartOfSpeech.PhrasalVerb);
+
+    public bool IsPhrase => AllPartsOfSpeech.Any(p => p is PartOfSpeech.Phrase or PartOfSpeech.NounPhrase);
+
     public bool IsIdiomOrPhrase => AllPartsOfSpeech.Any(p =>
-        p is PartOfSpeech.Idiom or PartOfSpeech.NounPhrase or PartOfSpeech.PhrasalVerb);
+        p is PartOfSpeech.Idiom or PartOfSpeech.NounPhrase or PartOfSpeech.PhrasalVerb or PartOfSpeech.Phrase);
 
     public string PartsOfSpeechDisplay
     {

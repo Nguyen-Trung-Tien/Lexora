@@ -306,6 +306,7 @@ public class TestService : ITestService
         List<Word> distractorPool)
     {
         var primaryMeaning = word.Meanings.OrderBy(m => m.OrderIndex).FirstOrDefault();
+        var targetPos = primaryMeaning?.PartOfSpeech ?? word.PrimaryPartOfSpeech;
         string definitionVi = primaryMeaning?.DefinitionVi ?? word.Term;
         string? phonetic = word.PhoneticUs ?? word.PhoneticUk;
         string? audio = word.AudioUsPath ?? word.AudioUkPath;
@@ -320,39 +321,63 @@ public class TestService : ITestService
         {
             case TestType.WordToMeaning:
                 prompt = $"What is the meaning of \"{word.Term}\"?";
-                subPrompt = !string.IsNullOrEmpty(phonetic) ? phonetic : $"Part of speech: {word.PrimaryPartOfSpeech}";
+                subPrompt = !string.IsNullOrEmpty(phonetic) ? phonetic : $"Part of speech: {targetPos}";
                 correctAnswer = definitionVi;
-                explanation = $"{word.Term} ({word.PrimaryPartOfSpeech}): {definitionVi}";
+                explanation = $"{word.Term} ({targetPos}): {definitionVi}";
 
                 options.Add(correctAnswer);
-                var wrongMeanings = distractorPool
-                    .Where(w => w.Id != word.Id)
-                    .SelectMany(w => w.Meanings)
-                    .Select(m => m.DefinitionVi)
+                var samePosMeanings = distractorPool
+                    .Where(w => w.Id != word.Id && (w.PrimaryPartOfSpeech == targetPos || w.Meanings.Any(m => m.PartOfSpeech == targetPos)))
+                    .SelectMany(w => w.Meanings.Where(m => m.PartOfSpeech == targetPos).DefaultIfEmpty(w.Meanings.FirstOrDefault()))
+                    .Where(m => m != null)
+                    .Select(m => m!.DefinitionVi)
                     .Where(d => !string.IsNullOrWhiteSpace(d) && !d.Equals(correctAnswer, StringComparison.OrdinalIgnoreCase))
                     .Distinct()
                     .OrderBy(_ => Random.Shared.Next())
                     .Take(3)
                     .ToList();
-                options.AddRange(wrongMeanings);
+
+                var otherMeanings = distractorPool
+                    .Where(w => w.Id != word.Id && w.PrimaryPartOfSpeech != targetPos && !w.Meanings.Any(m => m.PartOfSpeech == targetPos))
+                    .SelectMany(w => w.Meanings)
+                    .Select(m => m.DefinitionVi)
+                    .Where(d => !string.IsNullOrWhiteSpace(d) && !d.Equals(correctAnswer, StringComparison.OrdinalIgnoreCase) && !samePosMeanings.Contains(d))
+                    .Distinct()
+                    .OrderBy(_ => Random.Shared.Next())
+                    .Take(Math.Max(0, 3 - samePosMeanings.Count))
+                    .ToList();
+
+                options.AddRange(samePosMeanings);
+                options.AddRange(otherMeanings);
                 break;
 
             case TestType.MeaningToWord:
                 prompt = $"Which word means: \"{definitionVi}\"?";
-                subPrompt = $"Part of speech: {word.PrimaryPartOfSpeech}";
+                subPrompt = $"Part of speech: {targetPos}";
                 correctAnswer = word.Term;
                 explanation = $"{word.Term} [{phonetic}] — {definitionVi}";
 
                 options.Add(correctAnswer);
-                var wrongTerms = distractorPool
-                    .Where(w => w.Id != word.Id)
+                var samePosTerms = distractorPool
+                    .Where(w => w.Id != word.Id && (w.PrimaryPartOfSpeech == targetPos || w.Meanings.Any(m => m.PartOfSpeech == targetPos)))
                     .Select(w => w.Term)
                     .Where(t => !t.Equals(correctAnswer, StringComparison.OrdinalIgnoreCase))
                     .Distinct()
                     .OrderBy(_ => Random.Shared.Next())
                     .Take(3)
                     .ToList();
-                options.AddRange(wrongTerms);
+
+                var otherTerms = distractorPool
+                    .Where(w => w.Id != word.Id && w.PrimaryPartOfSpeech != targetPos && !w.Meanings.Any(m => m.PartOfSpeech == targetPos))
+                    .Select(w => w.Term)
+                    .Where(t => !t.Equals(correctAnswer, StringComparison.OrdinalIgnoreCase) && !samePosTerms.Contains(t))
+                    .Distinct()
+                    .OrderBy(_ => Random.Shared.Next())
+                    .Take(Math.Max(0, 3 - samePosTerms.Count))
+                    .ToList();
+
+                options.AddRange(samePosTerms);
+                options.AddRange(otherTerms);
                 break;
 
             case TestType.FillInTheBlank:
@@ -384,15 +409,26 @@ public class TestService : ITestService
                 }
 
                 options.Add(correctAnswer);
-                var wrongWords = distractorPool
-                    .Where(w => w.Id != word.Id)
+                var samePosBlankWords = distractorPool
+                    .Where(w => w.Id != word.Id && w.PrimaryPartOfSpeech == word.PrimaryPartOfSpeech)
                     .Select(w => w.Term)
                     .Where(t => !t.Equals(correctAnswer, StringComparison.OrdinalIgnoreCase))
                     .Distinct()
                     .OrderBy(_ => Random.Shared.Next())
                     .Take(3)
                     .ToList();
-                options.AddRange(wrongWords);
+
+                var otherBlankWords = distractorPool
+                    .Where(w => w.Id != word.Id && w.PrimaryPartOfSpeech != word.PrimaryPartOfSpeech)
+                    .Select(w => w.Term)
+                    .Where(t => !t.Equals(correctAnswer, StringComparison.OrdinalIgnoreCase) && !samePosBlankWords.Contains(t))
+                    .Distinct()
+                    .OrderBy(_ => Random.Shared.Next())
+                    .Take(Math.Max(0, 3 - samePosBlankWords.Count))
+                    .ToList();
+
+                options.AddRange(samePosBlankWords);
+                options.AddRange(otherBlankWords);
                 break;
 
             case TestType.PartOfSpeech:

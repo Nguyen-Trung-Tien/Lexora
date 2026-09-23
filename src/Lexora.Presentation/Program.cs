@@ -40,12 +40,18 @@ public static class Program
         return isFirstInstance;
     }
 
+    public static bool PendingActivation { get; set; }
+
     private static void OnAppActivated(object? sender, AppActivationArguments args)
     {
         // When a second instance redirects to us, restore and activate MainWindow
         if (App.Current?.MainWindow is MainWindow window)
         {
             window.BringToForeground();
+        }
+        else
+        {
+            PendingActivation = true;
         }
     }
 

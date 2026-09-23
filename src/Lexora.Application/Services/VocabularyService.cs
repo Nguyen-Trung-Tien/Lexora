@@ -224,7 +224,8 @@ public class VocabularyService : IVocabularyService
 
     public async Task DeleteWordAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var word = await _vocabRepo.GetByIdAsync(id, cancellationToken);
+        var word = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken)
+                   ?? await _vocabRepo.GetByIdAsync(id, cancellationToken);
         if (word != null)
         {
             await _vocabRepo.DeleteAsync(word, cancellationToken);
@@ -238,15 +239,24 @@ public class VocabularyService : IVocabularyService
         var idList = ids.Distinct().ToList();
         if (idList.Count == 0) return 0;
 
-        int deletedCount = 0;
-        foreach (var id in idList)
+        var words = await _vocabRepo.GetByIdsWithDetailsAsync(idList, cancellationToken);
+        if (words == null || words.Count == 0)
         {
-            var word = await _vocabRepo.GetByIdAsync(id, cancellationToken);
-            if (word != null)
+            var fallbackWords = new List<Word>();
+            foreach (var id in idList)
             {
-                await _vocabRepo.DeleteAsync(word, cancellationToken);
-                deletedCount++;
+                var w = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken)
+                        ?? await _vocabRepo.GetByIdAsync(id, cancellationToken);
+                if (w != null) fallbackWords.Add(w);
             }
+            words = fallbackWords;
+        }
+
+        int deletedCount = 0;
+        foreach (var word in words)
+        {
+            await _vocabRepo.DeleteAsync(word, cancellationToken);
+            deletedCount++;
         }
 
         if (deletedCount > 0)

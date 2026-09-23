@@ -29,6 +29,85 @@ public class ReviewService : IReviewService
         return cards.Select(MapToDto).ToList();
     }
 
+    public async Task<IReadOnlyList<ReviewCardDto>> GetBalancedReviewQueueAsync(int limit = 30, CancellationToken cancellationToken = default)
+    {
+        if (limit <= 0) limit = 30;
+
+        // Quotas: 50% mature due cards, 30% weak/lapsed, 20% new cards
+        int dueQuota = (int)Math.Ceiling(limit * 0.50);
+        int weakQuota = (int)Math.Ceiling(limit * 0.30);
+        int newQuota = limit - dueQuota - weakQuota;
+        if (newQuota <= 0) newQuota = (int)Math.Ceiling(limit * 0.20);
+
+        var result = new List<ReviewCardDto>();
+        var seenCardIds = new HashSet<Guid>();
+
+        // 1. Fetch Due Cards
+        var dueCards = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, dueQuota * 2, cancellationToken);
+        foreach (var c in dueCards)
+        {
+            if (result.Count >= dueQuota) break;
+            if (seenCardIds.Add(c.Id))
+            {
+                result.Add(MapToDto(c));
+            }
+        }
+
+        // 2. Fetch Weak / Difficult Cards
+        var weakCards = await _reviewRepo.GetDifficultCardsAsync(weakQuota * 2, cancellationToken);
+        int addedWeak = 0;
+        foreach (var c in weakCards)
+        {
+            if (addedWeak >= weakQuota || result.Count >= limit) break;
+            if (seenCardIds.Add(c.Id))
+            {
+                result.Add(MapToDto(c));
+                addedWeak++;
+            }
+        }
+
+        // 3. Fetch New Cards
+        var newCards = await _reviewRepo.GetNewCardsAsync(newQuota * 2, cancellationToken);
+        int addedNew = 0;
+        foreach (var c in newCards)
+        {
+            if (addedNew >= newQuota || result.Count >= limit) break;
+            if (seenCardIds.Add(c.Id))
+            {
+                result.Add(MapToDto(c));
+                addedNew++;
+            }
+        }
+
+        // 4. Backfill from remaining due cards if under limit
+        if (result.Count < limit)
+        {
+            foreach (var c in dueCards)
+            {
+                if (result.Count >= limit) break;
+                if (seenCardIds.Add(c.Id))
+                {
+                    result.Add(MapToDto(c));
+                }
+            }
+        }
+
+        // 5. Backfill from remaining new cards if still under limit
+        if (result.Count < limit)
+        {
+            foreach (var c in newCards)
+            {
+                if (result.Count >= limit) break;
+                if (seenCardIds.Add(c.Id))
+                {
+                    result.Add(MapToDto(c));
+                }
+            }
+        }
+
+        return result;
+    }
+
     public async Task<IReadOnlyList<ReviewCardDto>> GetNewCardsAsync(int limit = 20, CancellationToken cancellationToken = default)
     {
         var cards = await _reviewRepo.GetNewCardsAsync(limit, cancellationToken);

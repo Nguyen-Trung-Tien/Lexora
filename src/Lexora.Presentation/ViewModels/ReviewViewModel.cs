@@ -264,7 +264,7 @@ public partial class ReviewViewModel : ObservableObject
                 ReviewSessionMode.Difficult => await _reviewService.GetDifficultCardsAsync(limit: 20),
                 ReviewSessionMode.ByTopic when topicId.HasValue => await _reviewService.GetCardsByTopicIdAsync(topicId.Value, limit: 50),
                 ReviewSessionMode.CustomSelection when wordIds != null && wordIds.Count > 0 => await _reviewService.GetCardsByWordIdsAsync(wordIds),
-                _ => await _reviewService.GetDueCardsAsync(limit: 30)
+                _ => await _reviewService.GetBalancedReviewQueueAsync(limit: 30)
             };
 
             // If in TodayDue mode and empty, fallback to new cards automatically
@@ -331,13 +331,17 @@ public partial class ReviewViewModel : ObservableObject
         _soundFeedback?.PlayCardFlipSound();
     }
 
-    private bool _isRatingInProgress;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRate))]
+    public partial bool IsRatingInProgress { get; set; } = false;
+
+    public bool CanRate => !IsRatingInProgress && IsAnswerVisible && CurrentCard != null;
 
     [RelayCommand]
     public async Task RateCardAsync(ReviewRating rating)
     {
-        if (CurrentCard == null || _isRatingInProgress) return;
-        _isRatingInProgress = true;
+        if (CurrentCard == null || IsRatingInProgress) return;
+        IsRatingInProgress = true;
 
         try
         {
@@ -419,15 +423,15 @@ public partial class ReviewViewModel : ObservableObject
         }
         finally
         {
-            _isRatingInProgress = false;
+            IsRatingInProgress = false;
         }
     }
 
     [RelayCommand]
     public async Task UndoLastReviewAsync()
     {
-        if (_undoStack.Count == 0 || _isRatingInProgress) return;
-        _isRatingInProgress = true;
+        if (_undoStack.Count == 0 || IsRatingInProgress) return;
+        IsRatingInProgress = true;
 
         try
         {
@@ -464,7 +468,7 @@ public partial class ReviewViewModel : ObservableObject
         }
         finally
         {
-            _isRatingInProgress = false;
+            IsRatingInProgress = false;
         }
     }
 
