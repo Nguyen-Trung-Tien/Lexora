@@ -970,8 +970,12 @@ public sealed partial class VocabularyPage : Page
     {
         try
         {
-            await Task.Yield();
-            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.Content?.XamlRoot ?? this.XamlRoot;
+            // Ensure we are on the UI thread before constructing ContentDialog.
+            // Task.Yield() is unsafe here — it can resume on a thread-pool thread
+            // if no SynchronizationContext is installed, causing RPC_E_WRONG_THREAD.
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
 
             var dialog = new SmartImportDialog(format => ViewModel.GetSampleTemplate(format))
             {
@@ -993,6 +997,8 @@ public sealed partial class VocabularyPage : Page
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] SmartImport error: {ex}");
+            // Log full details to crash.log so the exception can be diagnosed.
+            Services.SafeDialogExtensions.LogSmartImportError("VocabularyPage", ex);
             ShowNotification(InfoBarSeverity.Error, Loc.GetString("Vocab_ImportFailed"), ex.Message);
         }
     }

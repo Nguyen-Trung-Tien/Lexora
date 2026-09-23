@@ -117,6 +117,24 @@ public static class SafeDialogExtensions
     }
 
     /// <summary>
+    /// Logs Smart Import errors to the local diagnostic crash.log file.
+    /// </summary>
+    public static void LogSmartImportError(string source, Exception ex)
+    {
+        try
+        {
+            var logDir = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Lexora");
+            System.IO.Directory.CreateDirectory(logDir);
+            var logPath = System.IO.Path.Combine(logDir, "crash.log");
+            var text = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [SmartImport] [{source}] Error: {ex.GetType().FullName}: {ex.Message}\nStackTrace:\n{ex.StackTrace}\nInnerException: {ex.InnerException}\n\n";
+            System.IO.File.AppendAllText(logPath, text);
+        }
+        catch { }
+    }
+
+    /// <summary>
     /// Safely hides the dialog if it is currently open without throwing exceptions.
     /// </summary>
     public static void HideSafe(this ContentDialog dialog)
