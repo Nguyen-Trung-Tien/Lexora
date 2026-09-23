@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
 using Windows.Storage.Pickers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -172,6 +173,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         ChkSelectAll.Content = _loc.GetString("SmartImport_SelectAll");
         TextDone.Text = _loc.GetString("SmartImport_DoneBtn");
         BtnClearPaste.Content = _loc.CurrentLanguage == "vi-VN" ? "Xoá ô nhập" : "Clear Text";
+        TextDropHint.Text = _loc.GetString("SmartImport_DragDropHint");
     }
 
     private void GoToStep(int step)
@@ -229,6 +231,58 @@ public sealed partial class SmartImportDialog : ContentDialog
     private void BtnModeFile_Click(object sender, RoutedEventArgs e) => UpdateMode(true);
     private void BtnModePaste_Click(object sender, RoutedEventArgs e) => UpdateMode(false);
 
+    private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".json", ".csv", ".tsv", ".txt", ".tab", ".md"
+    };
+
+    private const long MaxFileSizeBytes = 20 * 1024 * 1024; // 20 MB ceiling per AGENTS.md
+
+    private void DropZone_DragOver(object sender, DragEventArgs e)
+    {
+        if (e.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            e.AcceptedOperation = DataPackageOperation.Copy;
+            e.DragUIOverride.Caption = _loc.CurrentLanguage == "vi-VN" ? "Thả tệp để nhập thông minh" : "Drop file to smart import";
+            e.DragUIOverride.IsCaptionVisible = true;
+            e.DragUIOverride.IsGlyphVisible = true;
+            DropZoneBorder.BorderBrush = ThemeResourceHelper.GetThemeBrush("AccentFillColorDefaultBrush") 
+                ?? (Brush)App.Current.Resources["AccentFillColorDefaultBrush"];
+        }
+    }
+
+    private void DropZone_DragLeave(object sender, DragEventArgs e)
+    {
+        DropZoneBorder.BorderBrush = ThemeResourceHelper.GetThemeBrush("CardStrokeColorDefaultBrush")
+            ?? (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"];
+    }
+
+    private async void DropZone_Drop(object sender, DragEventArgs e)
+    {
+        DropZoneBorder.BorderBrush = ThemeResourceHelper.GetThemeBrush("CardStrokeColorDefaultBrush")
+            ?? (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"];
+
+        try
+        {
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                var items = await e.DataView.GetStorageItemsAsync();
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+                if (items.Count > 0 && items[0] is StorageFile file)
+                {
+                    await LoadSelectedFileAsync(file.Path, file.Name, file);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            TextSelectedFile.Text = $"Lỗi: {ex.Message}";
+            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush")
+                ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+        }
+    }
+
     private async void BtnBrowseFile_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -239,6 +293,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             picker.FileTypeFilter.Add(".csv");
             picker.FileTypeFilter.Add(".txt");
             picker.FileTypeFilter.Add(".tsv");
+            picker.FileTypeFilter.Add(".tab");
 
             var mainWindow = App.Current.MainWindow;
             if (mainWindow != null)
@@ -248,17 +303,117 @@ public sealed partial class SmartImportDialog : ContentDialog
             }
 
             var file = await picker.PickSingleFileAsync();
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             if (file != null)
             {
-                FileNameHint = file.Name;
-                ContentToImport = await Windows.Storage.FileIO.ReadTextAsync(file);
-                TextSelectedFile.Text = string.Format(_loc.GetString("SmartImport_SelectedFile"), file.Name);
-                EvaluateContent();
+                await LoadSelectedFileAsync(file.Path, file.Name, file);
             }
         }
         catch (Exception ex)
         {
-            TextSelectedFile.Text = $"Lỗi đọc file: {ex.Message}";
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            TextSelectedFile.Text = $"Lỗi: {ex.Message}";
+            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush")
+                ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+        }
+    }
+
+    private async Task LoadSelectedFileAsync(string? filePath, string fileName, StorageFile? storageFile = null)
+    {
+        await DispatcherQueue.EnsureOnUIThreadAsync();
+
+        try
+        {
+            var ext = System.IO.Path.GetExtension(fileName).ToLowerInvariant();
+            if (string.IsNullOrEmpty(ext) || !AllowedExtensions.Contains(ext))
+            {
+                TextSelectedFile.Text = string.Format(
+                    _loc.GetString("SmartImport_UnsupportedFileType"),
+                    string.IsNullOrEmpty(ext) ? "(no extension)" : ext);
+                TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") 
+                    ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+                ContentToImport = string.Empty;
+                FileNameHint = null;
+                EvaluateContent();
+                BtnAnalyzeNext.IsEnabled = false;
+                return;
+            }
+
+            // 1. Check file size if path exists
+            if (!string.IsNullOrEmpty(filePath) && System.IO.File.Exists(filePath))
+            {
+                var fileInfo = new System.IO.FileInfo(filePath);
+                if (fileInfo.Length > MaxFileSizeBytes)
+                {
+                    TextSelectedFile.Text = _loc.GetString("SmartImport_FileTooLarge");
+                    TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") 
+                        ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+                    ContentToImport = string.Empty;
+                    FileNameHint = null;
+                    EvaluateContent();
+                    BtnAnalyzeNext.IsEnabled = false;
+                    return;
+                }
+            }
+
+            // 2. Read file content safely
+            string content;
+            if (!string.IsNullOrEmpty(filePath) && System.IO.File.Exists(filePath))
+            {
+                try
+                {
+                    content = await System.IO.File.ReadAllTextAsync(filePath, System.Text.Encoding.UTF8);
+                }
+                catch
+                {
+                    using var stream = System.IO.File.OpenRead(filePath);
+                    using var reader = new System.IO.StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+                    content = await reader.ReadToEndAsync();
+                }
+            }
+            else if (storageFile != null)
+            {
+                content = await Windows.Storage.FileIO.ReadTextAsync(storageFile);
+            }
+            else
+            {
+                throw new System.IO.FileNotFoundException("Could not locate file path.");
+            }
+
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+
+            // 3. Check for binary characters (null bytes)
+            if (content.Contains('\0'))
+            {
+                TextSelectedFile.Text = _loc.GetString("SmartImport_BinaryFileError");
+                TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") 
+                    ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+                ContentToImport = string.Empty;
+                FileNameHint = null;
+                EvaluateContent();
+                BtnAnalyzeNext.IsEnabled = false;
+                return;
+            }
+
+            // 4. Success: bind content
+            FileNameHint = fileName;
+            ContentToImport = content;
+            TextSelectedFile.Text = string.Format(_loc.GetString("SmartImport_SelectedFile"), fileName);
+            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("TextFillColorSecondaryBrush")
+                ?? new SolidColorBrush(Microsoft.UI.Colors.Gray);
+            EvaluateContent();
+            BtnAnalyzeNext.IsEnabled = !string.IsNullOrWhiteSpace(ContentToImport) && DetectedFormat != DataFormat.Unknown;
+        }
+        catch (Exception ex)
+        {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            TextSelectedFile.Text = $"Lỗi đọc tệp: {ex.Message}";
+            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush")
+                ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+            ContentToImport = string.Empty;
+            FileNameHint = null;
+            EvaluateContent();
+            BtnAnalyzeNext.IsEnabled = false;
         }
     }
 
@@ -384,6 +539,15 @@ public sealed partial class SmartImportDialog : ContentDialog
             return;
         }
 
+        if (DetectedFormat == DataFormat.Unknown)
+        {
+            TextFormatBadge.Text = _loc.GetString("SmartImport_FormatUnknown");
+            IconFormatBadge.Glyph = "\uEA39";
+            var criticalBrush = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+            IconFormatBadge.Foreground = criticalBrush;
+            return;
+        }
+
         if (_isGrammarMode)
         {
             if (_grammarExportImportService == null)
@@ -416,6 +580,8 @@ public sealed partial class SmartImportDialog : ContentDialog
                     CancellationToken.None,
                     progress);
 
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+
                 WasCommitted = true;
                 PanelImportProgress.Visibility = Visibility.Collapsed;
                 PanelImportReport.Visibility = Visibility.Visible;
@@ -427,6 +593,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             }
             catch (Exception ex)
             {
+                await DispatcherQueue.EnsureOnUIThreadAsync();
                 PanelImportProgress.Visibility = Visibility.Collapsed;
                 PanelImportReport.Visibility = Visibility.Visible;
                 TextReportTitle.Text = $"Lỗi: {ex.Message}";
@@ -443,6 +610,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         try
         {
             _analysisResult = await _exportImportService.AnalyzeSmartImportAsync(ContentToImport, FileNameHint);
+            await DispatcherQueue.EnsureOnUIThreadAsync();
 
             // Populate Step 2 Metrics
             TextMetricTotal.Text = _analysisResult.TotalParsed.ToString();
@@ -518,6 +686,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         }
         catch (Exception ex)
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             TextFormatBadge.Text = $"Lỗi phân tích: {ex.Message}";
             IconFormatBadge.Glyph = "\uEA39";
             var criticalBrush = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
@@ -579,6 +748,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             );
 
             CommitResult = await _exportImportService.CommitSmartImportAsync(request, CancellationToken.None, progress);
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             WasCommitted = true;
 
             // Show summary report
@@ -592,6 +762,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         }
         catch (Exception ex)
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             PanelImportProgress.Visibility = Visibility.Collapsed;
             PanelImportReport.Visibility = Visibility.Visible;
             TextReportTitle.Text = $"Lỗi: {ex.Message}";

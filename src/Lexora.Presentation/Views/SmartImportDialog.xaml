@@ -92,11 +92,16 @@
                 <Grid>
                     <!-- Mode 1: File Selection -->
                     <StackPanel x:Name="PanelFile" Spacing="10">
-                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        <Border x:Name="DropZoneBorder"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 CornerRadius="10"
-                                Padding="16">
+                                Padding="16"
+                                AllowDrop="True"
+                                DragOver="DropZone_DragOver"
+                                DragLeave="DropZone_DragLeave"
+                                Drop="DropZone_Drop">
                             <StackPanel Spacing="10" HorizontalAlignment="Center">
                                 <FontIcon Glyph="&#xE8E5;" FontSize="28" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
                                 <Button x:Name="BtnBrowseFile"
@@ -110,6 +115,10 @@
                                         <TextBlock x:Name="TextBrowseFile" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Button>
+                                <TextBlock x:Name="TextDropHint"
+                                           TextAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                 <TextBlock x:Name="TextSelectedFile"
                                            TextAlignment="Center"
                                            TextWrapping="Wrap"

@@ -47,6 +47,26 @@ public class SmartImportExportUnitTests
         SmartContentDetector.DetectFormat(null).Should().Be(DataFormat.Unknown);
     }
 
+    [Theory]
+    [InlineData("data.xlsx")]
+    [InlineData("document.pdf")]
+    [InlineData("archive.zip")]
+    [InlineData("app.exe")]
+    [InlineData("image.png")]
+    public void SmartContentDetector_DetectFormat_UnsupportedExtension_ShouldReturnUnknown(string fileName)
+    {
+        var detected = SmartContentDetector.DetectFormat("some random content", fileName);
+        detected.Should().Be(DataFormat.Unknown);
+    }
+
+    [Fact]
+    public void SmartContentDetector_DetectFormat_BinaryContentWithNullBytes_ShouldReturnUnknown()
+    {
+        var binaryContent = "PK\u0003\u0004\0\0\0\0";
+        var detected = SmartContentDetector.DetectFormat(binaryContent, "words.txt");
+        detected.Should().Be(DataFormat.Unknown);
+    }
+
     [Fact]
     public async Task Vocabulary_ImportSmartAsync_ShouldAutoDetectJson_AndSkipExisting()
     {

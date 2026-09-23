@@ -10,23 +10,42 @@ public enum DataFormat
 
 public static class SmartContentDetector
 {
+    private static readonly HashSet<string> UnsupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".xlsx", ".xls", ".doc", ".docx", ".pdf", ".zip", ".rar", ".7z", ".tar", ".gz",
+        ".exe", ".dll", ".bin", ".dat", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico",
+        ".mp3", ".wav", ".m4a", ".mp4", ".mkv", ".avi", ".sqlite", ".db"
+    };
+
     /// <summary>
     /// Detects the data format from the file extension and/or raw content string.
     /// </summary>
     public static DataFormat DetectFormat(string? content, string? fileNameOrExtension = null)
     {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return DataFormat.Unknown;
+        }
+
+        // Binary check: if null characters are present, it's not valid text
+        if (content.Contains('\0'))
+        {
+            return DataFormat.Unknown;
+        }
+
         // 1. Check file extension hint if available
         if (!string.IsNullOrWhiteSpace(fileNameOrExtension))
         {
             var ext = fileNameOrExtension.Trim().ToLowerInvariant();
+            var dotExt = Path.GetExtension(ext);
+            if (!string.IsNullOrEmpty(dotExt) && UnsupportedExtensions.Contains(dotExt))
+            {
+                return DataFormat.Unknown;
+            }
+
             if (ext.EndsWith(".json")) return DataFormat.Json;
             if (ext.EndsWith(".csv")) return DataFormat.Csv;
-            if (ext.EndsWith(".tsv") || ext.EndsWith(".txt") || ext.EndsWith(".md")) return DataFormat.Txt;
-        }
-
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            return DataFormat.Unknown;
+            if (ext.EndsWith(".tsv") || ext.EndsWith(".txt") || ext.EndsWith(".tab") || ext.EndsWith(".md")) return DataFormat.Txt;
         }
 
         var trimmed = content.TrimStart('\uFEFF', ' ', '\t', '\r', '\n');
