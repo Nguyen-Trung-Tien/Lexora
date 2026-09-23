@@ -10,7 +10,9 @@ namespace Lexora.Presentation.Services;
 /// </summary>
 public static class SafeDialogExtensions
 {
-    private static readonly SemaphoreSlim _dialogSemaphore = new(1, 1);
+    // Timeout prevents permanent deadlock if a previous dialog crashed while holding the semaphore.
+    private static readonly TimeSpan _semaphoreTimeout = TimeSpan.FromSeconds(5);
+    private static SemaphoreSlim _dialogSemaphore = new(1, 1);
     private static ContentDialog? _currentlyActiveDialog;
 
     /// <summary>
@@ -37,7 +39,18 @@ public static class SafeDialogExtensions
                 await dispatcher.EnsureOnUIThreadAsync();
             }
 
-            await _dialogSemaphore.WaitAsync();
+            // Use a timeout to avoid permanent deadlock if a prior crash left the semaphore locked.
+            bool acquired = await _dialogSemaphore.WaitAsync(_semaphoreTimeout);
+            if (!acquired)
+            {
+                // Force-reset the semaphore so future dialogs can display.
+                System.Diagnostics.Debug.WriteLine("[SafeDialog] Semaphore timeout — resetting to recover from prior deadlock.");
+                _currentlyActiveDialog = null;
+                _dialogSemaphore = new SemaphoreSlim(1, 1);
+                // Try one more time after reset.
+                await _dialogSemaphore.WaitAsync();
+            }
+
             try
             {
                 if (dispatcher != null && !dispatcher.HasThreadAccess)

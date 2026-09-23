@@ -90,18 +90,35 @@ public sealed partial class SmartImportDialog : ContentDialog
 
         Unloaded += (s, e) => _scope?.Dispose();
 
+        // Sync theme from the main window so the dialog renders correctly in both Light and Dark mode.
         var rootTheme = (App.Current.MainWindow?.Content as FrameworkElement)?.ActualTheme;
-        if (rootTheme.HasValue)
+        if (rootTheme.HasValue && rootTheme.Value != ElementTheme.Default)
         {
             RequestedTheme = rootTheme.Value;
         }
 
         CloseButtonText = _loc.GetString("Action_Cancel");
 
-        ApplyLocalization();
-        UpdateMode(true);
-        UpdateDetectionBadge();
-        GoToStep(1);
+        // Defer visual-tree-dependent initialisation to the Loaded event so that
+        // ThemeResourceHelper can resolve ActualTheme from the live visual tree
+        // and named elements are guaranteed to exist.
+        Loaded += OnDialogLoaded;
+    }
+
+    private void OnDialogLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnDialogLoaded;
+        try
+        {
+            ApplyLocalization();
+            UpdateMode(true);
+            UpdateDetectionBadge();
+            GoToStep(1);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SmartImportDialog] OnDialogLoaded error: {ex.Message}");
+        }
     }
 
     private static Style? GetResourceStyle(string key)
