@@ -959,9 +959,7 @@ public sealed partial class VocabularyPage : Page
         try
         {
             await Task.Yield();
-            var xamlRoot = this.XamlRoot 
-                ?? (sender as FrameworkElement)?.XamlRoot 
-                ?? App.Current.MainWindow?.Content?.XamlRoot;
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.Content?.XamlRoot ?? this.XamlRoot;
 
             var dialog = new SmartImportDialog(format => ViewModel.GetSampleTemplate(format))
             {
@@ -982,6 +980,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] SmartImport error: {ex}");
             ShowNotification(InfoBarSeverity.Error, Loc.GetString("Vocab_ImportFailed"), ex.Message);
         }
     }

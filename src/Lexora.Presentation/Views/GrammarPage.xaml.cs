@@ -639,9 +639,7 @@ public sealed partial class GrammarPage : Page
         try
         {
             await Task.Yield();
-            var xamlRoot = this.XamlRoot 
-                ?? (sender as FrameworkElement)?.XamlRoot 
-                ?? App.Current.MainWindow?.Content?.XamlRoot;
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.Content?.XamlRoot ?? this.XamlRoot;
 
             var dialog = new SmartImportDialog(format => ViewModel.GetSampleTemplate(format), isGrammarMode: true)
             {
@@ -662,6 +660,7 @@ public sealed partial class GrammarPage : Page
         }
         catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"[GrammarPage] SmartImport error: {ex}");
             ShowNotification(InfoBarSeverity.Error, Loc.GetString("Grammar_ImportFailed"), ex.Message);
         }
     }

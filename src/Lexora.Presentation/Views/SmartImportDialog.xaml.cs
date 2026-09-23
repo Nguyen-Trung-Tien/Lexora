@@ -159,10 +159,14 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     private void GoToStep(int step)
     {
-        var accentBrush = ThemeResourceHelper.GetThemeBrush("AccentFillColorDefaultBrush");
-        var layerBrush = ThemeResourceHelper.GetThemeBrush("LayerFillColorDefaultBrush");
-        var accentText = ThemeResourceHelper.GetThemeBrush("AccentTextFillColorPrimaryBrush");
-        var subtleText = ThemeResourceHelper.GetThemeBrush("TextFillColorSecondaryBrush");
+        var accentBrush = ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush")
+            ?? new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 0, 120, 215));
+        var layerBrush = ThemeResourceHelper.GetThemeBrush(this, "LayerFillColorDefaultBrush")
+            ?? new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 45, 45, 45));
+        var accentText = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush")
+            ?? new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 0, 120, 215));
+        var subtleText = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush")
+            ?? new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 160, 160, 160));
 
         PanelStep1.Visibility = step == 1 ? Visibility.Visible : Visibility.Collapsed;
         PanelStep2.Visibility = step == 2 ? Visibility.Visible : Visibility.Collapsed;

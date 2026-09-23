@@ -1,3 +1,4 @@
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -20,62 +21,70 @@ public static class SafeDialogExtensions
     {
         ArgumentNullException.ThrowIfNull(dialog);
 
-        var dispatcher = dialog.DispatcherQueue 
-            ?? (preferredRoot?.Content as FrameworkElement)?.DispatcherQueue 
-            ?? App.Current.MainWindow?.DispatcherQueue;
-
-        if (dispatcher != null && !dispatcher.HasThreadAccess)
-        {
-            await dispatcher.EnsureOnUIThreadAsync();
-        }
-
-        await _dialogSemaphore.WaitAsync();
         try
         {
+            DispatcherQueue? dispatcher = null;
+            try
+            {
+                dispatcher = dialog.DispatcherQueue 
+                    ?? App.Current.MainWindow?.DispatcherQueue
+                    ?? (preferredRoot?.Content as FrameworkElement)?.DispatcherQueue;
+            }
+            catch { }
+
             if (dispatcher != null && !dispatcher.HasThreadAccess)
             {
                 await dispatcher.EnsureOnUIThreadAsync();
             }
 
-            // If a previous dialog is still recorded as active, safely hide it
-            if (_currentlyActiveDialog != null && _currentlyActiveDialog != dialog)
+            await _dialogSemaphore.WaitAsync();
+            try
             {
-                _currentlyActiveDialog.HideSafe();
-                await Task.Delay(50);
                 if (dispatcher != null && !dispatcher.HasThreadAccess)
                 {
                     await dispatcher.EnsureOnUIThreadAsync();
                 }
-            }
 
-            // Resolve XamlRoot
-            if (dialog.XamlRoot == null)
+                // If a previous dialog is still recorded as active, safely hide it
+                if (_currentlyActiveDialog != null && _currentlyActiveDialog != dialog)
+                {
+                    _currentlyActiveDialog.HideSafe();
+                    await Task.Delay(50);
+                    if (dispatcher != null && !dispatcher.HasThreadAccess)
+                    {
+                        await dispatcher.EnsureOnUIThreadAsync();
+                    }
+                }
+
+                // Always prioritize the top-level main window root over temporary/closing popup roots
+                var stableRoot = App.Current.MainWindow?.Content?.XamlRoot ?? preferredRoot ?? dialog.XamlRoot;
+                if (stableRoot != null)
+                {
+                    dialog.XamlRoot = stableRoot;
+                }
+
+                if (dialog.XamlRoot == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("[SafeDialog] Warning: XamlRoot is null; dialog display skipped to prevent crash.");
+                    LogDialogCrash(dialog.GetType().Name, new InvalidOperationException("XamlRoot could not be resolved when displaying ContentDialog."));
+                    return ContentDialogResult.None;
+                }
+
+                _currentlyActiveDialog = dialog;
+                var result = await dialog.ShowAsync();
+                return result;
+            }
+            finally
             {
-                dialog.XamlRoot = preferredRoot 
-                    ?? App.Current.MainWindow?.Content?.XamlRoot;
+                _currentlyActiveDialog = null;
+                _dialogSemaphore.Release();
             }
-
-            if (dialog.XamlRoot == null)
-            {
-                System.Diagnostics.Debug.WriteLine("[SafeDialog] Warning: XamlRoot is null; dialog display skipped to prevent crash.");
-                LogDialogCrash(dialog.GetType().Name, new InvalidOperationException("XamlRoot could not be resolved when displaying ContentDialog."));
-                return ContentDialogResult.None;
-            }
-
-            _currentlyActiveDialog = dialog;
-            var result = await dialog.ShowAsync();
-            return result;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[SafeDialog] Exception during ShowAsync: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[SafeDialog] Exception during ShowAsyncSafe: {ex.Message}");
             LogDialogCrash(dialog.GetType().Name, ex);
             return ContentDialogResult.None;
-        }
-        finally
-        {
-            _currentlyActiveDialog = null;
-            _dialogSemaphore.Release();
         }
     }
 
