@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
+using Lexora.Presentation.Services;
 using Microsoft.UI.Dispatching;
 
 namespace Lexora.Presentation.ViewModels;
@@ -16,7 +17,7 @@ public partial class GrammarViewModel : ObservableObject
     private readonly Services.ISoundFeedbackService? _soundFeedback;
     private readonly List<GrammarQuizSubmissionDto> _practiceSubmissions = new();
     // Captured on the UI thread so post-await mutations can be safely marshalled back.
-    private readonly DispatcherQueue _dispatcherQueue;
+    private readonly DispatcherQueue? _dispatcherQueue;
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
@@ -144,6 +145,7 @@ public partial class GrammarViewModel : ObservableObject
         try
         {
             var topics = await _grammarService.GetAllTopicsAsync();
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             Topics.Clear();
             foreach (var t in topics) Topics.Add(t);
         }
@@ -163,6 +165,7 @@ public partial class GrammarViewModel : ObservableObject
         _loadCts = new CancellationTokenSource();
         var ct = _loadCts.Token;
 
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
         IsLoading = true;
         try
         {
@@ -176,8 +179,12 @@ public partial class GrammarViewModel : ObservableObject
 
             if (ct.IsCancellationRequested) return;
 
+            var resultList = results.ToList();
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+
             Rules.Clear();
-            foreach (var r in results)
+            foreach (var r in resultList)
             {
                 Rules.Add(r);
             }
@@ -206,6 +213,7 @@ public partial class GrammarViewModel : ObservableObject
         {
             if (!ct.IsCancellationRequested)
             {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
                 IsLoading = false;
             }
         }
@@ -253,7 +261,17 @@ public partial class GrammarViewModel : ObservableObject
     [RelayCommand]
     public async Task DeleteRuleAsync(Guid id)
     {
+        var rule = Rules.FirstOrDefault(r => r.Id == id);
+        string title = rule?.Title ?? string.Empty;
+
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
+        if (SelectedRule?.Id == id)
+        {
+            SelectedRule = null;
+        }
+
         await _grammarService.DeleteRuleAsync(id);
+
         await LoadTopicsAsync();
         await LoadRulesAsync();
     }
@@ -306,26 +324,28 @@ public partial class GrammarViewModel : ObservableObject
 
     private bool _isDeletingRules = false;
 
-    public async Task<int> DeleteSelectedRulesAsync()
+    public async Task<int> DeleteSelectedRulesAsync(IEnumerable<Guid>? ids = null)
     {
-        if (SelectedRuleIds.Count == 0 || _isDeletingRules) return 0;
+        var targetIds = ids?.Distinct().ToList() ?? SelectedRuleIds.ToList();
+        if (targetIds.Count == 0 || _isDeletingRules) return 0;
         _isDeletingRules = true;
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
         IsLoading = true;
 
         try
         {
-            var idsToDelete = SelectedRuleIds.ToList();
-            int count = await _grammarService.DeleteRulesAsync(idsToDelete);
-
-            // Marshal all observable collection / property changes back to the UI thread.
-            // PropertyChanged raised off the UI thread causes COMException (0x8001010E).
-            _dispatcherQueue.TryEnqueue(() =>
+            if (SelectedRule != null && targetIds.Contains(SelectedRule.Id))
             {
-                SelectedRuleIds.Clear();
-                IsSelectionMode = false;
-                OnPropertyChanged(nameof(SelectedCount));
-                OnPropertyChanged(nameof(HasSelection));
-            });
+                SelectedRule = null;
+            }
+
+            int count = await _grammarService.DeleteRulesAsync(targetIds);
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            SelectedRuleIds.Clear();
+            IsSelectionMode = false;
+            OnPropertyChanged(nameof(SelectedCount));
+            OnPropertyChanged(nameof(HasSelection));
 
             await LoadTopicsAsync();
             await LoadRulesAsync();
@@ -334,10 +354,10 @@ public partial class GrammarViewModel : ObservableObject
         finally
         {
             _isDeletingRules = false;
-            // IsLoading = false is handled inside LoadRulesAsync; only reset here on early exit.
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             if (IsLoading)
             {
-                _dispatcherQueue.TryEnqueue(() => IsLoading = false);
+                IsLoading = false;
             }
         }
     }

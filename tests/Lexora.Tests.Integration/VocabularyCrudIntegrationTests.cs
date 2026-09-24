@@ -483,6 +483,71 @@ public class VocabularyCrudIntegrationTests : IDisposable
         dbFetch2.Topics.Should().Contain("Business");
     }
 
+    [Fact]
+    public async Task DeleteWordsAsync_BulkDeleteWithReviewCardsAndStudyLogs_ShouldDeleteAllAndCascadeCleanly()
+    {
+        // 1. Create two words
+        var word1 = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "bulkdeleteone",
+            PhoneticUk: null,
+            PhoneticUs: null,
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.B1,
+            PrimaryPartOfSpeech: PartOfSpeech.Noun,
+            Notes: null,
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(PartOfSpeech.Noun, "nghĩa 1", "def 1", null, new List<ExampleSentenceCreateDto>())
+            },
+            TopicIds: new List<Guid>(),
+            ExamTagIds: new List<Guid>()
+        ));
+
+        var word2 = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "bulkdeletetwo",
+            PhoneticUk: null,
+            PhoneticUs: null,
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.B2,
+            PrimaryPartOfSpeech: PartOfSpeech.Verb,
+            Notes: null,
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(PartOfSpeech.Verb, "nghĩa 2", "def 2", null, new List<ExampleSentenceCreateDto>())
+            },
+            TopicIds: new List<Guid>(),
+            ExamTagIds: new List<Guid>()
+        ));
+
+        // 2. Perform a review on word1 so it has StudyLogs
+        var card1 = await _context.ReviewCards.FirstAsync(rc => rc.WordId == word1.Id);
+        var reviewService = new ReviewService(_reviewRepo, new Lexora.Application.SpacedRepetition.Sm2SpacedRepetitionEngine(), _unitOfWork);
+        await reviewService.SubmitReviewAsync(card1.Id, ReviewRating.Good, 1200);
+
+        var logsBefore = await _context.StudyLogs.Where(sl => sl.ReviewCardId == card1.Id).ToListAsync();
+        logsBefore.Should().NotBeEmpty();
+
+        // 3. Bulk delete both words
+        var deletedCount = await _vocabService.DeleteWordsAsync(new[] { word1.Id, word2.Id });
+        deletedCount.Should().Be(2);
+
+        // 4. Verify entities and related cascaded rows are gone
+        var w1 = await _context.Words.FindAsync(word1.Id);
+        var w2 = await _context.Words.FindAsync(word2.Id);
+        w1.Should().BeNull();
+        w2.Should().BeNull();
+
+        var cards = await _context.ReviewCards.Where(rc => rc.WordId == word1.Id || rc.WordId == word2.Id).ToListAsync();
+        cards.Should().BeEmpty();
+
+        var logsAfter = await _context.StudyLogs.Where(sl => sl.ReviewCardId == card1.Id).ToListAsync();
+        logsAfter.Should().BeEmpty();
+    }
+
     public void Dispose()
     {
         _context.Dispose();

@@ -22,6 +22,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             .Include(w => w.WordExamTags)
                 .ThenInclude(wet => wet.ExamTag)
             .Include(w => w.ReviewCard)
+                .ThenInclude(rc => rc!.StudyLogs)
             .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
     }
 
@@ -38,6 +39,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             .Include(w => w.WordExamTags)
                 .ThenInclude(wet => wet.ExamTag)
             .Include(w => w.ReviewCard)
+                .ThenInclude(rc => rc!.StudyLogs)
             .Where(w => idList.Contains(w.Id))
             .ToListAsync(cancellationToken);
     }

@@ -188,6 +188,50 @@ public class GrammarIntegrationTests : IDisposable
         dbFetch2.Examples[0].SentenceEn.Should().Be("If we hurry, we can still catch the train.");
     }
 
+    [Fact]
+    public async Task DeleteRulesAsync_MultipleRules_ShouldDeleteAllAndCascadeExamples()
+    {
+        // 1. Create two grammar rules with examples
+        var rule1 = await _grammarService.CreateRuleAsync(new GrammarRuleCreateOrUpdateDto(
+            Id: null,
+            Title: "Rule 1 Bulk",
+            Structure: "S + V1",
+            ExplanationVi: "Giải thích 1",
+            ExplanationEn: "Explanation 1",
+            CommonMistakes: null,
+            Level: CefrLevel.A1,
+            ExamTarget: ExamType.Toeic,
+            Topic: "Basics",
+            Examples: [new("Example 1", "Ví dụ 1", null)]
+        ));
+
+        var rule2 = await _grammarService.CreateRuleAsync(new GrammarRuleCreateOrUpdateDto(
+            Id: null,
+            Title: "Rule 2 Bulk",
+            Structure: "S + V2",
+            ExplanationVi: "Giải thích 2",
+            ExplanationEn: "Explanation 2",
+            CommonMistakes: null,
+            Level: CefrLevel.A2,
+            ExamTarget: ExamType.Toeic,
+            Topic: "Basics",
+            Examples: [new("Example 2", "Ví dụ 2", null)]
+        ));
+
+        // 2. Bulk delete
+        var deletedCount = await _grammarService.DeleteRulesAsync(new[] { rule1.Id, rule2.Id });
+        deletedCount.Should().Be(2);
+
+        // 3. Verify rules and examples are deleted
+        var r1 = await _context.GrammarRules.FindAsync(rule1.Id);
+        var r2 = await _context.GrammarRules.FindAsync(rule2.Id);
+        r1.Should().BeNull();
+        r2.Should().BeNull();
+
+        var examples = await _context.GrammarExamples.Where(ge => ge.GrammarRuleId == rule1.Id || ge.GrammarRuleId == rule2.Id).ToListAsync();
+        examples.Should().BeEmpty();
+    }
+
     public void Dispose()
     {
         _context.Dispose();

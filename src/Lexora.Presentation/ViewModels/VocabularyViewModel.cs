@@ -19,7 +19,7 @@ public partial class VocabularyViewModel : ObservableObject
     private readonly ILocalizationService _localizationService;
     private readonly List<string> _knownTerms = new();
     // Captured on the UI thread so post-await mutations can be safely marshalled back.
-    private readonly DispatcherQueue _dispatcherQueue;
+    private readonly DispatcherQueue? _dispatcherQueue;
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
@@ -128,6 +128,7 @@ public partial class VocabularyViewModel : ObservableObject
         try
         {
             var units = await _vocabService.GetContextUnitsAsync();
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             ContextUnits.Clear();
             foreach (var u in units)
             {
@@ -191,13 +192,14 @@ public partial class VocabularyViewModel : ObservableObject
         try
         {
             var topics = await _vocabService.GetAllTopicsAsync();
+            var tags = await _vocabService.GetAllExamTagsAsync();
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             AvailableTopics.Clear();
             foreach (var t in topics)
             {
                 AvailableTopics.Add(t);
             }
 
-            var tags = await _vocabService.GetAllExamTagsAsync();
             AvailableExamTags.Clear();
             foreach (var et in tags)
             {
@@ -292,8 +294,12 @@ public partial class VocabularyViewModel : ObservableObject
                     .ThenBy(w => w.Term);
             }
 
+            var resultList = filteredResults.ToList();
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+
             Words.Clear();
-            foreach (var w in filteredResults)
+            foreach (var w in resultList)
             {
                 Words.Add(w);
             }
@@ -330,6 +336,7 @@ public partial class VocabularyViewModel : ObservableObject
         {
             if (!ct.IsCancellationRequested)
             {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
                 IsLoading = false;
             }
         }
@@ -388,13 +395,24 @@ public partial class VocabularyViewModel : ObservableObject
     public async Task DeleteWordAsync(Guid id)
     {
         var word = Words.FirstOrDefault(w => w.Id == id);
-        if (word != null)
+        string term = word?.Term ?? string.Empty;
+
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
+        if (SelectedWord?.Id == id)
         {
-            await _vocabService.DeleteWordAsync(id);
-            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordDeleted"), word.Term);
-            await LoadWordsAsync();
-            _ = LoadContextUnitsAsync();
+            SelectedWord = null;
         }
+
+        await _vocabService.DeleteWordAsync(id);
+
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
+        if (!string.IsNullOrEmpty(term))
+        {
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordDeleted"), term);
+        }
+
+        await LoadWordsAsync();
+        _ = LoadContextUnitsAsync();
     }
 
     [RelayCommand]
@@ -445,26 +463,28 @@ public partial class VocabularyViewModel : ObservableObject
 
     private bool _isDeletingWords = false;
 
-    public async Task<int> DeleteSelectedWordsAsync()
+    public async Task<int> DeleteSelectedWordsAsync(IEnumerable<Guid>? ids = null)
     {
-        if (SelectedWordIds.Count == 0 || _isDeletingWords) return 0;
+        var targetIds = ids?.Distinct().ToList() ?? SelectedWordIds.ToList();
+        if (targetIds.Count == 0 || _isDeletingWords) return 0;
         _isDeletingWords = true;
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
         IsLoading = true;
 
         try
         {
-            var idsToDelete = SelectedWordIds.ToList();
-            int count = await _vocabService.DeleteWordsAsync(idsToDelete);
-
-            // Marshal all observable collection / property changes back to the UI thread.
-            // PropertyChanged raised off the UI thread causes COMException (0x8001010E).
-            _dispatcherQueue.TryEnqueue(() =>
+            if (SelectedWord != null && targetIds.Contains(SelectedWord.Id))
             {
-                SelectedWordIds.Clear();
-                IsSelectionMode = false;
-                OnPropertyChanged(nameof(SelectedCount));
-                OnPropertyChanged(nameof(HasSelection));
-            });
+                SelectedWord = null;
+            }
+
+            int count = await _vocabService.DeleteWordsAsync(targetIds);
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            SelectedWordIds.Clear();
+            IsSelectionMode = false;
+            OnPropertyChanged(nameof(SelectedCount));
+            OnPropertyChanged(nameof(HasSelection));
 
             await LoadWordsAsync();
             _ = LoadContextUnitsAsync();
@@ -473,10 +493,10 @@ public partial class VocabularyViewModel : ObservableObject
         finally
         {
             _isDeletingWords = false;
-            // IsLoading = false is handled inside LoadWordsAsync; only reset here on early exit.
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             if (IsLoading)
             {
-                _dispatcherQueue.TryEnqueue(() => IsLoading = false);
+                IsLoading = false;
             }
         }
     }

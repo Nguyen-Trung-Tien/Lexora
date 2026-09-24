@@ -8,9 +8,9 @@ public static class DispatcherExtensions
     /// Ensures execution continues on the UI thread associated with the given DispatcherQueue.
     /// If the current thread is already the UI thread, this completes synchronously.
     /// </summary>
-    public static Task EnsureOnUIThreadAsync(this DispatcherQueue dispatcherQueue)
+    public static Task EnsureOnUIThreadAsync(this DispatcherQueue? dispatcherQueue)
     {
-        if (dispatcherQueue.HasThreadAccess)
+        if (dispatcherQueue == null || dispatcherQueue.HasThreadAccess)
         {
             return Task.CompletedTask;
         }
