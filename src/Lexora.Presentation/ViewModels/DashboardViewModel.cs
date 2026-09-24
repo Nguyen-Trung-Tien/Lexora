@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
+using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.Views;
 
@@ -87,6 +88,9 @@ public partial class DashboardViewModel : ObservableObject
     public ObservableCollection<StudyHistoryDayDto> StudyHeatmapList { get; } = new();
     public ObservableCollection<StudySessionDto> RecentSessionsList { get; } = new();
 
+    private List<LearningStatusDistributionDto>? _rawStatusBreakdown;
+    private List<ExamProgressDto>? _rawExamProgress;
+
     public DashboardViewModel(
         IStatisticsService statsService,
         INavigationService navService,
@@ -99,6 +103,7 @@ public partial class DashboardViewModel : ObservableObject
         _advisorService = advisorService;
 
         UpdateGreeting();
+        _localizationService.LanguageChanged += (s, e) => UpdateLanguageState();
     }
 
     public void UpdateLanguageState()
@@ -106,6 +111,7 @@ public partial class DashboardViewModel : ObservableObject
         UpdateGreeting();
         UpdateAdviceDisplay();
         UpdateForecastDisplay();
+        UpdateLocalizedStatusAndExams();
         OnPropertyChanged(nameof(DueReviewMessage));
     }
 
@@ -146,6 +152,58 @@ public partial class DashboardViewModel : ObservableObject
         };
     }
 
+    private string GetLocalizedStatusName(LearningStatus status) => status switch
+    {
+        LearningStatus.Mastered => _localizationService.GetString("Status_Mastered"),
+        LearningStatus.Remembered => _localizationService.GetString("Status_Remembered"),
+        LearningStatus.Learning => _localizationService.GetString("Status_Learning"),
+        LearningStatus.Review => _localizationService.GetString("Status_ReviewDue"),
+        LearningStatus.NotRemembered => _localizationService.GetString("Status_NotRemembered"),
+        LearningStatus.New => _localizationService.GetString("Status_New"),
+        _ => status.ToString()
+    };
+
+    private string GetLocalizedExamName(ExamType exam) => exam switch
+    {
+        ExamType.Toeic => _localizationService.GetString("Exam_Name_Toeic"),
+        ExamType.Vstep => _localizationService.GetString("Exam_Name_Vstep"),
+        ExamType.Ielts => _localizationService.GetString("Exam_Name_Ielts"),
+        _ => _localizationService.GetString("Exam_Name_General")
+    };
+
+    private string GetLocalizedExamDescription(ExamType exam) => exam switch
+    {
+        ExamType.Toeic => _localizationService.GetString("Exam_Target_Toeic"),
+        ExamType.Vstep => _localizationService.GetString("Exam_Target_Vstep"),
+        ExamType.Ielts => _localizationService.GetString("Exam_Target_Ielts"),
+        _ => _localizationService.GetString("Exam_Target_General")
+    };
+
+    private void UpdateLocalizedStatusAndExams()
+    {
+        if (_rawStatusBreakdown != null)
+        {
+            StatusBreakdown.Clear();
+            foreach (var s in _rawStatusBreakdown)
+            {
+                StatusBreakdown.Add(s with { DisplayName = GetLocalizedStatusName(s.Status) });
+            }
+        }
+
+        if (_rawExamProgress != null)
+        {
+            ExamProgressList.Clear();
+            foreach (var ep in _rawExamProgress)
+            {
+                ExamProgressList.Add(ep with
+                {
+                    CustomExamName = GetLocalizedExamName(ep.Exam),
+                    CustomTargetDescription = GetLocalizedExamDescription(ep.Exam)
+                });
+            }
+        }
+    }
+
     private void UpdateForecastDisplay()
     {
         ForecastDaysList.Clear();
@@ -183,11 +241,9 @@ public partial class DashboardViewModel : ObservableObject
             AccuracyRate = summary.AccuracyRate;
             StudiedTodayCount = summary.StudiedTodayCount;
 
-            StatusBreakdown.Clear();
-            foreach (var s in analytics.StatusBreakdown) StatusBreakdown.Add(s);
-
-            ExamProgressList.Clear();
-            foreach (var ep in analytics.ExamProgress) ExamProgressList.Add(ep);
+            _rawStatusBreakdown = analytics.StatusBreakdown;
+            _rawExamProgress = analytics.ExamProgress;
+            UpdateLocalizedStatusAndExams();
 
             CefrDistributionList.Clear();
             foreach (var c in analytics.CefrDistribution) CefrDistributionList.Add(c);

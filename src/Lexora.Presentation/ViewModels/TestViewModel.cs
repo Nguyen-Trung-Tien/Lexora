@@ -550,8 +550,12 @@ public partial class TestViewModel : ObservableObject
         }
     }
 
+    private bool _isFinishingTest = false;
+
     private async Task FinishTestAsync()
     {
+        if (_isFinishingTest) return;
+        _isFinishingTest = true;
         IsLoading = true;
         _totalTestTimer.Stop();
 
@@ -602,6 +606,7 @@ public partial class TestViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+            _isFinishingTest = false;
         }
     }
 

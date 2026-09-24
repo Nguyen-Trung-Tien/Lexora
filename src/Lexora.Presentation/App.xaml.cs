@@ -1,4 +1,5 @@
 using Lexora.Application;
+using Lexora.Application.Interfaces;
 using Lexora.Infrastructure;
 using Lexora.Infrastructure.Data;
 using Lexora.Presentation.Services;

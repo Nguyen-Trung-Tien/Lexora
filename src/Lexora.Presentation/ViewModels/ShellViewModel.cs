@@ -10,7 +10,7 @@ public partial class ShellViewModel : ObservableObject
     private readonly INavigationService _navigationService;
     private readonly ILocalizationService _localizationService;
     private readonly IReviewService _reviewService;
-    private readonly Lexora.Infrastructure.Services.IUserPreferencesService _preferencesService;
+    private readonly IUserPreferencesService _preferencesService;
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
@@ -41,7 +41,7 @@ public partial class ShellViewModel : ObservableObject
         INavigationService navigationService,
         ILocalizationService localizationService,
         IReviewService reviewService,
-        Lexora.Infrastructure.Services.IUserPreferencesService preferencesService)
+        IUserPreferencesService preferencesService)
     {
         _navigationService = navigationService;
         _localizationService = localizationService;

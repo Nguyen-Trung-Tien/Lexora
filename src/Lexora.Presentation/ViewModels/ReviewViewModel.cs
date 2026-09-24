@@ -7,8 +7,6 @@ using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
 
-using Lexora.Infrastructure.Services;
-
 namespace Lexora.Presentation.ViewModels;
 
 public partial class ReviewViewModel : ObservableObject
@@ -242,8 +240,12 @@ public partial class ReviewViewModel : ObservableObject
         await StartReviewWithFilterAsync(mode, null, null, null);
     }
 
+    private bool _isStartingReview = false;
+
     public async Task StartReviewWithFilterAsync(ReviewSessionMode mode, Guid? topicId = null, IReadOnlyList<Guid>? wordIds = null, string? customTitle = null)
     {
+        if (_isStartingReview) return;
+        _isStartingReview = true;
         IsLoading = true;
         IsCompleted = false;
         IsAnswerVisible = false;
@@ -309,6 +311,7 @@ public partial class ReviewViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+            _isStartingReview = false;
         }
     }
 

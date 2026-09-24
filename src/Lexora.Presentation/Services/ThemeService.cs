@@ -1,4 +1,4 @@
-using Lexora.Infrastructure.Services;
+using Lexora.Application.Interfaces;
 using Microsoft.UI.Xaml;
 
 namespace Lexora.Presentation.Services;

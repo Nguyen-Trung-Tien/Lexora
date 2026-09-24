@@ -1,16 +1,9 @@
-using Lexora.Infrastructure.Services;
+using Lexora.Application.Interfaces;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 using Windows.Media.SpeechSynthesis;
 
 namespace Lexora.Presentation.Services;
-
-public interface IAudioPlayerService
-{
-    double PlaybackRate { get; set; }
-    Task PlayPronunciationAsync(string term, string accent = "uk", double? rate = null);
-    void Stop();
-}
 
 public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 {

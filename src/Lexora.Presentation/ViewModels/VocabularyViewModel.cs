@@ -354,65 +354,97 @@ public partial class VocabularyViewModel : ObservableObject
         SelectedQuickFilter = "All";
     }
 
+    private bool _isSavingWord = false;
+
     [RelayCommand]
     public async Task SaveWordAsync(WordCreateOrUpdateDto dto)
     {
-        WordDto saved;
-        if (dto.Id == null)
+        if (_isSavingWord) return;
+        _isSavingWord = true;
+        try
         {
-            saved = await _vocabService.CreateWordAsync(dto);
-            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordAdded"), saved.Term);
-        }
-        else
-        {
-            saved = await _vocabService.UpdateWordAsync(dto);
-            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordUpdated"), saved.Term);
-        }
+            WordDto saved;
+            if (dto.Id == null)
+            {
+                saved = await _vocabService.CreateWordAsync(dto);
+                StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordAdded"), saved.Term);
+            }
+            else
+            {
+                saved = await _vocabService.UpdateWordAsync(dto);
+                StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordUpdated"), saved.Term);
+            }
 
-        await LoadWordsAsync();
-        _ = LoadContextUnitsAsync();
-        SelectedWord = Words.FirstOrDefault(w => w.Id == saved.Id);
-        if (SelectedWord == null)
-        {
-            ResetFilters();
             await LoadWordsAsync();
+            _ = LoadContextUnitsAsync();
             SelectedWord = Words.FirstOrDefault(w => w.Id == saved.Id);
+            if (SelectedWord == null)
+            {
+                ResetFilters();
+                await LoadWordsAsync();
+                SelectedWord = Words.FirstOrDefault(w => w.Id == saved.Id);
+            }
+        }
+        finally
+        {
+            _isSavingWord = false;
         }
     }
+
+    private bool _isCreatingTopic = false;
 
     [RelayCommand]
-    public async Task<TopicDto> CreateTopicAsync(TopicCreateOrUpdateDto dto)
+    public async Task<TopicDto?> CreateTopicAsync(TopicCreateOrUpdateDto dto)
     {
-        var created = await _vocabService.CreateTopicAsync(dto);
-        await LoadFiltersAsync();
-        await LoadContextUnitsAsync();
-        StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_TopicCreated"), created.Name);
-        return created;
+        if (_isCreatingTopic) return null;
+        _isCreatingTopic = true;
+        try
+        {
+            var created = await _vocabService.CreateTopicAsync(dto);
+            await LoadFiltersAsync();
+            await LoadContextUnitsAsync();
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_TopicCreated"), created.Name);
+            return created;
+        }
+        finally
+        {
+            _isCreatingTopic = false;
+        }
     }
 
+    private bool _isDeletingWord = false;
 
     [RelayCommand]
     public async Task DeleteWordAsync(Guid id)
     {
-        var word = Words.FirstOrDefault(w => w.Id == id);
-        string term = word?.Term ?? string.Empty;
-
-        await _dispatcherQueue.EnsureOnUIThreadAsync();
-        if (SelectedWord?.Id == id)
+        if (_isDeletingWord) return;
+        _isDeletingWord = true;
+        try
         {
-            SelectedWord = null;
+            var word = Words.FirstOrDefault(w => w.Id == id);
+            string term = word?.Term ?? string.Empty;
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            if (SelectedWord?.Id == id)
+            {
+                SelectedWord = null;
+            }
+
+            await _vocabService.DeleteWordAsync(id);
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            if (!string.IsNullOrEmpty(term))
+            {
+                StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordDeleted"), term);
+            }
+
+            await LoadWordsAsync();
+            _ = LoadContextUnitsAsync();
         }
-
-        await _vocabService.DeleteWordAsync(id);
-
-        await _dispatcherQueue.EnsureOnUIThreadAsync();
-        if (!string.IsNullOrEmpty(term))
+        finally
         {
-            StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordDeleted"), term);
+            _isDeletingWord = false;
         }
-
-        await LoadWordsAsync();
-        _ = LoadContextUnitsAsync();
     }
 
     [RelayCommand]

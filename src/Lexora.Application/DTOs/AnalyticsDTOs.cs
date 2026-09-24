@@ -15,10 +15,12 @@ public record ExamProgressDto(
     int TotalWords,
     int MasteredWords,
     int LearningWords,
-    double ProgressPercentage
+    double ProgressPercentage,
+    string? CustomExamName = null,
+    string? CustomTargetDescription = null
 )
 {
-    public string ExamName => Exam switch
+    public string ExamName => CustomExamName ?? Exam switch
     {
         ExamType.Toeic => "TOEIC Preparation",
         ExamType.Vstep => "VSTEP B1-C1",
@@ -26,7 +28,7 @@ public record ExamProgressDto(
         _ => "General Vocabulary"
     };
 
-    public string TargetDescription => Exam switch
+    public string TargetDescription => CustomTargetDescription ?? Exam switch
     {
         ExamType.Toeic => "Target score 600 - 850+",
         ExamType.Vstep => "Target level B1 - C1",

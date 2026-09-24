@@ -85,6 +85,20 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_ForecastTitle"] = "Dự Báo Khối Lượng Ôn Tập (7 Ngày Tới)",
             ["Dashboard_ForecastSubtitle"] = "Phân bố số thẻ dự kiến đến hạn theo thuật toán lặp lại ngắt quãng SM-2",
             ["Dashboard_ForecastTotal"] = "Tổng thẻ 7 ngày tới:",
+            ["Status_Mastered"] = "Đã thành thạo",
+            ["Status_Remembered"] = "Đã ghi nhớ",
+            ["Status_Learning"] = "Đang học",
+            ["Status_ReviewDue"] = "Cần ôn tập",
+            ["Status_NotRemembered"] = "Chưa nhớ",
+            ["Status_New"] = "Từ mới",
+            ["Exam_Name_Toeic"] = "Luyện thi TOEIC",
+            ["Exam_Name_Vstep"] = "Luyện thi VSTEP B1-C1",
+            ["Exam_Name_Ielts"] = "Luyện thi IELTS Academic",
+            ["Exam_Name_General"] = "Từ vựng chung",
+            ["Exam_Target_Toeic"] = "Mục tiêu điểm 600 - 850+",
+            ["Exam_Target_Vstep"] = "Mục tiêu bậc B1 - C1",
+            ["Exam_Target_Ielts"] = "Mục tiêu band 6.5 - 8.0+",
+            ["Exam_Target_General"] = "Làm chủ tiếng Anh hàng ngày",
             ["Vocab_DidYouMean"] = "Có phải bạn muốn tìm:",
             ["Vocab_ApplyTypo"] = "Áp dụng",
 
@@ -617,6 +631,10 @@ public class LocalizationService : ILocalizationService
             ["Settings_BackupFailed"] = "Sao lưu thất bại: {0}",
             ["Settings_RestoreSuccessStatus"] = "Khôi phục cơ sở dữ liệu thành công từ: {0}",
             ["Settings_RestoreFailedStatus"] = "Khôi phục thất bại: {0}",
+            ["Settings_BackupFailedTitle"] = "Sao lưu thất bại",
+            ["Settings_BackupSuccessTitle"] = "Sao lưu thành công",
+            ["Settings_RestoreFailedTitle"] = "Khôi phục thất bại",
+            ["Settings_RestoreSuccessTitle"] = "Khôi phục thành công",
 
             // Additional Review Workspace
             ["Review_Progress"] = "Tiến độ: ",
@@ -1027,6 +1045,20 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_ForecastTitle"] = "Workload Forecast (Next 7 Days)",
             ["Dashboard_ForecastSubtitle"] = "Projected review workload scheduled by the SM-2 algorithm",
             ["Dashboard_ForecastTotal"] = "Total reviews next 7 days:",
+            ["Status_Mastered"] = "Mastered",
+            ["Status_Remembered"] = "Remembered",
+            ["Status_Learning"] = "Learning",
+            ["Status_ReviewDue"] = "Review Due",
+            ["Status_NotRemembered"] = "Not Remembered",
+            ["Status_New"] = "New",
+            ["Exam_Name_Toeic"] = "TOEIC Preparation",
+            ["Exam_Name_Vstep"] = "VSTEP B1-C1",
+            ["Exam_Name_Ielts"] = "IELTS Academic",
+            ["Exam_Name_General"] = "General Vocabulary",
+            ["Exam_Target_Toeic"] = "Target score 600 - 850+",
+            ["Exam_Target_Vstep"] = "Target level B1 - C1",
+            ["Exam_Target_Ielts"] = "Target band 6.5 - 8.0+",
+            ["Exam_Target_General"] = "Daily English Mastery",
             ["Vocab_DidYouMean"] = "Did you mean:",
             ["Vocab_ApplyTypo"] = "Apply",
 
@@ -1560,6 +1592,10 @@ public class LocalizationService : ILocalizationService
             ["Settings_BackupFailed"] = "Backup failed: {0}",
             ["Settings_RestoreSuccessStatus"] = "Database restored successfully from: {0}",
             ["Settings_RestoreFailedStatus"] = "Restore failed: {0}",
+            ["Settings_BackupFailedTitle"] = "Backup Failed",
+            ["Settings_BackupSuccessTitle"] = "Backup Successful",
+            ["Settings_RestoreFailedTitle"] = "Restore Failed",
+            ["Settings_RestoreSuccessTitle"] = "Restore Successful",
 
             // Additional Review Workspace
             ["Review_Progress"] = "Progress: ",
@@ -1903,9 +1939,9 @@ public class LocalizationService : ILocalizationService
         }
     };
 
-    private readonly Lexora.Infrastructure.Services.IUserPreferencesService _preferencesService;
+    private readonly Lexora.Application.Interfaces.IUserPreferencesService _preferencesService;
 
-    public LocalizationService(Lexora.Infrastructure.Services.IUserPreferencesService preferencesService)
+    public LocalizationService(Lexora.Application.Interfaces.IUserPreferencesService preferencesService)
     {
         _preferencesService = preferencesService;
         var prefs = _preferencesService.GetPreferences();

@@ -115,6 +115,11 @@ public sealed partial class OperationProgressDialog : ContentDialog
         StatusBadgeIcon.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
         StatusBadgeIcon.Glyph = "\uE73E";
 
+        if (!string.IsNullOrWhiteSpace(title) && title.Contains("{0}"))
+        {
+            title = title.Replace("{0}", "").Trim(' ', ':', '-');
+        }
+
         CompletedTitleText.Text = title;
         CompletedSummaryText.Text = summary;
 
@@ -154,6 +159,11 @@ public sealed partial class OperationProgressDialog : ContentDialog
         StatusBadgeBorder.BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
         StatusBadgeIcon.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
         StatusBadgeIcon.Glyph = "\uEA39";
+
+        if (!string.IsNullOrWhiteSpace(title) && title.Contains("{0}"))
+        {
+            title = title.Replace("{0}", "").Trim(' ', ':', '-');
+        }
 
         CompletedTitleText.Text = title;
         CompletedSummaryText.Text = errorMessage;

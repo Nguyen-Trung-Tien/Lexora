@@ -36,6 +36,7 @@ public class LexoraDbContext : DbContext
             b.HasIndex(w => w.NormalizedTerm);
             b.HasIndex(w => w.Level);
             b.HasIndex(w => w.PrimaryPartOfSpeech);
+            b.HasIndex(w => w.CreatedAt);
             b.HasIndex(w => new { w.NormalizedTerm, w.Level });
 
             b.HasMany(w => w.Meanings)
@@ -73,6 +74,7 @@ public class LexoraDbContext : DbContext
         modelBuilder.Entity<WordTopic>(b =>
         {
             b.HasKey(wt => new { wt.WordId, wt.TopicId });
+            b.HasIndex(wt => wt.TopicId);
 
             b.HasOne(wt => wt.Word)
                 .WithMany(w => w.WordTopics)
@@ -89,6 +91,7 @@ public class LexoraDbContext : DbContext
         modelBuilder.Entity<WordExamTag>(b =>
         {
             b.HasKey(wet => new { wet.WordId, wet.ExamTagId });
+            b.HasIndex(wet => wet.ExamTagId);
 
             b.HasOne(wet => wet.Word)
                 .WithMany(w => w.WordExamTags)
@@ -139,6 +142,11 @@ public class LexoraDbContext : DbContext
             b.Property(gr => gr.Title).IsRequired().HasMaxLength(200);
             b.Property(gr => gr.Structure).IsRequired().HasMaxLength(500);
             b.Property(gr => gr.ExplanationVi).IsRequired();
+            b.HasIndex(gr => gr.Level);
+            b.HasIndex(gr => gr.ExamTarget);
+            b.HasIndex(gr => gr.Topic);
+            b.HasIndex(gr => gr.OrderIndex);
+            b.HasIndex(gr => new { gr.Level, gr.ExamTarget });
 
             b.HasMany(gr => gr.Examples)
                 .WithOne(ge => ge.GrammarRule)

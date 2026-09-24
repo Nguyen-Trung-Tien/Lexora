@@ -1,4 +1,6 @@
 using FluentAssertions;
+using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
 using Lexora.Infrastructure.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;

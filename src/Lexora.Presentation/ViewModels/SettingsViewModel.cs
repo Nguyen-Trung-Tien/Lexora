@@ -1,8 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
-using Lexora.Infrastructure.Services;
 using Lexora.Presentation.Services;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 
 namespace Lexora.Presentation.ViewModels;
@@ -16,6 +17,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IGrammarService _grammarService;
     private readonly IAudioPlayerService _audioService;
     private readonly IUserPreferencesService _preferencesService;
+    private readonly DispatcherQueue? _dispatcherQueue;
 
     [ObservableProperty]
     public partial int SelectedThemeIndex { get; set; } = 0; // 0 = System, 1 = Light, 2 = Dark
@@ -72,6 +74,8 @@ public partial class SettingsViewModel : ObservableObject
         _grammarService = grammarService;
         _audioService = audioService;
         _preferencesService = preferencesService;
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
+            ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
         CurrentLanguage = _locService.CurrentLanguage;
         var prefs = _preferencesService.GetPreferences();
@@ -126,37 +130,41 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadDatabaseStatsAsync()
     {
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
         IsLoadingStats = true;
         try
         {
             DatabasePath = _backupService.DatabasePath;
 
+            string formatted = _locService.GetString("Settings_DbNotCreatedYet");
             if (File.Exists(DatabasePath))
             {
                 var fileInfo = new FileInfo(DatabasePath);
                 var bytes = fileInfo.Length;
-                DatabaseSizeFormatted = bytes switch
+                formatted = bytes switch
                 {
                     < 1024 => $"{bytes} B",
                     < 1024 * 1024 => $"{bytes / 1024.0:F1} KB",
                     _ => $"{bytes / (1024.0 * 1024.0):F2} MB"
                 };
             }
-            else
-            {
-                DatabaseSizeFormatted = _locService.GetString("Settings_DbNotCreatedYet");
-            }
 
-            TotalWordsCount = await _vocabService.CountWordsAsync();
+            var wordCount = await _vocabService.CountWordsAsync();
             var grammarRules = await _grammarService.GetAllRulesAsync();
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            DatabaseSizeFormatted = formatted;
+            TotalWordsCount = wordCount;
             TotalGrammarCount = grammarRules.Count;
         }
         catch (Exception ex)
         {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             BackupStatusMessage = string.Format(_locService.GetString("Settings_FailedLoadStatsFormat"), ex.Message);
         }
         finally
         {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             IsLoadingStats = false;
         }
     }
@@ -184,9 +192,14 @@ public partial class SettingsViewModel : ObservableObject
         _ = _preferencesService.SavePreferencesAsync(current with { LanguageCode = langCode });
     }
 
+    private bool _isCreatingBackup = false;
+    private bool _isRestoringBackup = false;
+
     [RelayCommand]
     public async Task<string?> CreateBackupAsync(string? targetFilePath = null)
     {
+        if (_isCreatingBackup) return null;
+        _isCreatingBackup = true;
         try
         {
             string backupPath;
@@ -204,14 +217,20 @@ public partial class SettingsViewModel : ObservableObject
                 backupPath = await _backupService.CreateBackupAsync(desktop);
             }
 
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupSuccess"), backupPath);
             await LoadDatabaseStatsAsync();
             return backupPath;
         }
         catch (Exception ex)
         {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupFailed"), ex.Message);
             return null;
+        }
+        finally
+        {
+            _isCreatingBackup = false;
         }
     }
 
@@ -224,17 +243,25 @@ public partial class SettingsViewModel : ObservableObject
         string backupFilePath,
         IProgress<(int Percent, string StepMessage, string? Detail)>? progress = null)
     {
+        if (_isRestoringBackup) return false;
+        _isRestoringBackup = true;
         try
         {
             await _backupService.RestoreBackupAsync(backupFilePath, progress);
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreSuccessStatus"), Path.GetFileName(backupFilePath));
             await LoadDatabaseStatsAsync();
             return true;
         }
         catch (Exception ex)
         {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
             BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreFailedStatus"), ex.Message);
             return false;
+        }
+        finally
+        {
+            _isRestoringBackup = false;
         }
     }
 

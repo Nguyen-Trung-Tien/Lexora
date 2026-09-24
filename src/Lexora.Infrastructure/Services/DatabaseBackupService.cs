@@ -1,28 +1,8 @@
+using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Lexora.Infrastructure.Services;
-
-public record BackupMetadata(
-    string FilePath,
-    string FileName,
-    long FileSizeBytes,
-    string FileSizeFormatted,
-    DateTime LastModified,
-    int WordCount,
-    int MeaningCount,
-    int GrammarRuleCount,
-    int StudyLogCount,
-    bool IsValid,
-    string? ErrorMessage = null);
-
-public interface IDatabaseBackupService
-{
-    string DatabasePath { get; }
-    Task<string> CreateBackupAsync(string destinationDirectory, CancellationToken cancellationToken = default);
-    Task<string> CreateBackupToFileAsync(string targetFilePath, CancellationToken cancellationToken = default);
-    Task<BackupMetadata> GetBackupMetadataAsync(string backupFilePath, CancellationToken cancellationToken = default);
-    Task RestoreBackupAsync(string backupFilePath, IProgress<(int Percent, string StepMessage, string? Detail)>? progress = null, CancellationToken cancellationToken = default);
-}
 
 public class DatabaseBackupService : IDatabaseBackupService
 {

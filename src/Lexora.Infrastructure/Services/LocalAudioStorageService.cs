@@ -1,13 +1,7 @@
 using System.Text.RegularExpressions;
+using Lexora.Application.Interfaces;
 
 namespace Lexora.Infrastructure.Services;
-
-public interface IAudioStorageService
-{
-    string GetAudioCacheDirectory();
-    Task<string?> CacheAudioAsync(string term, string accent, Stream audioStream, CancellationToken cancellationToken = default);
-    string? GetCachedAudioPath(string term, string accent);
-}
 
 public class LocalAudioStorageService : IAudioStorageService
 {

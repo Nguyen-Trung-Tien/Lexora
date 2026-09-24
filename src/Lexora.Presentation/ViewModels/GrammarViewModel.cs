@@ -228,52 +228,83 @@ public partial class GrammarViewModel : ObservableObject
         SelectedTopic = null;
     }
 
+    private bool _isSavingRule = false;
+
     [RelayCommand]
     public async Task AddRuleAsync(GrammarRuleCreateOrUpdateDto dto)
     {
-        var created = await _grammarService.CreateRuleAsync(dto);
-        await LoadTopicsAsync();
-        await LoadRulesAsync();
-        SelectedRule = Rules.FirstOrDefault(r => r.Id == created.Id);
-        if (SelectedRule == null)
+        if (_isSavingRule) return;
+        _isSavingRule = true;
+        try
         {
-            ResetFilters();
+            var created = await _grammarService.CreateRuleAsync(dto);
+            await LoadTopicsAsync();
             await LoadRulesAsync();
             SelectedRule = Rules.FirstOrDefault(r => r.Id == created.Id);
+            if (SelectedRule == null)
+            {
+                ResetFilters();
+                await LoadRulesAsync();
+                SelectedRule = Rules.FirstOrDefault(r => r.Id == created.Id);
+            }
+        }
+        finally
+        {
+            _isSavingRule = false;
         }
     }
 
     [RelayCommand]
     public async Task UpdateRuleAsync(GrammarRuleCreateOrUpdateDto dto)
     {
-        var updated = await _grammarService.UpdateRuleAsync(dto);
-        await LoadTopicsAsync();
-        await LoadRulesAsync();
-        SelectedRule = Rules.FirstOrDefault(r => r.Id == updated.Id);
-        if (SelectedRule == null)
+        if (_isSavingRule) return;
+        _isSavingRule = true;
+        try
         {
-            ResetFilters();
+            var updated = await _grammarService.UpdateRuleAsync(dto);
+            await LoadTopicsAsync();
             await LoadRulesAsync();
             SelectedRule = Rules.FirstOrDefault(r => r.Id == updated.Id);
+            if (SelectedRule == null)
+            {
+                ResetFilters();
+                await LoadRulesAsync();
+                SelectedRule = Rules.FirstOrDefault(r => r.Id == updated.Id);
+            }
+        }
+        finally
+        {
+            _isSavingRule = false;
         }
     }
+
+    private bool _isDeletingSingleRule = false;
 
     [RelayCommand]
     public async Task DeleteRuleAsync(Guid id)
     {
-        var rule = Rules.FirstOrDefault(r => r.Id == id);
-        string title = rule?.Title ?? string.Empty;
-
-        await _dispatcherQueue.EnsureOnUIThreadAsync();
-        if (SelectedRule?.Id == id)
+        if (_isDeletingSingleRule) return;
+        _isDeletingSingleRule = true;
+        try
         {
-            SelectedRule = null;
+            var rule = Rules.FirstOrDefault(r => r.Id == id);
+            string title = rule?.Title ?? string.Empty;
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            if (SelectedRule?.Id == id)
+            {
+                SelectedRule = null;
+            }
+
+            await _grammarService.DeleteRuleAsync(id);
+
+            await LoadTopicsAsync();
+            await LoadRulesAsync();
         }
-
-        await _grammarService.DeleteRuleAsync(id);
-
-        await LoadTopicsAsync();
-        await LoadRulesAsync();
+        finally
+        {
+            _isDeletingSingleRule = false;
+        }
     }
 
     [RelayCommand]
@@ -365,9 +396,13 @@ public partial class GrammarViewModel : ObservableObject
     // ==========================================
     // Grammar Practice / Quiz methods
     // ==========================================
+    private bool _isStartingPractice = false;
+
     [RelayCommand]
     public async Task StartPracticeAsync()
     {
+        if (_isStartingPractice) return;
+        _isStartingPractice = true;
         IsLoading = true;
         try
         {
@@ -394,6 +429,7 @@ public partial class GrammarViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+            _isStartingPractice = false;
         }
     }
 

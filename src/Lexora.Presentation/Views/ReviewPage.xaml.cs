@@ -1,4 +1,5 @@
 using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,14 +15,14 @@ public sealed partial class ReviewPage : Page
     public ReviewViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
 
-    private readonly Lexora.Infrastructure.Services.IUserPreferencesService _preferencesService;
+    private readonly IUserPreferencesService _preferencesService;
 
     public ReviewPage()
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<ReviewViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
-        _preferencesService = App.Current.Services.GetRequiredService<Lexora.Infrastructure.Services.IUserPreferencesService>();
+        _preferencesService = App.Current.Services.GetRequiredService<IUserPreferencesService>();
 
         IsTabStop = true;
         Loaded += (s, e) =>

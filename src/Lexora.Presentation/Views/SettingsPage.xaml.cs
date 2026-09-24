@@ -332,14 +332,14 @@ public sealed partial class SettingsPage : Page
                 if (!string.IsNullOrEmpty(backupPath))
                 {
                     progressDialog.SetCompleted(
-                        Loc.GetString("Progress_CompletedTitle"),
+                        Loc.GetString("Settings_BackupSuccessTitle"),
                         ViewModel.BackupStatusMessage,
                         closeButtonText: Loc.GetString("Action_Close"));
                 }
                 else
                 {
                     progressDialog.SetError(
-                        Loc.GetString("Settings_BackupFailed"),
+                        Loc.GetString("Settings_BackupFailedTitle"),
                         ViewModel.BackupStatusMessage,
                         Loc.GetString("Action_Close"));
                 }
@@ -348,7 +348,7 @@ public sealed partial class SettingsPage : Page
             {
                 await DispatcherQueue.EnsureOnUIThreadAsync();
                 progressDialog.SetError(
-                    Loc.GetString("Settings_BackupFailed"),
+                    Loc.GetString("Settings_BackupFailedTitle"),
                     ex.Message,
                     Loc.GetString("Action_Close"));
             }
@@ -457,7 +457,7 @@ public sealed partial class SettingsPage : Page
                 {
                     var errorDialog = new ContentDialog
                     {
-                        Title = Loc.GetString("Settings_BackupFailed"),
+                        Title = Loc.GetString("Settings_RestoreFailedTitle"),
                         Content = string.Format(Loc.GetString("Settings_DlgRestoreInvalidFile"), metadata.ErrorMessage),
                         CloseButtonText = Loc.GetString("Action_Close"),
                         XamlRoot = this.XamlRoot,
@@ -584,7 +584,7 @@ public sealed partial class SettingsPage : Page
                     if (restored)
                     {
                         progressDialog.SetCompleted(
-                            Loc.GetString("Progress_CompletedTitle"),
+                            Loc.GetString("Settings_RestoreSuccessTitle"),
                             Loc.GetString("Settings_DlgRestoreSuccessMsg"),
                             imported: metadata.WordCount,
                             skipped: 0,
@@ -594,7 +594,7 @@ public sealed partial class SettingsPage : Page
                     else
                     {
                         progressDialog.SetError(
-                            Loc.GetString("Settings_BackupFailed"),
+                            Loc.GetString("Settings_RestoreFailedTitle"),
                             ViewModel.BackupStatusMessage,
                             Loc.GetString("Action_Close"));
                     }
@@ -603,7 +603,7 @@ public sealed partial class SettingsPage : Page
                 {
                     await DispatcherQueue.EnsureOnUIThreadAsync();
                     progressDialog.SetError(
-                        Loc.GetString("Settings_BackupFailed"),
+                        Loc.GetString("Settings_RestoreFailedTitle"),
                         ex.Message,
                         Loc.GetString("Action_Close"));
                 }
@@ -616,7 +616,7 @@ public sealed partial class SettingsPage : Page
                     var fallbackTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
                     var errDlg = new ContentDialog
                     {
-                        Title = Loc.GetString("Settings_BackupFailed"),
+                        Title = Loc.GetString("Settings_RestoreFailedTitle"),
                         Content = ex.Message,
                         CloseButtonText = Loc.GetString("Action_Close"),
                         XamlRoot = this.XamlRoot,

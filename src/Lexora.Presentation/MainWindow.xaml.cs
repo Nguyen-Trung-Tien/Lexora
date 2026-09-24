@@ -1,6 +1,6 @@
 using System.IO;
 using System.Runtime.InteropServices;
-using Lexora.Infrastructure.Services;
+using Lexora.Application.Interfaces;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.Views;
 using Microsoft.Extensions.DependencyInjection;
