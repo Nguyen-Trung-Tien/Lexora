@@ -26,4 +26,8 @@
     <ProjectReference Include="..\..\src\Lexora.Infrastructure\Lexora.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\src\Lexora.Presentation\Services\LocalizationService.cs" Link="Services\LocalizationService.cs" />
+  </ItemGroup>
+
 </Project>

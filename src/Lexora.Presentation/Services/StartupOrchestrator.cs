@@ -35,14 +35,14 @@ public class StartupOrchestrator : IStartupOrchestrator
         var loc = _serviceProvider.GetService<ILocalizationService>();
         _lastError = null;
         SetState(StartupState.Starting);
-        SetStatus(loc?.GetString("Splash_StatusBooting") ?? "Khởi động Lexora...");
+        SetStatus(loc?.GetString("Splash_StatusBooting") ?? "Starting Lexora...");
 
         try
         {
             // Step 1: Services setup & starting state
             cancellationToken.ThrowIfCancellationRequested();
             SetState(StartupState.Loading);
-            SetStatus(loc?.GetString("Splash_StatusCheckingDb") ?? "Đang kiểm tra cơ sở dữ liệu...");
+            SetStatus(loc?.GetString("Splash_StatusCheckingDb") ?? "Checking database...");
 
             // Step 2: Initialize SQLite Database & seed data
             using (var scope = _serviceProvider.CreateScope())
@@ -54,11 +54,11 @@ public class StartupOrchestrator : IStartupOrchestrator
             cancellationToken.ThrowIfCancellationRequested();
 
             // Step 3: Load Settings & Environment
-            SetStatus(loc?.GetString("Splash_StatusLoadingData") ?? "Đang tải dữ liệu học tập & cài đặt...");
+            SetStatus(loc?.GetString("Splash_StatusLoadingData") ?? "Loading study data & settings...");
             await Task.Yield(); // brief async yield for UI refresh
 
             // Step 4: Ready
-            SetStatus(loc?.GetString("Splash_StatusReady") ?? "Sẵn sàng khởi động!");
+            SetStatus(loc?.GetString("Splash_StatusReady") ?? "Ready to launch!");
             SetState(StartupState.Ready);
             _logger.LogInformation("Lexora application initialization completed successfully.");
         }
@@ -71,7 +71,7 @@ public class StartupOrchestrator : IStartupOrchestrator
         {
             _logger.LogError(ex, "Lexora startup sequence failed.");
             _lastError = ex;
-            var errFormat = loc?.GetString("Splash_StatusErrorFormat") ?? "Lỗi khởi tạo: {0}";
+            var errFormat = loc?.GetString("Splash_StatusErrorFormat") ?? "Initialization error: {0}";
             SetStatus(string.Format(errFormat, ex.Message));
             SetState(StartupState.LoadingError);
         }

@@ -142,11 +142,9 @@ public sealed partial class SmartImportDialog : ContentDialog
     {
         if (_isGrammarMode)
         {
-            Title = _loc.CurrentLanguage == "vi-VN" ? "Nhập dữ liệu Ngữ pháp thông minh" : "Smart Grammar Data Import";
-            SubtitleText.Text = _loc.CurrentLanguage == "vi-VN"
-                ? "Dán trực tiếp hoặc tải tệp (JSON, CSV, TXT) chứa danh sách cấu trúc ngữ pháp, giải thích và ví dụ câu."
-                : "Directly paste or load files (JSON, CSV, TXT) containing grammar rules, explanations, and example sentences.";
-            TextAnalyzeNext.Text = _loc.CurrentLanguage == "vi-VN" ? "Tiến hành nhập dữ liệu" : "Start Import";
+            Title = _loc.GetString("Grammar_SmartImport_Title");
+            SubtitleText.Text = _loc.GetString("Grammar_SmartImport_Subtitle");
+            TextAnalyzeNext.Text = _loc.GetString("Grammar_SmartImport_AnalyzeBtn");
         }
         else
         {
@@ -172,20 +170,17 @@ public sealed partial class SmartImportDialog : ContentDialog
         TextBackToStep1.Text = _loc.GetString("SmartImport_BackBtn");
         ChkSelectAll.Content = _loc.GetString("SmartImport_SelectAll");
         TextDone.Text = _loc.GetString("SmartImport_DoneBtn");
-        BtnClearPaste.Content = _loc.CurrentLanguage == "vi-VN" ? "Xoá ô nhập" : "Clear Text";
+        BtnClearPaste.Content = _loc.GetString("SmartImport_ClearPaste");
         TextDropHint.Text = _loc.GetString("SmartImport_DragDropHint");
     }
 
     private void GoToStep(int step)
     {
-        var accentBrush = ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush")
-            ?? new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 0, 120, 215));
-        var layerBrush = ThemeResourceHelper.GetThemeBrush(this, "LayerFillColorDefaultBrush")
-            ?? new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 45, 45, 45));
-        var accentText = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush")
-            ?? new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 0, 120, 215));
-        var subtleText = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush")
-            ?? new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 160, 160, 160));
+        var accentBrush = ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush");
+        var layerBrush = ThemeResourceHelper.GetThemeBrush(this, "LayerFillColorDefaultBrush");
+        var accentText = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush");
+        var subtleText = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush");
+        var onAccentText = ThemeResourceHelper.GetThemeBrush(this, "TextOnAccentFillColorPrimaryBrush");
 
         PanelStep1.Visibility = step == 1 ? Visibility.Visible : Visibility.Collapsed;
         PanelStep2.Visibility = step == 2 ? Visibility.Visible : Visibility.Collapsed;
@@ -197,12 +192,12 @@ public sealed partial class SmartImportDialog : ContentDialog
 
         // Step 2 Indicator
         Step2NumberBorder.Background = step >= 2 ? accentBrush : layerBrush;
-        Step2NumberText.Foreground = step >= 2 ? (Brush)new SolidColorBrush(Microsoft.UI.Colors.White) : subtleText;
+        Step2NumberText.Foreground = step >= 2 ? onAccentText : subtleText;
         Step2Text.Foreground = step >= 2 ? accentText : subtleText;
 
         // Step 3 Indicator
         Step3NumberBorder.Background = step == 3 ? accentBrush : layerBrush;
-        Step3NumberText.Foreground = step == 3 ? (Brush)new SolidColorBrush(Microsoft.UI.Colors.White) : subtleText;
+        Step3NumberText.Foreground = step == 3 ? onAccentText : subtleText;
         Step3Text.Foreground = step == 3 ? accentText : subtleText;
     }
 
@@ -277,9 +272,8 @@ public sealed partial class SmartImportDialog : ContentDialog
         catch (Exception ex)
         {
             await DispatcherQueue.EnsureOnUIThreadAsync();
-            TextSelectedFile.Text = $"Lỗi: {ex.Message}";
-            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush")
-                ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+            TextSelectedFile.Text = string.Format(_loc.GetString("Common_ErrorPrefix"), ex.Message);
+            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
         }
     }
 
@@ -312,9 +306,8 @@ public sealed partial class SmartImportDialog : ContentDialog
         catch (Exception ex)
         {
             await DispatcherQueue.EnsureOnUIThreadAsync();
-            TextSelectedFile.Text = $"Lỗi: {ex.Message}";
-            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush")
-                ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+            TextSelectedFile.Text = string.Format(_loc.GetString("Common_ErrorPrefix"), ex.Message);
+            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
         }
     }
 
@@ -330,8 +323,7 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextSelectedFile.Text = string.Format(
                     _loc.GetString("SmartImport_UnsupportedFileType"),
                     string.IsNullOrEmpty(ext) ? "(no extension)" : ext);
-                TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") 
-                    ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+                TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
                 ContentToImport = string.Empty;
                 FileNameHint = null;
                 EvaluateContent();
@@ -346,8 +338,7 @@ public sealed partial class SmartImportDialog : ContentDialog
                 if (fileInfo.Length > MaxFileSizeBytes)
                 {
                     TextSelectedFile.Text = _loc.GetString("SmartImport_FileTooLarge");
-                    TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") 
-                        ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+                    TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
                     ContentToImport = string.Empty;
                     FileNameHint = null;
                     EvaluateContent();
@@ -386,8 +377,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             if (content.Contains('\0'))
             {
                 TextSelectedFile.Text = _loc.GetString("SmartImport_BinaryFileError");
-                TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") 
-                    ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+                TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
                 ContentToImport = string.Empty;
                 FileNameHint = null;
                 EvaluateContent();
@@ -399,17 +389,15 @@ public sealed partial class SmartImportDialog : ContentDialog
             FileNameHint = fileName;
             ContentToImport = content;
             TextSelectedFile.Text = string.Format(_loc.GetString("SmartImport_SelectedFile"), fileName);
-            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("TextFillColorSecondaryBrush")
-                ?? new SolidColorBrush(Microsoft.UI.Colors.Gray);
+            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush");
             EvaluateContent();
             BtnAnalyzeNext.IsEnabled = !string.IsNullOrWhiteSpace(ContentToImport) && DetectedFormat != DataFormat.Unknown;
         }
         catch (Exception ex)
         {
             await DispatcherQueue.EnsureOnUIThreadAsync();
-            TextSelectedFile.Text = $"Lỗi đọc tệp: {ex.Message}";
-            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush")
-                ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+            TextSelectedFile.Text = string.Format(_loc.GetString("Common_FileReadError"), ex.Message);
+            TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
             ContentToImport = string.Empty;
             FileNameHint = null;
             EvaluateContent();
@@ -479,9 +467,9 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     private void UpdateDetectionBadge()
     {
-        var accentBrush = ThemeResourceHelper.GetThemeBrush("AccentTextFillColorPrimaryBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.DodgerBlue);
-        var successBrush = ThemeResourceHelper.GetThemeBrush("SystemFillColorSuccessBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.ForestGreen);
-        var cautionBrush = ThemeResourceHelper.GetThemeBrush("SystemFillColorCautionBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.Orange);
+        var accentBrush = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush");
+        var successBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
+        var cautionBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush");
 
         switch (DetectedFormat)
         {
@@ -534,8 +522,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         {
             TextFormatBadge.Text = _loc.GetString("SmartImport_NoContent");
             IconFormatBadge.Glyph = "\uEA39";
-            var criticalBrush = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
-            IconFormatBadge.Foreground = criticalBrush;
+            IconFormatBadge.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
             return;
         }
 
@@ -543,8 +530,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         {
             TextFormatBadge.Text = _loc.GetString("SmartImport_FormatUnknown");
             IconFormatBadge.Glyph = "\uEA39";
-            var criticalBrush = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
-            IconFormatBadge.Foreground = criticalBrush;
+            IconFormatBadge.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
             return;
         }
 
@@ -687,10 +673,9 @@ public sealed partial class SmartImportDialog : ContentDialog
         catch (Exception ex)
         {
             await DispatcherQueue.EnsureOnUIThreadAsync();
-            TextFormatBadge.Text = $"Lỗi phân tích: {ex.Message}";
+            TextFormatBadge.Text = string.Format(_loc.GetString("Common_ParseError"), ex.Message);
             IconFormatBadge.Glyph = "\uEA39";
-            var criticalBrush = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush") ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
-            IconFormatBadge.Foreground = criticalBrush;
+            IconFormatBadge.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
         }
         finally
         {

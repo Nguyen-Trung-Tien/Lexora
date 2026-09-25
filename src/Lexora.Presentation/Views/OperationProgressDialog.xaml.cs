@@ -98,7 +98,7 @@ public sealed partial class OperationProgressDialog : ContentDialog
     /// <summary>
     /// Shows the high-fidelity completed state with summary metrics cards and enables the Close button.
     /// </summary>
-    public void SetCompleted(string title, string summary, int imported = 0, int skipped = 0, int errors = 0, string closeButtonText = "Đóng")
+    public void SetCompleted(string title, string summary, int imported = 0, int skipped = 0, int errors = 0, string? closeButtonText = null)
     {
         if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
         {
@@ -137,13 +137,14 @@ public sealed partial class OperationProgressDialog : ContentDialog
             MetricsGrid.Visibility = Visibility.Visible;
         }
 
-        CloseButtonText = closeButtonText;
+        var defaultCloseText = App.Current?.Services?.GetService<ILocalizationService>()?.GetString("Action_Close") ?? "Close";
+        CloseButtonText = !string.IsNullOrWhiteSpace(closeButtonText) ? closeButtonText : defaultCloseText;
     }
 
     /// <summary>
     /// Displays an error or failure state.
     /// </summary>
-    public void SetError(string title, string errorMessage, string closeButtonText = "Đóng")
+    public void SetError(string title, string errorMessage, string? closeButtonText = null)
     {
         if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
         {
@@ -153,6 +154,9 @@ public sealed partial class OperationProgressDialog : ContentDialog
 
         ActiveProgressPanel.Visibility = Visibility.Collapsed;
         CompletedPanel.Visibility = Visibility.Visible;
+
+        var defaultCloseText = App.Current?.Services?.GetService<ILocalizationService>()?.GetString("Action_Close") ?? "Close";
+        CloseButtonText = !string.IsNullOrWhiteSpace(closeButtonText) ? closeButtonText : defaultCloseText;
 
         // Visual badge: Red critical cross icon
         StatusBadgeBorder.Background = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBackgroundBrush");

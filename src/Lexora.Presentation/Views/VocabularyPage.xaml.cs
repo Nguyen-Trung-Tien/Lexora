@@ -174,12 +174,15 @@ public sealed partial class VocabularyPage : Page
 
     private readonly DispatcherTimer _searchDebounceTimer;
 
-    protected override void OnNavigatedTo(NavigationEventArgs e)
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))
         {
+            SearchBox.Text = query;
             ViewModel.SearchTerm = query;
+            await ViewModel.LoadWordsAsync();
+            ViewModel.ApplyUnitFilter();
         }
     }
 
@@ -757,7 +760,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ErrorMarkStatus"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ErrorMarkStatus"), ex.Message);
         }
         finally
         {
@@ -775,7 +778,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ErrorMarkStatus"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ErrorMarkStatus"), ex.Message);
         }
         finally
         {
@@ -791,7 +794,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
 
@@ -803,7 +806,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
 
@@ -815,7 +818,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
 
@@ -852,7 +855,7 @@ public sealed partial class VocabularyPage : Page
         {
             progressDialog.HideSafe();
             await Task.Yield();
-            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
 
@@ -969,7 +972,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
 
@@ -1018,7 +1021,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ImportFailed"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ImportFailed"), ex.Message);
         }
     }
 
@@ -1030,7 +1033,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ImportFailed"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ImportFailed"), ex.Message);
         }
     }
 
@@ -1042,7 +1045,7 @@ public sealed partial class VocabularyPage : Page
         }
         catch (Exception ex)
         {
-            ShowErrorDialog(Loc.GetString("Vocab_ImportFailed"), ex.Message);
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ImportFailed"), ex.Message);
         }
     }
 
@@ -1172,28 +1175,7 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
-    private async void ShowErrorDialog(string title, string message)
-    {
-        try
-        {
-            if (this.XamlRoot == null) return;
-            await Task.Yield();
-            var theme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
-            var dialog = new ContentDialog
-            {
-                Title = title,
-                Content = message,
-                CloseButtonText = Loc.GetString("Action_Close"),
-                XamlRoot = this.XamlRoot,
-                RequestedTheme = theme
-            };
-            await dialog.ShowAsyncSafe();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] ShowErrorDialog error: {ex.Message}");
-        }
-    }
+
 
     private void AddWordAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
     {
@@ -1311,7 +1293,7 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
-    private void TestUnit_Click(object sender, RoutedEventArgs e)
+    private async void TestUnit_Click(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement fe && (fe.Tag as ContextUnitDto ?? fe.DataContext as ContextUnitDto) is ContextUnitDto unit)
         {
@@ -1322,12 +1304,12 @@ public sealed partial class VocabularyPage : Page
             }
             else
             {
-                ShowErrorDialog(Loc.GetString("Vocab_NoWordsInUnitTitle"), string.Format(Loc.GetString("Vocab_NoWordsInUnitTestMsg"), unit.Name));
+                await ShowErrorDialogAsync(Loc.GetString("Vocab_NoWordsInUnitTitle"), string.Format(Loc.GetString("Vocab_NoWordsInUnitTestMsg"), unit.Name));
             }
         }
     }
 
-    private void ReviewUnit_Click(object sender, RoutedEventArgs e)
+    private async void ReviewUnit_Click(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement fe && (fe.Tag as ContextUnitDto ?? fe.DataContext as ContextUnitDto) is ContextUnitDto unit)
         {
@@ -1338,7 +1320,7 @@ public sealed partial class VocabularyPage : Page
             }
             else
             {
-                ShowErrorDialog(Loc.GetString("Vocab_NoWordsInUnitTitle"), string.Format(Loc.GetString("Vocab_NoWordsInUnitReviewMsg"), unit.Name));
+                await ShowErrorDialogAsync(Loc.GetString("Vocab_NoWordsInUnitTitle"), string.Format(Loc.GetString("Vocab_NoWordsInUnitReviewMsg"), unit.Name));
             }
         }
     }
@@ -1364,7 +1346,7 @@ public sealed partial class VocabularyPage : Page
                 }
                 catch (Exception ex)
                 {
-                    ShowErrorDialog(Loc.GetString("Vocab_CreateTopicFailed"), ex.Message);
+                    await ShowErrorDialogAsync(Loc.GetString("Vocab_CreateTopicFailed"), ex.Message);
                 }
             }
         }

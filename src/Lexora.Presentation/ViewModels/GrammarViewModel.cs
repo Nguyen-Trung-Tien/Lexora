@@ -540,14 +540,8 @@ public partial class GrammarViewModel : ObservableObject
         var result = _grammarService.EvaluateQuiz(PracticeQuestions.ToList(), _practiceSubmissions);
         PracticeResult = result;
 
-        if (_localizationService.CurrentLanguage == "vi-VN")
-        {
-            ResultSummaryMessage = $"Bạn đã hoàn thành bài luyện tập với {result.CorrectCount}/{result.TotalQuestions} câu trả lời chính xác (Đạt {result.ScorePercentage:F0}%).";
-        }
-        else
-        {
-            ResultSummaryMessage = $"You completed the practice with {result.CorrectCount}/{result.TotalQuestions} correct answers ({result.ScorePercentage:F0}% score).";
-        }
+        var template = _localizationService.GetString("Grammar_Practice_ResultSummaryFormat");
+        ResultSummaryMessage = string.Format(template, result.CorrectCount, result.TotalQuestions, $"{result.ScorePercentage:F0}");
 
         _soundFeedback?.PlayReviewCompleteSound();
 
@@ -557,18 +551,9 @@ public partial class GrammarViewModel : ObservableObject
 
     private void UpdatePracticeStatusTip()
     {
-        if (!IsAnswerSubmitted)
-        {
-            PracticeStatusTip = _localizationService.CurrentLanguage == "vi-VN"
-                ? "Chọn một phương án để kiểm tra cấu trúc"
-                : "Select an option to check structure formula";
-        }
-        else
-        {
-            PracticeStatusTip = _localizationService.CurrentLanguage == "vi-VN"
-                ? "Nhấn 'Câu tiếp theo' để tiếp tục"
-                : "Click 'Next Question' to continue";
-        }
+        PracticeStatusTip = !IsAnswerSubmitted
+            ? _localizationService.GetString("Grammar_Practice_SelectOptionTip")
+            : _localizationService.GetString("Grammar_Practice_NextQuestionTip");
     }
 
     private void UpdateNextButtonText()

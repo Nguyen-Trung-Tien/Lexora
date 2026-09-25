@@ -80,7 +80,7 @@ public sealed partial class ReviewPage : Page
                 ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
                 ViewModel.SpeechRate = prefs.SpeechRate;
                 UpdateModeButtonStyles(ReviewSessionMode.CustomSelection);
-                await ViewModel.StartCustomWordReviewAsync(idList, $"Từ vựng chọn lọc ({idList.Count})");
+                await ViewModel.StartCustomWordReviewAsync(idList);
             }
             else if (e.Parameter is TopicDto topic)
             {
@@ -89,7 +89,8 @@ public sealed partial class ReviewPage : Page
                 ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
                 ViewModel.SpeechRate = prefs.SpeechRate;
                 UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
-                await ViewModel.StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: topic.Id, customTitle: $"Unit: {topic.Name}");
+                var topicTitle = string.Format(Loc.GetString("Review_Session_ByTopicFormat"), topic.Name);
+                await ViewModel.StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: topic.Id, customTitle: topicTitle);
             }
             else
             {

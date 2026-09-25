@@ -630,6 +630,7 @@ public partial class TestViewModel : ObservableObject
         if (WeakWordsList.Count == 0) return;
 
         WeakWordsOnly = true;
+        IsCustomListMode = false;
         SelectedTestType = TestType.Mixed;
         QuestionCount = Math.Min(WeakWordsList.Count, 20);
         await StartTestAsync();

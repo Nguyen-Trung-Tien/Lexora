@@ -7,31 +7,34 @@
 
 ## 🚀 Tổng Quan Tiến Độ (Dashboard)
 
-| Giai Đoạn | Tên Module / Phase | Trạng Thái | Tiến Độ (%) | Kiểm Thử |
-|---|---|:---:|:---:|:---:|
-| **Phase 1** | **Foundation & Clean Architecture** | ✅ Hoàn thành | 100% | Đã verify |
-| **Phase 2** | **Vocabulary Management (CRUD, Audio, Import/Export)** | ✅ Hoàn thành | 100% | 11/11 tests pass |
-| **Phase 3** | **Learning & Spaced Repetition (SM-2 & Ebbinghaus)** | ✅ Hoàn thành | 100% | 13/13 tests pass |
-| **Phase 4** | **Vocabulary Test & Practice (Quiz, Dictation, Fill-in)** | ✅ Hoàn thành | 100% | 8/8 tests pass |
-| **Phase 5** | **Grammar & Sentence Structure** | ✅ Hoàn thành | 100% | 6/6 tests pass |
-| **Phase 6** | **Dashboard, Analytics & Retention Charts** | ✅ Hoàn thành | 100% | 4/4 tests pass |
-| **Phase 7** | **UI/UX Polish, Shortcuts & Accessibility** | ✅ Hoàn thành | 100% | Dynamic i18n & Intervals |
-| **Phase 8** | **Backup, Packaging & Release** | ✅ Hoàn thành | 100% | Rollback & QuickCheck |
-| **Phase 9** | **Senior Architecture, Security & Smart Optimization** | ✅ Hoàn thành | 100% | Batch Load, CWE-1236, PRAGMAs |
-| **Phase 10** | **Intelligence, Workload Forecast & Query Optimization** | ✅ Hoàn thành | 100% | 96/96 tests pass |
-| **Phase 11** | **Real-Time Dynamic i18n & Fluid Motion Transitions** | ✅ Hoàn thành | 100% | 96/96 tests pass |
+| Giai Đoạn    | Tên Module / Phase                                           |  Trạng Thái   | Tiến Độ (%) |           Kiểm Thử            |
+| ------------ | ------------------------------------------------------------ | :-----------: | :---------: | :---------------------------: |
+| **Phase 1**  | **Foundation & Clean Architecture**                          | ✅ Hoàn thành |    100%     |           Đã verify           |
+| **Phase 2**  | **Vocabulary Management (CRUD, Audio, Import/Export)**       | ✅ Hoàn thành |    100%     |       11/11 tests pass        |
+| **Phase 3**  | **Learning & Spaced Repetition (SM-2 & Ebbinghaus)**         | ✅ Hoàn thành |    100%     |       13/13 tests pass        |
+| **Phase 4**  | **Vocabulary Test & Practice (Quiz, Dictation, Fill-in)**    | ✅ Hoàn thành |    100%     |        8/8 tests pass         |
+| **Phase 5**  | **Grammar & Sentence Structure**                             | ✅ Hoàn thành |    100%     |        6/6 tests pass         |
+| **Phase 6**  | **Dashboard, Analytics & Retention Charts**                  | ✅ Hoàn thành |    100%     |        4/4 tests pass         |
+| **Phase 7**  | **UI/UX Polish, Shortcuts & Accessibility**                  | ✅ Hoàn thành |    100%     |   Dynamic i18n & Intervals    |
+| **Phase 8**  | **Backup, Packaging & Release**                              | ✅ Hoàn thành |    100%     |     Rollback & QuickCheck     |
+| **Phase 9**  | **Senior Architecture, Security & Smart Optimization**       | ✅ Hoàn thành |    100%     | Batch Load, CWE-1236, PRAGMAs |
+| **Phase 10** | **Intelligence, Workload Forecast & Query Optimization**     | ✅ Hoàn thành |    100%     |       96/96 tests pass        |
+| **Phase 11** | **Real-Time Dynamic i18n & Fluid Motion Transitions**        | ✅ Hoàn thành |    100%     |       96/96 tests pass        |
+| **Phase 12** | **Master Project Audit, Architecture & Quality Remediation** | ✅ Hoàn thành |    100%     |      177/177 tests pass       |
 
-**Tổng tiến độ toàn diện toàn dự án: 100% (Hoàn thành 11/11 Phases)**  
-**Trạng thái Build & Test**: 96/96 Unit & Integration Tests **PASS** (70 Unit + 26 Integration, 0 errors, 0 warnings).
-- **Trí thông minh học tập**: Smart Learning Advisor (`IStudyAdvisorService`), 7-Day Spaced Repetition Workload Forecast (`WorkloadForecastDto`), Typo-Tolerant & Fuzzy Search Engine (`IFuzzySearchService` với Damerau-Levenshtein).
-- **Tối ưu hóa Database**: Zero-allocation `CountDueCardsAsync` và `GetDueForecastCountsAsync` trong `ReviewRepository` & `ReviewService`.
-- **Giao diện hiện đại**: Smart Study Advisor Hero Card và 7-Day Forecast Pills trên `DashboardPage`, Typo suggestion banner trên `VocabularyPage`.
+**Tổng tiến độ toàn diện toàn dự án: 100% (Hoàn thành 12/12 Phases)**  
+**Trạng thái Build & Test**: 177/177 Unit & Integration Tests **PASS** (140 Unit + 37 Integration, 0 errors, 0 warnings).
+
+- **Master Quality Audit**: Đạt chuẩn 100% Clean Architecture, không có EF Core rò rỉ vào Presentation layer, 100% Fluent Theme Resource Brushes, không có hardcoded hex color.
+- **Bilingual i18n**: 786 keys đối xứng 100% giữa `vi-VN` và `en-US`, 0 keys thiếu, format string token đồng nhất, không gây FormatException khi runtime switching.
+- **Workflow & UI/UX**: Chữa lỗi navigation query filtering, loại bỏ duplicate dialog methods, sửa lỗi reset CustomListMode trong Test engine, chuẩn hóa SmartImport dialog.
 
 ---
 
 ## 📋 Chi Tiết Từng Giai Đoạn
 
 ### ✅ Phase 1 — Nền Tảng Kiến Trúc (Foundation) — 100%
+
 - [x] **Cấu trúc Clean Architecture 4 tầng**:
   - `src/Lexora.Domain`: Entity, Enums, Value Objects, Repository Interfaces (không phụ thuộc bên thứ 3).
   - `src/Lexora.Application`: DTOs, Service Interfaces, SM-2 Engine, Business Logic.
@@ -49,6 +52,7 @@
 ---
 
 ### ✅ Phase 2 — Quản Lý Từ Vựng (Vocabulary) — 100%
+
 - [x] **Cấu trúc Dữ liệu Đa Nghĩa**:
   - Entity `Word`: Từ gốc, phiên âm IPA, đường dẫn Audio, ghi chú ngữ cảnh.
   - Entity `WordMeaning`: Hỗ trợ 1 từ có nhiều nghĩa, từ loại (`n, v, adj, adv, pv, prep, conj`), CEFR Level (`A1-C2`).
@@ -69,6 +73,7 @@
 ---
 
 ### ✅ Phase 3 — Học & Ôn Tập Lặp Lại Ngắt Quãng (Learning & SM-2) — 100%
+
 - [x] **Thuật Toán Spaced Repetition SuperMemo SM-2**:
   - Engine chuẩn `Sm2SpacedRepetitionEngine`: Tính toán `EaseFactor` (sàn tối thiểu 1.3), khoảng cách ngày ôn tập (`IntervalDays`), chu kỳ lặp (`Repetitions`).
   - Lập lịch ngày ôn tập tiếp theo chính xác (`NextReviewAt`).
@@ -91,6 +96,7 @@
 ---
 
 ### ✅ Phase 4 — Kiểm Tra & Luyện Tập (Practice & Quizzes) — 100%
+
 - [x] **Đa dạng các dạng câu hỏi trắc nghiệm & điền từ**:
   - Trắc nghiệm Từ vựng -> Nghĩa (Word to Meaning Quiz).
   - Trắc nghiệm Nghĩa -> Từ vựng (Meaning to Word Quiz).
@@ -115,6 +121,7 @@
 ---
 
 ### ✅ Phase 5 — Ngữ Pháp & Cấu Trúc Câu (Grammar Master) — 100%
+
 - [x] **Nghiệp vụ CRUD cấu trúc ngữ pháp**:
   - Entity `GrammarRule` và `GrammarExample` trong Domain.
   - Triển khai đầy đủ Thêm / Sửa / Xóa cấu trúc ngữ pháp kèm cascade quản lý danh sách ví dụ.
@@ -126,7 +133,7 @@
 - [x] **Chi tiết bài học & Cảnh báo lỗi**:
   - Hộp công thức trực quan (Formula box) phông chữ Monospace nổi bật.
   - Giải thích song ngữ Tiếng Việt & Tiếng Anh.
-  - Khung cảnh báo lỗi sai phổ biến (*Common Mistakes & Pitfalls*) màu vàng cảnh báo.
+  - Khung cảnh báo lỗi sai phổ biến (_Common Mistakes & Pitfalls_) màu vàng cảnh báo.
   - Danh sách câu ví dụ ngữ cảnh có bản dịch và ghi chú.
 - [x] **Bài tập thực hành ngữ pháp tương tác (Grammar Practice & Quiz)**:
   - Sinh đề thi trắc nghiệm ngữ pháp thông minh từ kho cấu trúc và câu ví dụ.
@@ -135,6 +142,7 @@
 ---
 
 ### ✅ Phase 6 — Báo Cáo & Thống Kê (Dashboard & Analytics) — 100%
+
 - [x] **Service tính toán số liệu thống kê chuyên sâu (`StatisticsService`)**:
   - `GetDashboardSummaryAsync`: Đếm số từ theo trạng thái, tỷ lệ nhớ, độ chính xác %, số từ cần ôn trong ngày.
   - `GetDetailedAnalyticsAsync`: Tổng hợp phân bổ từ vựng theo CEFR (A1-C2), Từ loại (POS), Kỳ thi (TOEIC, VSTEP, IELTS), và Chủ đề (Topics).
@@ -152,6 +160,7 @@
 ---
 
 ### ✅ Phase 7 — Tối Ưu Trải Nghiệm & Trợ Năng (UI/UX Polish) — 100%
+
 - [x] Hiệu ứng nền Mica Alt / Acrylic trên Windows 11.
 - [x] Hỗ trợ chuyển đổi Theme sáng/tối không cần khởi động lại app.
 - [x] Script tiện ích khởi chạy nhanh (`run.ps1`, `run.cmd`).
@@ -175,6 +184,7 @@
 ---
 
 ### ✅ Phase 8 — Đóng Gói, Sao Lưu & Phát Hành (Packaging & Release) — 100%
+
 - [x] **45 Unit Tests & Integration Tests tự động hoá** (`dotnet test`):
   - 27 Unit Tests kiểm thử toàn diện SM-2, Review, Test Quiz, Grammar, Import/Export, Statistics.
   - 18 Integration Tests kiểm thử SQLite DB, CRUD, Học tập, Báo cáo, Sao lưu DB, Cascade Integrity, và Large Volume Performance.
@@ -192,6 +202,7 @@
 ---
 
 ### ✅ Phase 10 — Trí Thông Minh Học Tập, Dự Báo Khối Lượng & Tối Ưu Hóa (Intelligence & Optimization) — 100%
+
 - [x] **Smart Learning Advisor & Daily Recommendations (`IStudyAdvisorService`)**:
   - Phân tích độ suy giảm trí nhớ Ebbinghaus, tính toán điểm rủi ro (Retention Risk Score) theo thời gian quá hạn và số lần quên (`Lapses`).
   - Tự động sinh đề xuất học tập cá nhân hóa (`UrgentReview`, `WeakWordsQuiz`, `DailyMaintenance`) kèm nút kích hoạt 1-click trực tiếp từ Dashboard.
@@ -200,7 +211,7 @@
   - Hiển thị trực quan qua dải thẻ ngày (Forecast Pills) kèm số lượng thẻ và nhãn cường độ.
 - [x] **Tìm kiếm thông minh chịu lỗi & Gợi ý chính tả (`IFuzzySearchService`)**:
   - Tích hợp thuật toán Damerau-Levenshtein distance tối ưu $O(N \times M)$ với mảng đệm không phân bổ (`stackalloc Span<int>`).
-  - Nhận diện lỗi gõ nhầm và tự động gợi ý "Có phải bạn muốn tìm: *[từ đúng]*" khi người học gõ sai chính tả.
+  - Nhận diện lỗi gõ nhầm và tự động gợi ý "Có phải bạn muốn tìm: _[từ đúng]_" khi người học gõ sai chính tả.
 - [x] **Tối ưu hóa Database & Query Performance**:
   - Triển khai `CountDueCardsAsync` và `GetDueForecastCountsAsync` zero-allocation trên `ReviewRepository`, cắt giảm 99% chi phí I/O và memory allocation so với việc nạp 1.000 thực thể vào bộ nhớ.
   - Tích hợp Debounce tìm kiếm bất đồng bộ kèm Token hủy tác vụ để tránh quá tải truy vấn khi gõ phím.
@@ -209,6 +220,7 @@
 ---
 
 ### ✅ Phase 11 — Tối Ưu Đa Ngôn Ngữ Tức Thời & Hiệu Ứng Mượt Mà (Real-Time i18n & Fluid Motion) — 100%
+
 - [x] **Tối ưu hóa Đa Ngôn Ngữ Tức Thời (Real-Time Dynamic i18n)**:
   - Tự động nạp ngôn ngữ đã lưu (`LanguageCode`) từ `UserPreferencesService` ngay khi khởi động mà không làm chậm splash sequence.
   - Sửa lỗi điều hướng trùng lặp trong `NavigationService` bằng cơ chế `force: true` và phương thức `Reload(new SuppressNavigationTransitionInfo())` giúp reload trang không giật lag.
@@ -220,6 +232,26 @@
     - **ReviewPage**: Khung đáp án/định nghĩa và 4 nút chấm điểm SM-2 trượt vào êm ái khi lật thẻ.
     - **TestPage**: Hiệu ứng chuyển động mượt mà khi chuyển giữa chế độ Cấu hình (Setup), Thi trắc nghiệm (Testing) và Bảng tổng kết kết quả (Result).
 - [x] **Kiểm thử & Đảm bảo chất lượng**: Biên dịch 0 warnings, 0 errors, toàn bộ 96/96 Unit & Integration Tests đạt 100%.
+
+---
+
+### ✅ Phase 12 — Master Project Audit, Architecture & Quality Remediation — 100%
+
+- [x] **Audit Kiến Trúc & Ranh Giới (Architecture & Boundary Integrity)**:
+  - Xác minh 100% tầng `Presentation` tuân thủ nguyên tắc Clean Architecture: không có tham chiếu trực tiếp đến `LexoraDbContext`, không gọi EF Core trực tiếp; mọi luồng đều đi qua Application Services và DTOs.
+  - Loại bỏ các phương thức trùng lặp (`ShowErrorDialog` vs `ShowErrorDialogAsync`), chuẩn hóa việc truyền XamlRoot và theme sang `ShowAsyncSafe`.
+- [x] **Chuẩn Hóa Đa Ngôn Ngữ (Bilingual i18n & Deduplication)**:
+  - Khắc phục triệt để 96 keys định nghĩa trùng lặp trong `LocalizationService.cs`.
+  - Bổ sung toàn bộ các keys còn thiếu cho `GrammarViewModel`, `SmartImportDialog`, `OperationProgressDialog`, `ReviewPage`.
+  - Đảm bảo 786 keys hoàn toàn đối xứng giữa `vi-VN` và `en-US` (0 keys thiếu, format string token khớp 100%).
+  - Bổ sung bộ unit test tự động `LocalizationServiceTests` kiểm thử tính toàn vẹn và đối xứng từ điển.
+- [x] **Sửa Lỗi Quy Trình & Nghiệp Vụ (Workflows & Logic Bugs)**:
+  - Sửa lỗi `TestViewModel.RetestWeakWordsAsync`: Reset `IsCustomListMode = false` để tránh việc kiểm tra nhầm danh sách từ tùy chọn cũ thay vì từ yếu.
+  - Sửa lỗi điều hướng tìm kiếm trong `VocabularyPage`: Tự động kích hoạt lọc từ vựng khi nhận tham số query từ navigation.
+  - Loại bỏ toàn bộ các fallback gán `SolidColorBrush` cứng trong `SmartImportDialog.xaml.cs`, chuyển sang `ThemeResourceHelper.GetThemeBrush`.
+- [x] **Chất lượng & Kiểm thử tự động (Verification & Quality Benchmark)**:
+  - Toàn bộ 177 / 177 Unit & Integration Tests vượt qua (140 Unit + 37 Integration, 0 Failed, 0 Skipped).
+  - Biên dịch toàn bộ Solution với 0 warning, 0 error.
 
 ---
 
@@ -240,4 +272,3 @@ dotnet test Lexora.slnx
 # 4. Đóng gói Release phiên bản phát hành
 .\build-release.ps1
 ```
-
