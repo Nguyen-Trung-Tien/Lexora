@@ -35,8 +35,19 @@ public sealed partial class ReviewPage : Page
         KeyDown += ReviewPage_KeyDown;
 
         Loc.LanguageChanged += OnLanguageChanged;
-        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+        Unloaded += (s, e) =>
+        {
+            Loc.LanguageChanged -= OnLanguageChanged;
+            ViewModel.StopAudio();
+        };
     }
+
+    protected override void OnNavigatedFrom(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        ViewModel.StopAudio();
+    }
+
 
     private void UpdateSpeedFlyoutLabels()
     {

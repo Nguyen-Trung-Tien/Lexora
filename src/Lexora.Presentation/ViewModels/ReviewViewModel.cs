@@ -652,4 +652,10 @@ public partial class ReviewViewModel : ObservableObject
         var countLabel = string.Format(_localizationService.GetString("Review_LettersCountFormat"), totalLetters);
         return $"{string.Join("   ", parts)}  ({countLabel})";
     }
+
+    public void StopAudio()
+    {
+        _audioPlayer.Stop();
+    }
 }
+

@@ -12,7 +12,7 @@ public static class SafeDialogExtensions
 {
     // Timeout prevents permanent deadlock if a previous dialog crashed while holding the semaphore.
     private static readonly TimeSpan _semaphoreTimeout = TimeSpan.FromSeconds(5);
-    private static SemaphoreSlim _dialogSemaphore = new(1, 1);
+    private static readonly SemaphoreSlim _dialogSemaphore = new(1, 1);
     private static ContentDialog? _currentlyActiveDialog;
 
     /// <summary>
@@ -43,12 +43,8 @@ public static class SafeDialogExtensions
             bool acquired = await _dialogSemaphore.WaitAsync(_semaphoreTimeout);
             if (!acquired)
             {
-                // Force-reset the semaphore so future dialogs can display.
-                System.Diagnostics.Debug.WriteLine("[SafeDialog] Semaphore timeout — resetting to recover from prior deadlock.");
-                _currentlyActiveDialog = null;
-                _dialogSemaphore = new SemaphoreSlim(1, 1);
-                // Try one more time after reset.
-                await _dialogSemaphore.WaitAsync();
+                System.Diagnostics.Debug.WriteLine("[SafeDialog] Semaphore timeout — another dialog is currently active. Display skipped to prevent collision.");
+                return ContentDialogResult.None;
             }
 
             try
@@ -90,6 +86,12 @@ public static class SafeDialogExtensions
             finally
             {
                 _currentlyActiveDialog = null;
+                // Allow the visual tree to clean up the closed dialog before unlocking next dialog (AGENTS.md 3.3)
+                try
+                {
+                    await Task.Yield();
+                }
+                catch { }
                 _dialogSemaphore.Release();
             }
         }

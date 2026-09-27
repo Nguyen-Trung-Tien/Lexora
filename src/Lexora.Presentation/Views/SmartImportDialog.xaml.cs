@@ -347,7 +347,30 @@ public sealed partial class SmartImportDialog : ContentDialog
                 }
             }
 
-            // 2. Read file content safely
+            // 2. Enforce 20MB file size ceiling before in-memory buffering (Rule 04)
+            long fileSizeBytes = 0;
+            if (!string.IsNullOrEmpty(filePath) && System.IO.File.Exists(filePath))
+            {
+                fileSizeBytes = new System.IO.FileInfo(filePath).Length;
+            }
+            else if (storageFile != null)
+            {
+                var basicProps = await storageFile.GetBasicPropertiesAsync();
+                fileSizeBytes = (long)basicProps.Size;
+            }
+
+            if (fileSizeBytes > 20 * 1024 * 1024)
+            {
+                TextSelectedFile.Text = _loc.GetString("SmartImport_FileTooLarge");
+                TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+                ContentToImport = string.Empty;
+                FileNameHint = null;
+                EvaluateContent();
+                BtnAnalyzeNext.IsEnabled = false;
+                return;
+            }
+
+            // Read file content safely
             string content;
             if (!string.IsNullOrEmpty(filePath) && System.IO.File.Exists(filePath))
             {

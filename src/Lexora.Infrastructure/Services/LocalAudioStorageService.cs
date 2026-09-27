@@ -25,8 +25,21 @@ public class LocalAudioStorageService : IAudioStorageService
         var filePath = GetSafeFilePath(term, accent);
         if (filePath == null) return null;
 
+        const long maxAudioBytes = 10 * 1024 * 1024; // 10MB limit
+        if (audioStream.CanSeek && audioStream.Length > maxAudioBytes)
+        {
+            throw new ArgumentException("Audio stream exceeds maximum allowable size (10MB).", nameof(audioStream));
+        }
+
         using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
         await audioStream.CopyToAsync(fileStream, cancellationToken);
+
+        if (fileStream.Length > maxAudioBytes)
+        {
+            fileStream.Dispose();
+            try { File.Delete(filePath); } catch { }
+            throw new InvalidOperationException("Cached audio exceeds maximum allowable size (10MB).");
+        }
 
         return filePath;
     }

@@ -241,17 +241,24 @@ public partial class SettingsViewModel : ObservableObject
 
     public async Task<bool> RestoreBackupAsync(
         string backupFilePath,
-        IProgress<(int Percent, string StepMessage, string? Detail)>? progress = null)
+        IProgress<(int Percent, string StepMessage, string? Detail)>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         if (_isRestoringBackup) return false;
         _isRestoringBackup = true;
         try
         {
-            await _backupService.RestoreBackupAsync(backupFilePath, progress);
+            await _backupService.RestoreBackupAsync(backupFilePath, progress, cancellationToken);
             await _dispatcherQueue.EnsureOnUIThreadAsync();
             BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreSuccessStatus"), Path.GetFileName(backupFilePath));
             await LoadDatabaseStatsAsync();
             return true;
+        }
+        catch (OperationCanceledException)
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            BackupStatusMessage = _locService.GetString("Common_OperationCancelled") ?? "Operation cancelled.";
+            return false;
         }
         catch (Exception ex)
         {

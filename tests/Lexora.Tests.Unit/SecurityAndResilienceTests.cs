@@ -209,4 +209,81 @@ public class SecurityAndResilienceTests : IDisposable
         builder.ConnectionString.Should().Contain("Cache=Shared");
         builder.DefaultTimeout.Should().Be(15);
     }
+
+    [Theory]
+    [InlineData("backup.exe")]
+    [InlineData("backup.bat")]
+    [InlineData("backup.sh")]
+    [InlineData("backup.dll")]
+    [InlineData("backup.txt")]
+    public async Task DatabaseBackupService_CreateBackupToFile_InvalidExtension_ThrowsArgumentException(string invalidFileName)
+    {
+        // Arrange
+        var dbFile = Path.Combine(_tempDirectory, "lexora.db");
+        File.WriteAllText(dbFile, "db dummy content");
+        var backupService = new DatabaseBackupService(dbFile, NullLogger<DatabaseBackupService>.Instance);
+        var targetPath = Path.Combine(_tempDirectory, invalidFileName);
+
+        // Act
+        var act = async () => await backupService.CreateBackupToFileAsync(targetPath);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*Invalid backup file extension*");
+    }
+
+    [Fact]
+    public async Task DatabaseBackupService_CreateBackupToFile_EmptyPath_ThrowsArgumentException()
+    {
+        // Arrange
+        var dbFile = Path.Combine(_tempDirectory, "lexora.db");
+        var backupService = new DatabaseBackupService(dbFile, NullLogger<DatabaseBackupService>.Instance);
+
+        // Act
+        var act = async () => await backupService.CreateBackupToFileAsync(string.Empty);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*Target file path cannot be empty*");
+    }
+
+    [Fact]
+    public async Task LocalAudioStorageService_CacheAudioAsync_Exceeds10MB_ThrowsArgumentException()
+    {
+        // Arrange
+        var cacheDir = Path.Combine(_tempDirectory, "audio_cache_limit");
+        var storageService = new LocalAudioStorageService(cacheDir);
+
+        // Create a fake stream reporting > 10MB
+        var mockStream = new Mock<Stream>();
+        mockStream.Setup(s => s.CanSeek).Returns(true);
+        mockStream.Setup(s => s.Length).Returns(11 * 1024 * 1024); // 11MB
+
+        // Act
+        var act = async () => await storageService.CacheAudioAsync("oversized", "us", mockStream.Object);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*exceeds maximum allowable size*");
+    }
+
+    [Fact]
+    public async Task ExportImportService_ImportFromCsv_Exceeding20MB_ReturnsPayloadLimitError()
+    {
+        // Arrange
+        var vocabRepoMock = new Mock<IVocabularyRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        var service = new ExportImportService(vocabRepoMock.Object, unitOfWorkMock.Object);
+
+        // Create a string of length > 20_000_000
+        var oversizedCsv = new string('A', 20_000_001);
+
+        // Act
+        var result = await service.ImportFromCsvAsync(oversizedCsv);
+
+        // Assert
+        result.TotalImported.Should().Be(0);
+        result.Errors.Should().Contain(e => e.Contains("exceeds maximum allowed size"));
+    }
 }
+

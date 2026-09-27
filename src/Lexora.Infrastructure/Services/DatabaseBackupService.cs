@@ -32,6 +32,17 @@ public class DatabaseBackupService : IDatabaseBackupService
 
     public async Task<string> CreateBackupToFileAsync(string targetFilePath, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(targetFilePath))
+            throw new ArgumentException("Target file path cannot be empty.", nameof(targetFilePath));
+
+        var ext = Path.GetExtension(targetFilePath);
+        if (!string.Equals(ext, ".db", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".bak", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".sqlite", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException($"Invalid backup file extension '{ext}'. Only .db, .bak, or .sqlite files are permitted.", nameof(targetFilePath));
+        }
+
         if (!File.Exists(_dbFilePath))
             throw new FileNotFoundException("Database file not found.", _dbFilePath);
 

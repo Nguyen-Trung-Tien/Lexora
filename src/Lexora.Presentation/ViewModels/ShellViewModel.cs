@@ -5,12 +5,14 @@ using Lexora.Presentation.Services;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class ShellViewModel : ObservableObject
+public partial class ShellViewModel : ObservableObject, IDisposable
 {
     private readonly INavigationService _navigationService;
     private readonly ILocalizationService _localizationService;
     private readonly IReviewService _reviewService;
     private readonly IUserPreferencesService _preferencesService;
+    private readonly EventHandler? _languageChangedHandler;
+    private readonly EventHandler<Lexora.Application.DTOs.UserPreferences>? _prefsChangedHandler;
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
@@ -49,12 +51,28 @@ public partial class ShellViewModel : ObservableObject
         _preferencesService = preferencesService;
 
         UpdateLocalizedTexts();
-        _localizationService.LanguageChanged += async (s, e) =>
+        _languageChangedHandler = async (s, e) =>
         {
             UpdateLocalizedTexts();
             await CheckDueReviewsAsync();
         };
-        _preferencesService.PreferencesChanged += async (s, prefs) => await CheckDueReviewsAsync();
+        _prefsChangedHandler = async (s, prefs) => await CheckDueReviewsAsync();
+
+        _localizationService.LanguageChanged += _languageChangedHandler;
+        _preferencesService.PreferencesChanged += _prefsChangedHandler;
+    }
+
+    public void Dispose()
+    {
+        if (_languageChangedHandler != null)
+        {
+            _localizationService.LanguageChanged -= _languageChangedHandler;
+        }
+        if (_prefsChangedHandler != null)
+        {
+            _preferencesService.PreferencesChanged -= _prefsChangedHandler;
+        }
+        GC.SuppressFinalize(this);
     }
 
     public async Task CheckDueReviewsAsync()

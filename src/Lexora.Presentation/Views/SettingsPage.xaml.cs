@@ -1,3 +1,4 @@
+using Lexora.Application.DTOs;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -468,73 +469,7 @@ public sealed partial class SettingsPage : Page
                 }
 
                 // 2. Build high-fidelity Fluent 2 preview confirmation layout
-                var previewXaml = $@"
-<StackPanel xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
-            Spacing=""14"" MaxWidth=""460"">
-    <Border Background=""{{ThemeResource SubtleFillColorSecondaryBrush}}""
-            BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
-            BorderThickness=""1"" CornerRadius=""10"" Padding=""14,12"">
-        <Grid ColumnDefinitions=""Auto,*"" ColumnSpacing=""12"">
-            <Border Width=""38"" Height=""38"" CornerRadius=""8""
-                    Background=""{{ThemeResource LayerFillColorDefaultBrush}}""
-                    BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
-                    BorderThickness=""1"">
-                <FontIcon Glyph=""&#xE896;"" FontSize=""18"" Foreground=""{{ThemeResource AccentTextFillColorPrimaryBrush}}""
-                          HorizontalAlignment=""Center"" VerticalAlignment=""Center""/>
-            </Border>
-            <StackPanel Grid.Column=""1"" Spacing=""2"" VerticalAlignment=""Center"">
-                <TextBlock Text=""{System.Security.SecurityElement.Escape(metadata.FileName)}"" FontWeight=""SemiBold"" FontSize=""14""
-                           TextTrimming=""CharacterEllipsis"" Foreground=""{{ThemeResource TextFillColorPrimaryBrush}}""/>
-                <TextBlock Text=""{System.Security.SecurityElement.Escape(metadata.FileSizeFormatted)} • {metadata.LastModified:g}""
-                           FontSize=""12"" Foreground=""{{ThemeResource TextFillColorSecondaryBrush}}""/>
-            </StackPanel>
-        </Grid>
-    </Border>
-
-    <Grid ColumnDefinitions=""*,*"" ColumnSpacing=""10"">
-        <Border Background=""{{ThemeResource SubtleFillColorSecondaryBrush}}""
-                BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
-                BorderThickness=""1"" CornerRadius=""10"" Padding=""12,10"">
-            <StackPanel Spacing=""2"">
-                <TextBlock Text=""{System.Security.SecurityElement.Escape(Loc.GetString("Settings_DlgRestoreCurrentStats"))}""
-                           FontSize=""11"" Foreground=""{{ThemeResource TextFillColorSecondaryBrush}}""/>
-                <TextBlock Text=""{ViewModel.TotalWordsCount} {System.Security.SecurityElement.Escape(Loc.GetString("Vocab_NavTab").ToLower())} • {ViewModel.TotalGrammarCount} {System.Security.SecurityElement.Escape(Loc.GetString("Grammar_NavTab").ToLower())}""
-                           FontSize=""13"" FontWeight=""Bold"" Foreground=""{{ThemeResource TextFillColorPrimaryBrush}}""/>
-            </StackPanel>
-        </Border>
-
-        <Border Grid.Column=""1"" Background=""{{ThemeResource SubtleFillColorSecondaryBrush}}""
-                BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
-                BorderThickness=""1"" CornerRadius=""10"" Padding=""12,10"">
-            <StackPanel Spacing=""2"">
-                <TextBlock Text=""{System.Security.SecurityElement.Escape(Loc.GetString("Settings_DlgRestoreBackupStats"))}""
-                           FontSize=""11"" Foreground=""{{ThemeResource AccentTextFillColorPrimaryBrush}}""/>
-                <TextBlock Text=""{metadata.WordCount} {System.Security.SecurityElement.Escape(Loc.GetString("Vocab_NavTab").ToLower())} • {metadata.GrammarRuleCount} {System.Security.SecurityElement.Escape(Loc.GetString("Grammar_NavTab").ToLower())}""
-                           FontSize=""13"" FontWeight=""Bold"" Foreground=""{{ThemeResource AccentTextFillColorPrimaryBrush}}""/>
-            </StackPanel>
-        </Border>
-    </Grid>
-
-    <Border Background=""{{ThemeResource SubtleFillColorSecondaryBrush}}""
-            BorderBrush=""{{ThemeResource CardStrokeColorDefaultBrush}}""
-            BorderThickness=""1"" CornerRadius=""10"" Padding=""12,10"">
-        <TextBlock Text=""{System.Security.SecurityElement.Escape(string.Format(Loc.GetString("Settings_DlgRestoreStatsFormat"), metadata.WordCount, metadata.GrammarRuleCount, metadata.StudyLogCount))}""
-                   FontSize=""12"" Foreground=""{{ThemeResource TextFillColorSecondaryBrush}}"" TextWrapping=""Wrap""/>
-    </Border>
-
-    <Border Background=""{{ThemeResource SystemFillColorCautionBackgroundBrush}}""
-            BorderBrush=""{{ThemeResource SystemFillColorCautionBrush}}""
-            BorderThickness=""1"" CornerRadius=""10"" Padding=""12,10"">
-        <StackPanel Spacing=""4"">
-            <TextBlock Text=""{System.Security.SecurityElement.Escape(Loc.GetString("Settings_DlgRestoreConfirmTitle"))}""
-                       FontWeight=""SemiBold"" FontSize=""12"" Foreground=""{{ThemeResource TextFillColorPrimaryBrush}}""/>
-            <TextBlock Text=""{System.Security.SecurityElement.Escape(Loc.GetString("Settings_DlgRestoreWarningNote"))}""
-                       FontSize=""11"" Foreground=""{{ThemeResource TextFillColorSecondaryBrush}}"" TextWrapping=""Wrap""/>
-        </StackPanel>
-    </Border>
-</StackPanel>";
-
-                var previewContent = (UIElement)Microsoft.UI.Xaml.Markup.XamlReader.Load(previewXaml);
+                var previewContent = CreateRestorePreviewContent(metadata);
 
                 var confirmDialog = new ContentDialog
                 {
@@ -654,5 +589,171 @@ public sealed partial class SettingsPage : Page
         {
             System.Diagnostics.Debug.WriteLine($"[SettingsPage] TestUsVoice error: {ex.Message}");
         }
+    }
+
+    private UIElement CreateRestorePreviewContent(BackupMetadata metadata)
+    {
+        var panel = new StackPanel { Spacing = 14, MaxWidth = 460 };
+
+        // File Header Card
+        var fileCard = new Border
+        {
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(10),
+            Padding = new Thickness(14, 12, 14, 12)
+        };
+
+        var fileGrid = new Grid { ColumnSpacing = 12 };
+        fileGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        fileGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var iconBorder = new Border
+        {
+            Width = 38,
+            Height = 38,
+            CornerRadius = new CornerRadius(8),
+            Background = ThemeResourceHelper.GetThemeBrush(this, "LayerFillColorDefaultBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            Child = new FontIcon
+            {
+                Glyph = "\uE896",
+                FontSize = 18,
+                Foreground = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush"),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            }
+        };
+        Grid.SetColumn(iconBorder, 0);
+
+        var fileInfoStack = new StackPanel { Spacing = 2, VerticalAlignment = VerticalAlignment.Center };
+        fileInfoStack.Children.Add(new TextBlock
+        {
+            Text = metadata.FileName,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            FontSize = 14,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorPrimaryBrush")
+        });
+        fileInfoStack.Children.Add(new TextBlock
+        {
+            Text = $"{metadata.FileSizeFormatted} • {metadata.LastModified:g}",
+            FontSize = 12,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush")
+        });
+        Grid.SetColumn(fileInfoStack, 1);
+
+        fileGrid.Children.Add(iconBorder);
+        fileGrid.Children.Add(fileInfoStack);
+        fileCard.Child = fileGrid;
+        panel.Children.Add(fileCard);
+
+        // Stats Comparison Grid
+        var statsGrid = new Grid { ColumnSpacing = 10 };
+        statsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        statsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var currentBorder = new Border
+        {
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(10),
+            Padding = new Thickness(12, 10, 12, 10)
+        };
+        var currentStack = new StackPanel { Spacing = 2 };
+        currentStack.Children.Add(new TextBlock
+        {
+            Text = Loc.GetString("Settings_DlgRestoreCurrentStats"),
+            FontSize = 11,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush")
+        });
+        currentStack.Children.Add(new TextBlock
+        {
+            Text = $"{ViewModel.TotalWordsCount} {Loc.GetString("Vocab_NavTab").ToLower()} • {ViewModel.TotalGrammarCount} {Loc.GetString("Grammar_NavTab").ToLower()}",
+            FontSize = 13,
+            FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorPrimaryBrush")
+        });
+        currentBorder.Child = currentStack;
+        Grid.SetColumn(currentBorder, 0);
+
+        var backupBorder = new Border
+        {
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(10),
+            Padding = new Thickness(12, 10, 12, 10)
+        };
+        var backupStack = new StackPanel { Spacing = 2 };
+        backupStack.Children.Add(new TextBlock
+        {
+            Text = Loc.GetString("Settings_DlgRestoreBackupStats"),
+            FontSize = 11,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush")
+        });
+        backupStack.Children.Add(new TextBlock
+        {
+            Text = $"{metadata.WordCount} {Loc.GetString("Vocab_NavTab").ToLower()} • {metadata.GrammarRuleCount} {Loc.GetString("Grammar_NavTab").ToLower()}",
+            FontSize = 13,
+            FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush")
+        });
+        backupBorder.Child = backupStack;
+        Grid.SetColumn(backupBorder, 1);
+
+        statsGrid.Children.Add(currentBorder);
+        statsGrid.Children.Add(backupBorder);
+        panel.Children.Add(statsGrid);
+
+        // Detailed Stats
+        var detailsBorder = new Border
+        {
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(10),
+            Padding = new Thickness(12, 10, 12, 10),
+            Child = new TextBlock
+            {
+                Text = string.Format(Loc.GetString("Settings_DlgRestoreStatsFormat"), metadata.WordCount, metadata.GrammarRuleCount, metadata.StudyLogCount),
+                FontSize = 12,
+                Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush"),
+                TextWrapping = TextWrapping.Wrap
+            }
+        };
+        panel.Children.Add(detailsBorder);
+
+        // Warning Border
+        var warningBorder = new Border
+        {
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBackgroundBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(10),
+            Padding = new Thickness(12, 10, 12, 10)
+        };
+        var warningStack = new StackPanel { Spacing = 4 };
+        warningStack.Children.Add(new TextBlock
+        {
+            Text = Loc.GetString("Settings_DlgRestoreConfirmTitle"),
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            FontSize = 12,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorPrimaryBrush")
+        });
+        warningStack.Children.Add(new TextBlock
+        {
+            Text = Loc.GetString("Settings_DlgRestoreWarningNote"),
+            FontSize = 11,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush"),
+            TextWrapping = TextWrapping.Wrap
+        });
+        warningBorder.Child = warningStack;
+        panel.Children.Add(warningBorder);
+
+        return panel;
     }
 }

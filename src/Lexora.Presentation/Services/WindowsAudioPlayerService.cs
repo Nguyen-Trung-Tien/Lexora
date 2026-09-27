@@ -11,6 +11,8 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
     private readonly IUserPreferencesService _preferencesService;
     private readonly MediaPlayer _mediaPlayer;
     private readonly SpeechSynthesizer _synthesizer;
+    private readonly SemaphoreSlim _audioSemaphore = new(1, 1);
+    private readonly EventHandler<Lexora.Application.DTOs.UserPreferences> _preferencesChangedHandler;
 
     public double PlaybackRate { get; set; } = 1.0;
 
@@ -22,10 +24,11 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         _synthesizer = new SpeechSynthesizer();
 
         PlaybackRate = _preferencesService.GetPreferences().SpeechRate;
-        _preferencesService.PreferencesChanged += (_, prefs) =>
+        _preferencesChangedHandler = (_, prefs) =>
         {
             PlaybackRate = prefs.SpeechRate;
         };
+        _preferencesService.PreferencesChanged += _preferencesChangedHandler;
     }
 
     public async Task PlayPronunciationAsync(string term, string accent = "uk", double? rate = null)
@@ -40,6 +43,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 
         double effectiveRate = Math.Clamp(rate ?? PlaybackRate, 0.5, 2.0);
 
+        await _audioSemaphore.WaitAsync();
         try
         {
             // Stop any currently playing audio before beginning new playback
@@ -88,6 +92,10 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         {
             // Fail silently or log if sound device not available
         }
+        finally
+        {
+            _audioSemaphore.Release();
+        }
     }
 
     public void Stop()
@@ -104,8 +112,10 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 
     public void Dispose()
     {
+        _preferencesService.PreferencesChanged -= _preferencesChangedHandler;
         _mediaPlayer.Dispose();
         _synthesizer.Dispose();
+        _audioSemaphore.Dispose();
         GC.SuppressFinalize(this);
     }
 }

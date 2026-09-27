@@ -915,28 +915,31 @@ public sealed partial class VocabularyPage : Page
             };
 
             var res = await dialog.ShowAsyncSafe();
-            if (res == ContentDialogResult.Primary)
+            if (res == ContentDialogResult.Primary && File.Exists(savedPath))
             {
                 try
                 {
-                    var fileUri = new Uri(savedPath);
-                    _ = Windows.System.Launcher.LaunchUriAsync(fileUri);
+                    var cleanPath = Path.GetFullPath(savedPath);
+                    var ext = Path.GetExtension(cleanPath).ToLowerInvariant();
+                    if (ext is ".csv" or ".json" or ".txt" or ".db" or ".tsv")
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(cleanPath) { UseShellExecute = true });
+                    }
                 }
                 catch
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(savedPath) { UseShellExecute = true });
+                    // Fallback
                 }
             }
-            else if (res == ContentDialogResult.Secondary)
+            else if (res == ContentDialogResult.Secondary && File.Exists(savedPath))
             {
                 try
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = "explorer.exe",
-                        Arguments = $"/select,\"{savedPath}\"",
-                        UseShellExecute = true
-                    });
+                    var cleanPath = Path.GetFullPath(savedPath);
+                    var psi = new System.Diagnostics.ProcessStartInfo("explorer.exe");
+                    psi.ArgumentList.Add($"/select,{cleanPath}");
+                    psi.UseShellExecute = false;
+                    System.Diagnostics.Process.Start(psi);
                 }
                 catch
                 {
@@ -1083,6 +1086,13 @@ public sealed partial class VocabularyPage : Page
             await DispatcherQueue.EnsureOnUIThreadAsync();
             if (file != null)
             {
+                var basicProps = await file.GetBasicPropertiesAsync();
+                if (basicProps.Size > 20 * 1024 * 1024)
+                {
+                    await ShowErrorDialogAsync(Loc.GetString("Vocab_ImportFailed"), Loc.GetString("SmartImport_FileTooLarge"));
+                    return;
+                }
+
                 fileName = file.Name;
                 contentToImport = await Windows.Storage.FileIO.ReadTextAsync(file);
             }

@@ -21,7 +21,11 @@ public sealed partial class ShellPage : Page
 
         UpdateNavigationLabels();
         _localizationService.LanguageChanged += OnLanguageChanged;
-        Unloaded += (s, e) => _localizationService.LanguageChanged -= OnLanguageChanged;
+        Unloaded += (s, e) =>
+        {
+            _localizationService.LanguageChanged -= OnLanguageChanged;
+            ViewModel.Dispose();
+        };
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
