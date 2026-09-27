@@ -20,9 +20,24 @@ public class LocalAudioStorageService : IAudioStorageService
 
     public string GetAudioCacheDirectory() => _cacheDirectory;
 
+
+    public string? GetCachedAudioPath(string term, string accent)
+    {
+        var normalizedAccent = NormalizeAccent(accent);
+        var wavPath = GetSafeFilePath(term, normalizedAccent, ".wav");
+        if (wavPath != null && File.Exists(wavPath)) return wavPath;
+
+        var mp3Path = GetSafeFilePath(term, normalizedAccent, ".mp3");
+        if (mp3Path != null && File.Exists(mp3Path)) return mp3Path;
+
+        return null;
+    }
+
     public async Task<string?> CacheAudioAsync(string term, string accent, Stream audioStream, CancellationToken cancellationToken = default)
     {
-        var filePath = GetSafeFilePath(term, accent);
+        var normalizedAccent = NormalizeAccent(accent);
+        // Default to .wav for synthesizer streams or fallback
+        var filePath = GetSafeFilePath(term, normalizedAccent, ".wav");
         if (filePath == null) return null;
 
         const long maxAudioBytes = 10 * 1024 * 1024; // 10MB limit
@@ -44,27 +59,29 @@ public class LocalAudioStorageService : IAudioStorageService
         return filePath;
     }
 
-    public string? GetCachedAudioPath(string term, string accent)
+    public static string NormalizeAccent(string? accent)
     {
-        var filePath = GetSafeFilePath(term, accent);
-        if (filePath == null) return null;
-        return File.Exists(filePath) ? filePath : null;
+        if (string.IsNullOrWhiteSpace(accent)) return "uk";
+        var clean = SafeCharRegex.Replace(accent.Trim().ToLowerInvariant(), "").Trim();
+        if (clean == "en-gb" || clean == "engb" || clean == "gb" || clean == "british" || clean == "uk") return "uk";
+        if (clean == "en-us" || clean == "enus" || clean == "usa" || clean == "american" || clean == "us") return "us";
+        return clean.Length > 0 ? clean : "uk";
     }
 
-    private string? GetSafeFilePath(string term, string accent)
+    private string? GetSafeFilePath(string term, string accent, string extension = ".wav")
     {
         if (string.IsNullOrWhiteSpace(term)) return null;
 
         var safeTerm = SafeCharRegex.Replace(term.Trim().ToLowerInvariant(), "_").Trim('_');
-        var safeAccent = SafeCharRegex.Replace((accent ?? "uk").Trim().ToLowerInvariant(), "").Trim();
+        var safeAccent = NormalizeAccent(accent);
 
         if (string.IsNullOrWhiteSpace(safeTerm)) return null;
-        if (string.IsNullOrWhiteSpace(safeAccent)) safeAccent = "uk";
 
         // Limit file name length
         if (safeTerm.Length > 100) safeTerm = safeTerm.Substring(0, 100);
 
-        var fileName = $"{safeTerm}_{safeAccent}.mp3";
+        var ext = extension.StartsWith('.') ? extension : "." + extension;
+        var fileName = $"{safeTerm}_{safeAccent}{ext}";
         var fullPath = Path.GetFullPath(Path.Combine(_cacheDirectory, fileName));
 
         // Ensure path remains strictly within cache directory with trailing separator

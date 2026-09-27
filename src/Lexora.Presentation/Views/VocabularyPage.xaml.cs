@@ -758,7 +758,9 @@ public sealed partial class VocabularyPage : Page
             if (sender is Button btn && btn.DataContext is WordDto w)
             {
                 var audioService = App.Current.Services.GetRequiredService<IAudioPlayerService>();
-                await audioService.PlayPronunciationAsync(w.Term, "uk");
+                var prefsService = App.Current.Services.GetRequiredService<IUserPreferencesService>();
+                var accent = prefsService.GetPreferences().PreferredAccent ?? "uk";
+                await audioService.PlayPronunciationAsync(w.Term, accent);
             }
         }
         catch (Exception ex)

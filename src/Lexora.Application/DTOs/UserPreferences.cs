@@ -9,6 +9,7 @@ public record UserPreferences
     public double SpeechRate { get; init; } = 1.0;
     public bool EnableTypingPractice { get; init; } = false;
     public bool IsNavPaneOpen { get; init; } = true;
+    public string PreferredAccent { get; init; } = "uk"; // "uk" (en-GB) or "us" (en-US)
 
     // Window state — restored on next launch
     public int WindowWidth { get; init; } = 1280;

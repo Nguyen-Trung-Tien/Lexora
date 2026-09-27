@@ -18,6 +18,7 @@ public partial class TestViewModel : ObservableObject
     private readonly IAudioPlayerService _audioPlayer;
     private readonly INavigationService _navService;
     private readonly ILocalizationService _localizationService;
+    private readonly IUserPreferencesService _preferencesService;
 
     private Guid _sessionId;
     private List<TestQuestionDto> _allQuestions = new();
@@ -152,7 +153,8 @@ public partial class TestViewModel : ObservableObject
         IReviewService reviewService,
         IAudioPlayerService audioPlayer,
         INavigationService navService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IUserPreferencesService preferencesService)
     {
         _testService = testService;
         _vocabService = vocabService;
@@ -160,6 +162,7 @@ public partial class TestViewModel : ObservableObject
         _audioPlayer = audioPlayer;
         _navService = navService;
         _localizationService = localizationService;
+        _preferencesService = preferencesService;
     }
 
     [RelayCommand]
@@ -624,14 +627,16 @@ public partial class TestViewModel : ObservableObject
     public async Task PlayAudioAsync()
     {
         if (CurrentQuestion == null) return;
-        await _audioPlayer.PlayPronunciationAsync(CurrentQuestion.TargetWord.Term, "us");
+        var accent = _preferencesService.GetPreferences().PreferredAccent ?? "uk";
+        await _audioPlayer.PlayPronunciationAsync(CurrentQuestion.TargetWord.Term, accent);
     }
 
     [RelayCommand]
     public async Task PlayWordAudioAsync(WordDto? word)
     {
         if (word == null) return;
-        await _audioPlayer.PlayPronunciationAsync(word.Term, "us");
+        var accent = _preferencesService.GetPreferences().PreferredAccent ?? "uk";
+        await _audioPlayer.PlayPronunciationAsync(word.Term, accent);
     }
 
     [RelayCommand]

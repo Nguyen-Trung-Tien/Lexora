@@ -354,7 +354,7 @@ public sealed partial class ReviewPage : Page
         ViewModel.RevealAnswer();
         if (_preferencesService.GetPreferences().AutoPlayAudio)
         {
-            _ = ViewModel.PlayUkAudioAsync();
+            _ = ViewModel.PlayPreferredAudioAsync();
         }
     }
 

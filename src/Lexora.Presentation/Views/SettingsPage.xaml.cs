@@ -25,6 +25,7 @@ public sealed partial class SettingsPage : Page
         {
             UpdateLanguageButtons();
             UpdateThemeButtons();
+            UpdateAccentButtons();
         };
     }
 
@@ -34,6 +35,8 @@ public sealed partial class SettingsPage : Page
         {
             UpdateLanguageButtons();
             UpdateThemeButtons();
+            UpdateAccentButtons();
+            ViewModel.UpdateVoiceStatus();
             Bindings.Update();
         });
     }
@@ -45,6 +48,7 @@ public sealed partial class SettingsPage : Page
             await ViewModel.InitializeAsync();
             UpdateLanguageButtons();
             UpdateThemeButtons();
+            UpdateAccentButtons();
 
             SpeechRateCombo.SelectedIndex = ViewModel.SpeechRate switch
             {
@@ -98,6 +102,68 @@ public sealed partial class SettingsPage : Page
 
         ApplyLangBtn(LangViButton, TextLangVi, CheckLangVi, isVi);
         ApplyLangBtn(LangEnButton, TextLangEn, CheckLangEn, !isVi);
+    }
+
+    private void UpdateAccentButtons()
+    {
+        bool isUk = ViewModel.PreferredAccent.Equals("uk", StringComparison.OrdinalIgnoreCase);
+        var cardBg = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+        var cardStroke = GetThemeBrush("CardStrokeColorDefaultBrush");
+        var accentText = GetThemeBrush("AccentTextFillColorPrimaryBrush");
+        var subtleText = GetThemeBrush("TextFillColorSecondaryBrush");
+        var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+        void ApplyAccentBtn(Button btn, TextBlock text, FontIcon check, bool isActive)
+        {
+            btn.Style = null;
+            if (isActive)
+            {
+                if (cardBg != null) btn.Background = cardBg;
+                if (cardStroke != null) btn.BorderBrush = cardStroke;
+                btn.BorderThickness = new Thickness(1);
+                if (accentText != null) text.Foreground = accentText;
+                btn.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
+                check.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                btn.Background = transparent;
+                btn.BorderThickness = new Thickness(0);
+                if (subtleText != null) text.Foreground = subtleText;
+                btn.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
+                check.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        ApplyAccentBtn(AccentUkButton, TextAccentUk, CheckAccentUk, isUk);
+        ApplyAccentBtn(AccentUsButton, TextAccentUs, CheckAccentUs, !isUk);
+    }
+
+    private async void AccentUkButton_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.SetPreferredAccentAsync("uk");
+        UpdateAccentButtons();
+    }
+
+    private async void AccentUsButton_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.SetPreferredAccentAsync("us");
+        UpdateAccentButtons();
+    }
+
+    private async void TestVoiceUk_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.TestVoiceAsync("uk");
+    }
+
+    private async void TestVoiceUs_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.TestVoiceAsync("us");
+    }
+
+    private async void OpenSpeechSettings_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.OpenWindowsSpeechSettingsAsync();
     }
 
     private async void CopyDbPath_Click(object sender, RoutedEventArgs e)

@@ -17,6 +17,7 @@ public partial class VocabularyViewModel : ObservableObject
     private readonly IAudioPlayerService _audioPlayer;
     private readonly IFuzzySearchService _fuzzySearchService;
     private readonly ILocalizationService _localizationService;
+    private readonly IUserPreferencesService _preferencesService;
     private readonly List<string> _knownTerms = new();
     // Captured on the UI thread so post-await mutations can be safely marshalled back.
     private readonly DispatcherQueue? _dispatcherQueue;
@@ -104,7 +105,8 @@ public partial class VocabularyViewModel : ObservableObject
         IExportImportService exportImportService,
         IAudioPlayerService audioPlayer,
         IFuzzySearchService fuzzySearchService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IUserPreferencesService preferencesService)
     {
         _vocabService = vocabService;
         _reviewService = reviewService;
@@ -112,6 +114,7 @@ public partial class VocabularyViewModel : ObservableObject
         _audioPlayer = audioPlayer;
         _fuzzySearchService = fuzzySearchService;
         _localizationService = localizationService;
+        _preferencesService = preferencesService;
         // Must be captured on the UI thread (constructor is always called from UI thread).
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
             ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
@@ -580,10 +583,13 @@ public partial class VocabularyViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task PlayPronunciationAsync(string accent)
+    public async Task PlayPronunciationAsync(string? accent = null)
     {
         if (SelectedWord == null) return;
-        await _audioPlayer.PlayPronunciationAsync(SelectedWord.Term, accent);
+        var chosenAccent = !string.IsNullOrWhiteSpace(accent)
+            ? accent
+            : (_preferencesService.GetPreferences().PreferredAccent ?? "uk");
+        await _audioPlayer.PlayPronunciationAsync(SelectedWord.Term, chosenAccent);
     }
 
     public async Task<string> ExportToJsonAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)

@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ITestService, TestService>();
         services.AddSingleton<IFuzzySearchService, FuzzySearchService>();
         services.AddScoped<IStudyAdvisorService, StudyAdvisorService>();
+        services.AddSingleton<IPronunciationVoiceResolver, PronunciationVoiceResolver>();
 
         return services;
     }

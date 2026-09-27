@@ -284,7 +284,81 @@
 
                     <MenuFlyoutSeparator />
 
-                    <!-- Setting Row 3: Speech Playback Speed -->
+                    <!-- Setting Row 3: Pronunciation Preference (UK vs US) -->
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                        <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_PronunciationPreference')}" FontWeight="SemiBold" FontSize="14" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_PronunciationSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Button x:Name="AccentUkButton" Click="AccentUkButton_Click" CornerRadius="8" Padding="14,6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock x:Name="TextAccentUk" Text="{x:Bind Loc.GetString('Settings_Accent_UK')}" VerticalAlignment="Center" FontSize="13" />
+                                        <FontIcon x:Name="CheckAccentUk" Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="AccentUsButton" Click="AccentUsButton_Click" CornerRadius="8" Padding="14,6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock x:Name="TextAccentUs" Text="{x:Bind Loc.GetString('Settings_Accent_US')}" VerticalAlignment="Center" FontSize="13" />
+                                        <FontIcon x:Name="CheckAccentUs" Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Voice Engine Diagnostic & Test Panel -->
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="14,12" Margin="0,2">
+                        <StackPanel Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Settings_VoiceDiagnostic_Title')}" FontWeight="SemiBold" FontSize="13" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Click="OpenSpeechSettings_Click" Padding="10,4" CornerRadius="6" Background="Transparent" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE8A7;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Settings_Voice_InstallHelp')}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                <!-- UK Voice Info -->
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,10">
+                                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                                        <TextBlock Text="🇬🇧 British English (UK)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UkVoiceStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                        <Button Grid.Row="2" Click="TestVoiceUk_Click" HorizontalAlignment="Left" Padding="10,4" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE768;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Settings_TestVoice_UK')}" FontSize="11" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+
+                                <!-- US Voice Info -->
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,10">
+                                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                                        <TextBlock Text="🇺🇸 American English (US)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                        <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UsVoiceStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                        <Button Grid.Row="2" Click="TestVoiceUs_Click" HorizontalAlignment="Left" Padding="10,4" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE768;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Settings_TestVoice_US')}" FontSize="11" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <MenuFlyoutSeparator />
+
+                    <!-- Setting Row 4: Speech Playback Speed -->
                     <Grid ColumnDefinitions="*,Auto" Margin="0,2">
                         <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_SpeechRate')}" FontWeight="SemiBold" FontSize="14" />

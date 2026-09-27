@@ -56,6 +56,27 @@ public partial class SettingsViewModel : ObservableObject
     public partial string TestVoiceTerm { get; set; } = "Welcome to Lexora English Learning";
 
     [ObservableProperty]
+    public partial string PreferredAccent { get; set; } = "uk";
+
+    [ObservableProperty]
+    public partial bool HasUkVoice { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasUsVoice { get; set; }
+
+    [ObservableProperty]
+    public partial string UkVoiceDisplayName { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string UsVoiceDisplayName { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string UkVoiceStatus { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string UsVoiceStatus { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial bool IsLoadingStats { get; set; }
 
     public SettingsViewModel(
@@ -84,8 +105,52 @@ public partial class SettingsViewModel : ObservableObject
         EnableReviewReminder = prefs.EnableReviewReminder;
         SpeechRate = prefs.SpeechRate;
         EnableTypingPractice = prefs.EnableTypingPractice;
+        PreferredAccent = string.IsNullOrWhiteSpace(prefs.PreferredAccent) ? "uk" : prefs.PreferredAccent;
 
         DatabasePath = _backupService.DatabasePath;
+
+        UpdateVoiceStatus();
+    }
+
+    public void UpdateVoiceStatus()
+    {
+        var resUk = _audioService.ResolveVoice("uk");
+        HasUkVoice = resUk.IsExactMatch;
+        UkVoiceDisplayName = resUk.Voice?.DisplayName ?? "N/A";
+        UkVoiceStatus = HasUkVoice
+            ? string.Format(_locService.GetString("Settings_Voice_Installed"), UkVoiceDisplayName)
+            : string.Format(_locService.GetString("Settings_Voice_FallbackWarning"), UkVoiceDisplayName);
+
+        var resUs = _audioService.ResolveVoice("us");
+        HasUsVoice = resUs.IsExactMatch;
+        UsVoiceDisplayName = resUs.Voice?.DisplayName ?? "N/A";
+        UsVoiceStatus = HasUsVoice
+            ? string.Format(_locService.GetString("Settings_Voice_Installed"), UsVoiceDisplayName)
+            : string.Format(_locService.GetString("Settings_Voice_FallbackWarning"), UsVoiceDisplayName);
+    }
+
+    [RelayCommand]
+    public async Task SetPreferredAccentAsync(string accent)
+    {
+        if (string.IsNullOrWhiteSpace(accent)) return;
+        var normalized = accent.Trim().ToLowerInvariant();
+        if (normalized != "uk" && normalized != "us") normalized = "uk";
+
+        PreferredAccent = normalized;
+        var current = _preferencesService.GetPreferences();
+        await _preferencesService.SavePreferencesAsync(current with { PreferredAccent = normalized });
+    }
+
+    [RelayCommand]
+    public async Task OpenWindowsSpeechSettingsAsync()
+    {
+        try
+        {
+            await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:speech"));
+        }
+        catch
+        {
+        }
     }
 
     [RelayCommand]

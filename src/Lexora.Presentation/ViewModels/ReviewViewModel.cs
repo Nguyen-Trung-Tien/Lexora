@@ -478,6 +478,14 @@ public partial class ReviewViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task PlayPreferredAudioAsync()
+    {
+        if (CurrentCard == null) return;
+        var accent = _preferencesService.GetPreferences().PreferredAccent ?? "uk";
+        await _audioPlayer.PlayPronunciationAsync(CurrentCard.Term, accent);
+    }
+
+    [RelayCommand]
     public async Task PlayUkAudioAsync()
     {
         if (CurrentCard == null) return;
@@ -548,7 +556,7 @@ public partial class ReviewViewModel : ObservableObject
         {
             TypingFeedbackMessage = _localizationService.GetString("Review_TypingFeedbackCorrect");
             IsAnswerVisible = true;
-            _ = PlayUkAudioAsync();
+            _ = PlayPreferredAudioAsync();
         }
         else
         {
