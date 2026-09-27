@@ -6,6 +6,7 @@ using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
+using Microsoft.UI.Xaml.Controls;
 
 namespace Lexora.Presentation.ViewModels;
 
@@ -39,6 +40,9 @@ public partial class TestViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
     public partial string StatusMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial InfoBarSeverity StatusSeverity { get; set; } = InfoBarSeverity.Informational;
 
     public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
 
@@ -293,6 +297,7 @@ public partial class TestViewModel : ObservableObject
         }
 
         UpdateSelectedCustomWordsCount();
+        StatusSeverity = matchedCount > 0 ? InfoBarSeverity.Success : InfoBarSeverity.Warning;
         StatusMessage = matchedCount > 0
             ? string.Format(_localizationService.GetString("Test_Status_PastedMatched"), matchedCount)
             : _localizationService.GetString("Test_Status_PastedNoMatch");
@@ -305,6 +310,7 @@ public partial class TestViewModel : ObservableObject
         SelectedExamType = null;
         SelectedLevel = null;
         WeakWordsOnly = false;
+        StatusMessage = string.Empty;
     }
 
     [RelayCommand]
@@ -360,6 +366,7 @@ public partial class TestViewModel : ObservableObject
     {
         if (IsLoading) return;
         IsLoading = true;
+        StatusSeverity = InfoBarSeverity.Informational;
         StatusMessage = _localizationService.GetString("Test_Status_Preparing");
 
         try
@@ -372,6 +379,7 @@ public partial class TestViewModel : ObservableObject
                 var selected = CustomWordCandidates.Where(c => c.IsSelected == true).Select(c => c.Word.Id).ToList();
                 if (selected.Count == 0)
                 {
+                    StatusSeverity = InfoBarSeverity.Warning;
                     StatusMessage = _localizationService.GetString("Test_Status_SelectAtLeastOne");
                     IsLoading = false;
                     return;
@@ -397,6 +405,7 @@ public partial class TestViewModel : ObservableObject
 
             if (_allQuestions.Count == 0)
             {
+                StatusSeverity = InfoBarSeverity.Warning;
                 StatusMessage = _localizationService.GetString("Test_Status_NoQuestions");
                 IsLoading = false;
                 return;
@@ -414,6 +423,7 @@ public partial class TestViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            StatusSeverity = InfoBarSeverity.Error;
             StatusMessage = string.Format(_localizationService.GetString("Test_ErrorFormat"), ex.Message);
         }
         finally

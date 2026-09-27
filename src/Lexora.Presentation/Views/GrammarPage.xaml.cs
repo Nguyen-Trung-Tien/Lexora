@@ -260,6 +260,7 @@ public sealed partial class GrammarPage : Page
             if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
             {
                 await ViewModel.AddRuleAsync(dialog.ResultDto);
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Add"), Loc.GetString("Grammar_Status_RuleAdded"));
             }
         }
         catch (Exception ex)
@@ -289,6 +290,7 @@ public sealed partial class GrammarPage : Page
             if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
             {
                 await ViewModel.UpdateRuleAsync(dialog.ResultDto);
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Edit"), Loc.GetString("Grammar_Status_RuleUpdated"));
             }
         }
         catch (Exception ex)

@@ -138,11 +138,22 @@ public static class SafeDialogExtensions
 
     /// <summary>
     /// Safely hides the dialog if it is currently open without throwing exceptions.
+    /// Marshals to the UI thread if called from a background worker.
     /// </summary>
     public static void HideSafe(this ContentDialog dialog)
     {
         try
         {
+            var dispatcher = dialog.DispatcherQueue ?? App.Current.MainWindow?.DispatcherQueue;
+            if (dispatcher != null && !dispatcher.HasThreadAccess)
+            {
+                dispatcher.TryEnqueue(() =>
+                {
+                    try { dialog.Hide(); } catch { }
+                });
+                return;
+            }
+
             dialog.Hide();
         }
         catch
@@ -153,12 +164,26 @@ public static class SafeDialogExtensions
 
     /// <summary>
     /// Closes whatever dialog is currently open, if any.
+    /// Marshals to the UI thread if called from a background worker.
     /// </summary>
     public static void HideActiveDialog()
     {
         try
         {
-            _currentlyActiveDialog?.Hide();
+            var active = _currentlyActiveDialog;
+            if (active == null) return;
+
+            var dispatcher = active.DispatcherQueue ?? App.Current.MainWindow?.DispatcherQueue;
+            if (dispatcher != null && !dispatcher.HasThreadAccess)
+            {
+                dispatcher.TryEnqueue(() =>
+                {
+                    try { active.Hide(); } catch { }
+                });
+                return;
+            }
+
+            active.Hide();
         }
         catch
         {

@@ -605,7 +605,7 @@ public sealed partial class SmartImportDialog : ContentDialog
                 await DispatcherQueue.EnsureOnUIThreadAsync();
                 PanelImportProgress.Visibility = Visibility.Collapsed;
                 PanelImportReport.Visibility = Visibility.Visible;
-                TextReportTitle.Text = $"Lỗi: {ex.Message}";
+                TextReportTitle.Text = string.Format(_loc.GetString("SmartImport_ErrorTitleFormat"), ex.Message);
             }
             finally
             {
@@ -773,7 +773,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             await DispatcherQueue.EnsureOnUIThreadAsync();
             PanelImportProgress.Visibility = Visibility.Collapsed;
             PanelImportReport.Visibility = Visibility.Visible;
-            TextReportTitle.Text = $"Lỗi: {ex.Message}";
+            TextReportTitle.Text = string.Format(_loc.GetString("SmartImport_ErrorTitleFormat"), ex.Message);
         }
         finally
         {

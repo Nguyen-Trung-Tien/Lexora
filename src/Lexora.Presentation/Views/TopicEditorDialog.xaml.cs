@@ -11,22 +11,7 @@ public sealed partial class TopicEditorDialog : ContentDialog
     public ILocalizationService Loc { get; }
     public TopicCreateOrUpdateDto? ResultDto { get; private set; }
 
-    private readonly List<TopicIconOption> _iconOptions =
-    [
-        new() { Glyph = "\uE8EC", Name = "Chủ đề chung (General / Topic)" },
-        new() { Glyph = "\uE82D", Name = "Sách & Giáo dục (Education)" },
-        new() { Glyph = "\uE8F1", Name = "Bài học & Thư viện (Units)" },
-        new() { Glyph = "\uE825", Name = "Kinh doanh & Quản lý (Business)" },
-        new() { Glyph = "\uE709", Name = "Du lịch & Địa lý (Travel)" },
-        new() { Glyph = "\uE7F4", Name = "Công nghệ & Máy tính (Tech)" },
-        new() { Glyph = "\uE9CA", Name = "Khoa học & Nghiên cứu (Science)" },
-        new() { Glyph = "\uE707", Name = "Ẩm thực & Nhà hàng (Food)" },
-        new() { Glyph = "\uE7C3", Name = "Thể thao & Giải trí (Sports)" },
-        new() { Glyph = "\uE734", Name = "Mục tiêu & Quan trọng (Goal)" },
-        new() { Glyph = "\uE8BD", Name = "Giao tiếp & Hội thoại (Chat)" },
-        new() { Glyph = "\uE7BE", Name = "Y tế & Sức khỏe (Health)" }
-    ];
-
+    private readonly List<TopicIconOption> _iconOptions;
     private string _selectedIcon = "\uE8EC";
 
     public TopicEditorDialog()
@@ -43,6 +28,22 @@ public sealed partial class TopicEditorDialog : ContentDialog
         PrimaryButtonText = Loc.GetString("TopicEditor_Save");
         CloseButtonText = Loc.GetString("TopicEditor_Cancel");
         DialogInfoBar.Title = Loc.GetString("TopicEditor_ValidationTitle");
+
+        _iconOptions =
+        [
+            new() { Glyph = "\uE8EC", Name = Loc.GetString("TopicIcon_General") },
+            new() { Glyph = "\uE82D", Name = Loc.GetString("TopicIcon_Education") },
+            new() { Glyph = "\uE8F1", Name = Loc.GetString("TopicIcon_Units") },
+            new() { Glyph = "\uE825", Name = Loc.GetString("TopicIcon_Business") },
+            new() { Glyph = "\uE709", Name = Loc.GetString("TopicIcon_Travel") },
+            new() { Glyph = "\uE7F4", Name = Loc.GetString("TopicIcon_Tech") },
+            new() { Glyph = "\uE9CA", Name = Loc.GetString("TopicIcon_Science") },
+            new() { Glyph = "\uE707", Name = Loc.GetString("TopicIcon_Food") },
+            new() { Glyph = "\uE7C3", Name = Loc.GetString("TopicIcon_Sports") },
+            new() { Glyph = "\uE734", Name = Loc.GetString("TopicIcon_Goal") },
+            new() { Glyph = "\uE8BD", Name = Loc.GetString("TopicIcon_Chat") },
+            new() { Glyph = "\uE7BE", Name = Loc.GetString("TopicIcon_Health") }
+        ];
 
         _iconOptions[0].IsSelected = true;
         _selectedIcon = _iconOptions[0].Glyph;

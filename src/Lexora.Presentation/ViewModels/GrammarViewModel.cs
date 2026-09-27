@@ -20,7 +20,10 @@ public partial class GrammarViewModel : ObservableObject
     private readonly DispatcherQueue? _dispatcherQueue;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmptyState))]
     public partial bool IsLoading { get; set; } = true;
+
+    public bool IsEmptyState => !IsLoading && Rules.Count == 0;
 
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;

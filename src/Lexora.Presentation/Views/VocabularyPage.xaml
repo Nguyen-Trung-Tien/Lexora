@@ -401,7 +401,7 @@
 
                         <!-- Empty State -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Margin="24"
-                                    Visibility="{x:Bind ViewModel.Words.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
+                                    Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Border Width="56" Height="56" CornerRadius="16" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Padding="10" HorizontalAlignment="Center">
                                 <FontIcon Glyph="&#xE82D;" FontSize="24" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>

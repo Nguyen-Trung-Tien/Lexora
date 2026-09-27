@@ -351,4 +351,9 @@ public sealed partial class TestPage : Page
     {
         return isCorrect ? Loc.GetString("Grammar_Correct") : Loc.GetString("Grammar_Incorrect");
     }
+
+    private void StatusInfoBar_Closed(InfoBar sender, InfoBarClosedEventArgs args)
+    {
+        ViewModel.StatusMessage = string.Empty;
+    }
 }

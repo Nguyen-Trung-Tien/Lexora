@@ -89,8 +89,11 @@
 
                 <!-- Status InfoBar -->
                 <InfoBar IsOpen="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"
-                         Severity="Informational"
-                         Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" CornerRadius="8" />
+                         Severity="{x:Bind ViewModel.StatusSeverity, Mode=OneWay}"
+                         Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                         IsClosable="True"
+                         Closed="StatusInfoBar_Closed"
+                         CornerRadius="8" />
 
                 <!-- 2-Column Responsive Workspace for Test Setup -->
                 <Grid ColumnDefinitions="1.15*,1*" ColumnSpacing="18">

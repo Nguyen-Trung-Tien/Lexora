@@ -195,7 +195,7 @@
                     <Grid Grid.Row="2">
                         <!-- Empty State -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="24"
-                                    Visibility="{x:Bind ViewModel.Rules.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
+                                    Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <FontIcon Glyph="&#xE8D2;" FontSize="36" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             <TextBlock Text="{x:Bind Loc.GetString('Grammar_EmptyTitle')}" FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" />
                             <TextBlock Text="{x:Bind Loc.GetString('Grammar_EmptySubtitle')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />

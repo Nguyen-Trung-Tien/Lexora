@@ -31,9 +31,6 @@ public sealed partial class ReviewPage : Page
             Focus(FocusState.Programmatic);
         };
 
-        PreviewKeyDown += ReviewPage_PreviewKeyDown;
-        KeyDown += ReviewPage_KeyDown;
-
         Loc.LanguageChanged += OnLanguageChanged;
         Unloaded += (s, e) =>
         {
@@ -115,74 +112,7 @@ public sealed partial class ReviewPage : Page
         }
     }
 
-    private void ReviewPage_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
-    {
-        if (ViewModel.IsCompleted || ViewModel.IsLoading) return;
 
-        // Guard against hotkeys when typing in a text box
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-
-        if (e.Key == VirtualKey.Space && !ViewModel.IsAnswerVisible && !ViewModel.IsTypingRecallActive)
-        {
-            e.Handled = true;
-            ViewModel.RevealAnswer();
-            if (_preferencesService.GetPreferences().AutoPlayAudio)
-            {
-                _ = ViewModel.PlayUkAudioAsync();
-            }
-        }
-    }
-
-    private void ReviewPage_KeyDown(object sender, KeyRoutedEventArgs e)
-    {
-        if (ViewModel.IsCompleted || ViewModel.IsLoading) return;
-
-        // Guard against hotkeys when typing in a text box
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-
-        if (e.Key == VirtualKey.Space && !ViewModel.IsAnswerVisible)
-        {
-            ViewModel.RevealAnswer();
-            if (_preferencesService.GetPreferences().AutoPlayAudio)
-            {
-                _ = ViewModel.PlayUkAudioAsync();
-            }
-            e.Handled = true;
-        }
-        else if (ViewModel.IsAnswerVisible)
-        {
-            switch (e.Key)
-            {
-                case VirtualKey.Number1 or VirtualKey.NumberPad1:
-                    _ = ViewModel.RateCardAsync(ReviewRating.Again);
-                    e.Handled = true;
-                    break;
-                case VirtualKey.Number2 or VirtualKey.NumberPad2:
-                    _ = ViewModel.RateCardAsync(ReviewRating.Hard);
-                    e.Handled = true;
-                    break;
-                case VirtualKey.Number3 or VirtualKey.NumberPad3:
-                    _ = ViewModel.RateCardAsync(ReviewRating.Good);
-                    e.Handled = true;
-                    break;
-                case VirtualKey.Number4 or VirtualKey.NumberPad4:
-                    _ = ViewModel.RateCardAsync(ReviewRating.Easy);
-                    e.Handled = true;
-                    break;
-            }
-        }
-
-        if (e.Key == VirtualKey.U)
-        {
-            _ = ViewModel.PlayUkAudioAsync();
-            e.Handled = true;
-        }
-        else if (e.Key == VirtualKey.S)
-        {
-            _ = ViewModel.PlayUsAudioAsync();
-            e.Handled = true;
-        }
-    }
 
     private void UndoAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
@@ -195,7 +125,7 @@ public sealed partial class ReviewPage : Page
 
     private void SpaceAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        if (ViewModel.IsTypingRecallActive) return;
+        if (ViewModel.IsTypingRecallActive || FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
 
         if (ViewModel.IsCardActive && !ViewModel.IsAnswerVisible)
         {
@@ -204,39 +134,63 @@ public sealed partial class ReviewPage : Page
         }
     }
 
-    private void Rate1Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    private async void Rate1Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        if (ViewModel.IsCardActive && ViewModel.IsAnswerVisible)
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+        if (ViewModel.CanRate)
         {
-            AgainButton_Click(this, new RoutedEventArgs());
             args.Handled = true;
+            await ViewModel.RateCardAsync(ReviewRating.Again);
         }
     }
 
-    private void Rate2Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    private async void Rate2Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        if (ViewModel.IsCardActive && ViewModel.IsAnswerVisible)
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+        if (ViewModel.CanRate)
         {
-            HardButton_Click(this, new RoutedEventArgs());
             args.Handled = true;
+            await ViewModel.RateCardAsync(ReviewRating.Hard);
         }
     }
 
-    private void Rate3Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    private async void Rate3Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        if (ViewModel.IsCardActive && ViewModel.IsAnswerVisible)
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+        if (ViewModel.CanRate)
         {
-            GoodButton_Click(this, new RoutedEventArgs());
             args.Handled = true;
+            await ViewModel.RateCardAsync(ReviewRating.Good);
         }
     }
 
-    private void Rate4Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    private async void Rate4Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        if (ViewModel.IsCardActive && ViewModel.IsAnswerVisible)
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+        if (ViewModel.CanRate)
         {
-            EasyButton_Click(this, new RoutedEventArgs());
             args.Handled = true;
+            await ViewModel.RateCardAsync(ReviewRating.Easy);
+        }
+    }
+
+    private async void PlayUkAudioAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+        if (ViewModel.IsCardActive)
+        {
+            args.Handled = true;
+            await ViewModel.PlayUkAudioAsync();
+        }
+    }
+
+    private async void PlayUsAudioAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+        if (ViewModel.IsCardActive)
+        {
+            args.Handled = true;
+            await ViewModel.PlayUsAudioAsync();
         }
     }
 
@@ -301,10 +255,11 @@ public sealed partial class ReviewPage : Page
         if (ReviewUnitCombo?.SelectedItem is TopicDto selectedTopic)
         {
             UpdateModeButtonStyles(ReviewSessionMode.ByTopic);
+            var topicTitle = string.Format(Loc.GetString("Review_Session_ByTopicFormat"), selectedTopic.Name);
             await ViewModel.StartReviewWithFilterAsync(
                 ReviewSessionMode.ByTopic,
                 topicId: selectedTopic.Id,
-                customTitle: $"Unit: {selectedTopic.Name}");
+                customTitle: topicTitle);
         }
     }
 

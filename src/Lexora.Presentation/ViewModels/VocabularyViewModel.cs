@@ -22,7 +22,10 @@ public partial class VocabularyViewModel : ObservableObject
     private readonly DispatcherQueue? _dispatcherQueue;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmptyState))]
     public partial bool IsLoading { get; set; } = true;
+
+    public bool IsEmptyState => !IsLoading && Words.Count == 0;
 
     [ObservableProperty]
     public partial string SearchTerm { get; set; } = string.Empty;
