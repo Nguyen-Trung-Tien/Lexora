@@ -480,22 +480,36 @@
                                     <!-- Phonetics & Pronunciation audio buttons -->
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <!-- UK Audio Button -->
-                                        <Button Padding="10,6" Click="PlayUkAudio_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                                        <Button x:Name="BtnPlayUk"
+                                                Padding="10,6" Click="PlayUkAudio_Click"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1" CornerRadius="8"
+                                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PlayUkPronunciation')}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
-                                                <TextBlock Text="UK" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUk, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <FontIcon x:Name="IconPlayUk" Glyph="&#xE768;" FontSize="13"
+                                                          Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                                <TextBlock Text="UK" FontWeight="Bold"
+                                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUk, Mode=OneWay}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             </StackPanel>
                                         </Button>
 
                                         <!-- US Audio Button -->
-                                        <Button Padding="10,6" Click="PlayUsAudio_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                                        <Button x:Name="BtnPlayUs"
+                                                Padding="10,6" Click="PlayUsAudio_Click"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1" CornerRadius="8"
+                                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PlayUsPronunciation')}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                                <TextBlock Text="US" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                                <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUs, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <FontIcon x:Name="IconPlayUs" Glyph="&#xE768;" FontSize="13"
+                                                          Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="US" FontWeight="Bold"
+                                                           Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUs, Mode=OneWay}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>

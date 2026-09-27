@@ -729,25 +729,41 @@ public sealed partial class VocabularyPage : Page
 
     private async void PlayUkAudio_Click(object sender, RoutedEventArgs e)
     {
+        if (BtnPlayUk != null) BtnPlayUk.IsEnabled = false;
+        var prevGlyph = IconPlayUk?.Glyph ?? "\uE768";
         try
         {
+            if (IconPlayUk != null) IconPlayUk.Glyph = "\uE995"; // Speaker/playing icon
             await ViewModel.PlayPronunciationAsync("uk");
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] PlayUkAudio error: {ex.Message}");
         }
+        finally
+        {
+            if (IconPlayUk != null) IconPlayUk.Glyph = prevGlyph;
+            if (BtnPlayUk != null) BtnPlayUk.IsEnabled = true;
+        }
     }
 
     private async void PlayUsAudio_Click(object sender, RoutedEventArgs e)
     {
+        if (BtnPlayUs != null) BtnPlayUs.IsEnabled = false;
+        var prevGlyph = IconPlayUs?.Glyph ?? "\uE768";
         try
         {
+            if (IconPlayUs != null) IconPlayUs.Glyph = "\uE995"; // Speaker/playing icon
             await ViewModel.PlayPronunciationAsync("us");
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] PlayUsAudio error: {ex.Message}");
+        }
+        finally
+        {
+            if (IconPlayUs != null) IconPlayUs.Glyph = prevGlyph;
+            if (BtnPlayUs != null) BtnPlayUs.IsEnabled = true;
         }
     }
 
