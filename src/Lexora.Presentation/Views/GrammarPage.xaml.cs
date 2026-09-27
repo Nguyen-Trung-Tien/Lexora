@@ -391,8 +391,8 @@ public sealed partial class GrammarPage : Page
     public string GetFeedbackTitle(bool isCorrect)
     {
         return isCorrect 
-            ? (Loc.CurrentLanguage == "vi-VN" ? "Chính xác! 🎉" : "Correct! 🎉")
-            : (Loc.CurrentLanguage == "vi-VN" ? "Chưa chính xác!" : "Incorrect!");
+            ? Loc.GetString("Grammar_FeedbackCorrect")
+            : Loc.GetString("Grammar_FeedbackIncorrect");
     }
 
     public Brush GetQuestionReviewBrush(bool? isCorrect)
@@ -410,9 +410,9 @@ public sealed partial class GrammarPage : Page
     {
         if (isCorrect == true)
         {
-            return Loc.CurrentLanguage == "vi-VN" ? "Chính xác" : "Correct";
+            return Loc.GetString("Grammar_Correct");
         }
-        return Loc.CurrentLanguage == "vi-VN" ? "Chưa đúng" : "Incorrect";
+        return Loc.GetString("Grammar_Incorrect");
     }
 
     private void RegisterShortcuts()

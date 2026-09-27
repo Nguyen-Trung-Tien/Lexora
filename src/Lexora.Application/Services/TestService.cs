@@ -265,6 +265,8 @@ public class TestService : ITestService
             : scorePercent >= 60.0 ? TestScoreTier.Good
             : TestScoreTier.NeedsPractice;
 
+        var uniqueWeakWords = weakWords.DistinctBy(w => w.Id).ToList();
+
         return new TestResultDto(
             sessionId,
             resultType,
@@ -276,8 +278,8 @@ public class TestService : ITestService
             scorePercent,
             timeTaken,
             evaluatedQuestions,
-            weakWords.DistinctBy(w => w.Id).ToList(),
-            weakWords.DistinctBy(w => w.Id).ToList(),
+            uniqueWeakWords,
+            uniqueWeakWords,
             scoreTier
         );
     }
@@ -484,6 +486,9 @@ public class TestService : ITestService
                 options.AddRange(defChoices);
                 break;
         }
+
+        // Deduplicate in case distractors had duplicates
+        options = options.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
         // Fallback in case distractor pool had fewer than 3 unique options
         while (options.Count < 4)

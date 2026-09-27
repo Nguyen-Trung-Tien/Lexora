@@ -46,11 +46,10 @@ public class UserPreferencesService : IUserPreferencesService
             _currentPreferences = preferences;
         }
 
+        var tempPath = $"{_settingsFilePath}.{Guid.NewGuid():N}.tmp";
         try
         {
             var json = JsonSerializer.Serialize(preferences, JsonOptions);
-            var tempPath = _settingsFilePath + ".tmp";
-
             await File.WriteAllTextAsync(tempPath, json, cancellationToken);
             File.Move(tempPath, _settingsFilePath, overwrite: true);
 
@@ -60,6 +59,13 @@ public class UserPreferencesService : IUserPreferencesService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to save user preferences to {Path}", _settingsFilePath);
+        }
+        finally
+        {
+            if (File.Exists(tempPath))
+            {
+                try { File.Delete(tempPath); } catch { }
+            }
         }
     }
 

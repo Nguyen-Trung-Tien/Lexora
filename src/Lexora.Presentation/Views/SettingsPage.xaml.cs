@@ -12,6 +12,7 @@ public sealed partial class SettingsPage : Page
 {
     public SettingsViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
+    private bool _isBackupOrRestoreInProgress;
 
     public SettingsPage()
     {
@@ -341,6 +342,11 @@ public sealed partial class SettingsPage : Page
 
     private async void BackupButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_isBackupOrRestoreInProgress) return;
+        _isBackupOrRestoreInProgress = true;
+        var clickedButton = sender as Button;
+        if (clickedButton != null) clickedButton.IsEnabled = false;
+
         try
         {
             string? targetFilePath = null;
@@ -431,10 +437,20 @@ public sealed partial class SettingsPage : Page
         {
             System.Diagnostics.Debug.WriteLine($"[SettingsPage] BackupButton error: {ex.Message}");
         }
+        finally
+        {
+            _isBackupOrRestoreInProgress = false;
+            if (clickedButton != null) clickedButton.IsEnabled = true;
+        }
     }
 
     private async void RestoreButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_isBackupOrRestoreInProgress) return;
+        _isBackupOrRestoreInProgress = true;
+        var clickedButton = sender as Button;
+        if (clickedButton != null) clickedButton.IsEnabled = false;
+
         try
         {
             string? selectedFilePath = null;
@@ -637,6 +653,11 @@ public sealed partial class SettingsPage : Page
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[SettingsPage] RestoreButton error: {ex.Message}");
+        }
+        finally
+        {
+            _isBackupOrRestoreInProgress = false;
+            if (clickedButton != null) clickedButton.IsEnabled = true;
         }
     }
 

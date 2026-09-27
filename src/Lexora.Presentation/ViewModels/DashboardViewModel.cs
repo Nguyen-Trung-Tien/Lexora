@@ -15,6 +15,7 @@ public partial class DashboardViewModel : ObservableObject
     private readonly INavigationService _navService;
     private readonly ILocalizationService _localizationService;
     private readonly IStudyAdvisorService _advisorService;
+    private bool _isLoadingDashboard;
 
     [ObservableProperty]
     public partial string GreetingText { get; set; } = string.Empty;
@@ -219,6 +220,8 @@ public partial class DashboardViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadDashboardAsync()
     {
+        if (_isLoadingDashboard) return;
+        _isLoadingDashboard = true;
         IsLoading = true;
         try
         {
@@ -265,6 +268,7 @@ public partial class DashboardViewModel : ObservableObject
         }
         finally
         {
+            _isLoadingDashboard = false;
             IsLoading = false;
         }
     }

@@ -172,7 +172,5 @@ public sealed partial class OperationProgressDialog : ContentDialog
         CompletedTitleText.Text = title;
         CompletedSummaryText.Text = errorMessage;
         MetricsGrid.Visibility = Visibility.Collapsed;
-
-        CloseButtonText = closeButtonText;
     }
 }

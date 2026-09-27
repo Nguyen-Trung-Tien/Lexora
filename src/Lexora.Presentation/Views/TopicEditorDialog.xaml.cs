@@ -119,15 +119,7 @@ public partial class TopicIconOption : CommunityToolkit.Mvvm.ComponentModel.Obse
 
     private static Microsoft.UI.Xaml.Media.Brush GetResourceBrush(string key)
     {
-        try
-        {
-            if (App.Current?.Resources?.TryGetValue(key, out var resource) == true && resource is Microsoft.UI.Xaml.Media.Brush brush)
-            {
-                return brush;
-            }
-        }
-        catch { /* Fallback */ }
-        return _fallbackTransparent;
+        return Services.ThemeResourceHelper.GetThemeBrush(key) ?? _fallbackTransparent;
     }
 
     public Microsoft.UI.Xaml.Media.Brush BackgroundBrush => IsSelected

@@ -244,6 +244,8 @@ public class GrammarService : IGrammarService
                 options.AddRange(distractors);
             }
 
+            options = options.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
             while (options.Count < 4)
             {
                 options.Add($"Alternative Formula {options.Count + 1}");

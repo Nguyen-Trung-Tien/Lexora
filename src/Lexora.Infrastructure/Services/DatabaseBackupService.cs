@@ -38,9 +38,10 @@ public class DatabaseBackupService : IDatabaseBackupService
         var ext = Path.GetExtension(targetFilePath);
         if (!string.Equals(ext, ".db", StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(ext, ".bak", StringComparison.OrdinalIgnoreCase) &&
-            !string.Equals(ext, ".sqlite", StringComparison.OrdinalIgnoreCase))
+            !string.Equals(ext, ".sqlite", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".sqlite3", StringComparison.OrdinalIgnoreCase))
         {
-            throw new ArgumentException($"Invalid backup file extension '{ext}'. Only .db, .bak, or .sqlite files are permitted.", nameof(targetFilePath));
+            throw new ArgumentException($"Invalid backup file extension '{ext}'. Only .db, .bak, .sqlite, or .sqlite3 files are permitted.", nameof(targetFilePath));
         }
 
         if (!File.Exists(_dbFilePath))
@@ -216,6 +217,26 @@ public class DatabaseBackupService : IDatabaseBackupService
                 StudyLogCount: 0,
                 IsValid: false,
                 ErrorMessage: "Tệp sao lưu không tồn tại.");
+        }
+
+        var ext = Path.GetExtension(backupFilePath);
+        if (!string.Equals(ext, ".db", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".bak", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".sqlite", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".sqlite3", StringComparison.OrdinalIgnoreCase))
+        {
+            return new BackupMetadata(
+                FilePath: backupFilePath,
+                FileName: Path.GetFileName(backupFilePath) ?? string.Empty,
+                FileSizeBytes: 0,
+                FileSizeFormatted: "0 B",
+                LastModified: DateTime.MinValue,
+                WordCount: 0,
+                MeaningCount: 0,
+                GrammarRuleCount: 0,
+                StudyLogCount: 0,
+                IsValid: false,
+                ErrorMessage: $"Invalid backup file extension '{ext}'. Only .db, .bak, .sqlite, or .sqlite3 files are permitted.");
         }
 
         var fileInfo = new FileInfo(backupFilePath);
