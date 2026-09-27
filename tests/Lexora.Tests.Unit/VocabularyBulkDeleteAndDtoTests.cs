@@ -181,4 +181,56 @@ public class VocabularyBulkDeleteAndDtoTests
         dto.IsPhrasalVerb.Should().BeTrue();
         dto.PartsOfSpeechDisplay.Should().Be("phr. v.");
     }
+
+    [Fact]
+    public void WordDto_WithMultiplePartsOfSpeech_ShouldExposeAllPartsOfSpeechAndCombinedDisplay()
+    {
+        // Arrange
+        var meanings = new List<WordMeaningDto>
+        {
+            new(Guid.NewGuid(), PartOfSpeech.Verb, "chạy, vận hành", "to move fast on foot", null, 0, []),
+            new(Guid.NewGuid(), PartOfSpeech.Noun, "chuyến đi, cuộc chạy", "an act of running", null, 1, []),
+            new(Guid.NewGuid(), PartOfSpeech.Verb, "quản lý, điều hành", "to manage or operate", null, 2, [])
+        };
+
+        var dto = new WordDto(
+            Id: Guid.NewGuid(),
+            Term: "run",
+            PhoneticUk: "/rʌn/",
+            PhoneticUs: "/rʌn/",
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.A1,
+            PrimaryPartOfSpeech: PartOfSpeech.Verb,
+            Notes: null,
+            Meanings: meanings,
+            Topics: [],
+            ExamTags: [],
+            LearningStatus: LearningStatus.Learning,
+            NextReviewAt: null,
+            Confidence: 1.0
+        );
+
+        // Assert
+        dto.HasMultiplePartsOfSpeech.Should().BeTrue();
+        dto.AllPartsOfSpeech.Should().ContainInOrder(PartOfSpeech.Verb, PartOfSpeech.Noun);
+        dto.AllPartsOfSpeech.Should().HaveCount(2);
+        dto.PartsOfSpeechDisplay.Should().Be("v. • n.");
+    }
+
+    [Fact]
+    public void WordDto_GetAbbreviation_ShouldReturnCorrectAbbreviationForAllPartsOfSpeech()
+    {
+        WordDto.GetAbbreviation(PartOfSpeech.Noun).Should().Be("n.");
+        WordDto.GetAbbreviation(PartOfSpeech.Verb).Should().Be("v.");
+        WordDto.GetAbbreviation(PartOfSpeech.Adjective).Should().Be("adj.");
+        WordDto.GetAbbreviation(PartOfSpeech.Adverb).Should().Be("adv.");
+        WordDto.GetAbbreviation(PartOfSpeech.PhrasalVerb).Should().Be("phr. v.");
+        WordDto.GetAbbreviation(PartOfSpeech.NounPhrase).Should().Be("n. phr.");
+        WordDto.GetAbbreviation(PartOfSpeech.Idiom).Should().Be("idiom");
+        WordDto.GetAbbreviation(PartOfSpeech.Phrase).Should().Be("phr.");
+        WordDto.GetAbbreviation(PartOfSpeech.Preposition).Should().Be("prep.");
+        WordDto.GetAbbreviation(PartOfSpeech.Conjunction).Should().Be("conj.");
+        WordDto.GetAbbreviation(PartOfSpeech.Interjection).Should().Be("interj.");
+    }
 }

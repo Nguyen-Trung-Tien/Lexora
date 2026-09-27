@@ -548,6 +548,130 @@ public class VocabularyCrudIntegrationTests : IDisposable
         logsAfter.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task CreateAndEditWord_WithMultiPosHierarchy_ShouldPersistAtomicAndMaintainConsistency()
+    {
+        // 1. CREATE WORD WITH VERB & NOUN
+        var createDto = new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "run",
+            PhoneticUk: "/rʌn/",
+            PhoneticUs: "/rʌn/",
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.A1,
+            PrimaryPartOfSpeech: PartOfSpeech.Verb,
+            Notes: "Irregular verb: run - ran - run",
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(
+                    PartOfSpeech: PartOfSpeech.Verb,
+                    DefinitionVi: "chạy bằng chân với tốc độ nhanh",
+                    DefinitionEn: "to move fast on foot",
+                    Explanation: "Dùng cho người và động vật di chuyển nhanh",
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("She runs five miles every morning.", "Cô ấy chạy 5 dặm mỗi sáng.", null),
+                        new("He had to run to catch the bus.", "Anh ấy phải chạy để kịp xe buýt.", null)
+                    }
+                ),
+                new(
+                    PartOfSpeech: PartOfSpeech.Verb,
+                    DefinitionVi: "vận hành, quản lý doanh nghiệp hoặc hệ thống",
+                    DefinitionEn: "to manage or be in charge of",
+                    Explanation: "Thường dùng trong kinh doanh, quản trị",
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("They run a successful software company.", "Họ điều hành một công ty phần mềm thành công.", null)
+                    }
+                ),
+                new(
+                    PartOfSpeech: PartOfSpeech.Noun,
+                    DefinitionVi: "chuyến đi, đợt chạy hoặc quãng đường",
+                    DefinitionEn: "an act or period of running",
+                    Explanation: "Ví dụ: go for a run",
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("I go for a run in the park.", "Tôi đi chạy bộ trong công viên.", null)
+                    }
+                )
+            },
+            TopicIds: new List<Guid>(),
+            ExamTagIds: new List<Guid>()
+        );
+
+        var created = await _vocabService.CreateWordAsync(createDto);
+
+        // Verification of Create
+        created.Should().NotBeNull();
+        created.Term.Should().Be("run");
+        created.PrimaryPartOfSpeech.Should().Be(PartOfSpeech.Verb);
+        created.HasMultiplePartsOfSpeech.Should().BeTrue();
+        created.AllPartsOfSpeech.Should().ContainInOrder(PartOfSpeech.Verb, PartOfSpeech.Noun);
+        created.Meanings.Should().HaveCount(3);
+        created.Meanings.Where(m => m.PartOfSpeech == PartOfSpeech.Verb).Should().HaveCount(2);
+        created.Meanings.Where(m => m.PartOfSpeech == PartOfSpeech.Noun).Should().HaveCount(1);
+        created.PartsOfSpeechDisplay.Should().Be("v. • n.");
+
+        // 2. EDIT WORD: Remove Noun, Add Adjective, change Primary to Adjective, update Verb meaning
+        var updateDto = new WordCreateOrUpdateDto(
+            Id: created.Id,
+            Term: "run",
+            PhoneticUk: "/rʌn/",
+            PhoneticUs: "/rʌn/",
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.B1,
+            PrimaryPartOfSpeech: PartOfSpeech.Adjective,
+            Notes: "Updated notes",
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(
+                    PartOfSpeech: PartOfSpeech.Verb,
+                    DefinitionVi: "chạy nhanh (đã cập nhật)",
+                    DefinitionEn: "to move swiftly on foot",
+                    Explanation: null,
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("Run fast!", "Chạy nhanh lên!", null)
+                    }
+                ),
+                new(
+                    PartOfSpeech: PartOfSpeech.Adjective,
+                    DefinitionVi: "được đúc, chảy lỏng (như kim loại nóng chảy)",
+                    DefinitionEn: "melted or in a liquid state",
+                    Explanation: "Thuật ngữ kỹ thuật hoặc nấu chảy",
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("Run butter or run metal.", "Bơ chảy hoặc kim loại nóng chảy.", null)
+                    }
+                )
+            },
+            TopicIds: new List<Guid>(),
+            ExamTagIds: new List<Guid>()
+        );
+
+        var updated = await _vocabService.UpdateWordAsync(updateDto);
+
+        // Verification of Update
+        updated.Should().NotBeNull();
+        updated.Id.Should().Be(created.Id);
+        updated.PrimaryPartOfSpeech.Should().Be(PartOfSpeech.Adjective);
+        updated.Level.Should().Be(CefrLevel.B1);
+        updated.Meanings.Should().HaveCount(2);
+        updated.AllPartsOfSpeech.Should().ContainInOrder(PartOfSpeech.Adjective, PartOfSpeech.Verb);
+        updated.AllPartsOfSpeech.Should().NotContain(PartOfSpeech.Noun);
+        updated.PartsOfSpeechDisplay.Should().Be("adj. • v.");
+
+        var fetched = await _vocabService.GetWordByIdAsync(created.Id);
+        fetched.Should().NotBeNull();
+        fetched!.PrimaryPartOfSpeech.Should().Be(PartOfSpeech.Adjective);
+        fetched.Meanings.Should().HaveCount(2);
+        fetched.AllPartsOfSpeech.Should().Contain(PartOfSpeech.Verb);
+        fetched.AllPartsOfSpeech.Should().Contain(PartOfSpeech.Adjective);
+        fetched.AllPartsOfSpeech.Should().NotContain(PartOfSpeech.Noun);
+    }
+
     public void Dispose()
     {
         _context.Dispose();

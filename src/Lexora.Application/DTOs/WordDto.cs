@@ -77,6 +77,7 @@ public record WordDto(
         PartOfSpeech.PhrasalVerb => "phr. v.",
         PartOfSpeech.NounPhrase => "n. phr.",
         PartOfSpeech.Idiom => "idiom",
+        PartOfSpeech.Phrase => "phr.",
         PartOfSpeech.Preposition => "prep.",
         PartOfSpeech.Conjunction => "conj.",
         PartOfSpeech.Interjection => "interj.",

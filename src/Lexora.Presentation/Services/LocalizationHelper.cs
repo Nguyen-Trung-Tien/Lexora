@@ -88,5 +88,26 @@ public static class LocalizationHelper
         }
         return loc?.GetString("Test_Incorrect") ?? "Incorrect";
     }
+
+    public static string FormatPartOfSpeech(PartOfSpeech pos)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        if (loc == null) return pos.ToString();
+        return pos switch
+        {
+            PartOfSpeech.Noun => loc.GetString("WordEditor_PosNoun"),
+            PartOfSpeech.Verb => loc.GetString("WordEditor_PosVerb"),
+            PartOfSpeech.Adjective => loc.GetString("WordEditor_PosAdj"),
+            PartOfSpeech.Adverb => loc.GetString("WordEditor_PosAdv"),
+            PartOfSpeech.PhrasalVerb => loc.GetString("WordEditor_PosPhrasalVerb"),
+            PartOfSpeech.NounPhrase => loc.GetString("WordEditor_PosNounPhrase"),
+            PartOfSpeech.Idiom => loc.GetString("WordEditor_PosIdiom"),
+            PartOfSpeech.Phrase => loc.GetString("WordEditor_PosPhrase"),
+            PartOfSpeech.Preposition => loc.GetString("WordEditor_PosPreposition"),
+            PartOfSpeech.Conjunction => loc.GetString("WordEditor_PosConjunction"),
+            PartOfSpeech.Interjection => loc.GetString("WordEditor_PosInterjection"),
+            _ => pos.ToString()
+        };
+    }
 }
 

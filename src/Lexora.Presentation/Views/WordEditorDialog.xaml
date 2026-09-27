@@ -10,7 +10,7 @@
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
-        <x:Double x:Key="ContentDialogMaxWidth">840</x:Double>
+        <x:Double x:Key="ContentDialogMaxWidth">880</x:Double>
         <x:Double x:Key="ContentDialogMinWidth">480</x:Double>
     </ContentDialog.Resources>
 
@@ -24,286 +24,341 @@
     </ContentDialog.TitleTemplate>
 
     <Grid x:Name="DialogContentRoot">
+        <ScrollViewer MaxHeight="590"
+                      HorizontalAlignment="Stretch"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,4,12,8">
+            <StackPanel Spacing="16">
+                <!-- Top Validation Error InfoBar -->
+                <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" />
 
-        <ScrollViewer MaxHeight="580" HorizontalAlignment="Stretch" Padding="0,4,12,8">
-        <StackPanel Spacing="16">
-            <!-- Validation Error InfoBar -->
-            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" />
-
-            <!-- Card 1: Term & Core Attributes -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
-                <StackPanel Spacing="14">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE82D;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        <TextBlock Text="{x:Bind Loc.GetString('Vocab_Title')}" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-
-                    <Grid ColumnDefinitions="2*,*" ColumnSpacing="12">
-                        <TextBox x:Name="TermTextBox"
-                                 Header="{x:Bind Loc.GetString('WordEditor_HeaderTerm')}"
-                                 PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderTerm')}"
-                                 FontWeight="SemiBold" />
-                        <ComboBox Grid.Column="1" x:Name="LevelComboBox"
-                                  Header="{x:Bind Loc.GetString('WordEditor_HeaderLevel')}"
-                                  HorizontalAlignment="Stretch" />
-                    </Grid>
-
-                    <!-- Multi-POS (Các góc từ / Loại từ) Section -->
-                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8" Padding="12">
-                        <StackPanel Spacing="10">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel Spacing="2">
-                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <FontIcon Glyph="&#xE8D2;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('WordEditor_HeaderMultiPos')}" FontWeight="SemiBold" FontSize="13" />
-                                    </StackPanel>
-                                    <TextBlock Text="{x:Bind Loc.GetString('WordEditor_MultiPosHint')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind Loc.GetString('WordEditor_PrimaryPosLabel')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                                    <ComboBox x:Name="PosComboBox" MinWidth="130" SelectionChanged="PosComboBox_SelectionChanged" />
-                                </StackPanel>
-                            </Grid>
-
-                            <!-- Chips Grid for Parts of Speech -->
-                            <ItemsRepeater x:Name="PosChipsRepeater">
-                                <ItemsRepeater.Layout>
-                                    <UniformGridLayout Orientation="Horizontal" MinItemWidth="160" MinColumnSpacing="8" MinRowSpacing="8" ItemsStretch="Fill" />
-                                </ItemsRepeater.Layout>
-                                <ItemsRepeater.ItemTemplate>
-                                    <DataTemplate x:DataType="views:PosChipItem">
-                                        <ToggleButton IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
-                                                      Click="PosChip_Click"
-                                                      HorizontalAlignment="Stretch"
-                                                      ToolTipService.ToolTip="{x:Bind DisplayName}"
-                                                      CornerRadius="6" Padding="10,6">
-                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
-                                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
-                                                    <TextBlock Text="{x:Bind ShortAbbr}" FontWeight="Bold" FontSize="10" />
-                                                </Border>
-                                                <TextBlock Grid.Column="1" Text="{x:Bind DisplayName}" FontSize="12" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                            </Grid>
-                                        </ToggleButton>
-                                    </DataTemplate>
-                                </ItemsRepeater.ItemTemplate>
-                            </ItemsRepeater>
-                        </StackPanel>
-                    </Border>
-
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                        <TextBox x:Name="IpaUkTextBox"
-                                 Header="{x:Bind Loc.GetString('WordEditor_HeaderPhoneticUk')}"
-                                 PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderPhoneticUk')}" />
-                        <TextBox Grid.Column="1" x:Name="IpaUsTextBox"
-                                 Header="{x:Bind Loc.GetString('WordEditor_HeaderPhoneticUs')}"
-                                 PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderPhoneticUs')}" />
-                        <TextBox Grid.Column="2" x:Name="NotesTextBox"
-                                 Header="{x:Bind Loc.GetString('WordEditor_HeaderNotes')}"
-                                 PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderNotes')}" />
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <!-- Card 2: Meanings Section -->
-            <StackPanel Spacing="12">
-                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,2">
-                    <StackPanel Spacing="2">
+                <!-- ======================================================== -->
+                <!-- CARD 1: BASIC INFORMATION (Term, Level, Phonetics, Notes) -->
+                <!-- ======================================================== -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="10" Padding="16">
+                    <StackPanel Spacing="14">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE762;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionMeanings')}" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
+                            <FontIcon Glyph="&#xE82D;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionBasicInfo')}" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                         </StackPanel>
-                        <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionMeaningsDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+
+                        <!-- Term and Level -->
+                        <Grid ColumnDefinitions="2*,*" ColumnSpacing="12">
+                            <TextBox x:Name="TermTextBox"
+                                     Header="{x:Bind Loc.GetString('WordEditor_HeaderTerm')}"
+                                     PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderTerm')}"
+                                     FontWeight="SemiBold" />
+                            <ComboBox Grid.Column="1" x:Name="LevelComboBox"
+                                      Header="{x:Bind Loc.GetString('WordEditor_HeaderLevel')}"
+                                      HorizontalAlignment="Stretch" />
+                        </Grid>
+
+                        <!-- Phonetics and Notes -->
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                            <TextBox x:Name="IpaUkTextBox"
+                                     Header="{x:Bind Loc.GetString('WordEditor_HeaderPhoneticUk')}"
+                                     PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderPhoneticUk')}" />
+                            <TextBox Grid.Column="1" x:Name="IpaUsTextBox"
+                                     Header="{x:Bind Loc.GetString('WordEditor_HeaderPhoneticUs')}"
+                                     PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderPhoneticUs')}" />
+                            <TextBox Grid.Column="2" x:Name="NotesTextBox"
+                                     Header="{x:Bind Loc.GetString('WordEditor_HeaderNotes')}"
+                                     PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderNotes')}" />
+                        </Grid>
                     </StackPanel>
-                    <Button Grid.Column="1" Click="AddMeaningButton_Click" Style="{ThemeResource AccentButtonStyle}" CornerRadius="6" VerticalAlignment="Center" Padding="14,6">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE710;" FontSize="12" />
-                            <TextBlock Text="{x:Bind Loc.GetString('WordEditor_BtnAddMeaning')}" />
+                </Border>
+
+                <!-- ======================================================== -->
+                <!-- CARD 2: PARTS OF SPEECH & MEANINGS (Hierarchical Tree)   -->
+                <!-- ======================================================== -->
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,2">
+                        <StackPanel Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE762;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionPosAndMeanings')}"
+                                           FontWeight="SemiBold"
+                                           Style="{ThemeResource SubtitleTextBlockStyle}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionPosAndMeaningsDesc')}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       FontSize="12" />
                         </StackPanel>
-                    </Button>
-                </Grid>
 
-                <!-- Meanings Items -->
-                <ItemsControl x:Name="MeaningsItemsControl">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
-                                <StackPanel Spacing="12">
-                                    <!-- Meaning Header bar with Pill Badge, Inline POS selector, and Delete button -->
-                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12" VerticalAlignment="Center">
-                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding MeaningBadge}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="12" FontWeight="Bold" />
-                                        </Border>
+                        <!-- Add Part of Speech Button with MenuFlyout -->
+                        <Button Grid.Column="1" x:Name="BtnAddPosGroup"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                CornerRadius="6"
+                                VerticalAlignment="Center"
+                                Padding="14,6">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE710;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('WordEditor_BtnAddPos')}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <Button.Flyout>
+                                <MenuFlyout x:Name="AddPosMenuFlyout" Opening="AddPosMenuFlyout_Opening" />
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
 
-                                        <Border Grid.Column="1" />
+                    <!-- Part of Speech Group Cards -->
+                    <ItemsControl x:Name="PosGroupsItemsControl" ItemsSource="{x:Bind PosGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,14">
+                                    <StackPanel Spacing="14">
+                                        <!-- POS Group Header Bar -->
+                                        <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                                            <!-- POS Pill Badge -->
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,5" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <FontIcon Glyph="&#xE8D2;" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{Binding HeaderTitle}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="13" />
+                                                </StackPanel>
+                                            </Border>
 
-                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding HeaderMeaningPos}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            <ComboBox ItemsSource="{Binding AvailablePartsOfSpeech}"
+                                            <!-- Dropdown to switch POS if needed -->
+                                            <ComboBox Grid.Column="1"
+                                                      ItemsSource="{Binding AvailablePartsOfSpeech}"
                                                       SelectedItem="{Binding PartOfSpeech, Mode=TwoWay}"
+                                                      SelectionChanged="PosGroupComboBox_SelectionChanged"
                                                       MinWidth="130" VerticalAlignment="Center" />
-                                        </StackPanel>
 
-                                        <Button Grid.Column="3"
-                                                VerticalAlignment="Center"
-                                                ToolTipService.ToolTip="{Binding TooltipDeleteMeaning}"
-                                                Click="DeleteMeaningButton_Click"
-                                                IsEnabled="{Binding CanDelete}"
-                                                Padding="8,6" CornerRadius="6">
-                                            <FontIcon Glyph="&#xE74D;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                        </Button>
-                                    </Grid>
+                                            <!-- Primary POS Indicator / Set Primary Button -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <Border Background="{ThemeResource SystemFillColorSuccessBrush}"
+                                                        CornerRadius="6" Padding="8,4"
+                                                        Visibility="{Binding PrimaryBadgeVisibility}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <FontIcon Glyph="&#xE735;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                        <TextBlock Text="{Binding PrimaryPosBadge}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <Button Visibility="{Binding SetPrimaryButtonVisibility}"
+                                                        Click="SetPrimaryPosButton_Click"
+                                                        ToolTipService.ToolTip="{Binding TooltipSetAsPrimary}"
+                                                        Style="{ThemeResource SubtleButtonStyle}"
+                                                        Padding="8,4" CornerRadius="6">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <FontIcon Glyph="&#xE734;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                        <TextBlock Text="{Binding SetAsPrimaryText}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
 
-                                    <!-- Vietnamese Definition -->
-                                    <TextBox Header="{Binding HeaderDefinitionVi}"
-                                             Text="{Binding DefinitionVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             PlaceholderText="{Binding PlaceholderDefinitionVi}"
-                                             FontWeight="Medium" />
+                                            <!-- Spacer -->
+                                            <Border Grid.Column="3" />
 
-                                    <!-- English Definition & Context Nuance -->
-                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                        <TextBox Header="{Binding HeaderDefinitionEn}"
-                                                 Text="{Binding DefinitionEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 PlaceholderText="{Binding PlaceholderDefinitionEn}" />
-                                        <TextBox Grid.Column="1"
-                                                 Header="{Binding HeaderExplanation}"
-                                                 Text="{Binding Explanation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 PlaceholderText="{Binding PlaceholderExplanation}" />
-                                    </Grid>
+                                            <!-- Delete POS Group Button -->
+                                            <Button Grid.Column="4"
+                                                    Click="DeletePosGroupButton_Click"
+                                                    IsEnabled="{Binding CanDelete}"
+                                                    ToolTipService.ToolTip="{Binding TooltipDeletePos}"
+                                                    Padding="8,6" CornerRadius="6">
+                                                <FontIcon Glyph="&#xE74D;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                            </Button>
+                                        </Grid>
 
-                                    <!-- Examples list inside meaning -->
-                                    <StackPanel Spacing="8" Margin="0,6,0,0">
-                                        <TextBlock Text="{Binding SectionExamples}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        
-                                        <ItemsControl ItemsSource="{Binding Examples}">
+                                        <!-- Thin separator -->
+                                        <MenuFlyoutSeparator Margin="0,-4,0,2" />
+
+                                        <!-- Meanings inside this Part of Speech -->
+                                        <ItemsControl ItemsSource="{Binding Meanings}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Grid ColumnDefinitions="Auto,*,*,Auto" ColumnSpacing="8" Margin="0,2,0,6" VerticalAlignment="Center">
-                                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding ExampleBadge}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
-                                                        </Border>
-                                                        <TextBox Grid.Column="1"
-                                                                 PlaceholderText="{Binding PlaceholderExampleEn}"
-                                                                 Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                        <TextBox Grid.Column="2"
-                                                                 PlaceholderText="{Binding PlaceholderExampleVi}"
-                                                                 Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                        <Button Grid.Column="3"
-                                                                ToolTipService.ToolTip="{Binding TooltipDeleteExample}"
-                                                                Click="DeleteExampleButton_Click"
-                                                                Padding="8,6" CornerRadius="6">
-                                                            <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                                        </Button>
-                                                    </Grid>
+                                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                            BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                                        <StackPanel Spacing="10">
+                                                            <!-- Meaning Header with badge & delete button -->
+                                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                        BorderThickness="1" CornerRadius="4" Padding="8,3">
+                                                                    <TextBlock Text="{Binding MeaningBadge}" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                                </Border>
+                                                                <Border Grid.Column="1" />
+                                                                <Button Grid.Column="2"
+                                                                        Click="DeleteMeaningButton_Click"
+                                                                        IsEnabled="{Binding CanDelete}"
+                                                                        ToolTipService.ToolTip="{Binding TooltipDeleteMeaning}"
+                                                                        Padding="6,4" CornerRadius="4">
+                                                                    <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                                                </Button>
+                                                            </Grid>
+
+                                                            <!-- Vietnamese Definition (Required) -->
+                                                            <TextBox Header="{Binding HeaderDefinitionVi}"
+                                                                     Text="{Binding DefinitionVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                     PlaceholderText="{Binding PlaceholderDefinitionVi}"
+                                                                     FontWeight="Medium" />
+
+                                                            <!-- English Definition & Nuance/Explanation -->
+                                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                                                <TextBox Header="{Binding HeaderDefinitionEn}"
+                                                                         Text="{Binding DefinitionEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                         PlaceholderText="{Binding PlaceholderDefinitionEn}" />
+                                                                <TextBox Grid.Column="1"
+                                                                         Header="{Binding HeaderExplanation}"
+                                                                         Text="{Binding Explanation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                         PlaceholderText="{Binding PlaceholderExplanation}" />
+                                                            </Grid>
+
+                                                            <!-- Examples for this meaning -->
+                                                            <StackPanel Spacing="6" Margin="0,4,0,0">
+                                                                <TextBlock Text="{Binding SectionExamples}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                                <ItemsControl ItemsSource="{Binding Examples}">
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate>
+                                                                            <Grid ColumnDefinitions="Auto,*,*,Auto" ColumnSpacing="8" Margin="0,2,0,4" VerticalAlignment="Center">
+                                                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                                                    <TextBlock Text="{Binding ExampleBadge}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
+                                                                                </Border>
+                                                                                <TextBox Grid.Column="1"
+                                                                                         PlaceholderText="{Binding PlaceholderExampleEn}"
+                                                                                         Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <TextBox Grid.Column="2"
+                                                                                         PlaceholderText="{Binding PlaceholderExampleVi}"
+                                                                                         Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <Button Grid.Column="3"
+                                                                                        ToolTipService.ToolTip="{Binding TooltipDeleteExample}"
+                                                                                        Click="DeleteExampleButton_Click"
+                                                                                        Padding="6,4" CornerRadius="4">
+                                                                                    <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                                                                </Button>
+                                                                            </Grid>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+
+                                                                <Button HorizontalAlignment="Left" Click="AddExampleButton_Click" Padding="10,4" CornerRadius="6">
+                                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                        <FontIcon Glyph="&#xE710;" FontSize="11" />
+                                                                        <TextBlock Text="{Binding BtnAddExample}" FontSize="11" />
+                                                                    </StackPanel>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Border>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
 
-                                        <Button HorizontalAlignment="Left" Click="AddExampleButton_Click" Padding="12,6" CornerRadius="6">
+                                        <!-- Add Meaning to this POS Button -->
+                                        <Button Click="AddMeaningToPosButton_Click"
+                                                HorizontalAlignment="Left"
+                                                Style="{ThemeResource SubtleButtonStyle}"
+                                                Padding="12,6" CornerRadius="6">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon Glyph="&#xE710;" FontSize="11" />
-                                                <TextBlock Text="{Binding BtnAddExample}" FontSize="12" />
+                                                <FontIcon Glyph="&#xE710;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{Binding BtnAddMeaningLabel}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-
-            <!-- Card 3: Topics & Exams -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
-                <StackPanel Spacing="14">
-                    <StackPanel Spacing="2">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE734;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionTopicsExams')}" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                        </StackPanel>
-                        <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionTopicsExamsDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                    </StackPanel>
-
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                        <!-- Topics list -->
-                        <StackPanel Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{x:Bind Loc.GetString('WordEditor_HeaderTopics')}" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-                                <Button Grid.Column="1" Style="{ThemeResource SubtleButtonStyle}" Padding="6,2" ToolTipService.ToolTip="{x:Bind Loc.GetString('WordEditor_AddTopic')}">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <FontIcon Glyph="&#xE710;" FontSize="10" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('WordEditor_AddTopic')}" FontSize="11" />
-                                    </StackPanel>
-                                    <Button.Flyout>
-                                        <Flyout x:Name="AddTopicFlyout">
-                                            <StackPanel Spacing="10" Width="260">
-                                                <TextBlock Text="{x:Bind Loc.GetString('WordEditor_AddTopicFlyoutTitle')}" FontWeight="SemiBold" FontSize="13" />
-                                                <TextBox x:Name="NewTopicNameTextBox"
-                                                         PlaceholderText="{x:Bind Loc.GetString('TopicEditor_HeaderName')}"
-                                                         KeyDown="NewTopicNameTextBox_KeyDown" />
-                                                <TextBox x:Name="NewTopicDescTextBox"
-                                                         PlaceholderText="{x:Bind Loc.GetString('TopicEditor_HeaderDesc')}"
-                                                         Height="54" TextWrapping="Wrap" AcceptsReturn="True" />
-                                                <Button Style="{ThemeResource AccentButtonStyle}"
-                                                        HorizontalAlignment="Stretch"
-                                                        Click="CreateTopicQuickButton_Click">
-                                                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                        <FontIcon Glyph="&#xE710;" FontSize="11" />
-                                                        <TextBlock Text="{x:Bind Loc.GetString('TopicEditor_Save')}" FontWeight="SemiBold" FontSize="12" />
-                                                    </StackPanel>
-                                                </Button>
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                            </Grid>
-                            <Border BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6" MinHeight="100" MaxHeight="140" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-
-                                <Grid>
-                                    <ListView x:Name="TopicsListView" SelectionMode="Multiple">
-                                        <ListView.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                                            </DataTemplate>
-                                        </ListView.ItemTemplate>
-                                    </ListView>
-                                    <TextBlock x:Name="EmptyTopicsTextBlock"
-                                               Text="{x:Bind Loc.GetString('WordEditor_EmptyTopics')}"
-                                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                               FontSize="12" FontStyle="Italic"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               Visibility="Collapsed" />
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Exam tags list -->
-                        <StackPanel Grid.Column="1" Spacing="6">
-                            <TextBlock Text="{x:Bind Loc.GetString('WordEditor_HeaderExams')}" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                            <Border BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6" MinHeight="100" MaxHeight="140" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                <Grid>
-                                    <ListView x:Name="ExamTagsListView" SelectionMode="Multiple">
-                                        <ListView.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                                            </DataTemplate>
-                                        </ListView.ItemTemplate>
-                                    </ListView>
-                                    <TextBlock x:Name="EmptyExamTagsTextBlock"
-                                               Text="{x:Bind Loc.GetString('WordEditor_EmptyExams')}"
-                                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                               FontSize="12" FontStyle="Italic"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               Visibility="Collapsed" />
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
-            </Border>
-        </StackPanel>
-    </ScrollViewer>
+
+                <!-- ======================================================== -->
+                <!-- CARD 3: TOPICS & EXAMS METADATA                          -->
+                <!-- ======================================================== -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="10" Padding="16">
+                    <StackPanel Spacing="14">
+                        <StackPanel Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE734;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionTopicsExams')}" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind Loc.GetString('WordEditor_SectionTopicsExamsDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                            <!-- Topics list -->
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('WordEditor_HeaderTopics')}" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                    <Button Grid.Column="1" Style="{ThemeResource SubtleButtonStyle}" Padding="6,2" ToolTipService.ToolTip="{x:Bind Loc.GetString('WordEditor_AddTopic')}">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon Glyph="&#xE710;" FontSize="10" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('WordEditor_AddTopic')}" FontSize="11" />
+                                        </StackPanel>
+                                        <Button.Flyout>
+                                            <Flyout x:Name="AddTopicFlyout">
+                                                <StackPanel Spacing="10" Width="260">
+                                                    <TextBlock Text="{x:Bind Loc.GetString('WordEditor_AddTopicFlyoutTitle')}" FontWeight="SemiBold" FontSize="13" />
+                                                    <TextBox x:Name="NewTopicNameTextBox"
+                                                             PlaceholderText="{x:Bind Loc.GetString('TopicEditor_HeaderName')}"
+                                                             KeyDown="NewTopicNameTextBox_KeyDown" />
+                                                    <TextBox x:Name="NewTopicDescTextBox"
+                                                             PlaceholderText="{x:Bind Loc.GetString('TopicEditor_HeaderDesc')}"
+                                                             Height="54" TextWrapping="Wrap" AcceptsReturn="True" />
+                                                    <Button Style="{ThemeResource AccentButtonStyle}"
+                                                            HorizontalAlignment="Stretch"
+                                                            Click="CreateTopicQuickButton_Click">
+                                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                            <FontIcon Glyph="&#xE710;" FontSize="11" />
+                                                            <TextBlock Text="{x:Bind Loc.GetString('TopicEditor_Save')}" FontWeight="SemiBold" FontSize="12" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </Grid>
+                                <Border BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6" MinHeight="100" MaxHeight="140" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                    <Grid>
+                                        <ListView x:Name="TopicsListView" SelectionMode="Multiple">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                        <TextBlock x:Name="EmptyTopicsTextBlock"
+                                                   Text="{x:Bind Loc.GetString('WordEditor_EmptyTopics')}"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   FontSize="12" FontStyle="Italic"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Visibility="Collapsed" />
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Exam tags list -->
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock Text="{x:Bind Loc.GetString('WordEditor_HeaderExams')}" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                <Border BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6" MinHeight="100" MaxHeight="140" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                    <Grid>
+                                        <ListView x:Name="ExamTagsListView" SelectionMode="Multiple">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                        <TextBlock x:Name="EmptyExamTagsTextBlock"
+                                                   Text="{x:Bind Loc.GetString('WordEditor_EmptyExams')}"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   FontSize="12" FontStyle="Italic"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Visibility="Collapsed" />
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </ContentDialog>
