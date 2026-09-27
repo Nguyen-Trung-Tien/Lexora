@@ -16,6 +16,17 @@ public static class SafeDialogExtensions
     private static ContentDialog? _currentlyActiveDialog;
 
     /// <summary>
+    /// Indicates whether a modal ContentDialog is currently active on screen.
+    /// Used by ShortcutManager to prevent navigation and background mutations during modal workflows.
+    /// </summary>
+    public static bool IsDialogOpen => _currentlyActiveDialog != null;
+
+    /// <summary>
+    /// Gets the currently active ContentDialog instance, if any.
+    /// </summary>
+    public static ContentDialog? CurrentlyActiveDialog => _currentlyActiveDialog;
+
+    /// <summary>
     /// Displays a ContentDialog safely, serializing dialog requests and automatically resolving XamlRoot.
     /// Returns ContentDialogResult.None if the dialog cannot be shown or fails.
     /// </summary>

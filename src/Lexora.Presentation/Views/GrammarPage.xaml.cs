@@ -23,10 +23,14 @@ public sealed partial class GrammarPage : Page
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
 
         Loc.LanguageChanged += OnLanguageChanged;
+        RegisterShortcuts();
+
         Unloaded += (s, e) =>
         {
             Loc.LanguageChanged -= OnLanguageChanged;
             _searchDebounceTimer?.Stop();
+            var sm = App.Current.Services.GetService<IShortcutManager>();
+            sm?.UnregisterPageShortcuts(typeof(GrammarPage));
         };
 
         _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
@@ -270,7 +274,7 @@ public sealed partial class GrammarPage : Page
             dialog.InitializeForCreate();
 
             var result = await dialog.ShowAsyncSafe(xamlRoot);
-            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            if ((result == ContentDialogResult.Primary || dialog.ResultDto != null) && dialog.ResultDto != null)
             {
                 await ViewModel.AddRuleAsync(dialog.ResultDto);
                 ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Add"), Loc.GetString("Grammar_Status_RuleAdded"));
@@ -300,7 +304,7 @@ public sealed partial class GrammarPage : Page
             dialog.InitializeForEdit(ViewModel.SelectedRule);
 
             var result = await dialog.ShowAsyncSafe(xamlRoot);
-            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            if ((result == ContentDialogResult.Primary || dialog.ResultDto != null) && dialog.ResultDto != null)
             {
                 await ViewModel.UpdateRuleAsync(dialog.ResultDto);
                 ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Edit"), Loc.GetString("Grammar_Status_RuleUpdated"));
@@ -411,34 +415,82 @@ public sealed partial class GrammarPage : Page
         return Loc.CurrentLanguage == "vi-VN" ? "Chưa đúng" : "Incorrect";
     }
 
-    private void AddRuleAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    private void RegisterShortcuts()
     {
-        AddRuleButton_Click(this, new RoutedEventArgs());
-        args.Handled = true;
-    }
+        var sm = App.Current.Services.GetService<IShortcutManager>();
+        if (sm == null) return;
 
-    private void EditRuleAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (ViewModel.SelectedRule != null)
+        sm.RegisterPageShortcuts(typeof(GrammarPage), new[]
         {
-            EditRuleButton_Click(this, new RoutedEventArgs());
-            args.Handled = true;
-        }
-    }
-
-    private void DeleteRuleAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (ViewModel.SelectedRule != null)
-        {
-            DeleteRuleButton_Click(this, new RoutedEventArgs());
-            args.Handled = true;
-        }
-    }
-
-    private void PracticeAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
-    {
-        PracticeButton_Click(this, new RoutedEventArgs());
-        args.Handled = true;
+            new ShortcutDefinition
+            {
+                Id = "Grammar.AddRule",
+                Gesture = new ShortcutGesture(ShortcutKey.N, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(GrammarPage),
+                DescriptionKey = "Grammar_TooltipAdd",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = true,
+                AllowWhenDialogActive = false,
+                ExecuteAsync = () =>
+                {
+                    AddRuleButton_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Grammar.EditRule",
+                Gesture = new ShortcutGesture(ShortcutKey.E, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(GrammarPage),
+                DescriptionKey = "Grammar_TooltipEdit",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.SelectedRule != null && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    EditRuleButton_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Grammar.DeleteRule",
+                Gesture = new ShortcutGesture(ShortcutKey.Delete, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.D, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(GrammarPage),
+                DescriptionKey = "Grammar_DeleteRule",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.SelectedRule != null && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    DeleteRuleButton_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Grammar.Practice",
+                Gesture = new ShortcutGesture(ShortcutKey.P, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(GrammarPage),
+                DescriptionKey = "Grammar_TooltipPractice",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.SelectedRule != null && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    PracticeButton_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            }
+        });
     }
 
     private async void CopyStructureButton_Click(object sender, RoutedEventArgs e)

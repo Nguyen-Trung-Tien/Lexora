@@ -21,11 +21,29 @@ public sealed partial class ShellPage : Page
 
         UpdateNavigationLabels();
         _localizationService.LanguageChanged += OnLanguageChanged;
+
+        if (App.Current.Services.GetService<IShortcutManager>() is ShortcutManager sm)
+        {
+            sm.GlobalSearchRequested += OnGlobalSearchRequested;
+        }
+
         Unloaded += (s, e) =>
         {
             _localizationService.LanguageChanged -= OnLanguageChanged;
+            if (App.Current.Services.GetService<IShortcutManager>() is ShortcutManager smClean)
+            {
+                smClean.GlobalSearchRequested -= OnGlobalSearchRequested;
+            }
             ViewModel.Dispose();
         };
+    }
+
+    private void OnGlobalSearchRequested(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            GlobalSearchBox.Focus(FocusState.Programmatic);
+        });
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
@@ -307,44 +325,6 @@ public sealed partial class ShellPage : Page
     {
         _navigationService.Navigate(typeof(ReviewPage));
         NavView.SelectedItem = NavItemReview;
-    }
-
-    private void NavigateAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
-    {
-        switch (sender.Key)
-        {
-            case Windows.System.VirtualKey.Number1:
-                _navigationService.Navigate(typeof(DashboardPage));
-                NavView.SelectedItem = NavItemDashboard;
-                args.Handled = true;
-                break;
-            case Windows.System.VirtualKey.Number2:
-                _navigationService.Navigate(typeof(VocabularyPage));
-                NavView.SelectedItem = NavItemVocabulary;
-                args.Handled = true;
-                break;
-            case Windows.System.VirtualKey.Number3:
-                _navigationService.Navigate(typeof(ReviewPage));
-                NavView.SelectedItem = NavItemReview;
-                args.Handled = true;
-                break;
-            case Windows.System.VirtualKey.Number4:
-                _navigationService.Navigate(typeof(TestPage));
-                NavView.SelectedItem = NavItemTest;
-                args.Handled = true;
-                break;
-            case Windows.System.VirtualKey.Number5:
-                _navigationService.Navigate(typeof(GrammarPage));
-                NavView.SelectedItem = NavItemGrammar;
-                args.Handled = true;
-                break;
-        }
-    }
-
-    private void SearchAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
-    {
-        GlobalSearchBox.Focus(FocusState.Programmatic);
-        args.Handled = true;
     }
 }
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
 using Windows.Graphics;
 using WinRT.Interop;
 
@@ -42,6 +43,13 @@ public sealed partial class MainWindow : Window
         {
             root.Loaded += (s, e) => UpdateTitleBarButtons();
             root.ActualThemeChanged += (s, e) => UpdateTitleBarButtons();
+
+            // Centralized keyboard shortcut router
+            root.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((s, e) =>
+            {
+                var shortcutManager = App.Current.Services.GetService<IShortcutManager>();
+                shortcutManager?.ProcessKeyDown(e, root.XamlRoot);
+            }), handledEventsToo: false);
         }
 
         // 2. Set Taskbar and Window Icon

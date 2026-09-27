@@ -67,6 +67,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddSingleton<ISoundFeedbackService, SoundFeedbackService>();
                 services.AddSingleton<IToastNotificationService, ToastNotificationService>();
                 services.AddSingleton<IStartupOrchestrator, StartupOrchestrator>();
+                services.AddSingleton<IShortcutManager, ShortcutManager>();
 
                 // ViewModels
                 services.AddTransient<ShellViewModel>();

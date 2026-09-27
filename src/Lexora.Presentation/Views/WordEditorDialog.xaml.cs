@@ -158,6 +158,18 @@ public sealed partial class WordEditorDialog : ContentDialog
         CloseButtonText = Loc.GetString("WordEditor_Cancel");
         DialogInfoBar.Title = Loc.GetString("WordEditor_ValidationTitle");
 
+        KeyDown += (s, e) =>
+        {
+            if (e.Key == Windows.System.VirtualKey.S && (ShortcutManager.GetCurrentModifiers() & ShortcutModifiers.Control) == ShortcutModifiers.Control)
+            {
+                e.Handled = true;
+                if (TrySaveInternal())
+                {
+                    this.Hide();
+                }
+            }
+        };
+
         _allTopics = allTopics.ToList();
         _allExamTags = allExamTags.ToList();
         _editingWordId = existingWord?.Id;
@@ -547,7 +559,7 @@ public sealed partial class WordEditorDialog : ContentDialog
         }
     }
 
-    private void WordEditorDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    private bool TrySaveInternal()
     {
         DialogInfoBar.IsOpen = false;
 
@@ -557,16 +569,14 @@ public sealed partial class WordEditorDialog : ContentDialog
             DialogInfoBar.Message = Loc.GetString("WordEditor_ErrTermRequired");
             DialogInfoBar.IsOpen = true;
             TermTextBox.Focus(FocusState.Programmatic);
-            args.Cancel = true;
-            return;
+            return false;
         }
 
         if (PosGroups.Count == 0)
         {
             DialogInfoBar.Message = Loc.GetString("WordEditor_ErrMeaningRequired");
             DialogInfoBar.IsOpen = true;
-            args.Cancel = true;
-            return;
+            return false;
         }
 
         // Validate each POS group and collect meanings
@@ -581,8 +591,7 @@ public sealed partial class WordEditorDialog : ContentDialog
             {
                 DialogInfoBar.Message = string.Format(Loc.GetString("WordEditor_ErrPosNeedsMeaning"), group.DisplayName);
                 DialogInfoBar.IsOpen = true;
-                args.Cancel = true;
-                return;
+                return false;
             }
 
             foreach (var m in validMeaningsForGroup)
@@ -610,8 +619,7 @@ public sealed partial class WordEditorDialog : ContentDialog
         {
             DialogInfoBar.Message = Loc.GetString("WordEditor_ErrMeaningRequired");
             DialogInfoBar.IsOpen = true;
-            args.Cancel = true;
-            return;
+            return false;
         }
 
         var primaryGroup = PosGroups.FirstOrDefault(g => g.IsPrimary) ?? PosGroups[0];
@@ -635,5 +643,15 @@ public sealed partial class WordEditorDialog : ContentDialog
             selectedTopics,
             selectedExamTags
         );
+
+        return true;
+    }
+
+    private void WordEditorDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        if (!TrySaveInternal())
+        {
+            args.Cancel = true;
+        }
     }
 }

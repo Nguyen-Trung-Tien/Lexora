@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\src\Lexora.Presentation\Services\LocalizationService.cs" Link="Services\LocalizationService.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\ShortcutResolver.cs" Link="Services\ShortcutResolver.cs" />
   </ItemGroup>
 
 </Project>

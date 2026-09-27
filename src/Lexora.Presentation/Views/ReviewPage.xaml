@@ -9,21 +9,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
-    <Page.KeyboardAccelerators>
-        <KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="UndoAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Space" Invoked="SpaceAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Enter" Invoked="SpaceAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Number1" Invoked="Rate1Accelerator_Invoked" />
-        <KeyboardAccelerator Key="Number2" Invoked="Rate2Accelerator_Invoked" />
-        <KeyboardAccelerator Key="Number3" Invoked="Rate3Accelerator_Invoked" />
-        <KeyboardAccelerator Key="Number4" Invoked="Rate4Accelerator_Invoked" />
-        <KeyboardAccelerator Key="NumberPad1" Invoked="Rate1Accelerator_Invoked" />
-        <KeyboardAccelerator Key="NumberPad2" Invoked="Rate2Accelerator_Invoked" />
-        <KeyboardAccelerator Key="NumberPad3" Invoked="Rate3Accelerator_Invoked" />
-        <KeyboardAccelerator Key="NumberPad4" Invoked="Rate4Accelerator_Invoked" />
-        <KeyboardAccelerator Key="U" Invoked="PlayUkAudioAccelerator_Invoked" />
-        <KeyboardAccelerator Key="S" Invoked="PlayUsAudioAccelerator_Invoked" />
-    </Page.KeyboardAccelerators>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Padding="28,20" HorizontalAlignment="Stretch">

@@ -28,10 +28,14 @@ public sealed partial class VocabularyPage : Page
         PopulateFilterCombos();
 
         Loc.LanguageChanged += OnLanguageChanged;
+        RegisterShortcuts();
+
         Unloaded += (s, e) =>
         {
             Loc.LanguageChanged -= OnLanguageChanged;
             _searchDebounceTimer?.Stop();
+            var sm = App.Current.Services.GetService<IShortcutManager>();
+            sm?.UnregisterPageShortcuts(typeof(VocabularyPage));
         };
 
         _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
@@ -586,7 +590,7 @@ public sealed partial class VocabularyPage : Page
             };
 
             var result = await dialog.ShowAsyncSafe(xamlRoot);
-            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            if ((result == ContentDialogResult.Primary || dialog.ResultDto != null) && dialog.ResultDto != null)
             {
                 await ViewModel.SaveWordAsync(dialog.ResultDto);
                 PopulateTopicFilterCombo();
@@ -662,7 +666,7 @@ public sealed partial class VocabularyPage : Page
             };
 
             var result = await dialog.ShowAsyncSafe(xamlRoot);
-            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            if ((result == ContentDialogResult.Primary || dialog.ResultDto != null) && dialog.ResultDto != null)
             {
                 await ViewModel.SaveWordAsync(dialog.ResultDto);
                 PopulateTopicFilterCombo();
@@ -1200,28 +1204,99 @@ public sealed partial class VocabularyPage : Page
 
 
 
-    private void AddWordAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    private void RegisterShortcuts()
     {
-        AddWordButton_Click(this, new RoutedEventArgs());
-        args.Handled = true;
-    }
+        var sm = App.Current.Services.GetService<IShortcutManager>();
+        if (sm == null) return;
 
-    private void EditWordAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (ViewModel.SelectedWord != null)
+        sm.RegisterPageShortcuts(typeof(VocabularyPage), new[]
         {
-            EditWordButton_Click(this, new RoutedEventArgs());
-            args.Handled = true;
-        }
-    }
-
-    private void DeleteWordAccelerator_Invoked(Microsoft.UI.Xaml.Input.KeyboardAccelerator sender, Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (ViewModel.SelectedWord != null)
-        {
-            DeleteWordButton_Click(this, new RoutedEventArgs());
-            args.Handled = true;
-        }
+            new ShortcutDefinition
+            {
+                Id = "Vocab.AddWord",
+                Gesture = new ShortcutGesture(ShortcutKey.N, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(VocabularyPage),
+                DescriptionKey = "Vocab_TooltipAddWord",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = true,
+                AllowWhenDialogActive = false,
+                ExecuteAsync = () =>
+                {
+                    AddWordButton_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Vocab.EditWord",
+                Gesture = new ShortcutGesture(ShortcutKey.E, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(VocabularyPage),
+                DescriptionKey = "Vocab_TooltipEditWord",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.SelectedWord != null && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    EditWordButton_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Vocab.DeleteWord",
+                Gesture = new ShortcutGesture(ShortcutKey.Delete, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.D, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(VocabularyPage),
+                DescriptionKey = "Vocab_TooltipDeleteWord",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.SelectedWord != null && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    DeleteWordButton_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Vocab.Refresh",
+                Gesture = new ShortcutGesture(ShortcutKey.F5, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.R, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(VocabularyPage),
+                DescriptionKey = "Vocab_SearchPlaceholder",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => !ViewModel.IsLoading && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.LoadWordsAsync();
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Vocab.SmartImport",
+                Gesture = new ShortcutGesture(ShortcutKey.I, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(VocabularyPage),
+                DescriptionKey = "Vocab_SmartImport",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    SmartImport_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            }
+        });
     }
 
     private void TestThisWordButton_Click(object sender, RoutedEventArgs e)

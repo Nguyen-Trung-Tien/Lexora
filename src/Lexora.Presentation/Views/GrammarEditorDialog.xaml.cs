@@ -37,6 +37,18 @@ public sealed partial class GrammarEditorDialog : ContentDialog
         ExamComboBox.ItemsSource = Enum.GetValues<ExamType>();
 
         PrimaryButtonClick += GrammarEditorDialog_PrimaryButtonClick;
+
+        KeyDown += (s, e) =>
+        {
+            if (e.Key == Windows.System.VirtualKey.S && (ShortcutManager.GetCurrentModifiers() & ShortcutModifiers.Control) == ShortcutModifiers.Control)
+            {
+                e.Handled = true;
+                if (TrySaveInternal())
+                {
+                    this.Hide();
+                }
+            }
+        };
     }
 
     public void InitializeForCreate()
@@ -115,7 +127,7 @@ public sealed partial class GrammarEditorDialog : ContentDialog
         }
     }
 
-    private void GrammarEditorDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    private bool TrySaveInternal()
     {
         DialogInfoBar.IsOpen = false;
 
@@ -127,24 +139,21 @@ public sealed partial class GrammarEditorDialog : ContentDialog
         {
             DialogInfoBar.Message = Loc.GetString("GrammarEditor_ErrTitleRequired");
             DialogInfoBar.IsOpen = true;
-            args.Cancel = true;
-            return;
+            return false;
         }
 
         if (string.IsNullOrWhiteSpace(structure))
         {
             DialogInfoBar.Message = Loc.GetString("GrammarEditor_ErrStructureRequired");
             DialogInfoBar.IsOpen = true;
-            args.Cancel = true;
-            return;
+            return false;
         }
 
         if (string.IsNullOrWhiteSpace(explanationVi))
         {
             DialogInfoBar.Message = Loc.GetString("GrammarEditor_ErrExplanationViRequired");
             DialogInfoBar.IsOpen = true;
-            args.Cancel = true;
-            return;
+            return false;
         }
 
         var examples = ExampleItems
@@ -164,6 +173,16 @@ public sealed partial class GrammarEditorDialog : ContentDialog
             Topic: string.IsNullOrWhiteSpace(TopicTextBox.Text) ? null : TopicTextBox.Text.Trim(),
             Examples: examples
         );
+
+        return true;
+    }
+
+    private void GrammarEditorDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        if (!TrySaveInternal())
+        {
+            args.Cancel = true;
+        }
     }
 }
 

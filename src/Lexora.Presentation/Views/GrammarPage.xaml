@@ -11,13 +11,6 @@
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
-    <Page.KeyboardAccelerators>
-        <KeyboardAccelerator Key="N" Modifiers="Control" Invoked="AddRuleAccelerator_Invoked" />
-        <KeyboardAccelerator Key="E" Modifiers="Control" Invoked="EditRuleAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Delete" Invoked="DeleteRuleAccelerator_Invoked" />
-        <KeyboardAccelerator Key="P" Modifiers="Control" Invoked="PracticeAccelerator_Invoked" />
-    </Page.KeyboardAccelerators>
-
     <Grid RowDefinitions="Auto,*" Padding="28,20" RowSpacing="14">
         
         <!-- Loading Ring Overlay -->

@@ -1,5 +1,6 @@
 using Lexora.Application.DTOs;
 using Lexora.Domain.Enums;
+using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -20,13 +21,15 @@ public sealed partial class TestPage : Page
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<TestViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
-        KeyDown += TestPage_KeyDown;
+        RegisterShortcuts();
 
         Loc.LanguageChanged += OnLanguageChanged;
         Unloaded += (s, e) =>
         {
             Loc.LanguageChanged -= OnLanguageChanged;
             ViewModel.CleanupSession();
+            var sm = App.Current.Services.GetService<IShortcutManager>();
+            sm?.UnregisterPageShortcuts(typeof(TestPage));
         };
 
         ActualThemeChanged += (s, e) =>
@@ -78,44 +81,118 @@ public sealed partial class TestPage : Page
         ViewModel.CleanupSession();
     }
 
-    private async void TestPage_KeyDown(object sender, KeyRoutedEventArgs e)
+    private void RegisterShortcuts()
     {
-        // Guard against hotkeys when typing in a text box
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
+        var sm = App.Current.Services.GetService<IShortcutManager>();
+        if (sm == null) return;
 
-        if (ViewModel.IsTestingMode)
+        sm.RegisterPageShortcuts(typeof(TestPage), new[]
         {
-            if (e.Key == VirtualKey.Space)
+            new ShortcutDefinition
             {
-                e.Handled = true;
-                await ViewModel.PlayAudioAsync();
-            }
-            else if (e.Key == VirtualKey.Enter)
+                Id = "Test.PlayAudio",
+                Gesture = new ShortcutGesture(ShortcutKey.Space, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(TestPage),
+                DescriptionKey = "Review_AudioUk",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsTestingMode && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.PlayAudioAsync();
+                }
+            },
+            new ShortcutDefinition
             {
-                e.Handled = true;
-                await ViewModel.NextQuestionAsync();
-            }
-            else if (e.Key is VirtualKey.Number1 or VirtualKey.A)
+                Id = "Test.NextQuestion",
+                Gesture = new ShortcutGesture(ShortcutKey.Enter, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(TestPage),
+                DescriptionKey = "Common_Next",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsTestingMode && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.NextQuestionAsync();
+                }
+            },
+            new ShortcutDefinition
             {
-                SelectOptionByIndex(0);
-                e.Handled = true;
-            }
-            else if (e.Key is VirtualKey.Number2 or VirtualKey.B)
+                Id = "Test.SelectOption1",
+                Gesture = new ShortcutGesture(ShortcutKey.Number1, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.A, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(TestPage),
+                DescriptionKey = "Test_Option1",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsTestingMode && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    SelectOptionByIndex(0);
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
             {
-                SelectOptionByIndex(1);
-                e.Handled = true;
-            }
-            else if (e.Key is VirtualKey.Number3 or VirtualKey.C)
+                Id = "Test.SelectOption2",
+                Gesture = new ShortcutGesture(ShortcutKey.Number2, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.B, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(TestPage),
+                DescriptionKey = "Test_Option2",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsTestingMode && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    SelectOptionByIndex(1);
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
             {
-                SelectOptionByIndex(2);
-                e.Handled = true;
-            }
-            else if (e.Key is VirtualKey.Number4 or VirtualKey.D)
+                Id = "Test.SelectOption3",
+                Gesture = new ShortcutGesture(ShortcutKey.Number3, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.C, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(TestPage),
+                DescriptionKey = "Test_Option3",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsTestingMode && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    SelectOptionByIndex(2);
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
             {
-                SelectOptionByIndex(3);
-                e.Handled = true;
+                Id = "Test.SelectOption4",
+                Gesture = new ShortcutGesture(ShortcutKey.Number4, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.D, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(TestPage),
+                DescriptionKey = "Test_Option4",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsTestingMode && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    SelectOptionByIndex(3);
+                    return Task.CompletedTask;
+                }
             }
-        }
+        });
     }
 
     private void SelectOptionByIndex(int index)

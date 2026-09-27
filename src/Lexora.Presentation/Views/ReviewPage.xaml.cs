@@ -1,6 +1,7 @@
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
+using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -32,10 +33,14 @@ public sealed partial class ReviewPage : Page
         };
 
         Loc.LanguageChanged += OnLanguageChanged;
+        RegisterShortcuts();
+
         Unloaded += (s, e) =>
         {
             Loc.LanguageChanged -= OnLanguageChanged;
             ViewModel.StopAudio();
+            var sm = App.Current.Services.GetService<IShortcutManager>();
+            sm?.UnregisterPageShortcuts(typeof(ReviewPage));
         };
     }
 
@@ -114,84 +119,150 @@ public sealed partial class ReviewPage : Page
 
 
 
-    private void UndoAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    private void RegisterShortcuts()
     {
-        if (ViewModel.CanUndo)
-        {
-            _ = ViewModel.UndoLastReviewAsync();
-            args.Handled = true;
-        }
-    }
+        var sm = App.Current.Services.GetService<IShortcutManager>();
+        if (sm == null) return;
 
-    private void SpaceAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (ViewModel.IsTypingRecallActive || FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-
-        if (ViewModel.IsCardActive && !ViewModel.IsAnswerVisible)
+        sm.RegisterPageShortcuts(typeof(ReviewPage), new[]
         {
-            ShowAnswerButton_Click(this, new RoutedEventArgs());
-            args.Handled = true;
-        }
-    }
-
-    private async void Rate1Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-        if (ViewModel.CanRate)
-        {
-            args.Handled = true;
-            await ViewModel.RateCardAsync(ReviewRating.Again);
-        }
-    }
-
-    private async void Rate2Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-        if (ViewModel.CanRate)
-        {
-            args.Handled = true;
-            await ViewModel.RateCardAsync(ReviewRating.Hard);
-        }
-    }
-
-    private async void Rate3Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-        if (ViewModel.CanRate)
-        {
-            args.Handled = true;
-            await ViewModel.RateCardAsync(ReviewRating.Good);
-        }
-    }
-
-    private async void Rate4Accelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-        if (ViewModel.CanRate)
-        {
-            args.Handled = true;
-            await ViewModel.RateCardAsync(ReviewRating.Easy);
-        }
-    }
-
-    private async void PlayUkAudioAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-        if (ViewModel.IsCardActive)
-        {
-            args.Handled = true;
-            await ViewModel.PlayUkAudioAsync();
-        }
-    }
-
-    private async void PlayUsAudioAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-    {
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox) return;
-        if (ViewModel.IsCardActive)
-        {
-            args.Handled = true;
-            await ViewModel.PlayUsAudioAsync();
-        }
+            new ShortcutDefinition
+            {
+                Id = "Review.Undo",
+                Gesture = new ShortcutGesture(ShortcutKey.Z, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(ReviewPage),
+                DescriptionKey = "Review_UndoTooltip",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.CanUndo && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.UndoLastReviewAsync();
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Review.ShowAnswer",
+                Gesture = new ShortcutGesture(ShortcutKey.Space, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.Enter, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(ReviewPage),
+                DescriptionKey = "Review_BtnShowAnswer",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsCardActive && !ViewModel.IsAnswerVisible && !ViewModel.IsTypingRecallActive && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = () =>
+                {
+                    ShowAnswerButton_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Review.RateAgain",
+                Gesture = new ShortcutGesture(ShortcutKey.Number1, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.NumPad1, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(ReviewPage),
+                DescriptionKey = "Review_RatingAgain",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.CanRate && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.RateCardAsync(ReviewRating.Again);
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Review.RateHard",
+                Gesture = new ShortcutGesture(ShortcutKey.Number2, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.NumPad2, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(ReviewPage),
+                DescriptionKey = "Review_RatingHard",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.CanRate && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.RateCardAsync(ReviewRating.Hard);
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Review.RateGood",
+                Gesture = new ShortcutGesture(ShortcutKey.Number3, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.NumPad3, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(ReviewPage),
+                DescriptionKey = "Review_RatingGood",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.CanRate && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.RateCardAsync(ReviewRating.Good);
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Review.RateEasy",
+                Gesture = new ShortcutGesture(ShortcutKey.Number4, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.NumPad4, ShortcutModifiers.None),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(ReviewPage),
+                DescriptionKey = "Review_RatingEasy",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.CanRate && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.RateCardAsync(ReviewRating.Easy);
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Review.PlayUkAudio",
+                Gesture = new ShortcutGesture(ShortcutKey.U, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.U, ShortcutModifiers.Alt),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(ReviewPage),
+                DescriptionKey = "Review_AudioUk",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsCardActive && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.PlayUkAudioAsync();
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Review.PlayUsAudio",
+                Gesture = new ShortcutGesture(ShortcutKey.S, ShortcutModifiers.None),
+                SecondaryGesture = new ShortcutGesture(ShortcutKey.S, ShortcutModifiers.Alt),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(ReviewPage),
+                DescriptionKey = "Review_AudioUs",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = false,
+                AllowWhenDialogActive = false,
+                CanExecute = () => ViewModel.IsCardActive && !SafeDialogExtensions.IsDialogOpen,
+                ExecuteAsync = async () =>
+                {
+                    await ViewModel.PlayUsAudioAsync();
+                }
+            }
+        });
     }
 
     private void TypingInputBox_KeyDown(object sender, KeyRoutedEventArgs e)
