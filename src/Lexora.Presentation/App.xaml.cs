@@ -40,6 +40,13 @@ public partial class App : Microsoft.UI.Xaml.Application
 
         InitializeComponent();
 
+        // Capture the UI-thread DispatcherQueue NOW — App() always runs on the UI thread.
+        // The factory lambda below closes over this value so WindowsAudioPlayerService
+        // always receives the correct UI DispatcherQueue regardless of which thread
+        // resolves the singleton for the first time.
+        var uiDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()
+            ?? throw new InvalidOperationException("App() must be called on the UI thread.");
+
         _host = Host.CreateDefaultBuilder()
             .UseDefaultServiceProvider(options =>
             {
@@ -64,7 +71,13 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddSingleton<IThemeService, ThemeService>();
                 services.AddSingleton<ILocalizationService, LocalizationService>();
                 services.AddSingleton<IVoiceProvider, WindowsVoiceProvider>();
-                services.AddSingleton<IAudioPlayerService, WindowsAudioPlayerService>();
+                services.AddSingleton<IAudioPlayerService>(sp =>
+                    new WindowsAudioPlayerService(
+                        sp.GetRequiredService<IAudioStorageService>(),
+                        sp.GetRequiredService<IUserPreferencesService>(),
+                        sp.GetRequiredService<IPronunciationVoiceResolver>(),
+                        uiDispatcherQueue,
+                        sp.GetService<ILogger<WindowsAudioPlayerService>>()));
                 services.AddSingleton<ISoundFeedbackService, SoundFeedbackService>();
                 services.AddSingleton<IToastNotificationService, ToastNotificationService>();
                 services.AddSingleton<IStartupOrchestrator, StartupOrchestrator>();

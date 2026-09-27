@@ -3,6 +3,7 @@ using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.UI.Dispatching;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 using Windows.Media.SpeechSynthesis;
@@ -11,8 +12,11 @@ namespace Lexora.Presentation.Services;
 
 /// <summary>
 /// Windows-native TTS and cached-audio pronunciation service.
-/// A fresh <see cref="SpeechSynthesizer"/> is created per synthesis call to avoid
-/// COM shared-state race conditions (COMException 0x8001010E on non-UI threads).
+///
+/// THREADING CONTRACT:
+///   SpeechSynthesizer is a WinRT STA COM object — must be constructed and used
+///   exclusively on the UI thread. All synthesis work is dispatched to the UI
+///   thread via _dispatcherQueue. Only cache I/O uses ConfigureAwait(false).
 /// </summary>
 public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 {
@@ -20,6 +24,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
     private readonly IUserPreferencesService _preferencesService;
     private readonly IPronunciationVoiceResolver _voiceResolver;
     private readonly ILogger<WindowsAudioPlayerService> _logger;
+    private readonly DispatcherQueue _dispatcherQueue;
     private readonly MediaPlayer _mediaPlayer;
     private readonly SemaphoreSlim _audioSemaphore = new(1, 1);
     private readonly EventHandler<UserPreferences> _preferencesChangedHandler;
@@ -33,11 +38,13 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         IAudioStorageService audioStorage,
         IUserPreferencesService preferencesService,
         IPronunciationVoiceResolver voiceResolver,
+        DispatcherQueue dispatcherQueue,
         ILogger<WindowsAudioPlayerService>? logger = null)
     {
         _audioStorage = audioStorage;
         _preferencesService = preferencesService;
         _voiceResolver = voiceResolver;
+        _dispatcherQueue = dispatcherQueue;
         _logger = logger ?? NullLogger<WindowsAudioPlayerService>.Instance;
         _mediaPlayer = new MediaPlayer();
 
@@ -62,23 +69,19 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 
         double effectiveRate = Math.Clamp(rate ?? PlaybackRate, 0.5, 2.0);
 
-        // Resolve voice before acquiring the semaphore (pure CPU work)
         var resolution = _voiceResolver.ResolveVoice(accent);
         if (resolution.IsFallback)
         {
             try { FallbackVoiceUsed?.Invoke(this, resolution); }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex, "FallbackVoiceUsed event handler threw.");
-            }
+            catch (Exception ex) { _logger.LogDebug(ex, "FallbackVoiceUsed event handler threw."); }
         }
 
-        await _audioSemaphore.WaitAsync().ConfigureAwait(false);
+        // No ConfigureAwait(false) — preserve context for UI dispatch
+        await _audioSemaphore.WaitAsync();
         try
         {
             if (_disposed) return;
 
-            // Stop any currently playing audio
             StopInternal();
             _mediaPlayer.PlaybackSession.PlaybackRate = effectiveRate;
 
@@ -91,9 +94,8 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
                 return;
             }
 
-            // 2. Synthesize via Windows TTS.
-            //    A fresh SpeechSynthesizer per call prevents shared-state races.
-            await SynthesizeAndPlayAsync(safeTerm, resolution, effectiveRate).ConfigureAwait(false);
+            // 2. Synthesize via TTS on UI thread (SpeechSynthesizer is WinRT STA)
+            await SynthesizeOnUIThreadAsync(safeTerm, resolution, effectiveRate);
         }
         catch (Exception ex)
         {
@@ -105,51 +107,65 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         }
     }
 
-    private async Task SynthesizeAndPlayAsync(string term, VoiceResolutionResult resolution, double rate)
+    private async Task SynthesizeOnUIThreadAsync(string term, VoiceResolutionResult resolution, double rate)
     {
-        // Fresh synthesizer per call â€” avoids COMException on non-UI threads
-        using var synth = new SpeechSynthesizer();
+        var tcs = new TaskCompletionSource<SpeechSynthesisStream>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        if (resolution.Voice != null)
+        bool enqueued = _dispatcherQueue.TryEnqueue(async () =>
         {
-            var matchingVoice = SpeechSynthesizer.AllVoices
-                .FirstOrDefault(v => string.Equals(v.Id, resolution.Voice.Id, StringComparison.OrdinalIgnoreCase));
-            if (matchingVoice != null)
-                synth.Voice = matchingVoice;
-        }
+            try
+            {
+                using var synth = new SpeechSynthesizer();
+                if (resolution.Voice != null)
+                {
+                    var match = SpeechSynthesizer.AllVoices
+                        .FirstOrDefault(v => string.Equals(v.Id, resolution.Voice.Id, StringComparison.OrdinalIgnoreCase));
+                    if (match != null)
+                        synth.Voice = match;
+                }
+                synth.Options.SpeakingRate = rate;
+                var stream = await synth.SynthesizeTextToStreamAsync(term);
+                tcs.TrySetResult(stream);
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        });
 
-        synth.Options.SpeakingRate = rate;
+        if (!enqueued)
+        {
+            _logger.LogWarning("DispatcherQueue.TryEnqueue failed — UI thread may be shut down.");
+            tcs.TrySetCanceled();
+            return;
+        }
 
         SpeechSynthesisStream stream;
         try
         {
-            stream = await synth.SynthesizeTextToStreamAsync(term);
+            stream = await tcs.Task;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex,
-                "SpeechSynthesizer failed for '{Term}'. Voice='{Voice}'. Locale='{Locale}'.",
-                term, resolution.Voice?.DisplayName ?? "default", resolution.RequestedLocale);
+            _logger.LogWarning(ex, "SpeechSynthesizer failed for '{Term}'. Voice='{Voice}'.",
+                term, resolution.Voice?.DisplayName ?? "default");
             return;
         }
 
-        // Cache synthesized audio only for exact-match voices
         if (resolution.IsExactMatch)
         {
             try
             {
                 using var memStream = new MemoryStream();
                 using (var readStream = stream.AsStreamForRead())
-                {
                     await readStream.CopyToAsync(memStream).ConfigureAwait(false);
-                }
                 memStream.Position = 0;
                 await _audioStorage.CacheAudioAsync(term, resolution.RequestedLocale, memStream).ConfigureAwait(false);
                 stream.Seek(0);
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "Failed to cache synthesized audio for '{Term}'.", term);
+                _logger.LogDebug(ex, "Failed to cache audio for '{Term}'.", term);
             }
         }
 
@@ -173,7 +189,6 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
     {
         if (_disposed) return;
         _disposed = true;
-
         _preferencesService.PreferencesChanged -= _preferencesChangedHandler;
         try { StopInternal(); } catch { }
         _mediaPlayer.Dispose();

@@ -729,11 +729,13 @@ public sealed partial class VocabularyPage : Page
 
     private async void PlayUkAudio_Click(object sender, RoutedEventArgs e)
     {
-        if (BtnPlayUk != null) BtnPlayUk.IsEnabled = false;
-        var prevGlyph = IconPlayUk?.Glyph ?? "\uE768";
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (BtnPlayUk != null) BtnPlayUk.IsEnabled = false;
+            if (IconPlayUk != null) IconPlayUk.Glyph = "\uE995";
+        });
         try
         {
-            if (IconPlayUk != null) IconPlayUk.Glyph = "\uE995"; // Speaker/playing icon
             await ViewModel.PlayPronunciationAsync("uk");
         }
         catch (Exception ex)
@@ -742,18 +744,23 @@ public sealed partial class VocabularyPage : Page
         }
         finally
         {
-            if (IconPlayUk != null) IconPlayUk.Glyph = prevGlyph;
-            if (BtnPlayUk != null) BtnPlayUk.IsEnabled = true;
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (IconPlayUk != null) IconPlayUk.Glyph = "\uE768";
+                if (BtnPlayUk != null) BtnPlayUk.IsEnabled = true;
+            });
         }
     }
 
     private async void PlayUsAudio_Click(object sender, RoutedEventArgs e)
     {
-        if (BtnPlayUs != null) BtnPlayUs.IsEnabled = false;
-        var prevGlyph = IconPlayUs?.Glyph ?? "\uE768";
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (BtnPlayUs != null) BtnPlayUs.IsEnabled = false;
+            if (IconPlayUs != null) IconPlayUs.Glyph = "\uE995";
+        });
         try
         {
-            if (IconPlayUs != null) IconPlayUs.Glyph = "\uE995"; // Speaker/playing icon
             await ViewModel.PlayPronunciationAsync("us");
         }
         catch (Exception ex)
@@ -762,8 +769,11 @@ public sealed partial class VocabularyPage : Page
         }
         finally
         {
-            if (IconPlayUs != null) IconPlayUs.Glyph = prevGlyph;
-            if (BtnPlayUs != null) BtnPlayUs.IsEnabled = true;
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (IconPlayUs != null) IconPlayUs.Glyph = "\uE768";
+                if (BtnPlayUs != null) BtnPlayUs.IsEnabled = true;
+            });
         }
     }
 

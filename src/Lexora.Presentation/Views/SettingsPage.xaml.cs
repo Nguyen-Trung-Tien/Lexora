@@ -142,13 +142,13 @@ public sealed partial class SettingsPage : Page
     private async void AccentUkButton_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.SetPreferredAccentAsync("uk");
-        UpdateAccentButtons();
+        DispatcherQueue.TryEnqueue(UpdateAccentButtons);
     }
 
     private async void AccentUsButton_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.SetPreferredAccentAsync("us");
-        UpdateAccentButtons();
+        DispatcherQueue.TryEnqueue(UpdateAccentButtons);
     }
 
     private async void TestVoiceUk_Click(object sender, RoutedEventArgs e)
@@ -174,22 +174,29 @@ public sealed partial class SettingsPage : Page
             package.SetText(ViewModel.DatabasePath);
             Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
 
-            // Visual feedback: checkmark + "Đã sao chép!"
-            IconCopyDbPath.Glyph = "\uE73E";
-            var bSuccess = GetThemeBrush("SystemFillColorSuccessBrush");
-            if (bSuccess != null)
+            // Visual feedback: checkmark + success color — must be on UI thread
+            DispatcherQueue.TryEnqueue(() =>
             {
-                IconCopyDbPath.Foreground = bSuccess;
-                TextCopyDbPath.Foreground = bSuccess;
-            }
-            TextCopyDbPath.Text = Loc.GetString("Action_Copied");
+                IconCopyDbPath.Glyph = "\uE73E";
+                var bSuccess = GetThemeBrush("SystemFillColorSuccessBrush");
+                if (bSuccess != null)
+                {
+                    IconCopyDbPath.Foreground = bSuccess;
+                    TextCopyDbPath.Foreground = bSuccess;
+                }
+                TextCopyDbPath.Text = Loc.GetString("Action_Copied");
+            });
 
             await Task.Delay(1800);
 
-            IconCopyDbPath.Glyph = "\uE8C8";
-            IconCopyDbPath.ClearValue(FontIcon.ForegroundProperty);
-            TextCopyDbPath.Text = Loc.GetString("Action_Copy");
-            TextCopyDbPath.ClearValue(TextBlock.ForegroundProperty);
+            // Restore — also must be on UI thread
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                IconCopyDbPath.Glyph = "\uE8C8";
+                IconCopyDbPath.ClearValue(FontIcon.ForegroundProperty);
+                TextCopyDbPath.Text = Loc.GetString("Action_Copy");
+                TextCopyDbPath.ClearValue(TextBlock.ForegroundProperty);
+            });
         }
         catch (Exception ex)
         {
