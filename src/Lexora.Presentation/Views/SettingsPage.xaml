@@ -326,7 +326,7 @@
 
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                 <!-- UK Voice Info -->
-                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,10">
+                                <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,10">
                                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
                                         <TextBlock Text="🇬🇧 British English (UK)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UkVoiceStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
@@ -340,7 +340,7 @@
                                 </Border>
 
                                 <!-- US Voice Info -->
-                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,10">
+                                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,10">
                                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
                                         <TextBlock Text="🇺🇸 American English (US)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UsVoiceStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
