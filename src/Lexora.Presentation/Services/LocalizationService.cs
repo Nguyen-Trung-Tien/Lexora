@@ -47,6 +47,13 @@ public class LocalizationService : ILocalizationService
             ["Action_DeleteSelected"] = "Xóa đã chọn ({0})",
             ["Action_CancelSelection"] = "Hủy chọn",
 
+            // Toast Notifications
+            ["Toast_SuccessTitle"] = "Thành công",
+            ["Toast_ErrorTitle"] = "Đã xảy ra lỗi",
+            ["Toast_WarningTitle"] = "Cảnh báo",
+            ["Toast_InfoTitle"] = "Thông báo",
+            ["Toast_Close"] = "Đóng thông báo",
+
             // Dashboard
             ["Dashboard_HeroTitle"] = "Ôn tập ngắt quãng (SM-2)",
             ["Dashboard_HeroGreeting"] = "Sẵn sàng chinh phục mục tiêu từ vựng hôm nay?",
@@ -943,6 +950,13 @@ public class LocalizationService : ILocalizationService
             ["Action_DeselectAll"] = "Deselect All",
             ["Action_DeleteSelected"] = "Delete Selected ({0})",
             ["Action_CancelSelection"] = "Cancel Selection",
+
+            // Toast Notifications
+            ["Toast_SuccessTitle"] = "Success",
+            ["Toast_ErrorTitle"] = "Error Occurred",
+            ["Toast_WarningTitle"] = "Warning",
+            ["Toast_InfoTitle"] = "Information",
+            ["Toast_Close"] = "Dismiss",
 
             // Dashboard
             ["Dashboard_HeroTitle"] = "Spaced Repetition (SM-2)",

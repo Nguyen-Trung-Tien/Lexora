@@ -107,11 +107,13 @@ public partial class ReviewViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsTypingRecallActive))]
     [NotifyPropertyChangedFor(nameof(IsStandardFrontActive))]
     [NotifyPropertyChangedFor(nameof(IsShowMeaningButtonVisible))]
+    [NotifyPropertyChangedFor(nameof(CanRate))]
     public partial bool IsAnswerVisible { get; set; } = false;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCardActive))]
     [NotifyPropertyChangedFor(nameof(IsEmptyQueue))]
+    [NotifyPropertyChangedFor(nameof(CanRate))]
     public partial ReviewCardDto? CurrentCard { get; set; }
 
     [ObservableProperty]

@@ -393,8 +393,21 @@ public sealed partial class VocabularyPage : Page
 
     private DispatcherTimer? _notificationTimer;
 
-    private void ShowNotification(InfoBarSeverity severity, string title, string message, int autoCloseMs = 5000)
+    private void ShowNotification(InfoBarSeverity severity, string title, string message, int autoCloseMs = 4500)
     {
+        if (App.Current?.Services?.GetService<IToastNotificationService>() is { } toastService)
+        {
+            var type = severity switch
+            {
+                InfoBarSeverity.Success => ToastType.Success,
+                InfoBarSeverity.Error => ToastType.Error,
+                InfoBarSeverity.Warning => ToastType.Warning,
+                _ => ToastType.Information
+            };
+            toastService.Show(type, message, title, autoCloseMs);
+            return;
+        }
+
         DispatcherQueue.TryEnqueue(() =>
         {
             _notificationTimer?.Stop();

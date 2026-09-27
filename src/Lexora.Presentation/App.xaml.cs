@@ -65,6 +65,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddSingleton<ILocalizationService, LocalizationService>();
                 services.AddSingleton<IAudioPlayerService, WindowsAudioPlayerService>();
                 services.AddSingleton<ISoundFeedbackService, SoundFeedbackService>();
+                services.AddSingleton<IToastNotificationService, ToastNotificationService>();
                 services.AddSingleton<IStartupOrchestrator, StartupOrchestrator>();
 
                 // ViewModels
