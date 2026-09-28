@@ -140,6 +140,13 @@ public sealed partial class SmartImportDialog : ContentDialog
         Loaded += OnDialogLoaded;
     }
 
+    public void LoadInitialContent(string content, string fileName)
+    {
+        ContentToImport = content;
+        FileNameHint = fileName;
+        DetectedFormat = SmartContentDetector.DetectFormat(content, fileName);
+    }
+
     private void OnDialogLoaded(object sender, RoutedEventArgs e)
     {
         Loaded -= OnDialogLoaded;
@@ -148,6 +155,12 @@ public sealed partial class SmartImportDialog : ContentDialog
             ApplyLocalization();
             UpdateMode(true);
             UpdateDetectionBadge();
+            if (!string.IsNullOrWhiteSpace(ContentToImport))
+            {
+                TextSelectedFile.Text = string.Format(_loc.GetString("SmartImport_SelectedFile"), FileNameHint ?? "—");
+                TextSelectedFile.Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush");
+                BtnAnalyzeNext.IsEnabled = DetectedFormat != DataFormat.Unknown;
+            }
             GoToStep(1);
         }
         catch (Exception ex)

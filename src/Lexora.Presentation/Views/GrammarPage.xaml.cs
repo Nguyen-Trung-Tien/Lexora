@@ -843,7 +843,24 @@ public sealed partial class GrammarPage : Page
 
         if (!string.IsNullOrWhiteSpace(contentToImport))
         {
-            await ExecuteImportOperationAsync(contentToImport, fileName, ImportConflictResolution.Skip);
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
+            var dialog = new SmartImportDialog(fmt => ViewModel.GetSampleTemplate(fmt), isGrammarMode: true)
+            {
+                XamlRoot = xamlRoot
+            };
+            dialog.LoadInitialContent(contentToImport, fileName ?? "imported_grammar");
+            var res = await dialog.ShowAsyncSafe(xamlRoot);
+            if (dialog.WasCommitted)
+            {
+                await ViewModel.LoadRulesAsync();
+                await ViewModel.LoadTopicsAsync();
+                Bindings.Update();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
+            }
+            else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
+            {
+                await ExecuteImportOperationAsync(dialog.ContentToImport, dialog.FileNameHint, dialog.ConflictResolution);
+            }
         }
     }
 

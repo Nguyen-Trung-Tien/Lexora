@@ -1034,10 +1034,62 @@ public class ExportImportService : IExportImportService
                         if (!string.IsNullOrWhiteSpace(item.PhoneticUs)) existing.PhoneticUs = item.PhoneticUs;
                         if (!string.IsNullOrWhiteSpace(item.Notes)) existing.Notes = item.Notes;
                         if (item.PrimaryPartOfSpeech != 0) existing.PrimaryPartOfSpeech = item.PrimaryPartOfSpeech;
+                        existing.UpdatedAt = DateTime.UtcNow;
 
-                        MergeMeanings(existing, item.Meanings);
+                        _vocabRepo.RemoveWordChildren(existing);
+
+                        int mIdx = 0;
+                        var newMeanings = new List<WordMeaning>();
+                        foreach (var m in item.Meanings)
+                        {
+                            var meaning = new WordMeaning
+                            {
+                                WordId = existing.Id,
+                                PartOfSpeech = m.PartOfSpeech != 0 ? m.PartOfSpeech : existing.PrimaryPartOfSpeech,
+                                DefinitionVi = m.ResolvedDefinitionVi,
+                                DefinitionEn = m.ResolvedDefinitionEn,
+                                Explanation = m.Explanation,
+                                OrderIndex = mIdx++
+                            };
+
+                            foreach (var ex in m.Examples)
+                            {
+                                if (!string.IsNullOrWhiteSpace(ex.ResolvedSentenceEn))
+                                {
+                                    meaning.Examples.Add(new ExampleSentence
+                                    {
+                                        WordMeaningId = meaning.Id,
+                                        SentenceEn = ex.ResolvedSentenceEn,
+                                        SentenceVi = ex.ResolvedSentenceVi
+                                    });
+                                }
+                            }
+
+                            newMeanings.Add(meaning);
+                            existing.Meanings.Add(meaning);
+                        }
+
+                        if (existing.Meanings.Count == 0 && !string.IsNullOrWhiteSpace(item.ResolvedDefinitionVi))
+                        {
+                            var meaning = new WordMeaning
+                            {
+                                WordId = existing.Id,
+                                PartOfSpeech = existing.PrimaryPartOfSpeech,
+                                DefinitionVi = item.ResolvedDefinitionVi,
+                                DefinitionEn = item.ResolvedDefinitionEn,
+                                OrderIndex = 0
+                            };
+                            newMeanings.Add(meaning);
+                            existing.Meanings.Add(meaning);
+                        }
+
+                        if (newMeanings.Count > 0)
+                        {
+                            _vocabRepo.AddMeanings(newMeanings);
+                        }
 
                         // Link topics
+                        var newTopics = new List<WordTopic>();
                         foreach (var tname in item.Topics)
                         {
                             var lower = tname.ToLowerInvariant();
@@ -1049,11 +1101,18 @@ public class ExportImportService : IExportImportService
                             }
                             if (!existing.WordTopics.Any(wt => wt.TopicId == topic.Id))
                             {
-                                existing.WordTopics.Add(new WordTopic { WordId = existing.Id, TopicId = topic.Id });
+                                var wt = new WordTopic { WordId = existing.Id, TopicId = topic.Id };
+                                existing.WordTopics.Add(wt);
+                                newTopics.Add(wt);
                             }
+                        }
+                        if (newTopics.Count > 0)
+                        {
+                            _vocabRepo.AddWordTopics(newTopics);
                         }
 
                         // Link exam tags
+                        var newTags = new List<WordExamTag>();
                         foreach (var etname in item.ExamTags)
                         {
                             var lower = etname.ToLowerInvariant();
@@ -1070,8 +1129,14 @@ public class ExportImportService : IExportImportService
                             }
                             if (!existing.WordExamTags.Any(wet => wet.ExamTagId == examTag.Id))
                             {
-                                existing.WordExamTags.Add(new WordExamTag { WordId = existing.Id, ExamTagId = examTag.Id });
+                                var wet = new WordExamTag { WordId = existing.Id, ExamTagId = examTag.Id };
+                                existing.WordExamTags.Add(wet);
+                                newTags.Add(wet);
                             }
+                        }
+                        if (newTags.Count > 0)
+                        {
+                            _vocabRepo.AddWordExamTags(newTags);
                         }
 
                         await _vocabRepo.UpdateAsync(existing, cancellationToken);
@@ -1302,9 +1367,46 @@ public class ExportImportService : IExportImportService
                         if (!string.IsNullOrWhiteSpace(phoneticUk)) existing.PhoneticUk = phoneticUk;
                         if (!string.IsNullOrWhiteSpace(phoneticUs)) existing.PhoneticUs = phoneticUs;
                         if (!string.IsNullOrWhiteSpace(notes)) existing.Notes = notes;
+                        existing.PrimaryPartOfSpeech = primaryPos;
+                        existing.UpdatedAt = DateTime.UtcNow;
+
+                        _vocabRepo.RemoveWordChildren(existing);
 
                         var parsedMeanings = ParseMeaningsFromCsv(term, meaningsVi, posList, primaryPos, examplesText);
-                        MergeMeanings(existing, parsedMeanings);
+                        var newMeanings = new List<WordMeaning>();
+                        int mIdx = 0;
+                        foreach (var pm in parsedMeanings)
+                        {
+                            var meaning = new WordMeaning
+                            {
+                                WordId = existing.Id,
+                                PartOfSpeech = pm.PartOfSpeech,
+                                DefinitionVi = pm.ResolvedDefinitionVi,
+                                DefinitionEn = pm.ResolvedDefinitionEn,
+                                Explanation = pm.Explanation,
+                                OrderIndex = mIdx++
+                            };
+
+                            foreach (var ex in pm.Examples)
+                            {
+                                if (!string.IsNullOrWhiteSpace(ex.ResolvedSentenceEn))
+                                {
+                                    meaning.Examples.Add(new ExampleSentence
+                                    {
+                                        WordMeaningId = meaning.Id,
+                                        SentenceEn = ex.ResolvedSentenceEn,
+                                        SentenceVi = ex.ResolvedSentenceVi
+                                    });
+                                }
+                            }
+                            newMeanings.Add(meaning);
+                            existing.Meanings.Add(meaning);
+                        }
+                        if (newMeanings.Count > 0)
+                        {
+                            _vocabRepo.AddMeanings(newMeanings);
+                        }
+
                         await _vocabRepo.UpdateAsync(existing, cancellationToken);
                         updated++;
                     }
@@ -1570,16 +1672,22 @@ public class ExportImportService : IExportImportService
                         if (level != CefrLevel.None) existing.Level = level;
                         if (!string.IsNullOrWhiteSpace(phoneticUk)) existing.PhoneticUk = phoneticUk;
                         if (!string.IsNullOrWhiteSpace(phoneticUs)) existing.PhoneticUs = phoneticUs;
+                        existing.PrimaryPartOfSpeech = pos;
+                        existing.UpdatedAt = DateTime.UtcNow;
 
-                        if (!string.IsNullOrWhiteSpace(definition) && !existing.Meanings.Any(m => m.DefinitionVi.Equals(definition, StringComparison.OrdinalIgnoreCase)))
+                        _vocabRepo.RemoveWordChildren(existing);
+
+                        if (!string.IsNullOrWhiteSpace(definition))
                         {
-                            existing.Meanings.Add(new WordMeaning
+                            var meaning = new WordMeaning
                             {
                                 WordId = existing.Id,
                                 PartOfSpeech = pos,
                                 DefinitionVi = definition,
-                                OrderIndex = existing.Meanings.Count
-                            });
+                                OrderIndex = 0
+                            };
+                            existing.Meanings.Add(meaning);
+                            _vocabRepo.AddMeanings(new[] { meaning });
                         }
                         await _vocabRepo.UpdateAsync(existing, cancellationToken);
                         updated++;

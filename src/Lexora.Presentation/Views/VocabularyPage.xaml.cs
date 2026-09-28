@@ -1159,7 +1159,26 @@ public sealed partial class VocabularyPage : Page
 
         if (!string.IsNullOrWhiteSpace(contentToImport))
         {
-            await ExecuteImportOperationAsync(contentToImport, fileName, ImportConflictResolution.Skip);
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
+            var dialog = new SmartImportDialog(fmt => ViewModel.GetSampleTemplate(fmt))
+            {
+                XamlRoot = xamlRoot
+            };
+            dialog.LoadInitialContent(contentToImport, fileName ?? "imported_data");
+            var res = await dialog.ShowAsyncSafe(xamlRoot);
+            if (dialog.WasCommitted)
+            {
+                await ViewModel.LoadWordsAsync();
+                await ViewModel.LoadFiltersAsync();
+                await ViewModel.LoadContextUnitsAsync();
+                PopulateTopicFilterCombo();
+                Bindings.Update();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
+            }
+            else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
+            {
+                await ExecuteImportOperationAsync(dialog.ContentToImport, dialog.FileNameHint, dialog.ConflictResolution);
+            }
         }
     }
 
