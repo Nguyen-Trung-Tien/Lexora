@@ -782,7 +782,7 @@
         <!-- ======================================================== -->
         <Grid Grid.Row="2" Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="16">
+                <StackPanel Spacing="16" HorizontalAlignment="Stretch">
                     <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
                         <StackPanel Spacing="4" Margin="0,0,16,0">
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_UnitsHeaderTitle')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" TextWrapping="Wrap" />
