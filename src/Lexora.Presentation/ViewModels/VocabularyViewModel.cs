@@ -260,6 +260,7 @@ public partial class VocabularyViewModel : ObservableObject
         _loadCts = new CancellationTokenSource();
         var ct = _loadCts.Token;
 
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
         IsLoading = true;
         try
         {
@@ -310,11 +311,12 @@ public partial class VocabularyViewModel : ObservableObject
                 Words.Add(w);
             }
 
-            if (Words.Count > 0 && (SelectedWord == null || !Words.Any(w => w.Id == SelectedWord.Id)))
+            if (Words.Count > 0)
             {
-                SelectedWord = Words[0];
+                var matched = SelectedWord != null ? Words.FirstOrDefault(w => w.Id == SelectedWord.Id) : null;
+                SelectedWord = matched ?? Words[0];
             }
-            else if (Words.Count == 0)
+            else
             {
                 SelectedWord = null;
             }
@@ -340,11 +342,8 @@ public partial class VocabularyViewModel : ObservableObject
         }
         finally
         {
-            if (!ct.IsCancellationRequested)
-            {
-                await _dispatcherQueue.EnsureOnUIThreadAsync();
-                IsLoading = false;
-            }
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            IsLoading = false;
         }
     }
 
@@ -373,23 +372,28 @@ public partial class VocabularyViewModel : ObservableObject
             if (dto.Id == null)
             {
                 saved = await _vocabService.CreateWordAsync(dto);
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
                 StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordAdded"), saved.Term);
             }
             else
             {
                 saved = await _vocabService.UpdateWordAsync(dto);
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
                 StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordUpdated"), saved.Term);
             }
 
             await LoadWordsAsync();
             _ = LoadContextUnitsAsync();
-            SelectedWord = Words.FirstOrDefault(w => w.Id == saved.Id);
-            if (SelectedWord == null)
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            var matched = Words.FirstOrDefault(w => w.Id == saved.Id);
+            if (matched == null)
             {
                 ResetFilters();
                 await LoadWordsAsync();
-                SelectedWord = Words.FirstOrDefault(w => w.Id == saved.Id);
+                matched = Words.FirstOrDefault(w => w.Id == saved.Id);
             }
+            SelectedWord = matched ?? saved;
         }
         finally
         {

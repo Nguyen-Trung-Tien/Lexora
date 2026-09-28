@@ -38,6 +38,7 @@ public interface IVocabularyRepository : IRepository<Word>
     Task AddTopicAsync(Topic topic, CancellationToken cancellationToken = default);
     void DeleteTopic(Topic topic);
     Task<IReadOnlyList<ExamTag>> GetAllExamTagsAsync(CancellationToken cancellationToken = default);
+    Task AddExamTagAsync(ExamTag examTag, CancellationToken cancellationToken = default);
     void RemoveWordChildren(Word word);
     void AddMeanings(IEnumerable<WordMeaning> meanings);
     void AddWordTopics(IEnumerable<WordTopic> wordTopics);

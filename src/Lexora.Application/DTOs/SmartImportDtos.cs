@@ -41,7 +41,9 @@ public record SmartImportItemDto(
     bool IsDuplicate,
     bool IsValid,
     string? ValidationMessage,
-    bool IsSelected = true
+    bool IsSelected = true,
+    IReadOnlyList<WordMeaningCreateDto>? RichMeanings = null,
+    IReadOnlyList<PartOfSpeech>? AllPartsOfSpeech = null
 );
 
 public record SmartImportAnalysisResultDto(

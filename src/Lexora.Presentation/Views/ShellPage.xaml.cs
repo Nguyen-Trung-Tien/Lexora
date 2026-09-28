@@ -226,21 +226,25 @@ public sealed partial class ShellPage : Page
             }
         }
 
-        // 2. Vocabulary search matches (up to 5 words)
+        // 2. Vocabulary search matches (up to 8 words)
         try
         {
             using var scope = App.Current.Services.CreateScope();
             var vocabService = scope.ServiceProvider.GetRequiredService<Lexora.Application.Interfaces.IVocabularyService>();
-            var matchingWords = await vocabService.SearchWordsAsync(query, pageSize: 5, cancellationToken: ct);
+            var matchingWords = await vocabService.SearchWordsAsync(query, pageSize: 8, cancellationToken: ct);
 
             if (ct.IsCancellationRequested) return;
 
             foreach (var word in matchingWords)
             {
+                var posLabel = !string.IsNullOrWhiteSpace(word.PartsOfSpeechDisplay)
+                    ? word.PartsOfSpeechDisplay
+                    : word.PrimaryPartOfSpeech.ToString();
+
                 suggestions.Add(new SmartSearchSuggestion
                 {
                     Title = word.Term,
-                    Subtitle = string.IsNullOrWhiteSpace(word.PrimaryDefinition) ? word.PrimaryPartOfSpeech.ToString() : $"{word.PrimaryPartOfSpeech} • {word.PrimaryDefinition}",
+                    Subtitle = string.IsNullOrWhiteSpace(word.PrimaryDefinition) ? posLabel : $"{posLabel} • {word.PrimaryDefinition}",
                     Glyph = "\uE8BD",
                     SearchTerm = word.Term
                 });
@@ -257,7 +261,13 @@ public sealed partial class ShellPage : Page
 
         if (!ct.IsCancellationRequested)
         {
-            sender.ItemsSource = suggestions;
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (!ct.IsCancellationRequested)
+                {
+                    sender.ItemsSource = suggestions;
+                }
+            });
         }
     }
 

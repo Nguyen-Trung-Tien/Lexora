@@ -18,6 +18,7 @@ public class ExportImportService : IExportImportService
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         Converters = { new JsonStringEnumConverter() }
     };
@@ -249,6 +250,7 @@ public class ExportImportService : IExportImportService
         var existingTerms = existingList
             .Select(w => !string.IsNullOrEmpty(w.NormalizedTerm) ? w.NormalizedTerm : w.Term.Trim().ToLowerInvariant())
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var seenInBatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         if (format == DataFormat.Json)
         {
@@ -272,18 +274,95 @@ public class ExportImportService : IExportImportService
                 foreach (var jw in jsonWords)
                 {
                     rowIdx++;
-                    bool isTermValid = !string.IsNullOrWhiteSpace(jw.Term);
-                    string term = jw.Term?.Trim() ?? string.Empty;
+                    string term = jw.ResolvedTerm;
+                    bool isTermValid = !string.IsNullOrWhiteSpace(term);
                     string normalized = term.ToLowerInvariant();
-                    bool isDuplicate = existingTerms.Contains(normalized);
+                    bool isDuplicate = isTermValid && (existingTerms.Contains(normalized) || seenInBatch.Contains(normalized));
 
-                    var firstMeaning = jw.Meanings?.FirstOrDefault();
-                    string defVi = firstMeaning?.DefinitionVi ?? string.Empty;
-                    string? defEn = firstMeaning?.DefinitionEn;
-                    var pos = jw.PrimaryPartOfSpeech != 0 ? jw.PrimaryPartOfSpeech : (firstMeaning?.PartOfSpeech != 0 ? firstMeaning!.PartOfSpeech : PartOfSpeech.Noun);
+                    var richMeanings = new List<WordMeaningCreateDto>();
+                    var allPosList = new List<PartOfSpeech>();
 
-                    var allExamples = jw.Meanings?.SelectMany(m => m.Examples ?? []).Select(ex => ex.SentenceEn).Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
-                    string? exText = allExamples != null && allExamples.Count > 0 ? string.Join(" | ", allExamples) : null;
+                    if (jw.AllPartsOfSpeech != null && jw.AllPartsOfSpeech.Count > 0)
+                    {
+                        allPosList.AddRange(jw.AllPartsOfSpeech);
+                    }
+                    else if (jw.PartsOfSpeech != null && jw.PartsOfSpeech.Count > 0)
+                    {
+                        foreach (var p in jw.PartsOfSpeech)
+                        {
+                            allPosList.Add(ParsePartOfSpeech(p));
+                        }
+                    }
+
+                    if (jw.Meanings != null && jw.Meanings.Count > 0)
+                    {
+                        foreach (var m in jw.Meanings)
+                        {
+                            var mPos = m.PartOfSpeech != 0
+                                ? m.PartOfSpeech
+                                : (!string.IsNullOrWhiteSpace(m.Pos)
+                                    ? ParsePartOfSpeech(m.Pos)
+                                    : (jw.PrimaryPartOfSpeech != 0
+                                        ? jw.PrimaryPartOfSpeech
+                                        : (!string.IsNullOrWhiteSpace(jw.Pos) ? ParsePartOfSpeech(jw.Pos) : PartOfSpeech.Noun)));
+
+                            if (!allPosList.Contains(mPos))
+                            {
+                                allPosList.Add(mPos);
+                            }
+
+                            var exList = (m.Examples ?? []).Select(ex => new ExampleSentenceCreateDto(
+                                SentenceEn: ex.ResolvedSentenceEn,
+                                SentenceVi: ex.ResolvedSentenceVi,
+                                AudioPath: null
+                            )).Where(e => !string.IsNullOrWhiteSpace(e.SentenceEn)).ToList();
+
+                            richMeanings.Add(new WordMeaningCreateDto(
+                                PartOfSpeech: mPos,
+                                DefinitionVi: m.ResolvedDefinitionVi,
+                                DefinitionEn: m.ResolvedDefinitionEn,
+                                Explanation: m.Explanation,
+                                Examples: exList
+                            ));
+                        }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(jw.ResolvedDefinitionVi))
+                    {
+                        var mPos = jw.PrimaryPartOfSpeech != 0
+                            ? jw.PrimaryPartOfSpeech
+                            : (!string.IsNullOrWhiteSpace(jw.Pos) ? ParsePartOfSpeech(jw.Pos) : PartOfSpeech.Noun);
+                        if (!allPosList.Contains(mPos)) allPosList.Add(mPos);
+
+                        richMeanings.Add(new WordMeaningCreateDto(
+                            PartOfSpeech: mPos,
+                            DefinitionVi: jw.ResolvedDefinitionVi,
+                            DefinitionEn: jw.ResolvedDefinitionEn,
+                            Explanation: null,
+                            Examples: new List<ExampleSentenceCreateDto>()
+                        ));
+                    }
+
+                    var primaryPos = jw.PrimaryPartOfSpeech != 0
+                        ? jw.PrimaryPartOfSpeech
+                        : (!string.IsNullOrWhiteSpace(jw.Pos)
+                            ? ParsePartOfSpeech(jw.Pos)
+                            : (allPosList.Count > 0 ? allPosList[0] : PartOfSpeech.Noun));
+
+                    if (!allPosList.Contains(primaryPos))
+                    {
+                        allPosList.Insert(0, primaryPos);
+                    }
+
+                    var firstMeaning = richMeanings.FirstOrDefault();
+                    string defVi = firstMeaning?.DefinitionVi ?? jw.ResolvedDefinitionVi;
+                    string? defEn = firstMeaning?.DefinitionEn ?? jw.ResolvedDefinitionEn;
+
+                    var allExamples = richMeanings
+                        .SelectMany(m => m.Examples)
+                        .Select(ex => !string.IsNullOrWhiteSpace(ex.SentenceVi) ? $"{ex.SentenceEn} => {ex.SentenceVi}" : ex.SentenceEn)
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .ToList();
+                    string? exText = allExamples.Count > 0 ? string.Join(" | ", allExamples) : (!string.IsNullOrWhiteSpace(jw.Examples) ? jw.Examples : null);
                     string? topicsText = jw.Topics != null && jw.Topics.Count > 0 ? string.Join("; ", jw.Topics) : null;
                     string? examsText = jw.ExamTags != null && jw.ExamTags.Count > 0 ? string.Join("; ", jw.ExamTags) : null;
 
@@ -291,11 +370,16 @@ public class ExportImportService : IExportImportService
                     if (!isTermValid) validationMsg = "Thuật ngữ không được để trống / Term is required.";
                     else if (string.IsNullOrWhiteSpace(defVi)) validationMsg = "Chưa có định nghĩa tiếng Việt / Missing Vietnamese definition.";
 
+                    if (isTermValid)
+                    {
+                        seenInBatch.Add(normalized);
+                    }
+
                     previewItems.Add(new SmartImportItemDto(
                         RowIndex: rowIdx,
                         Term: term,
                         Level: jw.Level,
-                        PartOfSpeech: pos,
+                        PartOfSpeech: primaryPos,
                         DefinitionVi: defVi,
                         DefinitionEn: defEn,
                         PhoneticUk: jw.PhoneticUk,
@@ -306,7 +390,9 @@ public class ExportImportService : IExportImportService
                         Notes: jw.Notes,
                         IsDuplicate: isDuplicate,
                         IsValid: isTermValid && !string.IsNullOrWhiteSpace(defVi),
-                        ValidationMessage: validationMsg
+                        ValidationMessage: validationMsg,
+                        RichMeanings: richMeanings,
+                        AllPartsOfSpeech: allPosList.Distinct().ToList()
                     ));
                 }
             }
@@ -393,7 +479,8 @@ public class ExportImportService : IExportImportService
 
                     bool isTermValid = !string.IsNullOrWhiteSpace(term);
                     string normalized = term.ToLowerInvariant();
-                    bool isDuplicate = isTermValid && existingTerms.Contains(normalized);
+                    bool isDuplicate = isTermValid && (existingTerms.Contains(normalized) || seenInBatch.Contains(normalized));
+                    if (isTermValid) seenInBatch.Add(normalized);
 
                     string? validationMsg = null;
                     if (!isTermValid) validationMsg = "Thiếu thuật ngữ / Missing term.";
@@ -492,7 +579,8 @@ public class ExportImportService : IExportImportService
 
                 bool isTermValid = !string.IsNullOrWhiteSpace(term);
                 string normalized = term.ToLowerInvariant();
-                bool isDuplicate = isTermValid && existingTerms.Contains(normalized);
+                bool isDuplicate = isTermValid && (existingTerms.Contains(normalized) || seenInBatch.Contains(normalized));
+                if (isTermValid) seenInBatch.Add(normalized);
 
                 string? validationMsg = null;
                 if (!isTermValid) validationMsg = "Thiếu thuật ngữ / Missing term.";
@@ -580,28 +668,106 @@ public class ExportImportService : IExportImportService
                     if (!string.IsNullOrWhiteSpace(item.PhoneticUk)) existing.PhoneticUk = item.PhoneticUk;
                     if (!string.IsNullOrWhiteSpace(item.PhoneticUs)) existing.PhoneticUs = item.PhoneticUs;
                     if (!string.IsNullOrWhiteSpace(item.Notes)) existing.Notes = item.Notes;
+                    existing.PrimaryPartOfSpeech = item.PartOfSpeech;
+                    existing.UpdatedAt = DateTime.UtcNow;
 
-                    // Merge meaning if not existing
-                    bool hasMeaning = existing.Meanings.Any(m => string.Equals(m.DefinitionVi.Trim(), item.DefinitionVi.Trim(), StringComparison.OrdinalIgnoreCase));
-                    if (!hasMeaning && !string.IsNullOrWhiteSpace(item.DefinitionVi))
+                    _vocabRepo.RemoveWordChildren(existing);
+
+                    if (item.RichMeanings != null && item.RichMeanings.Count > 0)
                     {
-                        var newM = new WordMeaning
+                        int mIdx = 0;
+                        foreach (var rm in item.RichMeanings)
+                        {
+                            var meaning = new WordMeaning
+                            {
+                                WordId = existing.Id,
+                                PartOfSpeech = rm.PartOfSpeech != 0 ? rm.PartOfSpeech : item.PartOfSpeech,
+                                DefinitionVi = rm.DefinitionVi.Trim(),
+                                DefinitionEn = rm.DefinitionEn?.Trim(),
+                                Explanation = rm.Explanation?.Trim(),
+                                OrderIndex = mIdx++
+                            };
+
+                            foreach (var ex in rm.Examples)
+                            {
+                                if (!string.IsNullOrWhiteSpace(ex.SentenceEn))
+                                {
+                                    meaning.Examples.Add(new ExampleSentence
+                                    {
+                                        WordMeaningId = meaning.Id,
+                                        SentenceEn = ex.SentenceEn.Trim(),
+                                        SentenceVi = ex.SentenceVi?.Trim() ?? string.Empty,
+                                        AudioPath = ex.AudioPath
+                                    });
+                                }
+                            }
+
+                            existing.Meanings.Add(meaning);
+                        }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(item.DefinitionVi))
+                    {
+                        var meaning = new WordMeaning
                         {
                             WordId = existing.Id,
                             PartOfSpeech = item.PartOfSpeech,
                             DefinitionVi = item.DefinitionVi.Trim(),
-                            DefinitionEn = item.DefinitionEn?.Trim(),
-                            OrderIndex = existing.Meanings.Count
+                            DefinitionEn = string.IsNullOrWhiteSpace(item.DefinitionEn) ? null : item.DefinitionEn.Trim(),
+                            OrderIndex = 0
                         };
+
                         if (!string.IsNullOrWhiteSpace(item.Examples))
                         {
-                            var exTokens = item.Examples.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                            var exTokens = item.Examples.Split(new[] { '|', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                             foreach (var ex in exTokens)
                             {
-                                newM.Examples.Add(new ExampleSentence { WordMeaningId = newM.Id, SentenceEn = ex.Trim() });
+                                var parts = ex.Split(new[] { "=>" }, StringSplitOptions.RemoveEmptyEntries);
+                                var en = parts.Length > 0 ? parts[0].Trim() : ex.Trim();
+                                var vi = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+                                meaning.Examples.Add(new ExampleSentence { WordMeaningId = meaning.Id, SentenceEn = en, SentenceVi = vi });
                             }
                         }
-                        existing.Meanings.Add(newM);
+
+                        existing.Meanings.Add(meaning);
+                    }
+
+                    // Link topics
+                    if (!string.IsNullOrWhiteSpace(item.Topics))
+                    {
+                        var tTokens = item.Topics.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        foreach (var tname in tTokens)
+                        {
+                            var lower = tname.ToLowerInvariant();
+                            if (!allTopics.TryGetValue(lower, out var top))
+                            {
+                                top = new Topic { Name = tname.Trim() };
+                                await _vocabRepo.AddTopicAsync(top, cancellationToken);
+                                allTopics[lower] = top;
+                            }
+                            existing.WordTopics.Add(new WordTopic { WordId = existing.Id, TopicId = top.Id, Topic = top });
+                        }
+                    }
+
+                    // Link exam tags
+                    if (!string.IsNullOrWhiteSpace(item.ExamTags))
+                    {
+                        var etTokens = item.ExamTags.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        foreach (var etname in etTokens)
+                        {
+                            var lower = etname.ToLowerInvariant();
+                            if (!allExamTags.TryGetValue(lower, out var et))
+                            {
+                                var examType = ExamType.General;
+                                if (lower.Contains("toeic")) examType = ExamType.Toeic;
+                                else if (lower.Contains("ielts")) examType = ExamType.Ielts;
+                                else if (lower.Contains("vstep")) examType = ExamType.Vstep;
+
+                                et = new ExamTag { Name = etname.Trim(), Type = examType };
+                                await _vocabRepo.AddExamTagAsync(et, cancellationToken);
+                                allExamTags[lower] = et;
+                            }
+                            existing.WordExamTags.Add(new WordExamTag { WordId = existing.Id, ExamTagId = et.Id, ExamTag = et });
+                        }
                     }
 
                     await _vocabRepo.UpdateAsync(existing, cancellationToken);
@@ -627,24 +793,62 @@ public class ExportImportService : IExportImportService
                 CreatedAt = DateTime.UtcNow
             };
 
-            var meaning = new WordMeaning
+            if (item.RichMeanings != null && item.RichMeanings.Count > 0)
             {
-                WordId = word.Id,
-                PartOfSpeech = item.PartOfSpeech,
-                DefinitionVi = item.DefinitionVi.Trim(),
-                DefinitionEn = string.IsNullOrWhiteSpace(item.DefinitionEn) ? null : item.DefinitionEn.Trim(),
-                OrderIndex = 0
-            };
-
-            if (!string.IsNullOrWhiteSpace(item.Examples))
-            {
-                var exTokens = item.Examples.Split(new[] { '|', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                foreach (var ex in exTokens)
+                int mIdx = 0;
+                foreach (var rm in item.RichMeanings)
                 {
-                    meaning.Examples.Add(new ExampleSentence { WordMeaningId = meaning.Id, SentenceEn = ex.Trim() });
+                    var meaning = new WordMeaning
+                    {
+                        WordId = word.Id,
+                        PartOfSpeech = rm.PartOfSpeech != 0 ? rm.PartOfSpeech : item.PartOfSpeech,
+                        DefinitionVi = rm.DefinitionVi.Trim(),
+                        DefinitionEn = rm.DefinitionEn?.Trim(),
+                        Explanation = rm.Explanation?.Trim(),
+                        OrderIndex = mIdx++
+                    };
+
+                    foreach (var ex in rm.Examples)
+                    {
+                        if (!string.IsNullOrWhiteSpace(ex.SentenceEn))
+                        {
+                            meaning.Examples.Add(new ExampleSentence
+                            {
+                                WordMeaningId = meaning.Id,
+                                SentenceEn = ex.SentenceEn.Trim(),
+                                SentenceVi = ex.SentenceVi?.Trim() ?? string.Empty,
+                                AudioPath = ex.AudioPath
+                            });
+                        }
+                    }
+
+                    word.Meanings.Add(meaning);
                 }
             }
-            word.Meanings.Add(meaning);
+            else
+            {
+                var meaning = new WordMeaning
+                {
+                    WordId = word.Id,
+                    PartOfSpeech = item.PartOfSpeech,
+                    DefinitionVi = item.DefinitionVi.Trim(),
+                    DefinitionEn = string.IsNullOrWhiteSpace(item.DefinitionEn) ? null : item.DefinitionEn.Trim(),
+                    OrderIndex = 0
+                };
+
+                if (!string.IsNullOrWhiteSpace(item.Examples))
+                {
+                    var exTokens = item.Examples.Split(new[] { '|', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    foreach (var ex in exTokens)
+                    {
+                        var parts = ex.Split(new[] { "=>" }, StringSplitOptions.RemoveEmptyEntries);
+                        var en = parts.Length > 0 ? parts[0].Trim() : ex.Trim();
+                        var vi = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+                        meaning.Examples.Add(new ExampleSentence { WordMeaningId = meaning.Id, SentenceEn = en, SentenceVi = vi });
+                    }
+                }
+                word.Meanings.Add(meaning);
+            }
 
             // Link topics
             if (!string.IsNullOrWhiteSpace(item.Topics))
@@ -652,10 +856,14 @@ public class ExportImportService : IExportImportService
                 var tTokens = item.Topics.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 foreach (var tname in tTokens)
                 {
-                    if (allTopics.TryGetValue(tname.ToLowerInvariant(), out var top))
+                    var lower = tname.ToLowerInvariant();
+                    if (!allTopics.TryGetValue(lower, out var top))
                     {
-                        word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = top.Id });
+                        top = new Topic { Name = tname.Trim() };
+                        await _vocabRepo.AddTopicAsync(top, cancellationToken);
+                        allTopics[lower] = top;
                     }
+                    word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = top.Id, Topic = top });
                 }
             }
 
@@ -665,10 +873,19 @@ public class ExportImportService : IExportImportService
                 var etTokens = item.ExamTags.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 foreach (var etname in etTokens)
                 {
-                    if (allExamTags.TryGetValue(etname.ToLowerInvariant(), out var et))
+                    var lower = etname.ToLowerInvariant();
+                    if (!allExamTags.TryGetValue(lower, out var et))
                     {
-                        word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = et.Id });
+                        var examType = ExamType.General;
+                        if (lower.Contains("toeic")) examType = ExamType.Toeic;
+                        else if (lower.Contains("ielts")) examType = ExamType.Ielts;
+                        else if (lower.Contains("vstep")) examType = ExamType.Vstep;
+
+                        et = new ExamTag { Name = etname.Trim(), Type = examType };
+                        await _vocabRepo.AddExamTagAsync(et, cancellationToken);
+                        allExamTags[lower] = et;
                     }
+                    word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = et.Id, ExamTag = et });
                 }
             }
 
@@ -757,13 +974,14 @@ public class ExportImportService : IExportImportService
                     progress?.Report(new ProgressReport(pct, current, total, $"Đang xử lý: {current} / {total}", item.Term));
                 }
 
-                if (string.IsNullOrWhiteSpace(item.Term))
+                string term = item.ResolvedTerm;
+                if (string.IsNullOrWhiteSpace(term))
                 {
                     skipped++;
                     continue;
                 }
 
-                var normalized = item.Term.Trim().ToLowerInvariant();
+                var normalized = term.ToLowerInvariant();
 
                 // Check intra-file duplicate
                 if (!seenTerms.Add(normalized))
@@ -781,8 +999,47 @@ public class ExportImportService : IExportImportService
                         if (!string.IsNullOrWhiteSpace(item.PhoneticUk)) existing.PhoneticUk = item.PhoneticUk;
                         if (!string.IsNullOrWhiteSpace(item.PhoneticUs)) existing.PhoneticUs = item.PhoneticUs;
                         if (!string.IsNullOrWhiteSpace(item.Notes)) existing.Notes = item.Notes;
+                        if (item.PrimaryPartOfSpeech != 0) existing.PrimaryPartOfSpeech = item.PrimaryPartOfSpeech;
 
                         MergeMeanings(existing, item.Meanings);
+
+                        // Link topics
+                        foreach (var tname in item.Topics)
+                        {
+                            var lower = tname.ToLowerInvariant();
+                            if (!allTopics.TryGetValue(lower, out var topic))
+                            {
+                                topic = new Topic { Name = tname.Trim() };
+                                await _vocabRepo.AddTopicAsync(topic, cancellationToken);
+                                allTopics[lower] = topic;
+                            }
+                            if (!existing.WordTopics.Any(wt => wt.TopicId == topic.Id))
+                            {
+                                existing.WordTopics.Add(new WordTopic { WordId = existing.Id, TopicId = topic.Id });
+                            }
+                        }
+
+                        // Link exam tags
+                        foreach (var etname in item.ExamTags)
+                        {
+                            var lower = etname.ToLowerInvariant();
+                            if (!allExamTags.TryGetValue(lower, out var examTag))
+                            {
+                                var examType = ExamType.General;
+                                if (lower.Contains("toeic")) examType = ExamType.Toeic;
+                                else if (lower.Contains("ielts")) examType = ExamType.Ielts;
+                                else if (lower.Contains("vstep")) examType = ExamType.Vstep;
+
+                                examTag = new ExamTag { Name = etname.Trim(), Type = examType };
+                                await _vocabRepo.AddExamTagAsync(examTag, cancellationToken);
+                                allExamTags[lower] = examTag;
+                            }
+                            if (!existing.WordExamTags.Any(wet => wet.ExamTagId == examTag.Id))
+                            {
+                                existing.WordExamTags.Add(new WordExamTag { WordId = existing.Id, ExamTagId = examTag.Id });
+                            }
+                        }
+
                         await _vocabRepo.UpdateAsync(existing, cancellationToken);
                         updated++;
                     }
@@ -795,11 +1052,11 @@ public class ExportImportService : IExportImportService
 
                 var primaryPos = item.PrimaryPartOfSpeech != 0
                     ? item.PrimaryPartOfSpeech
-                    : (item.Meanings.FirstOrDefault(m => m.PartOfSpeech != 0)?.PartOfSpeech ?? PartOfSpeech.Noun);
+                    : (item.Meanings.FirstOrDefault(m => m.PartOfSpeech != 0)?.PartOfSpeech ?? (!string.IsNullOrWhiteSpace(item.Pos) ? ParsePartOfSpeech(item.Pos) : PartOfSpeech.Noun));
 
                 var word = new Word
                 {
-                    Term = item.Term.Trim(),
+                    Term = term,
                     NormalizedTerm = normalized,
                     PhoneticUk = item.PhoneticUk,
                     PhoneticUs = item.PhoneticUs,
@@ -811,37 +1068,51 @@ public class ExportImportService : IExportImportService
                 int idx = 0;
                 foreach (var m in item.Meanings)
                 {
-                    var meaningPos = m.PartOfSpeech != 0 ? m.PartOfSpeech : primaryPos;
+                    var meaningPos = m.PartOfSpeech != 0 ? m.PartOfSpeech : (!string.IsNullOrWhiteSpace(m.Pos) ? ParsePartOfSpeech(m.Pos) : primaryPos);
                     var meaning = new WordMeaning
                     {
                         WordId = word.Id,
                         PartOfSpeech = meaningPos,
-                        DefinitionVi = m.DefinitionVi,
-                        DefinitionEn = m.DefinitionEn,
+                        DefinitionVi = m.ResolvedDefinitionVi,
+                        DefinitionEn = m.ResolvedDefinitionEn,
                         Explanation = m.Explanation,
                         OrderIndex = idx++
                     };
 
                     foreach (var ex in m.Examples)
                     {
-                        meaning.Examples.Add(new ExampleSentence
+                        if (!string.IsNullOrWhiteSpace(ex.ResolvedSentenceEn))
                         {
-                            WordMeaningId = meaning.Id,
-                            SentenceEn = ex.SentenceEn,
-                            SentenceVi = ex.SentenceVi
-                        });
+                            meaning.Examples.Add(new ExampleSentence
+                            {
+                                WordMeaningId = meaning.Id,
+                                SentenceEn = ex.ResolvedSentenceEn,
+                                SentenceVi = ex.ResolvedSentenceVi
+                            });
+                        }
                     }
 
                     word.Meanings.Add(meaning);
                 }
 
-                if (word.Meanings.Count == 0)
+                if (word.Meanings.Count == 0 && !string.IsNullOrWhiteSpace(item.ResolvedDefinitionVi))
                 {
                     word.Meanings.Add(new WordMeaning
                     {
                         WordId = word.Id,
                         PartOfSpeech = word.PrimaryPartOfSpeech,
-                        DefinitionVi = item.Term,
+                        DefinitionVi = item.ResolvedDefinitionVi,
+                        DefinitionEn = item.ResolvedDefinitionEn,
+                        OrderIndex = 0
+                    });
+                }
+                else if (word.Meanings.Count == 0)
+                {
+                    word.Meanings.Add(new WordMeaning
+                    {
+                        WordId = word.Id,
+                        PartOfSpeech = word.PrimaryPartOfSpeech,
+                        DefinitionVi = term,
                         OrderIndex = 0
                     });
                 }
@@ -849,19 +1120,32 @@ public class ExportImportService : IExportImportService
                 // Link topics
                 foreach (var tname in item.Topics)
                 {
-                    if (allTopics.TryGetValue(tname.ToLowerInvariant(), out var topic))
+                    var lower = tname.ToLowerInvariant();
+                    if (!allTopics.TryGetValue(lower, out var topic))
                     {
-                        word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = topic.Id });
+                        topic = new Topic { Name = tname.Trim() };
+                        await _vocabRepo.AddTopicAsync(topic, cancellationToken);
+                        allTopics[lower] = topic;
                     }
+                    word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = topic.Id });
                 }
 
                 // Link exam tags
                 foreach (var etname in item.ExamTags)
                 {
-                    if (allExamTags.TryGetValue(etname.ToLowerInvariant(), out var examTag))
+                    var lower = etname.ToLowerInvariant();
+                    if (!allExamTags.TryGetValue(lower, out var examTag))
                     {
-                        word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = examTag.Id });
+                        var examType = ExamType.General;
+                        if (lower.Contains("toeic")) examType = ExamType.Toeic;
+                        else if (lower.Contains("ielts")) examType = ExamType.Ielts;
+                        else if (lower.Contains("vstep")) examType = ExamType.Vstep;
+
+                        examTag = new ExamTag { Name = etname.Trim(), Type = examType };
+                        await _vocabRepo.AddExamTagAsync(examTag, cancellationToken);
+                        allExamTags[lower] = examTag;
                     }
+                    word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = examTag.Id });
                 }
 
                 // Spaced repetition card
@@ -1399,9 +1683,10 @@ public class ExportImportService : IExportImportService
     {
         foreach (var m in incomingMeanings)
         {
+            var defVi = m.ResolvedDefinitionVi;
             var matchMeaning = existing.Meanings.FirstOrDefault(em =>
                 em.PartOfSpeech == m.PartOfSpeech &&
-                em.DefinitionVi.Trim().Equals(m.DefinitionVi.Trim(), StringComparison.OrdinalIgnoreCase));
+                em.DefinitionVi.Trim().Equals(defVi.Trim(), StringComparison.OrdinalIgnoreCase));
 
             if (matchMeaning == null)
             {
@@ -1409,19 +1694,22 @@ public class ExportImportService : IExportImportService
                 {
                     WordId = existing.Id,
                     PartOfSpeech = m.PartOfSpeech != 0 ? m.PartOfSpeech : existing.PrimaryPartOfSpeech,
-                    DefinitionVi = m.DefinitionVi,
-                    DefinitionEn = m.DefinitionEn,
+                    DefinitionVi = defVi,
+                    DefinitionEn = m.ResolvedDefinitionEn,
                     Explanation = m.Explanation,
                     OrderIndex = existing.Meanings.Count
                 };
                 foreach (var ex in m.Examples)
                 {
-                    newMeaning.Examples.Add(new ExampleSentence
+                    if (!string.IsNullOrWhiteSpace(ex.ResolvedSentenceEn))
                     {
-                        WordMeaningId = newMeaning.Id,
-                        SentenceEn = ex.SentenceEn,
-                        SentenceVi = ex.SentenceVi
-                    });
+                        newMeaning.Examples.Add(new ExampleSentence
+                        {
+                            WordMeaningId = newMeaning.Id,
+                            SentenceEn = ex.ResolvedSentenceEn,
+                            SentenceVi = ex.ResolvedSentenceVi
+                        });
+                    }
                 }
                 existing.Meanings.Add(newMeaning);
             }
@@ -1429,13 +1717,14 @@ public class ExportImportService : IExportImportService
             {
                 foreach (var ex in m.Examples)
                 {
-                    if (!matchMeaning.Examples.Any(ee => ee.SentenceEn.Trim().Equals(ex.SentenceEn.Trim(), StringComparison.OrdinalIgnoreCase)))
+                    var senEn = ex.ResolvedSentenceEn;
+                    if (!string.IsNullOrWhiteSpace(senEn) && !matchMeaning.Examples.Any(ee => ee.SentenceEn.Trim().Equals(senEn.Trim(), StringComparison.OrdinalIgnoreCase)))
                     {
                         matchMeaning.Examples.Add(new ExampleSentence
                         {
                             WordMeaningId = matchMeaning.Id,
-                            SentenceEn = ex.SentenceEn,
-                            SentenceVi = ex.SentenceVi
+                            SentenceEn = senEn,
+                            SentenceVi = ex.ResolvedSentenceVi
                         });
                     }
                 }
@@ -1679,30 +1968,91 @@ public class ExportImportService : IExportImportService
     private class WordExportModel
     {
         public string Term { get; set; } = string.Empty;
+        public string? Word { get; set; }
         public string? PhoneticUk { get; set; }
         public string? PhoneticUs { get; set; }
         public CefrLevel Level { get; set; }
         public PartOfSpeech PrimaryPartOfSpeech { get; set; }
+        public string? Pos { get; set; }
+        public string? PartOfSpeech { get; set; }
         public List<PartOfSpeech> AllPartsOfSpeech { get; set; } = new();
+        public List<string>? PartsOfSpeech { get; set; }
         public string? Notes { get; set; }
         public List<MeaningExportModel> Meanings { get; set; } = new();
+        public string? Definition { get; set; }
+        public string? DefinitionVi { get; set; }
+        public string? DefinitionEn { get; set; }
+        public string? Meaning { get; set; }
+        public string? MeaningVi { get; set; }
+        public string? MeaningEn { get; set; }
+        public string? Examples { get; set; }
+        public string? Example { get; set; }
         public List<string> Topics { get; set; } = new();
         public List<string> ExamTags { get; set; } = new();
+
+        public string ResolvedTerm => !string.IsNullOrWhiteSpace(Term)
+            ? Term.Trim()
+            : (!string.IsNullOrWhiteSpace(Word) ? Word.Trim() : string.Empty);
+
+        public string ResolvedDefinitionVi => !string.IsNullOrWhiteSpace(DefinitionVi)
+            ? DefinitionVi.Trim()
+            : (!string.IsNullOrWhiteSpace(MeaningVi)
+                ? MeaningVi.Trim()
+                : (!string.IsNullOrWhiteSpace(Definition)
+                    ? Definition.Trim()
+                    : (!string.IsNullOrWhiteSpace(Meaning) ? Meaning.Trim() : string.Empty)));
+
+        public string? ResolvedDefinitionEn => !string.IsNullOrWhiteSpace(DefinitionEn)
+            ? DefinitionEn.Trim()
+            : (!string.IsNullOrWhiteSpace(MeaningEn) ? MeaningEn.Trim() : null);
     }
 
     private class MeaningExportModel
     {
         public PartOfSpeech PartOfSpeech { get; set; }
+        public string? Pos { get; set; }
         public string DefinitionVi { get; set; } = string.Empty;
         public string? DefinitionEn { get; set; }
+        public string? Definition { get; set; }
+        public string? Meaning { get; set; }
+        public string? MeaningVi { get; set; }
+        public string? MeaningEn { get; set; }
         public string? Explanation { get; set; }
         public List<ExampleExportModel> Examples { get; set; } = new();
+
+        public string ResolvedDefinitionVi => !string.IsNullOrWhiteSpace(DefinitionVi)
+            ? DefinitionVi.Trim()
+            : (!string.IsNullOrWhiteSpace(MeaningVi)
+                ? MeaningVi.Trim()
+                : (!string.IsNullOrWhiteSpace(Definition)
+                    ? Definition.Trim()
+                    : (!string.IsNullOrWhiteSpace(Meaning) ? Meaning.Trim() : string.Empty)));
+
+        public string? ResolvedDefinitionEn => !string.IsNullOrWhiteSpace(DefinitionEn)
+            ? DefinitionEn.Trim()
+            : (!string.IsNullOrWhiteSpace(MeaningEn) ? MeaningEn.Trim() : null);
     }
 
     private class ExampleExportModel
     {
         public string SentenceEn { get; set; } = string.Empty;
         public string SentenceVi { get; set; } = string.Empty;
+        public string? En { get; set; }
+        public string? Vi { get; set; }
+        public string? Sentence { get; set; }
+        public string? Translation { get; set; }
+
+        public string ResolvedSentenceEn => !string.IsNullOrWhiteSpace(SentenceEn)
+            ? SentenceEn.Trim()
+            : (!string.IsNullOrWhiteSpace(En)
+                ? En.Trim()
+                : (!string.IsNullOrWhiteSpace(Sentence) ? Sentence.Trim() : string.Empty));
+
+        public string ResolvedSentenceVi => !string.IsNullOrWhiteSpace(SentenceVi)
+            ? SentenceVi.Trim()
+            : (!string.IsNullOrWhiteSpace(Vi)
+                ? Vi.Trim()
+                : (!string.IsNullOrWhiteSpace(Translation) ? Translation.Trim() : string.Empty));
     }
 
     private static List<string> ParseCsvLine(string line, char delimiter)

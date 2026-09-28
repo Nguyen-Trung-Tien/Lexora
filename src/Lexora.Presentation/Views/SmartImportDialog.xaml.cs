@@ -25,7 +25,18 @@ public class SmartImportPreviewItem : CommunityToolkit.Mvvm.ComponentModel.Obser
 
     public int RowNumber { get; set; }
     public string Term { get; set; } = string.Empty;
-    public string? PartOfSpeech { get; set; }
+    private string? _partOfSpeech;
+    public string? PartOfSpeech
+    {
+        get => _partOfSpeech;
+        set
+        {
+            if (SetProperty(ref _partOfSpeech, value))
+            {
+                OnPropertyChanged(nameof(HasPartOfSpeech));
+            }
+        }
+    }
     public bool HasPartOfSpeech => !string.IsNullOrWhiteSpace(PartOfSpeech);
     public string Meaning { get; set; } = string.Empty;
     public string? Pronunciation { get; set; }
@@ -39,10 +50,33 @@ public class SmartImportPreviewItem : CommunityToolkit.Mvvm.ComponentModel.Obser
     public bool IsValid { get; set; }
     public string? ValidationMessage { get; set; }
 
-    public string StatusText { get; set; } = string.Empty;
-    public Brush? StatusBackgroundBrush { get; set; }
-    public Brush? StatusBorderBrush { get; set; }
-    public Brush? StatusForegroundBrush { get; set; }
+    private string _statusText = string.Empty;
+    public string StatusText
+    {
+        get => _statusText;
+        set => SetProperty(ref _statusText, value);
+    }
+
+    private Brush? _statusBackgroundBrush;
+    public Brush? StatusBackgroundBrush
+    {
+        get => _statusBackgroundBrush;
+        set => SetProperty(ref _statusBackgroundBrush, value);
+    }
+
+    private Brush? _statusBorderBrush;
+    public Brush? StatusBorderBrush
+    {
+        get => _statusBorderBrush;
+        set => SetProperty(ref _statusBorderBrush, value);
+    }
+
+    private Brush? _statusForegroundBrush;
+    public Brush? StatusForegroundBrush
+    {
+        get => _statusForegroundBrush;
+        set => SetProperty(ref _statusForegroundBrush, value);
+    }
 
     public SmartImportItemDto OriginalDto { get; set; } = null!;
 }
@@ -638,15 +672,43 @@ public sealed partial class SmartImportDialog : ContentDialog
             var criticalBorder = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush");
             var criticalFg = ThemeResourceHelper.GetThemeBrush("SystemFillColorCriticalBrush");
 
+            var accentBorder = ThemeResourceHelper.GetThemeBrush("AccentFillColorDefaultBrush");
+            var accentFg = ThemeResourceHelper.GetThemeBrush("AccentTextFillColorPrimaryBrush");
+            bool isOverwrite = ConflictResolution == ImportConflictResolution.Overwrite;
+
             _previewItems.Clear();
             foreach (var item in _analysisResult.PreviewItems)
             {
+                string posDisplay;
+                if (item.AllPartsOfSpeech != null && item.AllPartsOfSpeech.Count > 0)
+                {
+                    posDisplay = string.Join(" • ", item.AllPartsOfSpeech.Select(WordDto.GetAbbreviation));
+                }
+                else
+                {
+                    posDisplay = WordDto.GetAbbreviation(item.PartOfSpeech);
+                }
+
+                string meaningDisplay;
+                if (item.RichMeanings != null && item.RichMeanings.Count > 1)
+                {
+                    meaningDisplay = string.Join("; ", item.RichMeanings.Select(m => $"({WordDto.GetAbbreviation(m.PartOfSpeech)}) {m.DefinitionVi}"));
+                }
+                else if (!string.IsNullOrWhiteSpace(item.DefinitionVi))
+                {
+                    meaningDisplay = item.DefinitionVi;
+                }
+                else
+                {
+                    meaningDisplay = item.DefinitionEn ?? string.Empty;
+                }
+
                 var preview = new SmartImportPreviewItem
                 {
                     RowNumber = item.RowIndex,
                     Term = item.Term,
-                    PartOfSpeech = item.PartOfSpeech.ToString(),
-                    Meaning = item.DefinitionVi,
+                    PartOfSpeech = posDisplay,
+                    Meaning = meaningDisplay,
                     Pronunciation = item.PhoneticUk ?? item.PhoneticUs,
                     ExampleSentence = item.Examples,
                     TopicName = item.Topics,
@@ -667,9 +729,18 @@ public sealed partial class SmartImportDialog : ContentDialog
                 }
                 else if (item.IsDuplicate)
                 {
-                    preview.StatusText = _loc.GetString("SmartImport_StatusDuplicate");
-                    preview.StatusBorderBrush = cautionBorder;
-                    preview.StatusForegroundBrush = cautionFg;
+                    if (isOverwrite)
+                    {
+                        preview.StatusText = _loc.GetString("SmartImport_StatusOverwrite");
+                        preview.StatusBorderBrush = accentBorder;
+                        preview.StatusForegroundBrush = accentFg;
+                    }
+                    else
+                    {
+                        preview.StatusText = _loc.GetString("SmartImport_StatusDuplicate");
+                        preview.StatusBorderBrush = cautionBorder;
+                        preview.StatusForegroundBrush = cautionFg;
+                    }
                 }
                 else
                 {
@@ -703,6 +774,42 @@ public sealed partial class SmartImportDialog : ContentDialog
         finally
         {
             BtnAnalyzeNext.IsEnabled = true;
+        }
+    }
+
+    private void RadioConflict_Checked(object sender, RoutedEventArgs e)
+    {
+        UpdateConflictBadges();
+    }
+
+    private void UpdateConflictBadges()
+    {
+        if (_previewItems.Count == 0) return;
+
+        var cautionBorder = ThemeResourceHelper.GetThemeBrush("SystemFillColorCautionBrush");
+        var cautionFg = ThemeResourceHelper.GetThemeBrush("SystemFillColorCautionBrush");
+        var accentBorder = ThemeResourceHelper.GetThemeBrush("AccentFillColorDefaultBrush");
+        var accentFg = ThemeResourceHelper.GetThemeBrush("AccentTextFillColorPrimaryBrush");
+
+        bool isOverwrite = ConflictResolution == ImportConflictResolution.Overwrite;
+
+        foreach (var preview in _previewItems)
+        {
+            if (preview.IsValid && preview.IsDuplicate)
+            {
+                if (isOverwrite)
+                {
+                    preview.StatusText = _loc.GetString("SmartImport_StatusOverwrite");
+                    preview.StatusBorderBrush = accentBorder;
+                    preview.StatusForegroundBrush = accentFg;
+                }
+                else
+                {
+                    preview.StatusText = _loc.GetString("SmartImport_StatusDuplicate");
+                    preview.StatusBorderBrush = cautionBorder;
+                    preview.StatusForegroundBrush = cautionFg;
+                }
+            }
         }
     }
 

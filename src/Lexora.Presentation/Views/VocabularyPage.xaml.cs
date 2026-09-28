@@ -192,6 +192,7 @@ public sealed partial class VocabularyPage : Page
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
+        ViewModel.SearchTerm = SearchBox.Text;
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
     }
@@ -594,6 +595,7 @@ public sealed partial class VocabularyPage : Page
             {
                 await ViewModel.SaveWordAsync(dialog.ResultDto);
                 PopulateTopicFilterCombo();
+                Bindings.Update();
 
                 CardSaveSuccessStoryboard.Begin();
                 soundFeedback?.PlayCardFlipSound();
@@ -670,6 +672,7 @@ public sealed partial class VocabularyPage : Page
             {
                 await ViewModel.SaveWordAsync(dialog.ResultDto);
                 PopulateTopicFilterCombo();
+                Bindings.Update();
 
                 // Smooth return bounce + pleasant completion feedback
                 CardSaveSuccessStoryboard.Begin();
@@ -1044,7 +1047,10 @@ public sealed partial class VocabularyPage : Page
             if (dialog.WasCommitted)
             {
                 await ViewModel.LoadWordsAsync();
+                await ViewModel.LoadFiltersAsync();
+                await ViewModel.LoadContextUnitsAsync();
                 PopulateTopicFilterCombo();
+                Bindings.Update();
                 ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
             }
             else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
@@ -1185,7 +1191,11 @@ public sealed partial class VocabularyPage : Page
         try
         {
             var importResult = await ViewModel.ImportSmartAsync(contentToImport, fileNameHint, conflictResolution, progress);
+            await ViewModel.LoadWordsAsync();
+            await ViewModel.LoadFiltersAsync();
+            await ViewModel.LoadContextUnitsAsync();
             PopulateTopicFilterCombo();
+            Bindings.Update();
 
             string summary;
             if (importResult.TotalUpdated > 0)
@@ -1507,6 +1517,7 @@ public sealed partial class VocabularyPage : Page
                 {
                     await ViewModel.SaveWordAsync(dialog.ResultDto);
                     PopulateTopicFilterCombo();
+                    Bindings.Update();
 
                     CardSaveSuccessStoryboard.Begin();
                     soundFeedback?.PlayCardFlipSound();

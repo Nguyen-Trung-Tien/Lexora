@@ -268,10 +268,12 @@
                             <RadioButton x:Name="RadioConflictSkip"
                                          IsChecked="True"
                                          FontSize="12"
-                                         GroupName="ConflictResolution" />
+                                         GroupName="ConflictResolution"
+                                         Checked="RadioConflict_Checked" />
                             <RadioButton x:Name="RadioConflictOverwrite"
                                          FontSize="12"
-                                         GroupName="ConflictResolution" />
+                                         GroupName="ConflictResolution"
+                                         Checked="RadioConflict_Checked" />
                         </StackPanel>
                     </Grid>
                 </Border>

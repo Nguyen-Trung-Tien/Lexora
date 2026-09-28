@@ -92,7 +92,7 @@
             <TextBox Grid.Column="1" x:Name="SearchBox"
                      MinWidth="160"
                      PlaceholderText="{x:Bind Loc.GetString('Vocab_SearchPlaceholder')}"
-                     Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay}"
+                     Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      TextChanged="SearchBox_TextChanged" CornerRadius="10" Padding="14,8" />
 
             <!-- Add Word Primary Button -->

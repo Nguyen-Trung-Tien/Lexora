@@ -218,7 +218,8 @@ public class VocabularyService : IVocabularyService
         await _vocabRepo.UpdateAsync(word, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var savedWord = await _vocabRepo.GetWithDetailsAsync(word.Id, cancellationToken);
+        var refreshed = await _vocabRepo.GetByIdsWithDetailsAsync([word.Id], cancellationToken);
+        var savedWord = refreshed.FirstOrDefault() ?? await _vocabRepo.GetWithDetailsAsync(word.Id, cancellationToken);
         return MapToDto(savedWord ?? word);
     }
 

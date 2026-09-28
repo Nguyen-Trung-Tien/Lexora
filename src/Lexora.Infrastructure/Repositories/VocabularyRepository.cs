@@ -150,9 +150,22 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var term = searchTerm.Trim().ToLowerInvariant();
+            var pattern = $"%{term}%";
             query = query.Where(w =>
-                w.NormalizedTerm.Contains(term) ||
-                w.Meanings.Any(m => m.DefinitionVi.ToLower().Contains(term) || (m.DefinitionEn != null && m.DefinitionEn.ToLower().Contains(term))));
+                EF.Functions.Like(w.NormalizedTerm, pattern) ||
+                EF.Functions.Like(w.Term, pattern) ||
+                (w.PhoneticUk != null && EF.Functions.Like(w.PhoneticUk, pattern)) ||
+                (w.PhoneticUs != null && EF.Functions.Like(w.PhoneticUs, pattern)) ||
+                (w.Notes != null && EF.Functions.Like(w.Notes, pattern)) ||
+                w.Meanings.Any(m =>
+                    EF.Functions.Like(m.DefinitionVi, pattern) ||
+                    (m.DefinitionEn != null && EF.Functions.Like(m.DefinitionEn, pattern)) ||
+                    (m.Explanation != null && EF.Functions.Like(m.Explanation, pattern)) ||
+                    m.Examples.Any(ex =>
+                        EF.Functions.Like(ex.SentenceEn, pattern) ||
+                        (ex.SentenceVi != null && EF.Functions.Like(ex.SentenceVi, pattern)))) ||
+                w.WordTopics.Any(wt => wt.Topic != null && EF.Functions.Like(wt.Topic.Name, pattern)) ||
+                w.WordExamTags.Any(wet => wet.ExamTag != null && EF.Functions.Like(wet.ExamTag.Name, pattern)));
         }
 
         if (level.HasValue && level.Value != CefrLevel.None)
@@ -172,7 +185,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
 
         if (examType.HasValue && examType.Value != ExamType.General)
         {
-            query = query.Where(w => w.WordExamTags.Any(wet => wet.ExamTag.Type == examType.Value));
+            query = query.Where(w => w.WordExamTags.Any(wet => wet.ExamTag != null && wet.ExamTag.Type == examType.Value));
         }
 
         if (status.HasValue)
@@ -209,10 +222,14 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         Context.Topics.Remove(topic);
     }
 
-
     public async Task<IReadOnlyList<ExamTag>> GetAllExamTagsAsync(CancellationToken cancellationToken = default)
     {
         return await Context.ExamTags.AsNoTracking().OrderBy(et => et.Name).ToListAsync(cancellationToken);
+    }
+
+    public async Task AddExamTagAsync(ExamTag examTag, CancellationToken cancellationToken = default)
+    {
+        await Context.ExamTags.AddAsync(examTag, cancellationToken);
     }
 
     public void RemoveWordChildren(Word word)
