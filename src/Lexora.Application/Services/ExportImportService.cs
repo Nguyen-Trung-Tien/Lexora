@@ -893,7 +893,7 @@ public class ExportImportService : IExportImportService
                     }
                     if (!word.WordTopics.Any(wt => wt.TopicId == top.Id))
                     {
-                        word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = top.Id, Topic = top });
+                        word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = top.Id });
                     }
                 }
             }
