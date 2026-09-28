@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
 using Lexora.Application.Services;
 using Lexora.Application.SpacedRepetition;
 using Lexora.Domain.Enums;
@@ -670,6 +671,117 @@ public class VocabularyCrudIntegrationTests : IDisposable
         fetched.AllPartsOfSpeech.Should().Contain(PartOfSpeech.Verb);
         fetched.AllPartsOfSpeech.Should().Contain(PartOfSpeech.Adjective);
         fetched.AllPartsOfSpeech.Should().NotContain(PartOfSpeech.Noun);
+    }
+
+    [Fact]
+    public async Task CommitSmartImportAsync_WithConflictResolutionOverwrite_ShouldSuccessfullyUpdateExistingWordWithoutUniqueConstraintViolation()
+    {
+        // 1. Arrange: Create an initial word with topics, exam tags, and meanings
+        var topic = new Domain.Entities.Topic { Name = "Business" };
+        var exam = new Domain.Entities.ExamTag { Name = "IELTS", Type = ExamType.Ielts };
+        _context.Topics.Add(topic);
+        _context.ExamTags.Add(exam);
+        await _context.SaveChangesAsync();
+
+        var createDto = new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "Shortlist",
+            PhoneticUk: "/ˈʃɔːt.lɪst/",
+            PhoneticUs: "/ˈʃɔːrt.lɪst/",
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.B2,
+            PrimaryPartOfSpeech: PartOfSpeech.Noun,
+            Notes: "Initial note",
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(
+                    PartOfSpeech: PartOfSpeech.Noun,
+                    DefinitionVi: "Danh sách rút gọn ban đầu",
+                    DefinitionEn: "A list of candidates",
+                    Explanation: "Initial explanation",
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("His name is on the shortlist.", "Tên anh ấy trong danh sách rút gọn.", null)
+                    }
+                )
+            },
+            TopicIds: new List<Guid> { topic.Id },
+            ExamTagIds: new List<Guid> { exam.Id }
+        );
+
+        var created = await _vocabService.CreateWordAsync(createDto);
+        created.Should().NotBeNull();
+
+        // 2. Act: Prepare SmartImportItemDto matching the user's JSON with Overwrite conflict resolution
+        var importItem = new SmartImportItemDto(
+            RowIndex: 1,
+            Term: "Shortlist",
+            Level: CefrLevel.B2,
+            PartOfSpeech: PartOfSpeech.Noun,
+            DefinitionVi: "Danh sách sàng lọc, danh sách rút gọn",
+            DefinitionEn: "A list of people who have been judged the most suitable",
+            PhoneticUk: "/ˈʃɔːt.lɪst/",
+            PhoneticUs: "/ˈʃɔːrt.lɪst/",
+            Examples: "His name has been included on the final shortlist.",
+            Topics: "Business",
+            ExamTags: "IELTS, TOEIC",
+            Notes: "Updated note",
+            IsDuplicate: true,
+            IsValid: true,
+            ValidationMessage: null,
+            IsSelected: true,
+            RichMeanings: new List<WordMeaningCreateDto>
+            {
+                new(
+                    PartOfSpeech: PartOfSpeech.Noun,
+                    DefinitionVi: "Danh sách sàng lọc, danh sách rút gọn",
+                    DefinitionEn: "A list of people who have been judged the most suitable for a job",
+                    Explanation: "Danh sách các ứng viên sáng giá nhất",
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("His name has been included on the final shortlist for the branch manager role.", "Tên của anh ấy đã được đưa vào danh sách rút gọn.", null)
+                    }
+                ),
+                new(
+                    PartOfSpeech: PartOfSpeech.Verb,
+                    DefinitionVi: "Sàng lọc, đưa vào danh sách rút gọn",
+                    DefinitionEn: "To put someone on a shortlist",
+                    Explanation: "Hành động chọn lọc ứng viên",
+                    Examples: new List<ExampleSentenceCreateDto>
+                    {
+                        new("Candidates who are shortlisted will be contacted next week.", "Các ứng viên lọt vào danh sách rút gọn sẽ được liên hệ.", null)
+                    }
+                )
+            },
+            AllPartsOfSpeech: new List<PartOfSpeech> { PartOfSpeech.Noun, PartOfSpeech.Verb }
+        );
+
+        var exportImportService = new ExportImportService(_vocabRepo, _unitOfWork);
+        var request = new SmartImportCommitRequestDto(
+            Items: new List<SmartImportItemDto> { importItem },
+            ConflictResolution: ImportConflictResolution.Overwrite
+        );
+
+        var result = await exportImportService.CommitSmartImportAsync(request);
+
+        // 3. Assert: Verify import commit results
+        result.TotalUpdated.Should().Be(1);
+        result.TotalImported.Should().Be(0);
+        result.TotalErrors.Should().Be(0);
+        result.Errors.Should().BeEmpty();
+
+        // Verify word in database
+        var updatedWord = await _vocabRepo.GetByTermAsync("shortlist");
+        updatedWord.Should().NotBeNull();
+        updatedWord!.Meanings.Should().HaveCount(2);
+        updatedWord.WordTopics.Should().HaveCount(1);
+        updatedWord.WordExamTags.Should().HaveCount(2); // IELTS and newly created TOEIC
+
+        // Test idempotency: Calling CommitSmartImportAsync again with Overwrite must succeed without errors
+        var secondResult = await exportImportService.CommitSmartImportAsync(request);
+        secondResult.TotalUpdated.Should().Be(1);
+        secondResult.TotalErrors.Should().Be(0);
     }
 
     public void Dispose()

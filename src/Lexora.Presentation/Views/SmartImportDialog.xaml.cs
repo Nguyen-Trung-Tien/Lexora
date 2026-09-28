@@ -197,6 +197,13 @@ public sealed partial class SmartImportDialog : ContentDialog
         TextConflictTitle.Text = _loc.GetString("SmartImport_ConflictTitle");
         RadioConflictSkip.Content = _loc.GetString("SmartImport_ConflictSkip");
         RadioConflictOverwrite.Content = _loc.GetString("SmartImport_ConflictOverwrite");
+        ToolTipService.SetToolTip(RadioConflictSkip, _loc.GetString("SmartImport_ConflictSkipTooltip"));
+        ToolTipService.SetToolTip(RadioConflictOverwrite, _loc.GetString("SmartImport_ConflictOverwriteTooltip"));
+
+        TextMetricTotalLabel.Text = _loc.GetString("SmartImport_MetricTotal");
+        TextMetricValidLabel.Text = _loc.GetString("SmartImport_MetricValid");
+        TextMetricDuplicatesLabel.Text = _loc.GetString("SmartImport_MetricDuplicates");
+        TextMetricErrorsLabel.Text = _loc.GetString("SmartImport_MetricErrors");
 
         Step1Text.Text = _loc.GetString("SmartImport_StepSource");
         Step2Text.Text = _loc.GetString("SmartImport_StepPreview");
@@ -206,6 +213,12 @@ public sealed partial class SmartImportDialog : ContentDialog
         TextDone.Text = _loc.GetString("SmartImport_DoneBtn");
         BtnClearPaste.Content = _loc.GetString("SmartImport_ClearPaste");
         TextDropHint.Text = _loc.GetString("SmartImport_DragDropHint");
+
+        TextReportTitle.Text = _loc.GetString("SmartImport_CommitSuccess");
+        TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), 0);
+        TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
+        TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
+        TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 0);
     }
 
     private void GoToStep(int step)
@@ -629,6 +642,10 @@ public sealed partial class SmartImportDialog : ContentDialog
                 PanelImportProgress.Visibility = Visibility.Collapsed;
                 PanelImportReport.Visibility = Visibility.Visible;
 
+                IconReportStatus.Glyph = "\uE73E";
+                IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
+                TextReportTitle.Text = _loc.GetString("SmartImport_CommitSuccess");
+
                 TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), importResult.TotalImported);
                 TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), importResult.TotalUpdated);
                 TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), importResult.TotalSkipped);
@@ -639,7 +656,14 @@ public sealed partial class SmartImportDialog : ContentDialog
                 await DispatcherQueue.EnsureOnUIThreadAsync();
                 PanelImportProgress.Visibility = Visibility.Collapsed;
                 PanelImportReport.Visibility = Visibility.Visible;
-                TextReportTitle.Text = string.Format(_loc.GetString("SmartImport_ErrorTitleFormat"), ex.Message);
+                IconReportStatus.Glyph = "\uEA39";
+                IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+                var errorMsg = ex.InnerException?.Message ?? ex.Message;
+                TextReportTitle.Text = string.Format(_loc.GetString("SmartImport_ErrorTitleFormat"), errorMsg);
+                TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), 0);
+                TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
+                TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
+                TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 1);
             }
             finally
             {
@@ -870,6 +894,10 @@ public sealed partial class SmartImportDialog : ContentDialog
             PanelImportProgress.Visibility = Visibility.Collapsed;
             PanelImportReport.Visibility = Visibility.Visible;
 
+            IconReportStatus.Glyph = "\uE73E";
+            IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
+            TextReportTitle.Text = _loc.GetString("SmartImport_CommitSuccess");
+
             TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), CommitResult.TotalImported);
             TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), CommitResult.TotalUpdated);
             TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), CommitResult.TotalSkipped);
@@ -880,7 +908,14 @@ public sealed partial class SmartImportDialog : ContentDialog
             await DispatcherQueue.EnsureOnUIThreadAsync();
             PanelImportProgress.Visibility = Visibility.Collapsed;
             PanelImportReport.Visibility = Visibility.Visible;
-            TextReportTitle.Text = string.Format(_loc.GetString("SmartImport_ErrorTitleFormat"), ex.Message);
+            IconReportStatus.Glyph = "\uEA39";
+            IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+            var errorMsg = ex.InnerException?.Message ?? ex.Message;
+            TextReportTitle.Text = string.Format(_loc.GetString("SmartImport_ErrorTitleFormat"), errorMsg);
+            TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), 0);
+            TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
+            TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
+            TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), selectedItems.Count);
         }
         finally
         {

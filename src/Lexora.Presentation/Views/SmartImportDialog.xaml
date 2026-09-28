@@ -224,28 +224,28 @@
                     <!-- Total -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="8,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
-                            <TextBlock Text="Tổng số dòng" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TextMetricTotalLabel" Text="Tổng số" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             <TextBlock x:Name="TextMetricTotal" Text="0" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Valid -->
                     <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="8" Padding="8,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
-                            <TextBlock Text="Hợp lệ" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TextMetricValidLabel" Text="Hợp lệ" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                             <TextBlock x:Name="TextMetricValid" Text="0" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Duplicates -->
                     <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="8,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
-                            <TextBlock Text="Đã có" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TextMetricDuplicatesLabel" Text="Trùng lặp" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" />
                             <TextBlock x:Name="TextMetricDuplicates" Text="0" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Errors -->
                     <Border Grid.Column="3" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1" CornerRadius="8" Padding="8,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
-                            <TextBlock Text="Lỗi/Thiếu" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TextMetricErrorsLabel" Text="Lỗi/Thiếu" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" />
                             <TextBlock x:Name="TextMetricErrors" Text="0" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
@@ -256,26 +256,29 @@
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
-                        Padding="10,6">
-                    <Grid ColumnDefinitions="Auto,*">
-                        <TextBlock x:Name="TextConflictTitle"
-                                   Text="Trùng lặp:"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,12,0" />
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16">
+                        Padding="12,8">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE8B7;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock x:Name="TextConflictTitle"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <RadioButton x:Name="RadioConflictSkip"
                                          IsChecked="True"
                                          FontSize="12"
                                          GroupName="ConflictResolution"
                                          Checked="RadioConflict_Checked" />
-                            <RadioButton x:Name="RadioConflictOverwrite"
+                            <RadioButton Grid.Column="1"
+                                         x:Name="RadioConflictOverwrite"
                                          FontSize="12"
                                          GroupName="ConflictResolution"
                                          Checked="RadioConflict_Checked" />
-                        </StackPanel>
-                    </Grid>
+                        </Grid>
+                    </StackPanel>
                 </Border>
 
                 <!-- Selection Controls -->
@@ -399,11 +402,14 @@
                 <!-- Final Report Card -->
                 <StackPanel x:Name="PanelImportReport" Spacing="16" Visibility="Collapsed">
                     <StackPanel Spacing="6" HorizontalAlignment="Center">
-                        <FontIcon Glyph="&#xE73E;" FontSize="42" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
+                        <FontIcon x:Name="IconReportStatus" Glyph="&#xE73E;" FontSize="42" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                         <TextBlock x:Name="TextReportTitle"
                                    Text="Nhập dữ liệu thành công!"
                                    FontSize="16"
                                    FontWeight="Bold"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   MaxWidth="540"
                                    HorizontalAlignment="Center" />
                     </StackPanel>
 

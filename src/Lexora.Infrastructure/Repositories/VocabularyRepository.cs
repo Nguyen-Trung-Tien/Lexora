@@ -50,6 +50,10 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         return await DbSet
             .Include(w => w.Meanings)
                 .ThenInclude(m => m.Examples)
+            .Include(w => w.WordTopics)
+                .ThenInclude(wt => wt.Topic)
+            .Include(w => w.WordExamTags)
+                .ThenInclude(wet => wet.ExamTag)
             .Include(w => w.ReviewCard)
             .FirstOrDefaultAsync(w => w.NormalizedTerm == normalized, cancellationToken);
     }

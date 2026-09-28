@@ -673,6 +673,7 @@ public class ExportImportService : IExportImportService
 
                     _vocabRepo.RemoveWordChildren(existing);
 
+                    var newMeanings = new List<WordMeaning>();
                     if (item.RichMeanings != null && item.RichMeanings.Count > 0)
                     {
                         int mIdx = 0;
@@ -702,6 +703,7 @@ public class ExportImportService : IExportImportService
                                 }
                             }
 
+                            newMeanings.Add(meaning);
                             existing.Meanings.Add(meaning);
                         }
                     }
@@ -728,13 +730,20 @@ public class ExportImportService : IExportImportService
                             }
                         }
 
+                        newMeanings.Add(meaning);
                         existing.Meanings.Add(meaning);
                     }
 
+                    if (newMeanings.Count > 0)
+                    {
+                        _vocabRepo.AddMeanings(newMeanings);
+                    }
+
                     // Link topics
+                    var newTopics = new List<WordTopic>();
                     if (!string.IsNullOrWhiteSpace(item.Topics))
                     {
-                        var tTokens = item.Topics.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        var tTokens = item.Topics.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                         foreach (var tname in tTokens)
                         {
                             var lower = tname.ToLowerInvariant();
@@ -744,14 +753,24 @@ public class ExportImportService : IExportImportService
                                 await _vocabRepo.AddTopicAsync(top, cancellationToken);
                                 allTopics[lower] = top;
                             }
-                            existing.WordTopics.Add(new WordTopic { WordId = existing.Id, TopicId = top.Id, Topic = top });
+                            if (!existing.WordTopics.Any(wt => wt.TopicId == top.Id))
+                            {
+                                var wt = new WordTopic { WordId = existing.Id, TopicId = top.Id };
+                                existing.WordTopics.Add(wt);
+                                newTopics.Add(wt);
+                            }
                         }
+                    }
+                    if (newTopics.Count > 0)
+                    {
+                        _vocabRepo.AddWordTopics(newTopics);
                     }
 
                     // Link exam tags
+                    var newTags = new List<WordExamTag>();
                     if (!string.IsNullOrWhiteSpace(item.ExamTags))
                     {
-                        var etTokens = item.ExamTags.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        var etTokens = item.ExamTags.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                         foreach (var etname in etTokens)
                         {
                             var lower = etname.ToLowerInvariant();
@@ -766,8 +785,17 @@ public class ExportImportService : IExportImportService
                                 await _vocabRepo.AddExamTagAsync(et, cancellationToken);
                                 allExamTags[lower] = et;
                             }
-                            existing.WordExamTags.Add(new WordExamTag { WordId = existing.Id, ExamTagId = et.Id, ExamTag = et });
+                            if (!existing.WordExamTags.Any(wet => wet.ExamTagId == et.Id))
+                            {
+                                var wet = new WordExamTag { WordId = existing.Id, ExamTagId = et.Id };
+                                existing.WordExamTags.Add(wet);
+                                newTags.Add(wet);
+                            }
                         }
+                    }
+                    if (newTags.Count > 0)
+                    {
+                        _vocabRepo.AddWordExamTags(newTags);
                     }
 
                     await _vocabRepo.UpdateAsync(existing, cancellationToken);
@@ -853,7 +881,7 @@ public class ExportImportService : IExportImportService
             // Link topics
             if (!string.IsNullOrWhiteSpace(item.Topics))
             {
-                var tTokens = item.Topics.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var tTokens = item.Topics.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 foreach (var tname in tTokens)
                 {
                     var lower = tname.ToLowerInvariant();
@@ -863,14 +891,17 @@ public class ExportImportService : IExportImportService
                         await _vocabRepo.AddTopicAsync(top, cancellationToken);
                         allTopics[lower] = top;
                     }
-                    word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = top.Id, Topic = top });
+                    if (!word.WordTopics.Any(wt => wt.TopicId == top.Id))
+                    {
+                        word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = top.Id, Topic = top });
+                    }
                 }
             }
 
             // Link exam tags
             if (!string.IsNullOrWhiteSpace(item.ExamTags))
             {
-                var etTokens = item.ExamTags.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var etTokens = item.ExamTags.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 foreach (var etname in etTokens)
                 {
                     var lower = etname.ToLowerInvariant();
@@ -885,7 +916,10 @@ public class ExportImportService : IExportImportService
                         await _vocabRepo.AddExamTagAsync(et, cancellationToken);
                         allExamTags[lower] = et;
                     }
-                    word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = et.Id, ExamTag = et });
+                    if (!word.WordExamTags.Any(wet => wet.ExamTagId == et.Id))
+                    {
+                        word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = et.Id, ExamTag = et });
+                    }
                 }
             }
 
