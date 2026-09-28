@@ -918,7 +918,7 @@ public class ExportImportService : IExportImportService
                     }
                     if (!word.WordExamTags.Any(wet => wet.ExamTagId == et.Id))
                     {
-                        word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = et.Id, ExamTag = et });
+                        word.WordExamTags.Add(new WordExamTag { WordId = word.Id, ExamTagId = et.Id });
                     }
                 }
             }
