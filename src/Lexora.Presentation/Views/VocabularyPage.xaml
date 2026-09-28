@@ -812,12 +812,6 @@
                         <FontIcon Glyph="&#xE8F1;" FontSize="40" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                         <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptyUnitsTitle')}" FontWeight="SemiBold" HorizontalAlignment="Center" TextWrapping="Wrap" />
                         <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptyUnitsSubtitle')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" />
-                        <Button Style="{ThemeResource AccentButtonStyle}" CornerRadius="8" Padding="14,8" Margin="0,8,0,0" Click="AddTopicButton_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE710;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_AddTopic')}" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
                     </StackPanel>
 
 
