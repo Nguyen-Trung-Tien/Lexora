@@ -325,7 +325,7 @@
                                     Padding="10,0" Height="34" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                     <FontIcon Glyph="&#xE82D;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                    <TextBlock Text="{x:Bind ViewModel.Words.Count, Mode=OneWay}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind ViewModel.TotalWordCount, Mode=OneWay}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
                                     <TextBlock Text="{x:Bind Loc.GetString('Vocab_WordsCount')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
@@ -346,12 +346,12 @@
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="12">
-                <Grid RowDefinitions="Auto,Auto,*">
+                <Grid RowDefinitions="Auto,Auto,*,Auto">
                     <Grid Padding="16,14" ColumnDefinitions="*,Auto" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                         <TextBlock Text="{x:Bind Loc.GetString('Vocab_Title')}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" />
                         <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,2">
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock Text="{x:Bind ViewModel.Words.Count, Mode=OneWay}" FontWeight="Bold" FontSize="12" />
+                                <TextBlock Text="{x:Bind ViewModel.TotalWordCount, Mode=OneWay}" FontWeight="Bold" FontSize="12" />
                                 <TextBlock Text="{x:Bind Loc.GetString('Vocab_WordsCount')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             </StackPanel>
                         </Border>
@@ -444,6 +444,70 @@
                             </ListView.ItemTemplate>
                         </ListView>
                     </Grid>
+
+                    <!-- Pagination Bar (Row 3) -->
+                    <Border Grid.Row="3"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,1,0,0"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            CornerRadius="0,0,12,12"
+                            Padding="10,8">
+                        <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                            <!-- Page Size Selector -->
+                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <ComboBox x:Name="PageSizeCombo"
+                                          SelectedIndex="1"
+                                          SelectionChanged="PageSizeCombo_SelectionChanged"
+                                          MinWidth="66" Height="28" Padding="6,2" FontSize="11" CornerRadius="6">
+                                    <ComboBoxItem Content="20" />
+                                    <ComboBoxItem Content="50" />
+                                    <ComboBoxItem Content="100" />
+                                    <ComboBoxItem Content="200" />
+                                </ComboBox>
+                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_PageSizeSuffix')}"
+                                           VerticalAlignment="Center" FontSize="11"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+
+                            <!-- Navigation Buttons & Page Info -->
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">
+                                <Button Command="{x:Bind ViewModel.FirstPageCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}"
+                                        Padding="0" Height="28" Width="28" CornerRadius="6"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_FirstPage')}">
+                                    <FontIcon Glyph="&#xE892;" FontSize="11" />
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.PreviousPageCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}"
+                                        Padding="0" Height="28" Width="28" CornerRadius="6"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PrevPage')}">
+                                    <FontIcon Glyph="&#xE76B;" FontSize="11" />
+                                </Button>
+
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="6"
+                                        Padding="8,0" Height="28">
+                                    <TextBlock Text="{x:Bind ViewModel.PageDisplayInfo, Mode=OneWay}"
+                                               FontSize="11" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </Border>
+
+                                <Button Command="{x:Bind ViewModel.NextPageCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}"
+                                        Padding="0" Height="28" Width="28" CornerRadius="6"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_NextPage')}">
+                                    <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.LastPageCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}"
+                                        Padding="0" Height="28" Width="28" CornerRadius="6"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_LastPage')}">
+                                    <FontIcon Glyph="&#xE893;" FontSize="11" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
 

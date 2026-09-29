@@ -353,6 +353,22 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
+    private async void PageSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (_isInitializing) return;
+            if (PageSizeCombo.SelectedItem is ComboBoxItem cbi && int.TryParse(cbi.Content?.ToString(), out int size))
+            {
+                await ViewModel.ChangePageSizeAsync(size);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] PageSizeCombo_SelectionChanged error: {ex.Message}");
+        }
+    }
+
     private void ResetFiltersButton_Click(object sender, RoutedEventArgs e)
     {
         SearchBox.Text = string.Empty;

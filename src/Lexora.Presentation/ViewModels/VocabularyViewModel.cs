@@ -88,6 +88,45 @@ public partial class VocabularyViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasSelection))]
     public partial bool IsSelectionMode { get; set; } = false;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
+    public partial int TotalWordCount { get; set; } = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
+    public partial int PageSize { get; set; } = 50;
+
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+    public string PageDisplayInfo => $"{CurrentPage} / {Math.Max(1, TotalPages)}";
+    public string ItemRangeDisplayInfo => TotalWordCount > 0
+        ? $"{Math.Min((CurrentPage - 1) * PageSize + 1, TotalWordCount)}-{Math.Min(CurrentPage * PageSize, TotalWordCount)} / {TotalWordCount}"
+        : "0 / 0";
+
+    partial void OnSearchTermChanged(string value) => CurrentPage = 1;
+    partial void OnSelectedLevelChanged(CefrLevel? value) => CurrentPage = 1;
+    partial void OnSelectedPartOfSpeechChanged(PartOfSpeech? value) => CurrentPage = 1;
+    partial void OnSelectedTopicIdChanged(Guid? value) => CurrentPage = 1;
+    partial void OnSelectedExamTypeChanged(ExamType? value) => CurrentPage = 1;
+    partial void OnSelectedStatusChanged(LearningStatus? value) => CurrentPage = 1;
+    partial void OnSelectedQuickFilterChanged(string value) => CurrentPage = 1;
+    partial void OnSortByChanged(string value) => CurrentPage = 1;
+    partial void OnIsAscendingChanged(bool value) => CurrentPage = 1;
+
     public ObservableCollection<Guid> SelectedWordIds { get; } = new();
 
     public int SelectedCount => SelectedWordIds.Count;
@@ -264,44 +303,112 @@ public partial class VocabularyViewModel : ObservableObject
         IsLoading = true;
         try
         {
-            var results = await _vocabService.SearchWordsAsync(
-                search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
-                level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
-                pos: SelectedPartOfSpeech,
-                topicId: SelectedTopicId,
-                examType: SelectedExamType,
-                status: SelectedStatus,
-                sortBy: SelectedQuickFilter == "DueToday" ? "nextreview" : SortBy,
-                isAscending: SelectedQuickFilter == "DueToday" || IsAscending,
-                pageSize: 200,
-                cancellationToken: ct);
+            List<WordDto> resultList;
 
-            if (ct.IsCancellationRequested) return;
+            if (SelectedQuickFilter == "DueToday" || SelectedQuickFilter == "Weak")
+            {
+                // In-memory status filter: fetch candidates matching other filters then paginate
+                var allCandidates = await _vocabService.SearchWordsAsync(
+                    search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
+                    level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                    pos: SelectedPartOfSpeech,
+                    topicId: SelectedTopicId,
+                    examType: SelectedExamType,
+                    status: SelectedStatus,
+                    sortBy: SelectedQuickFilter == "DueToday" ? "nextreview" : SortBy,
+                    isAscending: SelectedQuickFilter == "DueToday" || IsAscending,
+                    page: 1,
+                    pageSize: 10000,
+                    cancellationToken: ct);
 
-            var filteredResults = results.AsEnumerable();
-            if (SelectedQuickFilter == "DueToday")
-            {
-                filteredResults = filteredResults.Where(w => w.IsDueNow);
-            }
-            else if (SelectedQuickFilter == "Weak")
-            {
-                filteredResults = filteredResults.Where(w => w.Lapses > 0 || w.LearningStatus == LearningStatus.NotRemembered);
-            }
+                if (ct.IsCancellationRequested) return;
 
-            if (SortBy == "pos")
-            {
-                filteredResults = IsAscending
-                    ? filteredResults.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
-                    : filteredResults.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term);
-            }
-            else if (SortBy == "multipos")
-            {
-                filteredResults = filteredResults
-                    .OrderByDescending(w => w.AllPartsOfSpeech.Count)
-                    .ThenBy(w => w.Term);
-            }
+                var filtered = allCandidates.AsEnumerable();
+                if (SelectedQuickFilter == "DueToday")
+                {
+                    filtered = filtered.Where(w => w.IsDueNow);
+                }
+                else if (SelectedQuickFilter == "Weak")
+                {
+                    filtered = filtered.Where(w => w.Lapses > 0 || w.LearningStatus == LearningStatus.NotRemembered);
+                }
 
-            var resultList = filteredResults.ToList();
+                if (SortBy == "pos")
+                {
+                    filtered = IsAscending
+                        ? filtered.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
+                        : filtered.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term);
+                }
+                else if (SortBy == "multipos")
+                {
+                    filtered = filtered
+                        .OrderByDescending(w => w.AllPartsOfSpeech.Count)
+                        .ThenBy(w => w.Term);
+                }
+
+                var fullFilteredList = filtered.ToList();
+                TotalWordCount = fullFilteredList.Count;
+                TotalPages = Math.Max(1, (int)Math.Ceiling((double)TotalWordCount / PageSize));
+
+                if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+                if (CurrentPage < 1) CurrentPage = 1;
+
+                resultList = fullFilteredList
+                    .Skip((CurrentPage - 1) * PageSize)
+                    .Take(PageSize)
+                    .ToList();
+            }
+            else
+            {
+                // Standard database-level pagination
+                var total = await _vocabService.CountWordsAsync(
+                    search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
+                    level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                    pos: SelectedPartOfSpeech,
+                    topicId: SelectedTopicId,
+                    examType: SelectedExamType,
+                    status: SelectedStatus,
+                    cancellationToken: ct);
+
+                if (ct.IsCancellationRequested) return;
+
+                TotalWordCount = total;
+                TotalPages = Math.Max(1, (int)Math.Ceiling((double)TotalWordCount / PageSize));
+
+                if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+                if (CurrentPage < 1) CurrentPage = 1;
+
+                var results = await _vocabService.SearchWordsAsync(
+                    search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
+                    level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                    pos: SelectedPartOfSpeech,
+                    topicId: SelectedTopicId,
+                    examType: SelectedExamType,
+                    status: SelectedStatus,
+                    sortBy: SortBy,
+                    isAscending: IsAscending,
+                    page: CurrentPage,
+                    pageSize: PageSize,
+                    cancellationToken: ct);
+
+                if (ct.IsCancellationRequested) return;
+
+                var filteredResults = results.AsEnumerable();
+                if (SortBy == "pos")
+                {
+                    filteredResults = IsAscending
+                        ? filteredResults.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
+                        : filteredResults.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term);
+                }
+                else if (SortBy == "multipos")
+                {
+                    filteredResults = filteredResults
+                        .OrderByDescending(w => w.AllPartsOfSpeech.Count)
+                        .ThenBy(w => w.Term);
+                }
+
+                resultList = filteredResults.ToList();
+            }
 
             await _dispatcherQueue.EnsureOnUIThreadAsync();
 
@@ -344,6 +451,57 @@ public partial class VocabularyViewModel : ObservableObject
         {
             await _dispatcherQueue.EnsureOnUIThreadAsync();
             IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task NextPageAsync()
+    {
+        if (CurrentPage < TotalPages)
+        {
+            CurrentPage++;
+            await LoadWordsAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task PreviousPageAsync()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await LoadWordsAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task FirstPageAsync()
+    {
+        if (CurrentPage != 1)
+        {
+            CurrentPage = 1;
+            await LoadWordsAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task LastPageAsync()
+    {
+        if (CurrentPage != TotalPages)
+        {
+            CurrentPage = TotalPages;
+            await LoadWordsAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task ChangePageSizeAsync(int newSize)
+    {
+        if (newSize > 0 && PageSize != newSize)
+        {
+            PageSize = newSize;
+            CurrentPage = 1;
+            await LoadWordsAsync();
         }
     }
 

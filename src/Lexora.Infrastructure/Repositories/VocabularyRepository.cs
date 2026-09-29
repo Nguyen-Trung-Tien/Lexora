@@ -92,6 +92,12 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             "nextreview" => isAscending
                 ? query.OrderBy(w => w.ReviewCard != null ? w.ReviewCard.NextReviewAt : DateTime.MaxValue)
                 : query.OrderByDescending(w => w.ReviewCard != null ? w.ReviewCard.NextReviewAt : DateTime.MinValue),
+            "pos" => isAscending
+                ? query.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
+                : query.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term),
+            "multipos" => isAscending
+                ? query.OrderBy(w => w.Meanings.Count).ThenBy(w => w.Term)
+                : query.OrderByDescending(w => w.Meanings.Count).ThenBy(w => w.Term),
             _ => query.OrderBy(w => w.Term)
         };
 
