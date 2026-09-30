@@ -145,6 +145,9 @@ public partial class GrammarViewModel : ObservableObject
     public ObservableCollection<TestOptionItem> CurrentPracticeOptions { get; } = new();
     public ObservableCollection<GrammarQuizQuestionDto> PracticeQuestions { get; } = new();
 
+    /// <summary>Raised when StartPracticeAsync generates zero questions for the selected filters.</summary>
+    public event Action? NoPracticeQuestionsAvailable;
+
     public GrammarViewModel(
         IGrammarService grammarService,
         IGrammarExportImportService grammarExportImportService,
@@ -524,7 +527,11 @@ public partial class GrammarViewModel : ObservableObject
                 examType: SelectedExamTarget == ExamType.General ? null : SelectedExamTarget
             );
 
-            if (questions.Count == 0) return;
+            if (questions.Count == 0)
+            {
+                NoPracticeQuestionsAvailable?.Invoke();
+                return;
+            }
 
             PracticeQuestions.Clear();
             foreach (var q in questions) PracticeQuestions.Add(q);

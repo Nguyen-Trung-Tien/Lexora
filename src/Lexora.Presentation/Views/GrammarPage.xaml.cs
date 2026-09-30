@@ -16,12 +16,19 @@ public sealed partial class GrammarPage : Page
 {
     public GrammarViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
+    private readonly IToastNotificationService? _toastService;
 
     public GrammarPage()
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<GrammarViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
+        _toastService = App.Current.Services.GetService<IToastNotificationService>();
+
+        ViewModel.NoPracticeQuestionsAvailable += () =>
+        {
+            _toastService?.ShowWarning(Loc.GetString("Grammar_Practice_NoQuestions"));
+        };
 
         Loc.LanguageChanged += OnLanguageChanged;
         RegisterShortcuts();

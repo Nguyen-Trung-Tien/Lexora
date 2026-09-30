@@ -16,12 +16,14 @@ public sealed partial class VocabularyPage : Page
     public VocabularyViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
     private bool _isInitializing = true;
+    private readonly IToastNotificationService? _toastService;
 
     public VocabularyPage()
     {
         InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<VocabularyViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
+        _toastService = App.Current.Services.GetService<IToastNotificationService>();
 
         _isInitializing = true;
 
@@ -825,9 +827,11 @@ public sealed partial class VocabularyPage : Page
         {
             if (sender is Button btn) btn.IsEnabled = false;
             await ViewModel.MarkWordStatusAsync(remembered: true);
+            _toastService?.ShowSuccess(Loc.GetString("Vocab_MarkRemembered"));
         }
         catch (Exception ex)
         {
+            _toastService?.ShowError(ex.Message, Loc.GetString("Vocab_ErrorMarkStatus"));
             await ShowErrorDialogAsync(Loc.GetString("Vocab_ErrorMarkStatus"), ex.Message);
         }
         finally
@@ -843,9 +847,11 @@ public sealed partial class VocabularyPage : Page
         {
             if (sender is Button btn) btn.IsEnabled = false;
             await ViewModel.MarkWordStatusAsync(remembered: false);
+            _toastService?.ShowInfo(Loc.GetString("Vocab_MarkNotRemembered"));
         }
         catch (Exception ex)
         {
+            _toastService?.ShowError(ex.Message, Loc.GetString("Vocab_ErrorMarkStatus"));
             await ShowErrorDialogAsync(Loc.GetString("Vocab_ErrorMarkStatus"), ex.Message);
         }
         finally

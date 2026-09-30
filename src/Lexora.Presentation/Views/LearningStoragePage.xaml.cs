@@ -120,8 +120,16 @@ public sealed partial class LearningStoragePage : Page
     {
         if (sender is Button btn && btn.Tag is LearningStorageItemDto item)
         {
-            await ViewModel.MarkAsMasteredAsync(item);
-            _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Mastered"));
+            try
+            {
+                await ViewModel.MarkAsMasteredAsync(item);
+                _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Mastered"));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] CardMastered error: {ex.Message}");
+                _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+            }
         }
     }
 
@@ -169,8 +177,16 @@ public sealed partial class LearningStoragePage : Page
             var res = await dialog.ShowAsync();
             if (res == ContentDialogResult.Primary)
             {
-                await ViewModel.SaveNoteAsync((item.Id, noteBox.Text));
-                _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_StatusUpdated"));
+                try
+                {
+                    await ViewModel.SaveNoteAsync((item.Id, noteBox.Text));
+                    _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_StatusUpdated"));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] SaveNote error: {ex.Message}");
+                    _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+                }
             }
         }
     }
@@ -192,8 +208,16 @@ public sealed partial class LearningStoragePage : Page
             var res = await dialog.ShowAsync();
             if (res == ContentDialogResult.Primary)
             {
-                await ViewModel.RemoveItemAsync(item);
-                _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Removed"));
+                try
+                {
+                    await ViewModel.RemoveItemAsync(item);
+                    _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Removed"));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] RemoveItem error: {ex.Message}");
+                    _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+                }
             }
         }
     }
