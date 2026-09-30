@@ -24,7 +24,6 @@ public sealed partial class LearningStoragePage : Page
 
     public LearningStoragePage()
     {
-        InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<LearningStorageViewModel>();
         Loc = App.Current.Services.GetRequiredService<Services.ILocalizationService>();
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
@@ -32,6 +31,7 @@ public sealed partial class LearningStoragePage : Page
         _grammarService = App.Current.Services.GetRequiredService<IGrammarService>();
         _storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
+        InitializeComponent();
     }
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
@@ -86,7 +86,8 @@ public sealed partial class LearningStoragePage : Page
 
     private async void FilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (StatusFilterComboBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+        if (ViewModel == null) return;
+        if (StatusFilterComboBox?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
         {
             await ViewModel.ApplyFilterAsync(tag);
         }

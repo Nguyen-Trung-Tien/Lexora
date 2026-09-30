@@ -149,9 +149,8 @@
                                 <FontIcon Grid.Column="1" Glyph="&#xE9D9;" FontSize="14"
                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                             </Grid>
-                            <TextBlock Text="{x:Bind ViewModel.AverageRetention, Mode=OneWay, Converter={StaticResource RetentionToBrushConverter}}"
-                                       FontSize="24" FontWeight="Bold"
-                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}">
+                            <TextBlock FontSize="24" FontWeight="Bold"
+                                       Foreground="{x:Bind ViewModel.AverageRetention, Mode=OneWay, Converter={StaticResource RetentionToBrushConverter}}">
                                 <Run Text="{x:Bind ViewModel.AverageRetention, Mode=OneWay}" /><Run Text="%" FontSize="16" />
                             </TextBlock>
                         </StackPanel>
@@ -266,7 +265,7 @@
                 <!-- 6. Virtualized Storage Items List -->
                 <ListView ItemsSource="{x:Bind ViewModel.StorageItems, Mode=OneWay}"
                           SelectionMode="None"
-                          Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
+                          Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -404,7 +403,7 @@
 
                 <!-- 7. Pagination Bar -->
                 <Grid ColumnDefinitions="*,Auto,*"
-                      Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
+                      Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <Button HorizontalAlignment="Left" CornerRadius="8" Padding="14,6"
                             IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}"
                             Click="PrevPage_Click">
@@ -468,7 +467,7 @@
                     </Grid>
 
                     <!-- Practice In-Progress View -->
-                    <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsPracticeCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
+                    <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsPracticeCompleted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                         
                         <!-- Question Card -->
                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
@@ -505,7 +504,7 @@
                                         <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                                                   Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                         <FontIcon Glyph="&#xE711;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                                  Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}" />
+                                                  Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
                                         <TextBlock Text="{x:Bind ViewModel.CurrentQuestion.Explanation, Mode=OneWay}"
                                                    FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
                                     </StackPanel>
@@ -517,7 +516,7 @@
                         <Grid Margin="0,8,0,0">
                             <Button Style="{ThemeResource AccentButtonStyle}"
                                     HorizontalAlignment="Right" CornerRadius="8" Padding="20,10"
-                                    Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}"
+                                    Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                     Click="SubmitPractice_Click">
                                 <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Submit')}" FontWeight="SemiBold" />
                             </Button>
