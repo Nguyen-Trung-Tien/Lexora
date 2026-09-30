@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<IExportImportService, ExportImportService>();
         services.AddScoped<IGrammarExportImportService, GrammarExportImportService>();
         services.AddScoped<ITestService, TestService>();
+        services.AddScoped<ILearningStorageService, LearningStorageService>();
         services.AddSingleton<IFuzzySearchService, FuzzySearchService>();
         services.AddScoped<IStudyAdvisorService, StudyAdvisorService>();
         services.AddSingleton<IPronunciationVoiceResolver, PronunciationVoiceResolver>();

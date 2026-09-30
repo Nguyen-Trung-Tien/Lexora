@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IVocabularyRepository, VocabularyRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IGrammarRepository, GrammarRepository>();
+        services.AddScoped<ILearningStorageRepository, LearningStorageRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Initializer

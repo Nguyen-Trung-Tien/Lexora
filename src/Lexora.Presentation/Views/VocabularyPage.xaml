@@ -631,6 +631,12 @@
                                     <Border Background="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay, Converter={StaticResource CefrToBrushConverter}}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="12" />
                                     </Border>
+                                    <Button Click="MoveToStorageButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_BtnMoveToStorage')}" CornerRadius="8" Padding="8,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon Glyph="&#xE81C;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Nav_LearningStorage')}" FontSize="12" />
+                                        </StackPanel>
+                                    </Button>
                                     <Button Click="ReviewThisWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_BtnReview')}" CornerRadius="8" Padding="8,6">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE823;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />

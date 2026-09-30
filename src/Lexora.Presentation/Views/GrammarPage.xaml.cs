@@ -1,5 +1,6 @@
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
+using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -320,6 +321,23 @@ public sealed partial class GrammarPage : Page
         {
             ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Edit"), ex.Message);
             await ShowErrorDialogAsync(Loc.GetString("Action_Edit"), ex.Message);
+        }
+    }
+
+    private async void MoveToStorageButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedRule != null)
+        {
+            try
+            {
+                var storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
+                await storageService.MoveGrammarToStorageAsync(ViewModel.SelectedRule.Id, StorageAdditionReason.Manual);
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Nav_LearningStorage"), Loc.GetString("Storage_Toast_Added"));
+            }
+            catch (Exception ex)
+            {
+                ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Nav_LearningStorage"), ex.Message);
+            }
         }
     }
 

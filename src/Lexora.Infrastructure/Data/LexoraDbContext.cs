@@ -22,6 +22,7 @@ public class LexoraDbContext : DbContext
     public DbSet<GrammarRule> GrammarRules => Set<GrammarRule>();
     public DbSet<GrammarExample> GrammarExamples => Set<GrammarExample>();
     public DbSet<UserStreak> UserStreaks => Set<UserStreak>();
+    public DbSet<LearningStorageItem> LearningStorageItems => Set<LearningStorageItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -165,6 +166,31 @@ public class LexoraDbContext : DbContext
         {
             b.HasKey(s => s.Id);
             b.HasIndex(s => s.LastActiveDate);
+        });
+
+        // LearningStorageItem configuration
+        modelBuilder.Entity<LearningStorageItem>(b =>
+        {
+            b.HasKey(lsi => lsi.Id);
+            b.Property(lsi => lsi.Note).HasMaxLength(1000);
+            b.HasIndex(lsi => lsi.ItemType);
+            b.HasIndex(lsi => lsi.Status);
+            b.HasIndex(lsi => lsi.NextReviewAt);
+            b.HasIndex(lsi => lsi.RetentionProbability);
+            b.HasIndex(lsi => new { lsi.ItemType, lsi.Status });
+            b.HasIndex(lsi => new { lsi.ItemType, lsi.NextReviewAt });
+            b.HasIndex(lsi => lsi.WordId).IsUnique().HasFilter("\"WordId\" IS NOT NULL");
+            b.HasIndex(lsi => lsi.GrammarRuleId).IsUnique().HasFilter("\"GrammarRuleId\" IS NOT NULL");
+
+            b.HasOne(lsi => lsi.Word)
+                .WithMany()
+                .HasForeignKey(lsi => lsi.WordId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(lsi => lsi.GrammarRule)
+                .WithMany()
+                .HasForeignKey(lsi => lsi.GrammarRuleId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

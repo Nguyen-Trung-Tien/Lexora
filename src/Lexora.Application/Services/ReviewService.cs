@@ -12,15 +12,18 @@ public class ReviewService : IReviewService
     private readonly IReviewRepository _reviewRepo;
     private readonly ISpacedRepetitionEngine _srEngine;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILearningStorageRepository? _storageRepo;
 
     public ReviewService(
         IReviewRepository reviewRepo,
         ISpacedRepetitionEngine srEngine,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILearningStorageRepository? storageRepo = null)
     {
         _reviewRepo = reviewRepo;
         _srEngine = srEngine;
         _unitOfWork = unitOfWork;
+        _storageRepo = storageRepo;
     }
 
     public async Task<IReadOnlyList<ReviewCardDto>> GetDueCardsAsync(int limit = 50, CancellationToken cancellationToken = default)
@@ -215,6 +218,41 @@ public class ReviewService : IReviewService
         await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
 
         await _reviewRepo.UpdateAsync(card, cancellationToken);
+
+        // Auto-sync with Learning Storage when user lapses or rates Again
+        if (rating == ReviewRating.Again && _storageRepo != null)
+        {
+            var existingStorage = await _storageRepo.GetByWordIdAsync(card.WordId, cancellationToken);
+            if (existingStorage == null)
+            {
+                var storageItem = new LearningStorageItem
+                {
+                    ItemType = StorageItemType.Vocabulary,
+                    WordId = card.WordId,
+                    Status = StorageLearningStatus.Weak,
+                    ReasonAdded = StorageAdditionReason.Lapsed,
+                    EaseFactor = card.EaseFactor,
+                    IntervalDays = 1,
+                    Repetitions = 0,
+                    Lapses = card.Lapses,
+                    RetentionProbability = _srEngine.CalculateRetentionProbability(card),
+                    NextReviewAt = card.NextReviewAt,
+                    LastReviewedAt = card.LastReviewedAt
+                };
+                await _storageRepo.AddAsync(storageItem, cancellationToken);
+            }
+            else
+            {
+                existingStorage.Status = StorageLearningStatus.Weak;
+                existingStorage.Lapses = card.Lapses;
+                existingStorage.IntervalDays = 1;
+                existingStorage.NextReviewAt = card.NextReviewAt;
+                existingStorage.RetentionProbability = _srEngine.CalculateRetentionProbability(card);
+                existingStorage.UpdatedAt = DateTime.UtcNow;
+                await _storageRepo.UpdateAsync(existingStorage, cancellationToken);
+            }
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new ReviewEvaluationResultDto(
@@ -299,6 +337,37 @@ public class ReviewService : IReviewService
         _reviewRepo.AddStudyLog(log);
 
         await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
+
+        if (!remembered && _storageRepo != null)
+        {
+            var existingStorage = await _storageRepo.GetByWordIdAsync(wordId, cancellationToken);
+            if (existingStorage == null)
+            {
+                var storageItem = new LearningStorageItem
+                {
+                    ItemType = StorageItemType.Vocabulary,
+                    WordId = wordId,
+                    Status = StorageLearningStatus.Weak,
+                    ReasonAdded = StorageAdditionReason.Manual,
+                    EaseFactor = card.EaseFactor,
+                    IntervalDays = 1,
+                    Repetitions = 0,
+                    Lapses = card.Lapses,
+                    RetentionProbability = _srEngine.CalculateRetentionProbability(card),
+                    NextReviewAt = card.NextReviewAt,
+                    LastReviewedAt = card.LastReviewedAt
+                };
+                await _storageRepo.AddAsync(storageItem, cancellationToken);
+            }
+            else
+            {
+                existingStorage.Status = StorageLearningStatus.Weak;
+                existingStorage.NextReviewAt = card.NextReviewAt;
+                existingStorage.UpdatedAt = DateTime.UtcNow;
+                await _storageRepo.UpdateAsync(existingStorage, cancellationToken);
+            }
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 

@@ -1,0 +1,479 @@
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
+using Lexora.Domain.Enums;
+using Lexora.Presentation.Services;
+using Microsoft.UI.Dispatching;
+
+namespace Lexora.Presentation.ViewModels;
+
+public partial class LearningStorageViewModel : ObservableObject
+{
+    private readonly ILearningStorageService _storageService;
+    private readonly Services.ILocalizationService _localizationService;
+    private readonly IAudioPlayerService? _audioPlayer;
+    private readonly Services.ISoundFeedbackService? _soundFeedback;
+    private readonly DispatcherQueue? _dispatcherQueue;
+
+    public Services.ILocalizationService Loc => _localizationService;
+
+    // Active View / Tab: 0 = Vocabulary, 1 = Grammar
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsVocabTabSelected))]
+    [NotifyPropertyChangedFor(nameof(IsGrammarTabSelected))]
+    public partial int SelectedTab { get; set; } = 0;
+
+    public bool IsVocabTabSelected => SelectedTab == 0;
+    public bool IsGrammarTabSelected => SelectedTab == 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmptyState))]
+    public partial bool IsLoading { get; set; } = true;
+
+    public bool IsEmptyState => !IsLoading && StorageItems.Count == 0;
+
+    [ObservableProperty]
+    public partial string SearchQuery { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedStatusFilter { get; set; } = "All";
+
+    [ObservableProperty]
+    public partial LearningStorageItemDto? SelectedItem { get; set; }
+
+    // Statistics Cards
+    [ObservableProperty]
+    public partial int TotalItems { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial int VocabCount { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial int GrammarCount { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial int WeakCount { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial int LearningCount { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial int MasteredCount { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial int DueTodayCount { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial double AverageRetention { get; set; } = 0.0;
+
+    // Pagination
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    public partial int TotalCount { get; set; } = 0;
+
+    public int PageSize { get; set; } = 20;
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    public string PageDisplayInfo => string.Format(
+        _localizationService.GetString("Storage_Pagination_Format"),
+        CurrentPage, Math.Max(1, TotalPages), TotalCount);
+
+    public ObservableCollection<LearningStorageItemDto> StorageItems { get; } = new();
+
+    // Practice Flow State
+    [ObservableProperty]
+    public partial bool IsPracticeActive { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool IsPracticeLoading { get; set; } = false;
+
+    [ObservableProperty]
+    public partial int CurrentPracticeIndex { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial StoragePracticeQuestionDto? CurrentQuestion { get; set; }
+
+    [ObservableProperty]
+    public partial string? PracticeSelectedAnswer { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsPracticeAnswerSubmitted { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool IsCurrentAnswerCorrect { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool IsPracticeCompleted { get; set; } = false;
+
+    [ObservableProperty]
+    public partial string PracticeProgressText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PracticeResultSummaryText { get; set; } = string.Empty;
+
+    private readonly List<StoragePracticeQuestionDto> _practiceQuestions = new();
+    private readonly List<StoragePracticeSubmissionDto> _practiceSubmissions = new();
+
+    public LearningStorageViewModel(
+        ILearningStorageService storageService,
+        Services.ILocalizationService localizationService,
+        IAudioPlayerService? audioPlayer = null,
+        Services.ISoundFeedbackService? soundFeedback = null)
+    {
+        _storageService = storageService;
+        _localizationService = localizationService;
+        _audioPlayer = audioPlayer;
+        _soundFeedback = soundFeedback;
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+
+        _localizationService.LanguageChanged += (s, e) =>
+        {
+            OnPropertyChanged(nameof(PageDisplayInfo));
+        };
+    }
+
+    [RelayCommand]
+    public async Task InitializeAsync()
+    {
+        await LoadStatisticsAsync();
+        await LoadItemsAsync();
+    }
+
+    [RelayCommand]
+    public async Task LoadStatisticsAsync()
+    {
+        try
+        {
+            var stats = await _storageService.GetStatisticsAsync();
+            TotalItems = stats.Total;
+            VocabCount = stats.VocabCount;
+            GrammarCount = stats.GrammarCount;
+            WeakCount = stats.WeakCount;
+            LearningCount = stats.LearningCount;
+            MasteredCount = stats.MasteredCount;
+            DueTodayCount = stats.DueTodayCount;
+            AverageRetention = stats.AverageRetention;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] LoadStatistics error: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public async Task LoadItemsAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            var itemType = SelectedTab == 0 ? StorageItemType.Vocabulary : StorageItemType.Grammar;
+            StorageLearningStatus? status = SelectedStatusFilter switch
+            {
+                "Weak" => StorageLearningStatus.Weak,
+                "Learning" => StorageLearningStatus.Learning,
+                "New" => StorageLearningStatus.New,
+                "Mastered" => StorageLearningStatus.Mastered,
+                _ => null
+            };
+
+            bool? dueTodayOnly = SelectedStatusFilter == "DueToday" ? true : null;
+
+            var result = await _storageService.GetPagedItemsAsync(
+                itemType: itemType,
+                status: status,
+                search: string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
+                dueTodayOnly: dueTodayOnly,
+                page: CurrentPage,
+                pageSize: PageSize
+            );
+
+            StorageItems.Clear();
+            foreach (var item in result.Items)
+            {
+                StorageItems.Add(item);
+            }
+
+            TotalCount = result.TotalCount;
+            TotalPages = Math.Max(1, result.TotalPages);
+            if (CurrentPage > TotalPages)
+            {
+                CurrentPage = TotalPages;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] LoadItems error: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task SwitchTabAsync(int tabIndex)
+    {
+        if (SelectedTab == tabIndex) return;
+        SelectedTab = tabIndex;
+        CurrentPage = 1;
+        await LoadItemsAsync();
+    }
+
+    [RelayCommand]
+    public async Task ApplyFilterAsync(string filter)
+    {
+        SelectedStatusFilter = filter;
+        CurrentPage = 1;
+        await LoadItemsAsync();
+    }
+
+    [RelayCommand]
+    public async Task SearchAsync(string query)
+    {
+        SearchQuery = query;
+        CurrentPage = 1;
+        await LoadItemsAsync();
+    }
+
+    [RelayCommand]
+    public async Task NextPageAsync()
+    {
+        if (HasNextPage)
+        {
+            CurrentPage++;
+            await LoadItemsAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task PreviousPageAsync()
+    {
+        if (HasPreviousPage)
+        {
+            CurrentPage--;
+            await LoadItemsAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task MarkAsMasteredAsync(LearningStorageItemDto? item)
+    {
+        if (item == null) return;
+        try
+        {
+            await _storageService.MarkAsMasteredAsync(item.Id);
+            _soundFeedback?.PlaySuccessSound();
+            await LoadStatisticsAsync();
+            await LoadItemsAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] MarkAsMastered error: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public async Task RemoveItemAsync(LearningStorageItemDto? item)
+    {
+        if (item == null) return;
+        try
+        {
+            await _storageService.RemoveFromStorageAsync(item.Id);
+            StorageItems.Remove(item);
+            TotalCount = Math.Max(0, TotalCount - 1);
+            await LoadStatisticsAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] RemoveItem error: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public async Task UpdateStatusAsync((Guid Id, StorageLearningStatus Status) param)
+    {
+        try
+        {
+            await _storageService.UpdateStatusAsync(param.Id, param.Status);
+            await LoadStatisticsAsync();
+            await LoadItemsAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] UpdateStatus error: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public async Task SaveNoteAsync((Guid Id, string Note) param)
+    {
+        try
+        {
+            await _storageService.UpdateNoteAsync(param.Id, param.Note);
+            await LoadItemsAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] SaveNote error: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public async Task PlayAudioAsync(string? term)
+    {
+        if (string.IsNullOrWhiteSpace(term) || _audioPlayer == null) return;
+        try
+        {
+            await _audioPlayer.PlayPronunciationAsync(term, "us");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] PlayAudio error: {ex.Message}");
+        }
+    }
+
+    // --- Practice Flow ---
+    [RelayCommand]
+    public async Task StartPracticeAsync()
+    {
+        IsPracticeLoading = true;
+        IsPracticeActive = true;
+        IsPracticeCompleted = false;
+        CurrentPracticeIndex = 0;
+        _practiceQuestions.Clear();
+        _practiceSubmissions.Clear();
+
+        try
+        {
+            var itemType = SelectedTab == 0 ? StorageItemType.Vocabulary : StorageItemType.Grammar;
+            var questions = await _storageService.GeneratePracticeAsync(itemType, limit: 15, prioritizeWeak: true);
+
+            if (questions.Count == 0)
+            {
+                IsPracticeActive = false;
+                return;
+            }
+
+            _practiceQuestions.AddRange(questions);
+            DisplayCurrentQuestion();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] StartPractice error: {ex.Message}");
+            IsPracticeActive = false;
+        }
+        finally
+        {
+            IsPracticeLoading = false;
+        }
+    }
+
+    private void DisplayCurrentQuestion()
+    {
+        if (CurrentPracticeIndex >= 0 && CurrentPracticeIndex < _practiceQuestions.Count)
+        {
+            CurrentQuestion = _practiceQuestions[CurrentPracticeIndex];
+            PracticeSelectedAnswer = null;
+            IsPracticeAnswerSubmitted = false;
+            IsCurrentAnswerCorrect = false;
+
+            PracticeProgressText = string.Format(
+                _localizationService.GetString("Storage_Practice_QuestionFormat"),
+                CurrentPracticeIndex + 1, _practiceQuestions.Count);
+        }
+    }
+
+    [RelayCommand]
+    public void SelectPracticeAnswer(string answer)
+    {
+        if (IsPracticeAnswerSubmitted) return;
+        PracticeSelectedAnswer = answer;
+    }
+
+    [RelayCommand]
+    public void SubmitPracticeAnswer()
+    {
+        if (CurrentQuestion == null || string.IsNullOrWhiteSpace(PracticeSelectedAnswer) || IsPracticeAnswerSubmitted) return;
+
+        IsPracticeAnswerSubmitted = true;
+        IsCurrentAnswerCorrect = string.Equals(
+            PracticeSelectedAnswer.Trim(),
+            CurrentQuestion.CorrectAnswer.Trim(),
+            StringComparison.OrdinalIgnoreCase);
+
+        if (IsCurrentAnswerCorrect)
+        {
+            _soundFeedback?.PlaySuccessSound();
+        }
+        else
+        {
+            _soundFeedback?.PlayErrorSound();
+        }
+
+        _practiceSubmissions.Add(new StoragePracticeSubmissionDto(
+            CurrentQuestion.StorageItemId,
+            PracticeSelectedAnswer
+        ));
+    }
+
+    [RelayCommand]
+    public async Task NextPracticeQuestionAsync()
+    {
+        if (!IsPracticeAnswerSubmitted) return;
+
+        if (CurrentPracticeIndex + 1 < _practiceQuestions.Count)
+        {
+            CurrentPracticeIndex++;
+            DisplayCurrentQuestion();
+        }
+        else
+        {
+            // Evaluate whole practice session
+            await FinishPracticeAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task FinishPracticeAsync()
+    {
+        try
+        {
+            var result = await _storageService.EvaluatePracticeAsync(_practiceQuestions, _practiceSubmissions);
+            IsPracticeCompleted = true;
+
+            PracticeResultSummaryText = string.Format(
+                _localizationService.GetString("Storage_Practice_ResultSummary"),
+                result.Correct, result.Total, result.ScorePercent);
+
+            await LoadStatisticsAsync();
+            await LoadItemsAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] FinishPractice error: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public void ClosePractice()
+    {
+        IsPracticeActive = false;
+        IsPracticeCompleted = false;
+        CurrentQuestion = null;
+    }
+}

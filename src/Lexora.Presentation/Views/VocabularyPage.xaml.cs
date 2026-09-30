@@ -1405,6 +1405,23 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
+    private async void MoveToStorageButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWord != null)
+        {
+            try
+            {
+                var storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
+                await storageService.MoveWordToStorageAsync(ViewModel.SelectedWord.Id, StorageAdditionReason.Manual);
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Nav_LearningStorage"), Loc.GetString("Storage_Toast_Added"));
+            }
+            catch (Exception ex)
+            {
+                ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Nav_LearningStorage"), ex.Message);
+            }
+        }
+    }
+
     private void BtnViewList_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.SwitchToListView();

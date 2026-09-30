@@ -12,7 +12,18 @@ public class StatusToBrushConverter : IValueConverter
     {
         string brushKey = "AccentFillColorDefaultBrush";
 
-        if (value is LearningStatus status)
+        if (value is StorageLearningStatus storageStatus)
+        {
+            brushKey = storageStatus switch
+            {
+                StorageLearningStatus.Mastered => "SystemFillColorSuccessBrush",
+                StorageLearningStatus.Learning => "AccentFillColorDefaultBrush",
+                StorageLearningStatus.Weak => "SystemFillColorCriticalBrush",
+                StorageLearningStatus.New => "TextFillColorTertiaryBrush",
+                _ => "AccentFillColorDefaultBrush"
+            };
+        }
+        else if (value is LearningStatus status)
         {
             brushKey = status switch
             {

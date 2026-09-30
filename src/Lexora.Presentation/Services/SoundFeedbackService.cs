@@ -10,6 +10,8 @@ public interface ISoundFeedbackService
     void PlaySoftTapSound();
     void PlayReviewCompleteSound();
     void PlayStreakSound();
+    void PlaySuccessSound();
+    void PlayErrorSound();
 }
 
 /// <summary>
@@ -66,6 +68,10 @@ public sealed class SoundFeedbackService : ISoundFeedbackService, IDisposable
     public void PlayCardFlipSound() => PlayWavBytes(_cardFlipSoundBytes);
 
     public void PlaySoftTapSound() => PlayWavBytes(_softTapSoundBytes);
+
+    public void PlaySuccessSound() => PlayReviewCompleteSound();
+
+    public void PlayErrorSound() => PlaySoftTapSound();
 
     private void PlayWavBytes(byte[] wavBytes)
     {

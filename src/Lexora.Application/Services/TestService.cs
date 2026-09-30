@@ -13,6 +13,7 @@ public class TestService : ITestService
     private readonly IVocabularyRepository _vocabRepo;
     private readonly IReviewRepository _reviewRepo;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILearningStorageRepository? _storageRepo;
 
     private record ActiveSessionEntry(DateTime CreatedAt, List<TestQuestionDto> Questions);
     private static readonly ConcurrentDictionary<Guid, ActiveSessionEntry> ActiveTestSessions = new();
@@ -20,11 +21,13 @@ public class TestService : ITestService
     public TestService(
         IVocabularyRepository vocabRepo,
         IReviewRepository reviewRepo,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILearningStorageRepository? storageRepo = null)
     {
         _vocabRepo = vocabRepo;
         _reviewRepo = reviewRepo;
         _unitOfWork = unitOfWork;
+        _storageRepo = storageRepo;
     }
 
     public async Task<TestSessionDto> GenerateTestAsync(TestConfigurationDto config, CancellationToken cancellationToken = default)
@@ -228,6 +231,43 @@ public class TestService : ITestService
                         ResultingIntervalDays = card.IntervalDays
                     };
                     _reviewRepo.AddStudyLog(log);
+                }
+
+                // If user answered incorrectly, auto-sync into Learning Storage as Weak item
+                if (!isCorrect && _storageRepo != null)
+                {
+                    var existingStorage = await _storageRepo.GetByWordIdAsync(q.WordId, cancellationToken);
+                    if (existingStorage == null)
+                    {
+                        var storageItem = new LearningStorageItem
+                        {
+                            ItemType = StorageItemType.Vocabulary,
+                            WordId = q.WordId,
+                            Status = StorageLearningStatus.Weak,
+                            ReasonAdded = StorageAdditionReason.MultipleErrors,
+                            IncorrectCount = 1,
+                            EaseFactor = 2.3,
+                            IntervalDays = 1,
+                            Repetitions = 0,
+                            Lapses = 1,
+                            RetentionProbability = 40.0,
+                            NextReviewAt = DateTime.UtcNow,
+                            LastReviewedAt = DateTime.UtcNow
+                        };
+                        await _storageRepo.AddAsync(storageItem, cancellationToken);
+                    }
+                    else
+                    {
+                        existingStorage.IncorrectCount++;
+                        existingStorage.Lapses++;
+                        existingStorage.Status = StorageLearningStatus.Weak;
+                        existingStorage.ReasonAdded = StorageAdditionReason.MultipleErrors;
+                        existingStorage.IntervalDays = 1;
+                        existingStorage.NextReviewAt = DateTime.UtcNow;
+                        existingStorage.RetentionProbability = Math.Max(10.0, existingStorage.RetentionProbability - 20.0);
+                        existingStorage.UpdatedAt = DateTime.UtcNow;
+                        await _storageRepo.UpdateAsync(existingStorage, cancellationToken);
+                    }
                 }
             }
         }

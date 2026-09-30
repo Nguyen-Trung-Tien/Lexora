@@ -95,6 +95,9 @@ public sealed partial class ShellPage : Page
                         case GrammarPage:
                             NavView.SelectedItem = NavItemGrammar;
                             break;
+                        case LearningStoragePage:
+                            NavView.SelectedItem = NavItemLearningStorage;
+                            break;
                         case SettingsPage:
                             NavView.SelectedItem = NavItemSettings;
                             break;
@@ -141,6 +144,9 @@ public sealed partial class ShellPage : Page
                 case "Grammar":
                     _navigationService.Navigate(typeof(GrammarPage));
                     break;
+                case "LearningStorage":
+                    _navigationService.Navigate(typeof(LearningStoragePage));
+                    break;
                 case "Settings":
                     _navigationService.Navigate(typeof(SettingsPage));
                     break;
@@ -155,6 +161,7 @@ public sealed partial class ShellPage : Page
         NavItemReview.Content = _localizationService.GetString("Nav_Review");
         NavItemTest.Content = _localizationService.GetString("Nav_Test");
         NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
+        NavItemLearningStorage.Content = _localizationService.GetString("Nav_LearningStorage");
         NavItemSettings.Content = _localizationService.GetString("Nav_Settings");
         GlobalSearchBox.PlaceholderText = _localizationService.GetString("Search_Placeholder");
 
@@ -163,6 +170,7 @@ public sealed partial class ShellPage : Page
         ToolTipService.SetToolTip(NavItemReview, _localizationService.GetString("Shell_TooltipReview"));
         ToolTipService.SetToolTip(NavItemTest, _localizationService.GetString("Shell_TooltipTest"));
         ToolTipService.SetToolTip(NavItemGrammar, _localizationService.GetString("Shell_TooltipGrammar"));
+        ToolTipService.SetToolTip(NavItemLearningStorage, _localizationService.GetString("Shell_TooltipLearningStorage"));
         ToolTipService.SetToolTip(NavItemSettings, _localizationService.GetString("Shell_TooltipSettings"));
         ToolTipService.SetToolTip(GlobalSearchBox, _localizationService.GetString("Shell_SearchTooltip"));
     }

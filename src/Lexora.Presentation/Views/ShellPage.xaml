@@ -52,6 +52,11 @@
                         <FontIcon Glyph="&#xE8D2;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemLearningStorage" Content="Learning Storage" Tag="LearningStorage" ToolTipService.ToolTip="Learning Storage (Ctrl+6)">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE81C;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem x:Name="NavItemSettings" Content="Settings" Tag="Settings" ToolTipService.ToolTip="Settings">

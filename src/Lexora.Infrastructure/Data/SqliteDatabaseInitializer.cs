@@ -330,6 +330,38 @@ public class SqliteDatabaseInitializer
                 await _context.Database.ExecuteSqlRawAsync(migrationSql, cancellationToken);
                 _logger.LogInformation("StudyLogs table successfully migrated.");
             }
+
+            const string createStorageTableSql = """
+                CREATE TABLE IF NOT EXISTS "LearningStorageItems" (
+                    "Id" TEXT NOT NULL CONSTRAINT "PK_LearningStorageItems" PRIMARY KEY,
+                    "ItemType" INTEGER NOT NULL,
+                    "WordId" TEXT NULL,
+                    "GrammarRuleId" TEXT NULL,
+                    "Status" INTEGER NOT NULL,
+                    "ReasonAdded" INTEGER NOT NULL,
+                    "Note" TEXT NULL,
+                    "IncorrectCount" INTEGER NOT NULL DEFAULT 0,
+                    "CorrectCount" INTEGER NOT NULL DEFAULT 0,
+                    "EaseFactor" REAL NOT NULL DEFAULT 2.5,
+                    "IntervalDays" INTEGER NOT NULL DEFAULT 1,
+                    "Repetitions" INTEGER NOT NULL DEFAULT 0,
+                    "Lapses" INTEGER NOT NULL DEFAULT 0,
+                    "RetentionProbability" REAL NOT NULL DEFAULT 50.0,
+                    "LastReviewedAt" TEXT NULL,
+                    "NextReviewAt" TEXT NOT NULL,
+                    "CreatedAt" TEXT NOT NULL,
+                    "UpdatedAt" TEXT NOT NULL,
+                    CONSTRAINT "FK_LearningStorageItems_Words_WordId" FOREIGN KEY ("WordId") REFERENCES "Words" ("Id") ON DELETE CASCADE,
+                    CONSTRAINT "FK_LearningStorageItems_GrammarRules_GrammarRuleId" FOREIGN KEY ("GrammarRuleId") REFERENCES "GrammarRules" ("Id") ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS "IX_LearningStorageItems_ItemType" ON "LearningStorageItems" ("ItemType");
+                CREATE INDEX IF NOT EXISTS "IX_LearningStorageItems_Status" ON "LearningStorageItems" ("Status");
+                CREATE INDEX IF NOT EXISTS "IX_LearningStorageItems_NextReviewAt" ON "LearningStorageItems" ("NextReviewAt");
+                CREATE INDEX IF NOT EXISTS "IX_LearningStorageItems_RetentionProbability" ON "LearningStorageItems" ("RetentionProbability");
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_LearningStorageItems_WordId" ON "LearningStorageItems" ("WordId") WHERE "WordId" IS NOT NULL;
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_LearningStorageItems_GrammarRuleId" ON "LearningStorageItems" ("GrammarRuleId") WHERE "GrammarRuleId" IS NOT NULL;
+                """;
+            await _context.Database.ExecuteSqlRawAsync(createStorageTableSql, cancellationToken);
         }
         catch (Exception ex)
         {
