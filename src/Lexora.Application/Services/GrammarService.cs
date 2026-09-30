@@ -52,6 +52,46 @@ public class GrammarService : IGrammarService
         return rules.Select(MapToDto).ToList();
     }
 
+    public async Task<GrammarPagedResultDto> GetPagedRulesAsync(
+        int page,
+        int pageSize,
+        CefrLevel? level = null,
+        ExamType? examType = null,
+        string? topic = null,
+        string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 25;
+
+        int totalCount;
+        try
+        {
+            totalCount = await _grammarRepo.CountFilteredAsync(level, examType, topic, search, cancellationToken);
+        }
+        catch
+        {
+            var fallback = await _grammarRepo.GetFilteredAsync(level, examType, topic, search, cancellationToken);
+            totalCount = fallback.Count;
+            var pagedFallback = fallback.Skip((page - 1) * pageSize).Take(pageSize).Select(MapToDto).ToList();
+            return new GrammarPagedResultDto(pagedFallback, totalCount, page, pageSize);
+        }
+
+        int skip = (page - 1) * pageSize;
+        IReadOnlyList<GrammarRule> rules;
+        try
+        {
+            rules = await _grammarRepo.GetFilteredPagedAsync(skip, pageSize, level, examType, topic, search, cancellationToken);
+        }
+        catch
+        {
+            var fallback = await _grammarRepo.GetFilteredAsync(level, examType, topic, search, cancellationToken);
+            rules = fallback.Skip(skip).Take(pageSize).ToList();
+        }
+
+        return new GrammarPagedResultDto(rules.Select(MapToDto).ToList(), totalCount, page, pageSize);
+    }
+
     public async Task<IReadOnlyList<string>> GetAllTopicsAsync(CancellationToken cancellationToken = default)
     {
         return await _grammarRepo.GetAllTopicsAsync(cancellationToken);

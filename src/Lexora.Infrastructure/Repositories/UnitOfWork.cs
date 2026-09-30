@@ -7,6 +7,7 @@ namespace Lexora.Infrastructure.Repositories;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly LexoraDbContext _context;
+    private Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? _transaction;
 
     public UnitOfWork(LexoraDbContext context)
     {
@@ -22,16 +23,52 @@ public class UnitOfWork : IUnitOfWork
         catch
         {
             // Detach pending entries to prevent ChangeTracker poisoning for subsequent operations
-            foreach (var entry in _context.ChangeTracker.Entries().ToList())
-            {
-                entry.State = EntityState.Detached;
-            }
+            ClearTracker();
             throw;
         }
     }
 
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_transaction != null) return;
+        _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+    }
+
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_transaction != null)
+        {
+            await _transaction.CommitAsync(cancellationToken);
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
+    }
+
+    public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_transaction != null)
+        {
+            try
+            {
+                await _transaction.RollbackAsync(cancellationToken);
+            }
+            finally
+            {
+                await _transaction.DisposeAsync();
+                _transaction = null;
+            }
+        }
+        ClearTracker();
+    }
+
+    public void ClearTracker()
+    {
+        _context.ChangeTracker.Clear();
+    }
+
     public void Dispose()
     {
+        _transaction?.Dispose();
         _context.Dispose();
         GC.SuppressFinalize(this);
     }

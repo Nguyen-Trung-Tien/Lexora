@@ -802,6 +802,15 @@ public class LocalizationService : ILocalizationService
             ["Grammar_ImportTxt"] = "Nhập từ file TXT...",
             ["Grammar_ImportTxtTitle"] = "Nhập ngữ pháp (TXT)",
             ["Progress_SummaryFormatWithUpdated"] = "Đã nhập mới: {0} | Đã cập nhật: {1} | Bỏ qua: {2} | Lỗi: {3}",
+            ["SmartImport_InputDataLabel"] = "Nội dung dữ liệu:",
+            ["SmartImport_Cancelling"] = "Đang hủy tiến trình...",
+            ["SmartImport_CancelledTitle"] = "Đã hủy nhập dữ liệu bởi người dùng.",
+            ["Grammar_FirstPage"] = "Trang đầu",
+            ["Grammar_PrevPage"] = "Trang trước",
+            ["Grammar_NextPage"] = "Trang sau",
+            ["Grammar_LastPage"] = "Trang cuối",
+            ["Grammar_PageSize"] = "Số lượng/trang:",
+            ["Grammar_PageSizeSuffix"] = "/ trang",
 
             // Additional Test
             ["Test_MetricTotalQuestions"] = "Tổng câu hỏi",
@@ -1759,6 +1768,15 @@ public class LocalizationService : ILocalizationService
             ["Grammar_ImportTxt"] = "Import from TXT...",
             ["Grammar_ImportTxtTitle"] = "Import Grammar (TXT)",
             ["Progress_SummaryFormatWithUpdated"] = "Imported: {0} | Updated: {1} | Skipped: {2} | Errors: {3}",
+            ["SmartImport_InputDataLabel"] = "Data content:",
+            ["SmartImport_Cancelling"] = "Cancelling import...",
+            ["SmartImport_CancelledTitle"] = "Import cancelled by user.",
+            ["Grammar_FirstPage"] = "First page",
+            ["Grammar_PrevPage"] = "Previous page",
+            ["Grammar_NextPage"] = "Next page",
+            ["Grammar_LastPage"] = "Last page",
+            ["Grammar_PageSize"] = "Per page:",
+            ["Grammar_PageSizeSuffix"] = "/ page",
 
             // Additional Test
             ["Test_MetricTotalQuestions"] = "Total Questions",

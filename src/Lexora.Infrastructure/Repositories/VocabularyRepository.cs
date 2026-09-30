@@ -283,4 +283,44 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
     {
         Context.WordExamTags.AddRange(wordExamTags);
     }
+
+    public async Task<HashSet<string>> GetAllNormalizedTermsAsync(CancellationToken cancellationToken = default)
+    {
+        var terms = await DbSet
+            .AsNoTracking()
+            .Select(w => w.NormalizedTerm)
+            .ToListAsync(cancellationToken);
+        return new HashSet<string>(terms, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public async Task<IReadOnlyDictionary<string, Word>> GetWordsByTermsWithDetailsAsync(
+        IEnumerable<string> normalizedTerms,
+        CancellationToken cancellationToken = default)
+    {
+        var termList = normalizedTerms.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct().ToList();
+        if (termList.Count == 0) return new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
+
+        var words = await DbSet
+            .Include(w => w.Meanings)
+                .ThenInclude(m => m.Examples)
+            .Include(w => w.WordTopics)
+                .ThenInclude(wt => wt.Topic)
+            .Include(w => w.WordExamTags)
+                .ThenInclude(wet => wet.ExamTag)
+            .Include(w => w.ReviewCard)
+            .Where(w => termList.Contains(w.NormalizedTerm))
+            .ToListAsync(cancellationToken);
+
+        var dict = new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
+        foreach (var w in words)
+        {
+            dict[w.NormalizedTerm] = w;
+        }
+        return dict;
+    }
+
+    public override async Task AddRangeAsync(IEnumerable<Word> words, CancellationToken cancellationToken = default)
+    {
+        await DbSet.AddRangeAsync(words, cancellationToken);
+    }
 }

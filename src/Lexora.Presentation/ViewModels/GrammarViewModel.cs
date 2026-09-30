@@ -40,6 +40,41 @@ public partial class GrammarViewModel : ObservableObject
     [ObservableProperty]
     public partial string? SelectedTopic { get; set; }
 
+    // Pagination State
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
+    public partial int TotalRuleCount { get; set; } = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
+    public partial int PageSize { get; set; } = 20;
+
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+    public string PageDisplayInfo => $"{CurrentPage} / {Math.Max(1, TotalPages)}";
+    public string ItemRangeDisplayInfo => TotalRuleCount > 0
+        ? $"{Math.Min((CurrentPage - 1) * PageSize + 1, TotalRuleCount)}-{Math.Min(CurrentPage * PageSize, TotalRuleCount)} / {TotalRuleCount}"
+        : "0 / 0";
+
+    partial void OnSearchQueryChanged(string value) => CurrentPage = 1;
+    partial void OnSelectedLevelChanged(CefrLevel? value) => CurrentPage = 1;
+    partial void OnSelectedExamTargetChanged(ExamType? value) => CurrentPage = 1;
+    partial void OnSelectedTopicChanged(string? value) => CurrentPage = 1;
+
     // Practice Mode State
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMainMode))]
@@ -172,7 +207,9 @@ public partial class GrammarViewModel : ObservableObject
         IsLoading = true;
         try
         {
-            var results = await _grammarService.GetFilteredRulesAsync(
+            var pagedResult = await _grammarService.GetPagedRulesAsync(
+                page: CurrentPage,
+                pageSize: PageSize,
                 level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
                 examType: SelectedExamTarget == ExamType.General ? null : SelectedExamTarget,
                 topic: SelectedTopic,
@@ -182,12 +219,32 @@ public partial class GrammarViewModel : ObservableObject
 
             if (ct.IsCancellationRequested) return;
 
-            var resultList = results.ToList();
-
             await _dispatcherQueue.EnsureOnUIThreadAsync();
 
+            TotalRuleCount = pagedResult.TotalCount;
+            TotalPages = Math.Max(1, (int)Math.Ceiling((double)TotalRuleCount / PageSize));
+
+            if (CurrentPage > TotalPages)
+            {
+                CurrentPage = TotalPages;
+                pagedResult = await _grammarService.GetPagedRulesAsync(
+                    page: CurrentPage,
+                    pageSize: PageSize,
+                    level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                    examType: SelectedExamTarget == ExamType.General ? null : SelectedExamTarget,
+                    topic: SelectedTopic,
+                    search: string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery,
+                    cancellationToken: ct
+                );
+                if (ct.IsCancellationRequested) return;
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
+                TotalRuleCount = pagedResult.TotalCount;
+                TotalPages = Math.Max(1, (int)Math.Ceiling((double)TotalRuleCount / PageSize));
+            }
+            if (CurrentPage < 1) CurrentPage = 1;
+
             Rules.Clear();
-            foreach (var r in resultList)
+            foreach (var r in pagedResult.Rules)
             {
                 Rules.Add(r);
             }
@@ -223,12 +280,64 @@ public partial class GrammarViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task NextPageAsync()
+    {
+        if (CurrentPage < TotalPages)
+        {
+            CurrentPage++;
+            await LoadRulesAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task PreviousPageAsync()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await LoadRulesAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task FirstPageAsync()
+    {
+        if (CurrentPage != 1)
+        {
+            CurrentPage = 1;
+            await LoadRulesAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task LastPageAsync()
+    {
+        if (CurrentPage != TotalPages)
+        {
+            CurrentPage = TotalPages;
+            await LoadRulesAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task ChangePageSizeAsync(int newSize)
+    {
+        if (newSize > 0 && PageSize != newSize)
+        {
+            PageSize = newSize;
+            CurrentPage = 1;
+            await LoadRulesAsync();
+        }
+    }
+
+    [RelayCommand]
     public void ResetFilters()
     {
         SearchQuery = string.Empty;
         SelectedLevel = null;
         SelectedExamTarget = null;
         SelectedTopic = null;
+        CurrentPage = 1;
     }
 
     private bool _isSavingRule = false;

@@ -13,5 +13,9 @@ public interface IGrammarRepository : IRepository<GrammarRule>
     Task<IReadOnlyList<string>> GetAllTopicsAsync(CancellationToken cancellationToken = default);
     void RemoveExamples(IEnumerable<GrammarExample> examples);
     void AddExamples(IEnumerable<GrammarExample> examples);
+    Task<HashSet<string>> GetAllTitlesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyDictionary<string, GrammarRule>> GetRulesByTitlesWithExamplesAsync(IEnumerable<string> titles, CancellationToken cancellationToken = default);
+    Task<int> CountFilteredAsync(CefrLevel? level = null, ExamType? examType = null, string? topic = null, string? query = null, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<GrammarRule>> GetFilteredPagedAsync(int skip, int take, CefrLevel? level = null, ExamType? examType = null, string? topic = null, string? query = null, CancellationToken cancellationToken = default);
 }
 

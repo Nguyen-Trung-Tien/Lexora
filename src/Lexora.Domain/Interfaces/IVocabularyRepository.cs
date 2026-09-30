@@ -43,4 +43,6 @@ public interface IVocabularyRepository : IRepository<Word>
     void AddMeanings(IEnumerable<WordMeaning> meanings);
     void AddWordTopics(IEnumerable<WordTopic> wordTopics);
     void AddWordExamTags(IEnumerable<WordExamTag> wordExamTags);
+    Task<HashSet<string>> GetAllNormalizedTermsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyDictionary<string, Word>> GetWordsByTermsWithDetailsAsync(IEnumerable<string> normalizedTerms, CancellationToken cancellationToken = default);
 }

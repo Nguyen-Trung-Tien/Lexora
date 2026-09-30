@@ -69,3 +69,11 @@ public record GrammarPracticeResultDto(
     double ScorePercentage,
     List<GrammarQuizQuestionDto> Questions
 );
+
+public record GrammarPagedResultDto(
+    IReadOnlyList<GrammarRuleDto> Rules,
+    int TotalCount,
+    int Page,
+    int PageSize
+);
+

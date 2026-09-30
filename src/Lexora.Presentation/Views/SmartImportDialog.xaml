@@ -131,7 +131,7 @@
                     <!-- Mode 2: Paste Text -->
                     <StackPanel x:Name="PanelPaste" Spacing="8" Visibility="Collapsed">
                         <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,2">
-                            <TextBlock Text="Nội dung dữ liệu:"
+                            <TextBlock x:Name="TextModePasteHeader"
                                        FontSize="12"
                                        FontWeight="SemiBold"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -300,64 +300,87 @@
                         BorderThickness="1"
                         CornerRadius="10"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <ItemsControl x:Name="ItemsPreviewList">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="0,0,0,1"
-                                            Padding="10,8">
-                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
-                                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                      MinWidth="24"
-                                                      VerticalAlignment="Center" />
-                                            <Border Grid.Column="1"
-                                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                    CornerRadius="4"
-                                                    Padding="6,2"
-                                                    VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding RowNumber}"
-                                                           FontSize="11"
-                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            </Border>
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <TextBlock Text="{Binding Term}" FontWeight="SemiBold" FontSize="13" />
-                                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="4"
-                                                            Padding="6,1"
-                                                            Visibility="{Binding HasPartOfSpeech, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="{Binding PartOfSpeech}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                    </Border>
-                                                </StackPanel>
-                                                <TextBlock Text="{Binding Meaning}"
-                                                           FontSize="12"
-                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           MaxLines="1" />
+                    <ListView x:Name="ItemsPreviewListView"
+                              Height="220"
+                              SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="10,8">
+                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  MinWidth="24"
+                                                  VerticalAlignment="Center" />
+                                        <Border Grid.Column="1"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                CornerRadius="4"
+                                                Padding="6,2"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding RowNumber}"
+                                                       FontSize="11"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Border>
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{Binding Term}" FontWeight="SemiBold" FontSize="13" />
+                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="4"
+                                                        Padding="6,1"
+                                                        Visibility="{Binding HasPartOfSpeech, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                    <TextBlock Text="{Binding PartOfSpeech}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                </Border>
                                             </StackPanel>
-                                            <!-- Status Pill -->
-                                            <Border Grid.Column="3"
-                                                    Background="{Binding StatusBackgroundBrush}"
-                                                    BorderBrush="{Binding StatusBorderBrush}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="6"
-                                                    Padding="8,3"
-                                                    VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding StatusText}"
-                                                           FontSize="11"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{Binding StatusForegroundBrush}" />
-                                            </Border>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                                            <TextBlock Text="{Binding Meaning}"
+                                                       FontSize="12"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxLines="1" />
+                                        </StackPanel>
+                                        <!-- Status Pill -->
+                                        <Border Grid.Column="3"
+                                                Background="{Binding StatusBackgroundBrush}"
+                                                BorderBrush="{Binding StatusBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="8,3"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding StatusText}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{Binding StatusForegroundBrush}" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </Border>
+
+                <!-- Preview Pagination Controls -->
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2,0,0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TextPreviewPagingInfo"
+                               FontSize="11"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <Button x:Name="BtnPreviewFirstPage" Padding="6,4" CornerRadius="4" Click="BtnPreviewFirstPage_Click">
+                            <FontIcon Glyph="&#xE892;" FontSize="10" />
+                        </Button>
+                        <Button x:Name="BtnPreviewPrevPage" Padding="6,4" CornerRadius="4" Click="BtnPreviewPrevPage_Click">
+                            <FontIcon Glyph="&#xE76B;" FontSize="10" />
+                        </Button>
+                        <TextBlock x:Name="TextPreviewCurrentPage" Text="1 / 1" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0" />
+                        <Button x:Name="BtnPreviewNextPage" Padding="6,4" CornerRadius="4" Click="BtnPreviewNextPage_Click">
+                            <FontIcon Glyph="&#xE76C;" FontSize="10" />
+                        </Button>
+                        <Button x:Name="BtnPreviewLastPage" Padding="6,4" CornerRadius="4" Click="BtnPreviewLastPage_Click">
+                            <FontIcon Glyph="&#xE893;" FontSize="10" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
 
                 <!-- Navigation Action Buttons -->
                 <Grid ColumnDefinitions="*,*">
@@ -397,6 +420,17 @@
                                FontSize="13"
                                HorizontalAlignment="Center"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Button x:Name="BtnCancelImport"
+                            Margin="0,6,0,0"
+                            HorizontalAlignment="Center"
+                            CornerRadius="8"
+                            Padding="16,6"
+                            Click="BtnCancelImport_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE711;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                            <TextBlock x:Name="TextCancelImport" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
                 <!-- Final Report Card -->

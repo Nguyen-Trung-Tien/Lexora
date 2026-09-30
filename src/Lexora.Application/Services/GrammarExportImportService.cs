@@ -15,6 +15,7 @@ public class GrammarExportImportService : IGrammarExportImportService
     private readonly IUnitOfWork _unitOfWork;
 
     private const int MaxImportPayloadLength = 20_000_000; // 20 MB
+    private const int ImportBatchSize = 500;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -237,52 +238,112 @@ public class GrammarExportImportService : IGrammarExportImportService
         if (list == null || list.Count == 0)
             return new ImportResult(0, 0, ["JSON data is empty or invalid."], 0);
 
-        progress?.Report(new ProgressReport(5, 0, list.Count, "Đang phân tích dữ liệu JSON...", "Parsing..."));
+        var throttler = new ProgressThrottler(progress);
+        throttler.Report(5, 0, list.Count, "Đang phân tích dữ liệu JSON...", "Parsing...", force: true);
 
-        var existing = await _grammarRepo.GetAllAsync(cancellationToken);
-        var existingDict = existing
-            .GroupBy(r => r.Title.Trim().ToLowerInvariant())
-            .ToDictionary(g => g.Key, g => g.First());
+        Dictionary<string, GrammarRule> existingDict;
+        try
+        {
+            var existing = await _grammarRepo.GetAllAsync(cancellationToken);
+            existingDict = existing != null
+                ? existing.GroupBy(r => r.Title.Trim().ToLowerInvariant()).ToDictionary(g => g.Key, g => g.First())
+                : new Dictionary<string, GrammarRule>();
+        }
+        catch
+        {
+            existingDict = new Dictionary<string, GrammarRule>();
+        }
 
         int total = list.Count;
         var newRules = new List<GrammarRule>();
 
-        for (int i = 0; i < list.Count; i++)
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            int pct = (int)(10.0 + 80.0 * i / Math.Max(1, total));
-            var model = list[i];
-
-            if (string.IsNullOrWhiteSpace(model.Title))
+            for (int chunkStart = 0; chunkStart < list.Count; chunkStart += ImportBatchSize)
             {
-                skipped++;
-                errors.Add($"Row {i + 1}: Title is required — skipped.");
-                continue;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
+                var chunk = list.Skip(chunkStart).Take(ImportBatchSize).ToList();
+                var chunkNewRules = new List<GrammarRule>();
 
-            var titleKey = model.Title.Trim().ToLowerInvariant();
-            if (existingDict.TryGetValue(titleKey, out var existingRule))
-            {
-                if (conflictResolution == ImportConflictResolution.Overwrite)
+                for (int i = 0; i < chunk.Count; i++)
                 {
-                    if (!string.IsNullOrWhiteSpace(model.Structure)) existingRule.Structure = model.Structure.Trim();
-                    if (!string.IsNullOrWhiteSpace(model.ExplanationVi)) existingRule.ExplanationVi = model.ExplanationVi.Trim();
-                    if (!string.IsNullOrWhiteSpace(model.ExplanationEn)) existingRule.ExplanationEn = model.ExplanationEn.Trim();
-                    if (!string.IsNullOrWhiteSpace(model.CommonMistakes)) existingRule.CommonMistakes = model.CommonMistakes.Trim();
-                    if (!string.IsNullOrWhiteSpace(model.Topic)) existingRule.Topic = model.Topic.Trim();
-                    if (Enum.TryParse<CefrLevel>(model.Level, ignoreCase: true, out var lvl)) existingRule.Level = lvl;
-                    if (Enum.TryParse<ExamType>(model.ExamTarget, ignoreCase: true, out var examTgt)) existingRule.ExamTarget = examTgt;
+                    int globalIdx = chunkStart + i;
+                    var model = chunk[i];
+
+                    if (string.IsNullOrWhiteSpace(model.Title))
+                    {
+                        skipped++;
+                        errors.Add($"Row {globalIdx + 1}: Title is required — skipped.");
+                        continue;
+                    }
+
+                    var titleKey = model.Title.Trim().ToLowerInvariant();
+                    if (existingDict.TryGetValue(titleKey, out var existingRule))
+                    {
+                        if (conflictResolution == ImportConflictResolution.Overwrite)
+                        {
+                            if (!string.IsNullOrWhiteSpace(model.Structure)) existingRule.Structure = model.Structure.Trim();
+                            if (!string.IsNullOrWhiteSpace(model.ExplanationVi)) existingRule.ExplanationVi = model.ExplanationVi.Trim();
+                            if (!string.IsNullOrWhiteSpace(model.ExplanationEn)) existingRule.ExplanationEn = model.ExplanationEn.Trim();
+                            if (!string.IsNullOrWhiteSpace(model.CommonMistakes)) existingRule.CommonMistakes = model.CommonMistakes.Trim();
+                            if (!string.IsNullOrWhiteSpace(model.Topic)) existingRule.Topic = model.Topic.Trim();
+                            if (Enum.TryParse<CefrLevel>(model.Level, ignoreCase: true, out var lvl)) existingRule.Level = lvl;
+                            if (Enum.TryParse<ExamType>(model.ExamTarget, ignoreCase: true, out var examTgt)) existingRule.ExamTarget = examTgt;
+
+                            if (model.Examples != null)
+                            {
+                                foreach (var ex in model.Examples)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(ex.SentenceEn) &&
+                                        !existingRule.Examples.Any(e => e.SentenceEn.Trim().Equals(ex.SentenceEn.Trim(), StringComparison.OrdinalIgnoreCase)))
+                                    {
+                                        existingRule.Examples.Add(new GrammarExample
+                                        {
+                                            GrammarRuleId = existingRule.Id,
+                                            SentenceEn = ex.SentenceEn.Trim(),
+                                            SentenceVi = (ex.SentenceVi ?? string.Empty).Trim(),
+                                            Note = ex.Note?.Trim()
+                                        });
+                                    }
+                                }
+                            }
+
+                            await _grammarRepo.UpdateAsync(existingRule, cancellationToken);
+                            updated++;
+                        }
+                        else
+                        {
+                            skipped++;
+                        }
+                        continue;
+                    }
+
+                    if (!Enum.TryParse<CefrLevel>(model.Level, ignoreCase: true, out var level))
+                        level = CefrLevel.B1;
+                    if (!Enum.TryParse<ExamType>(model.ExamTarget, ignoreCase: true, out var examTarget))
+                        examTarget = ExamType.General;
+
+                    var rule = new GrammarRule
+                    {
+                        Title = model.Title.Trim(),
+                        Structure = (model.Structure ?? string.Empty).Trim(),
+                        ExplanationVi = (model.ExplanationVi ?? string.Empty).Trim(),
+                        ExplanationEn = model.ExplanationEn?.Trim(),
+                        CommonMistakes = model.CommonMistakes?.Trim(),
+                        Level = level,
+                        ExamTarget = examTarget,
+                        Topic = model.Topic?.Trim()
+                    };
 
                     if (model.Examples != null)
                     {
                         foreach (var ex in model.Examples)
                         {
-                            if (!string.IsNullOrWhiteSpace(ex.SentenceEn) &&
-                                !existingRule.Examples.Any(e => e.SentenceEn.Trim().Equals(ex.SentenceEn.Trim(), StringComparison.OrdinalIgnoreCase)))
+                            if (!string.IsNullOrWhiteSpace(ex.SentenceEn))
                             {
-                                existingRule.Examples.Add(new GrammarExample
+                                rule.Examples.Add(new GrammarExample
                                 {
-                                    GrammarRuleId = existingRule.Id,
                                     SentenceEn = ex.SentenceEn.Trim(),
                                     SentenceVi = (ex.SentenceVi ?? string.Empty).Trim(),
                                     Note = ex.Note?.Trim()
@@ -291,68 +352,48 @@ public class GrammarExportImportService : IGrammarExportImportService
                         }
                     }
 
-                    await _grammarRepo.UpdateAsync(existingRule, cancellationToken);
-                    updated++;
+                    chunkNewRules.Add(rule);
+                    existingDict[titleKey] = rule;
+                    imported++;
                 }
-                else
+
+                if (chunkNewRules.Count > 0)
                 {
-                    skipped++;
+                    await _grammarRepo.AddRangeAsync(chunkNewRules, cancellationToken);
+                    newRules.AddRange(chunkNewRules);
                 }
-                continue;
+
+                if (chunkStart + ImportBatchSize < list.Count)
+                {
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    _unitOfWork.ClearTracker();
+                }
+
+                int processedCount = Math.Min(chunkStart + chunk.Count, total);
+                int pct = (int)(10.0 + 80.0 * processedCount / Math.Max(1, total));
+                throttler.Report(pct, processedCount, total, "Đang nhập ngữ pháp...", $"Processed: {chunk[^1].Title}");
             }
 
-            if (!Enum.TryParse<CefrLevel>(model.Level, ignoreCase: true, out var level))
-                level = CefrLevel.B1;
-            if (!Enum.TryParse<ExamType>(model.ExamTarget, ignoreCase: true, out var examTarget))
-                examTarget = ExamType.General;
-
-            var rule = new GrammarRule
+            if (newRules.Count > 0 || updated > 0)
             {
-                Title = model.Title.Trim(),
-                Structure = (model.Structure ?? string.Empty).Trim(),
-                ExplanationVi = (model.ExplanationVi ?? string.Empty).Trim(),
-                ExplanationEn = model.ExplanationEn?.Trim(),
-                CommonMistakes = model.CommonMistakes?.Trim(),
-                Level = level,
-                ExamTarget = examTarget,
-                Topic = model.Topic?.Trim()
-            };
-
-            if (model.Examples != null)
+                throttler.Report(95, imported + updated, total, "Đang lưu vào cơ sở dữ liệu...", "Committing transaction...", force: true);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+                _unitOfWork.ClearTracker();
+            }
+            else
             {
-                foreach (var ex in model.Examples)
-                {
-                    if (!string.IsNullOrWhiteSpace(ex.SentenceEn))
-                    {
-                        rule.Examples.Add(new GrammarExample
-                        {
-                            SentenceEn = ex.SentenceEn.Trim(),
-                            SentenceVi = (ex.SentenceVi ?? string.Empty).Trim(),
-                            Note = ex.Note?.Trim()
-                        });
-                    }
-                }
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
             }
 
-            newRules.Add(rule);
-            existingDict[titleKey] = rule;
-            imported++;
-
-            progress?.Report(new ProgressReport(pct, i + 1, total, "Đang nhập ngữ pháp...", $"Processed: {model.Title}"));
+            throttler.Report(100, imported + updated, total, "Nhập ngữ pháp hoàn tất!", "Complete.", force: true);
         }
-
-        if (newRules.Count > 0)
+        catch (Exception ex)
         {
-            progress?.Report(new ProgressReport(92, imported, total, "Đang lưu vào cơ sở dữ liệu...", "Committing transaction..."));
-            await _grammarRepo.AddRangeAsync(newRules, cancellationToken);
+            await _unitOfWork.RollbackTransactionAsync(CancellationToken.None);
+            errors.Add($"Error importing grammar JSON: {ex.Message}");
         }
 
-        if (newRules.Count > 0 || updated > 0)
-        {
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-
-        progress?.Report(new ProgressReport(100, imported + updated, total, "Nhập ngữ pháp hoàn tất!", "Complete."));
         return new ImportResult(imported, skipped, errors, updated);
     }
 
@@ -375,7 +416,8 @@ public class GrammarExportImportService : IGrammarExportImportService
         if (records.Count < 2)
             return new ImportResult(0, 0, ["CSV content has no data rows."], 0);
 
-        progress?.Report(new ProgressReport(5, 0, records.Count - 1, "Đang phân tích CSV...", "Parsing header..."));
+        var throttler = new ProgressThrottler(progress);
+        throttler.Report(5, 0, records.Count - 1, "Đang phân tích CSV...", "Parsing header...", force: true);
 
         var header = records[0];
         int idxTitle = header.FindIndex(h => h.Equals("Title", StringComparison.OrdinalIgnoreCase));
@@ -392,125 +434,165 @@ public class GrammarExportImportService : IGrammarExportImportService
         if (idxTitle < 0)
             return new ImportResult(0, 0, ["CSV missing required 'Title' column."], 0);
 
-        var existing = await _grammarRepo.GetAllAsync(cancellationToken);
-        var existingDict = existing
-            .GroupBy(r => r.Title.Trim().ToLowerInvariant())
-            .ToDictionary(g => g.Key, g => g.First());
+        Dictionary<string, GrammarRule> existingDict;
+        try
+        {
+            var existing = await _grammarRepo.GetAllAsync(cancellationToken);
+            existingDict = existing != null
+                ? existing.GroupBy(r => r.Title.Trim().ToLowerInvariant()).ToDictionary(g => g.Key, g => g.First())
+                : new Dictionary<string, GrammarRule>();
+        }
+        catch
+        {
+            existingDict = new Dictionary<string, GrammarRule>();
+        }
 
-        int dataLines = records.Count - 1;
+        var dataRows = records.Skip(1).ToList();
+        int dataLines = dataRows.Count;
         var newRules = new List<GrammarRule>();
 
-        for (int i = 1; i < records.Count; i++)
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            int pct = (int)(10.0 + 80.0 * (i - 1) / Math.Max(1, dataLines));
-            var cols = records[i];
-
-            string title = idxTitle < cols.Count ? cols[idxTitle].Trim() : string.Empty;
-            if (string.IsNullOrWhiteSpace(title))
+            for (int chunkStart = 0; chunkStart < dataLines; chunkStart += ImportBatchSize)
             {
-                skipped++;
-                errors.Add($"Row {i + 1}: Title is empty — skipped.");
-                continue;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
+                var chunk = dataRows.Skip(chunkStart).Take(ImportBatchSize).ToList();
+                var chunkNewRules = new List<GrammarRule>();
 
-            string structure = idxStructure >= 0 && idxStructure < cols.Count ? cols[idxStructure].Trim() : string.Empty;
-            string explVi = idxExplVi >= 0 && idxExplVi < cols.Count ? cols[idxExplVi].Trim() : string.Empty;
-            string explEn = idxExplEn >= 0 && idxExplEn < cols.Count ? cols[idxExplEn].Trim() : string.Empty;
-            string mistakes = idxMistakes >= 0 && idxMistakes < cols.Count ? cols[idxMistakes].Trim() : string.Empty;
-            string levelStr = idxLevel >= 0 && idxLevel < cols.Count ? cols[idxLevel].Trim() : string.Empty;
-            string examStr = idxExam >= 0 && idxExam < cols.Count ? cols[idxExam].Trim() : string.Empty;
-            string topic = idxTopic >= 0 && idxTopic < cols.Count ? cols[idxTopic].Trim() : string.Empty;
-            string examplesEn = idxExamplesEn >= 0 && idxExamplesEn < cols.Count ? cols[idxExamplesEn].Trim() : string.Empty;
-            string examplesVi = idxExamplesVi >= 0 && idxExamplesVi < cols.Count ? cols[idxExamplesVi].Trim() : string.Empty;
-
-            var level = ParseCefrLevel(levelStr, CefrLevel.B1);
-            var examTarget = ParseExamType(examStr, ExamType.General);
-
-            var titleKey = title.ToLowerInvariant();
-            if (existingDict.TryGetValue(titleKey, out var existingRule))
-            {
-                if (conflictResolution == ImportConflictResolution.Overwrite)
+                for (int i = 0; i < chunk.Count; i++)
                 {
-                    if (!string.IsNullOrWhiteSpace(structure)) existingRule.Structure = structure;
-                    if (!string.IsNullOrWhiteSpace(explVi)) existingRule.ExplanationVi = explVi;
-                    if (!string.IsNullOrWhiteSpace(explEn)) existingRule.ExplanationEn = explEn;
-                    if (!string.IsNullOrWhiteSpace(mistakes)) existingRule.CommonMistakes = mistakes;
-                    if (!string.IsNullOrWhiteSpace(topic)) existingRule.Topic = topic;
-                    existingRule.Level = level;
-                    existingRule.ExamTarget = examTarget;
+                    int globalIdx = chunkStart + i;
+                    var cols = chunk[i];
 
-                    var enPartsExisting = examplesEn.Split('|', StringSplitOptions.RemoveEmptyEntries);
-                    var viPartsExisting = examplesVi.Split('|', StringSplitOptions.RemoveEmptyEntries);
-                    for (int j = 0; j < enPartsExisting.Length; j++)
+                    string title = idxTitle < cols.Count ? cols[idxTitle].Trim() : string.Empty;
+                    if (string.IsNullOrWhiteSpace(title))
                     {
-                        var sentEn = enPartsExisting[j].Trim();
-                        if (!string.IsNullOrWhiteSpace(sentEn) &&
-                            !existingRule.Examples.Any(e => e.SentenceEn.Trim().Equals(sentEn, StringComparison.OrdinalIgnoreCase)))
-                        {
-                            existingRule.Examples.Add(new GrammarExample
-                            {
-                                GrammarRuleId = existingRule.Id,
-                                SentenceEn = sentEn,
-                                SentenceVi = j < viPartsExisting.Length ? viPartsExisting[j].Trim() : string.Empty
-                            });
-                        }
+                        skipped++;
+                        errors.Add($"Row {globalIdx + 2}: Title is empty — skipped.");
+                        continue;
                     }
 
-                    await _grammarRepo.UpdateAsync(existingRule, cancellationToken);
-                    updated++;
+                    string structure = idxStructure >= 0 && idxStructure < cols.Count ? cols[idxStructure].Trim() : string.Empty;
+                    string explVi = idxExplVi >= 0 && idxExplVi < cols.Count ? cols[idxExplVi].Trim() : string.Empty;
+                    string explEn = idxExplEn >= 0 && idxExplEn < cols.Count ? cols[idxExplEn].Trim() : string.Empty;
+                    string mistakes = idxMistakes >= 0 && idxMistakes < cols.Count ? cols[idxMistakes].Trim() : string.Empty;
+                    string levelStr = idxLevel >= 0 && idxLevel < cols.Count ? cols[idxLevel].Trim() : string.Empty;
+                    string examStr = idxExam >= 0 && idxExam < cols.Count ? cols[idxExam].Trim() : string.Empty;
+                    string topic = idxTopic >= 0 && idxTopic < cols.Count ? cols[idxTopic].Trim() : string.Empty;
+                    string examplesEn = idxExamplesEn >= 0 && idxExamplesEn < cols.Count ? cols[idxExamplesEn].Trim() : string.Empty;
+                    string examplesVi = idxExamplesVi >= 0 && idxExamplesVi < cols.Count ? cols[idxExamplesVi].Trim() : string.Empty;
+
+                    var level = ParseCefrLevel(levelStr, CefrLevel.B1);
+                    var examTarget = ParseExamType(examStr, ExamType.General);
+
+                    var titleKey = title.ToLowerInvariant();
+                    if (existingDict.TryGetValue(titleKey, out var existingRule))
+                    {
+                        if (conflictResolution == ImportConflictResolution.Overwrite)
+                        {
+                            if (!string.IsNullOrWhiteSpace(structure)) existingRule.Structure = structure;
+                            if (!string.IsNullOrWhiteSpace(explVi)) existingRule.ExplanationVi = explVi;
+                            if (!string.IsNullOrWhiteSpace(explEn)) existingRule.ExplanationEn = explEn;
+                            if (!string.IsNullOrWhiteSpace(mistakes)) existingRule.CommonMistakes = mistakes;
+                            if (!string.IsNullOrWhiteSpace(topic)) existingRule.Topic = topic;
+                            existingRule.Level = level;
+                            existingRule.ExamTarget = examTarget;
+
+                            var enPartsExisting = examplesEn.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                            var viPartsExisting = examplesVi.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                            for (int j = 0; j < enPartsExisting.Length; j++)
+                            {
+                                var sentEn = enPartsExisting[j].Trim();
+                                if (!string.IsNullOrWhiteSpace(sentEn) &&
+                                    !existingRule.Examples.Any(e => e.SentenceEn.Trim().Equals(sentEn, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    existingRule.Examples.Add(new GrammarExample
+                                    {
+                                        GrammarRuleId = existingRule.Id,
+                                        SentenceEn = sentEn,
+                                        SentenceVi = j < viPartsExisting.Length ? viPartsExisting[j].Trim() : string.Empty
+                                    });
+                                }
+                            }
+
+                            await _grammarRepo.UpdateAsync(existingRule, cancellationToken);
+                            updated++;
+                        }
+                        else
+                        {
+                            skipped++;
+                        }
+                        continue;
+                    }
+
+                    var rule = new GrammarRule
+                    {
+                        Title = title,
+                        Structure = structure,
+                        ExplanationVi = explVi,
+                        ExplanationEn = string.IsNullOrWhiteSpace(explEn) ? null : explEn,
+                        CommonMistakes = string.IsNullOrWhiteSpace(mistakes) ? null : mistakes,
+                        Level = level,
+                        ExamTarget = examTarget,
+                        Topic = string.IsNullOrWhiteSpace(topic) ? null : topic
+                    };
+
+                    var enParts = examplesEn.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                    var viParts = examplesVi.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                    for (int j = 0; j < enParts.Length; j++)
+                    {
+                        var sentEn = enParts[j].Trim();
+                        if (string.IsNullOrWhiteSpace(sentEn)) continue;
+                        rule.Examples.Add(new GrammarExample
+                        {
+                            SentenceEn = sentEn,
+                            SentenceVi = j < viParts.Length ? viParts[j].Trim() : string.Empty
+                        });
+                    }
+
+                    chunkNewRules.Add(rule);
+                    existingDict[titleKey] = rule;
+                    imported++;
                 }
-                else
+
+                if (chunkNewRules.Count > 0)
                 {
-                    skipped++;
+                    await _grammarRepo.AddRangeAsync(chunkNewRules, cancellationToken);
+                    newRules.AddRange(chunkNewRules);
                 }
-                continue;
+
+                if (chunkStart + ImportBatchSize < dataLines)
+                {
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    _unitOfWork.ClearTracker();
+                }
+
+                int processedCount = Math.Min(chunkStart + chunk.Count, dataLines);
+                int pct = (int)(10.0 + 80.0 * processedCount / Math.Max(1, dataLines));
+                throttler.Report(pct, processedCount, dataLines, "Đang nhập ngữ pháp...", $"Processed: {chunk[^1][idxTitle]}");
             }
 
-            var rule = new GrammarRule
+            if (newRules.Count > 0 || updated > 0)
             {
-                Title = title,
-                Structure = structure,
-                ExplanationVi = explVi,
-                ExplanationEn = string.IsNullOrWhiteSpace(explEn) ? null : explEn,
-                CommonMistakes = string.IsNullOrWhiteSpace(mistakes) ? null : mistakes,
-                Level = level,
-                ExamTarget = examTarget,
-                Topic = string.IsNullOrWhiteSpace(topic) ? null : topic
-            };
-
-            var enParts = examplesEn.Split('|', StringSplitOptions.RemoveEmptyEntries);
-            var viParts = examplesVi.Split('|', StringSplitOptions.RemoveEmptyEntries);
-            for (int j = 0; j < enParts.Length; j++)
+                throttler.Report(92, imported + updated, dataLines, "Đang lưu vào cơ sở dữ liệu...", "Committing transaction...", force: true);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+                _unitOfWork.ClearTracker();
+            }
+            else
             {
-                var sentEn = enParts[j].Trim();
-                if (string.IsNullOrWhiteSpace(sentEn)) continue;
-                rule.Examples.Add(new GrammarExample
-                {
-                    SentenceEn = sentEn,
-                    SentenceVi = j < viParts.Length ? viParts[j].Trim() : string.Empty
-                });
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
             }
 
-            newRules.Add(rule);
-            existingDict[titleKey] = rule;
-            imported++;
-
-            progress?.Report(new ProgressReport(pct, i, dataLines, "Đang nhập ngữ pháp...", $"Processed: {title}"));
+            throttler.Report(100, imported + updated, dataLines, "Nhập CSV hoàn tất!", "Complete.", force: true);
         }
-
-        if (newRules.Count > 0)
+        catch (Exception ex)
         {
-            progress?.Report(new ProgressReport(92, imported, dataLines, "Đang lưu vào cơ sở dữ liệu...", "Committing transaction..."));
-            await _grammarRepo.AddRangeAsync(newRules, cancellationToken);
+            await _unitOfWork.RollbackTransactionAsync(CancellationToken.None);
+            errors.Add($"Error importing grammar CSV: {ex.Message}");
         }
 
-        if (newRules.Count > 0 || updated > 0)
-        {
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-
-        progress?.Report(new ProgressReport(100, imported + updated, dataLines, "Nhập CSV hoàn tất!", "Complete."));
         return new ImportResult(imported, skipped, errors, updated);
     }
 
@@ -529,12 +611,21 @@ public class GrammarExportImportService : IGrammarExportImportService
         if (txtContent.Length > MaxImportPayloadLength)
             return new ImportResult(0, 0, [$"Payload exceeds maximum allowed size of {MaxImportPayloadLength / 1_048_576} MB."], 0);
 
-        progress?.Report(new ProgressReport(5, 0, 0, "Đang phân tích định dạng văn bản...", "Parsing blocks..."));
+        var throttler = new ProgressThrottler(progress);
+        throttler.Report(5, 0, 0, "Đang phân tích định dạng văn bản...", "Parsing blocks...", force: true);
 
-        var existing = await _grammarRepo.GetAllAsync(cancellationToken);
-        var existingDict = existing
-            .GroupBy(r => r.Title.Trim().ToLowerInvariant())
-            .ToDictionary(g => g.Key, g => g.First());
+        Dictionary<string, GrammarRule> existingDict;
+        try
+        {
+            var existing = await _grammarRepo.GetAllAsync(cancellationToken);
+            existingDict = existing != null
+                ? existing.GroupBy(r => r.Title.Trim().ToLowerInvariant()).ToDictionary(g => g.Key, g => g.First())
+                : new Dictionary<string, GrammarRule>();
+        }
+        catch
+        {
+            existingDict = new Dictionary<string, GrammarRule>();
+        }
 
         var lines = txtContent.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
         var blocks = new List<List<string>>();
@@ -572,157 +663,192 @@ public class GrammarExportImportService : IGrammarExportImportService
         var newRules = new List<GrammarRule>();
         int total = blocks.Count;
 
-        for (int b = 0; b < blocks.Count; b++)
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
         {
-            var block = blocks[b];
-            string title = "";
-            string structure = "";
-            string explanationVi = "";
-            string? explanationEn = null;
-            string? mistakes = null;
-            string? topic = null;
-            CefrLevel level = CefrLevel.B1;
-            ExamType examTarget = ExamType.General;
-            var examples = new List<(string en, string vi)>();
-
-            foreach (var line in block)
+            for (int chunkStart = 0; chunkStart < blocks.Count; chunkStart += ImportBatchSize)
             {
-                if (line.StartsWith('#'))
+                cancellationToken.ThrowIfCancellationRequested();
+                var chunk = blocks.Skip(chunkStart).Take(ImportBatchSize).ToList();
+                var chunkNewRules = new List<GrammarRule>();
+
+                for (int b = 0; b < chunk.Count; b++)
                 {
-                    title = line.TrimStart('#', ' ').Trim();
-                }
-                else if (line.StartsWith("Title:", StringComparison.OrdinalIgnoreCase))
-                {
-                    title = line.Substring(6).Trim();
-                }
-                else if (line.StartsWith("Structure:", StringComparison.OrdinalIgnoreCase))
-                {
-                    structure = line.Substring(10).Trim();
-                }
-                else if (line.StartsWith("ExplanationVi:", StringComparison.OrdinalIgnoreCase))
-                {
-                    explanationVi = line.Substring(14).Trim();
-                }
-                else if (line.StartsWith("ExplanationEn:", StringComparison.OrdinalIgnoreCase))
-                {
-                    explanationEn = line.Substring(14).Trim();
-                }
-                else if (line.StartsWith("CommonMistakes:", StringComparison.OrdinalIgnoreCase))
-                {
-                    mistakes = line.Substring(15).Trim();
-                }
-                else if (line.StartsWith("Level:", StringComparison.OrdinalIgnoreCase))
-                {
-                    var segs = line.Split('|');
-                    foreach (var seg in segs)
+                    var block = chunk[b];
+                    string title = "";
+                    string structure = "";
+                    string explanationVi = "";
+                    string? explanationEn = null;
+                    string? mistakes = null;
+                    string? topic = null;
+                    CefrLevel level = CefrLevel.B1;
+                    ExamType examTarget = ExamType.General;
+                    var examples = new List<(string en, string vi)>();
+
+                    foreach (var line in block)
                     {
-                        var parts = seg.Split(':');
-                        if (parts.Length == 2)
+                        if (line.StartsWith('#'))
                         {
-                            var key = parts[0].Trim().ToLowerInvariant();
-                            var val = parts[1].Trim();
-                            if (key == "level") level = ParseCefrLevel(val, CefrLevel.B1);
-                            else if (key == "target") examTarget = ParseExamType(val, ExamType.General);
-                            else if (key == "topic") topic = val;
+                            title = line.TrimStart('#', ' ').Trim();
+                        }
+                        else if (line.StartsWith("Title:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            title = line.Substring(6).Trim();
+                        }
+                        else if (line.StartsWith("Structure:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            structure = line.Substring(10).Trim();
+                        }
+                        else if (line.StartsWith("ExplanationVi:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            explanationVi = line.Substring(14).Trim();
+                        }
+                        else if (line.StartsWith("ExplanationEn:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            explanationEn = line.Substring(14).Trim();
+                        }
+                        else if (line.StartsWith("CommonMistakes:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            mistakes = line.Substring(15).Trim();
+                        }
+                        else if (line.StartsWith("Level:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var segs = line.Split('|');
+                            foreach (var seg in segs)
+                            {
+                                var parts = seg.Split(':');
+                                if (parts.Length == 2)
+                                {
+                                    var key = parts[0].Trim().ToLowerInvariant();
+                                    var val = parts[1].Trim();
+                                    if (key == "level") level = ParseCefrLevel(val, CefrLevel.B1);
+                                    else if (key == "target") examTarget = ParseExamType(val, ExamType.General);
+                                    else if (key == "topic") topic = val;
+                                }
+                            }
+                        }
+                        else if (line.StartsWith("- ") || line.StartsWith("* "))
+                        {
+                            var exText = line.Substring(2).Trim();
+                            var arrowIdx = exText.IndexOf("=>", StringComparison.Ordinal);
+                            if (arrowIdx > 0)
+                            {
+                                var en = exText.Substring(0, arrowIdx).Trim();
+                                var vi = exText.Substring(arrowIdx + 2).Trim();
+                                examples.Add((en, vi));
+                            }
+                            else
+                            {
+                                examples.Add((exText, ""));
+                            }
                         }
                     }
-                }
-                else if (line.StartsWith("- ") || line.StartsWith("* "))
-                {
-                    var exText = line.Substring(2).Trim();
-                    var arrowIdx = exText.IndexOf("=>", StringComparison.Ordinal);
-                    if (arrowIdx > 0)
-                    {
-                        var en = exText.Substring(0, arrowIdx).Trim();
-                        var vi = exText.Substring(arrowIdx + 2).Trim();
-                        examples.Add((en, vi));
-                    }
-                    else
-                    {
-                        examples.Add((exText, ""));
-                    }
-                }
-            }
 
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                skipped++;
-                continue;
-            }
+                    if (string.IsNullOrWhiteSpace(title))
+                    {
+                        skipped++;
+                        continue;
+                    }
 
-            var titleKey = title.ToLowerInvariant();
-            if (existingDict.TryGetValue(titleKey, out var existingRule))
-            {
-                if (conflictResolution == ImportConflictResolution.Overwrite)
-                {
-                    if (!string.IsNullOrWhiteSpace(structure)) existingRule.Structure = structure;
-                    if (!string.IsNullOrWhiteSpace(explanationVi)) existingRule.ExplanationVi = explanationVi;
-                    if (!string.IsNullOrWhiteSpace(explanationEn)) existingRule.ExplanationEn = explanationEn;
-                    if (!string.IsNullOrWhiteSpace(mistakes)) existingRule.CommonMistakes = mistakes;
-                    if (!string.IsNullOrWhiteSpace(topic)) existingRule.Topic = topic;
-                    existingRule.Level = level;
-                    existingRule.ExamTarget = examTarget;
+                    var titleKey = title.ToLowerInvariant();
+                    if (existingDict.TryGetValue(titleKey, out var existingRule))
+                    {
+                        if (conflictResolution == ImportConflictResolution.Overwrite)
+                        {
+                            if (!string.IsNullOrWhiteSpace(structure)) existingRule.Structure = structure;
+                            if (!string.IsNullOrWhiteSpace(explanationVi)) existingRule.ExplanationVi = explanationVi;
+                            if (!string.IsNullOrWhiteSpace(explanationEn)) existingRule.ExplanationEn = explanationEn;
+                            if (!string.IsNullOrWhiteSpace(mistakes)) existingRule.CommonMistakes = mistakes;
+                            if (!string.IsNullOrWhiteSpace(topic)) existingRule.Topic = topic;
+                            existingRule.Level = level;
+                            existingRule.ExamTarget = examTarget;
+
+                            foreach (var (en, vi) in examples)
+                            {
+                                if (!existingRule.Examples.Any(e => e.SentenceEn.Trim().Equals(en.Trim(), StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    existingRule.Examples.Add(new GrammarExample
+                                    {
+                                        GrammarRuleId = existingRule.Id,
+                                        SentenceEn = en,
+                                        SentenceVi = vi
+                                    });
+                                }
+                            }
+
+                            await _grammarRepo.UpdateAsync(existingRule, cancellationToken);
+                            updated++;
+                        }
+                        else
+                        {
+                            skipped++;
+                        }
+                        continue;
+                    }
+
+                    var rule = new GrammarRule
+                    {
+                        Title = title,
+                        Structure = structure,
+                        ExplanationVi = string.IsNullOrWhiteSpace(explanationVi) ? title : explanationVi,
+                        ExplanationEn = explanationEn,
+                        CommonMistakes = mistakes,
+                        Level = level,
+                        ExamTarget = examTarget,
+                        Topic = topic
+                    };
 
                     foreach (var (en, vi) in examples)
                     {
-                        if (!existingRule.Examples.Any(e => e.SentenceEn.Trim().Equals(en.Trim(), StringComparison.OrdinalIgnoreCase)))
+                        rule.Examples.Add(new GrammarExample
                         {
-                            existingRule.Examples.Add(new GrammarExample
-                            {
-                                GrammarRuleId = existingRule.Id,
-                                SentenceEn = en,
-                                SentenceVi = vi
-                            });
-                        }
+                            SentenceEn = en,
+                            SentenceVi = vi
+                        });
                     }
 
-                    await _grammarRepo.UpdateAsync(existingRule, cancellationToken);
-                    updated++;
+                    chunkNewRules.Add(rule);
+                    existingDict[titleKey] = rule;
+                    imported++;
                 }
-                else
+
+                if (chunkNewRules.Count > 0)
                 {
-                    skipped++;
+                    await _grammarRepo.AddRangeAsync(chunkNewRules, cancellationToken);
+                    newRules.AddRange(chunkNewRules);
                 }
-                continue;
+
+                if (chunkStart + ImportBatchSize < blocks.Count)
+                {
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    _unitOfWork.ClearTracker();
+                }
+
+                int processedCount = Math.Min(chunkStart + chunk.Count, total);
+                int pct = (int)(10.0 + 80.0 * processedCount / Math.Max(1, total));
+                throttler.Report(pct, processedCount, total, "Đang xử lý...", $"Block {processedCount}/{total}");
             }
 
-            var rule = new GrammarRule
+            if (newRules.Count > 0 || updated > 0)
             {
-                Title = title,
-                Structure = structure,
-                ExplanationVi = string.IsNullOrWhiteSpace(explanationVi) ? title : explanationVi,
-                ExplanationEn = explanationEn,
-                CommonMistakes = mistakes,
-                Level = level,
-                ExamTarget = examTarget,
-                Topic = topic
-            };
-
-            foreach (var (en, vi) in examples)
+                throttler.Report(95, imported + updated, total, "Đang lưu vào cơ sở dữ liệu...", "Committing transaction...", force: true);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+                _unitOfWork.ClearTracker();
+            }
+            else
             {
-                rule.Examples.Add(new GrammarExample
-                {
-                    SentenceEn = en,
-                    SentenceVi = vi
-                });
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
             }
 
-            newRules.Add(rule);
-            existingDict[titleKey] = rule;
-            imported++;
+            throttler.Report(100, imported + updated, total, "Nhập TXT hoàn tất!", "Complete.", force: true);
         }
-
-        if (newRules.Count > 0)
+        catch (Exception ex)
         {
-            await _grammarRepo.AddRangeAsync(newRules, cancellationToken);
+            await _unitOfWork.RollbackTransactionAsync(CancellationToken.None);
+            errors.Add($"Error importing grammar TXT: {ex.Message}");
         }
 
-        if (newRules.Count > 0 || updated > 0)
-        {
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-
-        progress?.Report(new ProgressReport(100, imported + updated, total, "Nhập TXT hoàn tất!", "Complete."));
         return new ImportResult(imported, skipped, errors, updated);
     }
 

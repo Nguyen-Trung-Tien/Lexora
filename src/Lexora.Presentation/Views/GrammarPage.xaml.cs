@@ -957,4 +957,19 @@ public sealed partial class GrammarPage : Page
             System.Diagnostics.Debug.WriteLine($"[GrammarPage] ShowErrorDialog error: {ex.Message}");
         }
     }
+
+    private async void GrammarPageSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (GrammarPageSizeCombo.SelectedItem is ComboBoxItem cbi && int.TryParse(cbi.Content?.ToString(), out int size))
+            {
+                await ViewModel.ChangePageSizeAsync(size);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarPage] GrammarPageSizeCombo_SelectionChanged error: {ex.Message}");
+        }
+    }
 }

@@ -91,6 +91,11 @@ public sealed partial class SmartImportDialog : ContentDialog
     private readonly IGrammarExportImportService? _grammarExportImportService;
 
     private readonly ObservableCollection<SmartImportPreviewItem> _previewItems = new();
+    private readonly ObservableCollection<SmartImportPreviewItem> _currentPagePreviewItems = new();
+    private const int PreviewPageSize = 50;
+    private int _previewCurrentPage = 1;
+    private int PreviewTotalPages => Math.Max(1, (int)Math.Ceiling((double)_previewItems.Count / PreviewPageSize));
+    private CancellationTokenSource? _importCts;
     private SmartImportAnalysisResultDto? _analysisResult;
 
     public string? ContentToImport { get; private set; }
@@ -123,7 +128,12 @@ public sealed partial class SmartImportDialog : ContentDialog
             _grammarExportImportService = App.Current.Services.GetService<IGrammarExportImportService>();
         }
 
-        Unloaded += (s, e) => _scope?.Dispose();
+        Unloaded += (s, e) =>
+        {
+            _importCts?.Cancel();
+            _importCts?.Dispose();
+            _scope?.Dispose();
+        };
 
         // Sync theme from the main window so the dialog renders correctly in both Light and Dark mode.
         var rootTheme = (App.Current.MainWindow?.Content as FrameworkElement)?.ActualTheme;
@@ -226,6 +236,13 @@ public sealed partial class SmartImportDialog : ContentDialog
         TextDone.Text = _loc.GetString("SmartImport_DoneBtn");
         BtnClearPaste.Content = _loc.GetString("SmartImport_ClearPaste");
         TextDropHint.Text = _loc.GetString("SmartImport_DragDropHint");
+        TextModePasteHeader.Text = _loc.GetString("SmartImport_InputDataLabel");
+        TextCancelImport.Text = _loc.GetString("Action_Cancel");
+
+        ToolTipService.SetToolTip(BtnPreviewFirstPage, _loc.GetString("Vocab_FirstPage"));
+        ToolTipService.SetToolTip(BtnPreviewPrevPage, _loc.GetString("Vocab_PrevPage"));
+        ToolTipService.SetToolTip(BtnPreviewNextPage, _loc.GetString("Vocab_NextPage"));
+        ToolTipService.SetToolTip(BtnPreviewLastPage, _loc.GetString("Vocab_LastPage"));
 
         TextReportTitle.Text = _loc.GetString("SmartImport_CommitSuccess");
         TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), 0);
@@ -640,14 +657,23 @@ public sealed partial class SmartImportDialog : ContentDialog
                 });
             });
 
+            _importCts?.Dispose();
+            _importCts = new CancellationTokenSource();
+            BtnCancelImport.IsEnabled = true;
+
             try
             {
-                var importResult = await _grammarExportImportService.ImportSmartAsync(
-                    ContentToImport,
-                    FileNameHint,
-                    ConflictResolution,
-                    CancellationToken.None,
-                    progress);
+                var content = ContentToImport;
+                var fileHint = FileNameHint;
+                var cr = ConflictResolution;
+                var token = _importCts.Token;
+
+                var importResult = await Task.Run(async () => await _grammarExportImportService.ImportSmartAsync(
+                    content,
+                    fileHint,
+                    cr,
+                    token,
+                    progress));
 
                 await DispatcherQueue.EnsureOnUIThreadAsync();
 
@@ -663,6 +689,19 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), importResult.TotalUpdated);
                 TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), importResult.TotalSkipped);
                 TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), importResult.Errors.Count);
+            }
+            catch (OperationCanceledException)
+            {
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+                PanelImportProgress.Visibility = Visibility.Collapsed;
+                PanelImportReport.Visibility = Visibility.Visible;
+                IconReportStatus.Glyph = "\uE711";
+                IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush");
+                TextReportTitle.Text = _loc.GetString("SmartImport_CancelledTitle");
+                TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), 0);
+                TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
+                TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
+                TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 0);
             }
             catch (Exception ex)
             {
@@ -689,7 +728,9 @@ public sealed partial class SmartImportDialog : ContentDialog
         BtnAnalyzeNext.IsEnabled = false;
         try
         {
-            _analysisResult = await _exportImportService.AnalyzeSmartImportAsync(ContentToImport, FileNameHint);
+            var content = ContentToImport;
+            var fileHint = FileNameHint;
+            _analysisResult = await Task.Run(async () => await _exportImportService.AnalyzeSmartImportAsync(content, fileHint));
             await DispatcherQueue.EnsureOnUIThreadAsync();
 
             // Populate Step 2 Metrics
@@ -797,7 +838,9 @@ public sealed partial class SmartImportDialog : ContentDialog
                 _previewItems.Add(preview);
             }
 
-            ItemsPreviewList.ItemsSource = _previewItems;
+            ItemsPreviewListView.ItemsSource = _currentPagePreviewItems;
+            _previewCurrentPage = 1;
+            RefreshPreviewPage();
             UpdateSelectionCount();
             GoToStep(2);
         }
@@ -812,6 +855,66 @@ public sealed partial class SmartImportDialog : ContentDialog
         {
             BtnAnalyzeNext.IsEnabled = true;
         }
+    }
+
+    private void RefreshPreviewPage()
+    {
+        if (_previewCurrentPage > PreviewTotalPages) _previewCurrentPage = PreviewTotalPages;
+        if (_previewCurrentPage < 1) _previewCurrentPage = 1;
+
+        _currentPagePreviewItems.Clear();
+        var slice = _previewItems.Skip((_previewCurrentPage - 1) * PreviewPageSize).Take(PreviewPageSize);
+        foreach (var item in slice)
+        {
+            _currentPagePreviewItems.Add(item);
+        }
+
+        TextPreviewCurrentPage.Text = $"{_previewCurrentPage} / {PreviewTotalPages}";
+        int start = _previewItems.Count > 0 ? (_previewCurrentPage - 1) * PreviewPageSize + 1 : 0;
+        int end = Math.Min(_previewCurrentPage * PreviewPageSize, _previewItems.Count);
+        TextPreviewPagingInfo.Text = $"{start} - {end} / {_previewItems.Count}";
+
+        BtnPreviewFirstPage.IsEnabled = _previewCurrentPage > 1;
+        BtnPreviewPrevPage.IsEnabled = _previewCurrentPage > 1;
+        BtnPreviewNextPage.IsEnabled = _previewCurrentPage < PreviewTotalPages;
+        BtnPreviewLastPage.IsEnabled = _previewCurrentPage < PreviewTotalPages;
+    }
+
+    private void BtnPreviewFirstPage_Click(object sender, RoutedEventArgs e)
+    {
+        _previewCurrentPage = 1;
+        RefreshPreviewPage();
+    }
+
+    private void BtnPreviewPrevPage_Click(object sender, RoutedEventArgs e)
+    {
+        if (_previewCurrentPage > 1)
+        {
+            _previewCurrentPage--;
+            RefreshPreviewPage();
+        }
+    }
+
+    private void BtnPreviewNextPage_Click(object sender, RoutedEventArgs e)
+    {
+        if (_previewCurrentPage < PreviewTotalPages)
+        {
+            _previewCurrentPage++;
+            RefreshPreviewPage();
+        }
+    }
+
+    private void BtnPreviewLastPage_Click(object sender, RoutedEventArgs e)
+    {
+        _previewCurrentPage = PreviewTotalPages;
+        RefreshPreviewPage();
+    }
+
+    private void BtnCancelImport_Click(object sender, RoutedEventArgs e)
+    {
+        _importCts?.Cancel();
+        BtnCancelImport.IsEnabled = false;
+        TextImportProgressMessage.Text = _loc.GetString("SmartImport_Cancelling");
     }
 
     private void RadioConflict_Checked(object sender, RoutedEventArgs e)
@@ -892,6 +995,10 @@ public sealed partial class SmartImportDialog : ContentDialog
             });
         });
 
+        _importCts?.Dispose();
+        _importCts = new CancellationTokenSource();
+        BtnCancelImport.IsEnabled = true;
+
         try
         {
             var request = new SmartImportCommitRequestDto(
@@ -899,7 +1006,8 @@ public sealed partial class SmartImportDialog : ContentDialog
                 ConflictResolution: ConflictResolution
             );
 
-            CommitResult = await _exportImportService.CommitSmartImportAsync(request, CancellationToken.None, progress);
+            var token = _importCts.Token;
+            CommitResult = await Task.Run(async () => await _exportImportService.CommitSmartImportAsync(request, token, progress));
             await DispatcherQueue.EnsureOnUIThreadAsync();
             WasCommitted = true;
 
@@ -915,6 +1023,19 @@ public sealed partial class SmartImportDialog : ContentDialog
             TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), CommitResult.TotalUpdated);
             TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), CommitResult.TotalSkipped);
             TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), CommitResult.TotalErrors);
+        }
+        catch (OperationCanceledException)
+        {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            PanelImportProgress.Visibility = Visibility.Collapsed;
+            PanelImportReport.Visibility = Visibility.Visible;
+            IconReportStatus.Glyph = "\uE711";
+            IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush");
+            TextReportTitle.Text = _loc.GetString("SmartImport_CancelledTitle");
+            TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), CommitResult?.TotalImported ?? 0);
+            TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), CommitResult?.TotalUpdated ?? 0);
+            TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), CommitResult?.TotalSkipped ?? 0);
+            TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 0);
         }
         catch (Exception ex)
         {
@@ -941,3 +1062,4 @@ public sealed partial class SmartImportDialog : ContentDialog
         Hide();
     }
 }
+
