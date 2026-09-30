@@ -1529,7 +1529,10 @@ public sealed partial class VocabularyPage : Page
                 {
                     var created = await ViewModel.CreateTopicAsync(dialog.ResultDto);
                     PopulateTopicFilterCombo();
-                    ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Add"), string.Format(Loc.GetString("Vocab_TopicAdded"), created.Name));
+                    if (created != null)
+                    {
+                        ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Add"), string.Format(Loc.GetString("Vocab_TopicAdded"), created.Name));
+                    }
                 }
                 catch (Exception ex)
                 {

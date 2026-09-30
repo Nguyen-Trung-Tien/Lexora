@@ -80,7 +80,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             .FirstOrDefaultAsync(w => w.NormalizedTerm == normalized, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Word>> SearchAsync(
+    public Task<IReadOnlyList<Word>> SearchAsync(
         string? searchTerm = null,
         CefrLevel? level = null,
         PartOfSpeech? partOfSpeech = null,
@@ -91,8 +91,24 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         int take = 50,
         string? sortBy = null,
         bool isAscending = true,
-        bool? isDueToday = null,
-        bool? isWeak = null,
+        CancellationToken cancellationToken = default)
+    {
+        return SearchAsync(searchTerm, level, partOfSpeech, topicId, examType, status, skip, take, sortBy, isAscending, null, null, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Word>> SearchAsync(
+        string? searchTerm,
+        CefrLevel? level,
+        PartOfSpeech? partOfSpeech,
+        Guid? topicId,
+        ExamType? examType,
+        LearningStatus? status,
+        int skip,
+        int take,
+        string? sortBy,
+        bool isAscending,
+        bool? isDueToday,
+        bool? isWeak,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -128,15 +144,27 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         return await query.Skip(skip).Take(take).ToListAsync(cancellationToken);
     }
 
-    public async Task<int> CountFilteredAsync(
+    public Task<int> CountFilteredAsync(
         string? searchTerm = null,
         CefrLevel? level = null,
         PartOfSpeech? partOfSpeech = null,
         Guid? topicId = null,
         ExamType? examType = null,
         LearningStatus? status = null,
-        bool? isDueToday = null,
-        bool? isWeak = null,
+        CancellationToken cancellationToken = default)
+    {
+        return CountFilteredAsync(searchTerm, level, partOfSpeech, topicId, examType, status, null, null, cancellationToken);
+    }
+
+    public async Task<int> CountFilteredAsync(
+        string? searchTerm,
+        CefrLevel? level,
+        PartOfSpeech? partOfSpeech,
+        Guid? topicId,
+        ExamType? examType,
+        LearningStatus? status,
+        bool? isDueToday,
+        bool? isWeak,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();

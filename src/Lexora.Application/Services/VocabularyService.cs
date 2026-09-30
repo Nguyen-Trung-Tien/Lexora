@@ -54,9 +54,19 @@ public class VocabularyService : IVocabularyService
         CancellationToken cancellationToken = default)
     {
         int skip = Math.Max(0, (page - 1) * pageSize);
-        var words = await _vocabRepo.SearchAsync(
-            search, level, pos, topicId, examType, status,
-            skip, pageSize, sortBy, isAscending, isDueToday, isWeak, cancellationToken);
+        IReadOnlyList<Word> words;
+        if (isDueToday == null && isWeak == null)
+        {
+            words = await _vocabRepo.SearchAsync(
+                search, level, pos, topicId, examType, status,
+                skip, pageSize, sortBy, isAscending, cancellationToken);
+        }
+        else
+        {
+            words = await _vocabRepo.SearchAsync(
+                search, level, pos, topicId, examType, status,
+                skip, pageSize, sortBy, isAscending, isDueToday, isWeak, cancellationToken);
+        }
 
         return words.Select(MapToDto).ToList();
     }
@@ -72,7 +82,14 @@ public class VocabularyService : IVocabularyService
         bool? isWeak = null,
         CancellationToken cancellationToken = default)
     {
-        return await _vocabRepo.CountFilteredAsync(search, level, pos, topicId, examType, status, isDueToday, isWeak, cancellationToken);
+        if (isDueToday == null && isWeak == null)
+        {
+            return await _vocabRepo.CountFilteredAsync(search, level, pos, topicId, examType, status, cancellationToken);
+        }
+        else
+        {
+            return await _vocabRepo.CountFilteredAsync(search, level, pos, topicId, examType, status, isDueToday, isWeak, cancellationToken);
+        }
     }
 
     public async Task<WordDto> CreateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default)
