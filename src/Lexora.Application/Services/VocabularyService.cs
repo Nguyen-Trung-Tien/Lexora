@@ -49,12 +49,14 @@ public class VocabularyService : IVocabularyService
         int pageSize = 50,
         string? sortBy = null,
         bool isAscending = true,
+        bool? isDueToday = null,
+        bool? isWeak = null,
         CancellationToken cancellationToken = default)
     {
         int skip = Math.Max(0, (page - 1) * pageSize);
         var words = await _vocabRepo.SearchAsync(
             search, level, pos, topicId, examType, status,
-            skip, pageSize, sortBy, isAscending, cancellationToken);
+            skip, pageSize, sortBy, isAscending, isDueToday, isWeak, cancellationToken);
 
         return words.Select(MapToDto).ToList();
     }
@@ -66,9 +68,11 @@ public class VocabularyService : IVocabularyService
         Guid? topicId = null,
         ExamType? examType = null,
         LearningStatus? status = null,
+        bool? isDueToday = null,
+        bool? isWeak = null,
         CancellationToken cancellationToken = default)
     {
-        return await _vocabRepo.CountFilteredAsync(search, level, pos, topicId, examType, status, cancellationToken);
+        return await _vocabRepo.CountFilteredAsync(search, level, pos, topicId, examType, status, isDueToday, isWeak, cancellationToken);
     }
 
     public async Task<WordDto> CreateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default)
@@ -225,6 +229,8 @@ public class VocabularyService : IVocabularyService
 
     public async Task DeleteWordAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        if (id == Guid.Empty) return;
+
         var word = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken)
                    ?? await _vocabRepo.GetByIdAsync(id, cancellationToken);
         if (word != null)
@@ -237,35 +243,50 @@ public class VocabularyService : IVocabularyService
     public async Task<int> DeleteWordsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        var idList = ids.Distinct().ToList();
+        var idList = ids.Where(id => id != Guid.Empty).Distinct().ToList();
         if (idList.Count == 0) return 0;
 
-        var words = await _vocabRepo.GetByIdsWithDetailsAsync(idList, cancellationToken);
-        if (words == null || words.Count == 0)
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
         {
-            var fallbackWords = new List<Word>();
-            foreach (var id in idList)
+            int deletedCount = 0;
+            foreach (var chunk in idList.Chunk(250))
             {
-                var w = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken)
-                        ?? await _vocabRepo.GetByIdAsync(id, cancellationToken);
-                if (w != null) fallbackWords.Add(w);
+                cancellationToken.ThrowIfCancellationRequested();
+                var words = await _vocabRepo.GetByIdsWithDetailsAsync(chunk, cancellationToken);
+                if (words == null || words.Count == 0)
+                {
+                    var fallbackWords = new List<Word>();
+                    foreach (var id in chunk)
+                    {
+                        var w = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken)
+                                ?? await _vocabRepo.GetByIdAsync(id, cancellationToken);
+                        if (w != null) fallbackWords.Add(w);
+                    }
+                    words = fallbackWords;
+                }
+
+                foreach (var word in words)
+                {
+                    await _vocabRepo.DeleteAsync(word, cancellationToken);
+                    deletedCount++;
+                }
+
+                if (words.Count > 0)
+                {
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    _unitOfWork.ClearTracker();
+                }
             }
-            words = fallbackWords;
-        }
 
-        int deletedCount = 0;
-        foreach (var word in words)
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            return deletedCount;
+        }
+        catch
         {
-            await _vocabRepo.DeleteAsync(word, cancellationToken);
-            deletedCount++;
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
         }
-
-        if (deletedCount > 0)
-        {
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-
-        return deletedCount;
     }
 
     public async Task<IReadOnlyList<TopicDto>> GetAllTopicsAsync(CancellationToken cancellationToken = default)

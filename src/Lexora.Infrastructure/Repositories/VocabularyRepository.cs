@@ -28,20 +28,42 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
 
     public async Task<IReadOnlyList<Word>> GetByIdsWithDetailsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
     {
-        var idList = ids.Distinct().ToList();
+        var idList = ids.Where(id => id != Guid.Empty).Distinct().ToList();
         if (idList.Count == 0) return Array.Empty<Word>();
 
-        return await DbSet
-            .Include(w => w.Meanings)
-                .ThenInclude(m => m.Examples)
-            .Include(w => w.WordTopics)
-                .ThenInclude(wt => wt.Topic)
-            .Include(w => w.WordExamTags)
-                .ThenInclude(wet => wet.ExamTag)
-            .Include(w => w.ReviewCard)
-                .ThenInclude(rc => rc!.StudyLogs)
-            .Where(w => idList.Contains(w.Id))
-            .ToListAsync(cancellationToken);
+        if (idList.Count <= 500)
+        {
+            return await DbSet
+                .Include(w => w.Meanings)
+                    .ThenInclude(m => m.Examples)
+                .Include(w => w.WordTopics)
+                    .ThenInclude(wt => wt.Topic)
+                .Include(w => w.WordExamTags)
+                    .ThenInclude(wet => wet.ExamTag)
+                .Include(w => w.ReviewCard)
+                    .ThenInclude(rc => rc!.StudyLogs)
+                .Where(w => idList.Contains(w.Id))
+                .ToListAsync(cancellationToken);
+        }
+
+        var results = new List<Word>(idList.Count);
+        foreach (var chunk in idList.Chunk(500))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var batch = await DbSet
+                .Include(w => w.Meanings)
+                    .ThenInclude(m => m.Examples)
+                .Include(w => w.WordTopics)
+                    .ThenInclude(wt => wt.Topic)
+                .Include(w => w.WordExamTags)
+                    .ThenInclude(wet => wet.ExamTag)
+                .Include(w => w.ReviewCard)
+                    .ThenInclude(rc => rc!.StudyLogs)
+                .Where(w => chunk.Contains(w.Id))
+                .ToListAsync(cancellationToken);
+            results.AddRange(batch);
+        }
+        return results;
     }
 
     public async Task<Word?> GetByTermAsync(string term, CancellationToken cancellationToken = default)
@@ -69,6 +91,8 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         int take = 50,
         string? sortBy = null,
         bool isAscending = true,
+        bool? isDueToday = null,
+        bool? isWeak = null,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -82,7 +106,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             .AsNoTracking()
             .AsQueryable();
 
-        query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status);
+        query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
 
         query = sortBy?.ToLowerInvariant() switch
         {
@@ -111,10 +135,12 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         Guid? topicId = null,
         ExamType? examType = null,
         LearningStatus? status = null,
+        bool? isDueToday = null,
+        bool? isWeak = null,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();
-        query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status);
+        query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
         return await query.CountAsync(cancellationToken);
     }
 
@@ -155,7 +181,9 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         PartOfSpeech? partOfSpeech,
         Guid? topicId,
         ExamType? examType,
-        LearningStatus? status)
+        LearningStatus? status,
+        bool? isDueToday = null,
+        bool? isWeak = null)
     {
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -201,6 +229,17 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         if (status.HasValue)
         {
             query = query.Where(w => w.ReviewCard != null && w.ReviewCard.Status == status.Value);
+        }
+
+        if (isDueToday == true)
+        {
+            var now = DateTime.UtcNow;
+            query = query.Where(w => w.ReviewCard != null && w.ReviewCard.NextReviewAt <= now);
+        }
+
+        if (isWeak == true)
+        {
+            query = query.Where(w => w.ReviewCard != null && (w.ReviewCard.Lapses > 0 || w.ReviewCard.Status == LearningStatus.NotRemembered));
         }
 
         return query;

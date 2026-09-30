@@ -185,6 +185,8 @@ public class GrammarService : IGrammarService
 
     public async Task DeleteRuleAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        if (id == Guid.Empty) return;
+
         var rule = await _grammarRepo.GetWithExamplesAsync(id, cancellationToken)
                    ?? await _grammarRepo.GetByIdAsync(id, cancellationToken);
         if (rule != null)
@@ -197,27 +199,44 @@ public class GrammarService : IGrammarService
     public async Task<int> DeleteRulesAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
-        var idList = ids.Distinct().ToList();
+        var idList = ids.Where(id => id != Guid.Empty).Distinct().ToList();
         if (idList.Count == 0) return 0;
 
-        int deletedCount = 0;
-        foreach (var id in idList)
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
         {
-            var rule = await _grammarRepo.GetWithExamplesAsync(id, cancellationToken)
-                       ?? await _grammarRepo.GetByIdAsync(id, cancellationToken);
-            if (rule != null)
+            int deletedCount = 0;
+            foreach (var chunk in idList.Chunk(250))
             {
-                await _grammarRepo.DeleteAsync(rule, cancellationToken);
-                deletedCount++;
+                cancellationToken.ThrowIfCancellationRequested();
+                int chunkCount = 0;
+                foreach (var id in chunk)
+                {
+                    var rule = await _grammarRepo.GetWithExamplesAsync(id, cancellationToken)
+                               ?? await _grammarRepo.GetByIdAsync(id, cancellationToken);
+                    if (rule != null)
+                    {
+                        await _grammarRepo.DeleteAsync(rule, cancellationToken);
+                        deletedCount++;
+                        chunkCount++;
+                    }
+                }
+
+                if (chunkCount > 0)
+                {
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    _unitOfWork.ClearTracker();
+                }
             }
-        }
 
-        if (deletedCount > 0)
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            return deletedCount;
+        }
+        catch
         {
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
         }
-
-        return deletedCount;
     }
 
     public async Task<IReadOnlyList<GrammarQuizQuestionDto>> GenerateGrammarQuizAsync(

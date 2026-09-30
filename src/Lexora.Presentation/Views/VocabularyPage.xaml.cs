@@ -615,11 +615,13 @@ public sealed partial class VocabularyPage : Page
 
                 CardSaveSuccessStoryboard.Begin();
                 soundFeedback?.PlayCardFlipSound();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Add"), string.Format(Loc.GetString("Vocab_Status_WordAdded"), dialog.ResultDto.Term));
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] AddWord error: {ex.Message}");
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Add"), ex.Message);
             await ShowErrorDialogAsync(Loc.GetString("Vocab_AddWord"), ex.Message);
         }
     }
@@ -693,11 +695,13 @@ public sealed partial class VocabularyPage : Page
                 // Smooth return bounce + pleasant completion feedback
                 CardSaveSuccessStoryboard.Begin();
                 soundFeedback?.PlayCardFlipSound();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Edit"), string.Format(Loc.GetString("Vocab_Status_WordUpdated"), dialog.ResultDto.Term));
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] EditWord error: {ex.Message}");
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Edit"), ex.Message);
             await ShowErrorDialogAsync(Loc.GetString("Vocab_EditWord"), ex.Message);
         }
     }
@@ -919,6 +923,7 @@ public sealed partial class VocabularyPage : Page
         {
             progressDialog.HideSafe();
             await Task.Yield();
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Vocab_ExportFailedTitle"), ex.Message);
             await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
         }
     }
@@ -1259,10 +1264,20 @@ public sealed partial class VocabularyPage : Page
                 importResult.Errors.Count,
                 Loc.GetString("Action_Close"));
 
-            ShowNotification(
-                importResult.Errors.Count > 0 ? InfoBarSeverity.Warning : InfoBarSeverity.Success,
-                Loc.GetString("Progress_CompletedTitle"),
-                summary);
+            var severity = (importResult.TotalImported == 0 && importResult.TotalUpdated == 0 && importResult.Errors.Count > 0)
+                ? InfoBarSeverity.Error
+                : (importResult.Errors.Count > 0 || (importResult.TotalSkipped > 0 && importResult.TotalImported == 0 && importResult.TotalUpdated == 0))
+                    ? InfoBarSeverity.Warning
+                    : InfoBarSeverity.Success;
+
+            var notifTitle = severity switch
+            {
+                InfoBarSeverity.Error => Loc.GetString("Vocab_ImportFailed"),
+                InfoBarSeverity.Warning => Loc.GetString("Common_Warning"),
+                _ => Loc.GetString("Progress_CompletedTitle")
+            };
+
+            ShowNotification(severity, notifTitle, summary);
         }
         catch (Exception ex)
         {
@@ -1514,9 +1529,11 @@ public sealed partial class VocabularyPage : Page
                 {
                     var created = await ViewModel.CreateTopicAsync(dialog.ResultDto);
                     PopulateTopicFilterCombo();
+                    ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Add"), string.Format(Loc.GetString("Vocab_TopicAdded"), created.Name));
                 }
                 catch (Exception ex)
                 {
+                    ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Add"), ex.Message);
                     await ShowErrorDialogAsync(Loc.GetString("Vocab_CreateTopicFailed"), ex.Message);
                 }
             }
@@ -1556,12 +1573,14 @@ public sealed partial class VocabularyPage : Page
 
                     CardSaveSuccessStoryboard.Begin();
                     soundFeedback?.PlayCardFlipSound();
+                    ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Add"), string.Format(Loc.GetString("Vocab_Status_WordAdded"), dialog.ResultDto.Term));
                 }
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] AddWordToUnit error: {ex.Message}");
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Add"), ex.Message);
             await ShowErrorDialogAsync(Loc.GetString("Vocab_AddWord"), ex.Message);
         }
     }

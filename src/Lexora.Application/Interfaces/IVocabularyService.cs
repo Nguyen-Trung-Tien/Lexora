@@ -18,6 +18,8 @@ public interface IVocabularyService
         int pageSize = 50,
         string? sortBy = null,
         bool isAscending = true,
+        bool? isDueToday = null,
+        bool? isWeak = null,
         CancellationToken cancellationToken = default);
 
     Task<int> CountWordsAsync(
@@ -27,6 +29,8 @@ public interface IVocabularyService
         Guid? topicId = null,
         ExamType? examType = null,
         LearningStatus? status = null,
+        bool? isDueToday = null,
+        bool? isWeak = null,
         CancellationToken cancellationToken = default);
 
     Task<WordDto> CreateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default);

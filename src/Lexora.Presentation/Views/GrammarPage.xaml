@@ -35,7 +35,7 @@
             <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
                 
                 <!-- Search Box with Live Debounce -->
-                <TextBox MinWidth="160"
+                <TextBox x:Name="GrammarSearchBox" MinWidth="160"
                          PlaceholderText="{x:Bind Loc.GetString('Grammar_SearchPlaceholder')}"
                          Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}"
                          TextChanged="SearchBox_TextChanged"

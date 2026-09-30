@@ -81,13 +81,18 @@
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
             Padding="14,12"
-            MinWidth="320"
+            MinWidth="300"
             MaxWidth="420"
             Opacity="0"
             Visibility="Collapsed"
+            Translation="0,0,24"
             PointerEntered="ToastRoot_PointerEntered"
             PointerExited="ToastRoot_PointerExited"
             RenderTransformOrigin="0.5,0.5">
+
+        <Border.Shadow>
+            <ThemeShadow />
+        </Border.Shadow>
 
         <Border.RenderTransform>
             <TransformGroup>
@@ -115,6 +120,7 @@
                     <TextBlock x:Name="TitleTextBlock"
                                FontWeight="SemiBold"
                                FontSize="13"
+                               MaxLines="1"
                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                TextTrimming="CharacterEllipsis" />
                     <TextBlock x:Name="MessageTextBlock"

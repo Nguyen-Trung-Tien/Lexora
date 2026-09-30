@@ -11,10 +11,27 @@ public class ToastNotificationService : IToastNotificationService
         _localizationService = localizationService;
     }
 
+    private (string Message, ToastType Type, DateTime Timestamp)? _lastNotification;
+
     public void Show(ToastType type, string message, string? title = null, int durationMs = 4000)
     {
+        if (string.IsNullOrWhiteSpace(message)) return;
+
+        var cleanMessage = message.Trim();
+        var now = DateTime.UtcNow;
+
+        if (_lastNotification.HasValue &&
+            _lastNotification.Value.Type == type &&
+            string.Equals(_lastNotification.Value.Message, cleanMessage, StringComparison.Ordinal) &&
+            (now - _lastNotification.Value.Timestamp).TotalMilliseconds < 800)
+        {
+            // Suppress rapid identical notifications to prevent spam and visual glitch
+            return;
+        }
+        _lastNotification = (cleanMessage, type, now);
+
         var resolvedTitle = !string.IsNullOrWhiteSpace(title)
-            ? title
+            ? title.Trim()
             : type switch
             {
                 ToastType.Success => _localizationService.GetString("Toast_SuccessTitle"),
@@ -27,7 +44,7 @@ public class ToastNotificationService : IToastNotificationService
             Guid.NewGuid(),
             type,
             resolvedTitle,
-            message,
+            cleanMessage,
             durationMs);
 
         ToastRequested?.Invoke(notification);

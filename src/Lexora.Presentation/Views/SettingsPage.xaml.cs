@@ -415,6 +415,12 @@ public sealed partial class SettingsPage : Page
                         Loc.GetString("Settings_BackupSuccessTitle"),
                         ViewModel.BackupStatusMessage,
                         closeButtonText: Loc.GetString("Action_Close"));
+
+                    if (App.Current.Services.GetService<IToastNotificationService>() is { } toast)
+                    {
+                        var msg = string.Format(Loc.GetString("Backup_SuccessMsg"), backupPath);
+                        toast.ShowSuccess(msg, Loc.GetString("Settings_BackupSuccessTitle"));
+                    }
                 }
                 else
                 {
@@ -422,6 +428,12 @@ public sealed partial class SettingsPage : Page
                         Loc.GetString("Settings_BackupFailedTitle"),
                         ViewModel.BackupStatusMessage,
                         Loc.GetString("Action_Close"));
+
+                    if (App.Current.Services.GetService<IToastNotificationService>() is { } toast)
+                    {
+                        var msg = string.Format(Loc.GetString("Backup_FailedMsg"), ViewModel.BackupStatusMessage);
+                        toast.ShowError(msg, Loc.GetString("Settings_BackupFailedTitle"));
+                    }
                 }
             }
             catch (Exception ex)
@@ -431,6 +443,12 @@ public sealed partial class SettingsPage : Page
                     Loc.GetString("Settings_BackupFailedTitle"),
                     ex.Message,
                     Loc.GetString("Action_Close"));
+
+                if (App.Current.Services.GetService<IToastNotificationService>() is { } toast)
+                {
+                    var msg = string.Format(Loc.GetString("Backup_FailedMsg"), ex.Message);
+                    toast.ShowError(msg, Loc.GetString("Settings_BackupFailedTitle"));
+                }
             }
         }
         catch (Exception ex)
@@ -614,6 +632,12 @@ public sealed partial class SettingsPage : Page
                             skipped: 0,
                             errors: 0,
                             closeButtonText: Loc.GetString("Action_Close"));
+
+                        if (App.Current.Services.GetService<IToastNotificationService>() is { } toast)
+                        {
+                            var msg = string.Format(Loc.GetString("Restore_SuccessMsg"), selectedFilePath);
+                            toast.ShowSuccess(msg, Loc.GetString("Settings_RestoreSuccessTitle"));
+                        }
                     }
                     else
                     {
@@ -621,6 +645,12 @@ public sealed partial class SettingsPage : Page
                             Loc.GetString("Settings_RestoreFailedTitle"),
                             ViewModel.BackupStatusMessage,
                             Loc.GetString("Action_Close"));
+
+                        if (App.Current.Services.GetService<IToastNotificationService>() is { } toast)
+                        {
+                            var msg = string.Format(Loc.GetString("Restore_FailedMsg"), ViewModel.BackupStatusMessage);
+                            toast.ShowError(msg, Loc.GetString("Settings_RestoreFailedTitle"));
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -630,6 +660,12 @@ public sealed partial class SettingsPage : Page
                         Loc.GetString("Settings_RestoreFailedTitle"),
                         ex.Message,
                         Loc.GetString("Action_Close"));
+
+                    if (App.Current.Services.GetService<IToastNotificationService>() is { } toast)
+                    {
+                        var msg = string.Format(Loc.GetString("Restore_FailedMsg"), ex.Message);
+                        toast.ShowError(msg, Loc.GetString("Settings_RestoreFailedTitle"));
+                    }
                 }
             }
             catch (Exception ex)

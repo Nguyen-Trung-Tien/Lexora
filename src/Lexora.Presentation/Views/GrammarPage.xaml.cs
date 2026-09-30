@@ -64,6 +64,11 @@ public sealed partial class GrammarPage : Page
         base.OnNavigatedTo(e);
         try
         {
+            if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))
+            {
+                ViewModel.SearchQuery = query;
+                GrammarSearchBox.Text = query;
+            }
             await ViewModel.InitializeAsync();
         }
         catch (Exception ex)
@@ -282,6 +287,7 @@ public sealed partial class GrammarPage : Page
         }
         catch (Exception ex)
         {
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Add"), ex.Message);
             await ShowErrorDialogAsync(Loc.GetString("Action_Add"), ex.Message);
         }
     }
@@ -312,6 +318,7 @@ public sealed partial class GrammarPage : Page
         }
         catch (Exception ex)
         {
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Edit"), ex.Message);
             await ShowErrorDialogAsync(Loc.GetString("Action_Edit"), ex.Message);
         }
     }
@@ -918,10 +925,20 @@ public sealed partial class GrammarPage : Page
                 importResult.Errors.Count,
                 Loc.GetString("Action_Close"));
 
-            ShowNotification(
-                importResult.Errors.Count > 0 ? InfoBarSeverity.Warning : InfoBarSeverity.Success,
-                Loc.GetString("Progress_CompletedTitle"),
-                summary);
+            var severity = (importResult.TotalImported == 0 && importResult.TotalUpdated == 0 && importResult.Errors.Count > 0)
+                ? InfoBarSeverity.Error
+                : (importResult.Errors.Count > 0 || (importResult.TotalSkipped > 0 && importResult.TotalImported == 0 && importResult.TotalUpdated == 0))
+                    ? InfoBarSeverity.Warning
+                    : InfoBarSeverity.Success;
+
+            var notifTitle = severity switch
+            {
+                InfoBarSeverity.Error => Loc.GetString("Grammar_ImportFailed"),
+                InfoBarSeverity.Warning => Loc.GetString("Common_Warning"),
+                _ => Loc.GetString("Progress_CompletedTitle")
+            };
+
+            ShowNotification(severity, notifTitle, summary);
         }
         catch (Exception ex)
         {

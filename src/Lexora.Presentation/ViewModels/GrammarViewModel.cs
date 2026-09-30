@@ -482,7 +482,7 @@ public partial class GrammarViewModel : ObservableObject
                 SelectedRule = null;
             }
 
-            int count = await _grammarService.DeleteRulesAsync(targetIds);
+            int count = await Task.Run(() => _grammarService.DeleteRulesAsync(targetIds));
 
             await _dispatcherQueue.EnsureOnUIThreadAsync();
             SelectedRuleIds.Clear();

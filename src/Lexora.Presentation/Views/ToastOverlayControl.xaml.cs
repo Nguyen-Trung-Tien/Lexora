@@ -55,6 +55,11 @@ public sealed partial class ToastOverlayControl : UserControl
 
     public void Show(ToastNotification notification)
     {
+        // Stop any running animations immediately to avoid conflicting storyboard completions
+        EntranceStoryboard.Stop();
+        UpdatePulseStoryboard.Stop();
+        ExitStoryboard.Stop();
+
         _timer.Stop();
         _isDismissing = false;
         _isPaused = false;
@@ -64,12 +69,19 @@ public sealed partial class ToastOverlayControl : UserControl
         TimeProgressBar.Value = 100;
 
         TitleTextBlock.Text = notification.Title;
+        TitleTextBlock.Visibility = string.IsNullOrWhiteSpace(notification.Title) ? Visibility.Collapsed : Visibility.Visible;
+
         MessageTextBlock.Text = notification.Message;
+        ToolTipService.SetToolTip(MessageTextBlock, notification.Message);
 
         ApplyToastTheme(notification.Type);
 
         bool wasVisible = ToastRoot.Visibility == Visibility.Visible;
         ToastRoot.Visibility = Visibility.Visible;
+        ToastRoot.Opacity = 1.0;
+        ToastTranslate.Y = 0;
+        ToastScale.ScaleX = 1.0;
+        ToastScale.ScaleY = 1.0;
 
         if (wasVisible)
         {
@@ -111,12 +123,12 @@ public sealed partial class ToastOverlayControl : UserControl
             case ToastType.Information:
             default:
                 glyph = "\uE946"; // Info
-                if (App.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var aBrush))
-                    themeBrush = aBrush as Brush;
+                if (App.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var def))
+                    themeBrush = def as Brush;
                 break;
         }
 
-        themeBrush ??= (App.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var def) ? def as Brush : null);
+        themeBrush ??= (App.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var fallbackBrush) ? fallbackBrush as Brush : null);
 
         TypeIcon.Glyph = glyph;
         if (themeBrush != null)
@@ -145,6 +157,7 @@ public sealed partial class ToastOverlayControl : UserControl
         _isDismissing = true;
         _timer.Stop();
 
+        ExitStoryboard.Stop();
         ExitStoryboard.Completed -= ExitStoryboard_Completed;
         ExitStoryboard.Completed += ExitStoryboard_Completed;
         ExitStoryboard.Begin();
@@ -153,8 +166,11 @@ public sealed partial class ToastOverlayControl : UserControl
     private void ExitStoryboard_Completed(object? sender, object e)
     {
         ExitStoryboard.Completed -= ExitStoryboard_Completed;
-        ToastRoot.Visibility = Visibility.Collapsed;
-        _isDismissing = false;
+        if (_isDismissing)
+        {
+            ToastRoot.Visibility = Visibility.Collapsed;
+            _isDismissing = false;
+        }
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

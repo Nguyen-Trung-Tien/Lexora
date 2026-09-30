@@ -45,7 +45,11 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
         return await DbSet
             .AsNoTracking()
             .Include(gr => gr.Examples)
-            .Where(gr => gr.Title.ToLower().Contains(normalized) || gr.Structure.ToLower().Contains(normalized))
+            .Where(gr => gr.Title.ToLower().Contains(normalized) ||
+                         gr.Structure.ToLower().Contains(normalized) ||
+                         gr.ExplanationVi.ToLower().Contains(normalized) ||
+                         (gr.Topic != null && gr.Topic.ToLower().Contains(normalized)) ||
+                         gr.Examples.Any(ex => ex.SentenceEn.ToLower().Contains(normalized) || ex.SentenceVi.ToLower().Contains(normalized)))
             .OrderBy(gr => gr.OrderIndex)
             .ToListAsync(cancellationToken);
     }
@@ -79,7 +83,9 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
             var normalized = query.Trim().ToLowerInvariant();
             q = q.Where(gr => gr.Title.ToLower().Contains(normalized) ||
                               gr.Structure.ToLower().Contains(normalized) ||
-                              gr.ExplanationVi.ToLower().Contains(normalized));
+                              gr.ExplanationVi.ToLower().Contains(normalized) ||
+                              (gr.Topic != null && gr.Topic.ToLower().Contains(normalized)) ||
+                              gr.Examples.Any(ex => ex.SentenceEn.ToLower().Contains(normalized) || ex.SentenceVi.ToLower().Contains(normalized)));
         }
 
         return await q.OrderBy(gr => gr.OrderIndex).ThenBy(gr => gr.Title).ToListAsync(cancellationToken);

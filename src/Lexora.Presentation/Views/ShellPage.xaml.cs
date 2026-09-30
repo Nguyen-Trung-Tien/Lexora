@@ -246,7 +246,31 @@ public sealed partial class ShellPage : Page
                     Title = word.Term,
                     Subtitle = string.IsNullOrWhiteSpace(word.PrimaryDefinition) ? posLabel : $"{posLabel} • {word.PrimaryDefinition}",
                     Glyph = "\uE8BD",
-                    SearchTerm = word.Term
+                    SearchTerm = word.Term,
+                    TargetType = "Word"
+                });
+            }
+
+            // 3. Grammar search matches (up to 4 rules)
+            var grammarService = scope.ServiceProvider.GetRequiredService<Lexora.Application.Interfaces.IGrammarService>();
+            var matchingRules = await grammarService.SearchRulesAsync(query, cancellationToken: ct);
+
+            if (ct.IsCancellationRequested) return;
+
+            var prefix = _localizationService.GetString("Search_GrammarRule_Prefix");
+            foreach (var rule in matchingRules.Take(4))
+            {
+                var sub = !string.IsNullOrWhiteSpace(rule.Structure)
+                    ? $"{prefix} • {rule.Structure}"
+                    : (!string.IsNullOrWhiteSpace(rule.ExplanationVi) ? $"{prefix} • {rule.ExplanationVi}" : prefix);
+
+                suggestions.Add(new SmartSearchSuggestion
+                {
+                    Title = rule.Title,
+                    Subtitle = sub,
+                    Glyph = "\uE8D2",
+                    SearchTerm = rule.Title,
+                    TargetType = "Grammar"
                 });
             }
         }
@@ -315,6 +339,13 @@ public sealed partial class ShellPage : Page
                 return;
             }
 
+            if (chosen.TargetType == "Grammar")
+            {
+                _navigationService.Navigate(typeof(GrammarPage), chosen.SearchTerm ?? chosen.Title);
+                NavView.SelectedItem = NavItemGrammar;
+                return;
+            }
+
             if (!string.IsNullOrEmpty(chosen.SearchTerm))
             {
                 _navigationService.Navigate(typeof(VocabularyPage), chosen.SearchTerm);
@@ -345,6 +376,7 @@ public sealed class SmartSearchSuggestion
     public required string Glyph { get; init; }
     public string? TargetPage { get; init; }
     public string? SearchTerm { get; init; }
+    public string? TargetType { get; init; }
 
     public override string ToString() => Title;
 }

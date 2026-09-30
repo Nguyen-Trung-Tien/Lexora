@@ -19,6 +19,8 @@ public interface IVocabularyRepository : IRepository<Word>
         int take = 50,
         string? sortBy = null,
         bool isAscending = true,
+        bool? isDueToday = null,
+        bool? isWeak = null,
         CancellationToken cancellationToken = default);
 
     Task<int> CountFilteredAsync(
@@ -28,6 +30,8 @@ public interface IVocabularyRepository : IRepository<Word>
         Guid? topicId = null,
         ExamType? examType = null,
         LearningStatus? status = null,
+        bool? isDueToday = null,
+        bool? isWeak = null,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Word>> GetRandomWordsAsync(int count, Guid? excludeWordId = null, CancellationToken cancellationToken = default);

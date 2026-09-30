@@ -305,110 +305,60 @@ public partial class VocabularyViewModel : ObservableObject
         {
             List<WordDto> resultList;
 
-            if (SelectedQuickFilter == "DueToday" || SelectedQuickFilter == "Weak")
+            bool isDueToday = SelectedQuickFilter == "DueToday";
+            bool isWeak = SelectedQuickFilter == "Weak";
+
+            var total = await _vocabService.CountWordsAsync(
+                search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
+                level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                pos: SelectedPartOfSpeech,
+                topicId: SelectedTopicId,
+                examType: SelectedExamType,
+                status: SelectedStatus,
+                isDueToday: isDueToday ? true : null,
+                isWeak: isWeak ? true : null,
+                cancellationToken: ct);
+
+            if (ct.IsCancellationRequested) return;
+
+            TotalWordCount = total;
+            TotalPages = Math.Max(1, (int)Math.Ceiling((double)TotalWordCount / PageSize));
+
+            if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+            if (CurrentPage < 1) CurrentPage = 1;
+
+            var results = await _vocabService.SearchWordsAsync(
+                search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
+                level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                pos: SelectedPartOfSpeech,
+                topicId: SelectedTopicId,
+                examType: SelectedExamType,
+                status: SelectedStatus,
+                sortBy: isDueToday ? "nextreview" : SortBy,
+                isAscending: isDueToday || IsAscending,
+                isDueToday: isDueToday ? true : null,
+                isWeak: isWeak ? true : null,
+                page: CurrentPage,
+                pageSize: PageSize,
+                cancellationToken: ct);
+
+            if (ct.IsCancellationRequested) return;
+
+            var filteredResults = results.AsEnumerable();
+            if (SortBy == "pos")
             {
-                // In-memory status filter: fetch candidates matching other filters then paginate
-                var allCandidates = await _vocabService.SearchWordsAsync(
-                    search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
-                    level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
-                    pos: SelectedPartOfSpeech,
-                    topicId: SelectedTopicId,
-                    examType: SelectedExamType,
-                    status: SelectedStatus,
-                    sortBy: SelectedQuickFilter == "DueToday" ? "nextreview" : SortBy,
-                    isAscending: SelectedQuickFilter == "DueToday" || IsAscending,
-                    page: 1,
-                    pageSize: 10000,
-                    cancellationToken: ct);
-
-                if (ct.IsCancellationRequested) return;
-
-                var filtered = allCandidates.AsEnumerable();
-                if (SelectedQuickFilter == "DueToday")
-                {
-                    filtered = filtered.Where(w => w.IsDueNow);
-                }
-                else if (SelectedQuickFilter == "Weak")
-                {
-                    filtered = filtered.Where(w => w.Lapses > 0 || w.LearningStatus == LearningStatus.NotRemembered);
-                }
-
-                if (SortBy == "pos")
-                {
-                    filtered = IsAscending
-                        ? filtered.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
-                        : filtered.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term);
-                }
-                else if (SortBy == "multipos")
-                {
-                    filtered = filtered
-                        .OrderByDescending(w => w.AllPartsOfSpeech.Count)
-                        .ThenBy(w => w.Term);
-                }
-
-                var fullFilteredList = filtered.ToList();
-                TotalWordCount = fullFilteredList.Count;
-                TotalPages = Math.Max(1, (int)Math.Ceiling((double)TotalWordCount / PageSize));
-
-                if (CurrentPage > TotalPages) CurrentPage = TotalPages;
-                if (CurrentPage < 1) CurrentPage = 1;
-
-                resultList = fullFilteredList
-                    .Skip((CurrentPage - 1) * PageSize)
-                    .Take(PageSize)
-                    .ToList();
+                filteredResults = IsAscending
+                    ? filteredResults.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
+                    : filteredResults.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term);
             }
-            else
+            else if (SortBy == "multipos")
             {
-                // Standard database-level pagination
-                var total = await _vocabService.CountWordsAsync(
-                    search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
-                    level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
-                    pos: SelectedPartOfSpeech,
-                    topicId: SelectedTopicId,
-                    examType: SelectedExamType,
-                    status: SelectedStatus,
-                    cancellationToken: ct);
-
-                if (ct.IsCancellationRequested) return;
-
-                TotalWordCount = total;
-                TotalPages = Math.Max(1, (int)Math.Ceiling((double)TotalWordCount / PageSize));
-
-                if (CurrentPage > TotalPages) CurrentPage = TotalPages;
-                if (CurrentPage < 1) CurrentPage = 1;
-
-                var results = await _vocabService.SearchWordsAsync(
-                    search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
-                    level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
-                    pos: SelectedPartOfSpeech,
-                    topicId: SelectedTopicId,
-                    examType: SelectedExamType,
-                    status: SelectedStatus,
-                    sortBy: SortBy,
-                    isAscending: IsAscending,
-                    page: CurrentPage,
-                    pageSize: PageSize,
-                    cancellationToken: ct);
-
-                if (ct.IsCancellationRequested) return;
-
-                var filteredResults = results.AsEnumerable();
-                if (SortBy == "pos")
-                {
-                    filteredResults = IsAscending
-                        ? filteredResults.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
-                        : filteredResults.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term);
-                }
-                else if (SortBy == "multipos")
-                {
-                    filteredResults = filteredResults
-                        .OrderByDescending(w => w.AllPartsOfSpeech.Count)
-                        .ThenBy(w => w.Term);
-                }
-
-                resultList = filteredResults.ToList();
+                filteredResults = filteredResults
+                    .OrderByDescending(w => w.AllPartsOfSpeech.Count)
+                    .ThenBy(w => w.Term);
             }
+
+            resultList = filteredResults.ToList();
 
             await _dispatcherQueue.EnsureOnUIThreadAsync();
 
@@ -678,7 +628,7 @@ public partial class VocabularyViewModel : ObservableObject
                 SelectedWord = null;
             }
 
-            int count = await _vocabService.DeleteWordsAsync(targetIds);
+            int count = await Task.Run(() => _vocabService.DeleteWordsAsync(targetIds));
 
             await _dispatcherQueue.EnsureOnUIThreadAsync();
             SelectedWordIds.Clear();
