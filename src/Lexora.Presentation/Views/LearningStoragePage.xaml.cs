@@ -31,6 +31,10 @@ public sealed partial class LearningStoragePage : Page
         _grammarService = App.Current.Services.GetRequiredService<IGrammarService>();
         _storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
+        ViewModel.NoPracticeQuestionsAvailable += () =>
+        {
+            _toastService?.ShowWarning(Loc.GetString("Storage_Practice_NoQuestions"));
+        };
         InitializeComponent();
     }
 
@@ -210,33 +214,64 @@ public sealed partial class LearningStoragePage : Page
     {
         var searchBox = new TextBox
         {
-            PlaceholderText = "Nhập từ khóa tìm từ vựng cần thêm...",
-            Margin = new Thickness(0, 0, 0, 10)
+            PlaceholderText = Loc.GetString("Storage_Dialog_AddVocabPlaceholder"),
+            Margin = new Thickness(0, 0, 0, 10),
+            CornerRadius = new CornerRadius(8)
         };
+
+        var wordTemplate = (DataTemplate)Microsoft.UI.Xaml.Markup.XamlReader.Load(@"
+            <DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+                <Grid Padding=""6,8"" ColumnDefinitions=""Auto,*,Auto"" ColumnSpacing=""10"">
+                    <Border Width=""30"" Height=""30"" CornerRadius=""6"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" VerticalAlignment=""Center"">
+                        <FontIcon Glyph=""&#xE82D;"" FontSize=""13"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" HorizontalAlignment=""Center"" VerticalAlignment=""Center"" />
+                    </Border>
+                    <StackPanel Grid.Column=""1"" VerticalAlignment=""Center"" Spacing=""2"">
+                        <TextBlock Text=""{Binding Title}"" FontWeight=""SemiBold"" FontSize=""14"" Foreground=""{ThemeResource TextFillColorPrimaryBrush}"" />
+                        <TextBlock Text=""{Binding Subtitle}"" Foreground=""{ThemeResource TextFillColorSecondaryBrush}"" FontSize=""12"" TextTrimming=""CharacterEllipsis"" />
+                    </StackPanel>
+                    <Border Grid.Column=""2"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" CornerRadius=""4"" Padding=""6,2"" VerticalAlignment=""Center"">
+                        <TextBlock Text=""{Binding Badge}"" FontSize=""10"" Foreground=""{ThemeResource TextFillColorTertiaryBrush}"" />
+                    </Border>
+                </Grid>
+            </DataTemplate>");
 
         var listView = new ListView
         {
-            MaxHeight = 300,
-            SelectionMode = ListViewSelectionMode.Single
+            MaxHeight = 280,
+            SelectionMode = ListViewSelectionMode.Single,
+            ItemTemplate = wordTemplate
         };
 
         var allWords = await _vocabService.SearchWordsAsync(pageSize: 50);
-        listView.ItemsSource = allWords.Select(w => new { w.Id, Display = $"{w.Term} — {w.Meanings.FirstOrDefault()?.DefinitionVi}" }).ToList();
+        listView.ItemsSource = allWords.Select(w => new StorageCandidateItem
+        {
+            Id = w.Id,
+            Title = w.Term,
+            Subtitle = w.Meanings.FirstOrDefault()?.DefinitionVi ?? w.PhoneticUs ?? string.Empty,
+            Badge = w.Level.ToString()
+        }).ToList();
 
         searchBox.TextChanged += async (s, e) =>
         {
             var q = searchBox.Text;
             var words = await _vocabService.SearchWordsAsync(search: q, pageSize: 50);
-            listView.ItemsSource = words.Select(w => new { w.Id, Display = $"{w.Term} — {w.Meanings.FirstOrDefault()?.DefinitionVi}" }).ToList();
+            listView.ItemsSource = words.Select(w => new StorageCandidateItem
+            {
+                Id = w.Id,
+                Title = w.Term,
+                Subtitle = w.Meanings.FirstOrDefault()?.DefinitionVi ?? w.PhoneticUs ?? string.Empty,
+                Badge = w.Level.ToString()
+            }).ToList();
         };
 
         var noteBox = new TextBox
         {
             PlaceholderText = Loc.GetString("Storage_Dialog_AddNotePlaceholder"),
-            Margin = new Thickness(0, 10, 0, 0)
+            Margin = new Thickness(0, 10, 0, 0),
+            CornerRadius = new CornerRadius(8)
         };
 
-        var panel = new StackPanel { Spacing = 6 };
+        var panel = new StackPanel { Spacing = 6, MinWidth = 440 };
         panel.Children.Add(searchBox);
         panel.Children.Add(listView);
         panel.Children.Add(noteBox);
@@ -248,15 +283,19 @@ public sealed partial class LearningStoragePage : Page
             PrimaryButtonText = Loc.GetString("Action_Add"),
             CloseButtonText = Loc.GetString("Action_Cancel"),
             DefaultButton = ContentDialogButton.Primary,
+            IsPrimaryButtonEnabled = false,
             XamlRoot = this.XamlRoot
         };
 
-        var res = await dialog.ShowAsync();
-        if (res == ContentDialogResult.Primary && listView.SelectedItem != null)
+        listView.SelectionChanged += (s, e) =>
         {
-            dynamic selected = listView.SelectedItem;
-            Guid wordId = selected.Id;
-            await _storageService.MoveWordToStorageAsync(wordId, StorageAdditionReason.Manual, noteBox.Text);
+            dialog.IsPrimaryButtonEnabled = listView.SelectedItem != null;
+        };
+
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary && listView.SelectedItem is StorageCandidateItem selected)
+        {
+            await _storageService.MoveWordToStorageAsync(selected.Id, StorageAdditionReason.Manual, noteBox.Text);
             _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Added"));
             await ViewModel.InitializeAsync();
         }
@@ -264,22 +303,71 @@ public sealed partial class LearningStoragePage : Page
 
     private async Task ShowAddGrammarDialogAsync()
     {
+        var searchBox = new TextBox
+        {
+            PlaceholderText = Loc.GetString("Storage_Dialog_AddGrammarPlaceholder"),
+            Margin = new Thickness(0, 0, 0, 10),
+            CornerRadius = new CornerRadius(8)
+        };
+
+        var grammarTemplate = (DataTemplate)Microsoft.UI.Xaml.Markup.XamlReader.Load(@"
+            <DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+                <Grid Padding=""6,8"" ColumnDefinitions=""Auto,*,Auto"" ColumnSpacing=""10"">
+                    <Border Width=""30"" Height=""30"" CornerRadius=""6"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" VerticalAlignment=""Center"">
+                        <FontIcon Glyph=""&#xE8D2;"" FontSize=""13"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" HorizontalAlignment=""Center"" VerticalAlignment=""Center"" />
+                    </Border>
+                    <StackPanel Grid.Column=""1"" VerticalAlignment=""Center"" Spacing=""2"">
+                        <TextBlock Text=""{Binding Title}"" FontWeight=""SemiBold"" FontSize=""14"" Foreground=""{ThemeResource TextFillColorPrimaryBrush}"" />
+                        <TextBlock Text=""{Binding Subtitle}"" Foreground=""{ThemeResource TextFillColorSecondaryBrush}"" FontSize=""12"" TextTrimming=""CharacterEllipsis"" />
+                    </StackPanel>
+                    <Border Grid.Column=""2"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" CornerRadius=""4"" Padding=""6,2"" VerticalAlignment=""Center"">
+                        <TextBlock Text=""{Binding Badge}"" FontSize=""10"" Foreground=""{ThemeResource TextFillColorTertiaryBrush}"" />
+                    </Border>
+                </Grid>
+            </DataTemplate>");
+
         var listView = new ListView
         {
-            MaxHeight = 320,
-            SelectionMode = ListViewSelectionMode.Single
+            MaxHeight = 280,
+            SelectionMode = ListViewSelectionMode.Single,
+            ItemTemplate = grammarTemplate
         };
 
         var rules = await _grammarService.GetAllRulesAsync();
-        listView.ItemsSource = rules.Select(r => new { r.Id, Display = $"{r.Title} ({r.Structure})" }).ToList();
+        var candidateRules = rules.Select(r => new StorageCandidateItem
+        {
+            Id = r.Id,
+            Title = r.Title,
+            Subtitle = $"{r.Structure} • {r.ExplanationVi}",
+            Badge = r.Level.ToString()
+        }).ToList();
+        listView.ItemsSource = candidateRules;
+
+        searchBox.TextChanged += (s, e) =>
+        {
+            var q = searchBox.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                listView.ItemsSource = candidateRules;
+            }
+            else
+            {
+                listView.ItemsSource = candidateRules
+                    .Where(r => r.Title.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                                r.Subtitle.Contains(q, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+        };
 
         var noteBox = new TextBox
         {
             PlaceholderText = Loc.GetString("Storage_Dialog_AddNotePlaceholder"),
-            Margin = new Thickness(0, 10, 0, 0)
+            Margin = new Thickness(0, 10, 0, 0),
+            CornerRadius = new CornerRadius(8)
         };
 
-        var panel = new StackPanel { Spacing = 6 };
+        var panel = new StackPanel { Spacing = 6, MinWidth = 440 };
+        panel.Children.Add(searchBox);
         panel.Children.Add(listView);
         panel.Children.Add(noteBox);
 
@@ -290,15 +378,19 @@ public sealed partial class LearningStoragePage : Page
             PrimaryButtonText = Loc.GetString("Action_Add"),
             CloseButtonText = Loc.GetString("Action_Cancel"),
             DefaultButton = ContentDialogButton.Primary,
+            IsPrimaryButtonEnabled = false,
             XamlRoot = this.XamlRoot
         };
 
-        var res = await dialog.ShowAsync();
-        if (res == ContentDialogResult.Primary && listView.SelectedItem != null)
+        listView.SelectionChanged += (s, e) =>
         {
-            dynamic selected = listView.SelectedItem;
-            Guid ruleId = selected.Id;
-            await _storageService.MoveGrammarToStorageAsync(ruleId, StorageAdditionReason.Manual, noteBox.Text);
+            dialog.IsPrimaryButtonEnabled = listView.SelectedItem != null;
+        };
+
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary && listView.SelectedItem is StorageCandidateItem selected)
+        {
+            await _storageService.MoveGrammarToStorageAsync(selected.Id, StorageAdditionReason.Manual, noteBox.Text);
             _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Added"));
             await ViewModel.InitializeAsync();
         }
@@ -345,4 +437,14 @@ public sealed partial class LearningStoragePage : Page
     {
         ViewModel.ClosePractice();
     }
+}
+
+public class StorageCandidateItem
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Subtitle { get; set; } = string.Empty;
+    public string Badge { get; set; } = string.Empty;
+
+    public override string ToString() => string.IsNullOrWhiteSpace(Subtitle) ? Title : $"{Title} — {Subtitle}";
 }

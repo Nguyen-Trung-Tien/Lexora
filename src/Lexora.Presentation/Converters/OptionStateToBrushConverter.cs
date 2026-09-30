@@ -22,6 +22,7 @@ public class OptionStateToBrushConverter : IValueConverter
             // Icon badge background: use the solid semantic fill so the checkmark/x is clearly visible
             "Background" => state switch
             {
+                TestOptionState.Selected => "AccentFillColorDefaultBrush",
                 TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect => "SystemFillColorSuccessBrush",
                 TestOptionState.SelectedIncorrect => "SystemFillColorCriticalBrush",
                 _ => "SubtleFillColorSecondaryBrush"
@@ -29,12 +30,13 @@ public class OptionStateToBrushConverter : IValueConverter
             // Icon badge foreground: white on colored badge, secondary on subtle
             "Foreground" => state switch
             {
-                TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect or TestOptionState.SelectedIncorrect => "TextOnAccentFillColorPrimaryBrush",
+                TestOptionState.Selected or TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect or TestOptionState.SelectedIncorrect => "TextOnAccentFillColorPrimaryBrush",
                 _ => "TextFillColorSecondaryBrush"
             },
             // Button outer border
             "CardBorder" => state switch
             {
+                TestOptionState.Selected => "AccentFillColorDefaultBrush",
                 TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect => "SystemFillColorSuccessBrush",
                 TestOptionState.SelectedIncorrect => "SystemFillColorCriticalBrush",
                 _ => "CardStrokeColorDefaultBrush"
@@ -42,6 +44,7 @@ public class OptionStateToBrushConverter : IValueConverter
             // Button card background: tinted semantic fill for clear state feedback in both themes
             "CardBackground" => state switch
             {
+                TestOptionState.Selected => "SubtleFillColorSecondaryBrush",
                 TestOptionState.SelectedCorrect or TestOptionState.RevealedCorrect => "SystemFillColorSuccessBackgroundBrush",
                 TestOptionState.SelectedIncorrect => "SystemFillColorCriticalBackgroundBrush",
                 _ => "CardBackgroundFillColorDefaultBrush"

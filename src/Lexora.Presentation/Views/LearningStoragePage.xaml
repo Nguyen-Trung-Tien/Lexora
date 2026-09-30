@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:enums="using:Lexora.Domain.Enums"
+    xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
     Loaded="Page_Loaded"
@@ -24,16 +25,18 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="28,20">
-            <StackPanel Spacing="18" MaxWidth="1200" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="20" HorizontalAlignment="Stretch">
 
                 <!-- 1. Top Header -->
-                <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Spacing="4">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <StackPanel Spacing="4" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind Loc.GetString('Storage_Title')}"
                                    FontSize="26" FontWeight="Bold"
-                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                   TextWrapping="Wrap" />
                         <TextBlock Text="{x:Bind Loc.GetString('Storage_Subtitle')}"
-                                   FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                   FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap" />
                     </StackPanel>
 
                     <!-- Top Action Buttons -->
@@ -56,106 +59,110 @@
                         </Button>
 
                         <Button CornerRadius="8" Padding="12,8"
-                                Click="RefreshBtn_Click">
+                                Click="RefreshBtn_Click"
+                                ToolTipService.ToolTip="Refresh">
                             <FontIcon Glyph="&#xE72C;" FontSize="13" />
                         </Button>
                     </StackPanel>
                 </Grid>
 
-                <!-- 2. Overview Metrics Cards -->
-                <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="12">
-                    
-                    <!-- Weak (Needs Focus) Card -->
-                    <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                            CornerRadius="12" Padding="16,14">
-                        <StackPanel Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_StatWeak')}"
-                                           FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           TextTrimming="CharacterEllipsis" />
-                                <FontIcon Grid.Column="1" Glyph="&#xE7BA;" FontSize="14"
-                                          Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                            </Grid>
-                            <TextBlock Text="{x:Bind ViewModel.WeakCount, Mode=OneWay}"
-                                       FontSize="24" FontWeight="Bold"
-                                       Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                        </StackPanel>
-                    </Border>
+                <!-- 2. Overview Metrics Cards (Responsive with smooth fallback) -->
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                              HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                    <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="12" MinWidth="760">
+                        
+                        <!-- Weak (Needs Focus) Card -->
+                        <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                CornerRadius="12" Padding="16,14">
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_StatWeak')}"
+                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <FontIcon Grid.Column="1" Glyph="&#xE7BA;" FontSize="14"
+                                              Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                </Grid>
+                                <TextBlock Text="{x:Bind ViewModel.WeakCount, Mode=OneWay}"
+                                           FontSize="24" FontWeight="Bold"
+                                           Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                            </StackPanel>
+                        </Border>
 
-                    <!-- In Progress (Learning) Card -->
-                    <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                            CornerRadius="12" Padding="16,14">
-                        <StackPanel Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_StatLearning')}"
-                                           FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           TextTrimming="CharacterEllipsis" />
-                                <FontIcon Grid.Column="1" Glyph="&#xE82D;" FontSize="14"
-                                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            </Grid>
-                            <TextBlock Text="{x:Bind ViewModel.LearningCount, Mode=OneWay}"
-                                       FontSize="24" FontWeight="Bold"
-                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        </StackPanel>
-                    </Border>
+                        <!-- In Progress (Learning) Card -->
+                        <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                CornerRadius="12" Padding="16,14">
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_StatLearning')}"
+                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <FontIcon Grid.Column="1" Glyph="&#xE82D;" FontSize="14"
+                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                </Grid>
+                                <TextBlock Text="{x:Bind ViewModel.LearningCount, Mode=OneWay}"
+                                           FontSize="24" FontWeight="Bold"
+                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Mastered Card -->
-                    <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                            CornerRadius="12" Padding="16,14">
-                        <StackPanel Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_StatMastered')}"
-                                           FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           TextTrimming="CharacterEllipsis" />
-                                <FontIcon Grid.Column="1" Glyph="&#xE73E;" FontSize="14"
-                                          Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                            </Grid>
-                            <TextBlock Text="{x:Bind ViewModel.MasteredCount, Mode=OneWay}"
-                                       FontSize="24" FontWeight="Bold"
-                                       Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                        </StackPanel>
-                    </Border>
+                        <!-- Mastered Card -->
+                        <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                CornerRadius="12" Padding="16,14">
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_StatMastered')}"
+                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <FontIcon Grid.Column="1" Glyph="&#xE73E;" FontSize="14"
+                                              Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                </Grid>
+                                <TextBlock Text="{x:Bind ViewModel.MasteredCount, Mode=OneWay}"
+                                           FontSize="24" FontWeight="Bold"
+                                           Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Due for Review Card -->
-                    <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                            CornerRadius="12" Padding="16,14">
-                        <StackPanel Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_StatDueToday')}"
-                                           FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           TextTrimming="CharacterEllipsis" />
-                                <FontIcon Grid.Column="1" Glyph="&#xE823;" FontSize="14"
-                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            </Grid>
-                            <TextBlock Text="{x:Bind ViewModel.DueTodayCount, Mode=OneWay}"
-                                       FontSize="24" FontWeight="Bold"
-                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        </StackPanel>
-                    </Border>
+                        <!-- Due for Review Card -->
+                        <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                CornerRadius="12" Padding="16,14">
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_StatDueToday')}"
+                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <FontIcon Grid.Column="1" Glyph="&#xE823;" FontSize="14"
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </Grid>
+                                <TextBlock Text="{x:Bind ViewModel.DueTodayCount, Mode=OneWay}"
+                                           FontSize="24" FontWeight="Bold"
+                                           Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Average Retention Card -->
-                    <Border Grid.Column="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                            CornerRadius="12" Padding="16,14">
-                        <StackPanel Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_StatAvgRetention')}"
-                                           FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           TextTrimming="CharacterEllipsis" />
-                                <FontIcon Grid.Column="1" Glyph="&#xE9D9;" FontSize="14"
-                                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            </Grid>
-                            <TextBlock FontSize="24" FontWeight="Bold"
-                                       Foreground="{x:Bind ViewModel.AverageRetention, Mode=OneWay, Converter={StaticResource RetentionToBrushConverter}}">
-                                <Run Text="{x:Bind ViewModel.AverageRetention, Mode=OneWay}" /><Run Text="%" FontSize="16" />
-                            </TextBlock>
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                        <!-- Average Retention Card -->
+                        <Border Grid.Column="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                CornerRadius="12" Padding="16,14">
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_StatAvgRetention')}"
+                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <FontIcon Grid.Column="1" Glyph="&#xE9D9;" FontSize="14"
+                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                </Grid>
+                                <TextBlock FontSize="24" FontWeight="Bold"
+                                           Foreground="{x:Bind ViewModel.AverageRetention, Mode=OneWay, Converter={StaticResource RetentionToBrushConverter}}">
+                                    <Run Text="{x:Bind ViewModel.AverageRetention, Mode=OneWay}" /><Run Text="%" FontSize="16" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
 
                 <!-- 3. Section Tabs (Vocabulary / Grammar) -->
                 <Grid ColumnDefinitions="Auto,*,Auto">
@@ -431,17 +438,17 @@
         </ScrollViewer>
 
         <!-- 8. Interactive Practice Modal Overlay -->
-        <Grid Background="{ThemeResource LayerFillColorDefaultBrush}"
+        <Grid Background="{ThemeResource SmokeFillColorDefaultBrush}"
               Visibility="{x:Bind ViewModel.IsPracticeActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-              Canvas.ZIndex="30" Padding="30">
+              Canvas.ZIndex="30" Padding="20">
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                    CornerRadius="16" MaxWidth="720" MaxHeight="640"
+                    CornerRadius="16" MaxWidth="680" MaxHeight="660"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Padding="32,28">
+                    Padding="28,24">
                 
                 <!-- Practice Content -->
-                <StackPanel Spacing="20">
+                <StackPanel Spacing="18">
                     
                     <!-- Practice Header -->
                     <Grid ColumnDefinitions="*,Auto,Auto">
@@ -461,7 +468,8 @@
                         </Border>
 
                         <Button Grid.Column="2" Width="32" Height="32" Padding="0" CornerRadius="16"
-                                Click="ClosePractice_Click">
+                                Click="ClosePractice_Click"
+                                ToolTipService.ToolTip="Close">
                             <FontIcon Glyph="&#xE711;" FontSize="12" />
                         </Button>
                     </Grid>
@@ -471,51 +479,62 @@
                         
                         <!-- Question Card -->
                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                CornerRadius="12" Padding="20">
+                                CornerRadius="12" Padding="18">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="{x:Bind ViewModel.CurrentQuestion.Prompt, Mode=OneWay}"
                                            FontSize="16" FontWeight="SemiBold"
                                            TextWrapping="Wrap" />
                                 <TextBlock Text="{x:Bind ViewModel.CurrentQuestion.SubPrompt, Mode=OneWay}"
-                                           FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                           FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
 
-                        <!-- Answer Options List -->
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentQuestion.Options, Mode=OneWay}">
+                        <!-- Interactive Answer Options List -->
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentOptions, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="x:String">
-                                    <Button HorizontalAlignment="Stretch" Margin="0,0,0,8"
-                                            Padding="16,12" CornerRadius="8"
-                                            Tag="{x:Bind}"
-                                            Click="PracticeOption_Click">
-                                        <TextBlock Text="{x:Bind}" TextWrapping="Wrap" HorizontalAlignment="Left" />
+                                <DataTemplate x:DataType="vm:TestOptionItem">
+                                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            Margin="0,0,0,8" Padding="14,12" CornerRadius="10"
+                                            BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
+                                            BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"
+                                            Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBackground}"
+                                            IsEnabled="{x:Bind IsSelectable, Mode=OneWay}"
+                                            Click="PracticeOption_Click" Tag="{x:Bind Text}">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <Border Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Background}"
+                                                    CornerRadius="6" Width="28" Height="28" Margin="0,0,12,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind Glyph, Mode=OneWay}" FontSize="12" FontWeight="Bold"
+                                                           Foreground="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Foreground}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind Text}" FontSize="14" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                        </Grid>
                                     </Button>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <!-- Selected answer & Feedback info -->
+                        <!-- Feedback Info -->
                         <StackPanel Spacing="10" Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     CornerRadius="8" Padding="14,10">
-                                <StackPanel Spacing="4">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                                                  Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                        <FontIcon Glyph="&#xE711;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                                  Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
-                                        <TextBlock Text="{x:Bind ViewModel.CurrentQuestion.Explanation, Mode=OneWay}"
-                                                   FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
-                                    </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                              Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    <FontIcon Glyph="&#xE711;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                              Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                                    <TextBlock Text="{x:Bind ViewModel.CurrentQuestion.Explanation, Mode=OneWay}"
+                                               FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
 
                         <!-- Bottom Controls in Practice -->
-                        <Grid Margin="0,8,0,0">
+                        <Grid Margin="0,6,0,0">
                             <Button Style="{ThemeResource AccentButtonStyle}"
                                     HorizontalAlignment="Right" CornerRadius="8" Padding="20,10"
+                                    IsEnabled="{x:Bind ViewModel.HasSelectedPracticeAnswer, Mode=OneWay}"
                                     Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                     Click="SubmitPractice_Click">
                                 <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Submit')}" FontWeight="SemiBold" />
@@ -537,7 +556,7 @@
                                 <Border Width="56" Height="56" CornerRadius="28"
                                         Background="{ThemeResource SystemFillColorSuccessBrush}"
                                         HorizontalAlignment="Center">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="24" Foreground="White"
+                                    <FontIcon Glyph="&#xE73E;" FontSize="24" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
                                 <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_ResultTitle')}"

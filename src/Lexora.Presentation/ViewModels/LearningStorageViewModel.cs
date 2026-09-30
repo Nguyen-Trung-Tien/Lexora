@@ -112,6 +112,9 @@ public partial class LearningStorageViewModel : ObservableObject
     public partial string? PracticeSelectedAnswer { get; set; }
 
     [ObservableProperty]
+    public partial bool HasSelectedPracticeAnswer { get; set; } = false;
+
+    [ObservableProperty]
     public partial bool IsPracticeAnswerSubmitted { get; set; } = false;
 
     [ObservableProperty]
@@ -125,6 +128,10 @@ public partial class LearningStorageViewModel : ObservableObject
 
     [ObservableProperty]
     public partial string PracticeResultSummaryText { get; set; } = string.Empty;
+
+    public ObservableCollection<TestOptionItem> CurrentOptions { get; } = new();
+
+    public event Action? NoPracticeQuestionsAvailable;
 
     private readonly List<StoragePracticeQuestionDto> _practiceQuestions = new();
     private readonly List<StoragePracticeSubmissionDto> _practiceSubmissions = new();
@@ -357,6 +364,10 @@ public partial class LearningStorageViewModel : ObservableObject
         CurrentPracticeIndex = 0;
         _practiceQuestions.Clear();
         _practiceSubmissions.Clear();
+        CurrentOptions.Clear();
+        PracticeSelectedAnswer = null;
+        HasSelectedPracticeAnswer = false;
+        IsPracticeAnswerSubmitted = false;
 
         try
         {
@@ -366,6 +377,7 @@ public partial class LearningStorageViewModel : ObservableObject
             if (questions.Count == 0)
             {
                 IsPracticeActive = false;
+                NoPracticeQuestionsAvailable?.Invoke();
                 return;
             }
 
@@ -389,8 +401,23 @@ public partial class LearningStorageViewModel : ObservableObject
         {
             CurrentQuestion = _practiceQuestions[CurrentPracticeIndex];
             PracticeSelectedAnswer = null;
+            HasSelectedPracticeAnswer = false;
             IsPracticeAnswerSubmitted = false;
             IsCurrentAnswerCorrect = false;
+
+            CurrentOptions.Clear();
+            var letters = new[] { "A", "B", "C", "D", "E", "F" };
+            for (int i = 0; i < CurrentQuestion.Options.Count; i++)
+            {
+                var label = i < letters.Length ? letters[i] : (i + 1).ToString();
+                CurrentOptions.Add(new TestOptionItem
+                {
+                    Text = CurrentQuestion.Options[i],
+                    Letter = label,
+                    Glyph = label,
+                    State = TestOptionState.Default
+                });
+            }
 
             PracticeProgressText = string.Format(
                 _localizationService.GetString("Storage_Practice_QuestionFormat"),
@@ -401,8 +428,22 @@ public partial class LearningStorageViewModel : ObservableObject
     [RelayCommand]
     public void SelectPracticeAnswer(string answer)
     {
-        if (IsPracticeAnswerSubmitted) return;
+        if (IsPracticeAnswerSubmitted || string.IsNullOrWhiteSpace(answer)) return;
+
         PracticeSelectedAnswer = answer;
+        HasSelectedPracticeAnswer = true;
+
+        foreach (var opt in CurrentOptions)
+        {
+            if (string.Equals(opt.Text, answer, StringComparison.OrdinalIgnoreCase))
+            {
+                opt.State = TestOptionState.Selected;
+            }
+            else
+            {
+                opt.State = TestOptionState.Default;
+            }
+        }
     }
 
     [RelayCommand]
@@ -411,10 +452,30 @@ public partial class LearningStorageViewModel : ObservableObject
         if (CurrentQuestion == null || string.IsNullOrWhiteSpace(PracticeSelectedAnswer) || IsPracticeAnswerSubmitted) return;
 
         IsPracticeAnswerSubmitted = true;
-        IsCurrentAnswerCorrect = string.Equals(
-            PracticeSelectedAnswer.Trim(),
-            CurrentQuestion.CorrectAnswer.Trim(),
-            StringComparison.OrdinalIgnoreCase);
+        var trimmedUser = PracticeSelectedAnswer.Trim();
+        var trimmedCorrect = CurrentQuestion.CorrectAnswer.Trim();
+        IsCurrentAnswerCorrect = string.Equals(trimmedUser, trimmedCorrect, StringComparison.OrdinalIgnoreCase);
+
+        foreach (var opt in CurrentOptions)
+        {
+            bool isThisCorrect = string.Equals(opt.Text.Trim(), trimmedCorrect, StringComparison.OrdinalIgnoreCase);
+            bool isThisUser = string.Equals(opt.Text.Trim(), trimmedUser, StringComparison.OrdinalIgnoreCase);
+
+            if (isThisCorrect)
+            {
+                opt.State = isThisUser ? TestOptionState.SelectedCorrect : TestOptionState.RevealedCorrect;
+                opt.Glyph = "\uE73E"; // Checkmark
+            }
+            else if (isThisUser)
+            {
+                opt.State = TestOptionState.SelectedIncorrect;
+                opt.Glyph = "\uE711"; // Cross
+            }
+            else
+            {
+                opt.State = TestOptionState.Default;
+            }
+        }
 
         if (IsCurrentAnswerCorrect)
         {
@@ -475,5 +536,9 @@ public partial class LearningStorageViewModel : ObservableObject
         IsPracticeActive = false;
         IsPracticeCompleted = false;
         CurrentQuestion = null;
+        CurrentOptions.Clear();
+        PracticeSelectedAnswer = null;
+        HasSelectedPracticeAnswer = false;
+        IsPracticeAnswerSubmitted = false;
     }
 }

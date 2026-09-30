@@ -1061,6 +1061,10 @@ public class LocalizationService : ILocalizationService
             ["Storage_Empty_Subtitle"] = "Tuyệt vời! Bạn chưa có mục nào bị đánh dấu yếu hoặc hay quên. Các mục trả lời sai hoặc cần lưu ý sẽ tự động xuất hiện ở đây.",
             ["Storage_Pagination_Format"] = "Trang {0} / {1} ({2} mục)",
             ["Storage_Search_Placeholder"] = "Tìm kiếm trong Kho lưu trữ...",
+            ["Storage_Practice_NoQuestions"] = "Chưa có mục nào trong kho lưu trữ để luyện tập. Hãy thêm từ vựng hoặc ngữ pháp vào kho trước nhé!",
+            ["Storage_Dialog_AddGrammarPlaceholder"] = "Nhập từ khóa tìm cấu trúc ngữ pháp...",
+            ["Storage_Dialog_AddVocabPlaceholder"] = "Nhập từ khóa tìm từ vựng cần thêm...",
+            ["Storage_Dialog_SelectRequired"] = "Vui lòng chọn một mục từ danh sách.",
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -2108,6 +2112,10 @@ public class LocalizationService : ILocalizationService
             ["Storage_Empty_Subtitle"] = "Great job! You have no weak or unremembered items. Difficult words or rules will appear here automatically.",
             ["Storage_Pagination_Format"] = "Page {0} of {1} ({2} items)",
             ["Storage_Search_Placeholder"] = "Search Learning Storage...",
+            ["Storage_Practice_NoQuestions"] = "No items in storage available to practice. Please add vocabulary or grammar to storage first!",
+            ["Storage_Dialog_AddGrammarPlaceholder"] = "Search grammar rules to add...",
+            ["Storage_Dialog_AddVocabPlaceholder"] = "Search vocabulary to add...",
+            ["Storage_Dialog_SelectRequired"] = "Please select an item from the list.",
         }
     };
 
