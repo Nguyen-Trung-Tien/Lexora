@@ -200,6 +200,117 @@ public class ExportImportService : IExportImportService
         return sb.ToString();
     }
 
+    public async Task<string> ExportVocabularyOnlyJsonAsync(
+        IEnumerable<Guid>? wordIds = null,
+        CancellationToken cancellationToken = default,
+        IProgress<ProgressReport>? progress = null)
+    {
+        progress?.Report(new ProgressReport(10, 0, 0, "Trích xuất dữ liệu từ vựng...", "Querying database..."));
+        var words = await GetWordsForExportAsync(wordIds, cancellationToken);
+
+        progress?.Report(new ProgressReport(50, words.Count, words.Count, "Đang định dạng cấu trúc JSON...", "Serializing models..."));
+        var exportData = words.Select(w =>
+        {
+            var meanings = (w.Meanings ?? [])
+                .OrderBy(m => m.OrderIndex)
+                .Select(m => new MeaningOnlyExportModel
+                {
+                    PartOfSpeech = m.PartOfSpeech,
+                    DefinitionVi = m.DefinitionVi,
+                    DefinitionEn = m.DefinitionEn
+                }).ToList();
+
+            return new VocabularyOnlyExportModel
+            {
+                Term = w.Term,
+                Meanings = meanings
+            };
+        }).ToList();
+
+        progress?.Report(new ProgressReport(85, words.Count, words.Count, "Đang tạo dữ liệu xuất...", "Writing JSON buffer..."));
+        var json = JsonSerializer.Serialize(exportData, JsonOptions);
+        progress?.Report(new ProgressReport(100, words.Count, words.Count, "Xuất dữ liệu hoàn tất!", "Done."));
+        return json;
+    }
+
+    public async Task<string> ExportVocabularyOnlyCsvAsync(
+        IEnumerable<Guid>? wordIds = null,
+        CancellationToken cancellationToken = default,
+        IProgress<ProgressReport>? progress = null)
+    {
+        progress?.Report(new ProgressReport(10, 0, 0, "Trích xuất dữ liệu từ vựng...", "Querying database..."));
+        var words = await GetWordsForExportAsync(wordIds, cancellationToken);
+        var sb = new StringBuilder();
+
+        // Header: Strictly Term, DefinitionVi, DefinitionEn, PartOfSpeech
+        sb.AppendLine("Term,DefinitionVi,DefinitionEn,PartOfSpeech");
+
+        int current = 0;
+        int total = words.Count;
+        foreach (var w in words)
+        {
+            current++;
+            if (current % 25 == 0 || current == total)
+            {
+                int pct = (int)((double)current / total * 75) + 20;
+                progress?.Report(new ProgressReport(pct, current, total, $"Đang định dạng CSV ({current}/{total})...", w.Term));
+            }
+
+            var meanings = w.Meanings ?? [];
+            var defVi = string.Join(" | ", meanings.Select(m => m.DefinitionVi));
+            var defEn = string.Join(" | ", meanings.Where(m => !string.IsNullOrWhiteSpace(m.DefinitionEn)).Select(m => m.DefinitionEn!));
+            var pos = string.Join(" | ", meanings.Select(m => m.PartOfSpeech.ToString()).Distinct());
+            if (string.IsNullOrEmpty(pos)) pos = w.PrimaryPartOfSpeech.ToString();
+
+            sb.AppendLine(string.Join(",",
+                EscapeCsv(w.Term),
+                EscapeCsv(defVi),
+                EscapeCsv(defEn),
+                EscapeCsv(pos)
+            ));
+        }
+
+        progress?.Report(new ProgressReport(100, total, total, "Xuất CSV hoàn tất!", "Done."));
+        return sb.ToString();
+    }
+
+    public async Task<string> ExportVocabularyOnlyTxtAsync(
+        IEnumerable<Guid>? wordIds = null,
+        CancellationToken cancellationToken = default,
+        IProgress<ProgressReport>? progress = null)
+    {
+        progress?.Report(new ProgressReport(10, 0, 0, "Trích xuất dữ liệu từ vựng...", "Querying database..."));
+        var words = await GetWordsForExportAsync(wordIds, cancellationToken);
+        var sb = new StringBuilder();
+
+        // Comments header
+        sb.AppendLine("# Lexora Vocabulary Only Export (Term <tab> Meaning)");
+        sb.AppendLine($"# Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+        sb.AppendLine("# Format: Term <tab> DefinitionVi");
+        sb.AppendLine();
+
+        int current = 0;
+        int total = words.Count;
+        foreach (var w in words)
+        {
+            current++;
+            if (current % 25 == 0 || current == total)
+            {
+                int pct = (int)((double)current / total * 75) + 20;
+                progress?.Report(new ProgressReport(pct, current, total, $"Đang định dạng văn bản ({current}/{total})...", w.Term));
+            }
+
+            var meanings = w.Meanings ?? [];
+            var defVi = string.Join(" | ", meanings.Select(m => m.DefinitionVi));
+            if (string.IsNullOrWhiteSpace(defVi)) defVi = w.Term;
+
+            sb.AppendLine($"{w.Term}\t{defVi}");
+        }
+
+        progress?.Report(new ProgressReport(100, total, total, "Xuất TXT hoàn tất!", "Done."));
+        return sb.ToString();
+    }
+
     private const int MaxImportPayloadLength = 20_000_000; // 20 MB safety limit
     private const int ImportBatchSize = 500;
 
@@ -2312,6 +2423,19 @@ public class ExportImportService : IExportImportService
         }
 
         return records;
+    }
+
+    private class VocabularyOnlyExportModel
+    {
+        public string Term { get; set; } = string.Empty;
+        public List<MeaningOnlyExportModel> Meanings { get; set; } = new();
+    }
+
+    private class MeaningOnlyExportModel
+    {
+        public PartOfSpeech PartOfSpeech { get; set; } = PartOfSpeech.Noun;
+        public string DefinitionVi { get; set; } = string.Empty;
+        public string? DefinitionEn { get; set; }
     }
 
     private class WordExportModel

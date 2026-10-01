@@ -513,50 +513,108 @@ public sealed partial class VocabularyPage : Page
         };
 
         var result = await confirmDialog.ShowAsyncSafe();
-        if (result == ContentDialogResult.Primary)
+        if (result != ContentDialogResult.Primary) return;
+
+        await Task.Yield();
+
+        var idsToDelete = ViewModel.SelectedWordIds.ToList();
+        if (idsToDelete.Count == 0) return;
+
+        BtnDeleteSelectedWords.IsEnabled = false;
+        BtnSelectMode.IsEnabled = false;
+
+        using var cts = new CancellationTokenSource();
+        var progressDialog = new OperationProgressDialog
         {
-            await DispatcherQueue.EnsureOnUIThreadAsync();
+            Title = Loc.GetString("Vocab_ConfirmBulkDeleteTitle"),
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = theme
+        };
+        progressDialog.EnableCancellation(() => cts.Cancel());
+        progressDialog.SetIndeterminate(string.Format(Loc.GetString("Vocab_BulkDeleteProgress"), 0, count));
+        _ = progressDialog.ShowAsyncSafe();
 
-            // 1. Snapshot the IDs to delete BEFORE exiting selection mode or clearing UI!
-            var idsToDelete = ViewModel.SelectedWordIds.ToList();
-            if (idsToDelete.Count == 0) return;
+        int deletedCount = 0;
+        bool isCancelled = false;
+        Exception? deleteError = null;
 
-            // 2. Disable buttons and exit selection mode cleanly on UI thread
-            BtnDeleteSelectedWords.IsEnabled = false;
-            BtnSelectMode.IsEnabled = false;
-
-            // Turn off IsSelectionMode first so WordsListView_SelectionChanged will not clear SelectedWordIds or fire side effects
-            ViewModel.IsSelectionMode = false;
-            try
+        try
+        {
+            var progress = new Progress<ProgressReport>(report =>
             {
-                WordsListView.SelectionMode = ListViewSelectionMode.Single;
-                WordsListView.SelectedItems.Clear();
-            }
-            catch { }
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail);
+                });
+            });
 
-            int deletedCount = 0;
-            Exception? deleteError = null;
-            try
-            {
-                deletedCount = await ViewModel.DeleteSelectedWordsAsync(idsToDelete);
-            }
-            catch (Exception ex)
-            {
-                deleteError = ex;
-            }
+            deletedCount = await ViewModel.DeleteSelectedWordsAsync(idsToDelete, cts.Token, progress);
+        }
+        catch (OperationCanceledException)
+        {
+            isCancelled = true;
+        }
+        catch (Exception ex)
+        {
+            deleteError = ex;
+        }
+        finally
+        {
+            progressDialog.HideSafe();
+            await Task.Yield();
 
-            // 3. Ensure UI updates on UI thread
             await DispatcherQueue.EnsureOnUIThreadAsync();
             BtnSelectMode.IsEnabled = true;
             UpdateSelectionModeUI();
 
-            if (deleteError != null)
+            if (isCancelled)
+            {
+                ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Vocab_DeleteCancelledTitle"), Loc.GetString("Vocab_DeleteCancelledMsg"));
+            }
+            else if (deleteError != null)
             {
                 ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), deleteError.Message);
             }
             else
             {
-                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_BulkDeleteSuccess"), deletedCount));
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_BulkDeleteSuccessMsg"), deletedCount));
+            }
+        }
+    }
+
+    private async void AssignSelectedToTopic_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWordIds.Count == 0) return;
+
+        var selectedIds = ViewModel.SelectedWordIds.ToList();
+        var count = selectedIds.Count;
+
+        var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+        var dialog = new AssignTopicDialog(ViewModel.AvailableTopics, count)
+        {
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
+        };
+
+        var result = await dialog.ShowAsyncSafe();
+        if (result == ContentDialogResult.Primary && dialog.SelectedTopicId.HasValue)
+        {
+            var targetTopicId = dialog.SelectedTopicId.Value;
+            var topic = ViewModel.AvailableTopics.FirstOrDefault(t => t.Id == targetTopicId);
+            var topicName = topic?.Name ?? string.Empty;
+
+            try
+            {
+                await ViewModel.AssignWordsToTopicAsync(targetTopicId, selectedIds);
+                ViewModel.SelectedWordIds.Clear();
+                ViewModel.IsSelectionMode = false;
+                UpdateSelectionModeUI();
+
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Common_Success"), string.Format(Loc.GetString("Vocab_AssignSuccess"), count, topicName));
+            }
+            catch (Exception ex)
+            {
+                ShowNotification(InfoBarSeverity.Error, Loc.GetString("Common_Error"), ex.Message);
             }
         }
     }
@@ -905,6 +963,42 @@ public sealed partial class VocabularyPage : Page
         }
     }
 
+    private async void ExportVocabOnlyJson_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await PerformExportAsync("json", "JSON Vocabulary Only File", ".json", (p) => ViewModel.ExportVocabularyOnlyJsonAsync(progress: p));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
+    }
+
+    private async void ExportVocabOnlyCsv_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await PerformExportAsync("csv", "CSV Vocabulary Only File", ".csv", (p) => ViewModel.ExportVocabularyOnlyCsvAsync(progress: p));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
+    }
+
+    private async void ExportVocabOnlyTxt_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await PerformExportAsync("txt", "TXT Vocabulary Only File", ".txt", (p) => ViewModel.ExportVocabularyOnlyTxtAsync(progress: p));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
+    }
+
     private async Task PerformExportAsync(string format, string fileTypeDesc, string extension, Func<IProgress<ProgressReport>, Task<string>> exportFunc)
     {
         var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
@@ -1041,6 +1135,11 @@ public sealed partial class VocabularyPage : Page
             ExportSelectedMenuItem.IsEnabled = count > 0;
             ExportSelectedMenuItem.Text = string.Format(Loc.GetString("Vocab_ExportSelected"), count);
         }
+        if (ExportSelectedVocabOnlyMenuItem != null)
+        {
+            ExportSelectedVocabOnlyMenuItem.IsEnabled = count > 0;
+            ExportSelectedVocabOnlyMenuItem.Text = string.Format(Loc.GetString("Vocab_ExportSelectedVocabOnly"), count);
+        }
     }
 
     private async void ExportSelected_Click(object sender, RoutedEventArgs e)
@@ -1056,6 +1155,26 @@ public sealed partial class VocabularyPage : Page
                 "CSV Vocabulary File",
                 ".csv",
                 (progress) => ViewModel.ExportToCsvAsync(selectedIds, progress));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
+    }
+
+    private async void ExportSelectedVocabOnly_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var selectedWords = WordsListView?.SelectedItems?.OfType<WordDto>().ToList();
+            if (selectedWords == null || selectedWords.Count == 0) return;
+
+            var selectedIds = selectedWords.Select(w => w.Id).ToList();
+            await PerformExportAsync(
+                "csv",
+                "CSV Vocabulary Only File",
+                ".csv",
+                (progress) => ViewModel.ExportVocabularyOnlyCsvAsync(selectedIds, progress));
         }
         catch (Exception ex)
         {
@@ -1657,6 +1776,109 @@ public sealed partial class VocabularyPage : Page
         if (e.ClickedItem is WordSuggestionItemDto suggestion)
         {
             await ViewModel.SelectSuggestedWordAsync(suggestion);
+        }
+    }
+
+    private void TopicMoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn) return;
+        var unit = btn.Tag as ContextUnitDto ?? btn.DataContext as ContextUnitDto;
+        if (unit == null) return;
+
+        var flyout = new MenuFlyout();
+
+        if (unit.Id == Guid.Empty)
+        {
+            var itemInfo = new MenuFlyoutItem
+            {
+                Text = Loc.GetString("Vocab_CannotEditGeneral"),
+                IsEnabled = false
+            };
+            flyout.Items.Add(itemInfo);
+        }
+        else
+        {
+            var itemEdit = new MenuFlyoutItem
+            {
+                Text = Loc.GetString("Vocab_EditTopic"),
+                Icon = new FontIcon { Glyph = "\uE70F" }
+            };
+            itemEdit.Click += async (s, args) => await EditTopicAsync(unit);
+            flyout.Items.Add(itemEdit);
+
+            var itemDelete = new MenuFlyoutItem
+            {
+                Text = Loc.GetString("Vocab_DeleteTopic"),
+                Icon = new FontIcon { Glyph = "\uE74D" }
+            };
+            itemDelete.Click += async (s, args) => await DeleteTopicWithConfirmationAsync(unit);
+            flyout.Items.Add(itemDelete);
+        }
+
+        flyout.ShowAt(btn);
+    }
+
+    private async Task EditTopicAsync(ContextUnitDto unit)
+    {
+        try
+        {
+            var existingTopic = ViewModel.AvailableTopics.FirstOrDefault(t => t.Id == unit.Id)
+                ?? new TopicDto(unit.Id, unit.Name, unit.Description, null, null);
+
+            var xamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot;
+            var themeService = App.Current.Services.GetService<IThemeService>();
+            var activeTheme = themeService?.CurrentTheme ?? ElementTheme.Default;
+
+            var dialog = new TopicEditorDialog(existingTopic)
+            {
+                XamlRoot = xamlRoot,
+                RequestedTheme = activeTheme
+            };
+
+            var result = await dialog.ShowAsyncSafe(xamlRoot);
+            if (result == ContentDialogResult.Primary && dialog.ResultDto != null)
+            {
+                await ViewModel.UpdateTopicAsync(unit.Id, dialog.ResultDto);
+                PopulateTopicFilterCombo();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Edit"), string.Format(Loc.GetString("Vocab_TopicUpdated"), dialog.ResultDto.Name));
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] EditTopic error: {ex.Message}");
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Edit"), ex.Message);
+        }
+    }
+
+    private async Task DeleteTopicWithConfirmationAsync(ContextUnitDto unit)
+    {
+        try
+        {
+            var activeTheme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+            var confirmDialog = new ContentDialog
+            {
+                Title = Loc.GetString("Vocab_DeleteTopic"),
+                Content = string.Format(Loc.GetString("Vocab_DeleteTopicConfirm"), unit.Name),
+                PrimaryButtonText = Loc.GetString("Action_Delete"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = activeTheme
+            };
+
+            var result = await confirmDialog.ShowAsyncSafe();
+            if (result == ContentDialogResult.Primary)
+            {
+                await Task.Yield();
+                await ViewModel.DeleteTopicAsync(unit.Id);
+                PopulateTopicFilterCombo();
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_TopicDeleted"), unit.Name));
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] DeleteTopic error: {ex.Message}");
+            ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), ex.Message);
         }
     }
 }

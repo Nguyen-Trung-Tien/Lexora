@@ -147,4 +147,171 @@ public class TopicServiceTests
         result.Select(w => w.Term).Should().Contain(new[] { "Apple", "Banana" });
         _mockVocabRepo.Verify(r => r.GetByIdsWithDetailsAsync(It.Is<IEnumerable<Guid>>(ids => ids.Contains(id1) && ids.Contains(id2)), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task UpdateTopicAsync_WithValidDto_ShouldUpdateAndReturnDto()
+    {
+        // Arrange
+        var topicId = Guid.NewGuid();
+        var existingTopic = new Topic
+        {
+            Id = topicId,
+            Name = "Old Name",
+            Description = "Old Desc",
+            IconGlyph = "\uE825",
+            ColorHex = "#000000"
+        };
+
+        var updateDto = new TopicCreateOrUpdateDto(
+            Name: "New Tech Topic",
+            Description: "Updated technology vocabulary",
+            IconGlyph: "\uE7F4",
+            ColorHex: "#0078D4"
+        );
+
+        _mockVocabRepo.Setup(r => r.GetTopicByIdAsync(topicId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTopic);
+        _mockVocabRepo.Setup(r => r.GetTopicByNameAsync("New Tech Topic", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Topic?)null);
+
+        // Act
+        var result = await _vocabService.UpdateTopicAsync(topicId, updateDto);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Name.Should().Be("New Tech Topic");
+        result.Description.Should().Be("Updated technology vocabulary");
+        result.IconGlyph.Should().Be("\uE7F4");
+        existingTopic.Name.Should().Be("New Tech Topic");
+        existingTopic.Description.Should().Be("Updated technology vocabulary");
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateTopicAsync_WithGuidEmpty_ShouldThrowArgumentException()
+    {
+        // Arrange
+        var updateDto = new TopicCreateOrUpdateDto("Tech");
+
+        // Act
+        var act = () => _vocabService.UpdateTopicAsync(Guid.Empty, updateDto);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*General Context*");
+    }
+
+    [Fact]
+    public async Task UpdateTopicAsync_WithEmptyName_ShouldThrowArgumentException()
+    {
+        // Arrange
+        var topicId = Guid.NewGuid();
+        var updateDto = new TopicCreateOrUpdateDto("   ");
+
+        // Act
+        var act = () => _vocabService.UpdateTopicAsync(topicId, updateDto);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*Topic name cannot be empty*");
+    }
+
+    [Fact]
+    public async Task UpdateTopicAsync_WithDuplicateNameFromOtherTopic_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var topicId = Guid.NewGuid();
+        var otherTopicId = Guid.NewGuid();
+        var existingTopic = new Topic { Id = topicId, Name = "Current Name" };
+        var duplicateTopic = new Topic { Id = otherTopicId, Name = "Existing Name" };
+
+        _mockVocabRepo.Setup(r => r.GetTopicByIdAsync(topicId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTopic);
+        _mockVocabRepo.Setup(r => r.GetTopicByNameAsync("Existing Name", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(duplicateTopic);
+
+        var updateDto = new TopicCreateOrUpdateDto("Existing Name");
+
+        // Act
+        var act = () => _vocabService.UpdateTopicAsync(topicId, updateDto);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*already exists*");
+    }
+
+    [Fact]
+    public async Task DeleteTopicAsync_WithGuidEmpty_ShouldThrowArgumentException()
+    {
+        // Act
+        var act = () => _vocabService.DeleteTopicAsync(Guid.Empty);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*General Context*");
+    }
+
+    [Fact]
+    public async Task AssignWordsToTopicAsync_ShouldAddOnlyMissingAssociationsAndCommit()
+    {
+        // Arrange
+        var topicId = Guid.NewGuid();
+        var word1 = Guid.NewGuid();
+        var word2 = Guid.NewGuid();
+
+        _mockVocabRepo.Setup(r => r.GetTopicByIdAsync(topicId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Topic { Id = topicId, Name = "Topic" });
+
+        _mockVocabRepo.Setup(r => r.GetExistingWordTopicAssociationsAsync(topicId, It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new HashSet<Guid> { word1 });
+
+        // Act
+        await _vocabService.AssignWordsToTopicAsync(topicId, new[] { word1, word2 });
+
+        // Assert
+        _mockVocabRepo.Verify(r => r.AddWordTopics(
+            It.Is<IEnumerable<WordTopic>>(items => items.Count() == 1 && items.First().WordId == word2 && items.First().TopicId == topicId)), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task AssignWordsToTopicAsync_WithGuidEmpty_ShouldThrowArgumentException()
+    {
+        // Act
+        var act = () => _vocabService.AssignWordsToTopicAsync(Guid.Empty, new[] { Guid.NewGuid() });
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*General Context*");
+    }
+
+    [Fact]
+    public async Task UnassignWordsFromTopicAsync_ShouldCallRepoAndCommit()
+    {
+        // Arrange
+        var topicId = Guid.NewGuid();
+        var word1 = Guid.NewGuid();
+
+        // Act
+        await _vocabService.UnassignWordsFromTopicAsync(topicId, new[] { word1 });
+
+        // Assert
+        _mockVocabRepo.Verify(r => r.RemoveWordTopicAssociationsAsync(
+            topicId,
+            It.Is<IEnumerable<Guid>>(ids => ids.Contains(word1)),
+            It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UnassignWordsFromTopicAsync_WithGuidEmpty_ShouldThrowArgumentException()
+    {
+        // Act
+        var act = () => _vocabService.UnassignWordsFromTopicAsync(Guid.Empty, new[] { Guid.NewGuid() });
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*General Context*");
+    }
 }
+

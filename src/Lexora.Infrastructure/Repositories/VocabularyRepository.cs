@@ -296,6 +296,11 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
 
     public void DeleteTopic(Topic topic)
     {
+        var associations = Context.WordTopics.Where(wt => wt.TopicId == topic.Id).ToList();
+        if (associations.Count > 0)
+        {
+            Context.WordTopics.RemoveRange(associations);
+        }
         Context.Topics.Remove(topic);
     }
 
@@ -389,5 +394,40 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
     public override async Task AddRangeAsync(IEnumerable<Word> words, CancellationToken cancellationToken = default)
     {
         await DbSet.AddRangeAsync(words, cancellationToken);
+    }
+
+    public async Task<HashSet<Guid>> GetExistingWordTopicAssociationsAsync(
+        Guid topicId,
+        IEnumerable<Guid> wordIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = wordIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0) return new HashSet<Guid>();
+
+        var existing = await Context.WordTopics
+            .AsNoTracking()
+            .Where(wt => wt.TopicId == topicId && ids.Contains(wt.WordId))
+            .Select(wt => wt.WordId)
+            .ToListAsync(cancellationToken);
+
+        return new HashSet<Guid>(existing);
+    }
+
+    public async Task RemoveWordTopicAssociationsAsync(
+        Guid topicId,
+        IEnumerable<Guid> wordIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = wordIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0) return;
+
+        var toRemove = await Context.WordTopics
+            .Where(wt => wt.TopicId == topicId && ids.Contains(wt.WordId))
+            .ToListAsync(cancellationToken);
+
+        if (toRemove.Count > 0)
+        {
+            Context.WordTopics.RemoveRange(toRemove);
+        }
     }
 }

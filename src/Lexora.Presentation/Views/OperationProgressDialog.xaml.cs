@@ -173,4 +173,28 @@ public sealed partial class OperationProgressDialog : ContentDialog
         CompletedSummaryText.Text = errorMessage;
         MetricsGrid.Visibility = Visibility.Collapsed;
     }
+
+    /// <summary>
+    /// Enables the Close/Cancel button during progress and invokes callback when clicked.
+    /// </summary>
+    public void EnableCancellation(Action onCancel, string? cancelText = null)
+    {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(() => EnableCancellation(onCancel, cancelText));
+            return;
+        }
+
+        var defaultCancelText = App.Current?.Services?.GetService<ILocalizationService>()?.GetString("Action_Cancel") ?? "Cancel";
+        CloseButtonText = !string.IsNullOrWhiteSpace(cancelText) ? cancelText : defaultCancelText;
+
+        CloseButtonClick += (s, e) =>
+        {
+            try
+            {
+                onCancel();
+            }
+            catch { }
+        };
+    }
 }

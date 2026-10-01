@@ -3,6 +3,7 @@ using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Application.Services;
 using Lexora.Application.SpacedRepetition;
+using Lexora.Domain.Entities;
 using Lexora.Domain.Enums;
 using Lexora.Infrastructure.Data;
 using Lexora.Infrastructure.Repositories;
@@ -782,6 +783,142 @@ public class VocabularyCrudIntegrationTests : IDisposable
         var secondResult = await exportImportService.CommitSmartImportAsync(request);
         secondResult.TotalUpdated.Should().Be(1);
         secondResult.TotalErrors.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task TopicAndContextUnits_FullLifecycle_ShouldPreventDuplicatesAndOrphans()
+    {
+        // 1. Create 3 words
+        var w1 = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            null, "negotiate", null, null, null, null, CefrLevel.B2, PartOfSpeech.Verb, null,
+            new List<WordMeaningCreateDto> { new(PartOfSpeech.Verb, "đàm phán, thương lượng", "to discuss something in order to reach an agreement", null, []) },
+            [], []));
+
+        var w2 = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            null, "revenue", null, null, null, null, CefrLevel.B2, PartOfSpeech.Noun, null,
+            new List<WordMeaningCreateDto> { new(PartOfSpeech.Noun, "doanh thu", "income that a company receives", null, []) },
+            [], []));
+
+        var w3 = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            null, "contract", null, null, null, null, CefrLevel.B1, PartOfSpeech.Noun, null,
+            new List<WordMeaningCreateDto> { new(PartOfSpeech.Noun, "hợp đồng", "an official written agreement", null, []) },
+            [], []));
+
+        // 2. Create Topic
+        var topicDto = await _vocabService.CreateTopicAsync(new TopicCreateOrUpdateDto("Corporate Business", "Words for business contracts", "\uE825", "#0078D4"));
+        var topicId = topicDto.Id;
+
+        // 3. Assign w1, w2 to Topic
+        await _vocabService.AssignWordsToTopicAsync(topicId, new[] { w1.Id, w2.Id });
+
+        var units = await _vocabService.GetContextUnitsAsync();
+        var corpUnit = units.FirstOrDefault(u => u.Id == topicId);
+        corpUnit.Should().NotBeNull();
+        corpUnit!.TotalWords.Should().Be(2);
+
+        // 4. Test Duplicate Prevention: Re-assign w1, w2 along with w3
+        await _vocabService.AssignWordsToTopicAsync(topicId, new[] { w1.Id, w2.Id, w3.Id });
+
+        var unitsAfter = await _vocabService.GetContextUnitsAsync();
+        corpUnit = unitsAfter.FirstOrDefault(u => u.Id == topicId);
+        corpUnit!.TotalWords.Should().Be(3); // strictly 3, no duplicate WordTopic records!
+
+        // 5. Update Topic
+        var updatedTopic = await _vocabService.UpdateTopicAsync(topicId, new TopicCreateOrUpdateDto("International Business", "Updated desc", "\uE709", "#107C41"));
+        updatedTopic.Name.Should().Be("International Business");
+
+        // 6. Unassign w3 from Topic
+        await _vocabService.UnassignWordsFromTopicAsync(topicId, new[] { w3.Id });
+        unitsAfter = await _vocabService.GetContextUnitsAsync();
+        corpUnit = unitsAfter.FirstOrDefault(u => u.Id == topicId);
+        corpUnit!.TotalWords.Should().Be(2);
+
+        // 7. Delete Topic & verify words still exist (no cascade deletion of words) and no orphan junction records
+        await _vocabService.DeleteTopicAsync(topicId);
+
+        var allWords = await _vocabRepo.SearchAsync(null, null, null, null, null, null, 0, 100);
+        allWords.Should().Contain(w => w.Term == "negotiate");
+        allWords.Should().Contain(w => w.Term == "revenue");
+        allWords.Should().Contain(w => w.Term == "contract");
+
+        // Verify no orphan WordTopics
+        var orphanJunctions = await _context.WordTopics.Where(wt => wt.TopicId == topicId).ToListAsync();
+        orphanJunctions.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task BulkDelete_WithChunkingAndLargeBatch_ShouldDeleteAllAndCleanRelations()
+    {
+        // 1. Create 320 words in batches
+        var ids = new List<Guid>();
+        for (int i = 0; i < 320; i++)
+        {
+            var word = new Word
+            {
+                Term = $"batchword_{i}",
+                NormalizedTerm = $"batchword_{i}",
+                Level = CefrLevel.A1,
+                PrimaryPartOfSpeech = PartOfSpeech.Noun,
+                Meanings = new List<WordMeaning>
+                {
+                    new()
+                    {
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        DefinitionVi = $"nghĩa của từ {i}",
+                        DefinitionEn = $"meaning of word {i}"
+                    }
+                }
+            };
+            await _context.Words.AddAsync(word);
+            ids.Add(word.Id);
+        }
+        await _context.SaveChangesAsync();
+
+        var reports = new List<ProgressReport>();
+        var progress = new Progress<ProgressReport>(r => reports.Add(r));
+
+        // 2. Act: Delete in chunks (150 chunk size tested across 320 items)
+        int deleted = await _vocabService.DeleteWordsAsync(ids, CancellationToken.None, progress);
+
+        // 3. Assert
+        deleted.Should().Be(320);
+        var remaining = await _context.Words.Where(w => ids.Contains(w.Id)).CountAsync();
+        remaining.Should().Be(0);
+
+        var remainingMeanings = await _context.WordMeanings.Where(wm => ids.Contains(wm.WordId)).CountAsync();
+        remainingMeanings.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ExportVocabularyOnly_ShouldGeneratePureTermAndMeaningsWithoutGrammarOrLogs()
+    {
+        // 1. Create word
+        var word = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            null, "ubiquitous", "/juːˈbɪk.wɪ.təs/", null, null, null, CefrLevel.C1, PartOfSpeech.Adjective, "Everywhere",
+            new List<WordMeaningCreateDto>
+            {
+                new(PartOfSpeech.Adjective, "có mặt ở khắp nơi, phổ biến", "present, appearing, or found everywhere", "formal context", [])
+            },
+            [], []));
+
+        var exportImportService = new ExportImportService(_vocabRepo, _unitOfWork);
+
+        // 2. Export JSON Vocab Only
+        var json = await exportImportService.ExportVocabularyOnlyJsonAsync(new[] { word.Id });
+        json.Should().Contain("\"term\": \"ubiquitous\"");
+        json.Should().Contain("\"có mặt ở khắp nơi, phổ biến\"");
+        json.Should().NotContain("studyLogs");
+        json.Should().NotContain("grammarRules");
+
+        // 3. Export CSV Vocab Only
+        var csv = await exportImportService.ExportVocabularyOnlyCsvAsync(new[] { word.Id });
+        csv.Should().StartWith("Term,DefinitionVi,DefinitionEn,PartOfSpeech");
+        csv.Should().Contain("ubiquitous");
+        csv.Should().Contain("\"có mặt ở khắp nơi, phổ biến\"");
+
+        // 4. Export TXT Vocab Only
+        var txt = await exportImportService.ExportVocabularyOnlyTxtAsync(new[] { word.Id });
+        txt.Should().Contain("ubiquitous\tcó mặt ở khắp nơi, phổ biến");
     }
 
     public void Dispose()

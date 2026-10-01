@@ -292,4 +292,110 @@ public class ExportImportServiceTests
         var result = ExportImportService.ParsePartOfSpeech(input);
         result.Should().Be(expected);
     }
+
+    [Fact]
+    public async Task ExportVocabularyOnlyJsonAsync_ShouldReturnJsonWithOnlyTermsAndMeanings()
+    {
+        // Arrange
+        var sampleWord = new Word
+        {
+            Id = Guid.NewGuid(),
+            Term = "serendipity",
+            Meanings = new List<WordMeaning>
+            {
+                new()
+                {
+                    PartOfSpeech = PartOfSpeech.Noun,
+                    DefinitionVi = "sự may mắn tình cờ",
+                    DefinitionEn = "the occurrence and development of events by chance in a happy way",
+                    Explanation = "thường dùng trong văn học"
+                }
+            }
+        };
+
+        _vocabRepoMock.Setup(r => r.SearchAsync(
+            null, null, null, null, null, null, 0, 100000, null, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Word> { sampleWord });
+
+        // Act
+        var json = await _service.ExportVocabularyOnlyJsonAsync();
+
+        // Assert
+        json.Should().NotBeNullOrWhiteSpace();
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        root.ValueKind.Should().Be(JsonValueKind.Array);
+        root.GetArrayLength().Should().Be(1);
+
+        var first = root[0];
+        first.GetProperty("term").GetString().Should().Be("serendipity");
+        var meanings = first.GetProperty("meanings");
+        meanings.GetArrayLength().Should().Be(1);
+        meanings[0].GetProperty("definitionVi").GetString().Should().Be("sự may mắn tình cờ");
+
+        // Should NOT contain grammar, study logs or extra domain properties
+        first.TryGetProperty("grammarRules", out _).Should().BeFalse();
+        first.TryGetProperty("studyLogs", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ExportVocabularyOnlyCsvAsync_ShouldReturnPureCsvHeaderAndRow()
+    {
+        // Arrange
+        var sampleWord = new Word
+        {
+            Id = Guid.NewGuid(),
+            Term = "ephemeral",
+            Meanings = new List<WordMeaning>
+            {
+                new()
+                {
+                    PartOfSpeech = PartOfSpeech.Adjective,
+                    DefinitionVi = "phù du, chóng tàn",
+                    DefinitionEn = "lasting for a very short time"
+                }
+            }
+        };
+
+        _vocabRepoMock.Setup(r => r.SearchAsync(
+            null, null, null, null, null, null, 0, 100000, null, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Word> { sampleWord });
+
+        // Act
+        var csv = await _service.ExportVocabularyOnlyCsvAsync();
+
+        // Assert
+        csv.Should().StartWith("Term,DefinitionVi,DefinitionEn,PartOfSpeech");
+        csv.Should().Contain("ephemeral");
+        csv.Should().Contain("\"phù du, chóng tàn\"");
+    }
+
+    [Fact]
+    public async Task ExportVocabularyOnlyTxtAsync_ShouldReturnFormattedTextLines()
+    {
+        // Arrange
+        var sampleWord = new Word
+        {
+            Id = Guid.NewGuid(),
+            Term = "resilience",
+            Meanings = new List<WordMeaning>
+            {
+                new()
+                {
+                    PartOfSpeech = PartOfSpeech.Noun,
+                    DefinitionVi = "sự kiên cường, khả năng phục hồi"
+                }
+            }
+        };
+
+        _vocabRepoMock.Setup(r => r.SearchAsync(
+            null, null, null, null, null, null, 0, 100000, null, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Word> { sampleWord });
+
+        // Act
+        var txt = await _service.ExportVocabularyOnlyTxtAsync();
+
+        // Assert
+        txt.Should().Contain("resilience\tsự kiên cường, khả năng phục hồi");
+    }
 }

@@ -19,6 +19,21 @@ public interface IExportImportService
     Task<string> ExportToCsvAsync(IEnumerable<Guid>? wordIds = null, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
     Task<string> ExportToTxtAsync(IEnumerable<Guid>? wordIds = null, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
 
+    /// <summary>
+    /// Exports vocabulary words and their definitions only (without grammar rules, review statistics, or extra metadata).
+    /// </summary>
+    Task<string> ExportVocabularyOnlyJsonAsync(IEnumerable<Guid>? wordIds = null, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
+
+    /// <summary>
+    /// Exports vocabulary words and their definitions only in CSV format.
+    /// </summary>
+    Task<string> ExportVocabularyOnlyCsvAsync(IEnumerable<Guid>? wordIds = null, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
+
+    /// <summary>
+    /// Exports vocabulary words and their definitions only in clean flashcard/tab-delimited TXT format.
+    /// </summary>
+    Task<string> ExportVocabularyOnlyTxtAsync(IEnumerable<Guid>? wordIds = null, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
+
     Task<ImportResult> ImportFromJsonAsync(string jsonContent, ImportConflictResolution conflictResolution = ImportConflictResolution.Skip, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
     Task<ImportResult> ImportFromCsvAsync(string csvContent, ImportConflictResolution conflictResolution = ImportConflictResolution.Skip, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
     Task<ImportResult> ImportFromTxtAsync(string txtContent, ImportConflictResolution conflictResolution = ImportConflictResolution.Skip, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);

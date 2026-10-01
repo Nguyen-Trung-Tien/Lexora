@@ -271,4 +271,45 @@ public class VocabularyBulkDeleteAndDtoTests
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("*perspicacious*already exists*");
     }
+
+    [Fact]
+    public async Task DeleteWordsAsync_WithCancellationToken_WhenCancelled_ShouldThrowAndNotCommit()
+    {
+        // Arrange
+        using var cts = new CancellationTokenSource();
+        cts.Cancel(); // pre-cancelled
+
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+
+        // Act
+        var act = async () => await _vocabService.DeleteWordsAsync(new[] { id1, id2 }, cts.Token);
+
+        // Assert
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteWordsAsync_WithProgressReporter_ShouldReportProgressAndComplete()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+        var word1 = new Word { Id = id1, Term = "alpha" };
+        var word2 = new Word { Id = id2, Term = "beta" };
+
+        _mockVocabRepo.Setup(r => r.GetByIdAsync(id1, It.IsAny<CancellationToken>())).ReturnsAsync(word1);
+        _mockVocabRepo.Setup(r => r.GetByIdAsync(id2, It.IsAny<CancellationToken>())).ReturnsAsync(word2);
+
+        var reports = new List<ProgressReport>();
+        var progress = new Progress<ProgressReport>(r => reports.Add(r));
+
+        // Act
+        var count = await _vocabService.DeleteWordsAsync(new[] { id1, id2 }, CancellationToken.None, progress);
+
+        // Assert
+        count.Should().Be(2);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

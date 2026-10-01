@@ -314,19 +314,30 @@ public class VocabularyService : IVocabularyService
         }
     }
 
-    public async Task<int> DeleteWordsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    public async Task<int> DeleteWordsAsync(
+        IEnumerable<Guid> ids,
+        CancellationToken cancellationToken = default,
+        IProgress<ProgressReport>? progress = null)
     {
         ArgumentNullException.ThrowIfNull(ids);
         var idList = ids.Where(id => id != Guid.Empty).Distinct().ToList();
         if (idList.Count == 0) return 0;
 
+        progress?.Report(new ProgressReport(0, 0, idList.Count, "Bắt đầu xóa dữ liệu...", "Preparing deletion..."));
+
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
             int deletedCount = 0;
-            foreach (var chunk in idList.Chunk(250))
+            int total = idList.Count;
+            int chunkIndex = 0;
+            var chunks = idList.Chunk(150).ToList();
+
+            foreach (var chunk in chunks)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                chunkIndex++;
+
                 var words = await _vocabRepo.GetByIdsWithDetailsAsync(chunk, cancellationToken);
                 if (words == null || words.Count == 0)
                 {
@@ -351,10 +362,20 @@ public class VocabularyService : IVocabularyService
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
                     _unitOfWork.ClearTracker();
                 }
+
+                int pct = (int)((double)deletedCount / total * 90);
+                progress?.Report(new ProgressReport(
+                    pct,
+                    deletedCount,
+                    total,
+                    $"Đang xóa từ vựng ({deletedCount}/{total})...",
+                    $"Deleting words ({deletedCount}/{total})..."));
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
             _cacheService?.InvalidateVocabulary();
+
+            progress?.Report(new ProgressReport(100, deletedCount, total, "Xóa dữ liệu hoàn tất!", "Done."));
             return deletedCount;
         }
         catch
@@ -399,13 +420,139 @@ public class VocabularyService : IVocabularyService
         return new TopicDto(topic.Id, topic.Name, topic.Description, topic.IconGlyph, topic.ColorHex);
     }
 
+    public async Task<TopicDto> UpdateTopicAsync(Guid id, TopicCreateOrUpdateDto dto, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentException("Cannot update General Context (Guid.Empty).", nameof(id));
+        }
+
+        var trimmedName = dto.Name?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(trimmedName))
+        {
+            throw new ArgumentException("Topic name cannot be empty.", nameof(dto));
+        }
+
+        var topic = await _vocabRepo.GetTopicByIdAsync(id, cancellationToken);
+        if (topic == null)
+        {
+            throw new KeyNotFoundException($"Topic with ID {id} not found.");
+        }
+
+        var existingWithName = await _vocabRepo.GetTopicByNameAsync(trimmedName, cancellationToken);
+        if (existingWithName != null && existingWithName.Id != id)
+        {
+            throw new InvalidOperationException($"Topic with name '{trimmedName}' already exists.");
+        }
+
+        topic.Name = trimmedName;
+        topic.Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.IconGlyph)) topic.IconGlyph = dto.IconGlyph.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.ColorHex)) topic.ColorHex = dto.ColorHex.Trim();
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _cacheService?.InvalidateVocabulary();
+
+        return new TopicDto(topic.Id, topic.Name, topic.Description, topic.IconGlyph, topic.ColorHex);
+    }
+
     public async Task DeleteTopicAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentException("Cannot delete General Context (Guid.Empty).", nameof(id));
+        }
+
         var topic = await _vocabRepo.GetTopicByIdAsync(id, cancellationToken);
         if (topic != null)
         {
             _vocabRepo.DeleteTopic(topic);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _cacheService?.InvalidateVocabulary();
+        }
+    }
+
+    public async Task AssignWordsToTopicAsync(
+        Guid topicId,
+        IEnumerable<Guid> wordIds,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(wordIds);
+        if (topicId == Guid.Empty)
+        {
+            throw new ArgumentException("Cannot assign words directly to General Context (Guid.Empty).", nameof(topicId));
+        }
+
+        var topic = await _vocabRepo.GetTopicByIdAsync(topicId, cancellationToken);
+        if (topic == null)
+        {
+            throw new KeyNotFoundException($"Topic with ID {topicId} not found.");
+        }
+
+        var idList = wordIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (idList.Count == 0) return;
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            foreach (var chunk in idList.Chunk(250))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var existingAssocs = await _vocabRepo.GetExistingWordTopicAssociationsAsync(topicId, chunk, cancellationToken);
+                var newAssocs = chunk
+                    .Where(wid => !existingAssocs.Contains(wid))
+                    .Select(wid => new WordTopic { WordId = wid, TopicId = topicId })
+                    .ToList();
+
+                if (newAssocs.Count > 0)
+                {
+                    _vocabRepo.AddWordTopics(newAssocs);
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                }
+            }
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            _cacheService?.InvalidateVocabulary();
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    public async Task UnassignWordsFromTopicAsync(
+        Guid topicId,
+        IEnumerable<Guid> wordIds,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(wordIds);
+        if (topicId == Guid.Empty)
+        {
+            throw new ArgumentException("Cannot unassign from General Context (Guid.Empty).", nameof(topicId));
+        }
+
+        var idList = wordIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (idList.Count == 0) return;
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            foreach (var chunk in idList.Chunk(250))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await _vocabRepo.RemoveWordTopicAssociationsAsync(topicId, chunk, cancellationToken);
+            }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            _cacheService?.InvalidateVocabulary();
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
         }
     }
 

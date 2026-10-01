@@ -533,27 +533,38 @@ public partial class VocabularyViewModel : ObservableObject
             {
                 saved = await _vocabService.CreateWordAsync(dto);
                 await _dispatcherQueue.EnsureOnUIThreadAsync();
+                Words.Insert(0, saved);
+                TotalWordCount++;
+                SelectedWord = saved;
                 StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordAdded"), saved.Term);
             }
             else
             {
                 saved = await _vocabService.UpdateWordAsync(dto);
                 await _dispatcherQueue.EnsureOnUIThreadAsync();
+                int idx = -1;
+                for (int i = 0; i < Words.Count; i++)
+                {
+                    if (Words[i].Id == saved.Id)
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                if (idx >= 0)
+                {
+                    Words[idx] = saved;
+                }
+                else
+                {
+                    await LoadWordsAsync();
+                }
+                SelectedWord = saved;
                 StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordUpdated"), saved.Term);
             }
 
-            await LoadWordsAsync();
             _ = LoadContextUnitsAsync();
-
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            var matched = Words.FirstOrDefault(w => w.Id == saved.Id);
-            if (matched == null)
-            {
-                ResetFilters();
-                await LoadWordsAsync();
-                matched = Words.FirstOrDefault(w => w.Id == saved.Id);
-            }
-            SelectedWord = matched ?? saved;
+            _ = LoadFiltersAsync();
         }
         finally
         {
@@ -582,6 +593,78 @@ public partial class VocabularyViewModel : ObservableObject
         }
     }
 
+    public async Task<TopicDto?> UpdateTopicAsync(Guid id, TopicCreateOrUpdateDto dto)
+    {
+        try
+        {
+            var updated = await _vocabService.UpdateTopicAsync(id, dto);
+            await LoadFiltersAsync();
+            await LoadContextUnitsAsync();
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_TopicUpdated"), updated.Name);
+            return updated;
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+    public async Task DeleteTopicAsync(Guid id)
+    {
+        try
+        {
+            var topic = AvailableTopics.FirstOrDefault(t => t.Id == id);
+            string topicName = topic?.Name ?? string.Empty;
+
+            await _vocabService.DeleteTopicAsync(id);
+            await LoadFiltersAsync();
+            await LoadContextUnitsAsync();
+
+            if (!string.IsNullOrEmpty(topicName))
+            {
+                StatusMessage = string.Format(_localizationService.GetString("Vocab_TopicDeleted"), topicName);
+            }
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+    public async Task AssignWordsToTopicAsync(Guid topicId, IEnumerable<Guid> wordIds)
+    {
+        try
+        {
+            var idList = wordIds.Distinct().ToList();
+            if (idList.Count == 0) return;
+
+            await _vocabService.AssignWordsToTopicAsync(topicId, idList);
+            await LoadWordsAsync();
+            await LoadContextUnitsAsync();
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+    public async Task UnassignWordsFromTopicAsync(Guid topicId, IEnumerable<Guid> wordIds)
+    {
+        try
+        {
+            var idList = wordIds.Distinct().ToList();
+            if (idList.Count == 0) return;
+
+            await _vocabService.UnassignWordsFromTopicAsync(topicId, idList);
+            await LoadWordsAsync();
+            await LoadContextUnitsAsync();
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
     private bool _isDeletingWord = false;
 
     [RelayCommand]
@@ -595,9 +678,14 @@ public partial class VocabularyViewModel : ObservableObject
             string term = word?.Term ?? string.Empty;
 
             await _dispatcherQueue.EnsureOnUIThreadAsync();
+            if (word != null)
+            {
+                Words.Remove(word);
+                TotalWordCount = Math.Max(0, TotalWordCount - 1);
+            }
             if (SelectedWord?.Id == id)
             {
-                SelectedWord = null;
+                SelectedWord = Words.FirstOrDefault();
             }
 
             await _vocabService.DeleteWordAsync(id);
@@ -608,7 +696,6 @@ public partial class VocabularyViewModel : ObservableObject
                 StatusMessage = string.Format(_localizationService.GetString("Vocab_Status_WordDeleted"), term);
             }
 
-            await LoadWordsAsync();
             _ = LoadContextUnitsAsync();
         }
         finally
@@ -665,30 +752,52 @@ public partial class VocabularyViewModel : ObservableObject
 
     private bool _isDeletingWords = false;
 
-    public async Task<int> DeleteSelectedWordsAsync(IEnumerable<Guid>? ids = null)
+    public async Task<int> DeleteSelectedWordsAsync(
+        IEnumerable<Guid>? ids = null,
+        CancellationToken cancellationToken = default,
+        IProgress<ProgressReport>? progress = null)
     {
         var targetIds = ids?.Distinct().ToList() ?? SelectedWordIds.ToList();
         if (targetIds.Count == 0 || _isDeletingWords) return 0;
         _isDeletingWords = true;
         await _dispatcherQueue.EnsureOnUIThreadAsync();
         IsLoading = true;
+        StatusMessage = _localizationService.GetString("Vocab_BulkDeleteProgress");
 
         try
         {
-            if (SelectedWord != null && targetIds.Contains(SelectedWord.Id))
-            {
-                SelectedWord = null;
-            }
-
-            int count = await Task.Run(() => _vocabService.DeleteWordsAsync(targetIds));
+            int count = await Task.Run(
+                () => _vocabService.DeleteWordsAsync(targetIds, cancellationToken, progress),
+                cancellationToken);
 
             await _dispatcherQueue.EnsureOnUIThreadAsync();
+
+            var deletedSet = new HashSet<Guid>(targetIds);
+            for (int i = Words.Count - 1; i >= 0; i--)
+            {
+                if (deletedSet.Contains(Words[i].Id))
+                {
+                    Words.RemoveAt(i);
+                }
+            }
+
+            TotalWordCount = Math.Max(0, TotalWordCount - count);
+            if (SelectedWord != null && deletedSet.Contains(SelectedWord.Id))
+            {
+                SelectedWord = Words.FirstOrDefault();
+            }
+
             SelectedWordIds.Clear();
             IsSelectionMode = false;
             OnPropertyChanged(nameof(SelectedCount));
             OnPropertyChanged(nameof(HasSelection));
 
-            await LoadWordsAsync();
+            if (Words.Count == 0 && CurrentPage > 1)
+            {
+                CurrentPage--;
+                await LoadWordsAsync();
+            }
+
             _ = LoadContextUnitsAsync();
             return count;
         }
@@ -769,6 +878,21 @@ public partial class VocabularyViewModel : ObservableObject
     public async Task<string> ExportToTxtAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
     {
         return await _exportImportService.ExportToTxtAsync(wordIds, progress: progress);
+    }
+
+    public async Task<string> ExportVocabularyOnlyJsonAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
+    {
+        return await _exportImportService.ExportVocabularyOnlyJsonAsync(wordIds, progress: progress);
+    }
+
+    public async Task<string> ExportVocabularyOnlyCsvAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
+    {
+        return await _exportImportService.ExportVocabularyOnlyCsvAsync(wordIds, progress: progress);
+    }
+
+    public async Task<string> ExportVocabularyOnlyTxtAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
+    {
+        return await _exportImportService.ExportVocabularyOnlyTxtAsync(wordIds, progress: progress);
     }
 
     public async Task<ImportResult> ImportSmartAsync(

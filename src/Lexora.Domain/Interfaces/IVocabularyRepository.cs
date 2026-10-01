@@ -71,4 +71,6 @@ public interface IVocabularyRepository : IRepository<Word>
     void AddWordExamTags(IEnumerable<WordExamTag> wordExamTags);
     Task<HashSet<string>> GetAllNormalizedTermsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyDictionary<string, Word>> GetWordsByTermsWithDetailsAsync(IEnumerable<string> normalizedTerms, CancellationToken cancellationToken = default);
+    Task<HashSet<Guid>> GetExistingWordTopicAssociationsAsync(Guid topicId, IEnumerable<Guid> wordIds, CancellationToken cancellationToken = default);
+    Task RemoveWordTopicAssociationsAsync(Guid topicId, IEnumerable<Guid> wordIds, CancellationToken cancellationToken = default);
 }

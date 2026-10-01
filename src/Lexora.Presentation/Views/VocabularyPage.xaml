@@ -134,11 +134,19 @@
 
                         <!-- Export Options -->
                         <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Export')}">
-                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportJson')}" Click="ExportJson_Click" />
-                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportCsv')}" Click="ExportCsv_Click" />
-                            <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportTxt')}" Click="ExportTxt_Click" />
+                            <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_ExportAll')}">
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportJson')}" Click="ExportJson_Click" />
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportCsv')}" Click="ExportCsv_Click" />
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportTxt')}" Click="ExportTxt_Click" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_ExportVocabOnly')}">
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportVocabOnlyJson')}" Click="ExportVocabOnlyJson_Click" />
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportVocabOnlyCsv')}" Click="ExportVocabOnlyCsv_Click" />
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportVocabOnlyTxt')}" Click="ExportVocabOnlyTxt_Click" />
+                            </MenuFlyoutSubItem>
                             <MenuFlyoutSeparator />
                             <MenuFlyoutItem x:Name="ExportSelectedMenuItem" Click="ExportSelected_Click" IsEnabled="False" />
+                            <MenuFlyoutItem x:Name="ExportSelectedVocabOnlyMenuItem" Click="ExportSelectedVocabOnly_Click" IsEnabled="False" />
                         </MenuFlyoutSubItem>
 
                         <!-- Traditional / Manual Import Options -->
@@ -363,10 +371,19 @@
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="0,0,0,1" Padding="12,8">
-                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="8">
                             <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllWords_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
                             <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllWords_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
-                            <Button Grid.Column="3" x:Name="BtnDeleteSelectedWords"
+                            <Button Grid.Column="2" x:Name="BtnAssignSelectedToTopic"
+                                    Click="AssignSelectedToTopic_Click"
+                                    IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+                                    CornerRadius="6" Padding="8,4" FontSize="12">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <FontIcon Glyph="&#xE8F1;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_AssignToTopic')}" />
+                                </StackPanel>
+                            </Button>
+                            <Button Grid.Column="4" x:Name="BtnDeleteSelectedWords"
                                     Click="DeleteSelectedWords_Click"
                                     IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
                                     Background="{ThemeResource SystemFillColorCriticalBrush}"
@@ -1002,15 +1019,25 @@
                                                            TextWrapping="Wrap" MaxLines="2" />
                                             </StackPanel>
 
-                                            <Border Grid.Column="2" VerticalAlignment="Top"
-                                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                    BorderThickness="1" CornerRadius="6" Padding="8,3">
-                                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                                    <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="12" />
-                                                    <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Vocab_WordsSuffix')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </StackPanel>
-                                            </Border>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="1" CornerRadius="6" Padding="8,3">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="12" />
+                                                        <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Vocab_WordsSuffix')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <!-- Context Unit More Options (Edit / Delete Topic) -->
+                                                <Button Tag="{x:Bind}"
+                                                        Click="TopicMoreButton_Click"
+                                                        Padding="6,3" CornerRadius="6"
+                                                        Background="Transparent" BorderThickness="0"
+                                                        ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Action_Filter')}">
+                                                    <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </Button>
+                                            </StackPanel>
                                         </Grid>
 
                                         <!-- Mastery Stats & Progress Bar -->

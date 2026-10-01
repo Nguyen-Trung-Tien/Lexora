@@ -12,11 +12,13 @@ public sealed partial class TopicEditorDialog : ContentDialog
     public TopicCreateOrUpdateDto? ResultDto { get; private set; }
 
     private readonly List<TopicIconOption> _iconOptions;
+    public TopicDto? ExistingTopic { get; }
     private string _selectedIcon = "\uE8EC";
 
-    public TopicEditorDialog()
+    public TopicEditorDialog(TopicDto? existingTopic = null)
     {
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+        ExistingTopic = existingTopic;
         InitializeComponent();
 
         if (App.Current?.Services?.GetService<IThemeService>() is { } themeService && themeService.CurrentTheme != ElementTheme.Default)
@@ -28,7 +30,7 @@ public sealed partial class TopicEditorDialog : ContentDialog
             RequestedTheme = rootElem.ActualTheme;
         }
 
-        Title = Loc.GetString("TopicEditor_TitleAdd");
+        Title = existingTopic != null ? Loc.GetString("TopicEditor_TitleEdit") : Loc.GetString("TopicEditor_TitleAdd");
         PrimaryButtonText = Loc.GetString("TopicEditor_Save");
         CloseButtonText = Loc.GetString("TopicEditor_Cancel");
         DialogInfoBar.Title = Loc.GetString("TopicEditor_ValidationTitle");
@@ -49,10 +51,20 @@ public sealed partial class TopicEditorDialog : ContentDialog
             new() { Glyph = "\uE7BE", Name = Loc.GetString("TopicIcon_Health") }
         ];
 
-        _iconOptions[0].IsSelected = true;
-        _selectedIcon = _iconOptions[0].Glyph;
+        if (existingTopic != null)
+        {
+            NameTextBox.Text = existingTopic.Name;
+            DescriptionTextBox.Text = existingTopic.Description ?? string.Empty;
+            _selectedIcon = !string.IsNullOrWhiteSpace(existingTopic.IconGlyph) ? existingTopic.IconGlyph : "\uE8EC";
+        }
+
+        var matchedIcon = _iconOptions.FirstOrDefault(o => o.Glyph == _selectedIcon) ?? _iconOptions[0];
+        foreach (var opt in _iconOptions) opt.IsSelected = false;
+        matchedIcon.IsSelected = true;
+        _selectedIcon = matchedIcon.Glyph;
+
         IconGridView.ItemsSource = _iconOptions;
-        IconGridView.SelectedIndex = 0;
+        IconGridView.SelectedItem = matchedIcon;
 
         PrimaryButtonClick += TopicEditorDialog_PrimaryButtonClick;
     }
