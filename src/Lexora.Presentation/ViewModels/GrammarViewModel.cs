@@ -15,6 +15,7 @@ public partial class GrammarViewModel : ObservableObject
     private readonly IGrammarExportImportService _grammarExportImportService;
     private readonly Services.ILocalizationService _localizationService;
     private readonly Services.ISoundFeedbackService? _soundFeedback;
+    private readonly ISmartSearchService? _smartSearchService;
     private readonly List<GrammarQuizSubmissionDto> _practiceSubmissions = new();
     // Captured on the UI thread so post-await mutations can be safely marshalled back.
     private readonly DispatcherQueue? _dispatcherQueue;
@@ -27,6 +28,24 @@ public partial class GrammarViewModel : ObservableObject
 
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial IReadOnlyList<string> ClosestSuggestions { get; set; } = Array.Empty<string>();
+
+    [ObservableProperty]
+    public partial bool HasClosestSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial GrammarRelatedSuggestionsDto? RelatedSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsLoadingSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasRelatedSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial string SelectedSuggestionTab { get; set; } = "All";
 
     [ObservableProperty]
     public partial GrammarRuleDto? SelectedRule { get; set; }
@@ -74,6 +93,7 @@ public partial class GrammarViewModel : ObservableObject
     partial void OnSelectedLevelChanged(CefrLevel? value) => CurrentPage = 1;
     partial void OnSelectedExamTargetChanged(ExamType? value) => CurrentPage = 1;
     partial void OnSelectedTopicChanged(string? value) => CurrentPage = 1;
+    partial void OnSelectedRuleChanged(GrammarRuleDto? value) => _ = LoadRuleSuggestionsAsync(value);
 
     // Practice Mode State
     [ObservableProperty]
@@ -152,12 +172,14 @@ public partial class GrammarViewModel : ObservableObject
         IGrammarService grammarService,
         IGrammarExportImportService grammarExportImportService,
         Services.ILocalizationService localizationService,
-        Services.ISoundFeedbackService? soundFeedback = null)
+        Services.ISoundFeedbackService? soundFeedback = null,
+        ISmartSearchService? smartSearchService = null)
     {
         _grammarService = grammarService;
         _grammarExportImportService = grammarExportImportService;
         _localizationService = localizationService;
         _soundFeedback = soundFeedback;
+        _smartSearchService = smartSearchService;
         // Must be captured on the UI thread (constructor is always called from UI thread).
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
             ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
@@ -258,10 +280,47 @@ public partial class GrammarViewModel : ObservableObject
                 {
                     SelectedRule = Rules[0];
                 }
+                ClosestSuggestions = Array.Empty<string>();
+                HasClosestSuggestions = false;
             }
             else
             {
                 SelectedRule = null;
+                if (!string.IsNullOrWhiteSpace(SearchQuery))
+                {
+                    try
+                    {
+                        var smartRes = await _grammarService.SmartSearchRulesAsync(
+                            search: SearchQuery,
+                            level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                            examType: SelectedExamTarget == ExamType.General ? null : SelectedExamTarget,
+                            topic: SelectedTopic,
+                            page: 1,
+                            pageSize: 1,
+                            cancellationToken: ct);
+
+                        if (smartRes.ClosestSuggestions.Count > 0)
+                        {
+                            ClosestSuggestions = smartRes.ClosestSuggestions;
+                            HasClosestSuggestions = true;
+                        }
+                        else
+                        {
+                            ClosestSuggestions = Array.Empty<string>();
+                            HasClosestSuggestions = false;
+                        }
+                    }
+                    catch
+                    {
+                        ClosestSuggestions = Array.Empty<string>();
+                        HasClosestSuggestions = false;
+                    }
+                }
+                else
+                {
+                    ClosestSuggestions = Array.Empty<string>();
+                    HasClosestSuggestions = false;
+                }
             }
         }
         catch (OperationCanceledException)
@@ -735,5 +794,83 @@ public partial class GrammarViewModel : ObservableObject
     {
         await LoadTopicsAsync();
         await LoadRulesAsync();
+    }
+
+    [RelayCommand]
+    public async Task ApplyClosestSuggestionAsync(string? suggestion)
+    {
+        if (string.IsNullOrWhiteSpace(suggestion)) return;
+        SearchQuery = suggestion;
+        ClosestSuggestions = Array.Empty<string>();
+        HasClosestSuggestions = false;
+        CurrentPage = 1;
+        await LoadRulesAsync();
+    }
+
+    private CancellationTokenSource? _suggestionsCts;
+
+    [RelayCommand]
+    public async Task LoadRuleSuggestionsAsync(GrammarRuleDto? rule = null)
+    {
+        var targetRule = rule ?? SelectedRule;
+        if (targetRule == null)
+        {
+            RelatedSuggestions = null;
+            HasRelatedSuggestions = false;
+            return;
+        }
+
+        _suggestionsCts?.Cancel();
+        _suggestionsCts?.Dispose();
+        _suggestionsCts = new CancellationTokenSource();
+        var ct = _suggestionsCts.Token;
+
+        try
+        {
+            IsLoadingSuggestions = true;
+            var suggestions = await _grammarService.GetGrammarSuggestionsAsync(targetRule.Id, ct);
+            if (ct.IsCancellationRequested) return;
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            RelatedSuggestions = suggestions;
+            HasRelatedSuggestions = suggestions != null && suggestions.TotalSuggestionsCount > 0;
+        }
+        catch (OperationCanceledException)
+        {
+            // Cancelled
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarViewModel] LoadRuleSuggestionsAsync error: {ex.Message}");
+        }
+        finally
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            IsLoadingSuggestions = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task SelectSuggestedRuleAsync(GrammarSuggestionItemDto? suggestion)
+    {
+        if (suggestion == null) return;
+
+        var existing = Rules.FirstOrDefault(r => r.Id == suggestion.Rule.Id);
+        if (existing != null)
+        {
+            SelectedRule = existing;
+            return;
+        }
+
+        var rule = await _grammarService.GetRuleByIdAsync(suggestion.Rule.Id);
+        if (rule != null)
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            if (!Rules.Any(r => r.Id == rule.Id))
+            {
+                Rules.Insert(0, rule);
+            }
+            SelectedRule = rule;
+        }
     }
 }

@@ -281,6 +281,24 @@ public sealed partial class ShellPage : Page
                     TargetType = "Grammar"
                 });
             }
+
+            // 4. Closest suggestions fallback if no direct matches found
+            if (suggestions.Count == 0 && query.Length >= 2)
+            {
+                var smartWords = await vocabService.SmartSearchWordsAsync(search: query, pageSize: 1, cancellationToken: ct);
+                var closestLabel = _localizationService.GetString("Search_ClosestSuggestions");
+                foreach (var s in smartWords.ClosestSuggestions.Take(3))
+                {
+                    suggestions.Add(new SmartSearchSuggestion
+                    {
+                        Title = s,
+                        Subtitle = closestLabel,
+                        Glyph = "\uE721",
+                        SearchTerm = s,
+                        TargetType = "Word"
+                    });
+                }
+            }
         }
         catch (OperationCanceledException)
         {

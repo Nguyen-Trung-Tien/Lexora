@@ -10,11 +10,25 @@ public class GrammarService : IGrammarService
 {
     private readonly IGrammarRepository _grammarRepo;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISmartSearchService? _smartSearch;
+    private readonly IGrammarSuggestionService? _suggestionService;
+    private readonly ISmartSearchCacheService? _cacheService;
+    private readonly IVocabularyService? _vocabService;
 
-    public GrammarService(IGrammarRepository grammarRepo, IUnitOfWork unitOfWork)
+    public GrammarService(
+        IGrammarRepository grammarRepo,
+        IUnitOfWork unitOfWork,
+        ISmartSearchService? smartSearch = null,
+        IGrammarSuggestionService? suggestionService = null,
+        ISmartSearchCacheService? cacheService = null,
+        IVocabularyService? vocabService = null)
     {
         _grammarRepo = grammarRepo;
         _unitOfWork = unitOfWork;
+        _smartSearch = smartSearch;
+        _suggestionService = suggestionService;
+        _cacheService = cacheService;
+        _vocabService = vocabService;
     }
 
     public async Task<IReadOnlyList<GrammarRuleDto>> GetAllRulesAsync(CancellationToken cancellationToken = default)
@@ -78,6 +92,17 @@ public class GrammarService : IGrammarService
         }
 
         int skip = (page - 1) * pageSize;
+
+        if (!string.IsNullOrWhiteSpace(search) && _smartSearch != null)
+        {
+            var allFiltered = await _grammarRepo.GetFilteredAsync(level, examType, topic, search, cancellationToken);
+            totalCount = allFiltered.Count;
+            var dtos = allFiltered.Select(MapToDto).ToList();
+            var ranked = _smartSearch.RankGrammar(search, dtos, dtos.Count);
+            var pagedRanked = ranked.Skip(skip).Take(pageSize).Select(r => r.Item).ToList();
+            return new GrammarPagedResultDto(pagedRanked, totalCount, page, pageSize);
+        }
+
         IReadOnlyList<GrammarRule> rules;
         try
         {
@@ -129,6 +154,7 @@ public class GrammarService : IGrammarService
 
         await _grammarRepo.AddAsync(rule, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _cacheService?.InvalidateGrammar();
 
         return MapToDto(rule);
     }
@@ -178,6 +204,7 @@ public class GrammarService : IGrammarService
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _cacheService?.InvalidateGrammar();
 
         var refreshed = await _grammarRepo.GetWithExamplesAsync(rule.Id, cancellationToken);
         return MapToDto(refreshed ?? rule);
@@ -193,6 +220,7 @@ public class GrammarService : IGrammarService
         {
             await _grammarRepo.DeleteAsync(rule, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _cacheService?.InvalidateGrammar();
         }
     }
 
@@ -230,6 +258,7 @@ public class GrammarService : IGrammarService
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            _cacheService?.InvalidateGrammar();
             return deletedCount;
         }
         catch
@@ -358,6 +387,81 @@ public class GrammarService : IGrammarService
             scorePercent,
             evaluatedQuestions
         );
+    }
+
+    public async Task<GrammarRelatedSuggestionsDto> GetGrammarSuggestionsAsync(Guid ruleId, CancellationToken cancellationToken = default)
+    {
+        if (_suggestionService != null)
+        {
+            return await _suggestionService.GetSuggestionsAsync(ruleId, cancellationToken);
+        }
+
+        var rule = await GetRuleByIdAsync(ruleId, cancellationToken);
+        if (rule == null)
+        {
+            return new GrammarRelatedSuggestionsDto(
+                ruleId,
+                string.Empty,
+                Array.Empty<GrammarSuggestionItemDto>(),
+                Array.Empty<GrammarSuggestionItemDto>(),
+                Array.Empty<GrammarSuggestionItemDto>(),
+                Array.Empty<WordSuggestionItemDto>());
+        }
+
+        var allRules = await GetAllRulesAsync(cancellationToken);
+        IReadOnlyList<WordDto>? words = null;
+        if (_vocabService != null)
+        {
+            try { words = await _vocabService.SearchWordsAsync(pageSize: 100, cancellationToken: cancellationToken); }
+            catch { words = null; }
+        }
+
+        var searchSvc = _smartSearch ?? new SmartSearchService(new FuzzySearchService());
+        var suggestionSvc = new GrammarSuggestionService(this, searchSvc, _vocabService);
+        return suggestionSvc.GetSuggestions(rule, allRules, words);
+    }
+
+    public async Task<SmartSearchResultPageDto<GrammarRuleDto>> SmartSearchRulesAsync(
+        string? search = null,
+        CefrLevel? level = null,
+        ExamType? examType = null,
+        string? topic = null,
+        int page = 1,
+        int pageSize = 20,
+        string? sortBy = null,
+        bool isAscending = true,
+        CancellationToken cancellationToken = default)
+    {
+        var paged = await GetPagedRulesAsync(page, pageSize, level, examType, topic, search, cancellationToken);
+        var matchResults = new List<SmartSearchMatchResult<GrammarRuleDto>>();
+
+        if (!string.IsNullOrWhiteSpace(search) && _smartSearch != null)
+        {
+            foreach (var r in paged.Rules)
+            {
+                var scored = _smartSearch.ScoreGrammar(search, r);
+                matchResults.Add(scored ?? new SmartSearchMatchResult<GrammarRuleDto>(r, 50.0, "Matched"));
+            }
+        }
+        else
+        {
+            matchResults = paged.Rules.Select(r => new SmartSearchMatchResult<GrammarRuleDto>(r, 100.0, "Filter")).ToList();
+        }
+
+        IReadOnlyList<string> closestSuggestions = Array.Empty<string>();
+        if (paged.TotalCount == 0 && !string.IsNullOrWhiteSpace(search) && _smartSearch != null)
+        {
+            var allRules = await GetAllRulesAsync(cancellationToken);
+            var titles = allRules.Select(r => r.Title).ToList();
+            closestSuggestions = _smartSearch.FindClosestGrammarSuggestions(search, titles, maxSuggestions: 5);
+        }
+
+        return new SmartSearchResultPageDto<GrammarRuleDto>(
+            matchResults,
+            paged.TotalCount,
+            page,
+            pageSize,
+            closestSuggestions);
     }
 
     private static GrammarRuleDto MapToDto(GrammarRule r)

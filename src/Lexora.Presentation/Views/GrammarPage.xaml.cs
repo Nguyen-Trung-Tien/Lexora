@@ -1014,4 +1014,20 @@ public sealed partial class GrammarPage : Page
             System.Diagnostics.Debug.WriteLine($"[GrammarPage] GrammarPageSizeCombo_SelectionChanged error: {ex.Message}");
         }
     }
+
+    private async void ClosestSuggestion_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Content is string suggestion)
+        {
+            await ViewModel.ApplyClosestSuggestionAsync(suggestion);
+        }
+    }
+
+    private async void GrammarSuggestionsListView_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is GrammarSuggestionItemDto suggestion)
+        {
+            await ViewModel.SelectSuggestedRuleAsync(suggestion);
+        }
+    }
 }

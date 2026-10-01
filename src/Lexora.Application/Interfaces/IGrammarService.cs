@@ -18,4 +18,15 @@ public interface IGrammarService
     Task<IReadOnlyList<GrammarQuizQuestionDto>> GenerateGrammarQuizAsync(int count = 10, CefrLevel? level = null, ExamType? examType = null, CancellationToken cancellationToken = default);
     GrammarPracticeResultDto EvaluateQuiz(List<GrammarQuizQuestionDto> questions, List<GrammarQuizSubmissionDto> answers);
     Task<GrammarPagedResultDto> GetPagedRulesAsync(int page, int pageSize, CefrLevel? level = null, ExamType? examType = null, string? topic = null, string? search = null, CancellationToken cancellationToken = default);
+    Task<GrammarRelatedSuggestionsDto> GetGrammarSuggestionsAsync(Guid ruleId, CancellationToken cancellationToken = default);
+    Task<SmartSearchResultPageDto<GrammarRuleDto>> SmartSearchRulesAsync(
+        string? search = null,
+        CefrLevel? level = null,
+        ExamType? examType = null,
+        string? topic = null,
+        int page = 1,
+        int pageSize = 20,
+        string? sortBy = null,
+        bool isAscending = true,
+        CancellationToken cancellationToken = default);
 }

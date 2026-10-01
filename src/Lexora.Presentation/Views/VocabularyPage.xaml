@@ -401,6 +401,28 @@
                             </Border>
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptyTitle')}" FontWeight="Bold" FontSize="15" HorizontalAlignment="Center" TextAlignment="Center" />
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_EmptySubtitle')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="240" />
+
+                            <!-- Closest Suggestions Chips (Did you mean...) -->
+                            <StackPanel Visibility="{x:Bind ViewModel.HasClosestSuggestions, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Spacing="8" HorizontalAlignment="Center" Margin="0,10,0,0">
+                                <TextBlock Text="{x:Bind Loc.GetString('Search_ClosestSuggestions')}" FontSize="12" FontWeight="SemiBold"
+                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.ClosestSuggestions, Mode=OneWay}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Button Content="{x:Bind}"
+                                                    Style="{ThemeResource DefaultButtonStyle}"
+                                                    CornerRadius="14" Padding="12,4" FontSize="12"
+                                                    Click="ClosestSuggestion_Click" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
                         </StackPanel>
 
                         <!-- Words ListView -->
@@ -823,6 +845,71 @@
                                 <StackPanel Spacing="6">
                                     <TextBlock Text="{x:Bind Loc.GetString('Vocab_Notes')}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind ViewModel.SelectedWord.Notes, Mode=OneWay}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Related Vocabulary & Expansion Section -->
+                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                    CornerRadius="10" Padding="16"
+                                    Visibility="{x:Bind ViewModel.HasRelatedSuggestions, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel Spacing="10">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <FontIcon Glyph="&#xE71E;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_RelatedTitle')}" FontWeight="Bold" FontSize="14" />
+                                        </StackPanel>
+                                        <ProgressRing Grid.Column="1" Width="16" Height="16"
+                                                      IsActive="{x:Bind ViewModel.IsLoadingSuggestions, Mode=OneWay}"
+                                                      Visibility="{x:Bind ViewModel.IsLoadingSuggestions, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    </Grid>
+
+                                    <!-- Suggestions List -->
+                                    <ListView x:Name="SuggestionsListView"
+                                              ItemsSource="{x:Bind ViewModel.RelatedSuggestions.AllSuggestions, Mode=OneWay}"
+                                              SelectionMode="None"
+                                              IsItemClickEnabled="True"
+                                              ItemClick="SuggestionsListView_ItemClick"
+                                              Padding="0" MaxHeight="300">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate x:DataType="dto:WordSuggestionItemDto">
+                                                <Grid Margin="0,3" Padding="12,10"
+                                                      Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                      BorderThickness="1" CornerRadius="8"
+                                                      ColumnDefinitions="*,Auto">
+                                                    <StackPanel Spacing="4" VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="14"
+                                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                                <TextBlock Text="{x:Bind CategoryDisplay}" FontSize="10" FontWeight="SemiBold"
+                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                                                <TextBlock Text="{x:Bind PartOfSpeech}" FontSize="10"
+                                                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{x:Bind PrimaryDefinition}" FontSize="12"
+                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{x:Bind Reason}" FontSize="11" FontStyle="Italic"
+                                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <Border Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0"
+                                                            Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                            BorderThickness="1" CornerRadius="6" Padding="8,4">
+                                                        <TextBlock Text="{x:Bind ScoreDisplay}" FontSize="11" FontWeight="Bold"
+                                                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                    </Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
                                 </StackPanel>
                             </Border>
 

@@ -42,4 +42,19 @@ public interface IVocabularyService
     Task DeleteTopicAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ExamTagDto>> GetAllExamTagsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ContextUnitDto>> GetContextUnitsAsync(CancellationToken cancellationToken = default);
+    Task<WordRelatedSuggestionsDto> GetWordSuggestionsAsync(Guid wordId, CancellationToken cancellationToken = default);
+    Task<SmartSearchResultPageDto<WordDto>> SmartSearchWordsAsync(
+        string? search = null,
+        CefrLevel? level = null,
+        PartOfSpeech? pos = null,
+        Guid? topicId = null,
+        ExamType? examType = null,
+        LearningStatus? status = null,
+        int page = 1,
+        int pageSize = 50,
+        string? sortBy = null,
+        bool isAscending = true,
+        bool? isDueToday = null,
+        bool? isWeak = null,
+        CancellationToken cancellationToken = default);
 }

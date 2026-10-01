@@ -13,17 +13,26 @@ public class VocabularyService : IVocabularyService
     private readonly IReviewRepository _reviewRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISpacedRepetitionEngine _srEngine;
+    private readonly ISmartSearchService? _smartSearch;
+    private readonly IVocabularySuggestionService? _suggestionService;
+    private readonly ISmartSearchCacheService? _cacheService;
 
     public VocabularyService(
         IVocabularyRepository vocabRepo,
         IReviewRepository reviewRepo,
         IUnitOfWork unitOfWork,
-        ISpacedRepetitionEngine? srEngine = null)
+        ISpacedRepetitionEngine? srEngine = null,
+        ISmartSearchService? smartSearch = null,
+        IVocabularySuggestionService? suggestionService = null,
+        ISmartSearchCacheService? cacheService = null)
     {
         _vocabRepo = vocabRepo;
         _reviewRepo = reviewRepo;
         _unitOfWork = unitOfWork;
         _srEngine = srEngine ?? new Sm2SpacedRepetitionEngine();
+        _smartSearch = smartSearch;
+        _suggestionService = suggestionService;
+        _cacheService = cacheService;
     }
 
     public async Task<WordDto?> GetWordByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -54,6 +63,32 @@ public class VocabularyService : IVocabularyService
         CancellationToken cancellationToken = default)
     {
         int skip = Math.Max(0, (page - 1) * pageSize);
+
+        // Smart relevance sorting when requested or searching
+        if (sortBy?.Equals("relevance", StringComparison.OrdinalIgnoreCase) == true &&
+            !string.IsNullOrWhiteSpace(search) &&
+            _smartSearch != null)
+        {
+            int poolSize = Math.Max(300, page * pageSize * 3);
+            IReadOnlyList<Word> rawWords;
+            if (isDueToday == null && isWeak == null)
+            {
+                rawWords = await _vocabRepo.SearchAsync(
+                    search, level, pos, topicId, examType, status,
+                    0, poolSize, null, true, cancellationToken);
+            }
+            else
+            {
+                rawWords = await _vocabRepo.SearchAsync(
+                    search, level, pos, topicId, examType, status,
+                    0, poolSize, null, true, isDueToday, isWeak, cancellationToken);
+            }
+
+            var dtoList = rawWords.Select(MapToDto).ToList();
+            var ranked = _smartSearch.RankWords(search, dtoList, dtoList.Count);
+            return ranked.Skip(skip).Take(pageSize).Select(r => r.Item).ToList();
+        }
+
         IReadOnlyList<Word> words;
         if (isDueToday == null && isWeak == null)
         {
@@ -157,6 +192,7 @@ public class VocabularyService : IVocabularyService
 
         await _vocabRepo.AddAsync(word, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _cacheService?.InvalidateVocabulary();
 
         // Fetch back with full details
         var savedWord = await _vocabRepo.GetWithDetailsAsync(word.Id, cancellationToken);
@@ -238,6 +274,7 @@ public class VocabularyService : IVocabularyService
 
         await _vocabRepo.UpdateAsync(word, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _cacheService?.InvalidateVocabulary();
 
         var refreshed = await _vocabRepo.GetByIdsWithDetailsAsync([word.Id], cancellationToken);
         var savedWord = refreshed.FirstOrDefault() ?? await _vocabRepo.GetWithDetailsAsync(word.Id, cancellationToken);
@@ -254,6 +291,7 @@ public class VocabularyService : IVocabularyService
         {
             await _vocabRepo.DeleteAsync(word, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _cacheService?.InvalidateVocabulary();
         }
     }
 
@@ -297,6 +335,7 @@ public class VocabularyService : IVocabularyService
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            _cacheService?.InvalidateVocabulary();
             return deletedCount;
         }
         catch
@@ -417,6 +456,79 @@ public class VocabularyService : IVocabularyService
         }
 
         return result;
+    }
+
+    public async Task<WordRelatedSuggestionsDto> GetWordSuggestionsAsync(Guid wordId, CancellationToken cancellationToken = default)
+    {
+        if (_suggestionService != null)
+        {
+            return await _suggestionService.GetSuggestionsAsync(wordId, cancellationToken);
+        }
+
+        var word = await GetWordByIdAsync(wordId, cancellationToken);
+        if (word == null)
+        {
+            return new WordRelatedSuggestionsDto(
+                wordId,
+                string.Empty,
+                Array.Empty<WordSuggestionItemDto>(),
+                Array.Empty<WordSuggestionItemDto>(),
+                Array.Empty<WordSuggestionItemDto>(),
+                Array.Empty<WordSuggestionItemDto>(),
+                Array.Empty<WordSuggestionItemDto>());
+        }
+
+        var pool = await SearchWordsAsync(pageSize: 150, cancellationToken: cancellationToken);
+        var searchSvc = _smartSearch ?? new SmartSearchService(new FuzzySearchService());
+        var suggestionSvc = new VocabularySuggestionService(this, searchSvc);
+        return suggestionSvc.GetSuggestions(word, pool);
+    }
+
+    public async Task<SmartSearchResultPageDto<WordDto>> SmartSearchWordsAsync(
+        string? search = null,
+        CefrLevel? level = null,
+        PartOfSpeech? pos = null,
+        Guid? topicId = null,
+        ExamType? examType = null,
+        LearningStatus? status = null,
+        int page = 1,
+        int pageSize = 50,
+        string? sortBy = null,
+        bool isAscending = true,
+        bool? isDueToday = null,
+        bool? isWeak = null,
+        CancellationToken cancellationToken = default)
+    {
+        int totalCount = await CountWordsAsync(search, level, pos, topicId, examType, status, isDueToday, isWeak, cancellationToken);
+        var words = await SearchWordsAsync(search, level, pos, topicId, examType, status, page, pageSize, sortBy, isAscending, isDueToday, isWeak, cancellationToken);
+
+        var matchResults = new List<SmartSearchMatchResult<WordDto>>();
+        if (!string.IsNullOrWhiteSpace(search) && _smartSearch != null)
+        {
+            foreach (var w in words)
+            {
+                var scored = _smartSearch.ScoreWord(search, w);
+                matchResults.Add(scored ?? new SmartSearchMatchResult<WordDto>(w, 50.0, "Matched"));
+            }
+        }
+        else
+        {
+            matchResults = words.Select(w => new SmartSearchMatchResult<WordDto>(w, 100.0, "Filter")).ToList();
+        }
+
+        IReadOnlyList<string> closestSuggestions = Array.Empty<string>();
+        if (totalCount == 0 && !string.IsNullOrWhiteSpace(search) && _smartSearch != null)
+        {
+            var allTerms = await _vocabRepo.GetAllNormalizedTermsAsync(cancellationToken);
+            closestSuggestions = _smartSearch.FindClosestWordSuggestions(search, allTerms, maxSuggestions: 5);
+        }
+
+        return new SmartSearchResultPageDto<WordDto>(
+            matchResults,
+            totalCount,
+            page,
+            pageSize,
+            closestSuggestions);
     }
 
     private WordDto MapToDto(Word w)

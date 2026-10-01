@@ -125,6 +125,7 @@ public sealed partial class VocabularyPage : Page
         // Populate Sort combo
         SortCombo.ItemsSource = new List<string>
         {
+            Loc.GetString("Vocab_SortRelevance"),
             Loc.GetString("Vocab_SortTermAsc"),
             Loc.GetString("Vocab_SortTermDesc"),
             Loc.GetString("Vocab_SortLevelAsc"),
@@ -134,7 +135,7 @@ public sealed partial class VocabularyPage : Page
             Loc.GetString("Vocab_SortPosAsc"),
             Loc.GetString("Vocab_SortMultiPos")
         };
-        SortCombo.SelectedIndex = prevSortIdx < 8 ? prevSortIdx : 0;
+        SortCombo.SelectedIndex = prevSortIdx < 9 ? prevSortIdx : 0;
     }
 
     private void PopulateTopicFilterCombo()
@@ -314,35 +315,39 @@ public sealed partial class VocabularyPage : Page
             if (_isInitializing) return;
             switch (SortCombo.SelectedIndex)
             {
-                case 0: // Term A-Z
+                case 0: // Relevance
+                    ViewModel.SortBy = "relevance";
+                    ViewModel.IsAscending = false;
+                    break;
+                case 1: // Term A-Z
                     ViewModel.SortBy = "term";
                     ViewModel.IsAscending = true;
                     break;
-                case 1: // Term Z-A
+                case 2: // Term Z-A
                     ViewModel.SortBy = "term";
                     ViewModel.IsAscending = false;
                     break;
-                case 2: // Level low-high
+                case 3: // Level low-high
                     ViewModel.SortBy = "level";
                     ViewModel.IsAscending = true;
                     break;
-                case 3: // Level high-low
+                case 4: // Level high-low
                     ViewModel.SortBy = "level";
                     ViewModel.IsAscending = false;
                     break;
-                case 4: // Date newest
+                case 5: // Date newest
                     ViewModel.SortBy = "createdat";
                     ViewModel.IsAscending = false;
                     break;
-                case 5: // Date oldest
+                case 6: // Date oldest
                     ViewModel.SortBy = "createdat";
                     ViewModel.IsAscending = true;
                     break;
-                case 6: // Part of speech
+                case 7: // Part of speech
                     ViewModel.SortBy = "pos";
                     ViewModel.IsAscending = true;
                     break;
-                case 7: // Multi-POS first
+                case 8: // Multi-POS first
                     ViewModel.SortBy = "multipos";
                     ViewModel.IsAscending = false;
                     break;
@@ -1632,6 +1637,22 @@ public sealed partial class VocabularyPage : Page
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[VocabularyPage] ShowErrorDialog error: {ex.Message}");
+        }
+    }
+
+    private async void ClosestSuggestion_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Content is string suggestion)
+        {
+            await ViewModel.ApplyClosestSuggestionAsync(suggestion);
+        }
+    }
+
+    private async void SuggestionsListView_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is WordSuggestionItemDto suggestion)
+        {
+            await ViewModel.SelectSuggestedWordAsync(suggestion);
         }
     }
 }

@@ -16,11 +16,13 @@ public partial class VocabularyViewModel : ObservableObject
     private readonly IExportImportService _exportImportService;
     private readonly IAudioPlayerService _audioPlayer;
     private readonly IFuzzySearchService _fuzzySearchService;
+    private readonly ISmartSearchService? _smartSearchService;
     private readonly ILocalizationService _localizationService;
     private readonly IUserPreferencesService _preferencesService;
     private readonly List<string> _knownTerms = new();
     // Captured on the UI thread so post-await mutations can be safely marshalled back.
     private readonly DispatcherQueue? _dispatcherQueue;
+    private CancellationTokenSource? _suggestionsCts;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmptyState))]
@@ -36,6 +38,24 @@ public partial class VocabularyViewModel : ObservableObject
 
     [ObservableProperty]
     public partial bool HasTypoSuggestion { get; set; }
+
+    [ObservableProperty]
+    public partial IReadOnlyList<string> ClosestSuggestions { get; set; } = Array.Empty<string>();
+
+    [ObservableProperty]
+    public partial bool HasClosestSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial WordRelatedSuggestionsDto? RelatedSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsLoadingSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasRelatedSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial string SelectedSuggestionTab { get; set; } = "All";
 
     [ObservableProperty]
     public partial CefrLevel? SelectedLevel { get; set; }
@@ -126,6 +146,7 @@ public partial class VocabularyViewModel : ObservableObject
     partial void OnSelectedQuickFilterChanged(string value) => CurrentPage = 1;
     partial void OnSortByChanged(string value) => CurrentPage = 1;
     partial void OnIsAscendingChanged(bool value) => CurrentPage = 1;
+    partial void OnSelectedWordChanged(WordDto? value) => _ = LoadWordSuggestionsAsync(value);
 
     public ObservableCollection<Guid> SelectedWordIds { get; } = new();
 
@@ -145,7 +166,8 @@ public partial class VocabularyViewModel : ObservableObject
         IAudioPlayerService audioPlayer,
         IFuzzySearchService fuzzySearchService,
         ILocalizationService localizationService,
-        IUserPreferencesService preferencesService)
+        IUserPreferencesService preferencesService,
+        ISmartSearchService? smartSearchService = null)
     {
         _vocabService = vocabService;
         _reviewService = reviewService;
@@ -154,6 +176,7 @@ public partial class VocabularyViewModel : ObservableObject
         _fuzzySearchService = fuzzySearchService;
         _localizationService = localizationService;
         _preferencesService = preferencesService;
+        _smartSearchService = smartSearchService;
         // Must be captured on the UI thread (constructor is always called from UI thread).
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
             ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
@@ -378,16 +401,45 @@ public partial class VocabularyViewModel : ObservableObject
                 SelectedWord = null;
             }
 
-            // Update known terms cache
-            foreach (var w in Words)
+            if (TotalWordCount == 0 && !string.IsNullOrWhiteSpace(SearchTerm))
             {
-                if (!_knownTerms.Contains(w.Term, StringComparer.OrdinalIgnoreCase))
+                try
                 {
-                    _knownTerms.Add(w.Term);
+                    var smartRes = await _vocabService.SmartSearchWordsAsync(
+                        search: SearchTerm,
+                        level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                        pos: SelectedPartOfSpeech,
+                        topicId: SelectedTopicId,
+                        examType: SelectedExamType,
+                        status: SelectedStatus,
+                        page: 1,
+                        pageSize: 1,
+                        cancellationToken: ct);
+
+                    if (smartRes.ClosestSuggestions.Count > 0)
+                    {
+                        ClosestSuggestions = smartRes.ClosestSuggestions;
+                        HasClosestSuggestions = true;
+                        TypoSuggestion = smartRes.ClosestSuggestions[0];
+                        HasTypoSuggestion = true;
+                    }
+                    else
+                    {
+                        CheckTypoSuggestion();
+                    }
+                }
+                catch
+                {
+                    CheckTypoSuggestion();
                 }
             }
-
-            CheckTypoSuggestion();
+            else
+            {
+                ClosestSuggestions = Array.Empty<string>();
+                HasClosestSuggestions = false;
+                TypoSuggestion = null;
+                HasTypoSuggestion = false;
+            }
         }
         catch (OperationCanceledException)
         {
@@ -762,24 +814,44 @@ public partial class VocabularyViewModel : ObservableObject
     public void CheckTypoSuggestion()
     {
         var query = SearchTerm?.Trim();
-        if (string.IsNullOrWhiteSpace(query) || query.Length < 3 || Words.Count > 0)
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 2 || Words.Count > 0)
         {
             TypoSuggestion = null;
             HasTypoSuggestion = false;
+            ClosestSuggestions = Array.Empty<string>();
+            HasClosestSuggestions = false;
             return;
         }
 
-        var candidates = _knownTerms.Count > 0 ? _knownTerms : ContextUnits.SelectMany(u => u.Words).Select(w => w.Term).Distinct();
-        var suggestion = _fuzzySearchService.SuggestCorrection(query, candidates);
+        if (_smartSearchService != null)
+        {
+            var candidates = _knownTerms.Count > 0 ? _knownTerms : ContextUnits.SelectMany(u => u.Words).Select(w => w.Term).Distinct();
+            var closest = _smartSearchService.FindClosestWordSuggestions(query, candidates, maxSuggestions: 4);
+            if (closest.Count > 0)
+            {
+                ClosestSuggestions = closest;
+                HasClosestSuggestions = true;
+                TypoSuggestion = closest[0];
+                HasTypoSuggestion = true;
+                return;
+            }
+        }
+
+        var fallbackCandidates = _knownTerms.Count > 0 ? _knownTerms : ContextUnits.SelectMany(u => u.Words).Select(w => w.Term).Distinct();
+        var suggestion = _fuzzySearchService.SuggestCorrection(query, fallbackCandidates);
         if (!string.IsNullOrEmpty(suggestion) && !string.Equals(suggestion, query, StringComparison.OrdinalIgnoreCase))
         {
             TypoSuggestion = suggestion;
             HasTypoSuggestion = true;
+            ClosestSuggestions = new[] { suggestion };
+            HasClosestSuggestions = true;
         }
         else
         {
             TypoSuggestion = null;
             HasTypoSuggestion = false;
+            ClosestSuggestions = Array.Empty<string>();
+            HasClosestSuggestions = false;
         }
     }
 
@@ -787,10 +859,85 @@ public partial class VocabularyViewModel : ObservableObject
     public async Task ApplyTypoSuggestionAsync()
     {
         if (string.IsNullOrWhiteSpace(TypoSuggestion)) return;
-        SearchTerm = TypoSuggestion;
+        await ApplyClosestSuggestionAsync(TypoSuggestion);
+    }
+
+    [RelayCommand]
+    public async Task ApplyClosestSuggestionAsync(string? suggestion)
+    {
+        if (string.IsNullOrWhiteSpace(suggestion)) return;
+        SearchTerm = suggestion;
         TypoSuggestion = null;
         HasTypoSuggestion = false;
+        ClosestSuggestions = Array.Empty<string>();
+        HasClosestSuggestions = false;
+        CurrentPage = 1;
         await LoadWordsAsync();
         ApplyUnitFilter();
+    }
+
+    [RelayCommand]
+    public async Task LoadWordSuggestionsAsync(WordDto? word = null)
+    {
+        var targetWord = word ?? SelectedWord;
+        if (targetWord == null)
+        {
+            RelatedSuggestions = null;
+            HasRelatedSuggestions = false;
+            return;
+        }
+
+        _suggestionsCts?.Cancel();
+        _suggestionsCts?.Dispose();
+        _suggestionsCts = new CancellationTokenSource();
+        var ct = _suggestionsCts.Token;
+
+        try
+        {
+            IsLoadingSuggestions = true;
+            var suggestions = await _vocabService.GetWordSuggestionsAsync(targetWord.Id, ct);
+            if (ct.IsCancellationRequested) return;
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            RelatedSuggestions = suggestions;
+            HasRelatedSuggestions = suggestions != null && suggestions.TotalSuggestionsCount > 0;
+        }
+        catch (OperationCanceledException)
+        {
+            // Cancelled
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyViewModel] LoadWordSuggestionsAsync error: {ex.Message}");
+        }
+        finally
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            IsLoadingSuggestions = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task SelectSuggestedWordAsync(WordSuggestionItemDto? suggestion)
+    {
+        if (suggestion == null) return;
+
+        var existing = Words.FirstOrDefault(w => w.Id == suggestion.Word.Id);
+        if (existing != null)
+        {
+            SelectedWord = existing;
+            return;
+        }
+
+        var word = await _vocabService.GetWordByIdAsync(suggestion.Word.Id);
+        if (word != null)
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            if (!Words.Any(w => w.Id == word.Id))
+            {
+                Words.Insert(0, word);
+            }
+            SelectedWord = word;
+        }
     }
 }

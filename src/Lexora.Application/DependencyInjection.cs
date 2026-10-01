@@ -19,6 +19,10 @@ public static class DependencyInjection
         services.AddScoped<ITestService, TestService>();
         services.AddScoped<ILearningStorageService, LearningStorageService>();
         services.AddSingleton<IFuzzySearchService, FuzzySearchService>();
+        services.AddSingleton<ISmartSearchService, SmartSearchService>();
+        services.AddSingleton<ISmartSearchCacheService, SmartSearchCacheService>();
+        services.AddScoped<IVocabularySuggestionService, VocabularySuggestionService>();
+        services.AddScoped<IGrammarSuggestionService, GrammarSuggestionService>();
         services.AddScoped<IStudyAdvisorService, StudyAdvisorService>();
         services.AddSingleton<IPronunciationVoiceResolver, PronunciationVoiceResolver>();
 
