@@ -10,9 +10,7 @@ namespace Lexora.Presentation.Views;
 public sealed partial class ToastOverlayControl : UserControl
 {
     public ILocalizationService Loc { get; }
-    private readonly DispatcherTimer _timer;
     private int _totalDurationMs = 4000;
-    private int _remainingMs = 4000;
     private bool _isPaused;
     private bool _isDismissing;
 
@@ -21,8 +19,7 @@ public sealed partial class ToastOverlayControl : UserControl
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
         InitializeComponent();
 
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-        _timer.Tick += Timer_Tick;
+        ProgressStoryboard.Completed += ProgressStoryboard_Completed;
 
         Loaded += ToastOverlayControl_Loaded;
         Unloaded += ToastOverlayControl_Unloaded;
@@ -42,7 +39,7 @@ public sealed partial class ToastOverlayControl : UserControl
         {
             toastService.ToastRequested -= OnToastRequested;
         }
-        _timer.Stop();
+        ProgressStoryboard.Stop();
     }
 
     private void OnToastRequested(ToastNotification notification)
@@ -59,14 +56,14 @@ public sealed partial class ToastOverlayControl : UserControl
         EntranceStoryboard.Stop();
         UpdatePulseStoryboard.Stop();
         ExitStoryboard.Stop();
+        ProgressStoryboard.Stop();
 
-        _timer.Stop();
         _isDismissing = false;
         _isPaused = false;
 
         _totalDurationMs = Math.Max(1500, notification.DurationMs);
-        _remainingMs = _totalDurationMs;
-        TimeProgressBar.Value = 100;
+        ProgressBarScale.ScaleX = 1.0;
+        ProgressAnimation.Duration = new Duration(TimeSpan.FromMilliseconds(_totalDurationMs));
 
         TitleTextBlock.Text = notification.Title;
         TitleTextBlock.Visibility = string.IsNullOrWhiteSpace(notification.Title) ? Visibility.Collapsed : Visibility.Visible;
@@ -93,7 +90,7 @@ public sealed partial class ToastOverlayControl : UserControl
             EntranceStoryboard.Begin();
         }
 
-        _timer.Start();
+        ProgressStoryboard.Begin();
     }
 
     private void ApplyToastTheme(ToastType type)
@@ -145,7 +142,7 @@ public sealed partial class ToastOverlayControl : UserControl
         if (themeBrush != null)
         {
             TypeIcon.Foreground = themeBrush;
-            TimeProgressBar.Foreground = themeBrush;
+            TimeProgressBar.Background = themeBrush;
         }
         if (badgeBgBrush != null)
         {
@@ -153,14 +150,9 @@ public sealed partial class ToastOverlayControl : UserControl
         }
     }
 
-    private void Timer_Tick(object? sender, object e)
+    private void ProgressStoryboard_Completed(object? sender, object e)
     {
-        if (_isPaused || _isDismissing) return;
-
-        _remainingMs -= 50;
-        TimeProgressBar.Value = Math.Max(0, ((double)_remainingMs / _totalDurationMs) * 100);
-
-        if (_remainingMs <= 0)
+        if (!_isDismissing && !_isPaused)
         {
             Dismiss();
         }
@@ -170,7 +162,7 @@ public sealed partial class ToastOverlayControl : UserControl
     {
         if (_isDismissing) return;
         _isDismissing = true;
-        _timer.Stop();
+        ProgressStoryboard.Stop();
 
         ExitStoryboard.Stop();
         ExitStoryboard.Completed -= ExitStoryboard_Completed;
@@ -196,11 +188,15 @@ public sealed partial class ToastOverlayControl : UserControl
 
     private void ToastRoot_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
+        if (_isDismissing) return;
         _isPaused = true;
+        ProgressStoryboard.Pause();
     }
 
     private void ToastRoot_PointerExited(object sender, PointerRoutedEventArgs e)
     {
+        if (_isDismissing || !_isPaused) return;
         _isPaused = false;
+        ProgressStoryboard.Resume();
     }
 }
