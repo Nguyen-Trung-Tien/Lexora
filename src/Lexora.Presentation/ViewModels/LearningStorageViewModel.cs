@@ -145,6 +145,7 @@ public partial class LearningStorageViewModel : ObservableObject
     public ObservableCollection<TestOptionItem> CurrentOptions { get; } = new();
 
     public event Action? NoPracticeQuestionsAvailable;
+    public event Action<string>? PracticeFailed;
 
     private readonly List<StoragePracticeQuestionDto> _practiceQuestions = new();
     private readonly List<StoragePracticeSubmissionDto> _practiceSubmissions = new();
@@ -404,6 +405,7 @@ public partial class LearningStorageViewModel : ObservableObject
         {
             System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] StartPractice error: {ex.Message}");
             IsPracticeActive = false;
+            PracticeFailed?.Invoke(ex.Message);
         }
         finally
         {

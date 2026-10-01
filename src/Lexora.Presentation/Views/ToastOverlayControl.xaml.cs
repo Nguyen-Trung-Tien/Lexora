@@ -99,6 +99,7 @@ public sealed partial class ToastOverlayControl : UserControl
     private void ApplyToastTheme(ToastType type)
     {
         Brush? themeBrush = null;
+        Brush? badgeBgBrush = null;
         string glyph = "\uE946";
 
         switch (type)
@@ -107,18 +108,24 @@ public sealed partial class ToastOverlayControl : UserControl
                 glyph = "\uE73E"; // Checkmark
                 if (App.Current.Resources.TryGetValue("SystemFillColorSuccessBrush", out var sBrush))
                     themeBrush = sBrush as Brush;
+                if (App.Current.Resources.TryGetValue("SystemFillColorSuccessBackgroundBrush", out var sBgBrush))
+                    badgeBgBrush = sBgBrush as Brush;
                 break;
 
             case ToastType.Error:
                 glyph = "\uE783"; // Critical error
                 if (App.Current.Resources.TryGetValue("SystemFillColorCriticalBrush", out var cBrush))
                     themeBrush = cBrush as Brush;
+                if (App.Current.Resources.TryGetValue("SystemFillColorCriticalBackgroundBrush", out var cBgBrush))
+                    badgeBgBrush = cBgBrush as Brush;
                 break;
 
             case ToastType.Warning:
                 glyph = "\uE7BA"; // Warning
                 if (App.Current.Resources.TryGetValue("SystemFillColorCautionBrush", out var wBrush))
                     themeBrush = wBrush as Brush;
+                if (App.Current.Resources.TryGetValue("SystemFillColorCautionBackgroundBrush", out var wBgBrush))
+                    badgeBgBrush = wBgBrush as Brush;
                 break;
 
             case ToastType.Information:
@@ -126,16 +133,23 @@ public sealed partial class ToastOverlayControl : UserControl
                 glyph = "\uE946"; // Info
                 if (App.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var def))
                     themeBrush = def as Brush;
+                if (App.Current.Resources.TryGetValue("SubtleFillColorSecondaryBrush", out var iBgBrush))
+                    badgeBgBrush = iBgBrush as Brush;
                 break;
         }
 
         themeBrush ??= (App.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var fallbackBrush) ? fallbackBrush as Brush : null);
+        badgeBgBrush ??= (App.Current.Resources.TryGetValue("SubtleFillColorSecondaryBrush", out var fallbackBg) ? fallbackBg as Brush : null);
 
         TypeIcon.Glyph = glyph;
         if (themeBrush != null)
         {
             TypeIcon.Foreground = themeBrush;
             TimeProgressBar.Foreground = themeBrush;
+        }
+        if (badgeBgBrush != null)
+        {
+            IconBadgeBorder.Background = badgeBgBrush;
         }
     }
 

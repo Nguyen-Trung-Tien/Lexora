@@ -17,6 +17,7 @@ public partial class ReviewViewModel : ObservableObject
     private readonly IVocabularyService _vocabService;
     private readonly ILocalizationService _localizationService;
     private readonly ISoundFeedbackService? _soundFeedback;
+    private readonly IToastNotificationService? _toastService;
     private readonly Stopwatch _cardTimer = new();
 
     private Guid? _currentSessionId;
@@ -180,7 +181,8 @@ public partial class ReviewViewModel : ObservableObject
         IUserPreferencesService preferencesService,
         IVocabularyService vocabService,
         ILocalizationService localizationService,
-        ISoundFeedbackService? soundFeedback = null)
+        ISoundFeedbackService? soundFeedback = null,
+        IToastNotificationService? toastService = null)
     {
         _reviewService = reviewService;
         _audioPlayer = audioPlayer;
@@ -188,6 +190,7 @@ public partial class ReviewViewModel : ObservableObject
         _vocabService = vocabService;
         _localizationService = localizationService;
         _soundFeedback = soundFeedback;
+        _toastService = toastService;
 
         UpdateActiveSessionTitle();
 
@@ -353,8 +356,7 @@ public partial class ReviewViewModel : ObservableObject
             _cardTimer.Stop();
             int responseTimeMs = (int)_cardTimer.ElapsedMilliseconds;
 
-            // Push current state to undo history before applying rating
-            _undoStack.Push(new ReviewUndoState(
+            var undoState = new ReviewUndoState(
                 CurrentCard,
                 rating,
                 SessionCorrectCount,
@@ -363,7 +365,11 @@ public partial class ReviewViewModel : ObservableObject
                 RemainingCount,
                 ProgressPercent,
                 IsCompleted
-            ));
+            );
+
+            await _reviewService.SubmitReviewAsync(CurrentCard.Id, rating, responseTimeMs, _currentSessionId);
+
+            _undoStack.Push(undoState);
             CanUndo = true;
 
             if (rating >= ReviewRating.Good)
@@ -377,8 +383,6 @@ public partial class ReviewViewModel : ObservableObject
 
             int totalReviewed = SessionCorrectCount + SessionIncorrectCount;
             SessionAccuracyRate = totalReviewed == 0 ? 0.0 : Math.Round((double)SessionCorrectCount / totalReviewed * 100, 1);
-
-            await _reviewService.SubmitReviewAsync(CurrentCard.Id, rating, responseTimeMs, _currentSessionId);
 
             if (ReviewQueue.Count > 0)
             {
@@ -424,7 +428,9 @@ public partial class ReviewViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            _cardTimer.Start();
             System.Diagnostics.Debug.WriteLine($"[ReviewViewModel] SubmitRatingAsync error: {ex.Message}");
+            _toastService?.ShowError(ex.Message, _localizationService.GetString("Common_Error"));
         }
         finally
         {
@@ -470,6 +476,7 @@ public partial class ReviewViewModel : ObservableObject
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[ReviewViewModel] UndoLastReviewAsync error: {ex.Message}");
+            _toastService?.ShowError(ex.Message, _localizationService.GetString("Common_Error"));
         }
         finally
         {

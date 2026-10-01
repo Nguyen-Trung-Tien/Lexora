@@ -36,6 +36,10 @@ public sealed partial class LearningStoragePage : Page
         {
             _toastService?.ShowWarning(Loc.GetString("Storage_Practice_NoQuestions"));
         };
+        ViewModel.PracticeFailed += (msg) =>
+        {
+            _toastService?.ShowWarning(msg);
+        };
         InitializeComponent();
     }
 
@@ -570,6 +574,10 @@ public sealed partial class LearningStoragePage : Page
             // Generates test focusing on Storage weak items
             var testSession = await _storageService.GenerateStorageTestAsync(questionCount: 15, prioritizeWeak: true);
             _navigationService.Navigate(typeof(TestPage), testSession);
+        }
+        catch (InvalidOperationException)
+        {
+            _toastService?.ShowWarning(Loc.GetString("Storage_Test_NoQuestions"));
         }
         catch (Exception ex)
         {

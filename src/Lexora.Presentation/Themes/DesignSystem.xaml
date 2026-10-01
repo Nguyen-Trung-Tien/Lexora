@@ -24,6 +24,9 @@
             <!-- Flashcard crisp border for tactile elevation in light mode -->
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.45" />
             <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.38" />
+            <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
+            <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.45" />
             <!-- Semantic state background fills -->
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#DFF6DD" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#FDE7E9" />
@@ -45,6 +48,9 @@
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.7" />
             <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
             <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+            <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
+            <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="#282828" />
+            <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
             <!-- Semantic state background fills -->
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#393D1B" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#442726" />
@@ -60,6 +66,9 @@
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
+            <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <!-- Semantic state background fills -->
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />

@@ -64,7 +64,11 @@ public sealed partial class TestPage : Page
                 await ViewModel.InitializeAsync();
             }
 
-            if (e.Parameter is IEnumerable<Guid> wordIds)
+            if (e.Parameter is TestSessionDto session)
+            {
+                ViewModel.StartTestWithSession(session);
+            }
+            else if (e.Parameter is IEnumerable<Guid> wordIds)
             {
                 await ViewModel.SetCustomWordSelectionAsync(wordIds);
                 UpdateModeSelectorStyles(true);

@@ -435,6 +435,30 @@ public partial class TestViewModel : ObservableObject
         }
     }
 
+    public void StartTestWithSession(TestSessionDto session)
+    {
+        if (session.Questions.Count == 0)
+        {
+            StatusSeverity = InfoBarSeverity.Warning;
+            StatusMessage = _localizationService.GetString("Test_Status_NoQuestions");
+            return;
+        }
+
+        _sessionId = session.SessionId;
+        _allQuestions = session.Questions;
+        _userAnswers.Clear();
+
+        CurrentQuestionIndex = 0;
+        TotalQuestions = _allQuestions.Count;
+        _totalTestTimer.Restart();
+
+        LoadQuestion(0);
+
+        IsSetupMode = false;
+        IsResultMode = false;
+        IsTestingMode = true;
+    }
+
     private void LoadQuestion(int index)
     {
         if (index < 0 || index >= _allQuestions.Count) return;
