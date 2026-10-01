@@ -22,9 +22,13 @@ public sealed partial class GrammarEditorDialog : ContentDialog
 
         InitializeComponent();
 
-        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService)
+        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService && themeService.CurrentTheme != ElementTheme.Default)
         {
             RequestedTheme = themeService.CurrentTheme;
+        }
+        else if (App.Current?.MainWindow?.Content is FrameworkElement rootElem && rootElem.ActualTheme != ElementTheme.Default)
+        {
+            RequestedTheme = rootElem.ActualTheme;
         }
 
         PrimaryButtonText = Loc.GetString("GrammarEditor_Save");

@@ -40,6 +40,7 @@ public record LearningStorageItemDto(
     public bool IsLearning => Status == StorageLearningStatus.Learning;
     public bool IsMastered => Status == StorageLearningStatus.Mastered;
     public bool IsNew => Status == StorageLearningStatus.New;
+    public bool IsVocabulary => ItemType == StorageItemType.Vocabulary;
 
     public string FormattedRetention => $"{Math.Round(RetentionProbability, 1)}%";
     public string FormattedInterval => IntervalDays <= 1 ? "1d" : $"{IntervalDays}d";

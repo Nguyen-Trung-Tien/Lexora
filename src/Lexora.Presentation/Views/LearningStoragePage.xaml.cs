@@ -13,7 +13,7 @@ namespace Lexora.Presentation.Views;
 public sealed partial class LearningStoragePage : Page
 {
     public LearningStorageViewModel ViewModel { get; }
-    public Services.ILocalizationService Loc { get; }
+    public Lexora.Presentation.Services.ILocalizationService Loc { get; }
 
     private readonly INavigationService _navigationService;
     private readonly IVocabularyService _vocabService;
@@ -41,25 +41,56 @@ public sealed partial class LearningStoragePage : Page
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.InitializeAsync();
+        UpdateSegmentedButtons();
     }
 
     private async void RefreshBtn_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.InitializeAsync();
+        UpdateSegmentedButtons();
     }
 
     private async void TabVocab_Click(object sender, RoutedEventArgs e)
     {
-        TabVocabBtn.IsChecked = true;
-        TabGrammarBtn.IsChecked = false;
         await ViewModel.SwitchTabAsync(0);
+        UpdateSegmentedButtons();
     }
 
     private async void TabGrammar_Click(object sender, RoutedEventArgs e)
     {
-        TabVocabBtn.IsChecked = false;
-        TabGrammarBtn.IsChecked = true;
         await ViewModel.SwitchTabAsync(1);
+        UpdateSegmentedButtons();
+    }
+
+    private void UpdateSegmentedButtons()
+    {
+        var cardBg = ThemeResourceHelper.GetThemeBrush(this, "CardBackgroundFillColorDefaultBrush");
+        var cardStroke = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush");
+        var accentText = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush");
+        var secondaryText = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush");
+        var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+        void ApplySegment(Button? btn, bool isActive)
+        {
+            if (btn == null) return;
+            btn.Style = null;
+            if (isActive)
+            {
+                if (cardBg != null) btn.Background = cardBg;
+                if (cardStroke != null) btn.BorderBrush = cardStroke;
+                btn.BorderThickness = new Thickness(1);
+                if (accentText != null) btn.Foreground = accentText;
+            }
+            else
+            {
+                btn.Background = transparent;
+                btn.BorderThickness = new Thickness(0);
+                if (secondaryText != null) btn.Foreground = secondaryText;
+            }
+        }
+
+        ApplySegment(BtnVocabTab, ViewModel.IsVocabTabSelected);
+        ApplySegment(BtnGrammarTab, ViewModel.IsGrammarTabSelected);
     }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -111,8 +142,11 @@ public sealed partial class LearningStoragePage : Page
     {
         if (sender is Button btn && btn.Tag is LearningStorageItemDto item)
         {
-            var audio = item.Word?.AudioUsPath ?? item.Word?.AudioUkPath;
-            await ViewModel.PlayAudioAsync(audio);
+            var term = item.Word?.Term ?? item.Title;
+            if (!string.IsNullOrWhiteSpace(term))
+            {
+                await ViewModel.PlayAudioAsync(term);
+            }
         }
     }
 
@@ -131,6 +165,37 @@ public sealed partial class LearningStoragePage : Page
                 _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
             }
         }
+    }
+
+    private void CardMenuFlyout_Opening(object? sender, object e)
+    {
+        if (sender is MenuFlyout flyout)
+        {
+            var item = (flyout.Target as FrameworkElement)?.Tag as LearningStorageItemDto;
+            if (flyout.Items.Count >= 5)
+            {
+                if (flyout.Items[0] is MenuFlyoutItem item0) { item0.Text = Loc.GetString("Storage_FilterWeak"); item0.Tag = item; }
+                if (flyout.Items[1] is MenuFlyoutItem item1) { item1.Text = Loc.GetString("Storage_FilterLearning"); item1.Tag = item; }
+                if (flyout.Items[2] is MenuFlyoutItem item2) { item2.Text = Loc.GetString("Storage_BtnEditNote"); item2.Tag = item; }
+                if (flyout.Items[4] is MenuFlyoutItem item4) { item4.Text = Loc.GetString("Storage_BtnRemove"); item4.Tag = item; }
+            }
+        }
+    }
+
+    private ElementTheme GetActiveTheme()
+    {
+        var themeService = App.Current?.Services?.GetService<IThemeService>();
+        if (themeService != null && themeService.CurrentTheme != ElementTheme.Default)
+        {
+            return themeService.CurrentTheme;
+        }
+
+        if ((this.XamlRoot?.Content as FrameworkElement)?.ActualTheme is { } actual && actual != ElementTheme.Default)
+        {
+            return actual;
+        }
+
+        return ElementTheme.Default;
     }
 
     private async void MenuMarkWeak_Click(object sender, RoutedEventArgs e)
@@ -164,6 +229,8 @@ public sealed partial class LearningStoragePage : Page
                 Margin = new Thickness(0, 10, 0, 0)
             };
 
+            var activeTheme = GetActiveTheme();
+
             var dialog = new ContentDialog
             {
                 Title = Loc.GetString("Storage_Dialog_EditNoteTitle"),
@@ -171,10 +238,11 @@ public sealed partial class LearningStoragePage : Page
                 PrimaryButtonText = Loc.GetString("Action_Save"),
                 CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Primary,
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = activeTheme
             };
 
-            var res = await dialog.ShowAsync();
+            var res = await dialog.ShowAsyncSafe(this.XamlRoot);
             if (res == ContentDialogResult.Primary)
             {
                 try
@@ -195,6 +263,8 @@ public sealed partial class LearningStoragePage : Page
     {
         if (sender is MenuFlyoutItem menuItem && menuItem.Tag is LearningStorageItemDto item)
         {
+            var activeTheme = GetActiveTheme();
+
             var dialog = new ContentDialog
             {
                 Title = Loc.GetString("Storage_Dialog_ConfirmRemoveTitle"),
@@ -202,10 +272,11 @@ public sealed partial class LearningStoragePage : Page
                 PrimaryButtonText = Loc.GetString("Action_Delete"),
                 CloseButtonText = Loc.GetString("Action_Cancel"),
                 DefaultButton = ContentDialogButton.Close,
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = activeTheme
             };
 
-            var res = await dialog.ShowAsync();
+            var res = await dialog.ShowAsyncSafe(this.XamlRoot);
             if (res == ContentDialogResult.Primary)
             {
                 try
@@ -300,6 +371,8 @@ public sealed partial class LearningStoragePage : Page
         panel.Children.Add(listView);
         panel.Children.Add(noteBox);
 
+        var activeTheme = GetActiveTheme();
+
         var dialog = new ContentDialog
         {
             Title = Loc.GetString("Storage_Dialog_AddTitle"),
@@ -308,7 +381,8 @@ public sealed partial class LearningStoragePage : Page
             CloseButtonText = Loc.GetString("Action_Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             IsPrimaryButtonEnabled = false,
-            XamlRoot = this.XamlRoot
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
         };
 
         listView.SelectionChanged += (s, e) =>
@@ -316,7 +390,7 @@ public sealed partial class LearningStoragePage : Page
             dialog.IsPrimaryButtonEnabled = listView.SelectedItem != null;
         };
 
-        var res = await dialog.ShowAsync();
+        var res = await dialog.ShowAsyncSafe(this.XamlRoot);
         if (res == ContentDialogResult.Primary && listView.SelectedItem is StorageCandidateItem selected)
         {
             await _storageService.MoveWordToStorageAsync(selected.Id, StorageAdditionReason.Manual, noteBox.Text);
@@ -395,6 +469,8 @@ public sealed partial class LearningStoragePage : Page
         panel.Children.Add(listView);
         panel.Children.Add(noteBox);
 
+        var activeGrammarTheme = GetActiveTheme();
+
         var dialog = new ContentDialog
         {
             Title = Loc.GetString("Storage_Dialog_AddTitle"),
@@ -403,7 +479,8 @@ public sealed partial class LearningStoragePage : Page
             CloseButtonText = Loc.GetString("Action_Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             IsPrimaryButtonEnabled = false,
-            XamlRoot = this.XamlRoot
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeGrammarTheme
         };
 
         listView.SelectionChanged += (s, e) =>
@@ -411,7 +488,7 @@ public sealed partial class LearningStoragePage : Page
             dialog.IsPrimaryButtonEnabled = listView.SelectedItem != null;
         };
 
-        var res = await dialog.ShowAsync();
+        var res = await dialog.ShowAsyncSafe(this.XamlRoot);
         if (res == ContentDialogResult.Primary && listView.SelectedItem is StorageCandidateItem selected)
         {
             await _storageService.MoveGrammarToStorageAsync(selected.Id, StorageAdditionReason.Manual, noteBox.Text);

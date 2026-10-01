@@ -15,6 +15,7 @@ public partial class LearningStorageViewModel : ObservableObject
     private readonly Services.ILocalizationService _localizationService;
     private readonly IAudioPlayerService? _audioPlayer;
     private readonly Services.ISoundFeedbackService? _soundFeedback;
+    private readonly IUserPreferencesService? _preferencesService;
     private readonly DispatcherQueue? _dispatcherQueue;
 
     public Services.ILocalizationService Loc => _localizationService;
@@ -66,7 +67,12 @@ public partial class LearningStorageViewModel : ObservableObject
     public partial int DueTodayCount { get; set; } = 0;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AvgRetention))]
+    [NotifyPropertyChangedFor(nameof(FormattedAvgRetention))]
     public partial double AverageRetention { get; set; } = 0.0;
+
+    public double AvgRetention => AverageRetention;
+    public string FormattedAvgRetention => $"{Math.Round(AverageRetention, 1)}%";
 
     // Pagination
     [ObservableProperty]
@@ -106,7 +112,14 @@ public partial class LearningStorageViewModel : ObservableObject
     public partial int CurrentPracticeIndex { get; set; } = 0;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentQuestionPrompt))]
+    [NotifyPropertyChangedFor(nameof(CurrentQuestionSubPrompt))]
+    [NotifyPropertyChangedFor(nameof(CurrentQuestionExplanation))]
     public partial StoragePracticeQuestionDto? CurrentQuestion { get; set; }
+
+    public string CurrentQuestionPrompt => CurrentQuestion?.Prompt ?? string.Empty;
+    public string CurrentQuestionSubPrompt => CurrentQuestion?.SubPrompt ?? string.Empty;
+    public string CurrentQuestionExplanation => CurrentQuestion?.Explanation ?? string.Empty;
 
     [ObservableProperty]
     public partial string? PracticeSelectedAnswer { get; set; }
@@ -140,12 +153,14 @@ public partial class LearningStorageViewModel : ObservableObject
         ILearningStorageService storageService,
         Services.ILocalizationService localizationService,
         IAudioPlayerService? audioPlayer = null,
-        Services.ISoundFeedbackService? soundFeedback = null)
+        Services.ISoundFeedbackService? soundFeedback = null,
+        IUserPreferencesService? preferencesService = null)
     {
         _storageService = storageService;
         _localizationService = localizationService;
         _audioPlayer = audioPlayer;
         _soundFeedback = soundFeedback;
+        _preferencesService = preferencesService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         _localizationService.LanguageChanged += (s, e) =>
@@ -346,7 +361,8 @@ public partial class LearningStorageViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(term) || _audioPlayer == null) return;
         try
         {
-            await _audioPlayer.PlayPronunciationAsync(term, "us");
+            var accent = _preferencesService?.GetPreferences().PreferredAccent ?? "us";
+            await _audioPlayer.PlayPronunciationAsync(term, accent);
         }
         catch (Exception ex)
         {

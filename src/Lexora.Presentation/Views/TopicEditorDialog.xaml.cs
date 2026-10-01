@@ -19,9 +19,13 @@ public sealed partial class TopicEditorDialog : ContentDialog
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
         InitializeComponent();
 
-        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService)
+        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService && themeService.CurrentTheme != ElementTheme.Default)
         {
             RequestedTheme = themeService.CurrentTheme;
+        }
+        else if (App.Current?.MainWindow?.Content is FrameworkElement rootElem && rootElem.ActualTheme != ElementTheme.Default)
+        {
+            RequestedTheme = rootElem.ActualTheme;
         }
 
         Title = Loc.GetString("TopicEditor_TitleAdd");

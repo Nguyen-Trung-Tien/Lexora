@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -88,6 +89,20 @@ public static class SafeDialogExtensions
                     System.Diagnostics.Debug.WriteLine("[SafeDialog] Warning: XamlRoot is null; dialog display skipped to prevent crash.");
                     LogDialogCrash(dialog.GetType().Name, new InvalidOperationException("XamlRoot could not be resolved when displaying ContentDialog."));
                     return ContentDialogResult.None;
+                }
+
+                // Automatically synchronize dialog RequestedTheme with active visual theme (Light / Dark)
+                if (dialog.RequestedTheme == ElementTheme.Default)
+                {
+                    var themeService = App.Current?.Services?.GetService<IThemeService>();
+                    if (themeService != null && themeService.CurrentTheme != ElementTheme.Default)
+                    {
+                        dialog.RequestedTheme = themeService.CurrentTheme;
+                    }
+                    else if ((preferredRoot?.Content ?? App.Current?.MainWindow?.Content) is FrameworkElement fe && fe.ActualTheme != ElementTheme.Default)
+                    {
+                        dialog.RequestedTheme = fe.ActualTheme;
+                    }
                 }
 
                 _currentlyActiveDialog = dialog;

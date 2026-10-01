@@ -14,7 +14,7 @@ namespace Lexora.Presentation.Services;
 /// Windows-native TTS and cached-audio pronunciation service.
 ///
 /// THREADING CONTRACT:
-///   SpeechSynthesizer is a WinRT STA COM object — must be constructed and used
+///   SpeechSynthesizer is a WinRT STA COM object ï¿½ must be constructed and used
 ///   exclusively on the UI thread. All synthesis work is dispatched to the UI
 ///   thread via _dispatcherQueue. Only cache I/O uses ConfigureAwait(false).
 /// </summary>
@@ -76,7 +76,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             catch (Exception ex) { _logger.LogDebug(ex, "FallbackVoiceUsed event handler threw."); }
         }
 
-        // No ConfigureAwait(false) — preserve context for UI dispatch
+        // No ConfigureAwait(false) ï¿½ preserve context for UI dispatch
         await _audioSemaphore.WaitAsync();
         try
         {
@@ -89,7 +89,9 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             var cachedPath = _audioStorage.GetCachedAudioPath(safeTerm, resolution.RequestedLocale);
             if (cachedPath != null && File.Exists(cachedPath))
             {
-                _mediaPlayer.Source = MediaSource.CreateFromUri(new Uri(cachedPath));
+                var bytes = await File.ReadAllBytesAsync(cachedPath).ConfigureAwait(false);
+                var stream = new MemoryStream(bytes).AsRandomAccessStream();
+                _mediaPlayer.Source = MediaSource.CreateFromStream(stream, "audio/wav");
                 _mediaPlayer.Play();
                 return;
             }
@@ -135,7 +137,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 
         if (!enqueued)
         {
-            _logger.LogWarning("DispatcherQueue.TryEnqueue failed — UI thread may be shut down.");
+            _logger.LogWarning("DispatcherQueue.TryEnqueue failed - UI thread may be shut down.");
             tcs.TrySetCanceled();
             return;
         }
@@ -156,12 +158,15 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         {
             try
             {
+                // Clone stream for reading so disposing readStream does not dispose the original stream for MediaPlayer
+                using var cloneStream = stream.CloneStream();
                 using var memStream = new MemoryStream();
-                using (var readStream = stream.AsStreamForRead())
+                using (var readStream = cloneStream.AsStreamForRead())
+                {
                     await readStream.CopyToAsync(memStream).ConfigureAwait(false);
+                }
                 memStream.Position = 0;
                 await _audioStorage.CacheAudioAsync(term, resolution.RequestedLocale, memStream).ConfigureAwait(false);
-                stream.Seek(0);
             }
             catch (Exception ex)
             {
@@ -169,6 +174,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             }
         }
 
+        stream.Seek(0);
         _mediaPlayer.Source = MediaSource.CreateFromStream(stream, stream.ContentType);
         _mediaPlayer.Play();
     }
