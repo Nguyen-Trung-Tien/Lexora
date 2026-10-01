@@ -14,10 +14,11 @@ public sealed partial class ShellPage : Page
 
     public ShellPage()
     {
-        InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<ShellViewModel>();
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
         _localizationService = App.Current.Services.GetRequiredService<ILocalizationService>();
+
+        InitializeComponent();
 
         // Ensure navigation service is bound to ContentFrame immediately
         _navigationService.Initialize(ContentFrame);
@@ -137,17 +138,13 @@ public sealed partial class ShellPage : Page
         }
 
         var item = args.InvokedItemContainer as NavigationViewItem
-            ?? sender.MenuItems.OfType<NavigationViewItem>().FirstOrDefault(i =>
-                Equals(i.Content, args.InvokedItem) ||
-                Equals(i.Tag, args.InvokedItem) ||
-                string.Equals(i.Content?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(i.Tag?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase))
-            ?? sender.FooterMenuItems.OfType<NavigationViewItem>().FirstOrDefault(i =>
-                Equals(i.Content, args.InvokedItem) ||
-                Equals(i.Tag, args.InvokedItem) ||
-                string.Equals(i.Content?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(i.Tag?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase))
-            ?? sender.SelectedItem as NavigationViewItem;
+            ?? sender.MenuItems.OfType<NavigationViewItem>()
+                .Concat(sender.FooterMenuItems.OfType<NavigationViewItem>())
+                .FirstOrDefault(i =>
+                    Equals(i.Content, args.InvokedItem) ||
+                    Equals(i.Tag, args.InvokedItem) ||
+                    string.Equals(i.Content?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(i.Tag?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase));
 
         if (item != null)
         {
@@ -165,8 +162,7 @@ public sealed partial class ShellPage : Page
             return;
         }
 
-        var item = args.SelectedItemContainer as NavigationViewItem
-            ?? sender.SelectedItem as NavigationViewItem;
+        var item = args.SelectedItemContainer as NavigationViewItem;
 
         if (item != null)
         {
@@ -177,29 +173,25 @@ public sealed partial class ShellPage : Page
     private void NavigateToItem(NavigationViewItem item)
     {
         var tag = item.Tag?.ToString();
-        switch (tag)
+        var targetType = tag switch
         {
-            case "Dashboard":
-                _navigationService.Navigate(typeof(DashboardPage));
-                break;
-            case "Vocabulary":
-                _navigationService.Navigate(typeof(VocabularyPage));
-                break;
-            case "Review":
-                _navigationService.Navigate(typeof(ReviewPage));
-                break;
-            case "Test":
-                _navigationService.Navigate(typeof(TestPage));
-                break;
-            case "Grammar":
-                _navigationService.Navigate(typeof(GrammarPage));
-                break;
-            case "LearningStorage":
-                _navigationService.Navigate(typeof(LearningStoragePage));
-                break;
-            case "Settings":
-                _navigationService.Navigate(typeof(SettingsPage));
-                break;
+            "Dashboard" => typeof(DashboardPage),
+            "Vocabulary" => typeof(VocabularyPage),
+            "Review" => typeof(ReviewPage),
+            "Test" => typeof(TestPage),
+            "Grammar" => typeof(GrammarPage),
+            "LearningStorage" => typeof(LearningStoragePage),
+            "Settings" => typeof(SettingsPage),
+            _ => null
+        };
+
+        if (targetType != null)
+        {
+            if (ContentFrame.Content?.GetType() == targetType)
+            {
+                return;
+            }
+            _navigationService.Navigate(targetType);
         }
     }
 

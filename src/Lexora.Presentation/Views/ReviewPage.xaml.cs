@@ -20,10 +20,11 @@ public sealed partial class ReviewPage : Page
 
     public ReviewPage()
     {
-        InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<ReviewViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _preferencesService = App.Current.Services.GetRequiredService<IUserPreferencesService>();
+
+        InitializeComponent();
 
         IsTabStop = true;
         Loaded += (s, e) =>

@@ -20,12 +20,12 @@ public sealed partial class VocabularyPage : Page
 
     public VocabularyPage()
     {
-        InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<VocabularyViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
-
         _isInitializing = true;
+
+        InitializeComponent();
 
         PopulateFilterCombos();
 

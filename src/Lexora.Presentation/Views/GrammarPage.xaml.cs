@@ -20,10 +20,11 @@ public sealed partial class GrammarPage : Page
 
     public GrammarPage()
     {
-        InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<GrammarViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
+
+        InitializeComponent();
 
         ViewModel.NoPracticeQuestionsAvailable += () =>
         {

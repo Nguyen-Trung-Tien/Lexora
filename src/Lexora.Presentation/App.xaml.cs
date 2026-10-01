@@ -125,7 +125,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         }
     }
 
-    private static void LogCrash(string source, Exception? ex, string? extra = null)
+    public static void LogCrash(string source, Exception? ex, string? extra = null)
     {
         try
         {

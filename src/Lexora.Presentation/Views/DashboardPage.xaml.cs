@@ -14,10 +14,11 @@ public sealed partial class DashboardPage : Page
 
     public DashboardPage()
     {
-        InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<DashboardViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _soundFeedback = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ISoundFeedbackService>();
+
+        InitializeComponent();
 
         Loc.LanguageChanged += OnLanguageChanged;
         Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;

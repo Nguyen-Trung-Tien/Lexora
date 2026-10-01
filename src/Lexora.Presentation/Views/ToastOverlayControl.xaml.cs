@@ -18,8 +18,8 @@ public sealed partial class ToastOverlayControl : UserControl
 
     public ToastOverlayControl()
     {
-        InitializeComponent();
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+        InitializeComponent();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _timer.Tick += Timer_Tick;

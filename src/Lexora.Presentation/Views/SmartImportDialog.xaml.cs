@@ -110,7 +110,6 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     public SmartImportDialog(Func<string, string>? sampleProvider = null, bool isGrammarMode = false)
     {
-        InitializeComponent();
         _sampleProvider = sampleProvider;
         _isGrammarMode = isGrammarMode;
 
@@ -127,6 +126,8 @@ public sealed partial class SmartImportDialog : ContentDialog
             _exportImportService = App.Current.Services.GetRequiredService<IExportImportService>();
             _grammarExportImportService = App.Current.Services.GetService<IGrammarExportImportService>();
         }
+
+        InitializeComponent();
 
         Unloaded += (s, e) =>
         {

@@ -239,6 +239,7 @@ public sealed partial class MainWindow : Window
 
         try
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             SplashOverlay.ShowLoadingState();
 
             // Run entrance animation and backend initialization concurrently
@@ -249,10 +250,14 @@ public sealed partial class MainWindow : Window
             // Wait for backend initialization
             await initTask;
 
+            // Ensure continuation returns to the UI thread before manipulating visual tree
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+
             if (_startupOrchestrator.CurrentState == StartupState.Ready)
             {
                 // Ensure entrance animation and minimal display timing finish smoothly
                 await Task.WhenAll(entranceTask, minDisplayTask);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
 
                 // Pre-navigate to ShellPage while splash is still covering
                 RootFrame.Navigate(typeof(ShellPage));
@@ -284,6 +289,7 @@ public sealed partial class MainWindow : Window
                 }
                 finally
                 {
+                    await DispatcherQueue.EnsureOnUIThreadAsync();
                     SplashOverlay.Visibility = Visibility.Collapsed;
                     SplashOverlay.IsHitTestVisible = false;
                 }
@@ -301,6 +307,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
+            App.LogCrash("MainWindow.StartStartupSequenceAsync", ex);
             DispatcherQueue.TryEnqueue(() => SplashOverlay.ShowError(ex.Message));
         }
     }

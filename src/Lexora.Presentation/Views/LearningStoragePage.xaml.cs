@@ -354,6 +354,7 @@ public sealed partial class LearningStoragePage : Page
         };
 
         var allWords = await _vocabService.SearchWordsAsync(pageSize: 50);
+        await DispatcherQueue.EnsureOnUIThreadAsync();
         listView.ItemsSource = allWords.Select(w => new StorageCandidateItem
         {
             Id = w.Id,
@@ -366,6 +367,7 @@ public sealed partial class LearningStoragePage : Page
         {
             var q = searchBox.Text;
             var words = await _vocabService.SearchWordsAsync(search: q, pageSize: 50);
+            await DispatcherQueue.EnsureOnUIThreadAsync();
             listView.ItemsSource = words.Select(w => new StorageCandidateItem
             {
                 Id = w.Id,
@@ -467,6 +469,7 @@ public sealed partial class LearningStoragePage : Page
         };
 
         var rules = await _grammarService.GetAllRulesAsync();
+        await DispatcherQueue.EnsureOnUIThreadAsync();
         var candidateRules = rules.Select(r => new StorageCandidateItem
         {
             Id = r.Id,

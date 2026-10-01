@@ -16,13 +16,13 @@ public interface INavigationService
 public class NavigationService : INavigationService
 {
     private Frame? _frame;
-
     public event EventHandler<Type>? Navigated;
 
-    public void Initialize(Frame frame)
+    private readonly Action<object, Microsoft.UI.Xaml.Navigation.NavigationEventArgs> _navigatedHandler;
+
+    public NavigationService()
     {
-        _frame = frame;
-        _frame.Navigated += (s, e) =>
+        _navigatedHandler = (s, e) =>
         {
             if (e.SourcePageType != null)
             {
@@ -31,12 +31,33 @@ public class NavigationService : INavigationService
         };
     }
 
+    public void Initialize(Frame frame)
+    {
+        if (_frame != null)
+        {
+            _frame.Navigated -= new Microsoft.UI.Xaml.Navigation.NavigatedEventHandler(_navigatedHandler);
+        }
+
+        _frame = frame;
+        _frame.Navigated += new Microsoft.UI.Xaml.Navigation.NavigatedEventHandler(_navigatedHandler);
+    }
+
     public bool Navigate(Type pageType, object? parameter = null, NavigationTransitionInfo? transitionInfo = null, bool force = false)
     {
         if (_frame == null)
         {
             System.Diagnostics.Debug.WriteLine($"[NavigationService] Cannot navigate to {pageType.Name}: _frame has not been initialized.");
             return false;
+        }
+
+        if (_frame.DispatcherQueue != null && !_frame.DispatcherQueue.HasThreadAccess)
+        {
+            bool dispatchedResult = false;
+            _frame.DispatcherQueue.TryEnqueue(() =>
+            {
+                dispatchedResult = Navigate(pageType, parameter, transitionInfo, force);
+            });
+            return dispatchedResult;
         }
 
         if (!force && _frame.Content?.GetType() == pageType && parameter == null) return false;
@@ -49,6 +70,7 @@ public class NavigationService : INavigationService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[NavigationService] Navigation failed to {pageType.Name}: {ex}");
+            App.LogCrash($"NavigationService.Navigate({pageType.Name})", ex);
             return false;
         }
     }

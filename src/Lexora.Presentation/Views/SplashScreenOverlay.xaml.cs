@@ -43,6 +43,7 @@ public sealed partial class SplashScreenOverlay : UserControl
 
     public async Task PlayEntranceAsync()
     {
+        await DispatcherQueue.EnsureOnUIThreadAsync();
         _entranceTcs = new TaskCompletionSource<bool>();
 
         if (!IsAnimationEnabled)
@@ -61,6 +62,7 @@ public sealed partial class SplashScreenOverlay : UserControl
 
     public async Task PlayExitAsync()
     {
+        await DispatcherQueue.EnsureOnUIThreadAsync();
         IsHitTestVisible = false;
         _exitTcs = new TaskCompletionSource<bool>();
 
@@ -88,23 +90,42 @@ public sealed partial class SplashScreenOverlay : UserControl
 
         var exitTimeout = Task.Delay(500);
         await Task.WhenAny(_exitTcs.Task, exitTimeout);
+        await DispatcherQueue.EnsureOnUIThreadAsync();
         Visibility = Visibility.Collapsed;
         IsHitTestVisible = false;
     }
 
     public void UpdateStatus(string message)
     {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(() => UpdateStatus(message));
+            return;
+        }
+
         StatusTextBlock.Text = message;
     }
 
     public void ShowLoadingState()
     {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(ShowLoadingState);
+            return;
+        }
+
         LoadingContainer.Visibility = Visibility.Visible;
         ErrorCard.Visibility = Visibility.Collapsed;
     }
 
     public void ShowError(string errorMessage)
     {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(() => ShowError(errorMessage));
+            return;
+        }
+
         LoadingContainer.Visibility = Visibility.Collapsed;
         ErrorDetailsTextBlock.Text = string.IsNullOrWhiteSpace(errorMessage)
             ? LocalizationHelper.GetString("Splash_InitFailedDesc")

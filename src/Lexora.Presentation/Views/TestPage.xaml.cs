@@ -18,9 +18,10 @@ public sealed partial class TestPage : Page
 
     public TestPage()
     {
-        InitializeComponent();
         ViewModel = App.Current.Services.GetRequiredService<TestViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
+
+        InitializeComponent();
         RegisterShortcuts();
 
         Loc.LanguageChanged += OnLanguageChanged;
