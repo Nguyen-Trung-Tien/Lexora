@@ -11,7 +11,6 @@ public class GrammarService : IGrammarService
     private readonly IGrammarRepository _grammarRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISmartSearchService? _smartSearch;
-    private readonly IGrammarSuggestionService? _suggestionService;
     private readonly ISmartSearchCacheService? _cacheService;
     private readonly IVocabularyService? _vocabService;
 
@@ -19,14 +18,12 @@ public class GrammarService : IGrammarService
         IGrammarRepository grammarRepo,
         IUnitOfWork unitOfWork,
         ISmartSearchService? smartSearch = null,
-        IGrammarSuggestionService? suggestionService = null,
         ISmartSearchCacheService? cacheService = null,
         IVocabularyService? vocabService = null)
     {
         _grammarRepo = grammarRepo;
         _unitOfWork = unitOfWork;
         _smartSearch = smartSearch;
-        _suggestionService = suggestionService;
         _cacheService = cacheService;
         _vocabService = vocabService;
     }
@@ -391,11 +388,6 @@ public class GrammarService : IGrammarService
 
     public async Task<GrammarRelatedSuggestionsDto> GetGrammarSuggestionsAsync(Guid ruleId, CancellationToken cancellationToken = default)
     {
-        if (_suggestionService != null)
-        {
-            return await _suggestionService.GetSuggestionsAsync(ruleId, cancellationToken);
-        }
-
         var rule = await GetRuleByIdAsync(ruleId, cancellationToken);
         if (rule == null)
         {

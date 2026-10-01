@@ -13,7 +13,7 @@
         <!-- Multi-layered camera push-in, aurora glow, specular     -->
         <!-- light sweep, and staggered title reveal                 -->
         <!-- ======================================================= -->
-        <Storyboard x:Name="EntranceStoryboard">
+        <Storyboard x:Name="EntranceStoryboard" Duration="0:0:1.0">
             <!-- 1. Ambient Aurora Glow Expand & Breathe -->
             <DoubleAnimation
                 Storyboard.TargetName="AuraScale"
@@ -157,8 +157,8 @@
                 Storyboard.TargetName="LoadingContainer"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.4"
-                BeginTime="0:0:0.55">
+                Duration="0:0:0.35"
+                BeginTime="0:0:0.30">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -168,7 +168,7 @@
         <!-- ======================================================= -->
         <!-- CINEMATIC EXIT STORYBOARD (Camera Push-through & Dissolve)-->
         <!-- ======================================================= -->
-        <Storyboard x:Name="ExitStoryboard">
+        <Storyboard x:Name="ExitStoryboard" Duration="0:0:0.35">
             <!-- Loading indicator quick fade -->
             <DoubleAnimation
                 Storyboard.TargetName="LoadingContainer"

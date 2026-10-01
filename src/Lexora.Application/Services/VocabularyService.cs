@@ -14,7 +14,6 @@ public class VocabularyService : IVocabularyService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISpacedRepetitionEngine _srEngine;
     private readonly ISmartSearchService? _smartSearch;
-    private readonly IVocabularySuggestionService? _suggestionService;
     private readonly ISmartSearchCacheService? _cacheService;
 
     public VocabularyService(
@@ -23,7 +22,6 @@ public class VocabularyService : IVocabularyService
         IUnitOfWork unitOfWork,
         ISpacedRepetitionEngine? srEngine = null,
         ISmartSearchService? smartSearch = null,
-        IVocabularySuggestionService? suggestionService = null,
         ISmartSearchCacheService? cacheService = null)
     {
         _vocabRepo = vocabRepo;
@@ -31,7 +29,6 @@ public class VocabularyService : IVocabularyService
         _unitOfWork = unitOfWork;
         _srEngine = srEngine ?? new Sm2SpacedRepetitionEngine();
         _smartSearch = smartSearch;
-        _suggestionService = suggestionService;
         _cacheService = cacheService;
     }
 
@@ -482,11 +479,6 @@ public class VocabularyService : IVocabularyService
 
     public async Task<WordRelatedSuggestionsDto> GetWordSuggestionsAsync(Guid wordId, CancellationToken cancellationToken = default)
     {
-        if (_suggestionService != null)
-        {
-            return await _suggestionService.GetSuggestionsAsync(wordId, cancellationToken);
-        }
-
         var word = await GetWordByIdAsync(wordId, cancellationToken);
         if (word == null)
         {

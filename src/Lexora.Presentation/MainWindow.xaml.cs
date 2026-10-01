@@ -244,7 +244,7 @@ public sealed partial class MainWindow : Window
 
             // Run entrance animation and backend initialization concurrently
             var entranceTask = SplashOverlay.PlayEntranceAsync();
-            var minDisplayTask = Task.Delay(250, ct);
+            var minDisplayTask = Task.Delay(1600, ct);
             var initTask = _startupOrchestrator.InitializeAppAsync(ct);
 
             // Wait for backend initialization
