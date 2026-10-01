@@ -258,6 +258,37 @@ public class LearningStorageIntegrationTests : IDisposable
         itemAfterDelete.Should().BeNull();
     }
 
+    [Fact]
+    public async Task MoveWordAndGrammarToStorage_ShouldNotThrow()
+    {
+        var word = await _context.Words.FirstAsync();
+        var grammar = await _context.GrammarRules.FirstAsync();
+
+        var service = new Lexora.Application.Services.LearningStorageService(
+            _storageRepo,
+            _vocabRepo,
+            _grammarRepo,
+            new ReviewRepository(_context),
+            new Lexora.Application.SpacedRepetition.Sm2SpacedRepetitionEngine(),
+            null!,
+            _unitOfWork
+        );
+
+        var wordItem = await service.MoveWordToStorageAsync(word.Id, StorageAdditionReason.Manual, "Test note");
+        wordItem.Should().NotBeNull();
+        wordItem.Title.Should().Be(word.Term);
+
+        var grammarItem = await service.MoveGrammarToStorageAsync(grammar.Id, StorageAdditionReason.Manual, "Grammar note");
+        grammarItem.Should().NotBeNull();
+        grammarItem.Title.Should().Be(grammar.Title);
+
+        var pagedVocab = await service.GetPagedItemsAsync(StorageItemType.Vocabulary);
+        pagedVocab.Items.Should().NotBeEmpty();
+
+        var pagedGrammar = await service.GetPagedItemsAsync(StorageItemType.Grammar);
+        pagedGrammar.Items.Should().NotBeEmpty();
+    }
+
     public void Dispose()
     {
         _context.Dispose();

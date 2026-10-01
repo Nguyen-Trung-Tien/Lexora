@@ -242,12 +242,20 @@ public sealed partial class LearningStoragePage : Page
                 RequestedTheme = activeTheme
             };
 
+            string? savedNoteText = null;
+            dialog.PrimaryButtonClick += (s, args) =>
+            {
+                savedNoteText = noteBox.Text;
+            };
+
             var res = await dialog.ShowAsyncSafe(this.XamlRoot);
-            if (res == ContentDialogResult.Primary)
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+
+            if (res == ContentDialogResult.Primary && savedNoteText != null)
             {
                 try
                 {
-                    await ViewModel.SaveNoteAsync((item.Id, noteBox.Text));
+                    await ViewModel.SaveNoteAsync((item.Id, savedNoteText));
                     _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_StatusUpdated"));
                 }
                 catch (Exception ex)
@@ -295,13 +303,21 @@ public sealed partial class LearningStoragePage : Page
 
     private async void OpenAddDialog_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.IsVocabTabSelected)
+        try
         {
-            await ShowAddWordDialogAsync();
+            if (ViewModel.IsVocabTabSelected)
+            {
+                await ShowAddWordDialogAsync();
+            }
+            else
+            {
+                await ShowAddGrammarDialogAsync();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await ShowAddGrammarDialogAsync();
+            System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] OpenAddDialog error: {ex.Message}");
+            _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
         }
     }
 
@@ -390,12 +406,31 @@ public sealed partial class LearningStoragePage : Page
             dialog.IsPrimaryButtonEnabled = listView.SelectedItem != null;
         };
 
-        var res = await dialog.ShowAsyncSafe(this.XamlRoot);
-        if (res == ContentDialogResult.Primary && listView.SelectedItem is StorageCandidateItem selected)
+        StorageCandidateItem? selectedCandidate = null;
+        string? noteText = null;
+
+        dialog.PrimaryButtonClick += (s, args) =>
         {
-            await _storageService.MoveWordToStorageAsync(selected.Id, StorageAdditionReason.Manual, noteBox.Text);
-            _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Added"));
-            await ViewModel.InitializeAsync();
+            selectedCandidate = listView.SelectedItem as StorageCandidateItem;
+            noteText = noteBox.Text;
+        };
+
+        var res = await dialog.ShowAsyncSafe(this.XamlRoot);
+        await DispatcherQueue.EnsureOnUIThreadAsync();
+
+        if (res == ContentDialogResult.Primary && selectedCandidate != null)
+        {
+            try
+            {
+                await _storageService.MoveWordToStorageAsync(selectedCandidate.Id, StorageAdditionReason.Manual, noteText);
+                _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Added"));
+                await ViewModel.InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] MoveWordToStorage error: {ex.Message}");
+                _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+            }
         }
     }
 
@@ -488,12 +523,31 @@ public sealed partial class LearningStoragePage : Page
             dialog.IsPrimaryButtonEnabled = listView.SelectedItem != null;
         };
 
-        var res = await dialog.ShowAsyncSafe(this.XamlRoot);
-        if (res == ContentDialogResult.Primary && listView.SelectedItem is StorageCandidateItem selected)
+        StorageCandidateItem? selectedCandidate = null;
+        string? noteText = null;
+
+        dialog.PrimaryButtonClick += (s, args) =>
         {
-            await _storageService.MoveGrammarToStorageAsync(selected.Id, StorageAdditionReason.Manual, noteBox.Text);
-            _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Added"));
-            await ViewModel.InitializeAsync();
+            selectedCandidate = listView.SelectedItem as StorageCandidateItem;
+            noteText = noteBox.Text;
+        };
+
+        var res = await dialog.ShowAsyncSafe(this.XamlRoot);
+        await DispatcherQueue.EnsureOnUIThreadAsync();
+
+        if (res == ContentDialogResult.Primary && selectedCandidate != null)
+        {
+            try
+            {
+                await _storageService.MoveGrammarToStorageAsync(selectedCandidate.Id, StorageAdditionReason.Manual, noteText);
+                _toastService?.ShowSuccess(Loc.GetString("Storage_Toast_Added"));
+                await ViewModel.InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] MoveGrammarToStorage error: {ex.Message}");
+                _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+            }
         }
     }
 

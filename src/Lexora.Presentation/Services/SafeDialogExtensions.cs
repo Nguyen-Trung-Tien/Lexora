@@ -107,18 +107,27 @@ public static class SafeDialogExtensions
 
                 _currentlyActiveDialog = dialog;
                 var result = await dialog.ShowAsync();
+
+                if (dispatcher != null && !dispatcher.HasThreadAccess)
+                {
+                    await dispatcher.EnsureOnUIThreadAsync();
+                }
+
                 return result;
             }
             finally
             {
                 _currentlyActiveDialog = null;
-                // Allow the visual tree to clean up the closed dialog before unlocking next dialog (AGENTS.md 3.3)
-                try
-                {
-                    await Task.Yield();
-                }
-                catch { }
                 _dialogSemaphore.Release();
+
+                if (dispatcher != null && !dispatcher.HasThreadAccess)
+                {
+                    try
+                    {
+                        await dispatcher.EnsureOnUIThreadAsync();
+                    }
+                    catch { }
+                }
             }
         }
         catch (Exception ex)
