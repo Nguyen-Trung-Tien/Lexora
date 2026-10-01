@@ -1,3 +1,4 @@
+using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -6,26 +7,25 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class DashboardPage : Page
+public sealed partial class DashboardPage : Page, ILocalizableView
 {
     public DashboardViewModel ViewModel { get; }
-    public Lexora.Presentation.Services.ILocalizationService Loc { get; }
-    private readonly Lexora.Presentation.Services.ISoundFeedbackService _soundFeedback;
+    public ILocalizationService Loc { get; }
+    private readonly ISoundFeedbackService _soundFeedback;
 
     public DashboardPage()
     {
-        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
+        NavigationCacheMode = NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<DashboardViewModel>();
-        Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
-        _soundFeedback = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ISoundFeedbackService>();
+        Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+        _soundFeedback = App.Current.Services.GetRequiredService<ISoundFeedbackService>();
 
         InitializeComponent();
 
-        Loc.LanguageChanged += OnLanguageChanged;
-        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
     }
 
-    private void OnLanguageChanged(object? sender, EventArgs e)
+    public void OnLanguageChanged()
     {
         DispatcherQueue.TryEnqueue(() =>
         {
@@ -37,6 +37,7 @@ public sealed partial class DashboardPage : Page
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        OnLanguageChanged();
         try
         {
             if (ViewModel.TotalWords == 0)

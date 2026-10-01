@@ -184,7 +184,7 @@
                                        FontSize="16" FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                            <TextBlock Text="Đã nhập" FontSize="11"
+                            <TextBlock x:Name="StatImportedLabel" Text="Đã nhập" FontSize="11"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
@@ -198,7 +198,7 @@
                                        FontSize="16" FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Text="Bỏ qua" FontSize="11"
+                            <TextBlock x:Name="StatSkippedLabel" Text="Bỏ qua" FontSize="11"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
@@ -212,7 +212,7 @@
                                        FontSize="16" FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                            <TextBlock Text="Lỗi" FontSize="11"
+                            <TextBlock x:Name="StatErrorLabel" Text="Lỗi" FontSize="11"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        HorizontalAlignment="Center" />
                         </StackPanel>

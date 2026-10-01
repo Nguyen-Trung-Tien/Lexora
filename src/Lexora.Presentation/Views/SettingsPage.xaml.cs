@@ -8,7 +8,7 @@ using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class SettingsPage : Page
+public sealed partial class SettingsPage : Page, ILocalizableView
 {
     public SettingsViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -23,8 +23,7 @@ public sealed partial class SettingsPage : Page
 
         InitializeComponent();
 
-        Loc.LanguageChanged += OnLanguageChanged;
-        Unloaded += (s, e) => Loc.LanguageChanged -= OnLanguageChanged;
+        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         ActualThemeChanged += (s, e) =>
         {
             UpdateLanguageButtons();
@@ -33,7 +32,7 @@ public sealed partial class SettingsPage : Page
         };
     }
 
-    private void OnLanguageChanged(object? sender, EventArgs e)
+    public void OnLanguageChanged()
     {
         DispatcherQueue.TryEnqueue(() =>
         {
@@ -43,6 +42,12 @@ public sealed partial class SettingsPage : Page
             ViewModel.UpdateVoiceStatus();
             Bindings.Update();
         });
+    }
+
+    protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        OnLanguageChanged();
     }
 
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)

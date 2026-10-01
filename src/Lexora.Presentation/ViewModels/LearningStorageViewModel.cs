@@ -527,12 +527,15 @@ public partial class LearningStorageViewModel : ObservableObject
         }
     }
 
+    private StoragePracticeResultDto? _lastPracticeResult;
+
     [RelayCommand]
     public async Task FinishPracticeAsync()
     {
         try
         {
             var result = await _storageService.EvaluatePracticeAsync(_practiceQuestions, _practiceSubmissions);
+            _lastPracticeResult = result;
             IsPracticeCompleted = true;
 
             PracticeResultSummaryText = string.Format(
@@ -553,10 +556,28 @@ public partial class LearningStorageViewModel : ObservableObject
     {
         IsPracticeActive = false;
         IsPracticeCompleted = false;
+        _lastPracticeResult = null;
         CurrentQuestion = null;
         CurrentOptions.Clear();
         PracticeSelectedAnswer = null;
         HasSelectedPracticeAnswer = false;
         IsPracticeAnswerSubmitted = false;
+    }
+
+    public void UpdateLanguageState()
+    {
+        OnPropertyChanged(nameof(PageDisplayInfo));
+        if (IsPracticeActive && _practiceQuestions.Count > 0)
+        {
+            PracticeProgressText = string.Format(
+                _localizationService.GetString("Storage_Practice_QuestionFormat"),
+                CurrentPracticeIndex + 1, _practiceQuestions.Count);
+        }
+        else if (IsPracticeCompleted && _lastPracticeResult != null)
+        {
+            PracticeResultSummaryText = string.Format(
+                _localizationService.GetString("Storage_Practice_ResultSummary"),
+                _lastPracticeResult.Correct, _lastPracticeResult.Total, _lastPracticeResult.ScorePercent);
+        }
     }
 }

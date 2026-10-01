@@ -7,9 +7,13 @@ namespace Lexora.Presentation.Views;
 
 public sealed partial class OperationProgressDialog : ContentDialog
 {
+    private readonly ILocalizationService? _loc;
+
     public OperationProgressDialog()
     {
+        _loc = App.Current?.Services?.GetService<ILocalizationService>();
         InitializeComponent();
+        ApplyLocalization();
         Loaded += OnLoaded;
 
         var actualTheme = (App.Current?.MainWindow?.Content as FrameworkElement)?.ActualTheme;
@@ -21,6 +25,19 @@ public sealed partial class OperationProgressDialog : ContentDialog
         {
             RequestedTheme = themeService.CurrentTheme;
         }
+    }
+
+    private void ApplyLocalization()
+    {
+        if (_loc == null) return;
+        StepMessageText.Text = _loc.GetString("Progress_DefaultPreparing");
+        StepDetailText.Text = _loc.GetString("Progress_PleaseWait");
+        CompletedTitleText.Text = _loc.GetString("Progress_CompletedTitle");
+        CompletedSummaryText.Text = _loc.GetString("Progress_CompletedSummary");
+        StatImportedLabel.Text = _loc.GetString("Progress_StatImported");
+        StatSkippedLabel.Text = _loc.GetString("Progress_StatSkipped");
+        StatErrorLabel.Text = _loc.GetString("Progress_StatError");
+        CloseButtonText = _loc.GetString("Action_Close");
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)

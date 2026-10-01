@@ -12,7 +12,7 @@ using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class GrammarPage : Page
+public sealed partial class GrammarPage : Page, ILocalizableView
 {
     public GrammarViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -32,12 +32,11 @@ public sealed partial class GrammarPage : Page
             _toastService?.ShowWarning(Loc.GetString("Grammar_Practice_NoQuestions"));
         };
 
-        Loc.LanguageChanged += OnLanguageChanged;
+        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         RegisterShortcuts();
 
         Unloaded += (s, e) =>
         {
-            Loc.LanguageChanged -= OnLanguageChanged;
             _searchDebounceTimer?.Stop();
             var sm = App.Current.Services.GetService<IShortcutManager>();
             sm?.UnregisterPageShortcuts(typeof(GrammarPage));
@@ -58,10 +57,11 @@ public sealed partial class GrammarPage : Page
         };
     }
 
-    private void OnLanguageChanged(object? sender, EventArgs e)
+    public void OnLanguageChanged()
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            ViewModel.UpdateLanguageState();
             Bindings.Update();
             UpdateSelectionModeUI();
         });
@@ -72,6 +72,7 @@ public sealed partial class GrammarPage : Page
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        OnLanguageChanged();
         try
         {
             if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))

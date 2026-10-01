@@ -11,7 +11,7 @@ using Windows.System;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class ReviewPage : Page
+public sealed partial class ReviewPage : Page, ILocalizableView
 {
     public ReviewViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -34,12 +34,11 @@ public sealed partial class ReviewPage : Page
             Focus(FocusState.Programmatic);
         };
 
-        Loc.LanguageChanged += OnLanguageChanged;
+        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         RegisterShortcuts();
 
         Unloaded += (s, e) =>
         {
-            Loc.LanguageChanged -= OnLanguageChanged;
             ViewModel.StopAudio();
             var sm = App.Current.Services.GetService<IShortcutManager>();
             sm?.UnregisterPageShortcuts(typeof(ReviewPage));
@@ -61,7 +60,7 @@ public sealed partial class ReviewPage : Page
         if (FlyoutSpeedVeryFast != null) FlyoutSpeedVeryFast.Text = Loc.GetString("Settings_Speed_VeryFast");
     }
 
-    private void OnLanguageChanged(object? sender, EventArgs e)
+    public void OnLanguageChanged()
     {
         DispatcherQueue.TryEnqueue(() =>
         {
@@ -74,6 +73,7 @@ public sealed partial class ReviewPage : Page
     protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        OnLanguageChanged();
         Focus(FocusState.Programmatic);
 
         try

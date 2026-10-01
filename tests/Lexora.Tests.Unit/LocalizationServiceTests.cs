@@ -108,4 +108,63 @@ public class LocalizationServiceTests
 
         mismatches.Should().BeEmpty("format string argument indices must match across locales to prevent FormatException");
     }
+
+    [Fact]
+    public void AllDictionaryEntries_MustNotBeNullOrWhiteSpace()
+    {
+        var field = typeof(LocalizationService).GetField("_resources", BindingFlags.NonPublic | BindingFlags.Instance);
+        var resources = (Dictionary<string, Dictionary<string, string>>)field!.GetValue(_loc)!;
+
+        foreach (var (locale, dict) in resources)
+        {
+            foreach (var (key, val) in dict)
+            {
+                val.Should().NotBeNullOrWhiteSpace($"key '{key}' in locale '{locale}' must have a valid non-empty string value");
+            }
+        }
+    }
+
+    [Fact]
+    public void SwitchLanguage_MultipleTimes_TogglesCorrectlyAndFiresEvents()
+    {
+        int eventCount = 0;
+        _loc.LanguageChanged += (s, e) => eventCount++;
+
+        _loc.SetLanguage("vi-VN");
+        _loc.CurrentLanguage.Should().Be("vi-VN");
+        _loc.GetString("Action_Save").Should().Be("Lưu");
+
+        _loc.SetLanguage("en-US");
+        _loc.CurrentLanguage.Should().Be("en-US");
+        _loc.GetString("Action_Save").Should().Be("Save");
+
+        _loc.SetLanguage("vi-VN");
+        _loc.CurrentLanguage.Should().Be("vi-VN");
+        _loc.GetString("Action_Save").Should().Be("Lưu");
+
+        _loc.SetLanguage("en-US");
+        _loc.CurrentLanguage.Should().Be("en-US");
+        _loc.GetString("Action_Save").Should().Be("Save");
+
+        eventCount.Should().Be(4);
+    }
+
+    [Theory]
+    [InlineData("Progress_DefaultPreparing", "Đang chuẩn bị dữ liệu...", "Preparing data...")]
+    [InlineData("Progress_CompletedSummary", "Toàn bộ dữ liệu đã được xử lý an toàn.", "All data processed securely.")]
+    [InlineData("Progress_StatImported", "Đã nhập", "Imported")]
+    [InlineData("Progress_StatSkipped", "Bỏ qua", "Skipped")]
+    [InlineData("Progress_StatError", "Lỗi", "Errors")]
+    [InlineData("Storage_RetentionLabel", "Ghi nhớ:", "Retention:")]
+    [InlineData("Storage_IntervalLabel", "Chu kỳ:", "Interval:")]
+    [InlineData("Storage_MistakesLabel", "Lỗi:", "Mistakes:")]
+    [InlineData("Storage_CorrectLabel", "• Đúng:", "• Correct:")]
+    public void NewlyAddedKeys_MustReturnAccurateTranslations(string key, string expectedVi, string expectedEn)
+    {
+        _loc.SetLanguage("vi-VN");
+        _loc.GetString(key).Should().Be(expectedVi);
+
+        _loc.SetLanguage("en-US");
+        _loc.GetString(key).Should().Be(expectedEn);
+    }
 }

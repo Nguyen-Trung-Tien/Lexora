@@ -57,6 +57,10 @@ public sealed partial class ShellPage : Page
             UpdateNavigationLabels();
             ViewModel.UpdateLocalizedTexts();
             Bindings.Update();
+            if (ContentFrame.Content is ILocalizableView localizableView)
+            {
+                localizableView.OnLanguageChanged();
+            }
         });
     }
 

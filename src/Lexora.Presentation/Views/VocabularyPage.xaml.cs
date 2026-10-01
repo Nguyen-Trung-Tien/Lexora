@@ -11,7 +11,7 @@ using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class VocabularyPage : Page
+public sealed partial class VocabularyPage : Page, ILocalizableView
 {
     public VocabularyViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -30,12 +30,11 @@ public sealed partial class VocabularyPage : Page
 
         PopulateFilterCombos();
 
-        Loc.LanguageChanged += OnLanguageChanged;
+        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         RegisterShortcuts();
 
         Unloaded += (s, e) =>
         {
-            Loc.LanguageChanged -= OnLanguageChanged;
             _searchDebounceTimer?.Stop();
             var sm = App.Current.Services.GetService<IShortcutManager>();
             sm?.UnregisterPageShortcuts(typeof(VocabularyPage));
@@ -81,7 +80,7 @@ public sealed partial class VocabularyPage : Page
         ActualThemeChanged += (s, e) => UpdateViewModeButtons();
     }
 
-    private void OnLanguageChanged(object? sender, EventArgs e)
+    public void OnLanguageChanged()
     {
         DispatcherQueue.TryEnqueue(() =>
         {
@@ -188,6 +187,7 @@ public sealed partial class VocabularyPage : Page
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        OnLanguageChanged();
         if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))
         {
             SearchBox.Text = query;

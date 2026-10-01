@@ -10,7 +10,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class LearningStoragePage : Page
+public sealed partial class LearningStoragePage : Page, ILocalizableView
 {
     public LearningStorageViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -41,6 +41,24 @@ public sealed partial class LearningStoragePage : Page
             _toastService?.ShowWarning(msg);
         };
         InitializeComponent();
+
+        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
+    }
+
+    public void OnLanguageChanged()
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            ViewModel.UpdateLanguageState();
+            UpdateSegmentedButtons();
+            Bindings.Update();
+        });
+    }
+
+    protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        OnLanguageChanged();
     }
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)

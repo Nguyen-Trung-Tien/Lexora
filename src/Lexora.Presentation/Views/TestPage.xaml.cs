@@ -11,7 +11,7 @@ using Windows.System;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class TestPage : Page
+public sealed partial class TestPage : Page, ILocalizableView
 {
     public TestViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -25,10 +25,9 @@ public sealed partial class TestPage : Page
         InitializeComponent();
         RegisterShortcuts();
 
-        Loc.LanguageChanged += OnLanguageChanged;
+        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         Unloaded += (s, e) =>
         {
-            Loc.LanguageChanged -= OnLanguageChanged;
             ViewModel.CleanupSession();
             var sm = App.Current.Services.GetService<IShortcutManager>();
             sm?.UnregisterPageShortcuts(typeof(TestPage));
@@ -42,10 +41,11 @@ public sealed partial class TestPage : Page
         };
     }
 
-    private void OnLanguageChanged(object? sender, EventArgs e)
+    public void OnLanguageChanged()
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            ViewModel.UpdateLanguageState();
             Bindings.Update();
             UpdateCountButtonLabels();
         });
@@ -54,6 +54,7 @@ public sealed partial class TestPage : Page
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        OnLanguageChanged();
         try
         {
             UpdateCountButtonLabels();

@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:enums="using:Lexora.Domain.Enums"
+    xmlns:services="using:Lexora.Presentation.Services"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
@@ -330,10 +331,10 @@
                                         <!-- Mark as Mastered button -->
                                         <Button Tag="{x:Bind}" CornerRadius="8" Padding="12,6"
                                                 Click="CardMasteredBtn_Click"
-                                                ToolTipService.ToolTip="Mark as Mastered">
+                                                ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Storage_BtnMarkMastered')}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon Glyph="&#xE73E;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                                <TextBlock Text="Mastered" FontSize="11" FontWeight="SemiBold" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Status_Mastered')}" FontSize="11" FontWeight="SemiBold" />
                                             </StackPanel>
                                         </Button>
 
@@ -342,23 +343,23 @@
                                             <FontIcon Glyph="&#xE712;" FontSize="13" />
                                             <Button.Flyout>
                                                 <MenuFlyout Opening="CardMenuFlyout_Opening">
-                                                    <MenuFlyoutItem Text="Mark as Weak" Click="MenuMarkWeak_Click">
+                                                    <MenuFlyoutItem Text="{x:Bind services:LocalizationHelper.GetString('Storage_FilterWeak')}" Click="MenuMarkWeak_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE7BA;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                                         </MenuFlyoutItem.Icon>
                                                     </MenuFlyoutItem>
-                                                    <MenuFlyoutItem Text="Mark as Learning" Click="MenuMarkLearning_Click">
+                                                    <MenuFlyoutItem Text="{x:Bind services:LocalizationHelper.GetString('Storage_FilterLearning')}" Click="MenuMarkLearning_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE82D;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                         </MenuFlyoutItem.Icon>
                                                     </MenuFlyoutItem>
-                                                    <MenuFlyoutItem Text="Edit Note" Click="MenuEditNote_Click">
+                                                    <MenuFlyoutItem Text="{x:Bind services:LocalizationHelper.GetString('Storage_BtnEditNote')}" Click="MenuEditNote_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE70F;" />
                                                         </MenuFlyoutItem.Icon>
                                                     </MenuFlyoutItem>
                                                     <MenuFlyoutSeparator />
-                                                    <MenuFlyoutItem Text="Remove from Storage" Click="MenuRemove_Click">
+                                                    <MenuFlyoutItem Text="{x:Bind services:LocalizationHelper.GetString('Storage_BtnRemove')}" Click="MenuRemove_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE74D;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                                         </MenuFlyoutItem.Icon>
@@ -379,24 +380,24 @@
                                         <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
                                             <!-- Retention -->
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Retention:" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_RetentionLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                                 <TextBlock Text="{x:Bind FormattedRetention}" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             </StackPanel>
 
                                             <!-- Interval -->
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Interval:" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_IntervalLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                                 <TextBlock Text="{x:Bind FormattedInterval}" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             </StackPanel>
 
                                             <!-- Mistakes / Correct count -->
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Mistakes:" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_MistakesLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                                 <TextBlock Text="{x:Bind IncorrectCount}" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                                <TextBlock Text="• Correct:" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_CorrectLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                                 <TextBlock Text="{x:Bind CorrectCount}" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                             </StackPanel>

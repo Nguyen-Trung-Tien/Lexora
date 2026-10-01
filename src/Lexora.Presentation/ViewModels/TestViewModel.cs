@@ -699,4 +699,27 @@ public partial class TestViewModel : ObservableObject
         _totalTestTimer.Stop();
         _audioPlayer.Stop();
     }
+
+    public void UpdateLanguageState()
+    {
+        if (IsTestingMode && TotalQuestions > 0)
+        {
+            ProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), CurrentQuestionIndex + 1, TotalQuestions);
+        }
+        else if (IsResultMode && TestResult != null)
+        {
+            if (ScorePercentage >= 85.0)
+            {
+                ResultMessage = _localizationService.GetString("Test_Result_Excellent");
+            }
+            else if (ScorePercentage >= 60.0)
+            {
+                ResultMessage = _localizationService.GetString("Test_Result_Good");
+            }
+            else
+            {
+                ResultMessage = _localizationService.GetString("Test_Result_NeedsPractice");
+            }
+        }
+    }
 }

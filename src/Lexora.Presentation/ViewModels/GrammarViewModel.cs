@@ -873,4 +873,20 @@ public partial class GrammarViewModel : ObservableObject
             SelectedRule = rule;
         }
     }
+
+    public void UpdateLanguageState()
+    {
+        if (IsPracticeMode && TotalPracticeQuestions > 0)
+        {
+            PracticeProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), CurrentQuestionIndex + 1, TotalPracticeQuestions);
+            PracticeStepBadge = $"{_localizationService.GetString("Test_Question").ToUpperInvariant()} {CurrentQuestionIndex + 1} / {TotalPracticeQuestions}";
+            UpdatePracticeStatusTip();
+            UpdateNextButtonText();
+        }
+        else if (IsPracticeResultMode && PracticeResult != null)
+        {
+            var template = _localizationService.GetString("Grammar_Practice_ResultSummaryFormat");
+            ResultSummaryMessage = string.Format(template, PracticeResult.CorrectCount, PracticeResult.TotalQuestions, $"{PracticeResult.ScorePercentage:F0}");
+        }
+    }
 }
