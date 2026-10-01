@@ -301,7 +301,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            SplashOverlay.ShowError(ex.Message);
+            DispatcherQueue.TryEnqueue(() => SplashOverlay.ShowError(ex.Message));
         }
     }
 
