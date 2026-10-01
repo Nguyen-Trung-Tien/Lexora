@@ -17,6 +17,25 @@ public class LearningStorageService : ILearningStorageService
     private readonly ITestService _testService;
     private readonly IUnitOfWork _unitOfWork;
 
+    private static readonly string[] FallbackVocabDistractors =
+    {
+        "Hành động hoặc hoạt động cụ thể",
+        "Trạng thái hoặc điều kiện tồn tại",
+        "Tính chất hoặc đặc điểm nổi bật",
+        "Đối tượng, sự vật hoặc hiện tượng",
+        "Cách thức hoặc phương thức thực hiện"
+    };
+
+    private static readonly string[] FallbackGrammarDistractors =
+    {
+        "S + V + O",
+        "S + to be + Adj / Noun",
+        "S + modal verb + V-inf",
+        "S + have/has + V3/ed",
+        "S + Aux + V-ing",
+        "It + is + Adj + to V-inf"
+    };
+
     public LearningStorageService(
         ILearningStorageRepository storageRepo,
         IVocabularyRepository vocabRepo,
@@ -426,9 +445,16 @@ public class LearningStorageService : ILearningStorageService
                     .ToList();
                 options.AddRange(distractors);
 
-                while (options.Count < 4)
+                if (options.Count < 4)
                 {
-                    options.Add($"Ý nghĩa khác {options.Count + 1}");
+                    foreach (var fallback in FallbackVocabDistractors)
+                    {
+                        if (options.Count >= 4) break;
+                        if (!options.Any(o => o.Equals(fallback, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            options.Add(fallback);
+                        }
+                    }
                 }
 
                 var shuffled = options.Distinct().OrderBy(_ => Random.Shared.Next()).ToList();
@@ -489,9 +515,16 @@ public class LearningStorageService : ILearningStorageService
                     .ToList();
                 options.AddRange(distractors);
 
-                while (options.Count < 4)
+                if (options.Count < 4)
                 {
-                    options.Add($"Cấu trúc thay thế {options.Count + 1}");
+                    foreach (var fallback in FallbackGrammarDistractors)
+                    {
+                        if (options.Count >= 4) break;
+                        if (!options.Any(o => o.Equals(fallback, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            options.Add(fallback);
+                        }
+                    }
                 }
 
                 var shuffled = options.Distinct().OrderBy(_ => Random.Shared.Next()).ToList();

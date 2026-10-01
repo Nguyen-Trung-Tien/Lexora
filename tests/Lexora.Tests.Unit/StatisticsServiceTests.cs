@@ -143,4 +143,33 @@ public class StatisticsServiceTests
             analytics.Last30DaysHeatmap[i].Date.Should().Be(analytics.Last30DaysHeatmap[i - 1].Date.AddDays(1));
         }
     }
+
+    [Fact]
+    public async Task GetDashboardSummaryAsync_WithHighVolumeToday_ShouldCountAllReviewsAccurately()
+    {
+        // Arrange: 250 reviews done today (exceeds default limit of 200)
+        _mockVocabRepo.Setup(v => v.CountAsync(null, It.IsAny<CancellationToken>())).ReturnsAsync(500);
+        _mockReviewRepo.Setup(r => r.GetCardCountsByStatusAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<LearningStatus, int>());
+        _mockReviewRepo.Setup(r => r.CountDueCardsAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(5);
+        _mockReviewRepo.Setup(r => r.GetUserStreakAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UserStreak { CurrentStreak = 10, LongestStreak = 15, LastActiveDate = DateOnly.FromDateTime(DateTime.Today) });
+
+        var todayLogs = Enumerable.Range(0, 250)
+            .Select(_ => new StudyLog { CreatedAt = DateTime.UtcNow, Rating = ReviewRating.Good })
+            .ToList();
+
+        _mockReviewRepo.Setup(r => r.GetRecentLogsAsync(200, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(todayLogs.Take(200).ToList());
+        _mockReviewRepo.Setup(r => r.GetLogsSinceAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(todayLogs);
+
+        // Act
+        var summary = await _statsService.GetDashboardSummaryAsync();
+
+        // Assert: all 250 reviews counted without truncation
+        summary.StudiedTodayCount.Should().Be(250);
+        summary.AccuracyRate.Should().Be(100.0);
+    }
 }

@@ -129,10 +129,22 @@ public class VocabularyService : IVocabularyService
 
     public async Task<WordDto> CreateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default)
     {
+        var trimmedTerm = dto.Term?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(trimmedTerm))
+        {
+            throw new ArgumentException("Word term cannot be empty.", nameof(dto));
+        }
+
+        var existingWord = await _vocabRepo.GetByTermAsync(trimmedTerm, cancellationToken);
+        if (existingWord != null)
+        {
+            throw new InvalidOperationException($"Word '{trimmedTerm}' already exists.");
+        }
+
         var word = new Word
         {
-            Term = dto.Term.Trim(),
-            NormalizedTerm = dto.Term.Trim().ToLowerInvariant(),
+            Term = trimmedTerm,
+            NormalizedTerm = trimmedTerm.ToLowerInvariant(),
             PhoneticUk = dto.PhoneticUk,
             PhoneticUs = dto.PhoneticUs,
             AudioUkPath = dto.AudioUkPath,
@@ -204,12 +216,22 @@ public class VocabularyService : IVocabularyService
         if (dto.Id == null)
             throw new ArgumentException("Word Id must not be null for update", nameof(dto));
 
+        var trimmedTerm = dto.Term?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(trimmedTerm))
+            throw new ArgumentException("Word term cannot be empty.", nameof(dto));
+
         var word = await _vocabRepo.GetWithDetailsAsync(dto.Id.Value, cancellationToken);
         if (word == null)
             throw new KeyNotFoundException($"Word with ID {dto.Id} not found");
 
-        word.Term = dto.Term.Trim();
-        word.NormalizedTerm = dto.Term.Trim().ToLowerInvariant();
+        var duplicate = await _vocabRepo.GetByTermAsync(trimmedTerm, cancellationToken);
+        if (duplicate != null && duplicate.Id != dto.Id.Value)
+        {
+            throw new InvalidOperationException($"Word '{trimmedTerm}' already exists.");
+        }
+
+        word.Term = trimmedTerm;
+        word.NormalizedTerm = trimmedTerm.ToLowerInvariant();
         word.PhoneticUk = dto.PhoneticUk;
         word.PhoneticUs = dto.PhoneticUs;
         word.AudioUkPath = dto.AudioUkPath;

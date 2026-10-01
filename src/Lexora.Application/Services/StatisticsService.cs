@@ -25,7 +25,15 @@ public class StatisticsService : IStatisticsService
         var streak = await _reviewRepo.GetUserStreakAsync(cancellationToken);
         var recentLogs = await _reviewRepo.GetRecentLogsAsync(200, cancellationToken);
 
-        return BuildSummary(totalWords, statusCounts, dueCount, streak, recentLogs);
+        var today = DateTime.Today;
+        var startOfTodayUtc = today.ToUniversalTime();
+        var todayLogs = await _reviewRepo.GetLogsSinceAsync(startOfTodayUtc, cancellationToken);
+
+        int studiedToday = todayLogs != null && todayLogs.Count > 0
+            ? todayLogs.Count(l => l.CreatedAt.ToLocalTime().Date == today)
+            : recentLogs.Count(l => l.CreatedAt.ToLocalTime().Date == today);
+
+        return BuildSummary(totalWords, statusCounts, dueCount, streak, recentLogs, studiedToday);
     }
 
     private static DashboardSummaryDto BuildSummary(
@@ -33,7 +41,8 @@ public class StatisticsService : IStatisticsService
         Dictionary<LearningStatus, int> statusCounts,
         int dueCount,
         UserStreak? streak,
-        IReadOnlyList<StudyLog> recentLogs)
+        IReadOnlyList<StudyLog> recentLogs,
+        int studiedToday)
     {
         int remembered = statusCounts.GetValueOrDefault(LearningStatus.Remembered, 0);
         int notRemembered = statusCounts.GetValueOrDefault(LearningStatus.NotRemembered, 0);
@@ -46,7 +55,6 @@ public class StatisticsService : IStatisticsService
 
         var today = DateTime.Today;
         var todayDate = DateOnly.FromDateTime(today);
-        int studiedToday = recentLogs.Count(l => l.CreatedAt.ToLocalTime().Date == today);
 
         int activeStreak = 0;
         if (streak != null && streak.LastActiveDate.HasValue)
@@ -79,7 +87,15 @@ public class StatisticsService : IStatisticsService
         var streak = await _reviewRepo.GetUserStreakAsync(cancellationToken);
         var recentLogs = await _reviewRepo.GetRecentLogsAsync(500, cancellationToken);
 
-        var summary = BuildSummary(totalWords, statusCounts, dueCount, streak, recentLogs);
+        // Untruncated 30-day logs query for accurate heatmap and activity metrics
+        var thirtyDaysAgoUtc = DateTime.UtcNow.Date.AddDays(-30);
+        var heatmapLogs = await _reviewRepo.GetLogsSinceAsync(thirtyDaysAgoUtc, cancellationToken);
+        var effectiveHeatmapLogs = (heatmapLogs != null && heatmapLogs.Count > 0) ? heatmapLogs : recentLogs;
+
+        var localToday = DateTime.Today;
+        int studiedToday = effectiveHeatmapLogs.Count(l => l.CreatedAt.ToLocalTime().Date == localToday);
+
+        var summary = BuildSummary(totalWords, statusCounts, dueCount, streak, recentLogs, studiedToday);
 
         var allWords = await _vocabRepo.GetWordsForAnalyticsAsync(cancellationToken)
             ?? await _vocabRepo.SearchAsync(take: 5000, cancellationToken: cancellationToken);
@@ -180,7 +196,7 @@ public class StatisticsService : IStatisticsService
         var heatmap = new List<StudyHistoryDayDto>();
 
         // Pre-group logs by local DateOnly
-        var logsByDate = recentLogs
+        var logsByDate = effectiveHeatmapLogs
             .GroupBy(l => DateOnly.FromDateTime(l.CreatedAt.ToLocalTime()))
             .ToDictionary(g => g.Key, g => g.ToList());
 

@@ -614,6 +614,7 @@ public partial class TestViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            StatusSeverity = InfoBarSeverity.Error;
             StatusMessage = string.Format(_localizationService.GetString("Test_FinalizeErrorFormat"), ex.Message);
         }
         finally

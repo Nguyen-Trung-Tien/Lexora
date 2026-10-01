@@ -233,4 +233,42 @@ public class VocabularyBulkDeleteAndDtoTests
         WordDto.GetAbbreviation(PartOfSpeech.Conjunction).Should().Be("conj.");
         WordDto.GetAbbreviation(PartOfSpeech.Interjection).Should().Be("interj.");
     }
+
+    [Fact]
+    public async Task CreateWordAsync_WhenTermAlreadyExists_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var existing = new Word { Id = Guid.NewGuid(), Term = "diligent", NormalizedTerm = "diligent" };
+        _mockVocabRepo.Setup(r => r.GetByTermAsync("diligent", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        var dto = new WordCreateOrUpdateDto(null, "diligent", null, null, null, null, CefrLevel.B2, PartOfSpeech.Adjective, null, [], [], []);
+
+        // Act & Assert
+        var act = async () => await _vocabService.CreateWordAsync(dto);
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*diligent*already exists*");
+    }
+
+    [Fact]
+    public async Task UpdateWordAsync_WhenTermAlreadyExistsOnDifferentWord_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var currentId = Guid.NewGuid();
+        var otherId = Guid.NewGuid();
+        var currentWord = new Word { Id = currentId, Term = "diligent", NormalizedTerm = "diligent" };
+        var duplicateWord = new Word { Id = otherId, Term = "perspicacious", NormalizedTerm = "perspicacious" };
+
+        _mockVocabRepo.Setup(r => r.GetWithDetailsAsync(currentId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentWord);
+        _mockVocabRepo.Setup(r => r.GetByTermAsync("perspicacious", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(duplicateWord);
+
+        var dto = new WordCreateOrUpdateDto(currentId, "perspicacious", null, null, null, null, CefrLevel.C2, PartOfSpeech.Adjective, null, [], [], []);
+
+        // Act & Assert
+        var act = async () => await _vocabService.UpdateWordAsync(dto);
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*perspicacious*already exists*");
+    }
 }

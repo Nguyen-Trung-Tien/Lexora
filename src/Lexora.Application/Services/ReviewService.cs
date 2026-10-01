@@ -286,6 +286,29 @@ public class ReviewService : IReviewService
             {
                 card.CorrectReviews--;
             }
+
+            // Roll back Learning Storage entry if this review was rated Again
+            if (lastLog.Rating == ReviewRating.Again && _storageRepo != null)
+            {
+                var existingStorage = await _storageRepo.GetByWordIdAsync(card.WordId, cancellationToken);
+                if (existingStorage != null)
+                {
+                    if (existingStorage.ReasonAdded == StorageAdditionReason.Lapsed && existingStorage.Repetitions == 0)
+                    {
+                        await _storageRepo.DeleteAsync(existingStorage, cancellationToken);
+                    }
+                    else
+                    {
+                        existingStorage.Lapses = previousLapses;
+                        existingStorage.IntervalDays = previousInterval;
+                        existingStorage.NextReviewAt = previousNextReviewAt;
+                        existingStorage.RetentionProbability = _srEngine.CalculateRetentionProbability(card);
+                        existingStorage.UpdatedAt = DateTime.UtcNow;
+                        await _storageRepo.UpdateAsync(existingStorage, cancellationToken);
+                    }
+                }
+            }
+
             await _reviewRepo.DeleteStudyLogAsync(lastLog, cancellationToken);
         }
 

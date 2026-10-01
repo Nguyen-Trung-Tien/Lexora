@@ -77,6 +77,15 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<StudyLog>> GetLogsSinceAsync(DateTime sinceUtc, CancellationToken cancellationToken = default)
+    {
+        return await Context.StudyLogs
+            .AsNoTracking()
+            .Where(l => l.CreatedAt >= sinceUtc)
+            .OrderByDescending(l => l.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<UserStreak?> GetUserStreakAsync(CancellationToken cancellationToken = default)
     {
         return await Context.UserStreaks.FirstOrDefaultAsync(cancellationToken);

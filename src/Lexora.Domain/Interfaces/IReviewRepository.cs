@@ -11,6 +11,7 @@ public interface IReviewRepository : IRepository<ReviewCard>
     Task<IReadOnlyList<ReviewCard>> GetCardsByStatusAsync(LearningStatus status, CancellationToken cancellationToken = default);
     Task<Dictionary<LearningStatus, int>> GetCardCountsByStatusAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StudyLog>> GetRecentLogsAsync(int limit = 50, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<StudyLog>> GetLogsSinceAsync(DateTime sinceUtc, CancellationToken cancellationToken = default);
     Task<UserStreak?> GetUserStreakAsync(CancellationToken cancellationToken = default);
     Task UpdateStreakAsync(DateOnly date, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ReviewCard>> GetDifficultCardsAsync(int limit = 20, CancellationToken cancellationToken = default);

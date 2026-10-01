@@ -245,4 +245,56 @@ public class ReviewSessionTests
         _mockReviewRepo.Verify(r => r.UpdateAsync(card, It.IsAny<CancellationToken>()), Times.Once);
         _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task UndoReviewAsync_WhenUndoingAgainRating_ShouldDeleteAutoCreatedLapsedStorageItem()
+    {
+        // Arrange
+        var cardId = Guid.NewGuid();
+        var wordId = Guid.NewGuid();
+        var card = new ReviewCard
+        {
+            Id = cardId,
+            WordId = wordId,
+            Status = LearningStatus.NotRemembered,
+            IntervalDays = 1,
+            EaseFactor = 2.3,
+            Repetitions = 0,
+            Lapses = 1,
+            TotalReviews = 1,
+            CorrectReviews = 0
+        };
+
+        var lastLog = new StudyLog
+        {
+            Id = Guid.NewGuid(),
+            ReviewCardId = cardId,
+            Rating = ReviewRating.Again
+        };
+
+        var storageItem = new LearningStorageItem
+        {
+            Id = Guid.NewGuid(),
+            WordId = wordId,
+            ReasonAdded = StorageAdditionReason.Lapsed,
+            Repetitions = 0,
+            Status = StorageLearningStatus.Weak
+        };
+
+        var mockStorageRepo = new Mock<ILearningStorageRepository>();
+        mockStorageRepo.Setup(s => s.GetByWordIdAsync(wordId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(storageItem);
+
+        var reviewServiceWithStorage = new ReviewService(_mockReviewRepo.Object, _srEngine, _mockUnitOfWork.Object, mockStorageRepo.Object);
+
+        _mockReviewRepo.Setup(r => r.GetByIdAsync(cardId, It.IsAny<CancellationToken>())).ReturnsAsync(card);
+        _mockReviewRepo.Setup(r => r.GetLastStudyLogAsync(cardId, It.IsAny<CancellationToken>())).ReturnsAsync(lastLog);
+
+        // Act: Undo the Again rating
+        await reviewServiceWithStorage.UndoReviewAsync(cardId, LearningStatus.Learning, 3, 2.5, 1, 0, DateTime.UtcNow.AddDays(3));
+
+        // Assert: Auto-added lapsed storage item was deleted
+        mockStorageRepo.Verify(s => s.DeleteAsync(storageItem, It.IsAny<CancellationToken>()), Times.Once);
+        _mockReviewRepo.Verify(r => r.DeleteStudyLogAsync(lastLog, It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
