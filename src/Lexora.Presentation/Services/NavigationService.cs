@@ -33,7 +33,12 @@ public class NavigationService : INavigationService
 
     public bool Navigate(Type pageType, object? parameter = null, NavigationTransitionInfo? transitionInfo = null, bool force = false)
     {
-        if (_frame == null) return false;
+        if (_frame == null)
+        {
+            System.Diagnostics.Debug.WriteLine($"[NavigationService] Cannot navigate to {pageType.Name}: _frame has not been initialized.");
+            return false;
+        }
+
         if (!force && _frame.Content?.GetType() == pageType && parameter == null) return false;
 
         try
@@ -43,7 +48,7 @@ public class NavigationService : INavigationService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[NavigationService] Navigation failed to {pageType.Name}: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[NavigationService] Navigation failed to {pageType.Name}: {ex}");
             return false;
         }
     }

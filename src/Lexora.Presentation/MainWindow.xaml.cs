@@ -269,7 +269,24 @@ public sealed partial class MainWindow : Window
                     MainContentScale.ScaleY = 1.0;
                 }
 
-                await SplashOverlay.PlayExitAsync();
+                // Disable hit-testing on splash immediately before exit begins
+                SplashOverlay.IsHitTestVisible = false;
+
+                try
+                {
+                    var exitTask = SplashOverlay.PlayExitAsync();
+                    var timeoutTask = Task.Delay(500, ct);
+                    await Task.WhenAny(exitTask, timeoutTask);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MainWindow] Splash exit error: {ex.Message}");
+                }
+                finally
+                {
+                    SplashOverlay.Visibility = Visibility.Collapsed;
+                    SplashOverlay.IsHitTestVisible = false;
+                }
 
                 if (Program.PendingActivation)
                 {

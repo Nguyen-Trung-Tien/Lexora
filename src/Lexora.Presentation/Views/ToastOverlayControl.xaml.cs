@@ -76,6 +76,7 @@ public sealed partial class ToastOverlayControl : UserControl
 
         ApplyToastTheme(notification.Type);
 
+        IsHitTestVisible = true;
         bool wasVisible = ToastRoot.Visibility == Visibility.Visible;
         ToastRoot.Visibility = Visibility.Visible;
         ToastRoot.Opacity = 1.0;
@@ -169,6 +170,7 @@ public sealed partial class ToastOverlayControl : UserControl
         if (_isDismissing)
         {
             ToastRoot.Visibility = Visibility.Collapsed;
+            IsHitTestVisible = false;
             _isDismissing = false;
         }
     }

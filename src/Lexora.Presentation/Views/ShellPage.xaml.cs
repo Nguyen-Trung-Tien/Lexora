@@ -19,6 +19,9 @@ public sealed partial class ShellPage : Page
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
         _localizationService = App.Current.Services.GetRequiredService<ILocalizationService>();
 
+        // Ensure navigation service is bound to ContentFrame immediately
+        _navigationService.Initialize(ContentFrame);
+
         UpdateNavigationLabels();
         _localizationService.LanguageChanged += OnLanguageChanged;
 
@@ -57,6 +60,7 @@ public sealed partial class ShellPage : Page
     }
 
     private bool _isNavInitialized;
+    private bool _isNavigatingFromCode;
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)
     {
@@ -77,30 +81,38 @@ public sealed partial class ShellPage : Page
 
                 ContentFrame.Navigated += (s, args) =>
                 {
-                    NavView.IsBackEnabled = _navigationService.CanGoBack;
-                    switch (ContentFrame.Content)
+                    _isNavigatingFromCode = true;
+                    try
                     {
-                        case DashboardPage:
-                            NavView.SelectedItem = NavItemDashboard;
-                            break;
-                        case VocabularyPage:
-                            NavView.SelectedItem = NavItemVocabulary;
-                            break;
-                        case ReviewPage:
-                            NavView.SelectedItem = NavItemReview;
-                            break;
-                        case TestPage:
-                            NavView.SelectedItem = NavItemTest;
-                            break;
-                        case GrammarPage:
-                            NavView.SelectedItem = NavItemGrammar;
-                            break;
-                        case LearningStoragePage:
-                            NavView.SelectedItem = NavItemLearningStorage;
-                            break;
-                        case SettingsPage:
-                            NavView.SelectedItem = NavItemSettings;
-                            break;
+                        NavView.IsBackEnabled = _navigationService.CanGoBack;
+                        switch (ContentFrame.Content)
+                        {
+                            case DashboardPage:
+                                NavView.SelectedItem = NavItemDashboard;
+                                break;
+                            case VocabularyPage:
+                                NavView.SelectedItem = NavItemVocabulary;
+                                break;
+                            case ReviewPage:
+                                NavView.SelectedItem = NavItemReview;
+                                break;
+                            case TestPage:
+                                NavView.SelectedItem = NavItemTest;
+                                break;
+                            case GrammarPage:
+                                NavView.SelectedItem = NavItemGrammar;
+                                break;
+                            case LearningStoragePage:
+                                NavView.SelectedItem = NavItemLearningStorage;
+                                break;
+                            case SettingsPage:
+                                NavView.SelectedItem = NavItemSettings;
+                                break;
+                        }
+                    }
+                    finally
+                    {
+                        _isNavigatingFromCode = false;
                     }
                 };
 
@@ -124,33 +136,70 @@ public sealed partial class ShellPage : Page
             return;
         }
 
-        if (args.InvokedItemContainer is NavigationViewItem item)
+        var item = args.InvokedItemContainer as NavigationViewItem
+            ?? sender.MenuItems.OfType<NavigationViewItem>().FirstOrDefault(i =>
+                Equals(i.Content, args.InvokedItem) ||
+                Equals(i.Tag, args.InvokedItem) ||
+                string.Equals(i.Content?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(i.Tag?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase))
+            ?? sender.FooterMenuItems.OfType<NavigationViewItem>().FirstOrDefault(i =>
+                Equals(i.Content, args.InvokedItem) ||
+                Equals(i.Tag, args.InvokedItem) ||
+                string.Equals(i.Content?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(i.Tag?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase))
+            ?? sender.SelectedItem as NavigationViewItem;
+
+        if (item != null)
         {
-            var tag = item.Tag?.ToString();
-            switch (tag)
-            {
-                case "Dashboard":
-                    _navigationService.Navigate(typeof(DashboardPage));
-                    break;
-                case "Vocabulary":
-                    _navigationService.Navigate(typeof(VocabularyPage));
-                    break;
-                case "Review":
-                    _navigationService.Navigate(typeof(ReviewPage));
-                    break;
-                case "Test":
-                    _navigationService.Navigate(typeof(TestPage));
-                    break;
-                case "Grammar":
-                    _navigationService.Navigate(typeof(GrammarPage));
-                    break;
-                case "LearningStorage":
-                    _navigationService.Navigate(typeof(LearningStoragePage));
-                    break;
-                case "Settings":
-                    _navigationService.Navigate(typeof(SettingsPage));
-                    break;
-            }
+            NavigateToItem(item);
+        }
+    }
+
+    private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    {
+        if (_isNavigatingFromCode) return;
+
+        if (args.IsSettingsSelected)
+        {
+            _navigationService.Navigate(typeof(SettingsPage));
+            return;
+        }
+
+        var item = args.SelectedItemContainer as NavigationViewItem
+            ?? sender.SelectedItem as NavigationViewItem;
+
+        if (item != null)
+        {
+            NavigateToItem(item);
+        }
+    }
+
+    private void NavigateToItem(NavigationViewItem item)
+    {
+        var tag = item.Tag?.ToString();
+        switch (tag)
+        {
+            case "Dashboard":
+                _navigationService.Navigate(typeof(DashboardPage));
+                break;
+            case "Vocabulary":
+                _navigationService.Navigate(typeof(VocabularyPage));
+                break;
+            case "Review":
+                _navigationService.Navigate(typeof(ReviewPage));
+                break;
+            case "Test":
+                _navigationService.Navigate(typeof(TestPage));
+                break;
+            case "Grammar":
+                _navigationService.Navigate(typeof(GrammarPage));
+                break;
+            case "LearningStorage":
+                _navigationService.Navigate(typeof(LearningStoragePage));
+                break;
+            case "Settings":
+                _navigationService.Navigate(typeof(SettingsPage));
+                break;
         }
     }
 

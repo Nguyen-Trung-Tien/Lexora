@@ -25,6 +25,7 @@ public sealed partial class SplashScreenOverlay : UserControl
         ExitStoryboard.Completed += (s, e) =>
         {
             Visibility = Visibility.Collapsed;
+            IsHitTestVisible = false;
             _exitTcs?.TrySetResult(true);
         };
         ReducedMotionEntrance.Completed += (s, e) => _entranceTcs?.TrySetResult(true);
@@ -53,11 +54,14 @@ public sealed partial class SplashScreenOverlay : UserControl
             EntranceStoryboard.Begin();
         }
 
-        await _entranceTcs.Task;
+        // Safety timeout in case storyboard completion is dropped by WinUI 3
+        var entranceTimeout = Task.Delay(1200);
+        await Task.WhenAny(_entranceTcs.Task, entranceTimeout);
     }
 
     public async Task PlayExitAsync()
     {
+        IsHitTestVisible = false;
         _exitTcs = new TaskCompletionSource<bool>();
 
         if (!IsAnimationEnabled)
@@ -69,9 +73,23 @@ public sealed partial class SplashScreenOverlay : UserControl
         else
         {
             ExitStoryboard.Begin();
+
+            // Safety timeout in case storyboard completion is dropped by WinUI 3
+            _ = Task.Delay(400).ContinueWith(_ =>
+            {
+                DispatcherQueue?.TryEnqueue(() =>
+                {
+                    Visibility = Visibility.Collapsed;
+                    IsHitTestVisible = false;
+                    _exitTcs?.TrySetResult(true);
+                });
+            });
         }
 
-        await _exitTcs.Task;
+        var exitTimeout = Task.Delay(500);
+        await Task.WhenAny(_exitTcs.Task, exitTimeout);
+        Visibility = Visibility.Collapsed;
+        IsHitTestVisible = false;
     }
 
     public void UpdateStatus(string message)

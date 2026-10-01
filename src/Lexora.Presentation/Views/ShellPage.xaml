@@ -20,6 +20,7 @@
             IsSettingsVisible="False"
             KeyboardAcceleratorPlacementMode="Hidden"
             ItemInvoked="NavView_ItemInvoked"
+            SelectionChanged="NavView_SelectionChanged"
             Loaded="NavView_Loaded">
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="NavItemDashboard" Content="Dashboard" Tag="Dashboard" ToolTipService.ToolTip="Dashboard (Ctrl+1)">
@@ -99,6 +100,7 @@
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Top"
                                    Margin="0,52,24,0"
+                                   IsHitTestVisible="False"
                                    Canvas.ZIndex="1000" />
     </Grid>
 </Page>
