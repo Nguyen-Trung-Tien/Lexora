@@ -64,7 +64,7 @@ public class NavigationService : INavigationService
 
         try
         {
-            transitionInfo ??= new EntranceNavigationTransitionInfo();
+            transitionInfo ??= new SuppressNavigationTransitionInfo();
             return _frame.Navigate(pageType, parameter, transitionInfo);
         }
         catch (Exception ex)

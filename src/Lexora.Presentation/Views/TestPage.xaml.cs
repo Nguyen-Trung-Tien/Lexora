@@ -18,6 +18,7 @@ public sealed partial class TestPage : Page
 
     public TestPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<TestViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
 
@@ -58,7 +59,10 @@ public sealed partial class TestPage : Page
             UpdateCountButtonLabels();
             UpdateTypeButtonStyles(ViewModel.SelectedTestType);
             UpdateCountButtonStyles(ViewModel.QuestionCount);
-            await ViewModel.InitializeAsync();
+            if (ViewModel.Topics.Count == 0)
+            {
+                await ViewModel.InitializeAsync();
+            }
 
             if (e.Parameter is IEnumerable<Guid> wordIds)
             {

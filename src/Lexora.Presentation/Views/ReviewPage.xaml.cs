@@ -20,6 +20,7 @@ public sealed partial class ReviewPage : Page
 
     public ReviewPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<ReviewViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _preferencesService = App.Current.Services.GetRequiredService<IUserPreferencesService>();
@@ -108,7 +109,14 @@ public sealed partial class ReviewPage : Page
             }
             else
             {
-                await ViewModel.InitializeAsync();
+                if (ViewModel.CurrentCard == null && !ViewModel.IsCompleted)
+                {
+                    await ViewModel.InitializeAsync();
+                }
+                else
+                {
+                    _ = ViewModel.RefreshDueCountAsync();
+                }
                 UpdateModeButtonStyles(ViewModel.CurrentMode);
             }
         }

@@ -20,7 +20,6 @@
             IsSettingsVisible="False"
             KeyboardAcceleratorPlacementMode="Hidden"
             ItemInvoked="NavView_ItemInvoked"
-            SelectionChanged="NavView_SelectionChanged"
             Loaded="NavView_Loaded">
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="NavItemDashboard" Content="Dashboard" Tag="Dashboard" ToolTipService.ToolTip="Dashboard (Ctrl+1)">

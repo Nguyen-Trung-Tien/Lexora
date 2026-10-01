@@ -61,7 +61,6 @@ public sealed partial class ShellPage : Page
     }
 
     private bool _isNavInitialized;
-    private bool _isNavigatingFromCode;
 
     private async void NavView_Loaded(object sender, RoutedEventArgs e)
     {
@@ -82,38 +81,30 @@ public sealed partial class ShellPage : Page
 
                 ContentFrame.Navigated += (s, args) =>
                 {
-                    _isNavigatingFromCode = true;
-                    try
+                    NavView.IsBackEnabled = _navigationService.CanGoBack;
+                    switch (ContentFrame.Content)
                     {
-                        NavView.IsBackEnabled = _navigationService.CanGoBack;
-                        switch (ContentFrame.Content)
-                        {
-                            case DashboardPage:
-                                NavView.SelectedItem = NavItemDashboard;
-                                break;
-                            case VocabularyPage:
-                                NavView.SelectedItem = NavItemVocabulary;
-                                break;
-                            case ReviewPage:
-                                NavView.SelectedItem = NavItemReview;
-                                break;
-                            case TestPage:
-                                NavView.SelectedItem = NavItemTest;
-                                break;
-                            case GrammarPage:
-                                NavView.SelectedItem = NavItemGrammar;
-                                break;
-                            case LearningStoragePage:
-                                NavView.SelectedItem = NavItemLearningStorage;
-                                break;
-                            case SettingsPage:
-                                NavView.SelectedItem = NavItemSettings;
-                                break;
-                        }
-                    }
-                    finally
-                    {
-                        _isNavigatingFromCode = false;
+                        case DashboardPage:
+                            NavView.SelectedItem = NavItemDashboard;
+                            break;
+                        case VocabularyPage:
+                            NavView.SelectedItem = NavItemVocabulary;
+                            break;
+                        case ReviewPage:
+                            NavView.SelectedItem = NavItemReview;
+                            break;
+                        case TestPage:
+                            NavView.SelectedItem = NavItemTest;
+                            break;
+                        case GrammarPage:
+                            NavView.SelectedItem = NavItemGrammar;
+                            break;
+                        case LearningStoragePage:
+                            NavView.SelectedItem = NavItemLearningStorage;
+                            break;
+                        case SettingsPage:
+                            NavView.SelectedItem = NavItemSettings;
+                            break;
                     }
                 };
 
@@ -145,24 +136,6 @@ public sealed partial class ShellPage : Page
                     Equals(i.Tag, args.InvokedItem) ||
                     string.Equals(i.Content?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(i.Tag?.ToString(), args.InvokedItem?.ToString(), StringComparison.OrdinalIgnoreCase));
-
-        if (item != null)
-        {
-            NavigateToItem(item);
-        }
-    }
-
-    private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
-    {
-        if (_isNavigatingFromCode) return;
-
-        if (args.IsSettingsSelected)
-        {
-            _navigationService.Navigate(typeof(SettingsPage));
-            return;
-        }
-
-        var item = args.SelectedItemContainer as NavigationViewItem;
 
         if (item != null)
         {

@@ -20,6 +20,7 @@ public sealed partial class GrammarPage : Page
 
     public GrammarPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<GrammarViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
@@ -77,8 +78,12 @@ public sealed partial class GrammarPage : Page
             {
                 ViewModel.SearchQuery = query;
                 GrammarSearchBox.Text = query;
+                await ViewModel.InitializeAsync();
             }
-            await ViewModel.InitializeAsync();
+            else if (ViewModel.Rules.Count == 0)
+            {
+                await ViewModel.InitializeAsync();
+            }
         }
         catch (Exception ex)
         {

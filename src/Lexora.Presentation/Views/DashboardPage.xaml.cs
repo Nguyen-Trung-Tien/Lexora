@@ -14,6 +14,7 @@ public sealed partial class DashboardPage : Page
 
     public DashboardPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<DashboardViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _soundFeedback = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ISoundFeedbackService>();
@@ -38,7 +39,15 @@ public sealed partial class DashboardPage : Page
         base.OnNavigatedTo(e);
         try
         {
-            await ViewModel.LoadDashboardAsync();
+            if (ViewModel.TotalWords == 0)
+            {
+                await ViewModel.LoadDashboardAsync();
+            }
+            else
+            {
+                // Background refresh without freezing UI thread during tab switch
+                _ = ViewModel.LoadDashboardAsync();
+            }
         }
         catch (Exception ex)
         {

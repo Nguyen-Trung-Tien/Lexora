@@ -13,9 +13,11 @@ public sealed partial class SettingsPage : Page
     public SettingsViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
     private bool _isBackupOrRestoreInProgress;
+    private bool _isInitialized;
 
     public SettingsPage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<SettingsViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
 
@@ -47,7 +49,11 @@ public sealed partial class SettingsPage : Page
     {
         try
         {
-            await ViewModel.InitializeAsync();
+            if (!_isInitialized)
+            {
+                await ViewModel.InitializeAsync();
+                _isInitialized = true;
+            }
             UpdateLanguageButtons();
             UpdateThemeButtons();
             UpdateAccentButtons();

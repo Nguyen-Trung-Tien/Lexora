@@ -24,6 +24,7 @@ public sealed partial class LearningStoragePage : Page
 
     public LearningStoragePage()
     {
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<LearningStorageViewModel>();
         Loc = App.Current.Services.GetRequiredService<Services.ILocalizationService>();
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
@@ -40,7 +41,10 @@ public sealed partial class LearningStoragePage : Page
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await ViewModel.InitializeAsync();
+        if (ViewModel.StorageItems.Count == 0)
+        {
+            await ViewModel.InitializeAsync();
+        }
         UpdateSegmentedButtons();
     }
 
