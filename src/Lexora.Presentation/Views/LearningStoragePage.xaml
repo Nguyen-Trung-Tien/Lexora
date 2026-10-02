@@ -452,17 +452,21 @@
         <Grid Background="{ThemeResource SmokeFillColorDefaultBrush}"
               Visibility="{x:Bind ViewModel.IsPracticeActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
               Canvas.ZIndex="30" Padding="20">
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+            <Border Background="{ThemeResource LexoraModalBackgroundBrush}"
+                    BorderBrush="{ThemeResource LexoraModalBorderBrush}" BorderThickness="1"
                     CornerRadius="16" MaxWidth="680" MaxHeight="660"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Padding="28,24">
+                    Padding="28,24"
+                    Translation="0,0,32">
+                <Border.Shadow>
+                    <ThemeShadow />
+                </Border.Shadow>
                 
-                <!-- Practice Content -->
-                <StackPanel Spacing="18">
+                <!-- Practice Modal Container -->
+                <Grid RowDefinitions="Auto,*">
                     
-                    <!-- Practice Header -->
-                    <Grid ColumnDefinitions="*,Auto,Auto">
+                    <!-- Practice Header (Always pinned at top) -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,18">
                         <StackPanel Spacing="2">
                             <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Title')}"
                                        FontSize="20" FontWeight="Bold"
@@ -485,107 +489,113 @@
                         </Button>
                     </Grid>
 
-                    <!-- Practice In-Progress View -->
-                    <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsPracticeCompleted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                        
-                        <!-- Question Card -->
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                CornerRadius="12" Padding="18">
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="{x:Bind ViewModel.CurrentQuestionPrompt, Mode=OneWay}"
-                                           FontSize="16" FontWeight="SemiBold"
-                                           TextWrapping="Wrap" />
-                                <TextBlock Text="{x:Bind ViewModel.CurrentQuestionSubPrompt, Mode=OneWay}"
-                                           FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Border>
+                    <!-- Scrollable Practice Content Area -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Spacing="18">
 
-                        <!-- Interactive Answer Options List -->
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentOptions, Mode=OneWay}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="vm:TestOptionItem">
-                                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                            Margin="0,0,0,8" Padding="14,12" CornerRadius="10"
-                                            BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
-                                            BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"
-                                            Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBackground}"
-                                            IsEnabled="{x:Bind IsSelectable, Mode=OneWay}"
-                                            Click="PracticeOption_Click" Tag="{x:Bind Text}">
-                                        <Grid ColumnDefinitions="Auto,*">
-                                            <Border Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Background}"
-                                                    CornerRadius="6" Width="28" Height="28" Margin="0,0,12,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock Text="{x:Bind Glyph, Mode=OneWay}" FontSize="12" FontWeight="Bold"
-                                                           Foreground="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Foreground}"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-                                            <TextBlock Grid.Column="1" Text="{x:Bind Text}" FontSize="14" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                        </Grid>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <!-- Feedback Info -->
-                        <StackPanel Spacing="10" Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    CornerRadius="8" Padding="14,10">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                                              Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                    <FontIcon Glyph="&#xE711;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                              Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
-                                    <TextBlock Text="{x:Bind ViewModel.CurrentQuestionExplanation, Mode=OneWay}"
-                                               FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Bottom Controls in Practice -->
-                        <Grid Margin="0,6,0,0">
-                            <Button Style="{ThemeResource AccentButtonStyle}"
-                                    HorizontalAlignment="Right" CornerRadius="8" Padding="20,10"
-                                    IsEnabled="{x:Bind ViewModel.HasSelectedPracticeAnswer, Mode=OneWay}"
-                                    Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                                    Click="SubmitPractice_Click">
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Submit')}" FontWeight="SemiBold" />
-                            </Button>
-
-                            <Button Style="{ThemeResource AccentButtonStyle}"
-                                    HorizontalAlignment="Right" CornerRadius="8" Padding="20,10"
-                                    Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    Click="NextPractice_Click">
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Next')}" FontWeight="SemiBold" />
-                            </Button>
-                        </Grid>
-                    </StackPanel>
-
-                    <!-- Practice Completed Summary Screen -->
-                    <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsPracticeCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="12" Padding="28">
-                            <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                <Border Width="56" Height="56" CornerRadius="28"
-                                        Background="{ThemeResource SystemFillColorSuccessBrush}"
-                                        HorizontalAlignment="Center">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="24" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <!-- Practice In-Progress View -->
+                            <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsPracticeCompleted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                
+                                <!-- Question Card -->
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        CornerRadius="12" Padding="18">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="{x:Bind ViewModel.CurrentQuestionPrompt, Mode=OneWay}"
+                                                   FontSize="16" FontWeight="SemiBold"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Text="{x:Bind ViewModel.CurrentQuestionSubPrompt, Mode=OneWay}"
+                                                   FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
                                 </Border>
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_ResultTitle')}"
-                                           FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
-                                <TextBlock Text="{x:Bind ViewModel.PracticeResultSummaryText, Mode=OneWay}"
-                                           FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           TextWrapping="Wrap" TextAlignment="Center" MaxWidth="480" HorizontalAlignment="Center" />
+
+                                <!-- Interactive Answer Options List -->
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentOptions, Mode=OneWay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:TestOptionItem">
+                                            <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                                    Margin="0,0,0,8" Padding="14,12" CornerRadius="10"
+                                                    BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
+                                                    BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"
+                                                    Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBackground}"
+                                                    IsEnabled="{x:Bind IsSelectable, Mode=OneWay}"
+                                                    Click="PracticeOption_Click" Tag="{x:Bind Text}">
+                                                <Grid ColumnDefinitions="Auto,*">
+                                                    <Border Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Background}"
+                                                            CornerRadius="6" Width="28" Height="28" Margin="0,0,12,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <TextBlock Text="{x:Bind Glyph, Mode=OneWay}" FontSize="12" FontWeight="Bold"
+                                                                   Foreground="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Foreground}"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind Text}" FontSize="14" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Feedback Info -->
+                                <StackPanel Spacing="10" Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            CornerRadius="8" Padding="14,10">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                      Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <FontIcon Glyph="&#xE711;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                      Visibility="{x:Bind ViewModel.IsCurrentAnswerCorrect, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentQuestionExplanation, Mode=OneWay}"
+                                                       FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Bottom Controls in Practice -->
+                                <Grid Margin="0,6,0,0">
+                                    <Button Style="{ThemeResource AccentButtonStyle}"
+                                            HorizontalAlignment="Right" CornerRadius="8" Padding="20,10"
+                                            IsEnabled="{x:Bind ViewModel.HasSelectedPracticeAnswer, Mode=OneWay}"
+                                            Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                                            Click="SubmitPractice_Click">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Submit')}" FontWeight="SemiBold" />
+                                    </Button>
+
+                                    <Button Style="{ThemeResource AccentButtonStyle}"
+                                            HorizontalAlignment="Right" CornerRadius="8" Padding="20,10"
+                                            Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Click="NextPractice_Click">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Next')}" FontWeight="SemiBold" />
+                                    </Button>
+                                </Grid>
                             </StackPanel>
-                        </Border>
 
-                        <Button Style="{ThemeResource AccentButtonStyle}"
-                                HorizontalAlignment="Center" CornerRadius="8" Padding="24,10"
-                                Click="ClosePractice_Click">
-                            <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Finish')}" FontWeight="SemiBold" />
-                        </Button>
-                    </StackPanel>
+                            <!-- Practice Completed Summary Screen -->
+                            <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.IsPracticeCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="12" Padding="28">
+                                    <StackPanel Spacing="12" HorizontalAlignment="Center">
+                                        <Border Width="56" Height="56" CornerRadius="28"
+                                                Background="{ThemeResource SystemFillColorSuccessBrush}"
+                                                HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="24" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_ResultTitle')}"
+                                                   FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.PracticeResultSummaryText, Mode=OneWay}"
+                                                   FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   TextWrapping="Wrap" TextAlignment="Center" MaxWidth="480" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
 
-                </StackPanel>
+                                <Button Style="{ThemeResource AccentButtonStyle}"
+                                        HorizontalAlignment="Center" CornerRadius="8" Padding="24,10"
+                                        Click="ClosePractice_Click">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Finish')}" FontWeight="SemiBold" />
+                                </Button>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </Border>
         </Grid>
 

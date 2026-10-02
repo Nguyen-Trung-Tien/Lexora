@@ -27,6 +27,9 @@
             <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.45" />
+            <!-- Modal Dialog & Floating Overlay tokens (100% opaque, zero bleed-through) -->
+            <SolidColorBrush x:Key="LexoraModalBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="LexoraModalBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.4" />
             <!-- Semantic state background fills -->
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#DFF6DD" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#FDE7E9" />
@@ -51,6 +54,9 @@
             <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="#282828" />
             <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
+            <!-- Modal Dialog & Floating Overlay tokens (100% opaque, zero bleed-through) -->
+            <SolidColorBrush x:Key="LexoraModalBackgroundBrush" Color="#282828" />
+            <SolidColorBrush x:Key="LexoraModalBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
             <!-- Semantic state background fills -->
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#393D1B" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#442726" />
@@ -69,6 +75,9 @@
             <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <!-- Modal Dialog & Floating Overlay tokens (100% opaque, zero bleed-through) -->
+            <SolidColorBrush x:Key="LexoraModalBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="LexoraModalBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <!-- Semantic state background fills -->
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />

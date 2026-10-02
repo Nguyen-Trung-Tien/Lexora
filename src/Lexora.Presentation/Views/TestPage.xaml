@@ -23,14 +23,18 @@
                   Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <!-- Dimming Layer -->
-                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" Opacity="0.65" />
+                <Border Background="{ThemeResource SmokeFillColorDefaultBrush}" />
 
                 <!-- Elevated Card -->
                 <Border Width="280" Padding="24" CornerRadius="16"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource LexoraModalBackgroundBrush}"
+                        BorderBrush="{ThemeResource LexoraModalBorderBrush}"
                         BorderThickness="1"
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Translation="0,0,32">
+                    <Border.Shadow>
+                        <ThemeShadow />
+                    </Border.Shadow>
                     <StackPanel Spacing="14" HorizontalAlignment="Center">
                         <!-- Dual Progress Spinner -->
                         <Grid HorizontalAlignment="Center" Width="52" Height="52">

@@ -101,6 +101,8 @@ public static class ThemeResourceHelper
             "SystemFillColorSuccessBackgroundBrush" => isLight ? LightSuccessBackground : DarkSuccessBackground,
             "SystemFillColorCriticalBackgroundBrush" => isLight ? LightCriticalBackground : DarkCriticalBackground,
             "SystemFillColorCautionBackgroundBrush" => isLight ? LightCautionBackground : DarkCautionBackground,
+            "LexoraModalBackgroundBrush" => isLight ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Color.FromArgb(255, 40, 40, 40)),
+            "LexoraModalBorderBrush" => isLight ? LightCardStroke : DarkCardStroke,
             _ => isLight ? LightCardBackground : DarkCardBackground
         };
     }
