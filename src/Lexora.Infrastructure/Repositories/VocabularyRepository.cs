@@ -141,7 +141,16 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             _ => query.OrderBy(w => w.Term)
         };
 
-        return await query.Skip(skip).Take(take).ToListAsync(cancellationToken);
+        var results = await query.Skip(skip).Take(take).ToListAsync(cancellationToken);
+        if (results.Count > 0 || string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return results;
+        }
+
+        // Diacritic-insensitive fallback for Vietnamese unaccented search
+        return await SearchDiacriticFallbackAsync(
+            searchTerm, level, partOfSpeech, topicId, examType, status,
+            skip, take, sortBy, isAscending, isDueToday, isWeak, cancellationToken);
     }
 
     public Task<int> CountFilteredAsync(
@@ -169,7 +178,149 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
     {
         var query = DbSet.AsNoTracking().AsQueryable();
         query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
-        return await query.CountAsync(cancellationToken);
+        var count = await query.CountAsync(cancellationToken);
+        if (count > 0 || string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return count;
+        }
+
+        // Diacritic-insensitive fallback count for Vietnamese unaccented search
+        return await CountDiacriticFallbackAsync(
+            searchTerm, level, partOfSpeech, topicId, examType, status,
+            isDueToday, isWeak, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<Word>> SearchDiacriticFallbackAsync(
+        string searchTerm,
+        CefrLevel? level,
+        PartOfSpeech? partOfSpeech,
+        Guid? topicId,
+        ExamType? examType,
+        LearningStatus? status,
+        int skip,
+        int take,
+        string? sortBy,
+        bool isAscending,
+        bool? isDueToday,
+        bool? isWeak,
+        CancellationToken cancellationToken)
+    {
+        var fallbackQuery = DbSet
+            .Include(w => w.Meanings)
+                .ThenInclude(m => m.Examples)
+            .Include(w => w.WordTopics)
+                .ThenInclude(wt => wt.Topic)
+            .Include(w => w.WordExamTags)
+                .ThenInclude(wet => wet.ExamTag)
+            .Include(w => w.ReviewCard)
+            .AsNoTracking()
+            .AsQueryable();
+
+        fallbackQuery = ApplyFilters(fallbackQuery, null, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
+
+        var candidates = await fallbackQuery.ToListAsync(cancellationToken);
+        var normQuery = Lexora.Domain.Common.SearchTextHelper.Normalize(searchTerm);
+        if (string.IsNullOrEmpty(normQuery)) return Array.Empty<Word>();
+
+        var matched = candidates.Where(w => IsWordMatch(w, normQuery));
+
+        matched = sortBy?.ToLowerInvariant() switch
+        {
+            "term" => isAscending ? matched.OrderBy(w => w.Term) : matched.OrderByDescending(w => w.Term),
+            "level" => isAscending ? matched.OrderBy(w => w.Level) : matched.OrderByDescending(w => w.Level),
+            "createdat" => isAscending ? matched.OrderBy(w => w.CreatedAt) : matched.OrderByDescending(w => w.CreatedAt),
+            "nextreview" => isAscending
+                ? matched.OrderBy(w => w.ReviewCard != null ? w.ReviewCard.NextReviewAt : DateTime.MaxValue)
+                : matched.OrderByDescending(w => w.ReviewCard != null ? w.ReviewCard.NextReviewAt : DateTime.MinValue),
+            "pos" => isAscending
+                ? matched.OrderBy(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term)
+                : matched.OrderByDescending(w => w.PrimaryPartOfSpeech).ThenBy(w => w.Term),
+            "multipos" => isAscending
+                ? matched.OrderBy(w => w.Meanings.Count).ThenBy(w => w.Term)
+                : matched.OrderByDescending(w => w.Meanings.Count).ThenBy(w => w.Term),
+            _ => matched.OrderBy(w => w.Term)
+        };
+
+        return matched.Skip(skip).Take(take).ToList();
+    }
+
+    private async Task<int> CountDiacriticFallbackAsync(
+        string searchTerm,
+        CefrLevel? level,
+        PartOfSpeech? partOfSpeech,
+        Guid? topicId,
+        ExamType? examType,
+        LearningStatus? status,
+        bool? isDueToday,
+        bool? isWeak,
+        CancellationToken cancellationToken)
+    {
+        var fallbackQuery = DbSet
+            .Include(w => w.Meanings)
+                .ThenInclude(m => m.Examples)
+            .Include(w => w.WordTopics)
+                .ThenInclude(wt => wt.Topic)
+            .Include(w => w.WordExamTags)
+                .ThenInclude(wet => wet.ExamTag)
+            .AsNoTracking()
+            .AsQueryable();
+
+        fallbackQuery = ApplyFilters(fallbackQuery, null, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
+
+        var candidates = await fallbackQuery.ToListAsync(cancellationToken);
+        var normQuery = Lexora.Domain.Common.SearchTextHelper.Normalize(searchTerm);
+        if (string.IsNullOrEmpty(normQuery)) return 0;
+
+        return candidates.Count(w => IsWordMatch(w, normQuery));
+    }
+
+    private static bool IsWordMatch(Word w, string normQuery)
+    {
+        if (Lexora.Domain.Common.SearchTextHelper.Normalize(w.Term).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+            Lexora.Domain.Common.SearchTextHelper.Normalize(w.NormalizedTerm).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+            (!string.IsNullOrEmpty(w.PhoneticUk) && Lexora.Domain.Common.SearchTextHelper.Normalize(w.PhoneticUk).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrEmpty(w.PhoneticUs) && Lexora.Domain.Common.SearchTextHelper.Normalize(w.PhoneticUs).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrEmpty(w.Notes) && Lexora.Domain.Common.SearchTextHelper.Normalize(w.Notes).Contains(normQuery, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        if (w.Meanings != null)
+        {
+            foreach (var m in w.Meanings)
+            {
+                if ((!string.IsNullOrEmpty(m.DefinitionVi) && Lexora.Domain.Common.SearchTextHelper.Normalize(m.DefinitionVi).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(m.DefinitionEn) && Lexora.Domain.Common.SearchTextHelper.Normalize(m.DefinitionEn).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(m.Explanation) && Lexora.Domain.Common.SearchTextHelper.Normalize(m.Explanation).Contains(normQuery, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+
+                if (normQuery.Length >= 5 && m.Examples != null)
+                {
+                    foreach (var ex in m.Examples)
+                    {
+                        if ((!string.IsNullOrEmpty(ex.SentenceEn) && Lexora.Domain.Common.SearchTextHelper.Normalize(ex.SentenceEn).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+                            (!string.IsNullOrEmpty(ex.SentenceVi) && Lexora.Domain.Common.SearchTextHelper.Normalize(ex.SentenceVi).Contains(normQuery, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (w.WordTopics != null && w.WordTopics.Any(wt => wt.Topic != null && !string.IsNullOrEmpty(wt.Topic.Name) && Lexora.Domain.Common.SearchTextHelper.Normalize(wt.Topic.Name).Contains(normQuery, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        if (w.WordExamTags != null && w.WordExamTags.Any(wet => wet.ExamTag != null && !string.IsNullOrEmpty(wet.ExamTag.Name) && Lexora.Domain.Common.SearchTextHelper.Normalize(wet.ExamTag.Name).Contains(normQuery, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public async Task<IReadOnlyList<Word>> GetRandomWordsAsync(int count, Guid? excludeWordId = null, CancellationToken cancellationToken = default)
@@ -217,6 +368,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         {
             var term = searchTerm.Trim().ToLowerInvariant();
             var pattern = $"%{term}%";
+            bool matchExamples = term.Length >= 5;
             query = query.Where(w =>
                 EF.Functions.Like(w.NormalizedTerm, pattern) ||
                 EF.Functions.Like(w.Term, pattern) ||
@@ -227,9 +379,9 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
                     EF.Functions.Like(m.DefinitionVi, pattern) ||
                     (m.DefinitionEn != null && EF.Functions.Like(m.DefinitionEn, pattern)) ||
                     (m.Explanation != null && EF.Functions.Like(m.Explanation, pattern)) ||
-                    m.Examples.Any(ex =>
+                    (matchExamples && m.Examples.Any(ex =>
                         EF.Functions.Like(ex.SentenceEn, pattern) ||
-                        (ex.SentenceVi != null && EF.Functions.Like(ex.SentenceVi, pattern)))) ||
+                        (ex.SentenceVi != null && EF.Functions.Like(ex.SentenceVi, pattern))))) ||
                 w.WordTopics.Any(wt => wt.Topic != null && EF.Functions.Like(wt.Topic.Name, pattern)) ||
                 w.WordExamTags.Any(wet => wet.ExamTag != null && EF.Functions.Like(wet.ExamTag.Name, pattern)));
         }

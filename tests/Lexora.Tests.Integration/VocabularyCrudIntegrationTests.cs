@@ -847,6 +847,42 @@ public class VocabularyCrudIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task Search_ByVietnameseMeaning_AccentedAndUnaccented_Test()
+    {
+        var word = new Word
+        {
+            Term = "collaborate",
+            NormalizedTerm = "collaborate",
+            Level = CefrLevel.B2,
+            PrimaryPartOfSpeech = PartOfSpeech.Verb,
+            Meanings = new List<WordMeaning>
+            {
+                new()
+                {
+                    DefinitionVi = "hợp tác, cộng tác",
+                    PartOfSpeech = PartOfSpeech.Verb
+                }
+            }
+        };
+        await _vocabRepo.AddAsync(word);
+        await _unitOfWork.SaveChangesAsync();
+
+        var resAccented = await _vocabRepo.SearchAsync("hợp tác", null, null, null, null, null, 0, 10);
+        var resUnaccented = await _vocabRepo.SearchAsync("hop tac", null, null, null, null, null, 0, 10);
+
+        resAccented.Should().NotBeEmpty();
+        resUnaccented.Should().NotBeEmpty();
+
+        var serviceAccented = await _vocabService.SearchWordsAsync(search: "hợp tác");
+        var serviceUnaccented = await _vocabService.SearchWordsAsync(search: "hop tac");
+        var countUnaccented = await _vocabService.CountWordsAsync(search: "hop tac");
+
+        serviceAccented.Should().NotBeEmpty();
+        serviceUnaccented.Should().NotBeEmpty();
+        countUnaccented.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
     public async Task BulkDelete_WithChunkingAndLargeBatch_ShouldDeleteAllAndCleanRelations()
     {
         // 1. Create 320 words in batches

@@ -23,9 +23,21 @@ public interface ISmartSearchService
         int maxSuggestions = 5,
         double minSimilarity = 0.55);
 
+    IReadOnlyList<string> FindClosestWordSuggestions(
+        string query,
+        IEnumerable<WordDto> candidates,
+        int maxSuggestions = 5,
+        double minSimilarity = 0.55);
+
     IReadOnlyList<string> FindClosestGrammarSuggestions(
         string query,
         IEnumerable<string> candidates,
+        int maxSuggestions = 5,
+        double minSimilarity = 0.55);
+
+    IReadOnlyList<string> FindClosestGrammarRuleSuggestions(
+        string query,
+        IEnumerable<GrammarRuleDto> candidates,
         int maxSuggestions = 5,
         double minSimilarity = 0.55);
 

@@ -18,35 +18,56 @@ public class FuzzySearchService : IFuzzySearchService
         var s = source.Trim().ToLowerInvariant();
         var t = target.Trim().ToLowerInvariant();
 
+        if (s == t) return 0;
+
         int n = s.Length;
         int m = t.Length;
 
-        // Use stackalloc for small strings to avoid heap allocation
-        Span<int> prevRow = n < 128 ? stackalloc int[n + 1] : new int[n + 1];
-        Span<int> currRow = n < 128 ? stackalloc int[n + 1] : new int[n + 1];
+        // Use stackalloc for small strings to avoid heap allocation (3 rows for Damerau-Levenshtein transpositions)
+        int rowLen = m + 1;
+        Span<int> row0 = rowLen <= 128 ? stackalloc int[rowLen] : new int[rowLen];
+        Span<int> row1 = rowLen <= 128 ? stackalloc int[rowLen] : new int[rowLen];
+        Span<int> row2 = rowLen <= 128 ? stackalloc int[rowLen] : new int[rowLen];
 
-        for (int i = 0; i <= n; i++)
+        for (int j = 0; j <= m; j++)
         {
-            prevRow[i] = i;
+            row1[j] = j;
         }
 
-        for (int j = 1; j <= m; j++)
+        for (int i = 1; i <= n; i++)
         {
-            currRow[0] = j;
-            char tChar = t[j - 1];
+            row2[0] = i;
+            char sChar = s[i - 1];
 
-            for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++)
             {
-                int cost = s[i - 1] == tChar ? 0 : 1;
-                currRow[i] = Math.Min(
-                    Math.Min(currRow[i - 1] + 1, prevRow[i] + 1),
-                    prevRow[i - 1] + cost);
+                char tChar = t[j - 1];
+                int cost = sChar == tChar ? 0 : 1;
+
+                int insertion = row2[j - 1] + 1;
+                int deletion = row1[j] + 1;
+                int substitution = row1[j - 1] + cost;
+
+                int min = Math.Min(Math.Min(insertion, deletion), substitution);
+
+                // Damerau-Levenshtein adjacent transposition
+                if (i > 1 && j > 1 && sChar == t[j - 2] && s[i - 2] == tChar)
+                {
+                    int transposition = row0[j - 2] + 1;
+                    if (transposition < min)
+                    {
+                        min = transposition;
+                    }
+                }
+
+                row2[j] = min;
             }
 
-            currRow.CopyTo(prevRow);
+            row1.CopyTo(row0);
+            row2.CopyTo(row1);
         }
 
-        return prevRow[n];
+        return row1[m];
     }
 
     public double CalculateSimilarity(string source, string target)
@@ -144,14 +165,22 @@ public class FuzzySearchService : IFuzzySearchService
                 return null;
 
             int dist = CalculateDistance(cleanQuery, cleanTerm);
-            if (dist <= maxDistance && dist < minDistance)
+            if (dist <= maxDistance)
             {
                 double sim = CalculateSimilarity(cleanQuery, cleanTerm);
-                if (sim >= 0.60 && sim > maxSimilarity)
+                if (sim >= 0.60)
                 {
-                    minDistance = dist;
-                    maxSimilarity = sim;
-                    bestCandidate = term;
+                    bool isBetter = sim > maxSimilarity ||
+                                    (Math.Abs(sim - maxSimilarity) < 0.001 && dist < minDistance) ||
+                                    (Math.Abs(sim - maxSimilarity) < 0.001 && dist == minDistance &&
+                                     bestCandidate != null && Math.Abs(cleanTerm.Length - cleanQuery.Length) < Math.Abs(bestCandidate.Length - cleanQuery.Length));
+
+                    if (isBetter)
+                    {
+                        minDistance = dist;
+                        maxSimilarity = sim;
+                        bestCandidate = term;
+                    }
                 }
             }
         }

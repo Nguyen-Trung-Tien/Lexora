@@ -232,6 +232,35 @@ public class GrammarIntegrationTests : IDisposable
         examples.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task SearchGrammar_ByVietnameseExplanation_AccentedAndUnaccented_Test()
+    {
+        var rule = await _grammarService.CreateRuleAsync(new GrammarRuleCreateOrUpdateDto(
+            Id: null,
+            Title: "Conditional Sentences Type 1",
+            Structure: "If + S + V(present), S + will + V(bare)",
+            ExplanationVi: "Câu điều kiện loại 1 diễn tả hành động có thể xảy ra ở hiện tại hoặc tương lai.",
+            ExplanationEn: "First conditional for real possibilities.",
+            CommonMistakes: null,
+            Level: CefrLevel.B1,
+            ExamTarget: ExamType.Toeic,
+            Topic: "Conditionals",
+            Examples: [new("If it rains, we will stay at home.", "Nếu trời mưa, chúng tôi sẽ ở nhà.", null)]
+        ));
+
+        // Accented search
+        var resAccented = await _grammarService.SearchRulesAsync("câu điều kiện");
+        resAccented.Should().Contain(r => r.Id == rule.Id);
+
+        // Unaccented search
+        var resUnaccented = await _grammarService.SearchRulesAsync("cau dieu kien");
+        resUnaccented.Should().Contain(r => r.Id == rule.Id);
+
+        // Filtered search with unaccented in examples
+        var resFiltered = await _grammarService.GetFilteredRulesAsync(search: "neu troi mua");
+        resFiltered.Should().Contain(r => r.Id == rule.Id);
+    }
+
     public void Dispose()
     {
         _context.Dispose();

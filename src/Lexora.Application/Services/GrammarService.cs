@@ -444,8 +444,7 @@ public class GrammarService : IGrammarService
         if (paged.TotalCount == 0 && !string.IsNullOrWhiteSpace(search) && _smartSearch != null)
         {
             var allRules = await GetAllRulesAsync(cancellationToken);
-            var titles = allRules.Select(r => r.Title).ToList();
-            closestSuggestions = _smartSearch.FindClosestGrammarSuggestions(search, titles, maxSuggestions: 5);
+            closestSuggestions = _smartSearch.FindClosestGrammarRuleSuggestions(search, allRules, maxSuggestions: 5);
         }
 
         return new SmartSearchResultPageDto<GrammarRuleDto>(

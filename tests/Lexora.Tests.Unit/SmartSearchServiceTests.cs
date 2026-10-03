@@ -186,6 +186,85 @@ public class SmartSearchServiceTests
     }
 
     [Fact]
+    public void FindClosestGrammarSuggestions_SingleWordTypo_MatchesMultiWordTitle()
+    {
+        var pool = new[]
+        {
+            "Conditional Sentences Type 1",
+            "Present Simple Tense",
+            "Passive Voice with Modals",
+            "Inversion with Negative Adverbials"
+        };
+
+        var suggestions = _sut.FindClosestGrammarSuggestions("conditonal", pool, maxSuggestions: 2);
+
+        suggestions.Should().NotBeEmpty();
+        suggestions[0].Should().Be("Conditional Sentences Type 1");
+    }
+
+    [Fact]
+    public void FindClosestGrammarSuggestions_MultiWordTypo_MatchesCorrectTitle()
+    {
+        var pool = new[]
+        {
+            "Conditional Sentences Type 1",
+            "Present Simple Tense",
+            "Past Continuous Tense"
+        };
+
+        var suggestions = _sut.FindClosestGrammarSuggestions("past continous", pool, maxSuggestions: 2);
+
+        suggestions.Should().NotBeEmpty();
+        suggestions[0].Should().Be("Past Continuous Tense");
+    }
+
+    [Fact]
+    public void FindClosestGrammarRuleSuggestions_VietnameseQuery_MatchesRuleExplanation()
+    {
+        var rules = new[]
+        {
+            CreateGrammar("Conditional Sentences Type 1", "If + S + V(s/es)", "Câu điều kiện loại 1 diễn tả điều kiện có thể xảy ra ở hiện tại hoặc tương lai."),
+            CreateGrammar("Present Simple", "S + V(s/es)", "Thì hiện tại đơn diễn tả chân lý, thói quen."),
+            CreateGrammar("Passive Voice", "S + be + V3/ed", "Câu bị động diễn tả hành động được tác động.")
+        };
+
+        var suggestions = _sut.FindClosestGrammarRuleSuggestions("cau dieu kien", rules, maxSuggestions: 2);
+
+        suggestions.Should().NotBeEmpty();
+        suggestions[0].Should().Be("Conditional Sentences Type 1");
+    }
+
+    [Fact]
+    public void FindClosestWordSuggestions_TranspositionTypo_MatchesWord()
+    {
+        var pool = new[] { "receive", "believe", "achieve", "the", "their" };
+
+        var suggestionsRecieve = _sut.FindClosestWordSuggestions("recieve", pool, maxSuggestions: 2);
+        suggestionsRecieve.Should().NotBeEmpty();
+        suggestionsRecieve[0].Should().Be("receive");
+
+        var suggestionsTeh = _sut.FindClosestWordSuggestions("teh", pool, maxSuggestions: 2);
+        suggestionsTeh.Should().NotBeEmpty();
+        suggestionsTeh[0].Should().Be("the");
+    }
+
+    [Fact]
+    public void FindClosestWordSuggestions_WithWordDtos_MatchesVietnameseDefinition()
+    {
+        var words = new[]
+        {
+            CreateWord("abandon", "từ bỏ, ruồng bỏ"),
+            CreateWord("accomplish", "hoàn thành, đạt được mục tiêu"),
+            CreateWord("resilience", "khả năng phục hồi, kiên cường")
+        };
+
+        var suggestions = _sut.FindClosestWordSuggestions("tu bo", words, maxSuggestions: 2);
+
+        suggestions.Should().NotBeEmpty();
+        suggestions[0].Should().Be("abandon");
+    }
+
+    [Fact]
     public void RankWords_LargeDataset_ExecutesPerformantly()
     {
         var words = new List<WordDto>(5000);

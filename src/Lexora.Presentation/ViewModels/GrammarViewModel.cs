@@ -36,6 +36,12 @@ public partial class GrammarViewModel : ObservableObject
     public partial bool HasClosestSuggestions { get; set; }
 
     [ObservableProperty]
+    public partial string? TypoSuggestion { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasTypoSuggestion { get; set; }
+
+    [ObservableProperty]
     public partial GrammarRelatedSuggestionsDto? RelatedSuggestions { get; set; }
 
     [ObservableProperty]
@@ -282,6 +288,8 @@ public partial class GrammarViewModel : ObservableObject
                 }
                 ClosestSuggestions = Array.Empty<string>();
                 HasClosestSuggestions = false;
+                TypoSuggestion = null;
+                HasTypoSuggestion = false;
             }
             else
             {
@@ -303,23 +311,31 @@ public partial class GrammarViewModel : ObservableObject
                         {
                             ClosestSuggestions = smartRes.ClosestSuggestions;
                             HasClosestSuggestions = true;
+                            TypoSuggestion = smartRes.ClosestSuggestions[0];
+                            HasTypoSuggestion = true;
                         }
                         else
                         {
                             ClosestSuggestions = Array.Empty<string>();
                             HasClosestSuggestions = false;
+                            TypoSuggestion = null;
+                            HasTypoSuggestion = false;
                         }
                     }
                     catch
                     {
                         ClosestSuggestions = Array.Empty<string>();
                         HasClosestSuggestions = false;
+                        TypoSuggestion = null;
+                        HasTypoSuggestion = false;
                     }
                 }
                 else
                 {
                     ClosestSuggestions = Array.Empty<string>();
                     HasClosestSuggestions = false;
+                    TypoSuggestion = null;
+                    HasTypoSuggestion = false;
                 }
             }
         }
@@ -797,14 +813,32 @@ public partial class GrammarViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task ApplyTypoSuggestionAsync()
+    {
+        if (string.IsNullOrWhiteSpace(TypoSuggestion)) return;
+        await ApplyClosestSuggestionAsync(TypoSuggestion);
+    }
+
+    [RelayCommand]
     public async Task ApplyClosestSuggestionAsync(string? suggestion)
     {
         if (string.IsNullOrWhiteSpace(suggestion)) return;
         SearchQuery = suggestion;
+        TypoSuggestion = null;
+        HasTypoSuggestion = false;
         ClosestSuggestions = Array.Empty<string>();
         HasClosestSuggestions = false;
         CurrentPage = 1;
         await LoadRulesAsync();
+
+        if (Rules.Count == 0 && (SelectedLevel != CefrLevel.None || SelectedExamTarget != ExamType.General || SelectedTopic != null))
+        {
+            SelectedLevel = CefrLevel.None;
+            SelectedExamTarget = ExamType.General;
+            SelectedTopic = null;
+            CurrentPage = 1;
+            await LoadRulesAsync();
+        }
     }
 
     private CancellationTokenSource? _suggestionsCts;

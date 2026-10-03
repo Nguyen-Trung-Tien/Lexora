@@ -682,6 +682,13 @@ public class VocabularyService : IVocabularyService
         {
             var allTerms = await _vocabRepo.GetAllNormalizedTermsAsync(cancellationToken);
             closestSuggestions = _smartSearch.FindClosestWordSuggestions(search, allTerms, maxSuggestions: 5);
+
+            if (closestSuggestions.Count == 0)
+            {
+                var candidateWords = await _vocabRepo.SearchAsync(take: 200, cancellationToken: cancellationToken);
+                var dtos = candidateWords.Select(MapToDto).ToList();
+                closestSuggestions = _smartSearch.FindClosestWordSuggestions(search, dtos, maxSuggestions: 5);
+            }
         }
 
         return new SmartSearchResultPageDto<WordDto>(

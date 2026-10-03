@@ -76,4 +76,15 @@ public class FuzzySearchServiceTests
 
         suggestion.Should().BeNull();
     }
+
+    [Theory]
+    [InlineData("teh", "the", 1)]
+    [InlineData("recieve", "receive", 1)]
+    [InlineData("calss", "class", 1)]
+    [InlineData("form", "from", 1)]
+    public void CalculateDistance_AdjacentTransposition_YieldsDistanceOne(string source, string target, int expected)
+    {
+        int dist = _fuzzyService.CalculateDistance(source, target);
+        dist.Should().Be(expected);
+    }
 }

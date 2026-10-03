@@ -479,6 +479,84 @@ public class SmartSearchService : ISmartSearchService
         return FindClosestSuggestionsInternal(query, candidates, maxSuggestions, minSimilarity);
     }
 
+    public IReadOnlyList<string> FindClosestWordSuggestions(
+        string query,
+        IEnumerable<WordDto> candidates,
+        int maxSuggestions = 5,
+        double minSimilarity = 0.55)
+    {
+        if (string.IsNullOrWhiteSpace(query) || candidates == null)
+            return Array.Empty<string>();
+
+        var cleanQuery = query.Trim();
+        var normQuery = NormalizeSearchText(cleanQuery);
+        if (normQuery.Length < 2) return Array.Empty<string>();
+
+        var scored = new List<(string Term, double Similarity, int Distance)>();
+
+        foreach (var word in candidates)
+        {
+            if (string.IsNullOrWhiteSpace(word.Term)) continue;
+            var term = word.Term.Trim();
+            var normTerm = NormalizeSearchText(term);
+
+            // Exact match shouldn't be suggested as a typo correction
+            if (string.Equals(normTerm, normQuery, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            // Score against Term
+            var termMatches = FindClosestSuggestionsInternal(cleanQuery, new[] { term }, 1, minSimilarity);
+            double bestSim = 0.0;
+            int bestDist = int.MaxValue;
+
+            if (termMatches.Count > 0)
+            {
+                bestDist = _fuzzyService.CalculateDistance(normQuery, normTerm);
+                bestSim = _fuzzyService.CalculateSimilarity(normQuery, normTerm);
+                if (normTerm.StartsWith(normQuery, StringComparison.OrdinalIgnoreCase))
+                    bestSim = Math.Max(bestSim, 0.90);
+                if (string.Equals(CollapseConsecutiveDuplicates(normQuery), CollapseConsecutiveDuplicates(normTerm), StringComparison.OrdinalIgnoreCase))
+                    bestSim = Math.Max(bestSim, 0.92);
+            }
+
+            // Also check Vietnamese definitions if query might be Vietnamese
+            if (word.Meanings != null)
+            {
+                foreach (var m in word.Meanings)
+                {
+                    if (!string.IsNullOrWhiteSpace(m.DefinitionVi))
+                    {
+                        var normDefVi = NormalizeSearchText(m.DefinitionVi);
+                        if (normDefVi.Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                            normDefVi.StartsWith(normQuery, StringComparison.OrdinalIgnoreCase))
+                        {
+                            double defScore = 0.85;
+                            if (defScore > bestSim)
+                            {
+                                bestSim = defScore;
+                                bestDist = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (bestSim >= minSimilarity || (cleanQuery.Length <= 4 && bestDist <= 1))
+            {
+                scored.Add((term, bestSim, bestDist));
+            }
+        }
+
+        return scored
+            .OrderByDescending(s => s.Similarity)
+            .ThenBy(s => s.Distance)
+            .ThenBy(s => Math.Abs(s.Term.Length - cleanQuery.Length))
+            .Select(s => s.Term)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(maxSuggestions)
+            .ToList();
+    }
+
     public IReadOnlyList<string> FindClosestGrammarSuggestions(
         string query,
         IEnumerable<string> candidates,
@@ -486,6 +564,138 @@ public class SmartSearchService : ISmartSearchService
         double minSimilarity = 0.55)
     {
         return FindClosestSuggestionsInternal(query, candidates, maxSuggestions, minSimilarity);
+    }
+
+    public IReadOnlyList<string> FindClosestGrammarRuleSuggestions(
+        string query,
+        IEnumerable<GrammarRuleDto> candidates,
+        int maxSuggestions = 5,
+        double minSimilarity = 0.55)
+    {
+        if (string.IsNullOrWhiteSpace(query) || candidates == null)
+            return Array.Empty<string>();
+
+        var cleanQuery = query.Trim();
+        var normQuery = NormalizeSearchText(cleanQuery);
+        if (normQuery.Length < 2) return Array.Empty<string>();
+
+        var qCollapsed = CollapseConsecutiveDuplicates(normQuery);
+        var qTokens = Tokenize(normQuery);
+
+        var ruleScores = new List<(string Title, double Score, int Distance)>();
+
+        foreach (var rule in candidates)
+        {
+            if (string.IsNullOrWhiteSpace(rule.Title)) continue;
+            var title = rule.Title.Trim();
+            var normTitle = NormalizeSearchText(title);
+
+            // Exact match does not need suggestion
+            if (string.Equals(normTitle, normQuery, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            double bestScore = 0.0;
+            int bestDist = int.MaxValue;
+
+            // 1. Direct match on Title (using phrase-aware search)
+            var titleMatches = FindClosestSuggestionsInternal(cleanQuery, new[] { title }, 1, minSimilarity);
+            if (titleMatches.Count > 0)
+            {
+                bestDist = _fuzzyService.CalculateDistance(normQuery, normTitle);
+                bestScore = _fuzzyService.CalculateSimilarity(normQuery, normTitle);
+
+                // Token level matching against title tokens
+                var titleTokens = Tokenize(normTitle);
+                foreach (var tt in titleTokens)
+                {
+                    var normTt = NormalizeSearchText(tt);
+                    double ttSim = _fuzzyService.CalculateSimilarity(normQuery, normTt);
+                    int ttDist = _fuzzyService.CalculateDistance(normQuery, normTt);
+
+                    if (normTt.StartsWith(normQuery, StringComparison.OrdinalIgnoreCase))
+                        ttSim = Math.Max(ttSim, 0.90);
+                    if (string.Equals(qCollapsed, CollapseConsecutiveDuplicates(normTt), StringComparison.OrdinalIgnoreCase))
+                        ttSim = Math.Max(ttSim, 0.92);
+
+                    if (ttSim > bestScore)
+                    {
+                        bestScore = ttSim * 0.95;
+                        bestDist = ttDist;
+                    }
+                }
+            }
+
+            // 2. Check Structure (e.g. If + S + V, have/has + V3)
+            if (!string.IsNullOrWhiteSpace(rule.Structure))
+            {
+                var normStruct = NormalizeSearchText(rule.Structure);
+                if (normStruct.Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                    normStruct.StartsWith(normQuery, StringComparison.OrdinalIgnoreCase))
+                {
+                    double structScore = 0.82;
+                    if (structScore > bestScore)
+                    {
+                        bestScore = structScore;
+                        bestDist = 1;
+                    }
+                }
+            }
+
+            // 3. Check Topic (e.g. Conditionals, Tenses, Passive Voice)
+            if (!string.IsNullOrWhiteSpace(rule.Topic))
+            {
+                var normTopic = NormalizeSearchText(rule.Topic);
+                if (normTopic.Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                    normTopic.StartsWith(normQuery, StringComparison.OrdinalIgnoreCase))
+                {
+                    double topicScore = 0.80;
+                    if (topicScore > bestScore)
+                    {
+                        bestScore = topicScore;
+                        bestDist = 1;
+                    }
+                }
+                else
+                {
+                    double topSim = _fuzzyService.CalculateSimilarity(normQuery, normTopic);
+                    if (topSim >= 0.70 && topSim * 0.88 > bestScore)
+                    {
+                        bestScore = topSim * 0.88;
+                        bestDist = _fuzzyService.CalculateDistance(normQuery, normTopic);
+                    }
+                }
+            }
+
+            // 4. Check ExplanationVi (Vietnamese name / keywords e.g. "câu điều kiện", "hiện tại hoàn thành")
+            if (!string.IsNullOrWhiteSpace(rule.ExplanationVi))
+            {
+                var normExplVi = NormalizeSearchText(rule.ExplanationVi);
+                if (normExplVi.Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                    normExplVi.StartsWith(normQuery, StringComparison.OrdinalIgnoreCase))
+                {
+                    double explScore = 0.84;
+                    if (explScore > bestScore)
+                    {
+                        bestScore = explScore;
+                        bestDist = 1;
+                    }
+                }
+            }
+
+            if (bestScore >= minSimilarity || (cleanQuery.Length <= 4 && bestDist <= 1))
+            {
+                ruleScores.Add((title, bestScore, bestDist));
+            }
+        }
+
+        return ruleScores
+            .OrderByDescending(r => r.Score)
+            .ThenBy(r => r.Distance)
+            .ThenBy(r => Math.Abs(r.Title.Length - cleanQuery.Length))
+            .Select(r => r.Title)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(maxSuggestions)
+            .ToList();
     }
 
     private IReadOnlyList<string> FindClosestSuggestionsInternal(
@@ -501,6 +711,9 @@ public class SmartSearchService : ISmartSearchService
         var normQuery = NormalizeSearchText(cleanQuery);
         if (normQuery.Length < 2) return Array.Empty<string>();
 
+        var qCollapsed = CollapseConsecutiveDuplicates(normQuery);
+        var qTokens = Tokenize(normQuery);
+
         var matches = new List<(string Candidate, double Similarity, int Distance)>();
 
         foreach (var c in candidates)
@@ -513,11 +726,129 @@ public class SmartSearchService : ISmartSearchService
             double sim = _fuzzyService.CalculateSimilarity(normQuery, normC);
             int dist = _fuzzyService.CalculateDistance(normQuery, normC);
 
+            // Double-letter typo match (e.g., accomodate -> accommodate, embaras -> embarrass)
+            var cCollapsed = CollapseConsecutiveDuplicates(normC);
+            if (string.Equals(qCollapsed, cCollapsed, StringComparison.OrdinalIgnoreCase))
+            {
+                sim = Math.Max(sim, 0.92);
+                dist = Math.Min(dist, 1);
+            }
+
             // Boost prefix or partial overlap
             if (normC.StartsWith(normQuery, StringComparison.OrdinalIgnoreCase))
-                sim = Math.Max(sim, 0.85);
+            {
+                double prefixScore = 0.90 - Math.Min(0.15, (normC.Length - normQuery.Length) * 0.015);
+                sim = Math.Max(sim, prefixScore);
+            }
             else if (normC.Contains(normQuery, StringComparison.OrdinalIgnoreCase))
-                sim = Math.Max(sim, 0.75);
+            {
+                sim = Math.Max(sim, 0.78);
+            }
+
+            // Multi-token candidate phrase matching (especially for Grammar titles and Phrasal verbs)
+            var cTokens = Tokenize(normC);
+            if (cTokens.Count > 1)
+            {
+                if (qTokens.Count == 1)
+                {
+                    double bestTokenSim = 0.0;
+                    int minTokenDist = int.MaxValue;
+                    foreach (var ct in cTokens)
+                    {
+                        var normCt = NormalizeSearchText(ct);
+                        if (string.Equals(normCt, normQuery, StringComparison.OrdinalIgnoreCase))
+                        {
+                            bestTokenSim = 1.0;
+                            minTokenDist = 0;
+                            break;
+                        }
+
+                        double tSim = _fuzzyService.CalculateSimilarity(normQuery, normCt);
+                        int tDist = _fuzzyService.CalculateDistance(normQuery, normCt);
+
+                        if (normCt.StartsWith(normQuery, StringComparison.OrdinalIgnoreCase))
+                            tSim = Math.Max(tSim, 0.88 - Math.Min(0.12, (normCt.Length - normQuery.Length) * 0.02));
+
+                        if (string.Equals(qCollapsed, CollapseConsecutiveDuplicates(normCt), StringComparison.OrdinalIgnoreCase))
+                        {
+                            tSim = Math.Max(tSim, 0.90);
+                            tDist = Math.Min(tDist, 1);
+                        }
+
+                        if (tSim > bestTokenSim)
+                        {
+                            bestTokenSim = tSim;
+                            minTokenDist = tDist;
+                        }
+                    }
+
+                    if (bestTokenSim >= minSimilarity || (cleanQuery.Length <= 4 && minTokenDist <= 1))
+                    {
+                        double phraseSim = bestTokenSim * 0.92;
+                        if (phraseSim > sim)
+                        {
+                            sim = phraseSim;
+                            dist = minTokenDist;
+                        }
+                    }
+                }
+                else if (qTokens.Count > 1)
+                {
+                    double totalTokenSim = 0.0;
+                    int totalTokenDist = 0;
+                    int matchedCount = 0;
+
+                    foreach (var qt in qTokens)
+                    {
+                        var normQt = NormalizeSearchText(qt);
+                        var qtCollapsed = CollapseConsecutiveDuplicates(normQt);
+                        double bestT = 0.0;
+                        int minD = int.MaxValue;
+
+                        foreach (var ct in cTokens)
+                        {
+                            var normCt = NormalizeSearchText(ct);
+                            if (string.Equals(normCt, normQt, StringComparison.OrdinalIgnoreCase))
+                            {
+                                bestT = 1.0;
+                                minD = 0;
+                                break;
+                            }
+                            double tSim = _fuzzyService.CalculateSimilarity(normQt, normCt);
+                            int tDist = _fuzzyService.CalculateDistance(normQt, normCt);
+                            if (normCt.StartsWith(normQt, StringComparison.OrdinalIgnoreCase))
+                                tSim = Math.Max(tSim, 0.88);
+                            if (string.Equals(qtCollapsed, CollapseConsecutiveDuplicates(normCt), StringComparison.OrdinalIgnoreCase))
+                            {
+                                tSim = Math.Max(tSim, 0.90);
+                                tDist = Math.Min(tDist, 1);
+                            }
+                            if (tSim > bestT)
+                            {
+                                bestT = tSim;
+                                minD = tDist;
+                            }
+                        }
+
+                        if (bestT >= 0.50)
+                        {
+                            matchedCount++;
+                            totalTokenSim += bestT;
+                            totalTokenDist += minD;
+                        }
+                    }
+
+                    if (matchedCount == qTokens.Count)
+                    {
+                        double avgSim = totalTokenSim / qTokens.Count;
+                        if (avgSim > sim)
+                        {
+                            sim = avgSim;
+                            dist = totalTokenDist;
+                        }
+                    }
+                }
+            }
 
             if (sim >= minSimilarity || (cleanQuery.Length <= 4 && dist <= 1))
             {
@@ -528,6 +859,7 @@ public class SmartSearchService : ISmartSearchService
         return matches
             .OrderByDescending(m => m.Similarity)
             .ThenBy(m => m.Distance)
+            .ThenBy(m => Math.Abs(m.Candidate.Length - cleanQuery.Length))
             .ThenBy(m => m.Candidate.Length)
             .Select(m => m.Candidate)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -535,27 +867,25 @@ public class SmartSearchService : ISmartSearchService
             .ToList();
     }
 
-    public string NormalizeSearchText(string text)
+    private static string CollapseConsecutiveDuplicates(string text)
     {
-        if (string.IsNullOrEmpty(text)) return string.Empty;
-
-        // Convert to lowercase and normalize
-        var normalized = text.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
-        var sb = new StringBuilder(normalized.Length);
-
-        foreach (char c in normalized)
+        if (string.IsNullOrEmpty(text) || text.Length < 2) return text;
+        var sb = new StringBuilder(text.Length);
+        char prev = '\0';
+        foreach (char c in text)
         {
-            var category = CharUnicodeInfo.GetUnicodeCategory(c);
-            if (category != UnicodeCategory.NonSpacingMark)
+            if (c != prev)
             {
-                // Handle Vietnamese specific 'đ'
-                if (c == 'đ') sb.Append('d');
-                else if (c == 'Đ') sb.Append('d');
-                else sb.Append(c);
+                sb.Append(c);
+                prev = c;
             }
         }
+        return sb.ToString();
+    }
 
-        return sb.ToString().Normalize(NormalizationForm.FormC);
+    public string NormalizeSearchText(string text)
+    {
+        return Lexora.Domain.Common.SearchTextHelper.Normalize(text);
     }
 
     public IReadOnlyList<string> Tokenize(string text)

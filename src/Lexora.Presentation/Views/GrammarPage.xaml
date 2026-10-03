@@ -140,6 +140,21 @@
                 </DropDownButton>
             </Grid>
         </ScrollViewer>
+
+        <!-- Smart Typo Suggestion Banner -->
+        <Border Visibility="{x:Bind ViewModel.HasTypoSuggestion, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
+                BorderThickness="1" CornerRadius="8" Padding="14,6">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <FontIcon Glyph="&#xE946;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
+                <TextBlock Text="{x:Bind Loc.GetString('Vocab_DidYouMean')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                <HyperlinkButton Command="{x:Bind ViewModel.ApplyTypoSuggestionCommand}" Padding="0" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind ViewModel.TypoSuggestion, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontStyle="Italic" />
+                </HyperlinkButton>
+                <TextBlock Text="?" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
         </StackPanel>
 
 

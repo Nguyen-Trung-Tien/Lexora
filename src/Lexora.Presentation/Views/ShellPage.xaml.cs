@@ -316,6 +316,22 @@ public sealed partial class ShellPage : Page
                         TargetType = "Word"
                     });
                 }
+
+                if (suggestions.Count == 0)
+                {
+                    var smartGrammar = await grammarService.SmartSearchRulesAsync(search: query, pageSize: 1, cancellationToken: ct);
+                    foreach (var s in smartGrammar.ClosestSuggestions.Take(3))
+                    {
+                        suggestions.Add(new SmartSearchSuggestion
+                        {
+                            Title = s,
+                            Subtitle = $"{closestLabel} • {prefix}",
+                            Glyph = "\uE8D2",
+                            SearchTerm = s,
+                            TargetType = "Grammar"
+                        });
+                    }
+                }
             }
         }
         catch (OperationCanceledException)
@@ -411,16 +427,4 @@ public sealed partial class ShellPage : Page
         _navigationService.Navigate(typeof(ReviewPage));
         NavView.SelectedItem = NavItemReview;
     }
-}
-
-public sealed class SmartSearchSuggestion
-{
-    public required string Title { get; init; }
-    public required string Subtitle { get; init; }
-    public required string Glyph { get; init; }
-    public string? TargetPage { get; init; }
-    public string? SearchTerm { get; init; }
-    public string? TargetType { get; init; }
-
-    public override string ToString() => Title;
 }

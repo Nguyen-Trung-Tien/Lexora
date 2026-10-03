@@ -214,12 +214,25 @@ public partial class VocabularyViewModel : ObservableObject
     {
         FilteredContextUnits.Clear();
         var query = SearchTerm?.Trim();
-        var list = string.IsNullOrEmpty(query)
-            ? ContextUnits
-            : ContextUnits.Where(u =>
-                (!string.IsNullOrEmpty(u.Name) && u.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                (!string.IsNullOrEmpty(u.Description) && u.Description.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                (u.Words != null && u.Words.Any(w => !string.IsNullOrEmpty(w.Term) && w.Term.Contains(query, StringComparison.OrdinalIgnoreCase))));
+        if (string.IsNullOrEmpty(query))
+        {
+            foreach (var unit in ContextUnits)
+            {
+                FilteredContextUnits.Add(unit);
+            }
+            return;
+        }
+
+        var normQuery = Lexora.Domain.Common.SearchTextHelper.Normalize(query);
+        var list = ContextUnits.Where(u =>
+            (!string.IsNullOrEmpty(u.Name) && Lexora.Domain.Common.SearchTextHelper.Normalize(u.Name).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrEmpty(u.Description) && Lexora.Domain.Common.SearchTextHelper.Normalize(u.Description).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+            (u.Words != null && u.Words.Any(w =>
+                (!string.IsNullOrEmpty(w.Term) && Lexora.Domain.Common.SearchTextHelper.Normalize(w.Term).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(w.PrimaryDefinition) && Lexora.Domain.Common.SearchTextHelper.Normalize(w.PrimaryDefinition).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+                (w.Meanings != null && w.Meanings.Any(m =>
+                    (!string.IsNullOrEmpty(m.DefinitionVi) && Lexora.Domain.Common.SearchTextHelper.Normalize(m.DefinitionVi).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(m.DefinitionEn) && Lexora.Domain.Common.SearchTextHelper.Normalize(m.DefinitionEn).Contains(normQuery, StringComparison.OrdinalIgnoreCase)))))));
 
         foreach (var unit in list)
         {
@@ -389,6 +402,10 @@ public partial class VocabularyViewModel : ObservableObject
             foreach (var w in resultList)
             {
                 Words.Add(w);
+                if (!_knownTerms.Contains(w.Term, StringComparer.OrdinalIgnoreCase))
+                {
+                    _knownTerms.Add(w.Term);
+                }
             }
 
             if (Words.Count > 0)
@@ -401,36 +418,52 @@ public partial class VocabularyViewModel : ObservableObject
                 SelectedWord = null;
             }
 
-            if (TotalWordCount == 0 && !string.IsNullOrWhiteSpace(SearchTerm))
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
             {
-                try
-                {
-                    var smartRes = await _vocabService.SmartSearchWordsAsync(
-                        search: SearchTerm,
-                        level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
-                        pos: SelectedPartOfSpeech,
-                        topicId: SelectedTopicId,
-                        examType: SelectedExamType,
-                        status: SelectedStatus,
-                        page: 1,
-                        pageSize: 1,
-                        cancellationToken: ct);
+                var normSearch = Lexora.Domain.Common.SearchTextHelper.Normalize(SearchTerm);
+                bool hasDirectTermOrDefMatch = Words.Any(w =>
+                    Lexora.Domain.Common.SearchTextHelper.Normalize(w.Term).StartsWith(normSearch, StringComparison.OrdinalIgnoreCase) ||
+                    Lexora.Domain.Common.SearchTextHelper.Normalize(w.Term).Equals(normSearch, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrEmpty(w.PrimaryDefinition) && Lexora.Domain.Common.SearchTextHelper.Normalize(w.PrimaryDefinition).Contains(normSearch, StringComparison.OrdinalIgnoreCase)));
 
-                    if (smartRes.ClosestSuggestions.Count > 0)
+                if (TotalWordCount == 0 || !hasDirectTermOrDefMatch)
+                {
+                    try
                     {
-                        ClosestSuggestions = smartRes.ClosestSuggestions;
-                        HasClosestSuggestions = true;
-                        TypoSuggestion = smartRes.ClosestSuggestions[0];
-                        HasTypoSuggestion = true;
+                        var smartRes = await _vocabService.SmartSearchWordsAsync(
+                            search: SearchTerm,
+                            level: SelectedLevel == CefrLevel.None ? null : SelectedLevel,
+                            pos: SelectedPartOfSpeech,
+                            topicId: SelectedTopicId,
+                            examType: SelectedExamType,
+                            status: SelectedStatus,
+                            page: 1,
+                            pageSize: 1,
+                            cancellationToken: ct);
+
+                        if (smartRes.ClosestSuggestions.Count > 0)
+                        {
+                            ClosestSuggestions = smartRes.ClosestSuggestions;
+                            HasClosestSuggestions = true;
+                            TypoSuggestion = smartRes.ClosestSuggestions[0];
+                            HasTypoSuggestion = true;
+                        }
+                        else
+                        {
+                            CheckTypoSuggestion();
+                        }
                     }
-                    else
+                    catch
                     {
                         CheckTypoSuggestion();
                     }
                 }
-                catch
+                else
                 {
-                    CheckTypoSuggestion();
+                    ClosestSuggestions = Array.Empty<string>();
+                    HasClosestSuggestions = false;
+                    TypoSuggestion = null;
+                    HasTypoSuggestion = false;
                 }
             }
             else
@@ -947,28 +980,13 @@ public partial class VocabularyViewModel : ObservableObject
             return;
         }
 
-        if (_smartSearchService != null)
+        var closest = GetClosestSuggestions(query, maxSuggestions: 4);
+        if (closest.Count > 0)
         {
-            var candidates = _knownTerms.Count > 0 ? _knownTerms : ContextUnits.SelectMany(u => u.Words).Select(w => w.Term).Distinct();
-            var closest = _smartSearchService.FindClosestWordSuggestions(query, candidates, maxSuggestions: 4);
-            if (closest.Count > 0)
-            {
-                ClosestSuggestions = closest;
-                HasClosestSuggestions = true;
-                TypoSuggestion = closest[0];
-                HasTypoSuggestion = true;
-                return;
-            }
-        }
-
-        var fallbackCandidates = _knownTerms.Count > 0 ? _knownTerms : ContextUnits.SelectMany(u => u.Words).Select(w => w.Term).Distinct();
-        var suggestion = _fuzzySearchService.SuggestCorrection(query, fallbackCandidates);
-        if (!string.IsNullOrEmpty(suggestion) && !string.Equals(suggestion, query, StringComparison.OrdinalIgnoreCase))
-        {
-            TypoSuggestion = suggestion;
-            HasTypoSuggestion = true;
-            ClosestSuggestions = new[] { suggestion };
+            ClosestSuggestions = closest;
             HasClosestSuggestions = true;
+            TypoSuggestion = closest[0];
+            HasTypoSuggestion = true;
         }
         else
         {
@@ -977,6 +995,30 @@ public partial class VocabularyViewModel : ObservableObject
             ClosestSuggestions = Array.Empty<string>();
             HasClosestSuggestions = false;
         }
+    }
+
+    public IReadOnlyList<string> GetClosestSuggestions(string query, int maxSuggestions = 4)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 2) return Array.Empty<string>();
+
+        if (_smartSearchService != null)
+        {
+            var candidates = _knownTerms.Count > 0 ? _knownTerms : ContextUnits.SelectMany(u => u.Words).Select(w => w.Term).Distinct();
+            var closest = _smartSearchService.FindClosestWordSuggestions(query, candidates, maxSuggestions);
+            if (closest.Count > 0) return closest;
+        }
+
+        var fallbackCandidates = _knownTerms.Count > 0 ? _knownTerms : ContextUnits.SelectMany(u => u.Words).Select(w => w.Term).Distinct();
+        var suggestion = _fuzzySearchService.SuggestCorrection(query, fallbackCandidates);
+        return !string.IsNullOrEmpty(suggestion) && !string.Equals(suggestion, query, StringComparison.OrdinalIgnoreCase)
+            ? new[] { suggestion }
+            : Array.Empty<string>();
+    }
+
+    public async Task<IReadOnlyList<WordDto>> SearchWordSuggestionsAsync(string query, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return Array.Empty<WordDto>();
+        return await _vocabService.SearchWordsAsync(search: query, pageSize: 8, cancellationToken: cancellationToken);
     }
 
     [RelayCommand]
@@ -998,6 +1040,18 @@ public partial class VocabularyViewModel : ObservableObject
         CurrentPage = 1;
         await LoadWordsAsync();
         ApplyUnitFilter();
+
+        if (TotalWordCount == 0 && (SelectedLevel != CefrLevel.None || SelectedPartOfSpeech != null || SelectedTopicId != null || SelectedExamType != null || SelectedStatus != null))
+        {
+            SelectedLevel = CefrLevel.None;
+            SelectedPartOfSpeech = null;
+            SelectedTopicId = null;
+            SelectedExamType = null;
+            SelectedStatus = null;
+            CurrentPage = 1;
+            await LoadWordsAsync();
+            ApplyUnitFilter();
+        }
     }
 
     [RelayCommand]

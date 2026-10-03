@@ -88,12 +88,30 @@
                 </StackPanel>
             </Border>
 
-            <!-- Search Box with Live Debounce -->
-            <TextBox Grid.Column="1" x:Name="SearchBox"
-                     MinWidth="160"
-                     PlaceholderText="{x:Bind Loc.GetString('Vocab_SearchPlaceholder')}"
-                     Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     TextChanged="SearchBox_TextChanged" CornerRadius="10" Padding="14,8" />
+            <!-- Search Box with Live Debounce & Instant Dropdown Suggestions -->
+            <AutoSuggestBox Grid.Column="1" x:Name="SearchBox"
+                            MinWidth="180"
+                            PlaceholderText="{x:Bind Loc.GetString('Vocab_SearchPlaceholder')}"
+                            Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextChanged="SearchBox_TextChanged"
+                            SuggestionChosen="SearchBox_SuggestionChosen"
+                            QuerySubmitted="SearchBox_QuerySubmitted"
+                            QueryIcon="Find"
+                            CornerRadius="10" Padding="14,8">
+                <AutoSuggestBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="4,4">
+                            <Border Width="24" Height="24" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                <FontIcon Glyph="{Binding Glyph}" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Text="{Binding Subtitle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </AutoSuggestBox.ItemTemplate>
+            </AutoSuggestBox>
 
             <!-- Add Word Primary Button -->
             <Button Grid.Column="2" Style="{ThemeResource AccentButtonStyle}"

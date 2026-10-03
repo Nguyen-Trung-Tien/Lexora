@@ -197,11 +197,107 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         }
     }
 
-    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
     {
-        ViewModel.SearchTerm = SearchBox.Text;
-        _searchDebounceTimer.Stop();
-        _searchDebounceTimer.Start();
+        if (e.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+        {
+            ViewModel.SearchTerm = sender.Text;
+            _searchDebounceTimer.Stop();
+            _searchDebounceTimer.Start();
+            await UpdateSearchSuggestionsAsync(sender.Text);
+        }
+        else if (e.Reason == AutoSuggestionBoxTextChangeReason.ProgrammaticChange)
+        {
+            ViewModel.SearchTerm = sender.Text;
+        }
+    }
+
+    private async Task UpdateSearchSuggestionsAsync(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+        {
+            SearchBox.ItemsSource = null;
+            return;
+        }
+
+        try
+        {
+            var suggestions = new List<SmartSearchSuggestion>();
+
+            // 1. Direct word matches
+            var matchedWords = await ViewModel.SearchWordSuggestionsAsync(query);
+
+            foreach (var w in matchedWords.Take(6))
+            {
+                var posLabel = !string.IsNullOrWhiteSpace(w.PartsOfSpeechDisplay)
+                    ? w.PartsOfSpeechDisplay
+                    : w.PrimaryPartOfSpeech.ToString();
+
+                suggestions.Add(new SmartSearchSuggestion
+                {
+                    Title = w.Term,
+                    Subtitle = string.IsNullOrWhiteSpace(w.PrimaryDefinition)
+                        ? posLabel
+                        : $"{posLabel} • {w.PrimaryDefinition}",
+                    Glyph = "\uE8BD",
+                    SearchTerm = w.Term,
+                    TargetType = "Word"
+                });
+            }
+
+            // 2. Typo suggestions if few or no direct matches
+            if (suggestions.Count < 3)
+            {
+                var typoCandidates = ViewModel.GetClosestSuggestions(query);
+                var didYouMean = Loc.GetString("Vocab_DidYouMean");
+                foreach (var s in typoCandidates.Take(3))
+                {
+                    if (!suggestions.Any(x => x.Title.Equals(s, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        suggestions.Add(new SmartSearchSuggestion
+                        {
+                            Title = s,
+                            Subtitle = $"{didYouMean} {s}?",
+                            Glyph = "\uE946",
+                            SearchTerm = s,
+                            TargetType = "Typo"
+                        });
+                    }
+                }
+            }
+
+            SearchBox.ItemsSource = suggestions.Count > 0 ? suggestions : null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] UpdateSearchSuggestionsAsync error: {ex.Message}");
+            SearchBox.ItemsSource = null;
+        }
+    }
+
+    private void SearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is SmartSearchSuggestion suggestion)
+        {
+            sender.Text = suggestion.Title;
+            ViewModel.SearchTerm = suggestion.Title;
+        }
+    }
+
+    private async void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is SmartSearchSuggestion suggestion)
+        {
+            sender.Text = suggestion.Title;
+            ViewModel.SearchTerm = suggestion.Title;
+        }
+        else if (!string.IsNullOrWhiteSpace(args.QueryText))
+        {
+            ViewModel.SearchTerm = args.QueryText.Trim();
+        }
+
+        await ViewModel.LoadWordsAsync();
+        ViewModel.ApplyUnitFilter();
     }
 
     private async void TopicFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)

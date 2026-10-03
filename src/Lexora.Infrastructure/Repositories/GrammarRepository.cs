@@ -42,7 +42,7 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
     public async Task<IReadOnlyList<GrammarRule>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {
         var normalized = query.Trim().ToLowerInvariant();
-        return await DbSet
+        var results = await DbSet
             .AsNoTracking()
             .Include(gr => gr.Examples)
             .Where(gr => gr.Title.ToLower().Contains(normalized) ||
@@ -52,6 +52,20 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
                          gr.Examples.Any(ex => ex.SentenceEn.ToLower().Contains(normalized) || ex.SentenceVi.ToLower().Contains(normalized)))
             .OrderBy(gr => gr.OrderIndex)
             .ToListAsync(cancellationToken);
+
+        if (results.Count > 0 || string.IsNullOrWhiteSpace(query))
+        {
+            return results;
+        }
+
+        // Diacritic-insensitive fallback for Vietnamese unaccented search
+        var allRules = await DbSet.AsNoTracking().Include(gr => gr.Examples).ToListAsync(cancellationToken);
+        var normQuery = Lexora.Domain.Common.SearchTextHelper.Normalize(query);
+        if (string.IsNullOrEmpty(normQuery)) return Array.Empty<GrammarRule>();
+
+        return allRules.Where(gr => IsGrammarMatch(gr, normQuery))
+            .OrderBy(gr => gr.OrderIndex)
+            .ToList();
     }
 
     public async Task<IReadOnlyList<GrammarRule>> GetFilteredAsync(
@@ -88,7 +102,50 @@ public class GrammarRepository : Repository<GrammarRule>, IGrammarRepository
                               gr.Examples.Any(ex => ex.SentenceEn.ToLower().Contains(normalized) || ex.SentenceVi.ToLower().Contains(normalized)));
         }
 
-        return await q.OrderBy(gr => gr.OrderIndex).ThenBy(gr => gr.Title).ToListAsync(cancellationToken);
+        var results = await q.OrderBy(gr => gr.OrderIndex).ThenBy(gr => gr.Title).ToListAsync(cancellationToken);
+        if (results.Count > 0 || string.IsNullOrWhiteSpace(query))
+        {
+            return results;
+        }
+
+        // Diacritic fallback for unaccented Vietnamese search
+        var fallbackQ = DbSet.AsNoTracking().Include(gr => gr.Examples).AsQueryable();
+        if (level.HasValue && level.Value != CefrLevel.None) fallbackQ = fallbackQ.Where(gr => gr.Level == level.Value);
+        if (examType.HasValue && examType.Value != ExamType.General) fallbackQ = fallbackQ.Where(gr => gr.ExamTarget == examType.Value);
+        if (!string.IsNullOrWhiteSpace(topic)) fallbackQ = fallbackQ.Where(gr => gr.Topic != null && gr.Topic.ToLower() == topic.ToLower());
+
+        var candidates = await fallbackQ.ToListAsync(cancellationToken);
+        var normQuery = Lexora.Domain.Common.SearchTextHelper.Normalize(query);
+        if (string.IsNullOrEmpty(normQuery)) return Array.Empty<GrammarRule>();
+
+        return candidates.Where(gr => IsGrammarMatch(gr, normQuery))
+            .OrderBy(gr => gr.OrderIndex).ThenBy(gr => gr.Title)
+            .ToList();
+    }
+
+    private static bool IsGrammarMatch(GrammarRule gr, string normQuery)
+    {
+        if (Lexora.Domain.Common.SearchTextHelper.Normalize(gr.Title).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+            Lexora.Domain.Common.SearchTextHelper.Normalize(gr.Structure).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+            Lexora.Domain.Common.SearchTextHelper.Normalize(gr.ExplanationVi).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+            (!string.IsNullOrEmpty(gr.Topic) && Lexora.Domain.Common.SearchTextHelper.Normalize(gr.Topic).Contains(normQuery, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        if (gr.Examples != null)
+        {
+            foreach (var ex in gr.Examples)
+            {
+                if (Lexora.Domain.Common.SearchTextHelper.Normalize(ex.SentenceEn).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrEmpty(ex.SentenceVi) && Lexora.Domain.Common.SearchTextHelper.Normalize(ex.SentenceVi).Contains(normQuery, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public async Task<IReadOnlyList<string>> GetAllTopicsAsync(CancellationToken cancellationToken = default)
