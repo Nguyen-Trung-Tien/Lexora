@@ -15,7 +15,8 @@ Every developer and AI agent working on this codebase **MUST** adhere to these r
 | [**03-winui3-fluent-design.md**](03-winui3-fluent-design.md) | **WinUI 3 & Fluent UX** | Zero hardcoded hex colors (`ThemeResource` brushes only), dynamic Mica backdrop, responsive `UniformGridLayout`, dialog safety (`XamlRoot`, top `InfoBar`). | `Lexora.Presentation` |
 | [**04-security-and-data-protection.md**](04-security-and-data-protection.md) | **Security & Persistence** | Path traversal sanitization, SQLite WAL mode, 16-byte magic header database restore validation, connection pool flushing, 20MB payload boundary. | `Lexora.Infrastructure`, `Lexora.Application` |
 | [**05-spaced-repetition-sm2.md**](05-spaced-repetition-sm2.md) | **SM-2 Algorithm Integrity** | Mathematical SuperMemo SM-2 rules, Ease Factor floor ($EF \ge 1.3$), lapse handling, UI concurrency state guards on rating buttons. | `Lexora.Application`, `Lexora.Presentation` |
-| [**06-testing-and-verification.md**](06-testing-and-verification.md) | **Testing & Quality Gates** | Mandatory 0 error & 0 warning build policy, 64/64 tests passing, unit test vs. SQLite in-memory integration test separation. | `tests/*` |
+| [**06-testing-and-verification.md**](06-testing-and-verification.md) | **Testing & Quality Gates** | Mandatory 0 error & 0 warning build policy, 300+ automated tests passing, unit test vs. SQLite in-memory integration test separation. | `tests/*` |
+| [**07-agent-token-efficiency-and-accuracy.md**](07-agent-token-efficiency-and-accuracy.md) | **AI Agent Token Economy & Precision** | Strict context preservation, targeted file slicing (`grep_search` + `view_file`), in-place diff edits, anti-hallucination verification, and C# 13 partial property conventions. | All Layers & Tooling |
 
 ---
 

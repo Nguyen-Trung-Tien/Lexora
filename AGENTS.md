@@ -191,8 +191,8 @@ Before completing any task, committing code, or declaring an issue resolved, dev
 # 1. Build the entire solution (Must finish with 0 warnings and 0 errors)
 dotnet build Lexora.slnx
 
-# 2. Run all unit and integration test suites (All 64 tests MUST pass)
-dotnet test Lexora.slnx
+# 2. Run all unit and integration test suites (All 304 tests MUST pass)
+dotnet test Lexora.slnx --no-build
 
 # 3. Packaging & Installer Verification (When modifying deployment scripts)
 powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.0.0"
@@ -200,7 +200,7 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.0.0"
 
 ### Current Quality Gate Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)`.
-- **Test Suite**: **64 / 64 Tests Passing** (40 Unit Tests + 24 Integration Tests, 0 Failed, 0 Skipped).
+- **Test Suite**: **304 / 304 Tests Passing** (255 Unit Tests + 49 Integration Tests, 0 Failed, 0 Skipped).
 
 ---
 
@@ -220,7 +220,8 @@ Lexora/
 │   ├── 03-winui3-fluent-design.md            # Fluent 2 UI/UX, brushes, and layouts
 │   ├── 04-security-and-data-protection.md    # Path traversal, backups, and file safety
 │   ├── 05-spaced-repetition-sm2.md           # SM-2 formula, intervals, and streak engine
-│   └── 06-testing-and-verification.md        # Test suite requirements & CI verification
+│   ├── 06-testing-and-verification.md        # Test suite requirements & CI verification
+│   └── 07-agent-token-efficiency-and-accuracy.md # AI Agent token economy, precision coding & tooling protocol
 ├── src/
 │   ├── Lexora.Domain/                        # Pure domain layer (Entities, Enums, Exceptions)
 │   │   ├── Entities/                         # Word, ContextUnit, GrammarRule, StudyLog
@@ -241,8 +242,8 @@ Lexora/
 │       ├── ViewModels/                       # DashboardViewModel, VocabularyViewModel, etc.
 │       └── Views/                            # ShellPage, DashboardPage, VocabularyPage, etc.
 └── tests/
-    ├── Lexora.Tests.Unit/                    # 40 xUnit Unit Tests (SM-2, DTOs, Services)
-    └── Lexora.Tests.Integration/             # 24 xUnit Integration Tests (SQLite, Repositories)
+    ├── Lexora.Tests.Unit/                    # 255 xUnit Unit Tests (SM-2, DTOs, Services)
+    └── Lexora.Tests.Integration/             # 49 xUnit Integration Tests (SQLite, Repositories)
 ```
 
 ---
@@ -258,5 +259,47 @@ Before marking any task as complete, verify:
 - [ ] **Dialog Safety**: All `ContentDialog` calls set `XamlRoot` and precede sequential dialogs with `await Task.Yield()`.
 - [ ] **Data Security**: File paths are validated against directory traversal; database operations commit atomically.
 - [ ] **SM-2 Engine Compliance**: Spaced repetition logic preserves $EF \ge 1.3$ and logs study records.
+- [ ] **Token Economy Enforced**: Only targeted file slices viewed (`grep_search` + `view_file`); in-place diff edits instead of full-file overwrites; no unpaged output dumps.
+- [ ] **Anti-Hallucination & Type Reusability**: Existing types and services verified before declaring new contracts; Clean Architecture cascade strictly followed.
 - [ ] **Clean Build**: `dotnet build Lexora.slnx` completes with **0 warnings and 0 errors**.
-- [ ] **All Tests Green**: `dotnet test Lexora.slnx` runs and passes **all 64 tests**.
+- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 304 tests**.
+
+---
+
+## 11. AI Agent Token Optimization & Precision Protocol (Gemini & Antigravity)
+
+> [!IMPORTANT]
+> To maximize inference efficiency, preserve the context window, and guarantee zero-defect code generation, AI agents (e.g. Gemini in Antigravity) **MUST** strictly adhere to the following operational protocols:
+
+### 11.1 Token Conservation & Context Window Economy
+1. **Targeted Inspection (`view_file`)**:
+   - **NEVER** dump entire files (>150 lines). Always combine `grep_search` to pinpoint symbols/lines, then read only the relevant 30–80 line block using `StartLine` and `EndLine`.
+   - Never re-read files that were already retrieved earlier in the current context.
+2. **Precision Diffs (`replace_file_content` / `multi_replace_file_content`)**:
+   - **NEVER** call `write_to_file` on existing files to apply small changes. Use atomic replacement chunks to minimize completion token generation and prevent accidental truncation or loss of existing imports and comments.
+3. **Paged & Scoped Terminal Commands**:
+   - When iterating on a feature or fixing a bug, do **NOT** run the full test suite repeatedly. Target specific tests:
+     `dotnet test --filter "FullyQualifiedName~<TargetClass>"`
+   - Always run with paging or compact flags when applicable (`git log -n 5`, `dotnet test --no-build`).
+4. **High-Density, Direct Communication**:
+   - Provide direct solutions with concise architectural explanations and markdown links to touched files `[FileName](file:///...)`. Avoid re-echoing the user's prompt or repeating large blocks of unmodified code.
+
+### 11.2 Precision Feature Implementation & Zero Hallucination
+1. **Verify Before Declaring Abstractions**:
+   - Always search `Lexora.Domain` and `Lexora.Application` first before writing any new entity, DTO, interface, or converter. Reuse existing types to keep domain contracts clean.
+2. **Strict Cascade of Changes**:
+   - Always implement in dependency order: `Domain` -> `Application` -> `Infrastructure` -> `Presentation`.
+   - Never import presentation namespaces into business or data layers.
+3. **C# 13 / .NET 10 Idioms**:
+   - Always declare observable properties as C# 13 partial properties:
+     `[ObservableProperty] public partial string MyProperty { get; set; }`
+   - Use primary constructors for dependency injection.
+   - Propagate `CancellationToken` through all async database and I/O chains.
+4. **UI & Localization Invariants**:
+   - Never use raw hex colors (`#FFFFFF`, `#000000`). Use `{ThemeResource ...}` brushes exclusively.
+   - Synchronize all UI strings into both `vi-VN` and `en-US` in `LocalizationService.cs`.
+   - Always set `XamlRoot` and handle dialog chaining with `await Task.Yield()`.
+5. **Mandatory Build & Test Verification**:
+   - Always execute `dotnet build Lexora.slnx` after editing code to verify 0 warnings and 0 errors.
+   - Run relevant tests to confirm zero functional regression before presenting the solution.
+
