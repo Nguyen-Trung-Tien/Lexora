@@ -269,37 +269,45 @@ Before marking any task as complete, verify:
 ## 11. AI Agent Token Optimization & Precision Protocol (Gemini & Antigravity)
 
 > [!IMPORTANT]
-> To maximize inference efficiency, preserve the context window, and guarantee zero-defect code generation, AI agents (e.g. Gemini in Antigravity) **MUST** strictly adhere to the following operational protocols:
+> To maximize inference efficiency, preserve the context window, and guarantee zero-defect code generation, AI agents (e.g. Gemini 2.5 / 3.x Flash & Pro in Antigravity) **MUST** strictly adhere to the following operational protocols:
 
 ### 11.1 Token Conservation & Context Window Economy
-1. **Targeted Inspection (`view_file`)**:
-   - **NEVER** dump entire files (>150 lines). Always combine `grep_search` to pinpoint symbols/lines, then read only the relevant 30–80 line block using `StartLine` and `EndLine`.
-   - Never re-read files that were already retrieved earlier in the current context.
+1. **Targeted Inspection (`view_file` & `grep_search`)**:
+   - **NEVER** dump entire files (>150 lines). Always combine `grep_search` (with `Includes` filters like `["*.cs"]`) to pinpoint symbols/lines, then read only the relevant 30–60 line block using `StartLine` and `EndLine`.
+   - Never re-read files that were already retrieved earlier in the current conversation context.
 2. **Precision Diffs (`replace_file_content` / `multi_replace_file_content`)**:
-   - **NEVER** call `write_to_file` on existing files to apply small changes. Use atomic replacement chunks to minimize completion token generation and prevent accidental truncation or loss of existing imports and comments.
-3. **Paged & Scoped Terminal Commands**:
+   - **NEVER** call `write_to_file` on existing files to apply modifications. Use atomic replacement chunks with minimal anchor lines (1–2 lines) to minimize completion tokens and prevent accidental truncation of imports or comments.
+   - Never replace entire classes or large blocks just to modify a single line or variable.
+3. **Quiet & Paged Terminal Commands (`run_command`)**:
+   - Keep build logs silent on success: `dotnet build Lexora.slnx -v q /clp:ErrorsOnly` (0 tokens returned on clean build).
    - When iterating on a feature or fixing a bug, do **NOT** run the full test suite repeatedly. Target specific tests:
-     `dotnet test --filter "FullyQualifiedName~<TargetClass>"`
-   - Always run with paging or compact flags when applicable (`git log -n 5`, `dotnet test --no-build`).
+     `dotnet test --filter "FullyQualifiedName~<TargetClass>" --logger "console;verbosity=minimal"`
+   - Always run git commands with compact flags (`git status -s`, `git diff --stat`, `git log -n 5 --oneline`).
 4. **High-Density, Direct Communication**:
-   - Provide direct solutions with concise architectural explanations and markdown links to touched files `[FileName](file:///...)`. Avoid re-echoing the user's prompt or repeating large blocks of unmodified code.
+   - Provide direct solutions with concise architectural explanations and markdown links to touched files `[FileName](file:///...)`. Avoid re-echoing the user's prompt or repeating large blocks of unmodified code in chat.
 
 ### 11.2 Precision Feature Implementation & Zero Hallucination
-1. **Verify Before Declaring Abstractions**:
+1. **5-Step Execution Cycle**:
+   - `Locate (grep_search)` $\rightarrow$ `Inspect (view_file slice)` $\rightarrow$ `Minimal Diff (replace_file)` $\rightarrow$ `Build Check (dotnet build -v q /clp:ErrorsOnly)` $\rightarrow$ `Targeted Test (dotnet test --filter)`.
+2. **Verify Before Declaring Abstractions**:
    - Always search `Lexora.Domain` and `Lexora.Application` first before writing any new entity, DTO, interface, or converter. Reuse existing types to keep domain contracts clean.
-2. **Strict Cascade of Changes**:
-   - Always implement in dependency order: `Domain` -> `Application` -> `Infrastructure` -> `Presentation`.
-   - Never import presentation namespaces into business or data layers.
-3. **C# 13 / .NET 10 Idioms**:
+3. **Strict Cascade of Changes**:
+   - Always implement in dependency order: `Domain` $\rightarrow$ `Application` $\rightarrow$ `Infrastructure` $\rightarrow$ `Presentation`. Never import presentation namespaces into business or data layers.
+4. **C# 13 / .NET 10 Idioms**:
    - Always declare observable properties as C# 13 partial properties:
      `[ObservableProperty] public partial string MyProperty { get; set; }`
-   - Use primary constructors for dependency injection.
-   - Propagate `CancellationToken` through all async database and I/O chains.
-4. **UI & Localization Invariants**:
+   - Use primary constructors for dependency injection across classes and ViewModels.
+   - Propagate `CancellationToken cancellationToken = default` through all async database and I/O chains.
+   - Use defensive null checks (`ArgumentNullException.ThrowIfNull(...)`) rather than blanket `!` suppression.
+5. **WinUI 3 & Fluent 2 Framework Specifics**:
    - Never use raw hex colors (`#FFFFFF`, `#000000`). Use `{ThemeResource ...}` brushes exclusively.
    - Synchronize all UI strings into both `vi-VN` and `en-US` in `LocalizationService.cs`.
    - Always set `XamlRoot` and handle dialog chaining with `await Task.Yield()`.
-5. **Mandatory Build & Test Verification**:
-   - Always execute `dotnet build Lexora.slnx` after editing code to verify 0 warnings and 0 errors.
+   - Dispatch background UI mutations through `DispatcherQueue.TryEnqueue`.
+   - Avoid `{x:Bind}` out of scope in `DataTemplate` or `MenuFlyout` (prevents compiler `WMC9999`).
+6. **Mandatory Build & Test Verification**:
+   - Always execute `dotnet build Lexora.slnx -v q /clp:ErrorsOnly` after editing code to verify **0 warnings and 0 errors**.
    - Run relevant tests to confirm zero functional regression before presenting the solution.
+7. **Surgical Error Recovery**:
+   - If a build fails, inspect only the $\pm 5$ lines surrounding the error line. Fix the exact type or syntax mismatch; never rewrite the entire file in panic.
 
