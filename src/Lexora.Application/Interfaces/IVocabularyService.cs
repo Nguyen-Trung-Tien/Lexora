@@ -60,4 +60,6 @@ public interface IVocabularyService
         bool? isDueToday = null,
         bool? isWeak = null,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<string>> GetClosestSuggestionsAsync(string query, int maxSuggestions = 5, CancellationToken cancellationToken = default);
 }

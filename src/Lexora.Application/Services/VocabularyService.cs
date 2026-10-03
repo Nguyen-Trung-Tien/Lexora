@@ -678,17 +678,9 @@ public class VocabularyService : IVocabularyService
         }
 
         IReadOnlyList<string> closestSuggestions = Array.Empty<string>();
-        if (totalCount == 0 && !string.IsNullOrWhiteSpace(search) && _smartSearch != null)
+        if (totalCount == 0 && !string.IsNullOrWhiteSpace(search))
         {
-            var allTerms = await _vocabRepo.GetAllNormalizedTermsAsync(cancellationToken);
-            closestSuggestions = _smartSearch.FindClosestWordSuggestions(search, allTerms, maxSuggestions: 5);
-
-            if (closestSuggestions.Count == 0)
-            {
-                var candidateWords = await _vocabRepo.SearchAsync(take: 200, cancellationToken: cancellationToken);
-                var dtos = candidateWords.Select(MapToDto).ToList();
-                closestSuggestions = _smartSearch.FindClosestWordSuggestions(search, dtos, maxSuggestions: 5);
-            }
+            closestSuggestions = await GetClosestSuggestionsAsync(search, 5, cancellationToken);
         }
 
         return new SmartSearchResultPageDto<WordDto>(
@@ -697,6 +689,25 @@ public class VocabularyService : IVocabularyService
             page,
             pageSize,
             closestSuggestions);
+    }
+
+    public async Task<IReadOnlyList<string>> GetClosestSuggestionsAsync(string query, int maxSuggestions = 5, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 2 || _smartSearch == null)
+        {
+            return Array.Empty<string>();
+        }
+
+        var allTerms = await _vocabRepo.GetAllNormalizedTermsAsync(cancellationToken);
+        var closest = _smartSearch.FindClosestWordSuggestions(query, allTerms, maxSuggestions);
+        if (closest.Count > 0)
+        {
+            return closest;
+        }
+
+        var candidateWords = await _vocabRepo.SearchAsync(take: 200, cancellationToken: cancellationToken);
+        var dtos = candidateWords.Select(MapToDto).ToList();
+        return _smartSearch.FindClosestWordSuggestions(query, dtos, maxSuggestions);
     }
 
     private WordDto MapToDto(Word w)

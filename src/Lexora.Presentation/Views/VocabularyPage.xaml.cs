@@ -248,7 +248,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
             // 2. Typo suggestions if few or no direct matches
             if (suggestions.Count < 3)
             {
-                var typoCandidates = ViewModel.GetClosestSuggestions(query);
+                var typoCandidates = await ViewModel.GetClosestSuggestionsAsync(query, 4);
                 var didYouMean = Loc.GetString("Vocab_DidYouMean");
                 foreach (var s in typoCandidates.Take(3))
                 {
@@ -275,29 +275,27 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         }
     }
 
-    private void SearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    private async void SearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
         if (args.SelectedItem is SmartSearchSuggestion suggestion)
         {
-            sender.Text = suggestion.Title;
-            ViewModel.SearchTerm = suggestion.Title;
+            var target = suggestion.SearchTerm ?? suggestion.Title;
+            sender.Text = target;
+            await ViewModel.ApplySearchTermAsync(target);
         }
     }
 
     private async void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        if (args.ChosenSuggestion is SmartSearchSuggestion suggestion)
-        {
-            sender.Text = suggestion.Title;
-            ViewModel.SearchTerm = suggestion.Title;
-        }
-        else if (!string.IsNullOrWhiteSpace(args.QueryText))
-        {
-            ViewModel.SearchTerm = args.QueryText.Trim();
-        }
+        var target = (args.ChosenSuggestion as SmartSearchSuggestion)?.SearchTerm
+            ?? (args.ChosenSuggestion as SmartSearchSuggestion)?.Title
+            ?? args.QueryText?.Trim();
 
-        await ViewModel.LoadWordsAsync();
-        ViewModel.ApplyUnitFilter();
+        if (!string.IsNullOrWhiteSpace(target))
+        {
+            sender.Text = target;
+            await ViewModel.ApplySearchTermAsync(target);
+        }
     }
 
     private async void TopicFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
