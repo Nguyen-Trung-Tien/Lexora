@@ -34,6 +34,13 @@
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#DFF6DD" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#FDE7E9" />
             <SolidColorBrush x:Key="SystemFillColorCautionBackgroundBrush" Color="#FFF4CE" />
+            <!-- Formula card & syntax tokens for Grammar & Test -->
+            <SolidColorBrush x:Key="LexoraFormulaCardBackgroundBrush" Color="#F0F6FF" />
+            <SolidColorBrush x:Key="LexoraFormulaCardBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.35" />
+            <SolidColorBrush x:Key="LexoraCodeTokenConditionBrush" Color="#006687" />
+            <SolidColorBrush x:Key="LexoraCodeTokenResultBrush" Color="#107C41" />
+            <SolidColorBrush x:Key="LexoraOptionSelectedBorderBrush" Color="{ThemeResource SystemAccentColor}" />
+            <SolidColorBrush x:Key="LexoraOptionSelectedBackgroundBrush" Color="#EBF3FC" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <!-- Hero card border: glowing accent stroke for depth in dark mode -->
@@ -61,6 +68,13 @@
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#393D1B" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#442726" />
             <SolidColorBrush x:Key="SystemFillColorCautionBackgroundBrush" Color="#433519" />
+            <!-- Formula card & syntax tokens for Grammar & Test -->
+            <SolidColorBrush x:Key="LexoraFormulaCardBackgroundBrush" Color="#0A192F" />
+            <SolidColorBrush x:Key="LexoraFormulaCardBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.45" />
+            <SolidColorBrush x:Key="LexoraCodeTokenConditionBrush" Color="#60CDFF" />
+            <SolidColorBrush x:Key="LexoraCodeTokenResultBrush" Color="#39D353" />
+            <SolidColorBrush x:Key="LexoraOptionSelectedBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+            <SolidColorBrush x:Key="LexoraOptionSelectedBackgroundBrush" Color="#0C2548" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
@@ -82,6 +96,13 @@
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="SystemFillColorCautionBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <!-- Formula card & syntax tokens for Grammar & Test -->
+            <SolidColorBrush x:Key="LexoraFormulaCardBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="LexoraFormulaCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraCodeTokenConditionBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraCodeTokenResultBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraOptionSelectedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="LexoraOptionSelectedBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
@@ -159,6 +180,24 @@
     <Style x:Key="ModernInteractiveCard" TargetType="Border" BasedOn="{StaticResource ModernElevatedCard}">
         <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
         <Setter Property="Padding" Value="18" />
+    </Style>
+
+    <!-- Syntax & Formula Display Card -->
+    <Style x:Key="LexoraFormulaCard" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource LexoraFormulaCardBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource LexoraFormulaCardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
+        <Setter Property="Padding" Value="18,14" />
+    </Style>
+
+    <!-- Exam Option Card Style -->
+    <Style x:Key="LexoraOptionCard" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="Padding" Value="14,12" />
     </Style>
 
     <!-- Filter Buttons (Pills) -->

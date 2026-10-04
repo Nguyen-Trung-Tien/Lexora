@@ -1637,15 +1637,26 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
     {
         if (ViewModel.SelectedWord != null)
         {
+            var btn = sender as Button;
+            if (btn != null) btn.IsEnabled = false;
+
             try
             {
                 var storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
                 await storageService.MoveWordToStorageAsync(ViewModel.SelectedWord.Id, StorageAdditionReason.Manual);
-                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Nav_LearningStorage"), Loc.GetString("Storage_Toast_Added"));
+                
+                string toastMsg = string.Format(Loc.GetString("Storage_Toast_Added"), ViewModel.SelectedWord.Term);
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Nav_LearningStorage"), toastMsg);
+                _toastService?.ShowSuccess(toastMsg, Loc.GetString("Nav_LearningStorage"));
             }
             catch (Exception ex)
             {
                 ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Nav_LearningStorage"), ex.Message);
+                _toastService?.ShowWarning(ex.Message, Loc.GetString("Nav_LearningStorage"));
+            }
+            finally
+            {
+                if (btn != null) btn.IsEnabled = true;
             }
         }
     }

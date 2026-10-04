@@ -168,6 +168,25 @@ public partial class LearningStorageViewModel : ObservableObject
         {
             OnPropertyChanged(nameof(PageDisplayInfo));
         };
+
+        _storageService.StorageChanged += OnStorageChanged;
+    }
+
+    private void OnStorageChanged(object? sender, EventArgs e)
+    {
+        if (_dispatcherQueue != null)
+        {
+            _dispatcherQueue.TryEnqueue(async () =>
+            {
+                await LoadStatisticsAsync();
+                await LoadItemsAsync();
+            });
+        }
+        else
+        {
+            _ = LoadStatisticsAsync();
+            _ = LoadItemsAsync();
+        }
     }
 
     [RelayCommand]

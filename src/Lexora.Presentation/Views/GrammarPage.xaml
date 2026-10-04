@@ -386,9 +386,7 @@
                             </StackPanel>
 
                             <!-- Formula / Structure box (Auto-wrapping with 1-click Copy) -->
-                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                    CornerRadius="12" Padding="18,14">
+                            <Border Style="{StaticResource LexoraFormulaCard}" Margin="0,4,0,0">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                     <StackPanel Spacing="6" VerticalAlignment="Center">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -418,8 +416,8 @@
                                 <TextBlock Text="{x:Bind ViewModel.SelectedRule.ExplanationEn, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource BodyTextBlockStyle}" FontStyle="Italic" Margin="0,4,0,0" TextWrapping="Wrap" />
                             </StackPanel>
 
-                            <!-- Common Mistakes -->
-                            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="12" Padding="16"
+                            <!-- Common Mistakes / Exam Traps -->
+                            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1.5" CornerRadius="12" Padding="16"
                                     Visibility="{x:Bind ViewModel.SelectedRule.CommonMistakes, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -430,18 +428,25 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- Examples -->
+                            <!-- Examples with Audio Pronunciation -->
                             <TextBlock Text="{x:Bind Loc.GetString('Grammar_Examples')}" FontWeight="Bold" FontSize="16" />
                             <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedRule.Examples, Mode=OneWay}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="dto:GrammarExampleDto">
                                         <Border Margin="0,4,0,8" Padding="16,12" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
-                                            <StackPanel Spacing="4">
-                                                <TextBlock Text="{x:Bind SentenceEn}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
-                                                <TextBlock Text="{x:Bind SentenceVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
-                                                <TextBlock Text="{x:Bind Note}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontStyle="Italic" Margin="0,2,0,0" TextWrapping="Wrap" />
-                                            </StackPanel>
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Text="{x:Bind SentenceEn}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{x:Bind SentenceVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{x:Bind Note}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontStyle="Italic" Margin="0,2,0,0" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Click="PlayExampleAudio_Click" Tag="{x:Bind SentenceEn}"
+                                                        VerticalAlignment="Center" ToolTipService.ToolTip="Listen"
+                                                        Style="{ThemeResource CircleIconButton}" Width="32" Height="32">
+                                                    <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                </Button>
+                                            </Grid>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

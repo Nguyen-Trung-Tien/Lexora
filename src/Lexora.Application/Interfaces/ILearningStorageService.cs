@@ -5,6 +5,8 @@ namespace Lexora.Application.Interfaces;
 
 public interface ILearningStorageService
 {
+    event EventHandler? StorageChanged;
+
     Task<StoragePagedResultDto> GetPagedItemsAsync(
         StorageItemType? itemType = null,
         StorageLearningStatus? status = null,

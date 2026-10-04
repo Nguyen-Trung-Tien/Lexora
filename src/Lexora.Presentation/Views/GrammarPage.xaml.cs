@@ -342,15 +342,26 @@ public sealed partial class GrammarPage : Page, ILocalizableView
     {
         if (ViewModel.SelectedRule != null)
         {
+            var btn = sender as Button;
+            if (btn != null) btn.IsEnabled = false;
+
             try
             {
                 var storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
                 await storageService.MoveGrammarToStorageAsync(ViewModel.SelectedRule.Id, StorageAdditionReason.Manual);
-                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Nav_LearningStorage"), Loc.GetString("Storage_Toast_Added"));
+                
+                string toastMsg = string.Format(Loc.GetString("Storage_Toast_Added"), ViewModel.SelectedRule.Title);
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Nav_LearningStorage"), toastMsg);
+                _toastService?.ShowSuccess(toastMsg, Loc.GetString("Nav_LearningStorage"));
             }
             catch (Exception ex)
             {
                 ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Nav_LearningStorage"), ex.Message);
+                _toastService?.ShowWarning(ex.Message, Loc.GetString("Nav_LearningStorage"));
+            }
+            finally
+            {
+                if (btn != null) btn.IsEnabled = true;
             }
         }
     }
@@ -1035,6 +1046,25 @@ public sealed partial class GrammarPage : Page, ILocalizableView
         if (e.ClickedItem is GrammarSuggestionItemDto suggestion)
         {
             await ViewModel.SelectSuggestedRuleAsync(suggestion);
+        }
+    }
+
+    private async void PlayExampleAudio_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is Button { Tag: string text } && !string.IsNullOrWhiteSpace(text))
+            {
+                var audioPlayer = App.Current.Services.GetService<IAudioPlayerService>();
+                if (audioPlayer != null)
+                {
+                    await audioPlayer.PlayPronunciationAsync(text);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarPage] PlayExampleAudio_Click error: {ex.Message}");
         }
     }
 }

@@ -55,18 +55,17 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         });
     }
 
-    protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
+        await ViewModel.InitializeAsync();
+        UpdateSegmentedButtons();
     }
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.StorageItems.Count == 0)
-        {
-            await ViewModel.InitializeAsync();
-        }
+        await ViewModel.InitializeAsync();
         UpdateSegmentedButtons();
     }
 

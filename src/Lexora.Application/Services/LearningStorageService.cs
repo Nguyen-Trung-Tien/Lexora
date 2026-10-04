@@ -9,6 +9,18 @@ namespace Lexora.Application.Services;
 
 public class LearningStorageService : ILearningStorageService
 {
+    public static event EventHandler? GlobalStorageChanged;
+    public event EventHandler? StorageChanged
+    {
+        add => GlobalStorageChanged += value;
+        remove => GlobalStorageChanged -= value;
+    }
+
+    private void NotifyStorageChanged()
+    {
+        GlobalStorageChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     private readonly ILearningStorageRepository _storageRepo;
     private readonly IVocabularyRepository _vocabRepo;
     private readonly IGrammarRepository _grammarRepo;
@@ -136,6 +148,7 @@ public class LearningStorageService : ILearningStorageService
             existing.UpdatedAt = DateTime.UtcNow;
             await _storageRepo.UpdateAsync(existing, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            NotifyStorageChanged();
             return MapToDto(existing);
         }
 
@@ -179,6 +192,7 @@ public class LearningStorageService : ILearningStorageService
 
         await _storageRepo.AddAsync(newItem, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        NotifyStorageChanged();
 
         var saved = await _storageRepo.GetWithDetailsAsync(newItem.Id, cancellationToken);
         return MapToDto(saved ?? newItem);
@@ -210,6 +224,7 @@ public class LearningStorageService : ILearningStorageService
             existing.UpdatedAt = DateTime.UtcNow;
             await _storageRepo.UpdateAsync(existing, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            NotifyStorageChanged();
             return MapToDto(existing);
         }
 
@@ -233,6 +248,7 @@ public class LearningStorageService : ILearningStorageService
 
         await _storageRepo.AddAsync(newItem, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        NotifyStorageChanged();
 
         var saved = await _storageRepo.GetWithDetailsAsync(newItem.Id, cancellationToken);
         return MapToDto(saved ?? newItem);
@@ -283,6 +299,7 @@ public class LearningStorageService : ILearningStorageService
         {
             await _storageRepo.DeleteAsync(item, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            NotifyStorageChanged();
         }
     }
 
@@ -292,6 +309,7 @@ public class LearningStorageService : ILearningStorageService
         if (count > 0)
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            NotifyStorageChanged();
         }
         return count;
     }
@@ -325,6 +343,7 @@ public class LearningStorageService : ILearningStorageService
 
         await _storageRepo.UpdateAsync(item, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        NotifyStorageChanged();
     }
 
     public async Task<int> MarkRangeAsMasteredAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
@@ -348,6 +367,7 @@ public class LearningStorageService : ILearningStorageService
         if (count > 0)
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            NotifyStorageChanged();
         }
         return count;
     }
@@ -374,6 +394,7 @@ public class LearningStorageService : ILearningStorageService
         item.UpdatedAt = DateTime.UtcNow;
         await _storageRepo.UpdateAsync(item, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        NotifyStorageChanged();
     }
 
     public async Task UpdateNoteAsync(Guid id, string? note, CancellationToken cancellationToken = default)
@@ -385,6 +406,7 @@ public class LearningStorageService : ILearningStorageService
         item.UpdatedAt = DateTime.UtcNow;
         await _storageRepo.UpdateAsync(item, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        NotifyStorageChanged();
     }
 
     public async Task AutoCheckAndAddToStorageAsync(
