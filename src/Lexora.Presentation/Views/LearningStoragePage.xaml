@@ -185,7 +185,7 @@
                 </ScrollViewer>
 
                 <!-- 3. Unified Streamlined Toolbar (Segmented Tabs, Search, Filter, Action) -->
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
                     <!-- Segmented View Mode Switcher -->
                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
                         <StackPanel Orientation="Horizontal" Spacing="4">
@@ -229,8 +229,19 @@
                         <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterDueToday')}" Tag="DueToday" />
                     </ComboBox>
 
+                    <!-- Multi-Select Toggle Button -->
+                    <Button Grid.Column="3" x:Name="BtnSelectMode"
+                            Click="BtnSelectMode_Click"
+                            CornerRadius="10" Padding="14,8"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="14" />
+                            <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
+
                     <!-- Add items primary button -->
-                    <Button Grid.Column="3" Click="OpenAddDialog_Click"
+                    <Button Grid.Column="4" Click="OpenAddDialog_Click"
                             Style="{ThemeResource AccentButtonStyle}"
                             CornerRadius="10" Padding="16,8"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_BtnAddToStorage')}">
@@ -240,6 +251,29 @@
                         </StackPanel>
                     </Button>
                 </Grid>
+
+                <!-- Multi-Selection Action Bar -->
+                <Border x:Name="SelectionActionBar"
+                        Visibility="{x:Bind ViewModel.IsSelectionMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="10" Padding="12,8">
+                    <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                        <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllItems_Click" CornerRadius="6" Padding="10,5" FontSize="12" />
+                        <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllItems_Click" CornerRadius="6" Padding="10,5" FontSize="12" />
+                        <Button Grid.Column="3" x:Name="BtnDeleteSelectedItems"
+                                Click="DeleteSelectedItems_Click"
+                                IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+                                Background="{ThemeResource SystemFillColorCriticalBrush}"
+                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                CornerRadius="6" Padding="12,5" FontSize="12" FontWeight="Bold">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE74D;" FontSize="11" />
+                                <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Border>
 
                 <!-- 4. Empty State -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -274,8 +308,10 @@
                 </Border>
 
                 <!-- 5. Virtualized Storage Items List -->
-                <ListView ItemsSource="{x:Bind ViewModel.StorageItems, Mode=OneWay}"
+                <ListView x:Name="StorageListView"
+                          ItemsSource="{x:Bind ViewModel.StorageItems, Mode=OneWay}"
                           SelectionMode="None"
+                          SelectionChanged="StorageListView_SelectionChanged"
                           Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">

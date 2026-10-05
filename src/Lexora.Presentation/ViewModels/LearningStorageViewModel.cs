@@ -44,6 +44,17 @@ public partial class LearningStorageViewModel : ObservableObject
     [ObservableProperty]
     public partial LearningStorageItemDto? SelectedItem { get; set; }
 
+    // Multi-Selection State
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedCount))]
+    [NotifyPropertyChangedFor(nameof(HasSelection))]
+    public partial bool IsSelectionMode { get; set; } = false;
+
+    public List<Guid> SelectedItemIds { get; } = new();
+
+    public int SelectedCount => SelectedItemIds.Count;
+    public bool HasSelection => SelectedItemIds.Count > 0;
+
     // Statistics Cards
     [ObservableProperty]
     public partial int TotalItems { get; set; } = 0;
@@ -272,6 +283,10 @@ public partial class LearningStorageViewModel : ObservableObject
     {
         if (SelectedTab == tabIndex) return;
         SelectedTab = tabIndex;
+        SelectedItemIds.Clear();
+        IsSelectionMode = false;
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
         CurrentPage = 1;
         await LoadItemsAsync();
     }
@@ -280,6 +295,9 @@ public partial class LearningStorageViewModel : ObservableObject
     public async Task ApplyFilterAsync(string filter)
     {
         SelectedStatusFilter = filter;
+        SelectedItemIds.Clear();
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
         CurrentPage = 1;
         await LoadItemsAsync();
     }
@@ -288,6 +306,9 @@ public partial class LearningStorageViewModel : ObservableObject
     public async Task SearchAsync(string query)
     {
         SearchQuery = query;
+        SelectedItemIds.Clear();
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
         CurrentPage = 1;
         await LoadItemsAsync();
     }
@@ -309,6 +330,129 @@ public partial class LearningStorageViewModel : ObservableObject
         {
             CurrentPage--;
             await LoadItemsAsync();
+        }
+    }
+
+    [RelayCommand]
+    public void ToggleSelectionMode()
+    {
+        IsSelectionMode = !IsSelectionMode;
+        if (!IsSelectionMode)
+        {
+            SelectedItemIds.Clear();
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    [RelayCommand]
+    public void SelectAllItems()
+    {
+        SelectedItemIds.Clear();
+        foreach (var item in StorageItems)
+        {
+            SelectedItemIds.Add(item.Id);
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    [RelayCommand]
+    public void ClearSelection()
+    {
+        SelectedItemIds.Clear();
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    public void ToggleItemSelection(Guid id)
+    {
+        if (SelectedItemIds.Contains(id))
+        {
+            SelectedItemIds.Remove(id);
+        }
+        else
+        {
+            SelectedItemIds.Add(id);
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    private bool _isDeletingItems = false;
+
+    public async Task<int> DeleteSelectedItemsAsync(
+        IEnumerable<Guid>? ids = null,
+        CancellationToken cancellationToken = default,
+        IProgress<ProgressReport>? progress = null)
+    {
+        var targetIds = ids?.Distinct().ToList() ?? SelectedItemIds.ToList();
+        if (targetIds.Count == 0 || _isDeletingItems) return 0;
+        _isDeletingItems = true;
+
+        if (_dispatcherQueue != null)
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+        }
+        IsLoading = true;
+
+        try
+        {
+            int count = await Task.Run(
+                () => _storageService.RemoveRangeFromStorageAsync(targetIds, cancellationToken, progress),
+                cancellationToken);
+
+            if (_dispatcherQueue != null)
+            {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
+            }
+
+            // Immediate UI update: remove deleted items from in-memory collection immediately
+            var deletedSet = new HashSet<Guid>(targetIds);
+            for (int i = StorageItems.Count - 1; i >= 0; i--)
+            {
+                if (deletedSet.Contains(StorageItems[i].Id))
+                {
+                    StorageItems.RemoveAt(i);
+                }
+            }
+
+            TotalCount = Math.Max(0, TotalCount - count);
+            if (SelectedItem != null && deletedSet.Contains(SelectedItem.Id))
+            {
+                SelectedItem = StorageItems.FirstOrDefault();
+            }
+
+            SelectedItemIds.Clear();
+            IsSelectionMode = false;
+            OnPropertyChanged(nameof(SelectedCount));
+            OnPropertyChanged(nameof(HasSelection));
+            OnPropertyChanged(nameof(IsEmptyState));
+
+            // Reload statistics to sync badges and metrics
+            await LoadStatisticsAsync();
+
+            // Handle page overflow if the current page was emptied
+            if (StorageItems.Count == 0 && CurrentPage > 1)
+            {
+                CurrentPage--;
+                await LoadItemsAsync();
+            }
+            else if (StorageItems.Count == 0 && TotalCount > 0)
+            {
+                await LoadItemsAsync();
+            }
+
+            return count;
+        }
+        finally
+        {
+            _isDeletingItems = false;
+            if (_dispatcherQueue != null)
+            {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
+            }
+            IsLoading = false;
         }
     }
 

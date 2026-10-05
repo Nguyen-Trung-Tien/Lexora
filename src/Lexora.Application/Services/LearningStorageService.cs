@@ -303,15 +303,57 @@ public class LearningStorageService : ILearningStorageService
         }
     }
 
-    public async Task<int> RemoveRangeFromStorageAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    public async Task<int> RemoveRangeFromStorageAsync(
+        IEnumerable<Guid> ids,
+        CancellationToken cancellationToken = default,
+        IProgress<ProgressReport>? progress = null)
     {
-        var count = await _storageRepo.DeleteRangeAsync(ids, cancellationToken);
-        if (count > 0)
+        ArgumentNullException.ThrowIfNull(ids);
+        var idList = ids.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (idList.Count == 0) return 0;
+
+        progress?.Report(new ProgressReport(0, 0, idList.Count, "Bắt đầu xóa khỏi kho lưu trữ...", "Preparing deletion..."));
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
         {
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            int deletedCount = 0;
+            int total = idList.Count;
+            var chunks = idList.Chunk(150).ToList();
+
+            foreach (var chunk in chunks)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var count = await _storageRepo.DeleteRangeAsync(chunk, cancellationToken);
+                deletedCount += count;
+
+                if (count > 0)
+                {
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    _unitOfWork.ClearTracker();
+                }
+
+                int pct = (int)((double)deletedCount / total * 90);
+                progress?.Report(new ProgressReport(
+                    pct,
+                    deletedCount,
+                    total,
+                    $"Đang xóa khỏi kho lưu trữ ({deletedCount}/{total})...",
+                    $"Removing from storage ({deletedCount}/{total})..."));
+            }
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
             NotifyStorageChanged();
+
+            progress?.Report(new ProgressReport(100, deletedCount, total, "Xóa khỏi kho lưu trữ hoàn tất!", "Done."));
+            return deletedCount;
         }
-        return count;
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 
     public async Task MarkAsMasteredAsync(Guid id, CancellationToken cancellationToken = default)

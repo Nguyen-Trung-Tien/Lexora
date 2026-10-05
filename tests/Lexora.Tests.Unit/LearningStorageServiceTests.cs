@@ -426,4 +426,53 @@ public class LearningStorageServiceTests
         storageItem.Status.Should().Be(StorageLearningStatus.Weak);
         storageItem.EaseFactor.Should().BeGreaterThanOrEqualTo(1.3); // SM-2 EF floor invariant
     }
+
+    [Fact]
+    public async Task RemoveRangeFromStorageAsync_WhenIdsEmpty_ShouldReturnZeroWithoutStartingTransaction()
+    {
+        // Act
+        var result = await _service.RemoveRangeFromStorageAsync(Array.Empty<Guid>());
+
+        // Assert
+        result.Should().Be(0);
+        _mockStorageRepo.Verify(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockUnitOfWork.Verify(u => u.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RemoveRangeFromStorageAsync_WhenValidIdsProvided_ShouldDeleteAndCommit()
+    {
+        // Arrange
+        var ids = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+        _mockStorageRepo
+            .Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(3);
+
+        // Act
+        var result = await _service.RemoveRangeFromStorageAsync(ids);
+
+        // Assert
+        result.Should().Be(3);
+        _mockUnitOfWork.Verify(u => u.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.ClearTracker(), Times.Once);
+        _mockUnitOfWork.Verify(u => u.CommitTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task RemoveRangeFromStorageAsync_WhenExceptionOccurs_ShouldRollbackTransaction()
+    {
+        // Arrange
+        var ids = new List<Guid> { Guid.NewGuid() };
+        _mockStorageRepo
+            .Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("DB error"));
+
+        // Act
+        var act = () => _service.RemoveRangeFromStorageAsync(ids);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        _mockUnitOfWork.Verify(u => u.RollbackTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

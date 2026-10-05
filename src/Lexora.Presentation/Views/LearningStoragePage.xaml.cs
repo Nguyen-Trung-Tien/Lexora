@@ -51,6 +51,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         {
             ViewModel.UpdateLanguageState();
             UpdateSegmentedButtons();
+            UpdateSelectionModeUI();
             Bindings.Update();
         });
     }
@@ -79,12 +80,14 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
     {
         await ViewModel.SwitchTabAsync(0);
         UpdateSegmentedButtons();
+        UpdateSelectionModeUI();
     }
 
     private async void TabGrammar_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.SwitchTabAsync(1);
         UpdateSegmentedButtons();
+        UpdateSelectionModeUI();
     }
 
     private void UpdateSegmentedButtons()
@@ -322,6 +325,170 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
                     System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] RemoveItem error: {ex.Message}");
                     _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
                 }
+            }
+        }
+    }
+
+    private void BtnSelectMode_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ToggleSelectionMode();
+        UpdateSelectionModeUI();
+    }
+
+    private void UpdateSelectionModeUI()
+    {
+        if (ViewModel.IsSelectionMode)
+        {
+            StorageListView.SelectionMode = ListViewSelectionMode.Multiple;
+            TextSelectMode.Text = Loc.GetString("Action_CancelSelection");
+            IconSelectMode.Glyph = "\uE711";
+            UpdateDeleteSelectedButtonText();
+        }
+        else
+        {
+            try
+            {
+                StorageListView.SelectedItems.Clear();
+                StorageListView.SelectionMode = ListViewSelectionMode.Single;
+            }
+            catch { }
+            TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
+            IconSelectMode.Glyph = "\uE762";
+            ViewModel.SelectedItemIds.Clear();
+            UpdateDeleteSelectedButtonText();
+        }
+    }
+
+    private void StorageListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!ViewModel.IsSelectionMode)
+        {
+            return;
+        }
+
+        ViewModel.SelectedItemIds.Clear();
+        foreach (var item in StorageListView.SelectedItems)
+        {
+            if (item is LearningStorageItemDto storageItem)
+            {
+                ViewModel.SelectedItemIds.Add(storageItem.Id);
+            }
+        }
+        UpdateDeleteSelectedButtonText();
+    }
+
+    private void SelectAllItems_Click(object sender, RoutedEventArgs e)
+    {
+        StorageListView.SelectAll();
+    }
+
+    private void DeselectAllItems_Click(object sender, RoutedEventArgs e)
+    {
+        StorageListView.SelectedItems.Clear();
+    }
+
+    private void UpdateDeleteSelectedButtonText()
+    {
+        TextDeleteSelected.Text = string.Format(Loc.GetString("Action_DeleteSelected"), ViewModel.SelectedItemIds.Count);
+        BtnDeleteSelectedItems.IsEnabled = ViewModel.SelectedItemIds.Count > 0;
+    }
+
+    private async void DeleteSelectedItems_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedItemIds.Count == 0) return;
+
+        var count = ViewModel.SelectedItemIds.Count;
+        var activeTheme = GetActiveTheme();
+        var confirmDialog = new ContentDialog
+        {
+            Title = Loc.GetString("Storage_ConfirmBulkDeleteTitle"),
+            Content = string.Format(Loc.GetString("Storage_ConfirmBulkDeleteMsg"), count),
+            PrimaryButtonText = Loc.GetString("Action_Delete"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = this.XamlRoot,
+            RequestedTheme = activeTheme
+        };
+
+        var result = await confirmDialog.ShowAsyncSafe();
+        if (result != ContentDialogResult.Primary) return;
+
+        await Task.Yield();
+
+        var idsToDelete = ViewModel.SelectedItemIds.ToList();
+        if (idsToDelete.Count == 0) return;
+
+        BtnDeleteSelectedItems.IsEnabled = false;
+        BtnSelectMode.IsEnabled = false;
+
+        using var cts = new CancellationTokenSource();
+        OperationProgressDialog? progressDialog = null;
+
+        // Show progress dialog with cancel capability for bulk operations (> 3 items)
+        if (count > 3)
+        {
+            progressDialog = new OperationProgressDialog
+            {
+                Title = Loc.GetString("Storage_ConfirmBulkDeleteTitle"),
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = activeTheme
+            };
+            progressDialog.EnableCancellation(() => cts.Cancel());
+            progressDialog.SetIndeterminate(string.Format(Loc.GetString("Storage_BulkDeleteProgress"), 0, count));
+            _ = progressDialog.ShowAsyncSafe();
+        }
+
+        int deletedCount = 0;
+        bool isCancelled = false;
+        Exception? deleteError = null;
+
+        try
+        {
+            Progress<ProgressReport>? progress = null;
+            if (progressDialog != null)
+            {
+                progress = new Progress<ProgressReport>(report =>
+                {
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail);
+                    });
+                });
+            }
+
+            deletedCount = await ViewModel.DeleteSelectedItemsAsync(idsToDelete, cts.Token, progress);
+        }
+        catch (OperationCanceledException)
+        {
+            isCancelled = true;
+        }
+        catch (Exception ex)
+        {
+            deleteError = ex;
+        }
+        finally
+        {
+            if (progressDialog != null)
+            {
+                progressDialog.HideSafe();
+                await Task.Yield();
+            }
+
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            BtnSelectMode.IsEnabled = true;
+            UpdateSelectionModeUI();
+
+            if (isCancelled)
+            {
+                _toastService?.ShowWarning(Loc.GetString("Storage_DeleteCancelledMsg"), Loc.GetString("Storage_DeleteCancelledTitle"));
+            }
+            else if (deleteError != null)
+            {
+                _toastService?.ShowError(deleteError.Message, Loc.GetString("Common_Error"));
+            }
+            else
+            {
+                _toastService?.ShowSuccess(string.Format(Loc.GetString("Storage_BulkDeleteSuccessMsg"), deletedCount), Loc.GetString("Action_Delete"));
             }
         }
     }

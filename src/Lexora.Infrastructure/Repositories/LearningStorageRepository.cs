@@ -194,14 +194,25 @@ public class LearningStorageRepository : Repository<LearningStorageItem>, ILearn
 
     public async Task<int> DeleteRangeAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
     {
-        var idList = ids.ToList();
+        var idList = ids.Where(id => id != Guid.Empty).Distinct().ToList();
         if (idList.Count == 0) return 0;
 
-        var items = await DbSet.Where(x => idList.Contains(x.Id)).ToListAsync(cancellationToken);
-        if (items.Count == 0) return 0;
+        const int batchSize = 150;
+        int totalDeleted = 0;
 
-        DbSet.RemoveRange(items);
-        return items.Count;
+        for (int i = 0; i < idList.Count; i += batchSize)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var batch = idList.Skip(i).Take(batchSize).ToList();
+            var items = await DbSet.Where(x => batch.Contains(x.Id)).ToListAsync(cancellationToken);
+            if (items.Count > 0)
+            {
+                DbSet.RemoveRange(items);
+                totalDeleted += items.Count;
+            }
+        }
+
+        return totalDeleted;
     }
 
     private static IQueryable<LearningStorageItem> ApplyFilters(

@@ -48,7 +48,7 @@ public interface ILearningStorageService
 
     Task RemoveFromStorageAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<int> RemoveRangeFromStorageAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
+    Task<int> RemoveRangeFromStorageAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
 
     Task MarkAsMasteredAsync(Guid id, CancellationToken cancellationToken = default);
 
