@@ -62,18 +62,21 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         OnLanguageChanged();
         await ViewModel.InitializeAsync();
         UpdateSegmentedButtons();
+        UpdateSelectionModeUI();
     }
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.InitializeAsync();
         UpdateSegmentedButtons();
+        UpdateSelectionModeUI();
     }
 
     private async void RefreshBtn_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.InitializeAsync();
         UpdateSegmentedButtons();
+        UpdateSelectionModeUI();
     }
 
     private async void TabVocab_Click(object sender, RoutedEventArgs e)
@@ -363,6 +366,11 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
     {
         if (!ViewModel.IsSelectionMode)
         {
+            try
+            {
+                StorageListView.SelectedItems.Clear();
+            }
+            catch { }
             return;
         }
 
@@ -413,83 +421,51 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         var result = await confirmDialog.ShowAsyncSafe();
         if (result != ContentDialogResult.Primary) return;
 
-        await Task.Yield();
+        await DispatcherQueue.EnsureOnUIThreadAsync();
 
+        // 1. Snapshot the IDs to delete BEFORE resetting selection mode or modifying UI!
         var idsToDelete = ViewModel.SelectedItemIds.ToList();
         if (idsToDelete.Count == 0) return;
 
+        // 2. Disable buttons and exit selection mode cleanly on UI thread FIRST!
         BtnDeleteSelectedItems.IsEnabled = false;
         BtnSelectMode.IsEnabled = false;
 
-        using var cts = new CancellationTokenSource();
-        OperationProgressDialog? progressDialog = null;
-
-        // Show progress dialog with cancel capability for bulk operations (> 3 items)
-        if (count > 3)
+        // Turn off IsSelectionMode first so StorageListView_SelectionChanged will not clear SelectedItemIds or corrupt SelectionModel
+        ViewModel.IsSelectionMode = false;
+        try
         {
-            progressDialog = new OperationProgressDialog
-            {
-                Title = Loc.GetString("Storage_ConfirmBulkDeleteTitle"),
-                XamlRoot = this.XamlRoot,
-                RequestedTheme = activeTheme
-            };
-            progressDialog.EnableCancellation(() => cts.Cancel());
-            progressDialog.SetIndeterminate(string.Format(Loc.GetString("Storage_BulkDeleteProgress"), 0, count));
-            _ = progressDialog.ShowAsyncSafe();
+            StorageListView.SelectionMode = ListViewSelectionMode.Single;
+            StorageListView.SelectedItems.Clear();
         }
+        catch { }
 
+        // 3. Perform deletion with graceful error handling and without secondary dialog conflicts
         int deletedCount = 0;
-        bool isCancelled = false;
         Exception? deleteError = null;
 
         try
         {
-            Progress<ProgressReport>? progress = null;
-            if (progressDialog != null)
-            {
-                progress = new Progress<ProgressReport>(report =>
-                {
-                    DispatcherQueue.TryEnqueue(() =>
-                    {
-                        progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail);
-                    });
-                });
-            }
-
-            deletedCount = await ViewModel.DeleteSelectedItemsAsync(idsToDelete, cts.Token, progress);
-        }
-        catch (OperationCanceledException)
-        {
-            isCancelled = true;
+            deletedCount = await ViewModel.DeleteSelectedItemsAsync(idsToDelete);
         }
         catch (Exception ex)
         {
             deleteError = ex;
         }
-        finally
+
+        // 4. Re-enable selection mode button and refresh UI
+        await DispatcherQueue.EnsureOnUIThreadAsync();
+        BtnSelectMode.IsEnabled = true;
+        UpdateSelectionModeUI();
+
+        // 5. Toast notification
+        if (deleteError != null)
         {
-            if (progressDialog != null)
-            {
-                progressDialog.HideSafe();
-                await Task.Yield();
-            }
-
-            await DispatcherQueue.EnsureOnUIThreadAsync();
-            BtnSelectMode.IsEnabled = true;
-            UpdateSelectionModeUI();
-
-            if (isCancelled)
-            {
-                _toastService?.ShowWarning(Loc.GetString("Storage_DeleteCancelledMsg"), Loc.GetString("Storage_DeleteCancelledTitle"));
-            }
-            else if (deleteError != null)
-            {
-                _toastService?.ShowError(deleteError.Message, Loc.GetString("Common_Error"));
-            }
-            else
-            {
-                _toastService?.ShowSuccess(string.Format(Loc.GetString("Storage_BulkDeleteSuccessMsg"), deletedCount), Loc.GetString("Action_Delete"));
-            }
+            _toastService?.ShowError(deleteError.Message, Loc.GetString("Common_Error"));
+        }
+        else
+        {
+            _toastService?.ShowSuccess(string.Format(Loc.GetString("Storage_BulkDeleteSuccessMsg"), deletedCount), Loc.GetString("Action_Delete"));
         }
     }
 

@@ -310,13 +310,13 @@
                 <!-- 5. Virtualized Storage Items List -->
                 <ListView x:Name="StorageListView"
                           ItemsSource="{x:Bind ViewModel.StorageItems, Mode=OneWay}"
-                          SelectionMode="None"
+                          SelectionMode="Single"
                           SelectionChanged="StorageListView_SelectionChanged"
                           Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            <Setter Property="Padding" Value="0,0,0,10" />
+                            <Setter Property="Margin" Value="0,0,0,8" />
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>

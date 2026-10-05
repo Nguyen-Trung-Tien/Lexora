@@ -185,6 +185,8 @@ public partial class LearningStorageViewModel : ObservableObject
 
     private void OnStorageChanged(object? sender, EventArgs e)
     {
+        if (_isDeletingItems) return; // Prevent concurrent reload and UI thread collision during bulk deletion
+
         if (_dispatcherQueue != null)
         {
             _dispatcherQueue.TryEnqueue(async () =>
