@@ -342,22 +342,24 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
     {
         if (ViewModel.IsSelectionMode)
         {
-            StorageListView.SelectionMode = ListViewSelectionMode.Multiple;
+            BtnSelectMode.Style = (Style)App.Current.Resources["AccentButtonStyle"];
             TextSelectMode.Text = Loc.GetString("Action_CancelSelection");
             IconSelectMode.Glyph = "\uE711";
+            StorageListView.SelectionMode = ListViewSelectionMode.Multiple;
             UpdateDeleteSelectedButtonText();
         }
         else
         {
+            BtnSelectMode.Style = (Style)App.Current.Resources["DefaultButtonStyle"];
+            TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
+            IconSelectMode.Glyph = "\uE762";
             try
             {
                 StorageListView.SelectedItems.Clear();
-                StorageListView.SelectionMode = ListViewSelectionMode.Single;
+                StorageListView.SelectionMode = ListViewSelectionMode.None;
             }
             catch { }
-            TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
-            IconSelectMode.Glyph = "\uE762";
-            ViewModel.SelectedItemIds.Clear();
+            ViewModel.ClearSelection();
             UpdateDeleteSelectedButtonText();
         }
     }
@@ -382,6 +384,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
                 ViewModel.SelectedItemIds.Add(storageItem.Id);
             }
         }
+        ViewModel.NotifySelectionChanged();
         UpdateDeleteSelectedButtonText();
     }
 
@@ -435,7 +438,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         ViewModel.IsSelectionMode = false;
         try
         {
-            StorageListView.SelectionMode = ListViewSelectionMode.Single;
+            StorageListView.SelectionMode = ListViewSelectionMode.None;
             StorageListView.SelectedItems.Clear();
         }
         catch { }

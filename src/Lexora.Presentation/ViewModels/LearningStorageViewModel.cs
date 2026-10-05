@@ -381,6 +381,12 @@ public partial class LearningStorageViewModel : ObservableObject
         OnPropertyChanged(nameof(HasSelection));
     }
 
+    public void NotifySelectionChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
     private bool _isDeletingItems = false;
 
     public async Task<int> DeleteSelectedItemsAsync(
