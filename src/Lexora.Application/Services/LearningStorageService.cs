@@ -257,38 +257,153 @@ public class LearningStorageService : ILearningStorageService
     public async Task<int> MoveWordsToStorageAsync(
         IEnumerable<Guid> wordIds,
         StorageAdditionReason reason = StorageAdditionReason.Manual,
+        string? note = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(wordIds);
+        var idList = wordIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (idList.Count == 0) return 0;
+
         int added = 0;
-        foreach (var id in wordIds)
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var existing = await _storageRepo.GetByWordIdAsync(id, cancellationToken);
-            if (existing == null)
+            foreach (var id in idList)
             {
-                await MoveWordToStorageAsync(id, reason, null, cancellationToken);
-                added++;
+                cancellationToken.ThrowIfCancellationRequested();
+                var existing = await _storageRepo.GetByWordIdAsync(id, cancellationToken);
+                if (existing != null)
+                {
+                    if (reason != StorageAdditionReason.Manual)
+                    {
+                        existing.ReasonAdded = reason;
+                    }
+                    if (!string.IsNullOrWhiteSpace(note))
+                    {
+                        existing.Note = note.Trim();
+                    }
+                    if (existing.Status == StorageLearningStatus.Mastered && reason != StorageAdditionReason.Manual)
+                    {
+                        existing.Status = StorageLearningStatus.Weak;
+                        existing.NextReviewAt = DateTime.UtcNow;
+                        existing.IntervalDays = 1;
+                    }
+                    existing.UpdatedAt = DateTime.UtcNow;
+                    await _storageRepo.UpdateAsync(existing, cancellationToken);
+                }
+                else
+                {
+                    var word = await _vocabRepo.GetWithDetailsAsync(id, cancellationToken);
+                    if (word == null) continue;
+
+                    var card = await _reviewRepo.GetByWordIdAsync(id, cancellationToken);
+
+                    var newItem = new LearningStorageItem
+                    {
+                        ItemType = StorageItemType.Vocabulary,
+                        WordId = word.Id,
+                        Status = reason == StorageAdditionReason.MultipleErrors ? StorageLearningStatus.Weak : StorageLearningStatus.Learning,
+                        ReasonAdded = reason,
+                        Note = note?.Trim(),
+                        EaseFactor = card?.EaseFactor ?? 2.5,
+                        IntervalDays = card?.IntervalDays ?? 1,
+                        Repetitions = card?.Repetitions ?? 0,
+                        Lapses = card?.Lapses ?? 0,
+                        RetentionProbability = 50.0,
+                        NextReviewAt = DateTime.UtcNow,
+                        LastReviewedAt = card?.LastReviewedAt
+                    };
+
+                    await _storageRepo.AddAsync(newItem, cancellationToken);
+                    added++;
+                }
             }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+
+        NotifyStorageChanged();
         return added;
     }
 
     public async Task<int> MoveGrammarsToStorageAsync(
         IEnumerable<Guid> grammarRuleIds,
         StorageAdditionReason reason = StorageAdditionReason.Manual,
+        string? note = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(grammarRuleIds);
+        var idList = grammarRuleIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (idList.Count == 0) return 0;
+
         int added = 0;
-        foreach (var id in grammarRuleIds)
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var existing = await _storageRepo.GetByGrammarRuleIdAsync(id, cancellationToken);
-            if (existing == null)
+            foreach (var id in idList)
             {
-                await MoveGrammarToStorageAsync(id, reason, null, cancellationToken);
-                added++;
+                cancellationToken.ThrowIfCancellationRequested();
+                var existing = await _storageRepo.GetByGrammarRuleIdAsync(id, cancellationToken);
+                if (existing != null)
+                {
+                    if (reason != StorageAdditionReason.Manual)
+                    {
+                        existing.ReasonAdded = reason;
+                    }
+                    if (!string.IsNullOrWhiteSpace(note))
+                    {
+                        existing.Note = note.Trim();
+                    }
+                    if (existing.Status == StorageLearningStatus.Mastered && reason != StorageAdditionReason.Manual)
+                    {
+                        existing.Status = StorageLearningStatus.Weak;
+                        existing.NextReviewAt = DateTime.UtcNow;
+                        existing.IntervalDays = 1;
+                    }
+                    existing.UpdatedAt = DateTime.UtcNow;
+                    await _storageRepo.UpdateAsync(existing, cancellationToken);
+                }
+                else
+                {
+                    var rule = await _grammarRepo.GetWithExamplesAsync(id, cancellationToken);
+                    if (rule == null) continue;
+
+                    var newItem = new LearningStorageItem
+                    {
+                        ItemType = StorageItemType.Grammar,
+                        GrammarRuleId = rule.Id,
+                        Status = reason == StorageAdditionReason.MultipleErrors ? StorageLearningStatus.Weak : StorageLearningStatus.Learning,
+                        ReasonAdded = reason,
+                        Note = note?.Trim(),
+                        EaseFactor = 2.5,
+                        IntervalDays = 1,
+                        Repetitions = 0,
+                        Lapses = 0,
+                        RetentionProbability = 50.0,
+                        NextReviewAt = DateTime.UtcNow
+                    };
+
+                    await _storageRepo.AddAsync(newItem, cancellationToken);
+                    added++;
+                }
             }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+
+        NotifyStorageChanged();
         return added;
     }
 

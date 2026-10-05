@@ -475,4 +475,73 @@ public class LearningStorageServiceTests
         await act.Should().ThrowAsync<InvalidOperationException>();
         _mockUnitOfWork.Verify(u => u.RollbackTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task MoveWordsToStorageAsync_WhenMultipleWordsProvided_ShouldBatchAddAndCommitOnce()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+        var word1 = new Word { Id = id1, Term = "word1" };
+        var word2 = new Word { Id = id2, Term = "word2" };
+
+        _mockStorageRepo.Setup(r => r.GetByWordIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((LearningStorageItem?)null);
+        _mockVocabRepo.Setup(r => r.GetWithDetailsAsync(id1, It.IsAny<CancellationToken>())).ReturnsAsync(word1);
+        _mockVocabRepo.Setup(r => r.GetWithDetailsAsync(id2, It.IsAny<CancellationToken>())).ReturnsAsync(word2);
+
+        // Act
+        var added = await _service.MoveWordsToStorageAsync(new[] { id1, id2 }, StorageAdditionReason.Manual, "Batch note");
+
+        // Assert
+        added.Should().Be(2);
+        _mockStorageRepo.Verify(r => r.AddAsync(It.IsAny<LearningStorageItem>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        _mockUnitOfWork.Verify(u => u.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.CommitTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task MoveWordsToStorageAsync_WhenWordDoesNotExist_ShouldSkipGracefullyWithoutCrashing()
+    {
+        // Arrange
+        var missingId = Guid.NewGuid();
+        _mockStorageRepo.Setup(r => r.GetByWordIdAsync(missingId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((LearningStorageItem?)null);
+        _mockVocabRepo.Setup(r => r.GetWithDetailsAsync(missingId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word?)null);
+
+        // Act
+        var added = await _service.MoveWordsToStorageAsync(new[] { missingId });
+
+        // Assert
+        added.Should().Be(0);
+        _mockStorageRepo.Verify(r => r.AddAsync(It.IsAny<LearningStorageItem>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockUnitOfWork.Verify(u => u.CommitTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task MoveGrammarsToStorageAsync_WhenMultipleRulesProvided_ShouldBatchAddAndCommitOnce()
+    {
+        // Arrange
+        var gId1 = Guid.NewGuid();
+        var gId2 = Guid.NewGuid();
+        var rule1 = new GrammarRule { Id = gId1, Title = "Rule 1", Structure = "S + V" };
+        var rule2 = new GrammarRule { Id = gId2, Title = "Rule 2", Structure = "S + to be" };
+
+        _mockStorageRepo.Setup(r => r.GetByGrammarRuleIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((LearningStorageItem?)null);
+        _mockGrammarRepo.Setup(r => r.GetWithExamplesAsync(gId1, It.IsAny<CancellationToken>())).ReturnsAsync(rule1);
+        _mockGrammarRepo.Setup(r => r.GetWithExamplesAsync(gId2, It.IsAny<CancellationToken>())).ReturnsAsync(rule2);
+
+        // Act
+        var added = await _service.MoveGrammarsToStorageAsync(new[] { gId1, gId2 }, StorageAdditionReason.Manual, "Grammar note");
+
+        // Assert
+        added.Should().Be(2);
+        _mockStorageRepo.Verify(r => r.AddAsync(It.IsAny<LearningStorageItem>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        _mockUnitOfWork.Verify(u => u.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.CommitTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

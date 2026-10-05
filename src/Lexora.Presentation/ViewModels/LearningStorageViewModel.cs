@@ -183,9 +183,11 @@ public partial class LearningStorageViewModel : ObservableObject
         _storageService.StorageChanged += OnStorageChanged;
     }
 
+    public bool IsOperating => _isDeletingItems || _isAddingItems;
+
     private void OnStorageChanged(object? sender, EventArgs e)
     {
-        if (_isDeletingItems) return; // Prevent concurrent reload and UI thread collision during bulk deletion
+        if (_isDeletingItems || _isAddingItems) return; // Prevent concurrent reload and UI thread collision during bulk operations
 
         if (_dispatcherQueue != null)
         {
@@ -388,6 +390,97 @@ public partial class LearningStorageViewModel : ObservableObject
     }
 
     private bool _isDeletingItems = false;
+    private bool _isAddingItems = false;
+
+    public async Task<int> AddWordsToStorageAsync(
+        IEnumerable<Guid> wordIds,
+        string? note = null,
+        CancellationToken cancellationToken = default)
+    {
+        var targetIds = wordIds.Distinct().Where(id => id != Guid.Empty).ToList();
+        if (targetIds.Count == 0 || _isAddingItems || _isDeletingItems) return 0;
+        _isAddingItems = true;
+
+        if (_dispatcherQueue != null)
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+        }
+        IsLoading = true;
+
+        try
+        {
+            int addedCount = await Task.Run(
+                () => _storageService.MoveWordsToStorageAsync(targetIds, StorageAdditionReason.Manual, note, cancellationToken),
+                cancellationToken);
+
+            if (_dispatcherQueue != null)
+            {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
+            }
+
+            // Immediate UI update: switch to Vocabulary tab and refresh list & metrics
+            SelectedTab = 0;
+            CurrentPage = 1;
+            await LoadStatisticsAsync();
+            await LoadItemsAsync();
+
+            return addedCount;
+        }
+        finally
+        {
+            _isAddingItems = false;
+            if (_dispatcherQueue != null)
+            {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
+            }
+            IsLoading = false;
+        }
+    }
+
+    public async Task<int> AddGrammarsToStorageAsync(
+        IEnumerable<Guid> grammarRuleIds,
+        string? note = null,
+        CancellationToken cancellationToken = default)
+    {
+        var targetIds = grammarRuleIds.Distinct().Where(id => id != Guid.Empty).ToList();
+        if (targetIds.Count == 0 || _isAddingItems || _isDeletingItems) return 0;
+        _isAddingItems = true;
+
+        if (_dispatcherQueue != null)
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+        }
+        IsLoading = true;
+
+        try
+        {
+            int addedCount = await Task.Run(
+                () => _storageService.MoveGrammarsToStorageAsync(targetIds, StorageAdditionReason.Manual, note, cancellationToken),
+                cancellationToken);
+
+            if (_dispatcherQueue != null)
+            {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
+            }
+
+            // Immediate UI update: switch to Grammar tab and refresh list & metrics
+            SelectedTab = 1;
+            CurrentPage = 1;
+            await LoadStatisticsAsync();
+            await LoadItemsAsync();
+
+            return addedCount;
+        }
+        finally
+        {
+            _isAddingItems = false;
+            if (_dispatcherQueue != null)
+            {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
+            }
+            IsLoading = false;
+        }
+    }
 
     public async Task<int> DeleteSelectedItemsAsync(
         IEnumerable<Guid>? ids = null,
@@ -395,7 +488,7 @@ public partial class LearningStorageViewModel : ObservableObject
         IProgress<ProgressReport>? progress = null)
     {
         var targetIds = ids?.Distinct().ToList() ?? SelectedItemIds.ToList();
-        if (targetIds.Count == 0 || _isDeletingItems) return 0;
+        if (targetIds.Count == 0 || _isDeletingItems || _isAddingItems) return 0;
         _isDeletingItems = true;
 
         if (_dispatcherQueue != null)

@@ -39,11 +39,13 @@ public interface ILearningStorageService
     Task<int> MoveWordsToStorageAsync(
         IEnumerable<Guid> wordIds,
         StorageAdditionReason reason = StorageAdditionReason.Manual,
+        string? note = null,
         CancellationToken cancellationToken = default);
 
     Task<int> MoveGrammarsToStorageAsync(
         IEnumerable<Guid> grammarRuleIds,
         StorageAdditionReason reason = StorageAdditionReason.Manual,
+        string? note = null,
         CancellationToken cancellationToken = default);
 
     Task RemoveFromStorageAsync(Guid id, CancellationToken cancellationToken = default);

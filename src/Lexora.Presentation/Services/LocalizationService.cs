@@ -1133,6 +1133,17 @@ public class LocalizationService : ILocalizationService
             ["Storage_Dialog_AddGrammarPlaceholder"] = "Nhập từ khóa tìm cấu trúc ngữ pháp...",
             ["Storage_Dialog_AddVocabPlaceholder"] = "Nhập từ khóa tìm từ vựng cần thêm...",
             ["Storage_Dialog_SelectRequired"] = "Vui lòng chọn một mục từ danh sách.",
+            ["Storage_Dialog_AddMultipleVocabTitle"] = "Thêm từ vựng vào Kho lưu trữ",
+            ["Storage_Dialog_AddMultipleGrammarTitle"] = "Thêm ngữ pháp vào Kho lưu trữ",
+            ["Storage_Dialog_SelectedCount"] = "Đã chọn: {0} mục",
+            ["Storage_Dialog_SelectAll"] = "Chọn tất cả",
+            ["Storage_Dialog_DeselectAll"] = "Bỏ chọn tất cả",
+            ["Storage_Dialog_AddMultipleBtn"] = "Thêm vào Kho ({0})",
+            ["Storage_Toast_BulkAddedVocab"] = "Đã thêm thành công {0} từ vựng vào Kho lưu trữ",
+            ["Storage_Toast_BulkAddedGrammar"] = "Đã thêm thành công {0} cấu trúc ngữ pháp vào Kho lưu trữ",
+            ["Storage_Toast_AlreadyInStorage"] = "Các mục đã chọn đều đã có trong Kho lưu trữ",
+            ["Storage_Toast_NoItemSelected"] = "Vui lòng chọn ít nhất một mục để thêm",
+            ["Storage_Toast_OperationInProgress"] = "Hệ thống đang xử lý dữ liệu, vui lòng đợi trong giây lát...",
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -2252,6 +2263,17 @@ public class LocalizationService : ILocalizationService
             ["Storage_Dialog_AddGrammarPlaceholder"] = "Search grammar rules to add...",
             ["Storage_Dialog_AddVocabPlaceholder"] = "Search vocabulary to add...",
             ["Storage_Dialog_SelectRequired"] = "Please select an item from the list.",
+            ["Storage_Dialog_AddMultipleVocabTitle"] = "Add Vocabulary to Learning Storage",
+            ["Storage_Dialog_AddMultipleGrammarTitle"] = "Add Grammar Rules to Learning Storage",
+            ["Storage_Dialog_SelectedCount"] = "Selected: {0} items",
+            ["Storage_Dialog_SelectAll"] = "Select All",
+            ["Storage_Dialog_DeselectAll"] = "Deselect All",
+            ["Storage_Dialog_AddMultipleBtn"] = "Add to Storage ({0})",
+            ["Storage_Toast_BulkAddedVocab"] = "Successfully added {0} vocabulary items to Learning Storage",
+            ["Storage_Toast_BulkAddedGrammar"] = "Successfully added {0} grammar rules to Learning Storage",
+            ["Storage_Toast_AlreadyInStorage"] = "All selected items are already in Learning Storage",
+            ["Storage_Toast_NoItemSelected"] = "Please select at least one item to add",
+            ["Storage_Toast_OperationInProgress"] = "System is processing data, please wait a moment...",
         }
     };
 
