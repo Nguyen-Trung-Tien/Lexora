@@ -60,6 +60,10 @@ public interface ILearningStorageService
 
     Task UpdateNoteAsync(Guid id, string? note, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlySet<Guid>> GetStoredWordIdsAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlySet<Guid>> GetStoredGrammarRuleIdsAsync(CancellationToken cancellationToken = default);
+
     Task AutoCheckAndAddToStorageAsync(
         Guid wordId,
         int consecutiveErrors,

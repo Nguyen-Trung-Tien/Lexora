@@ -35,4 +35,6 @@ public interface ILearningStorageRepository : IRepository<LearningStorageItem>
         bool prioritizeWeak,
         CancellationToken cancellationToken = default);
     Task<int> DeleteRangeAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
+    Task<IReadOnlySet<Guid>> GetStoredWordIdsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlySet<Guid>> GetStoredGrammarRuleIdsAsync(CancellationToken cancellationToken = default);
 }

@@ -1144,6 +1144,8 @@ public class LocalizationService : ILocalizationService
             ["Storage_Toast_AlreadyInStorage"] = "Các mục đã chọn đều đã có trong Kho lưu trữ",
             ["Storage_Toast_NoItemSelected"] = "Vui lòng chọn ít nhất một mục để thêm",
             ["Storage_Toast_OperationInProgress"] = "Hệ thống đang xử lý dữ liệu, vui lòng đợi trong giây lát...",
+            ["Storage_Dialog_AllItemsAlreadyAdded"] = "Tất cả các mục phù hợp đã có trong Kho lưu trữ.",
+            ["Storage_Dialog_NoItemsAvailable"] = "Không còn mục nào để thêm vào Kho lưu trữ.",
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -2274,6 +2276,8 @@ public class LocalizationService : ILocalizationService
             ["Storage_Toast_AlreadyInStorage"] = "All selected items are already in Learning Storage",
             ["Storage_Toast_NoItemSelected"] = "Please select at least one item to add",
             ["Storage_Toast_OperationInProgress"] = "System is processing data, please wait a moment...",
+            ["Storage_Dialog_AllItemsAlreadyAdded"] = "All matching items are already in Learning Storage.",
+            ["Storage_Dialog_NoItemsAvailable"] = "No more items available to add to Learning Storage.",
         }
     };
 

@@ -249,4 +249,24 @@ public class LearningStorageRepository : Repository<LearningStorageItem>, ILearn
 
         return query;
     }
+
+    public async Task<IReadOnlySet<Guid>> GetStoredWordIdsAsync(CancellationToken cancellationToken = default)
+    {
+        var ids = await DbSet
+            .AsNoTracking()
+            .Where(x => x.ItemType == StorageItemType.Vocabulary && x.WordId.HasValue)
+            .Select(x => x.WordId!.Value)
+            .ToListAsync(cancellationToken);
+        return ids.ToHashSet();
+    }
+
+    public async Task<IReadOnlySet<Guid>> GetStoredGrammarRuleIdsAsync(CancellationToken cancellationToken = default)
+    {
+        var ids = await DbSet
+            .AsNoTracking()
+            .Where(x => x.ItemType == StorageItemType.Grammar && x.GrammarRuleId.HasValue)
+            .Select(x => x.GrammarRuleId!.Value)
+            .ToListAsync(cancellationToken);
+        return ids.ToHashSet();
+    }
 }

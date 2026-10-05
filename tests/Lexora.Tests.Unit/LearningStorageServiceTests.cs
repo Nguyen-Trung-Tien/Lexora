@@ -544,4 +544,39 @@ public class LearningStorageServiceTests
         _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         _mockUnitOfWork.Verify(u => u.CommitTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task GetStoredWordIdsAsync_ShouldReturnIdsFromRepository()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+        var expectedSet = new HashSet<Guid> { id1, id2 };
+        _mockStorageRepo.Setup(r => r.GetStoredWordIdsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedSet);
+
+        // Act
+        var result = await _service.GetStoredWordIdsAsync();
+
+        // Assert
+        result.Should().BeEquivalentTo(expectedSet);
+        _mockStorageRepo.Verify(r => r.GetStoredWordIdsAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetStoredGrammarRuleIdsAsync_ShouldReturnIdsFromRepository()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var expectedSet = new HashSet<Guid> { id1 };
+        _mockStorageRepo.Setup(r => r.GetStoredGrammarRuleIdsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedSet);
+
+        // Act
+        var result = await _service.GetStoredGrammarRuleIdsAsync();
+
+        // Assert
+        result.Should().BeEquivalentTo(expectedSet);
+        _mockStorageRepo.Verify(r => r.GetStoredGrammarRuleIdsAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

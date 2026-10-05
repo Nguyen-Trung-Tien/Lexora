@@ -566,6 +566,16 @@ public class LearningStorageService : ILearningStorageService
         NotifyStorageChanged();
     }
 
+    public async Task<IReadOnlySet<Guid>> GetStoredWordIdsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _storageRepo.GetStoredWordIdsAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlySet<Guid>> GetStoredGrammarRuleIdsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _storageRepo.GetStoredGrammarRuleIdsAsync(cancellationToken);
+    }
+
     public async Task AutoCheckAndAddToStorageAsync(
         Guid wordId,
         int consecutiveErrors,

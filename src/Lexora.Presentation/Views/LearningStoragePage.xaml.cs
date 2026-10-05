@@ -506,6 +506,8 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
 
     private async Task ShowAddWordDialogAsync()
     {
+        var storedWordIds = (await _storageService.GetStoredWordIdsAsync()).ToHashSet();
+
         var searchBox = new TextBox
         {
             PlaceholderText = Loc.GetString("Storage_Dialog_AddVocabPlaceholder"),
@@ -583,6 +585,17 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         actionsBar.Children.Add(txtSelectedCount);
         Grid.SetColumn(txtSelectedCount, 2);
 
+        var txtEmpty = new TextBlock
+        {
+            Text = Loc.GetString("Storage_Dialog_AllItemsAlreadyAdded"),
+            FontSize = 12,
+            FontStyle = Windows.UI.Text.FontStyle.Italic,
+            Foreground = (Microsoft.UI.Xaml.Media.Brush)App.Current.Resources["TextFillColorSecondaryBrush"],
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 12, 0, 12),
+            Visibility = Visibility.Collapsed
+        };
+
         var noteBox = new TextBox
         {
             PlaceholderText = Loc.GetString("Storage_Dialog_AddNotePlaceholder"),
@@ -593,6 +606,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         var panel = new StackPanel { Spacing = 6, MinWidth = 460 };
         panel.Children.Add(searchBox);
         panel.Children.Add(actionsBar);
+        panel.Children.Add(txtEmpty);
         panel.Children.Add(listView);
         panel.Children.Add(noteBox);
 
@@ -621,28 +635,35 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
 
         void BindCandidates(IEnumerable<WordDto> words)
         {
-            var list = words.Select(w =>
-            {
-                var item = new StorageCandidateItem
+            var list = words
+                .Where(w => !storedWordIds.Contains(w.Id))
+                .Select(w =>
                 {
-                    Id = w.Id,
-                    Title = w.Term,
-                    Subtitle = w.Meanings.FirstOrDefault()?.DefinitionVi ?? w.PhoneticUs ?? string.Empty,
-                    Badge = w.Level.ToString(),
-                    IsSelected = selectedCandidateIds.Contains(w.Id)
-                };
-                item.PropertyChanged += (sender, args) =>
-                {
-                    if (args.PropertyName == nameof(StorageCandidateItem.IsSelected))
+                    var item = new StorageCandidateItem
                     {
-                        if (item.IsSelected) selectedCandidateIds.Add(item.Id);
-                        else selectedCandidateIds.Remove(item.Id);
-                        UpdateSelectionUI();
-                    }
-                };
-                return item;
-            }).ToList();
+                        Id = w.Id,
+                        Title = w.Term,
+                        Subtitle = w.Meanings.FirstOrDefault()?.DefinitionVi ?? w.PhoneticUs ?? string.Empty,
+                        Badge = w.Level.ToString(),
+                        IsSelected = selectedCandidateIds.Contains(w.Id)
+                    };
+                    item.PropertyChanged += (sender, args) =>
+                    {
+                        if (args.PropertyName == nameof(StorageCandidateItem.IsSelected))
+                        {
+                            if (item.IsSelected) selectedCandidateIds.Add(item.Id);
+                            else selectedCandidateIds.Remove(item.Id);
+                            UpdateSelectionUI();
+                        }
+                    };
+                    return item;
+                }).ToList();
+
             listView.ItemsSource = list;
+            txtEmpty.Text = string.IsNullOrWhiteSpace(searchBox.Text)
+                ? Loc.GetString("Storage_Dialog_NoItemsAvailable")
+                : Loc.GetString("Storage_Dialog_AllItemsAlreadyAdded");
+            txtEmpty.Visibility = list.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
         listView.ItemClick += (s, e) =>
@@ -679,14 +700,14 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
             UpdateSelectionUI();
         };
 
-        var initialWords = await _vocabService.SearchWordsAsync(pageSize: 60);
+        var initialWords = await _vocabService.SearchWordsAsync(pageSize: 150);
         await DispatcherQueue.EnsureOnUIThreadAsync();
         BindCandidates(initialWords);
 
         searchBox.TextChanged += async (s, e) =>
         {
             var q = searchBox.Text;
-            var words = await _vocabService.SearchWordsAsync(search: q, pageSize: 60);
+            var words = await _vocabService.SearchWordsAsync(search: q, pageSize: 150);
             await DispatcherQueue.EnsureOnUIThreadAsync();
             BindCandidates(words);
         };
@@ -725,6 +746,8 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
 
     private async Task ShowAddGrammarDialogAsync()
     {
+        var storedGrammarIds = (await _storageService.GetStoredGrammarRuleIdsAsync()).ToHashSet();
+
         var searchBox = new TextBox
         {
             PlaceholderText = Loc.GetString("Storage_Dialog_AddGrammarPlaceholder"),
@@ -802,6 +825,17 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         actionsBar.Children.Add(txtSelectedCount);
         Grid.SetColumn(txtSelectedCount, 2);
 
+        var txtEmpty = new TextBlock
+        {
+            Text = Loc.GetString("Storage_Dialog_AllItemsAlreadyAdded"),
+            FontSize = 12,
+            FontStyle = Windows.UI.Text.FontStyle.Italic,
+            Foreground = (Microsoft.UI.Xaml.Media.Brush)App.Current.Resources["TextFillColorSecondaryBrush"],
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 12, 0, 12),
+            Visibility = Visibility.Collapsed
+        };
+
         var noteBox = new TextBox
         {
             PlaceholderText = Loc.GetString("Storage_Dialog_AddNotePlaceholder"),
@@ -812,6 +846,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         var panel = new StackPanel { Spacing = 6, MinWidth = 460 };
         panel.Children.Add(searchBox);
         panel.Children.Add(actionsBar);
+        panel.Children.Add(txtEmpty);
         panel.Children.Add(listView);
         panel.Children.Add(noteBox);
 
@@ -838,30 +873,43 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
                 : Loc.GetString("Action_Add");
         }
 
-        var rules = await _grammarService.GetAllRulesAsync();
+        var allRules = await _grammarService.GetAllRulesAsync();
         await DispatcherQueue.EnsureOnUIThreadAsync();
-        var candidateRules = rules.Select(r =>
-        {
-            var item = new StorageCandidateItem
+        var candidateRules = allRules
+            .Where(r => !storedGrammarIds.Contains(r.Id))
+            .Select(r =>
             {
-                Id = r.Id,
-                Title = r.Title,
-                Subtitle = $"{r.Structure} • {r.ExplanationVi}",
-                Badge = r.Level.ToString(),
-                IsSelected = false
-            };
-            item.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(StorageCandidateItem.IsSelected))
+                var item = new StorageCandidateItem
                 {
-                    if (item.IsSelected) selectedCandidateIds.Add(item.Id);
-                    else selectedCandidateIds.Remove(item.Id);
-                    UpdateSelectionUI();
-                }
-            };
-            return item;
-        }).ToList();
-        listView.ItemsSource = candidateRules;
+                    Id = r.Id,
+                    Title = r.Title,
+                    Subtitle = $"{r.Structure} • {r.ExplanationVi}",
+                    Badge = r.Level.ToString(),
+                    IsSelected = false
+                };
+                item.PropertyChanged += (sender, args) =>
+                {
+                    if (args.PropertyName == nameof(StorageCandidateItem.IsSelected))
+                    {
+                        if (item.IsSelected) selectedCandidateIds.Add(item.Id);
+                        else selectedCandidateIds.Remove(item.Id);
+                        UpdateSelectionUI();
+                    }
+                };
+                return item;
+            }).ToList();
+
+        void UpdateGrammarListView(IEnumerable<StorageCandidateItem> items)
+        {
+            var list = items.ToList();
+            listView.ItemsSource = list;
+            txtEmpty.Text = string.IsNullOrWhiteSpace(searchBox.Text)
+                ? Loc.GetString("Storage_Dialog_NoItemsAvailable")
+                : Loc.GetString("Storage_Dialog_AllItemsAlreadyAdded");
+            txtEmpty.Visibility = list.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        UpdateGrammarListView(candidateRules);
 
         listView.ItemClick += (s, e) =>
         {
@@ -899,14 +947,14 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
             var q = searchBox.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(q))
             {
-                listView.ItemsSource = candidateRules;
+                UpdateGrammarListView(candidateRules);
             }
             else
             {
-                listView.ItemsSource = candidateRules
+                var filtered = candidateRules
                     .Where(r => r.Title.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                                r.Subtitle.Contains(q, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                                r.Subtitle.Contains(q, StringComparison.OrdinalIgnoreCase));
+                UpdateGrammarListView(filtered);
             }
         };
 
