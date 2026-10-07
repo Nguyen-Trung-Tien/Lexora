@@ -632,7 +632,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         var result = await confirmDialog.ShowAsyncSafe();
         if (result != ContentDialogResult.Primary) return;
 
-        await Task.Yield();
+        await DispatcherQueue.EnsureOnUIThreadAsync();
 
         var idsToDelete = ViewModel.SelectedContextUnitIds.ToList();
         if (idsToDelete.Count == 0) return;
@@ -640,28 +640,12 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         BtnDeleteSelectedUnits.IsEnabled = false;
         BtnSelectMode.IsEnabled = false;
 
-        using var cts = new CancellationTokenSource();
-        var progressDialog = new OperationProgressDialog
-        {
-            Title = Loc.GetString("Vocab_ConfirmBulkDeleteTopicsTitle"),
-            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot,
-            RequestedTheme = theme
-        };
-        progressDialog.EnableCancellation(() => cts.Cancel());
-        progressDialog.SetIndeterminate(string.Format(Loc.GetString("Vocab_BulkDeleteTopicsProgress"), count));
-        _ = progressDialog.ShowAsyncSafe();
-
         int deletedCount = 0;
-        bool isCancelled = false;
         Exception? deleteError = null;
 
         try
         {
-            deletedCount = await ViewModel.DeleteSelectedContextUnitsAsync(idsToDelete, cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            isCancelled = true;
+            deletedCount = await ViewModel.DeleteSelectedContextUnitsAsync(idsToDelete);
         }
         catch (Exception ex)
         {
@@ -669,20 +653,13 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         }
         finally
         {
-            progressDialog.HideSafe();
-            await Task.Yield();
-
             await DispatcherQueue.EnsureOnUIThreadAsync();
             BtnSelectMode.IsEnabled = true;
             PopulateTopicFilterCombo();
             UpdateAllUnitCheckBoxes();
             UpdateSelectionModeUI();
 
-            if (isCancelled)
-            {
-                ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Vocab_DeleteCancelledTitle"), Loc.GetString("Vocab_DeleteCancelledMsg"));
-            }
-            else if (deleteError != null)
+            if (deleteError != null)
             {
                 ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), deleteError.Message);
             }
@@ -779,14 +756,14 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
             PrimaryButtonText = Loc.GetString("Action_Delete"),
             CloseButtonText = Loc.GetString("Action_Cancel"),
             DefaultButton = ContentDialogButton.Close,
-            XamlRoot = this.XamlRoot,
+            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot,
             RequestedTheme = theme
         };
 
         var result = await confirmDialog.ShowAsyncSafe();
         if (result != ContentDialogResult.Primary) return;
 
-        await Task.Yield();
+        await DispatcherQueue.EnsureOnUIThreadAsync();
 
         var idsToDelete = ViewModel.SelectedWordIds.ToList();
         if (idsToDelete.Count == 0) return;
@@ -794,36 +771,12 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         BtnDeleteSelectedWords.IsEnabled = false;
         BtnSelectMode.IsEnabled = false;
 
-        using var cts = new CancellationTokenSource();
-        var progressDialog = new OperationProgressDialog
-        {
-            Title = Loc.GetString("Vocab_ConfirmBulkDeleteTitle"),
-            XamlRoot = this.XamlRoot,
-            RequestedTheme = theme
-        };
-        progressDialog.EnableCancellation(() => cts.Cancel());
-        progressDialog.SetIndeterminate(string.Format(Loc.GetString("Vocab_BulkDeleteProgress"), 0, count));
-        _ = progressDialog.ShowAsyncSafe();
-
         int deletedCount = 0;
-        bool isCancelled = false;
         Exception? deleteError = null;
 
         try
         {
-            var progress = new Progress<ProgressReport>(report =>
-            {
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    progressDialog.SetDeterminate(report.Percent, report.Message, report.StepDetail);
-                });
-            });
-
-            deletedCount = await ViewModel.DeleteSelectedWordsAsync(idsToDelete, cts.Token, progress);
-        }
-        catch (OperationCanceledException)
-        {
-            isCancelled = true;
+            deletedCount = await ViewModel.DeleteSelectedWordsAsync(idsToDelete);
         }
         catch (Exception ex)
         {
@@ -831,18 +784,11 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         }
         finally
         {
-            progressDialog.HideSafe();
-            await Task.Yield();
-
             await DispatcherQueue.EnsureOnUIThreadAsync();
             BtnSelectMode.IsEnabled = true;
             UpdateSelectionModeUI();
 
-            if (isCancelled)
-            {
-                ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Vocab_DeleteCancelledTitle"), Loc.GetString("Vocab_DeleteCancelledMsg"));
-            }
-            else if (deleteError != null)
+            if (deleteError != null)
             {
                 ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), deleteError.Message);
             }
@@ -2165,8 +2111,9 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
             var result = await confirmDialog.ShowAsyncSafe();
             if (result == ContentDialogResult.Primary)
             {
-                await Task.Yield();
+                await DispatcherQueue.EnsureOnUIThreadAsync();
                 await ViewModel.DeleteTopicAsync(unit.Id);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
                 PopulateTopicFilterCombo();
                 ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), string.Format(Loc.GetString("Vocab_TopicDeleted"), unit.Name));
             }

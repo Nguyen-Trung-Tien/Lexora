@@ -16,6 +16,7 @@ public partial class App : Microsoft.UI.Xaml.Application
 {
     private Window? _window;
     public Window? MainWindow => _window;
+    public Microsoft.UI.Dispatching.DispatcherQueue UIDispatcherQueue { get; }
     private readonly IHost _host;
 
     public static new App Current => (App)Microsoft.UI.Xaml.Application.Current;
@@ -46,6 +47,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         // resolves the singleton for the first time.
         var uiDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()
             ?? throw new InvalidOperationException("App() must be called on the UI thread.");
+        UIDispatcherQueue = uiDispatcherQueue;
 
         _host = Host.CreateDefaultBuilder()
             .UseDefaultServiceProvider(options =>

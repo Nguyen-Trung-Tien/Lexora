@@ -10,13 +10,25 @@ public static class DispatcherExtensions
     /// </summary>
     public static Task EnsureOnUIThreadAsync(this DispatcherQueue? dispatcherQueue)
     {
-        if (dispatcherQueue == null || dispatcherQueue.HasThreadAccess)
+        var dq = dispatcherQueue 
+            ?? App.Current?.UIDispatcherQueue 
+            ?? App.Current?.MainWindow?.DispatcherQueue;
+
+        if (dq == null || dq.HasThreadAccess)
         {
+            if (dq != null && SynchronizationContext.Current == null)
+            {
+                SynchronizationContext.SetSynchronizationContext(new DispatcherQueueSynchronizationContext(dq));
+            }
             return Task.CompletedTask;
         }
 
         var tcs = new TaskCompletionSource();
-        if (!dispatcherQueue.TryEnqueue(() => tcs.TrySetResult()))
+        if (!dq.TryEnqueue(() =>
+        {
+            SynchronizationContext.SetSynchronizationContext(new DispatcherQueueSynchronizationContext(dq));
+            tcs.TrySetResult();
+        }))
         {
             tcs.TrySetCanceled();
         }

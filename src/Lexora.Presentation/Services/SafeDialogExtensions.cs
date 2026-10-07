@@ -41,7 +41,8 @@ public static class SafeDialogExtensions
             try
             {
                 dispatcher = dialog.DispatcherQueue 
-                    ?? App.Current.MainWindow?.DispatcherQueue
+                    ?? App.Current?.UIDispatcherQueue
+                    ?? App.Current?.MainWindow?.DispatcherQueue
                     ?? (preferredRoot?.Content as FrameworkElement)?.DispatcherQueue;
             }
             catch { }
@@ -78,7 +79,7 @@ public static class SafeDialogExtensions
                 }
 
                 // Always prioritize the top-level main window root over temporary/closing popup roots
-                var stableRoot = App.Current.MainWindow?.Content?.XamlRoot ?? preferredRoot ?? dialog.XamlRoot;
+                var stableRoot = App.Current?.MainWindow?.Content?.XamlRoot ?? preferredRoot ?? dialog.XamlRoot;
                 if (stableRoot != null)
                 {
                     dialog.XamlRoot = stableRoot;
