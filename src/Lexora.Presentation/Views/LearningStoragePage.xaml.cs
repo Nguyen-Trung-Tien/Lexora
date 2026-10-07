@@ -66,9 +66,8 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         UpdateSelectionModeUI();
     }
 
-    private async void Page_Loaded(object sender, RoutedEventArgs e)
+    private void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await ViewModel.InitializeAsync();
         UpdateSegmentedButtons();
         UpdateSelectionModeUI();
     }
@@ -704,21 +703,51 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         await DispatcherQueue.EnsureOnUIThreadAsync();
         BindCandidates(initialWords);
 
-        searchBox.TextChanged += async (s, e) =>
+        CancellationTokenSource? dialogSearchCts = null;
+        DispatcherTimer? dialogDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+        dialogDebounceTimer.Tick += async (s, e) =>
         {
-            var q = searchBox.Text;
-            var words = await _vocabService.SearchWordsAsync(search: q, pageSize: 150);
-            await DispatcherQueue.EnsureOnUIThreadAsync();
-            BindCandidates(words);
+            dialogDebounceTimer.Stop();
+            dialogSearchCts?.Cancel();
+            dialogSearchCts?.Dispose();
+            dialogSearchCts = new CancellationTokenSource();
+            var token = dialogSearchCts.Token;
+
+            try
+            {
+                var q = searchBox.Text;
+                var words = await _vocabService.SearchWordsAsync(search: q, pageSize: 150, cancellationToken: token);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+                if (!token.IsCancellationRequested)
+                {
+                    BindCandidates(words);
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] Candidate search error: {ex.Message}");
+            }
+        };
+
+        searchBox.TextChanged += (s, e) =>
+        {
+            dialogDebounceTimer.Stop();
+            dialogDebounceTimer.Start();
         };
 
         string? noteText = null;
         dialog.PrimaryButtonClick += (s, args) =>
         {
+            dialogDebounceTimer.Stop();
+            dialogSearchCts?.Cancel();
             noteText = noteBox.Text;
         };
 
         var res = await dialog.ShowAsyncSafe(this.XamlRoot);
+        dialogDebounceTimer.Stop();
+        dialogSearchCts?.Cancel();
+        dialogSearchCts?.Dispose();
         await DispatcherQueue.EnsureOnUIThreadAsync();
 
         if (res == ContentDialogResult.Primary && selectedCandidateIds.Count > 0)

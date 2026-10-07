@@ -9,8 +9,9 @@ using Microsoft.UI.Dispatching;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class LearningStorageViewModel : ObservableObject
+public partial class LearningStorageViewModel : ObservableObject, IDisposable
 {
+    private readonly SemaphoreSlim _dbLock = new(1, 1);
     private readonly ILearningStorageService _storageService;
     private readonly Services.ILocalizationService _localizationService;
     private readonly IAudioPlayerService? _audioPlayer;
@@ -193,26 +194,50 @@ public partial class LearningStorageViewModel : ObservableObject
         {
             _dispatcherQueue.TryEnqueue(async () =>
             {
-                await LoadStatisticsAsync();
-                await LoadItemsAsync();
+                await RefreshAllAsync();
             });
         }
         else
         {
-            _ = LoadStatisticsAsync();
-            _ = LoadItemsAsync();
+            _ = RefreshAllAsync();
         }
     }
 
     [RelayCommand]
     public async Task InitializeAsync()
     {
-        await LoadStatisticsAsync();
-        await LoadItemsAsync();
+        await RefreshAllAsync();
+    }
+
+    public async Task RefreshAllAsync()
+    {
+        await _dbLock.WaitAsync();
+        try
+        {
+            await LoadStatisticsCoreAsync();
+            await LoadItemsCoreAsync();
+        }
+        finally
+        {
+            _dbLock.Release();
+        }
     }
 
     [RelayCommand]
     public async Task LoadStatisticsAsync()
+    {
+        await _dbLock.WaitAsync();
+        try
+        {
+            await LoadStatisticsCoreAsync();
+        }
+        finally
+        {
+            _dbLock.Release();
+        }
+    }
+
+    private async Task LoadStatisticsCoreAsync()
     {
         try
         {
@@ -234,6 +259,19 @@ public partial class LearningStorageViewModel : ObservableObject
 
     [RelayCommand]
     public async Task LoadItemsAsync()
+    {
+        await _dbLock.WaitAsync();
+        try
+        {
+            await LoadItemsCoreAsync();
+        }
+        finally
+        {
+            _dbLock.Release();
+        }
+    }
+
+    private async Task LoadItemsCoreAsync()
     {
         IsLoading = true;
         try
@@ -409,9 +447,8 @@ public partial class LearningStorageViewModel : ObservableObject
 
         try
         {
-            int addedCount = await Task.Run(
-                () => _storageService.MoveWordsToStorageAsync(targetIds, StorageAdditionReason.Manual, note, cancellationToken),
-                cancellationToken);
+            int addedCount = await _storageService.MoveWordsToStorageAsync(
+                targetIds, StorageAdditionReason.Manual, note, cancellationToken);
 
             if (_dispatcherQueue != null)
             {
@@ -421,8 +458,7 @@ public partial class LearningStorageViewModel : ObservableObject
             // Immediate UI update: switch to Vocabulary tab and refresh list & metrics
             SelectedTab = 0;
             CurrentPage = 1;
-            await LoadStatisticsAsync();
-            await LoadItemsAsync();
+            await RefreshAllAsync();
 
             return addedCount;
         }
@@ -454,9 +490,8 @@ public partial class LearningStorageViewModel : ObservableObject
 
         try
         {
-            int addedCount = await Task.Run(
-                () => _storageService.MoveGrammarsToStorageAsync(targetIds, StorageAdditionReason.Manual, note, cancellationToken),
-                cancellationToken);
+            int addedCount = await _storageService.MoveGrammarsToStorageAsync(
+                targetIds, StorageAdditionReason.Manual, note, cancellationToken);
 
             if (_dispatcherQueue != null)
             {
@@ -466,8 +501,7 @@ public partial class LearningStorageViewModel : ObservableObject
             // Immediate UI update: switch to Grammar tab and refresh list & metrics
             SelectedTab = 1;
             CurrentPage = 1;
-            await LoadStatisticsAsync();
-            await LoadItemsAsync();
+            await RefreshAllAsync();
 
             return addedCount;
         }
@@ -843,5 +877,12 @@ public partial class LearningStorageViewModel : ObservableObject
                 _localizationService.GetString("Storage_Practice_ResultSummary"),
                 _lastPracticeResult.Correct, _lastPracticeResult.Total, _lastPracticeResult.ScorePercent);
         }
+    }
+
+    public void Dispose()
+    {
+        _storageService.StorageChanged -= OnStorageChanged;
+        _dbLock.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

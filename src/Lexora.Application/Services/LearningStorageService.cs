@@ -192,10 +192,12 @@ public class LearningStorageService : ILearningStorageService
 
         await _storageRepo.AddAsync(newItem, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        NotifyStorageChanged();
 
         var saved = await _storageRepo.GetWithDetailsAsync(newItem.Id, cancellationToken);
-        return MapToDto(saved ?? newItem);
+        var resultDto = MapToDto(saved ?? newItem);
+
+        NotifyStorageChanged();
+        return resultDto;
     }
 
     public async Task<LearningStorageItemDto> MoveGrammarToStorageAsync(
@@ -248,10 +250,12 @@ public class LearningStorageService : ILearningStorageService
 
         await _storageRepo.AddAsync(newItem, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        NotifyStorageChanged();
 
         var saved = await _storageRepo.GetWithDetailsAsync(newItem.Id, cancellationToken);
-        return MapToDto(saved ?? newItem);
+        var resultDto = MapToDto(saved ?? newItem);
+
+        NotifyStorageChanged();
+        return resultDto;
     }
 
     public async Task<int> MoveWordsToStorageAsync(
