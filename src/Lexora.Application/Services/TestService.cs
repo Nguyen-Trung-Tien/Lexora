@@ -288,6 +288,11 @@ public class TestService : ITestService
         await _reviewRepo.UpdateStreakAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        if (incorrectCount > 0 && _storageRepo != null)
+        {
+            LearningStorageService.NotifyGlobalStorageChanged();
+        }
+
         // Clean up cache
         ActiveTestSessions.TryRemove(sessionId, out _);
 

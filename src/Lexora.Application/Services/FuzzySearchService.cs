@@ -23,6 +23,25 @@ public class FuzzySearchService : IFuzzySearchService
         int n = s.Length;
         int m = t.Length;
 
+        // Optimization: Ensure m is the shorter string to minimize row allocation and maximize stackalloc usage
+        if (m > n)
+        {
+            (s, t) = (t, s);
+            (n, m) = (m, n);
+        }
+
+        // Bound maximum comparison lengths to prevent quadratic slowdown on anomalous large inputs
+        if (m > 256)
+        {
+            m = 256;
+            t = t[..256];
+        }
+        if (n > 512)
+        {
+            n = 512;
+            s = s[..512];
+        }
+
         // Use stackalloc for small strings to avoid heap allocation (3 rows for Damerau-Levenshtein transpositions)
         int rowLen = m + 1;
         Span<int> row0 = rowLen <= 128 ? stackalloc int[rowLen] : new int[rowLen];
@@ -78,10 +97,16 @@ public class FuzzySearchService : IFuzzySearchService
         if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(target))
             return 0.0;
 
-        int distance = CalculateDistance(source, target);
-        int maxLen = Math.Max(source.Length, target.Length);
+        var s = source.Trim();
+        var t = target.Trim();
+
+        if (string.Equals(s, t, StringComparison.OrdinalIgnoreCase))
+            return 1.0;
+
+        int maxLen = Math.Max(s.Length, t.Length);
         if (maxLen == 0) return 1.0;
 
+        int distance = CalculateDistance(s, t);
         return Math.Max(0.0, 1.0 - (double)distance / maxLen);
     }
 

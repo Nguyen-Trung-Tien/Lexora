@@ -317,6 +317,7 @@ public class VocabularyService : IVocabularyService
             await _vocabRepo.DeleteAsync(word, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             _cacheService?.InvalidateVocabulary();
+            LearningStorageService.NotifyGlobalStorageChanged();
         }
     }
 
@@ -380,6 +381,7 @@ public class VocabularyService : IVocabularyService
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
             _cacheService?.InvalidateVocabulary();
+            LearningStorageService.NotifyGlobalStorageChanged();
 
             progress?.Report(new ProgressReport(100, deletedCount, total, "Xóa dữ liệu hoàn tất!", "Done."));
             return deletedCount;

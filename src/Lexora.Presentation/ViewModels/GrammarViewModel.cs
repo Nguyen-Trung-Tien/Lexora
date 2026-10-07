@@ -188,7 +188,8 @@ public partial class GrammarViewModel : ObservableObject
         _smartSearchService = smartSearchService;
         // Must be captured on the UI thread (constructor is always called from UI thread).
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
-            ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+            ?? App.Current?.UIDispatcherQueue
+            ?? App.Current?.MainWindow?.DispatcherQueue;
     }
 
     [RelayCommand]

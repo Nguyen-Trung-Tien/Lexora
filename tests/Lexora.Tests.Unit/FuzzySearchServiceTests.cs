@@ -87,4 +87,32 @@ public class FuzzySearchServiceTests
         int dist = _fuzzyService.CalculateDistance(source, target);
         dist.Should().Be(expected);
     }
+
+    [Fact]
+    public void CalculateSimilarity_WithUntrimmedWhitespace_ShouldAccuratelyComputeTrimmedSimilarity()
+    {
+        // "  apple  " trimmed is "apple", length 5
+        double similarity = _fuzzyService.CalculateSimilarity("  apple  ", "apple");
+        similarity.Should().Be(1.0);
+
+        double closeSim = _fuzzyService.CalculateSimilarity("  aple  ", "apple");
+        closeSim.Should().Be(0.8); // 1 - (1 / 5) = 0.8
+    }
+
+    [Fact]
+    public void CalculateDistance_Symmetry_ShouldProduceIdenticalResultsRegardlessOfOrder()
+    {
+        int dist1 = _fuzzyService.CalculateDistance("cat", "caterpillar");
+        int dist2 = _fuzzyService.CalculateDistance("caterpillar", "cat");
+        dist1.Should().Be(dist2);
+    }
+
+    [Fact]
+    public void CalculateDistance_WithVeryLongInput_ShouldRemainBoundedAndNotFreeze()
+    {
+        string longStr1 = new('a', 600);
+        string longStr2 = new('b', 600);
+        int dist = _fuzzyService.CalculateDistance(longStr1, longStr2);
+        dist.Should().BeGreaterThan(0);
+    }
 }

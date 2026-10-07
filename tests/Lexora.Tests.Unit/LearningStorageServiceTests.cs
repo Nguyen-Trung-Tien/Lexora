@@ -579,4 +579,44 @@ public class LearningStorageServiceTests
         result.Should().BeEquivalentTo(expectedSet);
         _mockStorageRepo.Verify(r => r.GetStoredGrammarRuleIdsAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public void NotifyGlobalStorageChanged_ShouldInvokeRegisteredSubscribers()
+    {
+        // Arrange
+        bool invoked = false;
+        void Handler(object? sender, EventArgs e) => invoked = true;
+
+        LearningStorageService.GlobalStorageChanged += Handler;
+
+        try
+        {
+            // Act
+            LearningStorageService.NotifyGlobalStorageChanged();
+
+            // Assert
+            invoked.Should().BeTrue();
+        }
+        finally
+        {
+            LearningStorageService.GlobalStorageChanged -= Handler;
+        }
+    }
+
+    [Fact]
+    public void NotifyGlobalStorageChanged_AfterUnsubscribe_ShouldNotInvokeSubscriber()
+    {
+        // Arrange
+        int callCount = 0;
+        void Handler(object? sender, EventArgs e) => callCount++;
+
+        LearningStorageService.GlobalStorageChanged += Handler;
+        LearningStorageService.GlobalStorageChanged -= Handler;
+
+        // Act
+        LearningStorageService.NotifyGlobalStorageChanged();
+
+        // Assert
+        callCount.Should().Be(0);
+    }
 }

@@ -255,6 +255,11 @@ public class ReviewService : IReviewService
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        if (rating == ReviewRating.Again && _storageRepo != null)
+        {
+            LearningStorageService.NotifyGlobalStorageChanged();
+        }
+
         return new ReviewEvaluationResultDto(
             card.Id,
             rating,
@@ -323,6 +328,11 @@ public class ReviewService : IReviewService
 
         await _reviewRepo.UpdateAsync(card, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        if (lastLog?.Rating == ReviewRating.Again && _storageRepo != null)
+        {
+            LearningStorageService.NotifyGlobalStorageChanged();
+        }
     }
 
     public async Task MarkStatusQuickAsync(Guid wordId, bool remembered, CancellationToken cancellationToken = default)
@@ -392,6 +402,11 @@ public class ReviewService : IReviewService
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        if (!remembered && _storageRepo != null)
+        {
+            LearningStorageService.NotifyGlobalStorageChanged();
+        }
     }
 
     public IntervalPreviewDto GetCardIntervalPreview(ReviewCardDto card)

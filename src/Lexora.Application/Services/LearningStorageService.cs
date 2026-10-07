@@ -9,16 +9,79 @@ namespace Lexora.Application.Services;
 
 public class LearningStorageService : ILearningStorageService
 {
-    public static event EventHandler? GlobalStorageChanged;
+    private static readonly object _eventLock = new();
+    private static readonly List<(WeakReference? Target, System.Reflection.MethodInfo Method)> _subscribers = new();
+
+    public static event EventHandler? GlobalStorageChanged
+    {
+        add
+        {
+            if (value == null) return;
+            lock (_eventLock)
+            {
+                _subscribers.Add((value.Target != null ? new WeakReference(value.Target) : null, value.Method));
+            }
+        }
+        remove
+        {
+            if (value == null) return;
+            lock (_eventLock)
+            {
+                for (int i = _subscribers.Count - 1; i >= 0; i--)
+                {
+                    var target = _subscribers[i].Target != null ? _subscribers[i].Target!.Target : null;
+                    if (_subscribers[i].Target != null && target == null)
+                    {
+                        _subscribers.RemoveAt(i);
+                    }
+                    else if (target == value.Target && _subscribers[i].Method == value.Method)
+                    {
+                        _subscribers.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     public event EventHandler? StorageChanged
     {
         add => GlobalStorageChanged += value;
         remove => GlobalStorageChanged -= value;
     }
 
+    public static void NotifyGlobalStorageChanged()
+    {
+        List<Action> actionsToInvoke = new();
+        lock (_eventLock)
+        {
+            for (int i = _subscribers.Count - 1; i >= 0; i--)
+            {
+                var target = _subscribers[i].Target != null ? _subscribers[i].Target!.Target : null;
+                if (_subscribers[i].Target != null && target == null)
+                {
+                    _subscribers.RemoveAt(i);
+                }
+                else
+                {
+                    var method = _subscribers[i].Method;
+                    actionsToInvoke.Add(() =>
+                    {
+                        try { method.Invoke(target, new object?[] { null, EventArgs.Empty }); } catch { }
+                    });
+                }
+            }
+        }
+
+        foreach (var action in actionsToInvoke)
+        {
+            action();
+        }
+    }
+
     private void NotifyStorageChanged()
     {
-        GlobalStorageChanged?.Invoke(this, EventArgs.Empty);
+        NotifyGlobalStorageChanged();
     }
 
     private readonly ILearningStorageRepository _storageRepo;

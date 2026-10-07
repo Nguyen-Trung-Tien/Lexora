@@ -16,6 +16,9 @@ public class SmartSearchCacheService : ISmartSearchCacheService
 
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
+    private int _vocabVersion = 0;
+    private int _grammarVersion = 0;
+
     public async Task<IReadOnlyList<WordDto>> GetCachedWordsAsync(
         Func<Task<IReadOnlyList<WordDto>>> factory,
         bool forceRefresh = false)
@@ -33,10 +36,17 @@ public class SmartSearchCacheService : ISmartSearchCacheService
                 return _cachedWords;
             }
 
+            int currentVersion = Volatile.Read(ref _vocabVersion);
             var words = await factory();
-            _cachedWords = words;
-            _vocabCacheTime = DateTime.UtcNow;
-            return _cachedWords;
+
+            // Only cache if no invalidation occurred during factory execution
+            if (currentVersion == Volatile.Read(ref _vocabVersion))
+            {
+                _cachedWords = words;
+                _vocabCacheTime = DateTime.UtcNow;
+            }
+
+            return words;
         }
         finally
         {
@@ -61,10 +71,17 @@ public class SmartSearchCacheService : ISmartSearchCacheService
                 return _cachedRules;
             }
 
+            int currentVersion = Volatile.Read(ref _grammarVersion);
             var rules = await factory();
-            _cachedRules = rules;
-            _grammarCacheTime = DateTime.UtcNow;
-            return _cachedRules;
+
+            // Only cache if no invalidation occurred during factory execution
+            if (currentVersion == Volatile.Read(ref _grammarVersion))
+            {
+                _cachedRules = rules;
+                _grammarCacheTime = DateTime.UtcNow;
+            }
+
+            return rules;
         }
         finally
         {
@@ -74,12 +91,14 @@ public class SmartSearchCacheService : ISmartSearchCacheService
 
     public void InvalidateVocabulary()
     {
+        Interlocked.Increment(ref _vocabVersion);
         _cachedWords = null;
         _vocabCacheTime = DateTime.MinValue;
     }
 
     public void InvalidateGrammar()
     {
+        Interlocked.Increment(ref _grammarVersion);
         _cachedRules = null;
         _grammarCacheTime = DateTime.MinValue;
     }

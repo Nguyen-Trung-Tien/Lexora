@@ -218,6 +218,7 @@ public class GrammarService : IGrammarService
             await _grammarRepo.DeleteAsync(rule, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             _cacheService?.InvalidateGrammar();
+            LearningStorageService.NotifyGlobalStorageChanged();
         }
     }
 
@@ -256,6 +257,7 @@ public class GrammarService : IGrammarService
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
             _cacheService?.InvalidateGrammar();
+            LearningStorageService.NotifyGlobalStorageChanged();
             return deletedCount;
         }
         catch

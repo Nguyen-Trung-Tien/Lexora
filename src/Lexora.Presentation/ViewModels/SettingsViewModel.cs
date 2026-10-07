@@ -96,7 +96,8 @@ public partial class SettingsViewModel : ObservableObject
         _audioService = audioService;
         _preferencesService = preferencesService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
-            ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+            ?? App.Current?.UIDispatcherQueue
+            ?? App.Current?.MainWindow?.DispatcherQueue;
 
         CurrentLanguage = _locService.CurrentLanguage;
         var prefs = _preferencesService.GetPreferences();

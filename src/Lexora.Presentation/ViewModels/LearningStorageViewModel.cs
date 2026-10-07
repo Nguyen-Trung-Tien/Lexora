@@ -174,7 +174,9 @@ public partial class LearningStorageViewModel : ObservableObject, IDisposable
         _audioPlayer = audioPlayer;
         _soundFeedback = soundFeedback;
         _preferencesService = preferencesService;
-        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
+            ?? App.Current?.UIDispatcherQueue
+            ?? App.Current?.MainWindow?.DispatcherQueue;
 
         _localizationService.LanguageChanged += (s, e) =>
         {

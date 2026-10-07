@@ -180,7 +180,9 @@ public static class SafeDialogExtensions
     {
         try
         {
-            var dispatcher = dialog.DispatcherQueue ?? App.Current.MainWindow?.DispatcherQueue;
+            var dispatcher = dialog.DispatcherQueue 
+                ?? App.Current?.UIDispatcherQueue 
+                ?? App.Current?.MainWindow?.DispatcherQueue;
             if (dispatcher != null && !dispatcher.HasThreadAccess)
             {
                 dispatcher.TryEnqueue(() =>
@@ -209,7 +211,9 @@ public static class SafeDialogExtensions
             var active = _currentlyActiveDialog;
             if (active == null) return;
 
-            var dispatcher = active.DispatcherQueue ?? App.Current.MainWindow?.DispatcherQueue;
+            var dispatcher = active.DispatcherQueue 
+                ?? App.Current?.UIDispatcherQueue 
+                ?? App.Current?.MainWindow?.DispatcherQueue;
             if (dispatcher != null && !dispatcher.HasThreadAccess)
             {
                 dispatcher.TryEnqueue(() =>
