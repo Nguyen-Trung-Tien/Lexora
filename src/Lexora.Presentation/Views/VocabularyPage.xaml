@@ -998,6 +998,32 @@
                         </StackPanel>
                     </Grid>
 
+                    <!-- Context Units Multi-Selection Action Bar -->
+                    <Border x:Name="UnitsSelectionActionBar"
+                            Visibility="{x:Bind ViewModel.IsSelectionMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="10" Padding="12,8">
+                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                            <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllUnits_Click" CornerRadius="6" Padding="10,5" FontSize="12" />
+                            <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllUnits_Click" CornerRadius="6" Padding="10,5" FontSize="12" />
+                            <TextBlock Grid.Column="2" x:Name="TextSelectedUnitsCount"
+                                       VerticalAlignment="Center" Margin="8,0,0,0" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <Button Grid.Column="3" x:Name="BtnDeleteSelectedUnits"
+                                    Click="DeleteSelectedUnits_Click"
+                                    IsEnabled="{x:Bind ViewModel.HasContextUnitSelection, Mode=OneWay}"
+                                    Background="{ThemeResource SystemFillColorCriticalBrush}"
+                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                    CornerRadius="6" Padding="12,5" FontSize="12" FontWeight="Bold">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="11" />
+                                    <TextBlock x:Name="TextDeleteSelectedUnits" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+
                     <!-- Empty state -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="40"
                                 Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntZeroToVisibilityConverter}}">
@@ -1019,9 +1045,19 @@
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1" CornerRadius="12" Padding="20">
                                     <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
-                                        <!-- Header: Icon, Name, Word Count Badge -->
-                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                            <Border Width="42" Height="42" CornerRadius="10"
+                                        <!-- Header: CheckBox, Icon, Name, Word Count Badge -->
+                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10">
+                                            <!-- Multi-Select CheckBox -->
+                                            <CheckBox x:Name="UnitSelectionCheckBox"
+                                                      Tag="{x:Bind}"
+                                                      Loaded="UnitSelectionCheckBox_Loaded"
+                                                      Unloaded="UnitSelectionCheckBox_Unloaded"
+                                                      Click="UnitSelectionCheckBox_Click"
+                                                      MinWidth="32" MinHeight="32" Padding="0"
+                                                      VerticalAlignment="Center"
+                                                      Visibility="Collapsed" />
+
+                                            <Border Grid.Column="1" Width="42" Height="42" CornerRadius="10"
                                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                     BorderThickness="1">
@@ -1030,14 +1066,14 @@
                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Border>
 
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
                                                 <TextBlock Text="{x:Bind Name}" FontWeight="Bold" FontSize="16" TextTrimming="CharacterEllipsis" />
                                                 <TextBlock Text="{x:Bind Description}" FontSize="12"
                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                            TextWrapping="Wrap" MaxLines="2" />
                                             </StackPanel>
 
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
                                                 <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                         BorderThickness="1" CornerRadius="6" Padding="8,3">

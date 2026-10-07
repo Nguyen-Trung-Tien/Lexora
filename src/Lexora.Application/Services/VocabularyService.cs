@@ -178,8 +178,11 @@ public class VocabularyService : IVocabularyService
             word.Meanings.Add(meaning);
         }
 
-        // Add topic associations
-        foreach (var topicId in dto.TopicIds)
+        // Add topic associations with defensive protection against deleted topics
+        var allTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
+        var validTopicIds = allTopics.Select(t => t.Id).ToHashSet();
+        var safeTopicIds = dto.TopicIds?.Where(tid => validTopicIds.Contains(tid)).Distinct().ToList() ?? new List<Guid>();
+        foreach (var topicId in safeTopicIds)
         {
             word.WordTopics.Add(new WordTopic { WordId = word.Id, TopicId = topicId });
         }
@@ -275,8 +278,11 @@ public class VocabularyService : IVocabularyService
         }
         _vocabRepo.AddMeanings(newMeanings);
 
-        // Update Topics
-        var newTopics = dto.TopicIds.Select(tid => new WordTopic { WordId = word.Id, TopicId = tid }).ToList();
+        // Update Topics with defensive protection against deleted topics
+        var allExistingTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
+        var validExistingTopicIds = allExistingTopics.Select(t => t.Id).ToHashSet();
+        var safeTopicIds = dto.TopicIds?.Where(tid => validExistingTopicIds.Contains(tid)).Distinct().ToList() ?? new List<Guid>();
+        var newTopics = safeTopicIds.Select(tid => new WordTopic { WordId = word.Id, TopicId = tid }).ToList();
         foreach (var topic in newTopics)
         {
             word.WordTopics.Add(topic);
@@ -471,6 +477,32 @@ public class VocabularyService : IVocabularyService
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             _cacheService?.InvalidateVocabulary();
         }
+    }
+
+    public async Task<int> DeleteTopicsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+        var validIds = ids.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (validIds.Count == 0) return 0;
+
+        int deletedCount = 0;
+        foreach (var id in validIds)
+        {
+            var topic = await _vocabRepo.GetTopicByIdAsync(id, cancellationToken);
+            if (topic != null)
+            {
+                _vocabRepo.DeleteTopic(topic);
+                deletedCount++;
+            }
+        }
+
+        if (deletedCount > 0)
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _cacheService?.InvalidateVocabulary();
+        }
+
+        return deletedCount;
     }
 
     public async Task AssignWordsToTopicAsync(

@@ -153,6 +153,11 @@ public partial class VocabularyViewModel : ObservableObject
     public int SelectedCount => SelectedWordIds.Count;
     public bool HasSelection => SelectedWordIds.Count > 0;
 
+    public ObservableCollection<Guid> SelectedContextUnitIds { get; } = new();
+
+    public int SelectedContextUnitCount => SelectedContextUnitIds.Count;
+    public bool HasContextUnitSelection => SelectedContextUnitIds.Count > 0;
+
     public ObservableCollection<WordDto> Words { get; } = new();
     public ObservableCollection<TopicDto> AvailableTopics { get; } = new();
     public ObservableCollection<ExamTagDto> AvailableExamTags { get; } = new();
@@ -646,10 +651,38 @@ public partial class VocabularyViewModel : ObservableObject
     {
         try
         {
+            if (id == Guid.Empty) return;
+
             var topic = AvailableTopics.FirstOrDefault(t => t.Id == id);
             string topicName = topic?.Name ?? string.Empty;
 
             await _vocabService.DeleteTopicAsync(id);
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+
+            for (int i = ContextUnits.Count - 1; i >= 0; i--)
+            {
+                if (ContextUnits[i].Id == id) ContextUnits.RemoveAt(i);
+            }
+            for (int i = FilteredContextUnits.Count - 1; i >= 0; i--)
+            {
+                if (FilteredContextUnits[i].Id == id) FilteredContextUnits.RemoveAt(i);
+            }
+            for (int i = AvailableTopics.Count - 1; i >= 0; i--)
+            {
+                if (AvailableTopics[i].Id == id) AvailableTopics.RemoveAt(i);
+            }
+
+            if (SelectedTopicId.HasValue && SelectedTopicId.Value == id)
+            {
+                SelectedTopicId = null;
+                await LoadWordsAsync();
+            }
+
+            SelectedContextUnitIds.Remove(id);
+            OnPropertyChanged(nameof(SelectedContextUnitCount));
+            OnPropertyChanged(nameof(HasContextUnitSelection));
+
             await LoadFiltersAsync();
             await LoadContextUnitsAsync();
 
@@ -661,6 +694,83 @@ public partial class VocabularyViewModel : ObservableObject
         catch
         {
             throw;
+        }
+    }
+
+    private bool _isDeletingUnits = false;
+
+    public async Task<int> DeleteSelectedContextUnitsAsync(
+        IEnumerable<Guid>? ids = null,
+        CancellationToken cancellationToken = default)
+    {
+        var targetIds = ids?.Where(id => id != Guid.Empty).Distinct().ToList()
+            ?? SelectedContextUnitIds.Where(id => id != Guid.Empty).ToList();
+        if (targetIds.Count == 0 || _isDeletingUnits) return 0;
+
+        _isDeletingUnits = true;
+        await _dispatcherQueue.EnsureOnUIThreadAsync();
+        IsLoading = true;
+        StatusMessage = _localizationService.GetString("Vocab_BulkDeleteTopicsProgress");
+
+        try
+        {
+            int count = await _vocabService.DeleteTopicsAsync(targetIds, cancellationToken);
+
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+
+            var deletedSet = new HashSet<Guid>(targetIds);
+
+            // Immediate removal from in-memory collections for instant UI update
+            for (int i = ContextUnits.Count - 1; i >= 0; i--)
+            {
+                if (deletedSet.Contains(ContextUnits[i].Id))
+                {
+                    ContextUnits.RemoveAt(i);
+                }
+            }
+
+            for (int i = FilteredContextUnits.Count - 1; i >= 0; i--)
+            {
+                if (deletedSet.Contains(FilteredContextUnits[i].Id))
+                {
+                    FilteredContextUnits.RemoveAt(i);
+                }
+            }
+
+            for (int i = AvailableTopics.Count - 1; i >= 0; i--)
+            {
+                if (deletedSet.Contains(AvailableTopics[i].Id))
+                {
+                    AvailableTopics.RemoveAt(i);
+                }
+            }
+
+            // If the filtered topic was deleted, reset filter immediately
+            if (SelectedTopicId.HasValue && deletedSet.Contains(SelectedTopicId.Value))
+            {
+                SelectedTopicId = null;
+                await LoadWordsAsync();
+            }
+
+            SelectedContextUnitIds.Clear();
+            IsSelectionMode = false;
+            OnPropertyChanged(nameof(SelectedContextUnitCount));
+            OnPropertyChanged(nameof(HasContextUnitSelection));
+
+            await LoadFiltersAsync();
+            await LoadContextUnitsAsync();
+
+            StatusMessage = string.Format(_localizationService.GetString("Vocab_BulkDeleteTopicsSuccess"), count);
+            return count;
+        }
+        finally
+        {
+            _isDeletingUnits = false;
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            if (IsLoading)
+            {
+                IsLoading = false;
+            }
         }
     }
 
@@ -744,10 +854,53 @@ public partial class VocabularyViewModel : ObservableObject
         if (!IsSelectionMode)
         {
             SelectedWordIds.Clear();
+            SelectedContextUnitIds.Clear();
         }
         OnPropertyChanged(nameof(SelectedCount));
         OnPropertyChanged(nameof(HasSelection));
+        OnPropertyChanged(nameof(SelectedContextUnitCount));
+        OnPropertyChanged(nameof(HasContextUnitSelection));
     }
+
+    [RelayCommand]
+    public void SelectAllContextUnits()
+    {
+        SelectedContextUnitIds.Clear();
+        foreach (var unit in FilteredContextUnits)
+        {
+            if (unit.Id != Guid.Empty)
+            {
+                SelectedContextUnitIds.Add(unit.Id);
+            }
+        }
+        OnPropertyChanged(nameof(SelectedContextUnitCount));
+        OnPropertyChanged(nameof(HasContextUnitSelection));
+    }
+
+    [RelayCommand]
+    public void DeselectAllContextUnits()
+    {
+        SelectedContextUnitIds.Clear();
+        OnPropertyChanged(nameof(SelectedContextUnitCount));
+        OnPropertyChanged(nameof(HasContextUnitSelection));
+    }
+
+    public void ToggleContextUnitSelection(Guid id)
+    {
+        if (id == Guid.Empty) return;
+        if (SelectedContextUnitIds.Contains(id))
+        {
+            SelectedContextUnitIds.Remove(id);
+        }
+        else
+        {
+            SelectedContextUnitIds.Add(id);
+        }
+        OnPropertyChanged(nameof(SelectedContextUnitCount));
+        OnPropertyChanged(nameof(HasContextUnitSelection));
+    }
+
+    public bool IsContextUnitSelected(Guid id) => SelectedContextUnitIds.Contains(id);
 
     [RelayCommand]
     public void SelectAllWords()
@@ -831,7 +984,7 @@ public partial class VocabularyViewModel : ObservableObject
                 await LoadWordsAsync();
             }
 
-            _ = LoadContextUnitsAsync();
+            await LoadContextUnitsAsync();
             return count;
         }
         finally

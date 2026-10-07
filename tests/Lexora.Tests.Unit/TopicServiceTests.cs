@@ -313,5 +313,58 @@ public class TopicServiceTests
         await act.Should().ThrowAsync<ArgumentException>()
             .WithMessage("*General Context*");
     }
+
+    [Fact]
+    public async Task DeleteTopicsAsync_WithValidTopicIds_ShouldDeleteAllAndCommit()
+    {
+        // Arrange
+        var topicId1 = Guid.NewGuid();
+        var topicId2 = Guid.NewGuid();
+        var topic1 = new Topic { Id = topicId1, Name = "Topic 1" };
+        var topic2 = new Topic { Id = topicId2, Name = "Topic 2" };
+
+        _mockVocabRepo.Setup(r => r.GetTopicByIdAsync(topicId1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(topic1);
+        _mockVocabRepo.Setup(r => r.GetTopicByIdAsync(topicId2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(topic2);
+
+        // Act
+        var deletedCount = await _vocabService.DeleteTopicsAsync(new[] { topicId1, topicId2 });
+
+        // Assert
+        deletedCount.Should().Be(2);
+        _mockVocabRepo.Verify(r => r.DeleteTopic(topic1), Times.Once);
+        _mockVocabRepo.Verify(r => r.DeleteTopic(topic2), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteTopicsAsync_WithGuidEmpty_ShouldIgnoreGuidEmpty()
+    {
+        // Arrange
+        var topicId1 = Guid.NewGuid();
+        var topic1 = new Topic { Id = topicId1, Name = "Topic 1" };
+
+        _mockVocabRepo.Setup(r => r.GetTopicByIdAsync(topicId1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(topic1);
+
+        // Act
+        var deletedCount = await _vocabService.DeleteTopicsAsync(new[] { Guid.Empty, topicId1 });
+
+        // Assert
+        deletedCount.Should().Be(1);
+        _mockVocabRepo.Verify(r => r.DeleteTopic(topic1), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteTopicsAsync_WithNull_ShouldThrowArgumentNullException()
+    {
+        // Act
+        var act = () => _vocabService.DeleteTopicsAsync(null!);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
 }
 

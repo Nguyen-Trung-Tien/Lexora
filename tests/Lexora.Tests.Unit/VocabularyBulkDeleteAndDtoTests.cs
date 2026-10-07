@@ -312,4 +312,46 @@ public class VocabularyBulkDeleteAndDtoTests
         count.Should().Be(2);
         _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task CreateWordAsync_WithDeletedTopicIds_ShouldFilterOutNonExistentTopicsDefensively()
+    {
+        // Arrange
+        var existingTopicId = Guid.NewGuid();
+        var deletedTopicId = Guid.NewGuid();
+
+        _mockVocabRepo.Setup(r => r.GetAllTopicsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Topic> { new() { Id = existingTopicId, Name = "Existing Topic" } });
+
+        _mockVocabRepo.Setup(r => r.AddAsync(It.IsAny<Word>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word w, CancellationToken _) => w);
+
+        var dto = new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "resilience",
+            PhoneticUk: null,
+            PhoneticUs: null,
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.C1,
+            PrimaryPartOfSpeech: PartOfSpeech.Noun,
+            Notes: null,
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(PartOfSpeech.Noun, "khả năng phục hồi", "capacity to recover quickly", null, new List<ExampleSentenceCreateDto>())
+            },
+            TopicIds: new List<Guid> { existingTopicId, deletedTopicId },
+            ExamTagIds: new List<Guid>()
+        );
+
+        // Act
+        var result = await _vocabService.CreateWordAsync(dto);
+
+        // Assert
+        result.Should().NotBeNull();
+        _mockVocabRepo.Verify(r => r.AddAsync(
+            It.Is<Word>(w => w.WordTopics.Count == 1 && w.WordTopics.First().TopicId == existingTopicId),
+            It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

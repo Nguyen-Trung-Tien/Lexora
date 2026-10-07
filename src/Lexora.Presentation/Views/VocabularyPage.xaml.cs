@@ -497,10 +497,17 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
     {
         if (ViewModel.IsSelectionMode)
         {
-            WordsListView.SelectionMode = ListViewSelectionMode.Multiple;
+            if (!ViewModel.IsUnitViewMode)
+            {
+                WordsListView.SelectionMode = ListViewSelectionMode.Multiple;
+                UpdateDeleteSelectedButtonText();
+            }
+            else
+            {
+                UpdateAllUnitCheckBoxes();
+            }
             TextSelectMode.Text = Loc.GetString("Action_CancelSelection");
             IconSelectMode.Glyph = "\uE711";
-            UpdateDeleteSelectedButtonText();
         }
         else
         {
@@ -513,7 +520,177 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
             TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
             IconSelectMode.Glyph = "\uE762";
             ViewModel.SelectedWordIds.Clear();
+            ViewModel.SelectedContextUnitIds.Clear();
             UpdateDeleteSelectedButtonText();
+            UpdateAllUnitCheckBoxes();
+        }
+    }
+
+    private readonly HashSet<CheckBox> _unitCheckBoxes = new();
+
+    private void UnitSelectionCheckBox_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox cb)
+        {
+            _unitCheckBoxes.Add(cb);
+            UpdateSingleUnitCheckBox(cb);
+        }
+    }
+
+    private void UnitSelectionCheckBox_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox cb)
+        {
+            _unitCheckBoxes.Remove(cb);
+        }
+    }
+
+    private void UnitSelectionCheckBox_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox cb && cb.Tag is ContextUnitDto unit)
+        {
+            if (unit.Id != Guid.Empty)
+            {
+                ViewModel.ToggleContextUnitSelection(unit.Id);
+                cb.IsChecked = ViewModel.SelectedContextUnitIds.Contains(unit.Id);
+                UpdateDeleteSelectedUnitsButtonText();
+            }
+        }
+    }
+
+    private void UpdateAllUnitCheckBoxes()
+    {
+        foreach (var cb in _unitCheckBoxes)
+        {
+            UpdateSingleUnitCheckBox(cb);
+        }
+        UpdateDeleteSelectedUnitsButtonText();
+    }
+
+    private void UpdateSingleUnitCheckBox(CheckBox cb)
+    {
+        if (cb.Tag is ContextUnitDto unit)
+        {
+            if (unit.Id == Guid.Empty)
+            {
+                cb.Visibility = Visibility.Collapsed;
+                cb.IsChecked = false;
+                cb.IsEnabled = false;
+            }
+            else
+            {
+                cb.Visibility = (ViewModel.IsSelectionMode && ViewModel.IsUnitViewMode)
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+                cb.IsChecked = ViewModel.SelectedContextUnitIds.Contains(unit.Id);
+                cb.IsEnabled = true;
+            }
+        }
+    }
+
+    private void UpdateDeleteSelectedUnitsButtonText()
+    {
+        var count = ViewModel.SelectedContextUnitIds.Count;
+        TextDeleteSelectedUnits.Text = string.Format(Loc.GetString("Vocab_DeleteSelectedTopics"), count);
+        TextSelectedUnitsCount.Text = string.Format(Loc.GetString("Vocab_SelectedUnitsCount"), count);
+        BtnDeleteSelectedUnits.IsEnabled = count > 0;
+    }
+
+    private void SelectAllUnits_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SelectAllContextUnits();
+        UpdateAllUnitCheckBoxes();
+    }
+
+    private void DeselectAllUnits_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.DeselectAllContextUnits();
+        UpdateAllUnitCheckBoxes();
+    }
+
+    private async void DeleteSelectedUnits_Click(object sender, RoutedEventArgs e)
+    {
+        var count = ViewModel.SelectedContextUnitIds.Count;
+        if (count == 0)
+        {
+            ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Common_Warning"), Loc.GetString("Vocab_NoTopicsSelected"));
+            return;
+        }
+
+        var theme = (this.XamlRoot?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+        var confirmDialog = new ContentDialog
+        {
+            Title = Loc.GetString("Vocab_ConfirmBulkDeleteTopicsTitle"),
+            Content = string.Format(Loc.GetString("Vocab_ConfirmBulkDeleteTopicsMsg"), count),
+            PrimaryButtonText = Loc.GetString("Action_Delete"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot,
+            RequestedTheme = theme
+        };
+
+        var result = await confirmDialog.ShowAsyncSafe();
+        if (result != ContentDialogResult.Primary) return;
+
+        await Task.Yield();
+
+        var idsToDelete = ViewModel.SelectedContextUnitIds.ToList();
+        if (idsToDelete.Count == 0) return;
+
+        BtnDeleteSelectedUnits.IsEnabled = false;
+        BtnSelectMode.IsEnabled = false;
+
+        using var cts = new CancellationTokenSource();
+        var progressDialog = new OperationProgressDialog
+        {
+            Title = Loc.GetString("Vocab_ConfirmBulkDeleteTopicsTitle"),
+            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot,
+            RequestedTheme = theme
+        };
+        progressDialog.EnableCancellation(() => cts.Cancel());
+        progressDialog.SetIndeterminate(string.Format(Loc.GetString("Vocab_BulkDeleteTopicsProgress"), count));
+        _ = progressDialog.ShowAsyncSafe();
+
+        int deletedCount = 0;
+        bool isCancelled = false;
+        Exception? deleteError = null;
+
+        try
+        {
+            deletedCount = await ViewModel.DeleteSelectedContextUnitsAsync(idsToDelete, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            isCancelled = true;
+        }
+        catch (Exception ex)
+        {
+            deleteError = ex;
+        }
+        finally
+        {
+            progressDialog.HideSafe();
+            await Task.Yield();
+
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            BtnSelectMode.IsEnabled = true;
+            PopulateTopicFilterCombo();
+            UpdateAllUnitCheckBoxes();
+            UpdateSelectionModeUI();
+
+            if (isCancelled)
+            {
+                ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Vocab_DeleteCancelledTitle"), Loc.GetString("Vocab_DeleteCancelledMsg"));
+            }
+            else if (deleteError != null)
+            {
+                ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), deleteError.Message);
+            }
+            else
+            {
+                var successMsg = string.Format(Loc.GetString("Vocab_BulkDeleteTopicsSuccess"), deletedCount);
+                ShowNotification(InfoBarSeverity.Success, Loc.GetString("Action_Delete"), successMsg);
+            }
         }
     }
 
@@ -679,6 +856,12 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
     private async void AssignSelectedToTopic_Click(object sender, RoutedEventArgs e)
     {
         if (ViewModel.SelectedWordIds.Count == 0) return;
+
+        if (ViewModel.AvailableTopics.Count == 0)
+        {
+            ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Common_Warning"), Loc.GetString("Vocab_NoTopicsAvailable"));
+            return;
+        }
 
         var selectedIds = ViewModel.SelectedWordIds.ToList();
         var count = selectedIds.Count;
@@ -1665,12 +1848,14 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
     {
         ViewModel.SwitchToListView();
         UpdateViewModeButtons();
+        UpdateSelectionModeUI();
     }
 
     private void BtnViewUnits_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.SwitchToUnitView();
         UpdateViewModeButtons();
+        UpdateSelectionModeUI();
     }
 
     private Microsoft.UI.Xaml.Media.Brush? GetThemeBrush(string key)
@@ -1813,6 +1998,12 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
                 var themeService = App.Current.Services.GetService<IThemeService>();
                 var activeTheme = themeService?.CurrentTheme ?? ElementTheme.Default;
                 var targetTopicId = unit.Id == Guid.Empty ? (Guid?)null : unit.Id;
+                if (targetTopicId.HasValue && !ViewModel.AvailableTopics.Any(t => t.Id == targetTopicId.Value))
+                {
+                    ShowNotification(InfoBarSeverity.Warning, Loc.GetString("Common_Warning"), Loc.GetString("Vocab_UnitNotFoundOrDeleted"));
+                    await ViewModel.LoadContextUnitsAsync();
+                    return;
+                }
 
                 var dialog = new WordEditorDialog(null, ViewModel.AvailableTopics, ViewModel.AvailableExamTags, preselectedTopicId: targetTopicId)
                 {

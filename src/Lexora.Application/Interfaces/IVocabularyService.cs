@@ -41,6 +41,7 @@ public interface IVocabularyService
     Task<TopicDto> CreateTopicAsync(TopicCreateOrUpdateDto dto, CancellationToken cancellationToken = default);
     Task<TopicDto> UpdateTopicAsync(Guid id, TopicCreateOrUpdateDto dto, CancellationToken cancellationToken = default);
     Task DeleteTopicAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<int> DeleteTopicsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
     Task AssignWordsToTopicAsync(Guid topicId, IEnumerable<Guid> wordIds, CancellationToken cancellationToken = default);
     Task UnassignWordsFromTopicAsync(Guid topicId, IEnumerable<Guid> wordIds, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ExamTagDto>> GetAllExamTagsAsync(CancellationToken cancellationToken = default);
