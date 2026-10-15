@@ -32,7 +32,6 @@ public sealed partial class GrammarPage : Page, ILocalizableView
             _toastService?.ShowWarning(Loc.GetString("Grammar_Practice_NoQuestions"));
         };
 
-        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         RegisterShortcuts();
 
         Unloaded += (s, e) =>

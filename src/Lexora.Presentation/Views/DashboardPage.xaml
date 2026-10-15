@@ -57,7 +57,7 @@
                             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="8,3">
                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                     <FontIcon Glyph="&#xE753;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                    <TextBlock Text="SQLite WAL Active" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_OfflineReady')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>

@@ -162,6 +162,8 @@ public partial class LearningStorageViewModel : ObservableObject, IDisposable
     private readonly List<StoragePracticeQuestionDto> _practiceQuestions = new();
     private readonly List<StoragePracticeSubmissionDto> _practiceSubmissions = new();
 
+    private readonly EventHandler _languageChangedHandler;
+
     public LearningStorageViewModel(
         ILearningStorageService storageService,
         Services.ILocalizationService localizationService,
@@ -178,10 +180,11 @@ public partial class LearningStorageViewModel : ObservableObject, IDisposable
             ?? App.Current?.UIDispatcherQueue
             ?? App.Current?.MainWindow?.DispatcherQueue;
 
-        _localizationService.LanguageChanged += (s, e) =>
+        _languageChangedHandler = (s, e) =>
         {
             OnPropertyChanged(nameof(PageDisplayInfo));
         };
+        _localizationService.LanguageChanged += _languageChangedHandler;
 
         _storageService.StorageChanged += OnStorageChanged;
     }
@@ -883,6 +886,7 @@ public partial class LearningStorageViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        _localizationService.LanguageChanged -= _languageChangedHandler;
         _storageService.StorageChanged -= OnStorageChanged;
         _dbLock.Dispose();
         GC.SuppressFinalize(this);

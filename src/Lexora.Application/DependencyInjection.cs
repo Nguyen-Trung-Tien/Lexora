@@ -10,6 +10,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddSingleton<ISpacedRepetitionEngine, Sm2SpacedRepetitionEngine>();
+        services.AddSingleton<IFsrsSpacedRepetitionEngine, FsrsSpacedRepetitionEngine>();
         services.AddScoped<IVocabularyService, VocabularyService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IStatisticsService, StatisticsService>();

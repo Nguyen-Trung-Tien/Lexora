@@ -163,14 +163,19 @@
                 </Border>
 
                 <!-- ACTIVE FLASHCARD WORKSPACE (Responsive 2-Column or Centered) -->
-                <Grid Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                <Grid x:Name="FlashcardWorkspaceGrid"
+                      Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                       ColumnDefinitions="*,340" ColumnSpacing="20" HorizontalAlignment="Stretch">
 
-                    <!-- Left: Main Study Flashcard -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <!-- Left: Main Study Flashcard with 3D PlaneProjection -->
+                    <Border x:Name="FlashcardMainBorder"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource LexoraFlashcardBorderBrush}"
                             BorderThickness="1.5" CornerRadius="16" Padding="32" MinHeight="480"
                             HorizontalAlignment="Stretch">
+                        <Border.Projection>
+                            <PlaneProjection x:Name="FlashcardProjection" CenterOfRotationX="0.5" CenterOfRotationY="0.5" />
+                        </Border.Projection>
 
                         <Grid RowDefinitions="Auto,Auto,Auto">
                             <!-- Front Card: Typing Drill OR Standard Display -->
@@ -510,7 +515,7 @@
                     </Border>
 
                     <!-- Right Sidebar: Session Progress & SM-2 Insights -->
-                    <StackPanel Grid.Column="1" Spacing="14">
+                    <StackPanel x:Name="FlashcardSidebarPanel" Grid.Column="1" Spacing="14">
                         <!-- Session Live Progress Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

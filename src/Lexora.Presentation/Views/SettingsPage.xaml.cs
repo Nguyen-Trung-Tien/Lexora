@@ -23,7 +23,6 @@ public sealed partial class SettingsPage : Page, ILocalizableView
 
         InitializeComponent();
 
-        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         ActualThemeChanged += (s, e) =>
         {
             UpdateLanguageButtons();

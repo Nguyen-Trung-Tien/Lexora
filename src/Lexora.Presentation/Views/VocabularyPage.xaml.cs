@@ -30,7 +30,6 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
 
         PopulateFilterCombos();
 
-        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         RegisterShortcuts();
 
         Unloaded += (s, e) =>

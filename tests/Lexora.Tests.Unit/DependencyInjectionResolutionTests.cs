@@ -59,5 +59,8 @@ public class DependencyInjectionResolutionTests
 
         var statsService = scope.ServiceProvider.GetRequiredService<IStatisticsService>();
         statsService.Should().NotBeNull();
+
+        var fsrsEngine = scope.ServiceProvider.GetRequiredService<Lexora.Application.SpacedRepetition.IFsrsSpacedRepetitionEngine>();
+        fsrsEngine.Should().NotBeNull();
     }
 }

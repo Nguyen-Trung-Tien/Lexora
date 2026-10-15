@@ -43,7 +43,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         };
         InitializeComponent();
 
-        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
+        Unloaded += (s, e) => ViewModel.Dispose();
     }
 
     public void OnLanguageChanged()

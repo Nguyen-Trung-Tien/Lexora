@@ -25,7 +25,6 @@ public sealed partial class TestPage : Page, ILocalizableView
         InitializeComponent();
         RegisterShortcuts();
 
-        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
         Unloaded += (s, e) =>
         {
             ViewModel.CleanupSession();

@@ -21,8 +21,6 @@ public sealed partial class DashboardPage : Page, ILocalizableView
         _soundFeedback = App.Current.Services.GetRequiredService<ISoundFeedbackService>();
 
         InitializeComponent();
-
-        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
     }
 
     public void OnLanguageChanged()

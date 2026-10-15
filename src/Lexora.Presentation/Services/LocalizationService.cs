@@ -56,6 +56,7 @@ public class LocalizationService : ILocalizationService
 
             // Dashboard
             ["Dashboard_HeroTitle"] = "Ôn tập ngắt quãng (SM-2)",
+            ["Dashboard_OfflineReady"] = "Sẵn sàng ngoại tuyến",
             ["Dashboard_HeroGreeting"] = "Sẵn sàng chinh phục mục tiêu từ vựng hôm nay?",
             ["Dashboard_StartReview"] = "Bắt đầu ôn tập hôm nay",
             ["Dashboard_QuickPractice"] = "Luyện trắc nghiệm nhanh",
@@ -1197,6 +1198,7 @@ public class LocalizationService : ILocalizationService
 
             // Dashboard
             ["Dashboard_HeroTitle"] = "Spaced Repetition (SM-2)",
+            ["Dashboard_OfflineReady"] = "Offline Ready",
             ["Dashboard_HeroGreeting"] = "Ready to conquer your vocabulary goals today?",
             ["Dashboard_StartReview"] = "Start Today's Review",
             ["Dashboard_QuickPractice"] = "Quick Practice Test",

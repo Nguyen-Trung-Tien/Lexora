@@ -271,6 +271,82 @@ public class TestService : ITestService
                 }
             }
         }
+        else if (answers.Count > 0)
+        {
+            // Resilient fallback: Evaluate directly against vocabulary entities when session cache is expired
+            var wordIds = answers.Select(a => a.WordId).Where(id => id != Guid.Empty).Distinct().ToList();
+            var words = (await _vocabRepo.GetByIdsWithDetailsAsync(wordIds, cancellationToken)).ToDictionary(w => w.Id);
+
+            for (int i = 0; i < answers.Count; i++)
+            {
+                var ans = answers[i];
+                if (!words.TryGetValue(ans.WordId, out var word)) continue;
+
+                var targetWordDto = MapToDto(word);
+                var userAnswer = ans.SelectedAnswer?.Trim() ?? string.Empty;
+
+                bool isCorrect = string.Equals(userAnswer, word.Term.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                                 word.Meanings.Any(m => string.Equals(userAnswer, m.DefinitionVi.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                                                        (!string.IsNullOrWhiteSpace(m.DefinitionEn) && string.Equals(userAnswer, m.DefinitionEn.Trim(), StringComparison.OrdinalIgnoreCase)));
+
+                if (isCorrect)
+                {
+                    correctCount++;
+                }
+                else
+                {
+                    incorrectCount++;
+                    weakWords.Add(targetWordDto);
+                }
+
+                var primaryMeaning = word.Meanings.FirstOrDefault();
+                var correctAnswer = primaryMeaning?.DefinitionVi ?? word.Term;
+                var q = new TestQuestionDto(
+                    word.Id,
+                    ans.QuestionNumber > 0 ? ans.QuestionNumber : i + 1,
+                    TestType.WordToMeaning,
+                    $"What is the meaning of \"{word.Term}\"?",
+                    null,
+                    word.AudioUsPath ?? word.AudioUkPath,
+                    correctAnswer,
+                    new List<string> { correctAnswer, userAnswer },
+                    primaryMeaning?.Explanation ?? string.Empty,
+                    targetWordDto,
+                    userAnswer,
+                    isCorrect
+                );
+                evaluatedQuestions.Add(q);
+
+                var card = await _reviewRepo.GetByWordIdAsync(ans.WordId, cancellationToken);
+                if (card != null)
+                {
+                    card.TotalReviews++;
+                    if (isCorrect)
+                    {
+                        card.CorrectReviews++;
+                    }
+                    else
+                    {
+                        card.Lapses++;
+                        card.Status = LearningStatus.NotRemembered;
+                        card.NextReviewAt = DateTime.UtcNow;
+                    }
+                    card.UpdatedAt = DateTime.UtcNow;
+                    await _reviewRepo.UpdateAsync(card, cancellationToken);
+
+                    var log = new StudyLog
+                    {
+                        StudySessionId = sessionId,
+                        ReviewCardId = card.Id,
+                        Rating = isCorrect ? ReviewRating.Good : ReviewRating.Again,
+                        ResponseTimeMs = ans.ResponseTimeMs,
+                        ResultingStatus = card.Status,
+                        ResultingIntervalDays = card.IntervalDays
+                    };
+                    _reviewRepo.AddStudyLog(log);
+                }
+            }
+        }
 
         int totalQuestions = evaluatedQuestions.Count > 0 ? evaluatedQuestions.Count : answers.Count;
         double scorePercent = totalQuestions > 0 ? Math.Round((double)correctCount / totalQuestions * 100.0, 1) : 0.0;

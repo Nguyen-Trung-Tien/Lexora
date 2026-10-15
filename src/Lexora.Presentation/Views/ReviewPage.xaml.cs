@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Animation;
 using Windows.System;
 
 namespace Lexora.Presentation.Views;
@@ -31,10 +32,12 @@ public sealed partial class ReviewPage : Page, ILocalizableView
         Loaded += (s, e) =>
         {
             UpdateSpeedFlyoutLabels();
+            UpdateResponsiveLayout(ActualWidth);
             Focus(FocusState.Programmatic);
         };
 
-        Loc.LanguageChanged += (s, e) => OnLanguageChanged();
+        SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
+
         RegisterShortcuts();
 
         Unloaded += (s, e) =>
@@ -43,6 +46,41 @@ public sealed partial class ReviewPage : Page, ILocalizableView
             var sm = App.Current.Services.GetService<IShortcutManager>();
             sm?.UnregisterPageShortcuts(typeof(ReviewPage));
         };
+    }
+
+    private void UpdateResponsiveLayout(double width)
+    {
+        if (FlashcardWorkspaceGrid == null || FlashcardSidebarPanel == null || FlashcardMainBorder == null) return;
+        if (width < 1000)
+        {
+            if (FlashcardWorkspaceGrid.ColumnDefinitions.Count > 1)
+            {
+                FlashcardWorkspaceGrid.ColumnDefinitions.Clear();
+                FlashcardWorkspaceGrid.RowDefinitions.Clear();
+                FlashcardWorkspaceGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                FlashcardWorkspaceGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                Grid.SetColumn(FlashcardMainBorder, 0);
+                Grid.SetRow(FlashcardMainBorder, 0);
+                Grid.SetColumn(FlashcardSidebarPanel, 0);
+                Grid.SetRow(FlashcardSidebarPanel, 1);
+                FlashcardSidebarPanel.Margin = new Thickness(0, 16, 0, 0);
+            }
+        }
+        else
+        {
+            if (FlashcardWorkspaceGrid.ColumnDefinitions.Count <= 1)
+            {
+                FlashcardWorkspaceGrid.RowDefinitions.Clear();
+                FlashcardWorkspaceGrid.ColumnDefinitions.Clear();
+                FlashcardWorkspaceGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                FlashcardWorkspaceGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(340, GridUnitType.Pixel) });
+                Grid.SetRow(FlashcardMainBorder, 0);
+                Grid.SetColumn(FlashcardMainBorder, 0);
+                Grid.SetRow(FlashcardSidebarPanel, 0);
+                Grid.SetColumn(FlashcardSidebarPanel, 1);
+                FlashcardSidebarPanel.Margin = new Thickness(0);
+            }
+        }
     }
 
     protected override void OnNavigatedFrom(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
@@ -358,9 +396,66 @@ public sealed partial class ReviewPage : Page, ILocalizableView
         }
     }
 
-    private void ShowAnswerButton_Click(object sender, RoutedEventArgs e)
+    private bool _isFlipping;
+
+    private async Task AnimateCardFlipAsync()
     {
-        ViewModel.RevealAnswer();
+        if (FlashcardProjection == null || _isFlipping)
+        {
+            ViewModel.RevealAnswer();
+            return;
+        }
+
+        _isFlipping = true;
+        try
+        {
+            var tcs1 = new TaskCompletionSource<bool>();
+            var sb1 = new Storyboard();
+            var da1 = new DoubleAnimation
+            {
+                From = 0,
+                To = 90,
+                Duration = new Duration(TimeSpan.FromMilliseconds(120)),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+            Storyboard.SetTarget(da1, FlashcardProjection);
+            Storyboard.SetTargetProperty(da1, "RotationY");
+            sb1.Children.Add(da1);
+            sb1.Completed += (s, e) => tcs1.TrySetResult(true);
+            sb1.Begin();
+            await tcs1.Task;
+
+            ViewModel.RevealAnswer();
+
+            var tcs2 = new TaskCompletionSource<bool>();
+            var sb2 = new Storyboard();
+            var da2 = new DoubleAnimation
+            {
+                From = -90,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(140)),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            Storyboard.SetTarget(da2, FlashcardProjection);
+            Storyboard.SetTargetProperty(da2, "RotationY");
+            sb2.Children.Add(da2);
+            sb2.Completed += (s, e) => tcs2.TrySetResult(true);
+            sb2.Begin();
+            await tcs2.Task;
+        }
+        finally
+        {
+            if (FlashcardProjection != null)
+            {
+                FlashcardProjection.RotationY = 0;
+            }
+            _isFlipping = false;
+        }
+    }
+
+    private async void ShowAnswerButton_Click(object sender, RoutedEventArgs e)
+    {
+        await AnimateCardFlipAsync();
         if (_preferencesService.GetPreferences().AutoPlayAudio)
         {
             _ = ViewModel.PlayPreferredAudioAsync();
