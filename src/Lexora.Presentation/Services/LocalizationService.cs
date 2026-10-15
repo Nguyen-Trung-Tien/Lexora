@@ -1157,6 +1157,38 @@ public class LocalizationService : ILocalizationService
             ["Storage_Toast_OperationInProgress"] = "Hệ thống đang xử lý dữ liệu, vui lòng đợi trong giây lát...",
             ["Storage_Dialog_AllItemsAlreadyAdded"] = "Tất cả các mục phù hợp đã có trong Kho lưu trữ.",
             ["Storage_Dialog_NoItemsAvailable"] = "Không còn mục nào để thêm vào Kho lưu trữ.",
+
+            // Smart Import Dialog Additions
+            ["SmartImport_Step1_Source"] = "Nguồn dữ liệu",
+            ["SmartImport_Step2_Preview"] = "Xem trước & Kiểm tra",
+            ["SmartImport_Step3_Results"] = "Kết quả",
+            ["SmartImport_SampleJson"] = "Mẫu JSON",
+            ["SmartImport_SampleCsv"] = "Mẫu CSV",
+            ["SmartImport_SampleTxt"] = "Mẫu TXT / Anki / Quizlet",
+            ["SmartImport_DragDropCaption"] = "Thả tệp để nhập thông minh",
+            ["Grammar_ServiceNotAvailable"] = "Dịch vụ nhập/xuất ngữ pháp không khả dụng.",
+
+            // Background Engine / Progress
+            ["Progress_EngineSubtitle"] = "Trình xử lý tác vụ nền Lexora",
+            ["Progress_Badge"] = "TIẾN ĐỘ",
+
+            // Global Search Quick Navigation
+            ["Search_SmartNav_LearningStorage"] = "Kho lưu trữ từ vựng & ngữ pháp yêu thích",
+
+            // Unit & Enum formatting
+            ["Vocab_DaysUnit"] = "ngày",
+            ["Cefr_None"] = "Chưa phân loại",
+
+            // Dashboard Study Session Types
+            ["Session_SpacedRepetition"] = "Ôn tập ngắt quãng (SM-2)",
+            ["Session_LearnNew"] = "Học từ vựng mới",
+            ["Session_Difficult"] = "Từ khó & Hay quên",
+            ["Session_ByTopic"] = "Ôn theo chủ đề",
+            ["Session_CustomSelection"] = "Ôn từ chọn lọc",
+            ["Session_QuickPractice"] = "Luyện trắc nghiệm nhanh",
+            ["Session_TestMultipleChoice"] = "Bài thi trắc nghiệm",
+            ["Session_TestFillBlank"] = "Bài thi điền từ",
+            ["Session_TestListening"] = "Bài thi luyện nghe",
         },
         ["en-US"] = new Dictionary<string, string>
         {
@@ -2300,6 +2332,38 @@ public class LocalizationService : ILocalizationService
             ["Storage_Toast_OperationInProgress"] = "System is processing data, please wait a moment...",
             ["Storage_Dialog_AllItemsAlreadyAdded"] = "All matching items are already in Learning Storage.",
             ["Storage_Dialog_NoItemsAvailable"] = "No more items available to add to Learning Storage.",
+
+            // Smart Import Dialog Additions
+            ["SmartImport_Step1_Source"] = "Data Source",
+            ["SmartImport_Step2_Preview"] = "Preview & Validate",
+            ["SmartImport_Step3_Results"] = "Results",
+            ["SmartImport_SampleJson"] = "Sample JSON",
+            ["SmartImport_SampleCsv"] = "Sample CSV",
+            ["SmartImport_SampleTxt"] = "Sample TXT / Anki / Quizlet",
+            ["SmartImport_DragDropCaption"] = "Drop file to smart import",
+            ["Grammar_ServiceNotAvailable"] = "Grammar export/import service not available.",
+
+            // Background Engine / Progress
+            ["Progress_EngineSubtitle"] = "Lexora Background Task Engine",
+            ["Progress_Badge"] = "PROGRESS",
+
+            // Global Search Quick Navigation
+            ["Search_SmartNav_LearningStorage"] = "Saved vocabulary & grammar learning storage",
+
+            // Unit & Enum formatting
+            ["Vocab_DaysUnit"] = "d",
+            ["Cefr_None"] = "Unclassified",
+
+            // Dashboard Study Session Types
+            ["Session_SpacedRepetition"] = "Spaced Repetition (SM-2)",
+            ["Session_LearnNew"] = "Learn New Words",
+            ["Session_Difficult"] = "Challenging Words",
+            ["Session_ByTopic"] = "Topic Review",
+            ["Session_CustomSelection"] = "Selected Words Review",
+            ["Session_QuickPractice"] = "Quick Practice",
+            ["Session_TestMultipleChoice"] = "Multiple Choice Test",
+            ["Session_TestFillBlank"] = "Fill in the Blank Test",
+            ["Session_TestListening"] = "Listening Test",
         }
     };
 

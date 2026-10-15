@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:services="using:Lexora.Presentation.Services"
     mc:Ignorable="d"
     DefaultButton="None"
     CornerRadius="16">
@@ -61,7 +62,7 @@
                                FontWeight="SemiBold" FontSize="17"
                                TextTrimming="CharacterEllipsis"
                                Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    <TextBlock Text="Lexora Background Task Engine"
+                    <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Progress_EngineSubtitle')}"
                                FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                 </StackPanel>
             </Grid>
@@ -101,7 +102,8 @@
                                    FontWeight="Bold"
                                    HorizontalAlignment="Center"
                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        <TextBlock Text="PROGRESS"
+                        <TextBlock x:Name="ProgressBadgeText"
+                                   Text="PROGRESS"
                                    FontSize="9"
                                    FontWeight="SemiBold"
                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"

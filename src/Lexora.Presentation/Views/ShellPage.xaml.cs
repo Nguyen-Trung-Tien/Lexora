@@ -233,6 +233,7 @@ public sealed partial class ShellPage : Page
             (Key: "review", Page: "Review", Title: _localizationService.GetString("Nav_Review"), Subtitle: _localizationService.GetString("Search_SmartNav_Review"), Glyph: "\uE895"),
             (Key: "test", Page: "Test", Title: _localizationService.GetString("Nav_Test"), Subtitle: _localizationService.GetString("Search_SmartNav_Test"), Glyph: "\uE765"),
             (Key: "grammar", Page: "Grammar", Title: _localizationService.GetString("Nav_Grammar"), Subtitle: _localizationService.GetString("Search_SmartNav_Grammar"), Glyph: "\uE8D2"),
+            (Key: "storage", Page: "LearningStorage", Title: _localizationService.GetString("Nav_LearningStorage"), Subtitle: _localizationService.GetString("Search_SmartNav_LearningStorage"), Glyph: "\uE7B8"),
             (Key: "settings", Page: "Settings", Title: _localizationService.GetString("Nav_Settings"), Subtitle: _localizationService.GetString("Search_SmartNav_Settings"), Glyph: "\uE713")
         };
 
@@ -265,7 +266,7 @@ public sealed partial class ShellPage : Page
             {
                 var posLabel = !string.IsNullOrWhiteSpace(word.PartsOfSpeechDisplay)
                     ? word.PartsOfSpeechDisplay
-                    : word.PrimaryPartOfSpeech.ToString();
+                    : LocalizationHelper.FormatPartOfSpeech(word.PrimaryPartOfSpeech);
 
                 suggestions.Add(new SmartSearchSuggestion
                 {

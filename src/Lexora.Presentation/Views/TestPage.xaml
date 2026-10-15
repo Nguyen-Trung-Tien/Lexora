@@ -271,7 +271,13 @@
                                 <Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="8">
                                     <ComboBox PlaceholderText="{x:Bind Loc.GetString('Test_AllExams')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.ExamTypes}"
-                                              SelectedItem="{x:Bind ViewModel.SelectedExamType, Mode=TwoWay}" CornerRadius="8" />
+                                              SelectedItem="{x:Bind ViewModel.SelectedExamType, Mode=TwoWay}" CornerRadius="8">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                     <ComboBox Grid.Column="1" PlaceholderText="{x:Bind Loc.GetString('Test_AllTopics')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.Topics}"
                                               SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}" CornerRadius="8">
@@ -286,7 +292,13 @@
                                     </ComboBox>
                                     <ComboBox Grid.Column="2" PlaceholderText="{x:Bind Loc.GetString('Test_AllLevels')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.CefrLevels}"
-                                              SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}" CornerRadius="8" />
+                                              SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}" CornerRadius="8">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                     <Button Grid.Column="3" Command="{x:Bind ViewModel.ResetFiltersCommand}" CornerRadius="8" Padding="10,6"
                                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_ResetFilters')}">
                                         <FontIcon Glyph="&#xE777;" FontSize="12" />

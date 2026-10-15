@@ -474,7 +474,7 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="dto:PosDistributionDto">
                                     <Grid ColumnDefinitions="110,*,40" Margin="0,4" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind PartOfSpeech}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatPartOfSpeech(PartOfSpeech)}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
                                         <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="6" CornerRadius="3" VerticalAlignment="Center" Margin="10,0" />
                                         <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12" />
                                     </Grid>
@@ -496,7 +496,7 @@
                             <DataTemplate x:DataType="dto:StudySessionDto">
                                 <Grid ColumnDefinitions="160,*,Auto,Auto" Padding="8,10" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind SessionType}" FontWeight="SemiBold" FontSize="13" />
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatSessionType(SessionType)}" FontWeight="SemiBold" FontSize="13" />
                                         <TextBlock Text="{x:Bind StartedAtText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">

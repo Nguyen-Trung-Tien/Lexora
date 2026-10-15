@@ -230,7 +230,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
             {
                 var posLabel = !string.IsNullOrWhiteSpace(w.PartsOfSpeechDisplay)
                     ? w.PartsOfSpeechDisplay
-                    : w.PrimaryPartOfSpeech.ToString();
+                    : LocalizationHelper.FormatPartOfSpeech(w.PrimaryPartOfSpeech);
 
                 suggestions.Add(new SmartSearchSuggestion
                 {

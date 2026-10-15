@@ -55,10 +55,22 @@
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                         <ComboBox x:Name="LevelComboBox"
                                   Header="{x:Bind Loc.GetString('GrammarEditor_HeaderLevel')}"
-                                  HorizontalAlignment="Stretch" />
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                         <ComboBox Grid.Column="1" x:Name="ExamComboBox"
                                   Header="{x:Bind Loc.GetString('GrammarEditor_HeaderExam')}"
-                                  HorizontalAlignment="Stretch" />
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                         <TextBox Grid.Column="2" x:Name="TopicTextBox"
                                  Header="{x:Bind Loc.GetString('GrammarEditor_HeaderTopic')}"
                                  PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderTopic')}" />

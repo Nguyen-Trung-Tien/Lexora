@@ -54,6 +54,7 @@
             <converters:ReviewRatingToForegroundConverter x:Key="ReviewRatingToForegroundConverter" />
             <converters:OptionStateToBrushConverter x:Key="OptionStateToBrushConverter" />
             <converters:OptionStateToThicknessConverter x:Key="OptionStateToThicknessConverter" />
+            <converters:EnumToLocalizedTextConverter x:Key="EnumToLocalizedTextConverter" />
 
             <!-- Fallback Button Style -->
             <Style x:Key="DefaultButtonStyle" TargetType="Button" />

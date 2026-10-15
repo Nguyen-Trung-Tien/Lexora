@@ -229,11 +229,16 @@ public sealed partial class SmartImportDialog : ContentDialog
         TextMetricDuplicatesLabel.Text = _loc.GetString("SmartImport_MetricDuplicates");
         TextMetricErrorsLabel.Text = _loc.GetString("SmartImport_MetricErrors");
 
-        Step1Text.Text = _loc.GetString("SmartImport_StepSource");
-        Step2Text.Text = _loc.GetString("SmartImport_StepPreview");
-        Step3Text.Text = _loc.GetString("SmartImport_StepSummary");
+        Step1Text.Text = _loc.GetString("SmartImport_Step1_Source");
+        Step2Text.Text = _loc.GetString("SmartImport_Step2_Preview");
+        Step3Text.Text = _loc.GetString("SmartImport_Step3_Results");
         TextBackToStep1.Text = _loc.GetString("SmartImport_BackBtn");
         ChkSelectAll.Content = _loc.GetString("SmartImport_SelectAll");
+        TextCommitImport.Text = string.Format(_loc.GetString("SmartImport_CommitBtn"), 0);
+        TextImportProgressMessage.Text = _loc.GetString("SmartImport_Importing");
+        MenuItemSampleJson.Text = _loc.GetString("SmartImport_SampleJson");
+        MenuItemSampleCsv.Text = _loc.GetString("SmartImport_SampleCsv");
+        MenuItemSampleTxt.Text = _loc.GetString("SmartImport_SampleTxt");
         TextDone.Text = _loc.GetString("SmartImport_DoneBtn");
         BtnClearPaste.Content = _loc.GetString("SmartImport_ClearPaste");
         TextDropHint.Text = _loc.GetString("SmartImport_DragDropHint");
@@ -316,7 +321,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         if (e.DataView.Contains(StandardDataFormats.StorageItems))
         {
             e.AcceptedOperation = DataPackageOperation.Copy;
-            e.DragUIOverride.Caption = _loc.CurrentLanguage == "vi-VN" ? "Thả tệp để nhập thông minh" : "Drop file to smart import";
+            e.DragUIOverride.Caption = _loc.GetString("SmartImport_DragDropCaption");
             e.DragUIOverride.IsCaptionVisible = true;
             e.DragUIOverride.IsGlyphVisible = true;
             DropZoneBorder.BorderBrush = ThemeResourceHelper.GetThemeBrush("AccentFillColorDefaultBrush") 
@@ -639,7 +644,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         {
             if (_grammarExportImportService == null)
             {
-                TextFormatBadge.Text = "Grammar export/import service not available.";
+                TextFormatBadge.Text = _loc.GetString("Grammar_ServiceNotAvailable");
                 return;
             }
 

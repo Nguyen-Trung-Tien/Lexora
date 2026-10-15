@@ -109,5 +109,64 @@ public static class LocalizationHelper
             _ => pos.ToString()
         };
     }
+
+    public static string FormatExamType(ExamType exam)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        if (loc == null) return exam.ToString();
+        return exam switch
+        {
+            ExamType.Toeic => loc.GetString("Exam_Name_Toeic"),
+            ExamType.Vstep => loc.GetString("Exam_Name_Vstep"),
+            ExamType.Ielts => loc.GetString("Exam_Name_Ielts"),
+            ExamType.General => loc.GetString("Exam_Name_General"),
+            _ => exam.ToString()
+        };
+    }
+
+    public static string FormatCefrLevel(CefrLevel level)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        if (loc == null) return level.ToString();
+        return level switch
+        {
+            CefrLevel.None => loc.GetString("Cefr_None"),
+            _ => level.ToString()
+        };
+    }
+
+    public static string FormatStorageStatus(StorageLearningStatus status)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        if (loc == null) return status.ToString();
+        return status switch
+        {
+            StorageLearningStatus.Weak => loc.GetString("Storage_FilterWeak"),
+            StorageLearningStatus.Learning => loc.GetString("Storage_FilterLearning"),
+            StorageLearningStatus.New => loc.GetString("Storage_FilterNew"),
+            StorageLearningStatus.Mastered => loc.GetString("Storage_FilterMastered"),
+            _ => status.ToString()
+        };
+    }
+
+    public static string FormatSessionType(string? sessionType)
+    {
+        if (string.IsNullOrWhiteSpace(sessionType)) return string.Empty;
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        if (loc == null) return sessionType;
+        return sessionType switch
+        {
+            "DailyReview" or "SpacedRepetition" or "Review" or "TodayDue" => loc.GetString("Session_SpacedRepetition"),
+            "LearnNew" => loc.GetString("Session_LearnNew"),
+            "Difficult" => loc.GetString("Session_Difficult"),
+            "ByTopic" => loc.GetString("Session_ByTopic"),
+            "CustomSelection" => loc.GetString("Session_CustomSelection"),
+            "QuickPractice" or "QuickTest" => loc.GetString("Session_QuickPractice"),
+            "Test_MultipleChoice" => loc.GetString("Session_TestMultipleChoice"),
+            "Test_FillBlank" => loc.GetString("Session_TestFillBlank"),
+            "Test_Listening" => loc.GetString("Session_TestListening"),
+            _ => sessionType
+        };
+    }
 }
 

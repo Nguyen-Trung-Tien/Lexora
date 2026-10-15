@@ -30,6 +30,7 @@ public sealed partial class OperationProgressDialog : ContentDialog
     private void ApplyLocalization()
     {
         if (_loc == null) return;
+        ProgressBadgeText.Text = _loc.GetString("Progress_Badge");
         StepMessageText.Text = _loc.GetString("Progress_DefaultPreparing");
         StepDetailText.Text = _loc.GetString("Progress_PleaseWait");
         CompletedTitleText.Text = _loc.GetString("Progress_CompletedTitle");

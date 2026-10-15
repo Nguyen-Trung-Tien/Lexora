@@ -53,7 +53,13 @@
                                      FontWeight="SemiBold" />
                             <ComboBox Grid.Column="1" x:Name="LevelComboBox"
                                       Header="{x:Bind Loc.GetString('WordEditor_HeaderLevel')}"
-                                      HorizontalAlignment="Stretch" />
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </Grid>
 
                         <!-- Phonetics and Notes -->
@@ -128,7 +134,13 @@
                                                       ItemsSource="{Binding AvailablePartsOfSpeech}"
                                                       SelectedItem="{Binding PartOfSpeech, Mode=TwoWay}"
                                                       SelectionChanged="PosGroupComboBox_SelectionChanged"
-                                                      MinWidth="130" VerticalAlignment="Center" />
+                                                      MinWidth="130" VerticalAlignment="Center">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
 
                                             <!-- Primary POS Indicator / Set Primary Button -->
                                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">

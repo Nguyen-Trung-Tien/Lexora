@@ -45,13 +45,25 @@
                 <ComboBox Grid.Column="1" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllLevels')}" MinWidth="145" CornerRadius="8"
                           ItemsSource="{x:Bind ViewModel.CefrLevels}"
                           SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}"
-                          SelectionChanged="FilterChanged" />
+                          SelectionChanged="FilterChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
                 <!-- Compact Inline Filter: Target Exam -->
                 <ComboBox Grid.Column="2" PlaceholderText="{x:Bind Loc.GetString('Grammar_AllExams')}" MinWidth="150" CornerRadius="8"
                           ItemsSource="{x:Bind ViewModel.ExamTypes}"
                           SelectedItem="{x:Bind ViewModel.SelectedExamTarget, Mode=TwoWay}"
-                          SelectionChanged="FilterChanged" />
+                          SelectionChanged="FilterChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
                 <!-- Add Rule Primary Button -->
                 <Button Grid.Column="3" Click="AddRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipAdd')}" Style="{ThemeResource AccentButtonStyle}" Padding="16,8" CornerRadius="10">

@@ -289,7 +289,13 @@
                             </StackPanel>
                             <ComboBox x:Name="LevelFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllLevels')}"
                                       SelectionChanged="LevelFilterCombo_SelectionChanged"
-                                      Width="130" Height="34" CornerRadius="8" FontSize="13" />
+                                      Width="130" Height="34" CornerRadius="8" FontSize="13">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- POS Filter -->
@@ -301,7 +307,13 @@
                             </StackPanel>
                             <ComboBox x:Name="PosFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllPos')}"
                                       SelectionChanged="PosFilterCombo_SelectionChanged"
-                                      Width="130" Height="34" CornerRadius="8" FontSize="13" />
+                                      Width="130" Height="34" CornerRadius="8" FontSize="13">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- Status Filter -->
@@ -313,7 +325,13 @@
                             </StackPanel>
                             <ComboBox x:Name="StatusFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllStatus')}"
                                       SelectionChanged="StatusFilterCombo_SelectionChanged"
-                                      Width="136" Height="34" CornerRadius="8" FontSize="13" />
+                                      Width="136" Height="34" CornerRadius="8" FontSize="13">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- Exam Target Filter -->
@@ -325,7 +343,13 @@
                             </StackPanel>
                             <ComboBox x:Name="ExamFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_ExamFilter')}"
                                       SelectionChanged="ExamFilterCombo_SelectionChanged"
-                                      Width="130" Height="34" CornerRadius="8" FontSize="13" />
+                                      Width="130" Height="34" CornerRadius="8" FontSize="13">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- Divider -->
@@ -798,7 +822,7 @@
                                                 <TextBlock Text="{x:Bind Loc.GetString('Vocab_Interval')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                                     <TextBlock Text="{x:Bind ViewModel.SelectedWord.IntervalDays, Mode=OneWay}" FontWeight="Bold" FontSize="13" />
-                                                    <TextBlock Text="d" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Bottom" />
+                                                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_DaysUnit')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Bottom" />
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>
