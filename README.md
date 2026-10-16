@@ -212,14 +212,12 @@ Lexora/
 │   ├── testing_and_qa.md           # 64-test taxonomy & QA checklists
 │   ├── installer_and_distribution.md # Packaging & Inno Setup specification
 │   └── contributing.md             # Contribution guide & Git workflow
-├── rules/                          # Engineering rules & architecture invariants
-│   ├── README.md                   # Rules index and precedence matrix
-│   ├── 01-clean-architecture.md    # Boundary rules & DI scope policies
-│   ├── 02-csharp-dotnet-standards.md # C# 13, primary constructors, async/await
-│   ├── 03-winui3-fluent-design.md  # Zero hardcoded colors, responsive layouts
-│   ├── 04-security-and-data-protection.md # Path sanitization, SQLite WAL & magic header
-│   ├── 05-spaced-repetition-sm2.md # SM-2 invariants & UI concurrency guards
-│   └── 06-testing-and-verification.md # 0-warning policy & test protocols
+├── .agents/                        # AI Agent Workspaces, Personas, Rules & Skills
+│   ├── hooks.json                  # Lifecycle validation hooks
+│   ├── personas/                   # Domain specialized agent personas
+│   ├── rules/                      # Modular repository rules & invariants (01-07)
+│   └── skills/                     # Standardized, executable agent skills
+├── changelog/                      # Keep-a-Changelog unreleased & archive fragments
 ├── installer/                      # Inno Setup compiler scripts
 │   └── LexoraSetup.iss             # Inno Setup 6 configuration script
 ├── publish/                        # Generated build artifacts & installers
@@ -257,12 +255,13 @@ Explore our in-depth documentation guides:
 ## 📜 Engineering Rules & Guidelines
 
 All contributors and autonomous agents must follow the repository invariants:
-- 🏛️ [**Rule 01: Clean Architecture & Boundaries**](rules/01-clean-architecture.md)
-- 💻 [**Rule 02: C# 13 & .NET 10 Coding Standards**](rules/02-csharp-dotnet-standards.md)
-- 🎨 [**Rule 03: WinUI 3 & Fluent UI/UX Guidelines**](rules/03-winui3-fluent-design.md)
-- 🔒 [**Rule 04: Security & Data Protection Invariants**](rules/04-security-and-data-protection.md)
-- 🧠 [**Rule 05: Spaced Repetition (SM-2) Integrity**](rules/05-spaced-repetition-sm2.md)
-- 🧪 [**Rule 06: Testing & Quality Gate Protocols**](rules/06-testing-and-verification.md)
+- 🏛️ [**Rule 01: Clean Architecture & Boundaries**](.agents/rules/01-clean-architecture.md)
+- 💻 [**Rule 02: C# 13 & .NET 10 Coding Standards**](.agents/rules/02-csharp-dotnet-standards.md)
+- 🎨 [**Rule 03: WinUI 3 & Fluent UI/UX Guidelines**](.agents/rules/03-winui3-fluent-design.md)
+- 🔒 [**Rule 04: Security & Data Protection Invariants**](.agents/rules/04-security-and-data-protection.md)
+- 🧠 [**Rule 05: Spaced Repetition (SM-2) Integrity**](.agents/rules/05-spaced-repetition-sm2.md)
+- 🧪 [**Rule 06: Testing & Quality Gate Protocols**](.agents/rules/06-testing-and-verification.md)
+- ⚡ [**Rule 07: AI Agent Token Optimization & Precision**](.agents/rules/07-agent-token-efficiency-and-accuracy.md)
 
 ---
 

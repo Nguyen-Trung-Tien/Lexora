@@ -1,0 +1,34 @@
+{
+  "version": "1.1.0",
+  "hooks": {
+    "pre_commit": [
+      {
+        "id": "verify-clean-architecture",
+        "description": "Verifies that Presentation layer never directly references LexoraDbContext or EF Core, and Domain remains pure.",
+        "command": "powershell -ExecutionPolicy Bypass -File .agents/skills/clean-architecture-lint/scripts/lint_architecture.ps1"
+      },
+      {
+        "id": "verify-i18n-parity",
+        "description": "Verifies 100% key parity between vi-VN and en-US localization dictionaries.",
+        "command": "powershell -ExecutionPolicy Bypass -File .agents/skills/i18n-localization-sync/scripts/sync_localization.ps1"
+      },
+      {
+        "id": "verify-sm2-engine",
+        "description": "Verifies that Spaced Repetition (SM-2) engine tests pass and EF >= 1.3 invariant is preserved.",
+        "command": "powershell -ExecutionPolicy Bypass -File .agents/skills/sm2-algorithm-verify/scripts/verify_sm2.ps1"
+      },
+      {
+        "id": "verify-quality-gates",
+        "description": "Runs silent build to enforce 0 warnings and 0 errors before commits.",
+        "command": "powershell -ExecutionPolicy Bypass -File .agents/skills/lexora-quality-audit/scripts/audit_quality_gates.ps1 -Mode BuildOnly"
+      }
+    ],
+    "post_edit": [
+      {
+        "id": "check-changelog-updated",
+        "description": "Reminds or checks that user-facing changes have an entry in CHANGELOG.md under [Unreleased] or changelog/unreleased/.",
+        "command": "powershell -ExecutionPolicy Bypass -Command \"if (-not (Test-Path changelog/unreleased/*.md) -and -not (Select-String -Path CHANGELOG.md -Pattern '\\[Unreleased\\]' -Quiet)) { Write-Warning 'Remember to create a changelog fragment in changelog/unreleased/ using bump_changelog.ps1' }\""
+      }
+    ]
+  }
+}

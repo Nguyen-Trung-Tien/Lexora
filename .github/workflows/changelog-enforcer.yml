@@ -1,0 +1,37 @@
+name: 📝 CHANGELOG SemVer Enforcer
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'CHANGELOG.md'
+
+jobs:
+  validate-changelog:
+    name: 🔍 Validate CHANGELOG.md Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔎 Verify CHANGELOG Modified
+        run: |
+          if ! git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^CHANGELOG.md$"; then
+            echo "❌ ERROR: PR touches src/ but CHANGELOG.md was not updated under [Unreleased]."
+            exit 1
+          fi
+
+      - name: 📋 Validate Keep a Changelog Format
+        run: |
+          grep -q "## \[Unreleased\]" CHANGELOG.md || {
+            echo "❌ ERROR: CHANGELOG.md must contain an '## [Unreleased]' section header."
+            exit 1
+          }
+          grep -E -q "### (Added|Changed|Deprecated|Removed|Fixed|Security)" CHANGELOG.md || {
+            echo "❌ ERROR: CHANGELOG.md must use standard SemVer subheadings (Added/Changed/Deprecated/Removed/Fixed/Security)."
+            exit 1
+          }
+          echo "✅ CHANGELOG.md matches enterprise standard."

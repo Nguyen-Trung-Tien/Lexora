@@ -11,6 +11,7 @@ Welcome to the **Lexora Documentation Portal**. This library contains complete g
 
 ### 💻 For Software Engineers & Contributors
 - [**Architecture & System Design**](architecture.md): Clean Architecture principles, layer boundaries, dependency injection, and concurrency designs.
+- [**Architecture Decision Records (ADRs)**](adr/): Complete history of architectural decisions, including [ADR-0001 (Clean Architecture)](adr/ADR-0001-clean-architecture-dotnet10.md), [ADR-0002 (SQLite WAL)](adr/ADR-0002-offline-first-sqlite-wal.md), and [ADR-0003 (SM-2 Spaced Repetition)](adr/ADR-0003-sm2-spaced-repetition-engine.md).
 - [**Application Services & API Reference**](api_and_services.md): Detailed specifications of all service interfaces, contracts, methods, and DTOs.
 - [**Database Schema & Persistence**](database_schema.md): Complete SQLite tables, ERD diagram, indexes, foreign key cascades, and PRAGMAs.
 - [**Spaced Repetition (SM-2) Engine**](spaced_repetition.md): Mathematical derivations, worked examples, and learning lifecycle states.

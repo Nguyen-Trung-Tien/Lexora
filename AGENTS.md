@@ -210,18 +210,50 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.0.0"
 Lexora/
 ├── Lexora.slnx                               # Solution file (.NET 10 slnx format)
 ├── AGENTS.md                                 # Developer & AI Agent master guidelines
+├── CHANGELOG.md                              # High-level version history (Semantic Versioning 2.0.0)
 ├── PROGRESS.md                               # Project progress tracking and milestones
 ├── README.md                                 # User-facing overview & feature breakdown
+├── ROADMAP.md                                # Strategic roadmap overview
 ├── build-installer.ps1                       # Inno Setup installer packaging script
 ├── build-release.ps1                         # Production release build script
-├── rules/                                    # Detailed modular developer rules
-│   ├── 01-clean-architecture.md              # Clean Architecture boundaries & DI patterns
-│   ├── 02-csharp-dotnet-standards.md         # C# 13, .NET 10, MVVM and async standards
-│   ├── 03-winui3-fluent-design.md            # Fluent 2 UI/UX, brushes, and layouts
-│   ├── 04-security-and-data-protection.md    # Path traversal, backups, and file safety
-│   ├── 05-spaced-repetition-sm2.md           # SM-2 formula, intervals, and streak engine
-│   ├── 06-testing-and-verification.md        # Test suite requirements & CI verification
-│   └── 07-agent-token-efficiency-and-accuracy.md # AI Agent token economy, precision coding & tooling protocol
+├── .agents/                                  # AI Agent Personas, Skills, Rules & Configurations
+│   ├── hooks.json                            # Antigravity IDE custom hooks & lifecycle triggers
+│   ├── personas/                             # Specialized subagent roles
+│   │   ├── architect.md                      # Clean Architecture & dependency flow guardian
+│   │   ├── fluent-ui-designer.md             # Fluent 2 UI/UX, accessibility & ThemeResource specialist
+│   │   ├── qa-engineer.md                    # Zero-warning build, automated testing & regression auditor
+│   │   └── security-auditor.md               # SQLite safety, path traversal & data protection guardian
+│   ├── rules/                                # Modular workspace rules (Antigravity discovered)
+│   │   ├── 01-clean-architecture.md          # Clean Architecture boundaries & DI patterns
+│   │   ├── 02-csharp-dotnet-standards.md     # C# 13, .NET 10, MVVM and async standards
+│   │   ├── 03-winui3-fluent-design.md        # Fluent 2 UI/UX, brushes, and layouts
+│   │   ├── 04-security-and-data-protection.md# Path traversal, backups, and file safety
+│   │   ├── 05-spaced-repetition-sm2.md       # SM-2 formula, intervals, and streak engine
+│   │   ├── 06-testing-and-verification.md    # Test suite requirements & CI verification
+│   │   ├── 07-agent-token-efficiency-and-accuracy.md # AI Agent token economy & precision protocol
+│   │   └── README.md                         # Rules index & guide
+│   └── skills/                               # Standardized, executable agent skills
+│       ├── clean-architecture-lint/          # Architecture boundaries static analysis
+│       ├── changelog-bump/                   # Keep-a-Changelog fragment creation & release consolidation
+│       ├── db-migration-check/               # SQLite schema, WAL mode & backup safety integrity
+│       ├── i18n-localization-sync/           # Bilingual (vi-VN / en-US) dictionary & XAML parity audit
+│       ├── lexora-quality-audit/             # Clean build (0 warnings) and test suite verification
+│       ├── release-package-prep/             # Version synchronization & release packaging readiness
+│       ├── sm2-algorithm-verify/             # Spaced Repetition (SM-2) engine invariant verification
+│       └── winui3-fluent-audit/              # Fluent 2 zero-hardcoded-colors & responsive layout audit
+├── changelog/                                # Changelog fragment management
+│   ├── unreleased/                           # PR/feature changelog fragments
+│   └── archive/                              # Archived version changelogs
+├── docs/                                     # Architecture, specs & documentation hub
+│   ├── adr/                                  # Architecture Decision Records (ADRs)
+│   ├── architecture.md                       # System architecture & Clean Architecture layout
+│   ├── api_and_services.md                   # Application services and DTO contracts
+│   ├── database_schema.md                    # SQLite schema, tables & indexes
+│   ├── spaced_repetition.md                  # SM-2 & FSRS algorithm specifications
+│   └── testing_and_qa.md                     # Automated test suites guide
+├── roadmap/                                  # Strategic roadmap & backlog tracking
+│   ├── milestones.md                         # Milestone definitions, releases & exit criteria
+│   └── backlog.md                            # Categorized backlog & acceptance criteria
 ├── src/
 │   ├── Lexora.Domain/                        # Pure domain layer (Entities, Enums, Exceptions)
 │   │   ├── Entities/                         # Word, ContextUnit, GrammarRule, StudyLog
@@ -241,9 +273,13 @@ Lexora/
 │       ├── Services/                         # LocalizationService, ThemeService
 │       ├── ViewModels/                       # DashboardViewModel, VocabularyViewModel, etc.
 │       └── Views/                            # ShellPage, DashboardPage, VocabularyPage, etc.
-└── tests/
-    ├── Lexora.Tests.Unit/                    # 255 xUnit Unit Tests (SM-2, DTOs, Services)
-    └── Lexora.Tests.Integration/             # 49 xUnit Integration Tests (SQLite, Repositories)
+├── tests/
+│   ├── Lexora.Tests.Unit/                    # 255 xUnit Unit Tests (SM-2, DTOs, Services)
+│   └── Lexora.Tests.Integration/             # 49 xUnit Integration Tests (SQLite, Repositories)
+└── .github/
+    └── workflows/
+        ├── agent-quality-gate.yml            # CI build & automated test quality gate
+        └── changelog-enforcer.yml            # CI check enforcing unreleased changelog fragment
 ```
 
 ---

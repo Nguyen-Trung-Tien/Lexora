@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LexoraQualityAuditArgs",
+  "description": "Arguments for running pre-flight quality audit on the Lexora repository.",
+  "type": "object",
+  "properties": {
+    "Mode": {
+      "type": "string",
+      "enum": ["BuildOnly", "FastUnit", "Full"],
+      "default": "BuildOnly",
+      "description": "Verification depth: BuildOnly (compilation check), FastUnit (build + unit tests), Full (all tests)."
+    },
+    "Filter": {
+      "type": "string",
+      "description": "Optional xUnit filter expression (e.g. 'FullyQualifiedName~FsrsSpacedRepetitionEngine')."
+    }
+  },
+  "additionalProperties": false
+}
