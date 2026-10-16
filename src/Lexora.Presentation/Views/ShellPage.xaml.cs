@@ -86,29 +86,27 @@ public sealed partial class ShellPage : Page
                 ContentFrame.Navigated += (s, args) =>
                 {
                     NavView.IsBackEnabled = _navigationService.CanGoBack;
-                    switch (ContentFrame.Content)
+
+                    if (_navigationService.HasPendingNavigation)
                     {
-                        case DashboardPage:
-                            NavView.SelectedItem = NavItemDashboard;
-                            break;
-                        case VocabularyPage:
-                            NavView.SelectedItem = NavItemVocabulary;
-                            break;
-                        case ReviewPage:
-                            NavView.SelectedItem = NavItemReview;
-                            break;
-                        case TestPage:
-                            NavView.SelectedItem = NavItemTest;
-                            break;
-                        case GrammarPage:
-                            NavView.SelectedItem = NavItemGrammar;
-                            break;
-                        case LearningStoragePage:
-                            NavView.SelectedItem = NavItemLearningStorage;
-                            break;
-                        case SettingsPage:
-                            NavView.SelectedItem = NavItemSettings;
-                            break;
+                        return;
+                    }
+
+                    NavigationViewItem? targetItem = ContentFrame.Content switch
+                    {
+                        DashboardPage => NavItemDashboard,
+                        VocabularyPage => NavItemVocabulary,
+                        ReviewPage => NavItemReview,
+                        TestPage => NavItemTest,
+                        GrammarPage => NavItemGrammar,
+                        LearningStoragePage => NavItemLearningStorage,
+                        SettingsPage => NavItemSettings,
+                        _ => null
+                    };
+
+                    if (targetItem != null && !ReferenceEquals(NavView.SelectedItem, targetItem))
+                    {
+                        NavView.SelectedItem = targetItem;
                     }
                 };
 
@@ -128,6 +126,10 @@ public sealed partial class ShellPage : Page
     {
         if (args.IsSettingsInvoked || args.InvokedItemContainer == NavItemSettings)
         {
+            if (_navigationService.CurrentPageType == typeof(SettingsPage))
+            {
+                return;
+            }
             _navigationService.Navigate(typeof(SettingsPage));
             return;
         }
@@ -164,7 +166,7 @@ public sealed partial class ShellPage : Page
 
         if (targetType != null)
         {
-            if (ContentFrame.Content?.GetType() == targetType)
+            if (_navigationService.CurrentPageType == targetType)
             {
                 return;
             }

@@ -42,8 +42,6 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
             _toastService?.ShowWarning(msg);
         };
         InitializeComponent();
-
-        Unloaded += (s, e) => ViewModel.Dispose();
     }
 
     public void OnLanguageChanged()
@@ -61,9 +59,16 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
-        await ViewModel.InitializeAsync();
-        UpdateSegmentedButtons();
-        UpdateSelectionModeUI();
+        try
+        {
+            await ViewModel.InitializeAsync();
+            UpdateSegmentedButtons();
+            UpdateSelectionModeUI();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] OnNavigatedTo error: {ex.Message}");
+        }
     }
 
     private void Page_Loaded(object sender, RoutedEventArgs e)

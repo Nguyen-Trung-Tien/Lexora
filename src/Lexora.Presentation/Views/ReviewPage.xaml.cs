@@ -116,6 +116,7 @@ public sealed partial class ReviewPage : Page, ILocalizableView
 
         try
         {
+            RegisterShortcuts();
             if (e.Parameter is ContextUnitDto unit)
             {
                 await ViewModel.LoadAvailableTopicsAsync();

@@ -11,23 +11,57 @@ public interface INavigationService
     bool CanGoBack { get; }
     void GoBack();
     event EventHandler<Type>? Navigated;
+    Type? CurrentPageType { get; }
+    bool HasPendingNavigation { get; }
+    bool IsNavigating { get; }
 }
 
 public class NavigationService : INavigationService
 {
+    private sealed record NavigationRequest(Type PageType, object? Parameter, NavigationTransitionInfo? TransitionInfo, bool Force);
+
     private Frame? _frame;
+    private Type? _currentTargetPageType;
+    private bool _isNavigating;
+    private NavigationRequest? _pendingRequest;
+
     public event EventHandler<Type>? Navigated;
 
-    private readonly Action<object, Microsoft.UI.Xaml.Navigation.NavigationEventArgs> _navigatedHandler;
+    public Type? CurrentPageType => _currentTargetPageType ?? _frame?.CurrentSourcePageType ?? _frame?.Content?.GetType();
+    public bool HasPendingNavigation => _pendingRequest != null;
+    public bool IsNavigating => _isNavigating;
+
+    private readonly Microsoft.UI.Xaml.Navigation.NavigatedEventHandler _navigatedHandler;
+    private readonly Microsoft.UI.Xaml.Navigation.NavigationFailedEventHandler _navigationFailedHandler;
+    private readonly Microsoft.UI.Xaml.Navigation.NavigationStoppedEventHandler _navigationStoppedHandler;
 
     public NavigationService()
     {
         _navigatedHandler = (s, e) =>
         {
+            _isNavigating = false;
             if (e.SourcePageType != null)
             {
+                _currentTargetPageType = e.SourcePageType;
                 Navigated?.Invoke(this, e.SourcePageType);
             }
+            ProcessPendingNavigation();
+        };
+
+        _navigationFailedHandler = (s, e) =>
+        {
+            e.Handled = true;
+            _isNavigating = false;
+            _currentTargetPageType = _frame?.CurrentSourcePageType ?? _frame?.Content?.GetType();
+            System.Diagnostics.Debug.WriteLine($"[NavigationService] Frame.NavigationFailed: {e.SourcePageType} -> {e.Exception}");
+            App.LogCrash($"NavigationService.NavigationFailed({e.SourcePageType?.Name})", e.Exception);
+            ProcessPendingNavigation();
+        };
+
+        _navigationStoppedHandler = (s, e) =>
+        {
+            _isNavigating = false;
+            ProcessPendingNavigation();
         };
     }
 
@@ -35,11 +69,15 @@ public class NavigationService : INavigationService
     {
         if (_frame != null)
         {
-            _frame.Navigated -= new Microsoft.UI.Xaml.Navigation.NavigatedEventHandler(_navigatedHandler);
+            _frame.Navigated -= _navigatedHandler;
+            _frame.NavigationFailed -= _navigationFailedHandler;
+            _frame.NavigationStopped -= _navigationStoppedHandler;
         }
 
         _frame = frame;
-        _frame.Navigated += new Microsoft.UI.Xaml.Navigation.NavigatedEventHandler(_navigatedHandler);
+        _frame.Navigated += _navigatedHandler;
+        _frame.NavigationFailed += _navigationFailedHandler;
+        _frame.NavigationStopped += _navigationStoppedHandler;
     }
 
     public bool Navigate(Type pageType, object? parameter = null, NavigationTransitionInfo? transitionInfo = null, bool force = false)
@@ -60,18 +98,61 @@ public class NavigationService : INavigationService
             return dispatchedResult;
         }
 
-        if (!force && _frame.Content?.GetType() == pageType && parameter == null) return false;
+        // Avoid redundant navigation to current active/target page if parameter hasn't changed
+        if (!force && parameter == null && CurrentPageType == pageType)
+        {
+            return false;
+        }
+
+        // If a navigation is currently in-flight, coalesce/queue this request instead of re-entering Frame.Navigate
+        if (_isNavigating)
+        {
+            _currentTargetPageType = pageType;
+            _pendingRequest = new NavigationRequest(pageType, parameter, transitionInfo, force);
+            return true;
+        }
 
         try
         {
-            transitionInfo ??= new SuppressNavigationTransitionInfo();
-            return _frame.Navigate(pageType, parameter, transitionInfo);
+            _isNavigating = true;
+            _currentTargetPageType = pageType;
+            transitionInfo ??= new EntranceNavigationTransitionInfo();
+            bool result = _frame.Navigate(pageType, parameter, transitionInfo);
+            if (!result)
+            {
+                _isNavigating = false;
+                _currentTargetPageType = _frame.CurrentSourcePageType ?? _frame.Content?.GetType();
+            }
+            return result;
         }
         catch (Exception ex)
         {
+            _isNavigating = false;
+            _currentTargetPageType = _frame.CurrentSourcePageType ?? _frame.Content?.GetType();
             System.Diagnostics.Debug.WriteLine($"[NavigationService] Navigation failed to {pageType.Name}: {ex}");
             App.LogCrash($"NavigationService.Navigate({pageType.Name})", ex);
+            ProcessPendingNavigation();
             return false;
+        }
+    }
+
+    private void ProcessPendingNavigation()
+    {
+        if (_pendingRequest == null) return;
+
+        var req = _pendingRequest;
+        _pendingRequest = null;
+
+        if (_frame?.DispatcherQueue != null)
+        {
+            _frame.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () =>
+            {
+                Navigate(req.PageType, req.Parameter, req.TransitionInfo, req.Force);
+            });
+        }
+        else
+        {
+            Navigate(req.PageType, req.Parameter, req.TransitionInfo, req.Force);
         }
     }
 

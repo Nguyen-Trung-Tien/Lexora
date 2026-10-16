@@ -187,12 +187,20 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
-        if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))
+        try
         {
-            SearchBox.Text = query;
-            ViewModel.SearchTerm = query;
-            await ViewModel.LoadWordsAsync();
-            ViewModel.ApplyUnitFilter();
+            RegisterShortcuts();
+            if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))
+            {
+                SearchBox.Text = query;
+                ViewModel.SearchTerm = query;
+                await ViewModel.LoadWordsAsync();
+                ViewModel.ApplyUnitFilter();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[VocabularyPage] OnNavigatedTo error: {ex.Message}");
         }
     }
 

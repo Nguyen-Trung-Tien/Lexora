@@ -74,6 +74,7 @@ public sealed partial class GrammarPage : Page, ILocalizableView
         OnLanguageChanged();
         try
         {
+            RegisterShortcuts();
             if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))
             {
                 ViewModel.SearchQuery = query;

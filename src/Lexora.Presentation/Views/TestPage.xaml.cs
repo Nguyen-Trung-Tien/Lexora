@@ -56,6 +56,7 @@ public sealed partial class TestPage : Page, ILocalizableView
         OnLanguageChanged();
         try
         {
+            RegisterShortcuts();
             UpdateCountButtonLabels();
             UpdateTypeButtonStyles(ViewModel.SelectedTestType);
             UpdateCountButtonStyles(ViewModel.QuestionCount);

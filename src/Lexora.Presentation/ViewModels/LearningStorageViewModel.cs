@@ -216,29 +216,45 @@ public partial class LearningStorageViewModel : ObservableObject, IDisposable
 
     public async Task RefreshAllAsync()
     {
-        await _dbLock.WaitAsync();
         try
         {
-            await LoadStatisticsCoreAsync();
-            await LoadItemsCoreAsync();
+            await _dbLock.WaitAsync();
+            try
+            {
+                await LoadStatisticsCoreAsync();
+                await LoadItemsCoreAsync();
+            }
+            finally
+            {
+                _dbLock.Release();
+            }
         }
-        finally
+        catch (ObjectDisposedException) { }
+        catch (Exception ex)
         {
-            _dbLock.Release();
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] RefreshAllAsync error: {ex.Message}");
         }
     }
 
     [RelayCommand]
     public async Task LoadStatisticsAsync()
     {
-        await _dbLock.WaitAsync();
         try
         {
-            await LoadStatisticsCoreAsync();
+            await _dbLock.WaitAsync();
+            try
+            {
+                await LoadStatisticsCoreAsync();
+            }
+            finally
+            {
+                _dbLock.Release();
+            }
         }
-        finally
+        catch (ObjectDisposedException) { }
+        catch (Exception ex)
         {
-            _dbLock.Release();
+            System.Diagnostics.Debug.WriteLine($"[LearningStorageViewModel] LoadStatisticsAsync error: {ex.Message}");
         }
     }
 
@@ -888,7 +904,6 @@ public partial class LearningStorageViewModel : ObservableObject, IDisposable
     {
         _localizationService.LanguageChanged -= _languageChangedHandler;
         _storageService.StorageChanged -= OnStorageChanged;
-        _dbLock.Dispose();
         GC.SuppressFinalize(this);
     }
 }
