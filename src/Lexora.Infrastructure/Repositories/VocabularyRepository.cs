@@ -15,6 +15,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
     public async Task<Word?> GetWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .AsSplitQuery()
             .Include(w => w.Meanings)
                 .ThenInclude(m => m.Examples)
             .Include(w => w.WordTopics)
@@ -34,6 +35,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         if (idList.Count <= 500)
         {
             return await DbSet
+                .AsSplitQuery()
                 .Include(w => w.Meanings)
                     .ThenInclude(m => m.Examples)
                 .Include(w => w.WordTopics)
@@ -51,6 +53,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         {
             cancellationToken.ThrowIfCancellationRequested();
             var batch = await DbSet
+                .AsSplitQuery()
                 .Include(w => w.Meanings)
                     .ThenInclude(m => m.Examples)
                 .Include(w => w.WordTopics)
@@ -112,6 +115,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
+            .AsSplitQuery()
             .Include(w => w.Meanings)
                 .ThenInclude(m => m.Examples)
             .Include(w => w.WordTopics)
@@ -620,6 +624,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         if (termList.Count == 0) return new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
 
         var words = await DbSet
+            .AsSplitQuery()
             .Include(w => w.Meanings)
                 .ThenInclude(m => m.Examples)
             .Include(w => w.WordTopics)

@@ -9,7 +9,7 @@ using Lexora.Presentation.Services;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class ReviewViewModel : ObservableObject
+public partial class ReviewViewModel : ObservableObject, IDisposable
 {
     private readonly IReviewService _reviewService;
     private readonly IAudioPlayerService _audioPlayer;
@@ -19,6 +19,7 @@ public partial class ReviewViewModel : ObservableObject
     private readonly ISoundFeedbackService? _soundFeedback;
     private readonly IToastNotificationService? _toastService;
     private readonly Stopwatch _cardTimer = new();
+    private readonly SemaphoreSlim _ratingLock = new(1, 1);
 
     private Guid? _currentSessionId;
     private int _initialQueueCount;
@@ -348,7 +349,7 @@ public partial class ReviewViewModel : ObservableObject
     [RelayCommand]
     public async Task RateCardAsync(ReviewRating rating)
     {
-        if (CurrentCard == null || IsRatingInProgress) return;
+        if (CurrentCard == null || !_ratingLock.Wait(0)) return;
         IsRatingInProgress = true;
 
         try
@@ -435,13 +436,14 @@ public partial class ReviewViewModel : ObservableObject
         finally
         {
             IsRatingInProgress = false;
+            try { _ratingLock.Release(); } catch (ObjectDisposedException) { }
         }
     }
 
     [RelayCommand]
     public async Task UndoLastReviewAsync()
     {
-        if (_undoStack.Count == 0 || IsRatingInProgress) return;
+        if (_undoStack.Count == 0 || !_ratingLock.Wait(0)) return;
         IsRatingInProgress = true;
 
         try
@@ -481,6 +483,7 @@ public partial class ReviewViewModel : ObservableObject
         finally
         {
             IsRatingInProgress = false;
+            try { _ratingLock.Release(); } catch (ObjectDisposedException) { }
         }
     }
 
@@ -673,6 +676,12 @@ public partial class ReviewViewModel : ObservableObject
     public void StopAudio()
     {
         _audioPlayer.Stop();
+    }
+
+    public void Dispose()
+    {
+        _ratingLock.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
 

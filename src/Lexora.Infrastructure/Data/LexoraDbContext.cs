@@ -112,6 +112,7 @@ public class LexoraDbContext : DbContext
             b.HasIndex(rc => rc.NextReviewAt);
             b.HasIndex(rc => rc.Status);
             b.HasIndex(rc => new { rc.NextReviewAt, rc.Status });
+            b.HasIndex(rc => new { rc.Status, rc.NextReviewAt });
 
             b.HasMany(rc => rc.StudyLogs)
                 .WithOne(sl => sl.ReviewCard)
@@ -134,6 +135,8 @@ public class LexoraDbContext : DbContext
         {
             b.HasKey(sl => sl.Id);
             b.HasIndex(sl => sl.CreatedAt);
+            b.HasIndex(sl => new { sl.ReviewCardId, sl.CreatedAt });
+            b.HasIndex(sl => new { sl.StudySessionId, sl.CreatedAt });
         });
 
         // GrammarRule & GrammarExample

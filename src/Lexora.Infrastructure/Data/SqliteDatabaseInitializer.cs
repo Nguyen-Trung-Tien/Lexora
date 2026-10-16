@@ -357,9 +357,11 @@ public class SqliteDatabaseInitializer
                 CREATE INDEX IF NOT EXISTS "IX_LearningStorageItems_ItemType" ON "LearningStorageItems" ("ItemType");
                 CREATE INDEX IF NOT EXISTS "IX_LearningStorageItems_Status" ON "LearningStorageItems" ("Status");
                 CREATE INDEX IF NOT EXISTS "IX_LearningStorageItems_NextReviewAt" ON "LearningStorageItems" ("NextReviewAt");
-                CREATE INDEX IF NOT EXISTS "IX_LearningStorageItems_RetentionProbability" ON "LearningStorageItems" ("RetentionProbability");
                 CREATE UNIQUE INDEX IF NOT EXISTS "IX_LearningStorageItems_WordId" ON "LearningStorageItems" ("WordId") WHERE "WordId" IS NOT NULL;
                 CREATE UNIQUE INDEX IF NOT EXISTS "IX_LearningStorageItems_GrammarRuleId" ON "LearningStorageItems" ("GrammarRuleId") WHERE "GrammarRuleId" IS NOT NULL;
+                CREATE INDEX IF NOT EXISTS "IX_ReviewCards_Status_NextReviewAt" ON "ReviewCards" ("Status", "NextReviewAt");
+                CREATE INDEX IF NOT EXISTS "IX_StudyLogs_ReviewCardId_CreatedAt" ON "StudyLogs" ("ReviewCardId", "CreatedAt");
+                CREATE INDEX IF NOT EXISTS "IX_StudyLogs_StudySessionId_CreatedAt" ON "StudyLogs" ("StudySessionId", "CreatedAt");
                 """;
             await _context.Database.ExecuteSqlRawAsync(createStorageTableSql, cancellationToken);
         }
