@@ -1,0 +1,75 @@
+{
+  "formatVersion": "1.0",
+  "metadata": {
+    "id": "relative-clauses-and-conditions",
+    "name": "Mệnh Đề Quan Hệ & Câu Điều Kiện (Clauses & Conditionals)",
+    "description": "Trọng điểm ngữ pháp trung - cao cấp: Mệnh đề quan hệ, câu điều kiện loại 0-3, câu điều kiện hỗn hợp và đảo ngữ.",
+    "author": "Lexora Community",
+    "category": "Grammar",
+    "targetExam": "IELTS",
+    "level": "B2",
+    "version": "1.0.0",
+    "itemCount": 8,
+    "language": "en-US",
+    "tags": ["Grammar", "Conditionals", "Inversion", "Clauses"],
+    "downloadUrl": "community/packages/relative-clauses-and-conditions.json",
+    "checksumSha256": "BD80002C8E5AE4D9ACCF18842E6A977682E51E0992F8B904512EC9FAB285CD8E",
+    "license": "CC-BY-4.0",
+    "sizeInBytes": 4131,
+    "updatedAt": "2026-10-17T00:00:00Z"
+  },
+  "vocabularyWords": null,
+  "grammarRules": [
+    {
+      "title": "Defining Relative Clauses (Mệnh Đề Quan Hệ Xác Định)",
+      "structure": "Noun + who/whom/which/that + Clause",
+      "explanationVi": "Cung cấp thông tin thiết yếu để xác định danh từ đứng trước; nếu bỏ mệnh đề này câu sẽ không đủ nghĩa. Không dùng dấu phẩy.",
+      "explanationEn": "Provides essential information to identify the preceding noun. Never separated by commas.",
+      "commonMistakes": "Dùng dấu phẩy ngăn cách mệnh đề quan hệ xác định hoặc dùng 'that' trong mệnh đề không xác định.",
+      "level": "B1",
+      "examTarget": "General",
+      "topic": "Complex Sentences",
+      "examples": [
+        {
+          "sentenceEn": "The applicant who possesses the highest score in English proficiency was hired immediately.",
+          "sentenceVi": "Ứng viên sở hữu điểm thông thạo tiếng Anh cao nhất đã được tuyển dụng ngay lập tức.",
+          "note": "'who' thay thế cho danh từ chỉ người 'The applicant'."
+        }
+      ]
+    },
+    {
+      "title": "Second Conditional (Câu Điều Kiện Loại 2)",
+      "structure": "If + S + V2/were, S + would/could + V_inf",
+      "explanationVi": "Diễn tả điều kiện không có thật hoặc giả định trái ngược với thực tế ở hiện tại hoặc tương lai.",
+      "explanationEn": "Used for unreal or hypothetical situations contrary to present or future facts.",
+      "commonMistakes": "Dùng 'would' trong mệnh đề If (ví dụ sai: If I would have money...). Dùng 'was' thay cho 'were' trong văn phong học thuật chuẩn.",
+      "level": "B2",
+      "examTarget": "IELTS",
+      "topic": "Conditionals",
+      "examples": [
+        {
+          "sentenceEn": "If the government invested more in green energy, carbon emissions would decrease substantially.",
+          "sentenceVi": "Nếu chính phủ đầu tư nhiều hơn vào năng lượng xanh, lượng khí thải carbon sẽ giảm đáng kể.",
+          "note": "Giả định cho tình huống hiện tại chưa diễn ra."
+        }
+      ]
+    },
+    {
+      "title": "Inversion in Conditionals (Đảo Ngữ Trong Câu Điều Kiện)",
+      "structure": "Type 1: Should + S + V_inf... | Type 2: Were + S + to V... | Type 3: Had + S + V3/ed...",
+      "explanationVi": "Bỏ từ 'If' và đảo trợ động từ (Should / Were / Had) lên đầu câu để tạo phong thái trang trọng, học thuật.",
+      "explanationEn": "Removes 'If' and inverts auxiliary verbs for formal and academic English.",
+      "commonMistakes": "Quên đưa động từ về nguyên thể trong đảo ngữ loại 1 (Should + S + V_inf) hoặc chia sai thì ở mệnh đề chính.",
+      "level": "C1",
+      "examTarget": "IELTS",
+      "topic": "Inversion",
+      "examples": [
+        {
+          "sentenceEn": "Had the committee reviewed the documentation thoroughly, this misunderstanding would have been avoided.",
+          "sentenceVi": "Giá như ủy ban xem xét hồ sơ một cách thấu đáo, sự hiểu lầm này đã có thể tránh được.",
+          "note": "Đảo ngữ câu điều kiện loại 3 (Had + S + V3)."
+        }
+      ]
+    }
+  ]
+}

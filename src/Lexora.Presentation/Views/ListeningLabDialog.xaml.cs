@@ -65,6 +65,8 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    private int _selectedTabIndex = 0;
+
     public ListeningLabDialog(
         IPronunciationListeningLabService labService,
         ILocalizationService loc,
@@ -76,13 +78,55 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
 
         InitializeComponent();
         Loaded += ListeningLabDialog_Loaded;
+        ActualThemeChanged += (s, e) => SelectTab(_selectedTabIndex);
     }
 
     private async void ListeningLabDialog_Loaded(object sender, RoutedEventArgs e)
     {
+        SelectTab(0);
         await LoadNextDictationAsync();
         await LoadMinimalPairsAsync();
         AccentComparisonList = await _labService.GetAccentComparisonListAsync();
+    }
+
+    private void TabDictation_Click(object sender, RoutedEventArgs e) => SelectTab(0);
+    private void TabMinimalPairs_Click(object sender, RoutedEventArgs e) => SelectTab(1);
+    private void TabAccentCompare_Click(object sender, RoutedEventArgs e) => SelectTab(2);
+
+    private void SelectTab(int index)
+    {
+        _selectedTabIndex = index;
+        if (PanelDictation != null) PanelDictation.Visibility = index == 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (PanelMinimalPairs != null) PanelMinimalPairs.Visibility = index == 1 ? Visibility.Visible : Visibility.Collapsed;
+        if (PanelAccentCompare != null) PanelAccentCompare.Visibility = index == 2 ? Visibility.Visible : Visibility.Collapsed;
+
+        var cardBg = ThemeResourceHelper.GetThemeBrush(this, "CardBackgroundFillColorDefaultBrush");
+        var cardStroke = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush");
+        var accentText = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush");
+        var secondaryText = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush");
+        var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+        void ApplyTab(Button? btn, bool isSelected)
+        {
+            if (btn == null) return;
+            if (isSelected)
+            {
+                if (cardBg != null) btn.Background = cardBg;
+                if (cardStroke != null) btn.BorderBrush = cardStroke;
+                btn.BorderThickness = new Thickness(1);
+                if (accentText != null) btn.Foreground = accentText;
+            }
+            else
+            {
+                btn.Background = transparent;
+                btn.BorderThickness = new Thickness(0);
+                if (secondaryText != null) btn.Foreground = secondaryText;
+            }
+        }
+
+        ApplyTab(BtnTabDictation, index == 0);
+        ApplyTab(BtnTabMinimalPairs, index == 1);
+        ApplyTab(BtnTabAccentCompare, index == 2);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

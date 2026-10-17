@@ -38,6 +38,10 @@
             <!-- Fallback Button Style -->
             <Style x:Key="DefaultButtonStyle" TargetType="Button" />
 
+            <!-- Global ContentDialog width limits (prevents layout clipping or narrow defaults) -->
+            <x:Double x:Key="ContentDialogMaxWidth">880</x:Double>
+            <x:Double x:Key="ContentDialogMinWidth">480</x:Double>
+
             <!-- Globally hide keyboard accelerator visual badges on Pages -->
             <Style TargetType="Page">
                 <Setter Property="KeyboardAcceleratorPlacementMode" Value="Hidden" />

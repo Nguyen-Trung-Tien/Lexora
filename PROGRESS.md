@@ -2,10 +2,10 @@
 
 ## 📊 Quality Gates Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
-- **Automated Tests**: **378 / 378 Tests Passing** (327 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+- **Automated Tests**: **395 / 395 Tests Passing** (344 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
-- **Fluent UI Audit**: `0 Violations` (`audit_fluent_ui.ps1` scanned 84 files).
-- **Localization (i18n)**: `100% Parity` across 1,173 keys (`sync_localization.ps1 -CheckXaml`).
+- **Fluent UI Audit**: `0 Violations` (`audit_fluent_ui.ps1` scanned 85 files).
+- **Localization (i18n)**: `100% Parity` across 1,274 keys (`sync_localization.ps1 -CheckXaml`).
 - **Clean Architecture**: `0 Violations` (`lint_architecture.ps1`).
 
 ---
@@ -83,5 +83,29 @@
   - **UK vs US Accent Comparison Lab**: Side-by-side pronunciation playback with phonetic transcription and linguistic variation notes (rhoticity, tapped 't', vowel shifts).
   - **Integrated Entry Points**: Seamlessly wired into `VocabularyPage.xaml` command bar, `TestPage.xaml` title banner, and shell quick actions.
   - **Automated Regression Suite**: Added 13 new unit tests in `PronunciationListeningLabServiceTests.cs`.
-  - **Current Quality Gate**: **378 / 378 tests passing** (327 Unit + 51 Integration, 0 Failed, 0 Skipped), 0 warnings, 0 errors.
-
+### 7. Lexora v1.2.1 — Download Center & Community Sharing
+- **Synchronized Version 1.2.1 Across All Artifacts**:
+  - `Directory.Build.props`: Centralized `<Version>1.2.1</Version>`, `<AssemblyVersion>1.2.1.0</AssemblyVersion>`, `<FileVersion>1.2.1.0</FileVersion>`.
+  - `Package.appxmanifest`: Windows App SDK MSIX package identity version set to `1.2.1.0`.
+  - `build-installer.ps1`: Default distribution package version updated to `1.2.1`.
+  - `SettingsViewModel.cs`: About section updated to version `1.2.1`.
+  - User identity, database schema, and existing study records 100% preserved.
+- **Download Center (`DownloadCenterPage.xaml`, `DownloadCenterViewModel.cs`)**:
+  - Tightly integrated into `ShellPage.xaml` navigation (`NavItemDownloadCenter`, glyph `\uE896`, shortcut `Ctrl+7`).
+  - 4 segmented tabs: `Vocabulary`, `Grammar`, `My Downloads`, and `Import & Share`.
+  - Rich metadata display: package name, description, author, level (CEFR A1–C2), exam target (TOEIC, IELTS, VSTEP, General), item counts, file sizes, and tags.
+  - Search and filter bar for level, exam type, and term queries.
+  - Full Fluent 2 states: Loading progress ring, empty states, offline indicator info bar, and inline progress bars for downloads/imports.
+- **Repository Catalog & Offline Fallback Architecture**:
+  - `ICommunityDataService` and `CommunityDataService`: Fetches catalog from remote repository with optional GitHub Personal Access Token (PAT) support without hardcoding secrets.
+  - Embedded/bundled local catalog (`community/catalog.json`) and starter packages for TOEIC 600, IELTS Academic, VSTEP B1/B2, English Tenses, and Relative Clauses.
+  - Seamless offline fallback when repository is unreachable or private (no internet required).
+- **Secure Community Sharing**:
+  - Package export to `.lexpkg` / JSON format without leaking private user history, study logs, or full database files.
+  - Direct HTTPS URL download and file import with 20MB safety ceiling, SHA-256 cryptographic checksum verification, and path traversal prevention.
+  - Configurable duplicate resolution (`Skip` untouched vs `Overwrite` update).
+  - Atomic database transactions with rollback capability on error.
+- **Quality Benchmark**:
+  - **395 / 395 Tests Passing** (344 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+  - Clean build: **0 Warnings, 0 Errors**.
+  - **100% Localization Parity** (1,274 keys across `vi-VN` and `en-US`).

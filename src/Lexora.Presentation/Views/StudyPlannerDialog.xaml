@@ -11,8 +11,14 @@
     Title="{x:Bind Loc.GetString('StudyPlanner_Title')}"
     PrimaryButtonText="{x:Bind Loc.GetString('Action_Close')}"
     DefaultButton="Primary"
-    CornerRadius="16"
-    MaxWidth="760">
+    HorizontalAlignment="Center"
+    VerticalAlignment="Center"
+    CornerRadius="16">
+
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">800</x:Double>
+        <x:Double x:Key="ContentDialogMinWidth">560</x:Double>
+    </ContentDialog.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="620">
         <StackPanel Spacing="18" Margin="0,8,0,0">

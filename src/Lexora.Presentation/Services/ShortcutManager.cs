@@ -131,6 +131,38 @@ public sealed class ShortcutManager : IShortcutManager
 
         RegisterShortcut(new ShortcutDefinition
         {
+            Id = "Global.NavigateLearningStorage",
+            Gesture = new ShortcutGesture(ShortcutKey.Number6, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Shell_TooltipLearningStorage",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                _navigationService.Navigate(typeof(Views.LearningStoragePage));
+                return Task.CompletedTask;
+            }
+        });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
+            Id = "Global.NavigateDownloadCenter",
+            Gesture = new ShortcutGesture(ShortcutKey.Number7, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Shell_TooltipDownloadCenter",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                _navigationService.Navigate(typeof(Views.DownloadCenterPage));
+                return Task.CompletedTask;
+            }
+        });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
             Id = "Global.SearchFocus",
             Gesture = new ShortcutGesture(ShortcutKey.K, ShortcutModifiers.Control),
             SecondaryGesture = new ShortcutGesture(ShortcutKey.F, ShortcutModifiers.Control),

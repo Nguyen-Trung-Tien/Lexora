@@ -165,29 +165,32 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         var cardStroke = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush");
         var accentText = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush");
         var secondaryText = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush");
+        var layerBg = ThemeResourceHelper.GetThemeBrush(this, "LayerFillColorDefaultBrush");
+        var subtleBg = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush");
         var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
-        void ApplySegment(Button? btn, bool isActive)
+        void ApplySegment(Button? btn, Border? badge, bool isActive)
         {
             if (btn == null) return;
-            btn.Style = null;
             if (isActive)
             {
                 if (cardBg != null) btn.Background = cardBg;
                 if (cardStroke != null) btn.BorderBrush = cardStroke;
                 btn.BorderThickness = new Thickness(1);
                 if (accentText != null) btn.Foreground = accentText;
+                if (badge != null && layerBg != null) badge.Background = layerBg;
             }
             else
             {
                 btn.Background = transparent;
                 btn.BorderThickness = new Thickness(0);
                 if (secondaryText != null) btn.Foreground = secondaryText;
+                if (badge != null && subtleBg != null) badge.Background = subtleBg;
             }
         }
 
-        ApplySegment(BtnVocabTab, ViewModel.IsVocabTabSelected);
-        ApplySegment(BtnGrammarTab, ViewModel.IsGrammarTabSelected);
+        ApplySegment(BtnVocabTab, BadgeVocab, ViewModel.IsVocabTabSelected);
+        ApplySegment(BtnGrammarTab, BadgeGrammar, ViewModel.IsGrammarTabSelected);
     }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)

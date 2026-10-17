@@ -1,0 +1,97 @@
+{
+  "formatVersion": "1.0",
+  "metadata": {
+    "id": "english-tenses-mastery",
+    "name": "Làm Chủ 12 Thì Tiếng Anh (English Tenses Mastery)",
+    "description": "Hệ thống toàn diện 12 thì tiếng Anh gồm công thức cấu trúc, cách dùng, dấu hiệu nhận biết và câu ví dụ.",
+    "author": "Lexora Community",
+    "category": "Grammar",
+    "targetExam": "General",
+    "level": "B1",
+    "version": "1.0.0",
+    "itemCount": 12,
+    "language": "en-US",
+    "tags": ["Grammar", "Tenses", "Foundational"],
+    "downloadUrl": "community/packages/english-tenses-mastery.json",
+    "checksumSha256": "E95E3D9C8D6E62B005F356C48CD1068D2DED4F4B3E207F656A6F89398D5AA116",
+    "license": "CC-BY-4.0",
+    "sizeInBytes": 5400,
+    "updatedAt": "2026-10-17T00:00:00Z"
+  },
+  "vocabularyWords": null,
+  "grammarRules": [
+    {
+      "title": "Present Simple Tense (Thì Hiện Tại Đơn)",
+      "structure": "(+) S + V(s/es) | (-) S + do/does not + V_inf | (?) Do/Does + S + V_inf?",
+      "explanationVi": "Diễn tả thói quen, hành động lặp đi lặp lại ở hiện tại, chân lý hoặc sự thật hiển nhiên, và lịch trình tàu xe cố định.",
+      "explanationEn": "Used for repeated habits, factual scientific truths, and scheduled timetables.",
+      "commonMistakes": "Quên thêm đuôi -s/es đối với chủ ngữ số ít (he/she/it). Dùng trợ động từ do/does sai chủ ngữ.",
+      "level": "A1",
+      "examTarget": "General",
+      "topic": "English Tenses",
+      "examples": [
+        {
+          "sentenceEn": "She usually reviews twenty flashcards on Lexora every morning.",
+          "sentenceVi": "Cô ấy thường ôn tập hai mươi thẻ ghi nhớ trên Lexora mỗi buổi sáng.",
+          "note": "Trạng từ chỉ tần suất 'usually' đứng trước động từ thường."
+        },
+        {
+          "sentenceEn": "The train to London departs at 8:30 AM tomorrow.",
+          "sentenceVi": "Chuyến tàu đi Luân Đôn khởi hành lúc 8:30 sáng mai.",
+          "note": "Lịch trình phương tiện công cộng dùng hiện tại đơn dù chỉ tương lai."
+        }
+      ]
+    },
+    {
+      "title": "Present Continuous Tense (Thì Hiện Tại Tiếp Diễn)",
+      "structure": "(+) S + am/is/are + V-ing | (-) S + am/is/are not + V-ing | (?) Am/Is/Are + S + V-ing?",
+      "explanationVi": "Diễn tả hành động đang xảy ra tại thời điểm nói hoặc xung quanh thời điểm nói; kế hoạch chắc chắn trong tương lai gần.",
+      "explanationEn": "Used for actions happening right now, temporary situations, or definite future arrangements.",
+      "commonMistakes": "Dùng thì tiếp diễn với các động từ chỉ nhận thức, cảm xúc (know, understand, love, hate, want).",
+      "level": "A2",
+      "examTarget": "General",
+      "topic": "English Tenses",
+      "examples": [
+        {
+          "sentenceEn": "The research team is conducting a comprehensive survey across three provinces.",
+          "sentenceVi": "Nhóm nghiên cứu đang tiến hành một cuộc khảo sát toàn diện tại ba tỉnh.",
+          "note": "Hành động đang tiến hành xung quanh thời điểm nói."
+        }
+      ]
+    },
+    {
+      "title": "Present Perfect Tense (Thì Hiện Tại Hoàn Thành)",
+      "structure": "(+) S + have/has + V3/ed | (-) S + have/has not + V3/ed | (?) Have/Has + S + V3/ed?",
+      "explanationVi": "Diễn tả hành động xảy ra trong quá khứ kéo dài đến hiện tại; trải nghiệm kinh nghiệm; hoặc hành động vừa mới xảy ra có kết quả ở hiện tại.",
+      "explanationEn": "Used for actions starting in the past continuing to present, experiences, or recent actions with present results.",
+      "commonMistakes": "Dùng thì hiện tại hoàn thành với mốc thời gian quá khứ cụ thể (như yesterday, last year). Trong trường hợp đó phải dùng Quá Khứ Đơn.",
+      "level": "B1",
+      "examTarget": "TOEIC",
+      "topic": "English Tenses",
+      "examples": [
+        {
+          "sentenceEn": "Our company has expanded its operations into five Southeast Asian countries since 2022.",
+          "sentenceVi": "Công ty chúng tôi đã mở rộng hoạt động sang năm quốc gia Đông Nam Á kể từ năm 2022.",
+          "note": "Đi kèm 'since' chỉ mốc thời gian bắt đầu."
+        }
+      ]
+    },
+    {
+      "title": "Past Simple Tense (Thì Quá Khứ Đơn)",
+      "structure": "(+) S + V2/ed | (-) S + did not + V_inf | (?) Did + S + V_inf?",
+      "explanationVi": "Diễn tả hành động đã hoàn tất trọn vẹn tại một thời điểm hoặc khoảng thời gian xác định trong quá khứ.",
+      "explanationEn": "Used for completed past actions with clear time markers.",
+      "commonMistakes": "Vẫn chia động từ dạng quá khứ sau trợ động từ did/didn't.",
+      "level": "A2",
+      "examTarget": "General",
+      "topic": "English Tenses",
+      "examples": [
+        {
+          "sentenceEn": "The board approved the annual operating budget yesterday afternoon.",
+          "sentenceVi": "Hội đồng quản trị đã phê duyệt ngân sách hoạt động hàng năm vào chiều hôm qua.",
+          "note": "Mốc thời gian 'yesterday afternoon' xác định rõ quá khứ."
+        }
+      ]
+    }
+  ]
+}

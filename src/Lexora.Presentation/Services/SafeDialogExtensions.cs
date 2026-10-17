@@ -106,6 +106,10 @@ public static class SafeDialogExtensions
                     }
                 }
 
+                // Guarantee absolute centering within the window/XamlRoot
+                dialog.HorizontalAlignment = HorizontalAlignment.Center;
+                dialog.VerticalAlignment = VerticalAlignment.Center;
+
                 _currentlyActiveDialog = dialog;
                 var result = await dialog.ShowAsync();
 

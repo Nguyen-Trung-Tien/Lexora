@@ -25,6 +25,23 @@ public sealed partial class TestPage : Page, ILocalizableView
         InitializeComponent();
         RegisterShortcuts();
 
+        void RefreshAllStyles()
+        {
+            UpdateTypeButtonStyles(ViewModel.SelectedTestType);
+            UpdateCountButtonStyles(ViewModel.QuestionCount);
+            UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
+        }
+
+        Loaded += (s, e) => RefreshAllStyles();
+
+        var themeService = App.Current.Services.GetService<IThemeService>();
+        if (themeService != null)
+        {
+            void OnThemeChanged(object? sender, ElementTheme theme) => DispatcherQueue.TryEnqueue(RefreshAllStyles);
+            themeService.ThemeChanged += OnThemeChanged;
+            Unloaded += (s, e) => themeService.ThemeChanged -= OnThemeChanged;
+        }
+
         Unloaded += (s, e) =>
         {
             ViewModel.CleanupSession();
@@ -32,12 +49,7 @@ public sealed partial class TestPage : Page, ILocalizableView
             sm?.UnregisterPageShortcuts(typeof(TestPage));
         };
 
-        ActualThemeChanged += (s, e) =>
-        {
-            UpdateTypeButtonStyles(ViewModel.SelectedTestType);
-            UpdateCountButtonStyles(ViewModel.QuestionCount);
-            UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
-        };
+        ActualThemeChanged += (s, e) => RefreshAllStyles();
     }
 
     public void OnLanguageChanged()
@@ -323,7 +335,6 @@ public sealed partial class TestPage : Page, ILocalizableView
 
         void ApplySegment(Button btn, bool isActive)
         {
-            btn.Style = null;
             if (isActive)
             {
                 if (cardBg != null) btn.Background = cardBg;
@@ -414,7 +425,6 @@ public sealed partial class TestPage : Page, ILocalizableView
 
         void ApplyPill(Button btn, bool isSelected)
         {
-            btn.Style = null;
             if (isSelected)
             {
                 if (cardBg != null) btn.Background = cardBg;

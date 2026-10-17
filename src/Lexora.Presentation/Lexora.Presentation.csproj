@@ -83,7 +83,14 @@
     <PublishTrimmed>False</PublishTrimmed>
   </PropertyGroup>
 
-  <!-- Ensure WinUI 3 XAML resources (PRI, XBF, Views, Themes, Assets) are copied to PublishDir -->
+  <ItemGroup>
+    <Content Include="..\..\community\**\*">
+      <Link>community\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Ensure WinUI 3 XAML resources (PRI, XBF, Views, Themes, Assets, Community) are copied to PublishDir -->
   <Target Name="CopyWinUIAssetsToPublishDir" AfterTargets="Publish">
     <ItemGroup>
       <_PriFiles Include="$(TargetDir)*.pri" />
@@ -91,11 +98,13 @@
       <_ViewFiles Include="$(TargetDir)Views\**\*" />
       <_ThemeFiles Include="$(TargetDir)Themes\**\*" />
       <_AssetFiles Include="$(TargetDir)Assets\**\*" />
+      <_CommunityFiles Include="$(TargetDir)community\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(_PriFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_XbfFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_ViewFiles)" DestinationFolder="$(PublishDir)Views\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_ThemeFiles)" DestinationFolder="$(PublishDir)Themes\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_AssetFiles)" DestinationFolder="$(PublishDir)Assets\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_CommunityFiles)" DestinationFolder="$(PublishDir)community\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

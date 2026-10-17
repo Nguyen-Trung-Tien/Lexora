@@ -193,7 +193,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE82D;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     <TextBlock x:Name="TextVocabTab" Text="{x:Bind Loc.GetString('Vocab_NavTab')}" FontWeight="SemiBold" />
-                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="6,1">
+                                    <Border x:Name="BadgeVocab" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="6,1">
                                         <TextBlock Text="{x:Bind ViewModel.VocabCount, Mode=OneWay}" FontSize="11" FontWeight="Bold" />
                                     </Border>
                                 </StackPanel>
@@ -202,7 +202,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE8D2;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     <TextBlock x:Name="TextGrammarTab" Text="{x:Bind Loc.GetString('Grammar_NavTab')}" FontWeight="SemiBold" />
-                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="6,1">
+                                    <Border x:Name="BadgeGrammar" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="6,1">
                                         <TextBlock Text="{x:Bind ViewModel.GrammarCount, Mode=OneWay}" FontSize="11" FontWeight="Bold" />
                                     </Border>
                                 </StackPanel>

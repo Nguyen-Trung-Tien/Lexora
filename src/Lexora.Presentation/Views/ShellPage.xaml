@@ -57,6 +57,11 @@
                         <FontIcon Glyph="&#xE81C;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemDownloadCenter" Content="Download Center" Tag="DownloadCenter" ToolTipService.ToolTip="Download Center (Ctrl+7)">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE896;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem x:Name="NavItemThemeToggle" Content="Theme" Tag="ThemeToggle" SelectsOnInvoked="False" ToolTipService.ToolTip="Toggle Theme (Ctrl+T)">

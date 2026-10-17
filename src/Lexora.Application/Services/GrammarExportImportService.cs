@@ -1021,23 +1021,4 @@ public class GrammarExportImportService : IGrammarExportImportService
         return records;
     }
 
-    private class GrammarRuleExportModel
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Structure { get; set; } = string.Empty;
-        public string ExplanationVi { get; set; } = string.Empty;
-        public string? ExplanationEn { get; set; }
-        public string? CommonMistakes { get; set; }
-        public string Level { get; set; } = "B1";
-        public string ExamTarget { get; set; } = "General";
-        public string? Topic { get; set; }
-        public List<GrammarExampleExportModel> Examples { get; set; } = [];
-    }
-
-    private class GrammarExampleExportModel
-    {
-        public string SentenceEn { get; set; } = string.Empty;
-        public string SentenceVi { get; set; } = string.Empty;
-        public string? Note { get; set; }
-    }
 }

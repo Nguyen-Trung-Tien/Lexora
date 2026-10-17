@@ -1,0 +1,274 @@
+{
+  "formatVersion": "1.0",
+  "metadata": {
+    "id": "toeic-essential-600",
+    "name": "600 Từ Vựng TOEIC Cốt Lõi (ETS Core)",
+    "description": "Bộ từ vựng chuẩn đề thi TOEIC phân loại theo các chủ đề kinh doanh, công sở, thương mại và logistics.",
+    "author": "Lexora Community",
+    "category": "Vocabulary",
+    "targetExam": "TOEIC",
+    "level": "B1",
+    "version": "1.0.0",
+    "itemCount": 30,
+    "language": "en-US",
+    "tags": ["TOEIC", "Business", "Office", "ETS"],
+    "downloadUrl": "community/packages/toeic-essential-600.json",
+    "checksumSha256": "990680C6944B7FDFE483B7F6AE2D2CAD49ABF0C75E5E6F6F41EA58D1E85C947E",
+    "license": "CC-BY-4.0",
+    "sizeInBytes": 10882,
+    "updatedAt": "2026-10-17T00:00:00Z"
+  },
+  "vocabularyWords": [
+    {
+      "term": "negotiate",
+      "phoneticUk": "/nɪˈɡəʊ.ʃi.eɪt/",
+      "phoneticUs": "/nəˈɡoʊ.ʃi.eɪt/",
+      "level": "B2",
+      "primaryPartOfSpeech": "Verb",
+      "allPartsOfSpeech": ["Verb"],
+      "notes": "Frequently tested in TOEIC contract and procurement questions.",
+      "meanings": [
+        {
+          "partOfSpeech": "Verb",
+          "definitionVi": "Đàm phán, thương lượng để đạt thỏa thuận.",
+          "definitionEn": "To have formal discussions with someone in order to reach an agreement.",
+          "explanation": "Thường đi kèm với 'with someone' hoặc 'for/about something'.",
+          "examples": [
+            {
+              "sentenceEn": "The procurement director is negotiating a new contract with our overseas supplier.",
+              "sentenceVi": "Giám đốc mua hàng đang đàm phán một hợp đồng mới với nhà cung cấp nước ngoài của chúng ta."
+            }
+          ]
+        }
+      ],
+      "topics": ["Business & Commerce"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "implement",
+      "phoneticUk": "/ˈɪm.plɪ.ment/",
+      "phoneticUs": "/ˈɪm.plə.ment/",
+      "level": "B2",
+      "primaryPartOfSpeech": "Verb",
+      "allPartsOfSpeech": ["Verb"],
+      "notes": "Synonym with carry out, execute.",
+      "meanings": [
+        {
+          "partOfSpeech": "Verb",
+          "definitionVi": "Triển khai, thi hành một kế hoạch hoặc chính sách.",
+          "definitionEn": "To start using a plan or system.",
+          "explanation": "Thường đi kèm với 'policy', 'system', 'strategy'.",
+          "examples": [
+            {
+              "sentenceEn": "Management decided to implement the new security protocol next Monday.",
+              "sentenceVi": "Ban quản lý đã quyết định triển khai quy trình bảo mật mới vào thứ Hai tới."
+            }
+          ]
+        }
+      ],
+      "topics": ["Office Operations"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "collaborate",
+      "phoneticUk": "/kəˈlæb.ə.reɪt/",
+      "phoneticUs": "/kəˈlæb.ə.reɪt/",
+      "level": "B2",
+      "primaryPartOfSpeech": "Verb",
+      "allPartsOfSpeech": ["Verb"],
+      "notes": "Collocation: collaborate on a project, collaborate with colleagues.",
+      "meanings": [
+        {
+          "partOfSpeech": "Verb",
+          "definitionVi": "Hợp tác, cộng tác cùng làm việc.",
+          "definitionEn": "To work together with somebody or an organization to produce something.",
+          "explanation": "Xuất hiện nhiều trong phần giao tiếp nội bộ công ty.",
+          "examples": [
+            {
+              "sentenceEn": "Both marketing and engineering teams collaborated to design the new application.",
+              "sentenceVi": "Cả đội ngũ tiếp thị và kỹ thuật đã hợp tác để thiết kế ứng dụng mới."
+            }
+          ]
+        }
+      ],
+      "topics": ["Office Operations"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "revenue",
+      "phoneticUk": "/ˈrev.ən.juː/",
+      "phoneticUs": "/ˈrev.ə.nuː/",
+      "level": "B2",
+      "primaryPartOfSpeech": "Noun",
+      "allPartsOfSpeech": ["Noun"],
+      "notes": "Key financial term in TOEIC corporate earnings reports.",
+      "meanings": [
+        {
+          "partOfSpeech": "Noun",
+          "definitionVi": "Doanh thu, tổng thu nhập của doanh nghiệp.",
+          "definitionEn": "The money that a company, organization, or government receives.",
+          "explanation": "Khác với 'profit' (lợi nhuận sau chi phí).",
+          "examples": [
+            {
+              "sentenceEn": "The quarterly financial report highlighted a 15% increase in gross revenue.",
+              "sentenceVi": "Báo cáo tài chính quý đã nêu bật mức tăng 15% trong tổng doanh thu."
+            }
+          ]
+        }
+      ],
+      "topics": ["Finance & Banking"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "warranty",
+      "phoneticUk": "/ˈwɒr.ən.ti/",
+      "phoneticUs": "/ˈwɔːr.ən.t̬i/",
+      "level": "B1",
+      "primaryPartOfSpeech": "Noun",
+      "allPartsOfSpeech": ["Noun"],
+      "notes": "Very common in customer support and product purchase notices.",
+      "meanings": [
+        {
+          "partOfSpeech": "Noun",
+          "definitionVi": "Phiếu bảo hành, thời hạn bảo hành sản phẩm.",
+          "definitionEn": "A written promise from a company that it will repair or replace a product if it breaks.",
+          "explanation": "Cụm 'under warranty' nghĩa là còn trong hạn bảo hành.",
+          "examples": [
+            {
+              "sentenceEn": "All electronic devices purchased today are covered by a two-year warranty.",
+              "sentenceVi": "Tất cả các thiết bị điện tử mua hôm nay đều được bảo hành hai năm."
+            }
+          ]
+        }
+      ],
+      "topics": ["Consumer Products"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "itinerary",
+      "phoneticUk": "/aɪˈtɪn.ər.ər.i/",
+      "phoneticUs": "/aɪˈtɪn.ə.rer.i/",
+      "level": "B2",
+      "primaryPartOfSpeech": "Noun",
+      "allPartsOfSpeech": ["Noun"],
+      "notes": "Crucial in business travel and airport announcements.",
+      "meanings": [
+        {
+          "partOfSpeech": "Noun",
+          "definitionVi": "Lịch trình chuyến đi, hành trình công tác.",
+          "definitionEn": "A detailed plan or route of a journey.",
+          "explanation": "Bao gồm giờ bay, khách sạn và các cuộc hẹn công tác.",
+          "examples": [
+            {
+              "sentenceEn": "The executive assistant finalized the itinerary for the CEO's trip to Tokyo.",
+              "sentenceVi": "Trợ lý điều hành đã hoàn tất lịch trình cho chuyến công tác tới Tokyo của CEO."
+            }
+          ]
+        }
+      ],
+      "topics": ["Travel & Transport"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "deadline",
+      "phoneticUk": "/ˈded.laɪn/",
+      "phoneticUs": "/ˈded.laɪn/",
+      "level": "B1",
+      "primaryPartOfSpeech": "Noun",
+      "allPartsOfSpeech": ["Noun"],
+      "notes": "Collocations: meet a deadline, miss a deadline, extend a deadline.",
+      "meanings": [
+        {
+          "partOfSpeech": "Noun",
+          "definitionVi": "Hạn chót, thời hạn hoàn thành công việc.",
+          "definitionEn": "A point in time by which something must be done.",
+          "explanation": "Từ vựng cơ bản và xuất hiện hầu như mọi đề thi.",
+          "examples": [
+            {
+              "sentenceEn": "The project deadline has been moved up to Friday afternoon.",
+              "sentenceVi": "Hạn chót của dự án đã được đẩy sớm lên chiều thứ Sáu."
+            }
+          ]
+        }
+      ],
+      "topics": ["Office Operations"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "compliance",
+      "phoneticUk": "/kəmˈplaɪ.əns/",
+      "phoneticUs": "/kəmˈplaɪ.əns/",
+      "level": "C1",
+      "primaryPartOfSpeech": "Noun",
+      "allPartsOfSpeech": ["Noun"],
+      "notes": "Phrase: in compliance with regulations.",
+      "meanings": [
+        {
+          "partOfSpeech": "Noun",
+          "definitionVi": "Sự tuân thủ các quy định, luật lệ pháp lý.",
+          "definitionEn": "The act of obeying an order, rule, or request.",
+          "explanation": "Thường gặp trong các tài liệu kiểm toán và an toàn lao động.",
+          "examples": [
+            {
+              "sentenceEn": "The factory operates in strict compliance with international environmental standards.",
+              "sentenceVi": "Nhà máy hoạt động tuân thủ nghiêm ngặt các tiêu chuẩn môi trường quốc tế."
+            }
+          ]
+        }
+      ],
+      "topics": ["Legal & Policies"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "reimburse",
+      "phoneticUk": "/ˌriː.ɪmˈbɜːs/",
+      "phoneticUs": "/ˌriː.ɪmˈbɝːs/",
+      "level": "B2",
+      "primaryPartOfSpeech": "Verb",
+      "allPartsOfSpeech": ["Verb"],
+      "notes": "Tested in expense report and human resources questions.",
+      "meanings": [
+        {
+          "partOfSpeech": "Verb",
+          "definitionVi": "Hoàn trả chi phí, thanh toán lại tiền tạm ứng.",
+          "definitionEn": "To pay back money to someone who has spent it for you or suffered a loss.",
+          "explanation": "Thường đi kèm hóa đơn (receipts).",
+          "examples": [
+            {
+              "sentenceEn": "The company will reimburse travel expenses within five business days of submission.",
+              "sentenceVi": "Công ty sẽ hoàn trả chi phí đi lại trong vòng năm ngày làm việc kể từ ngày nộp hồ sơ."
+            }
+          ]
+        }
+      ],
+      "topics": ["Finance & Banking"],
+      "examTags": ["TOEIC"]
+    },
+    {
+      "term": "facilitate",
+      "phoneticUk": "/fəˈsɪl.ɪ.teɪt/",
+      "phoneticUs": "/fəˈsɪl.ə.teɪt/",
+      "level": "B2",
+      "primaryPartOfSpeech": "Verb",
+      "allPartsOfSpeech": ["Verb"],
+      "notes": "Synonym: make easier, assist.",
+      "meanings": [
+        {
+          "partOfSpeech": "Verb",
+          "definitionVi": "Tạo điều kiện thuận lợi, hỗ trợ cho quá trình diễn ra dễ dàng.",
+          "definitionEn": "To make something possible or easier.",
+          "explanation": "Thường dùng trong mô tả phần mềm hoặc giải pháp quản lý.",
+          "examples": [
+            {
+              "sentenceEn": "The new cloud platform will facilitate real-time communication between regional branches.",
+              "sentenceVi": "Nền tảng đám mây mới sẽ tạo điều kiện thuận lợi cho liên lạc tức thì giữa các chi nhánh khu vực."
+            }
+          ]
+        }
+      ],
+      "topics": ["Technology & Systems"],
+      "examTags": ["TOEIC"]
+    }
+  ],
+  "grammarRules": null
+}

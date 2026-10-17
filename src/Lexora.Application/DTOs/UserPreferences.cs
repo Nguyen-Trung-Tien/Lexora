@@ -13,6 +13,8 @@ public record UserPreferences
     public bool AutoCheckUpdates { get; init; } = true;
     public string SpacedRepetitionAlgorithm { get; init; } = "SM2"; // "SM2" or "FSRS"
     public double TargetRetention { get; init; } = 0.90; // 0.85, 0.90, 0.95
+    public string CommunityCatalogUrl { get; init; } = "";
+    public string GitHubPersonalAccessToken { get; init; } = "";
 
     // Window state — restored on next launch
     public int WindowWidth { get; init; } = 1280;

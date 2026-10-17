@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -35,7 +36,12 @@ public static class ThemeResourceHelper
     public static Brush GetThemeBrush(FrameworkElement? element, string key)
     {
         bool isLight = false;
-        if (element != null && element.ActualTheme != ElementTheme.Default)
+        var themeService = App.Current?.Services?.GetService<IThemeService>();
+        if (themeService != null && themeService.CurrentTheme != ElementTheme.Default)
+        {
+            isLight = themeService.CurrentTheme == ElementTheme.Light;
+        }
+        else if (element != null && element.IsLoaded && element.ActualTheme != ElementTheme.Default)
         {
             isLight = element.ActualTheme == ElementTheme.Light;
         }
@@ -48,24 +54,29 @@ public static class ThemeResourceHelper
             isLight = (App.Current?.RequestedTheme == ApplicationTheme.Light);
         }
 
-        string themeKey = isLight ? "Light" : "Dark";
+        // Keys in WinUI 3 / XamlControlsResources: "Light" vs "Default" (Dark)
+        // Keys in custom DesignSystem.xaml: "Light" vs "Dark"
+        string[] targetThemes = isLight ? ["Light"] : ["Dark", "Default"];
 
         // 1. Search merged dictionaries (contains XamlControlsResources with system Light/Default dictionaries)
         if (Microsoft.UI.Xaml.Application.Current?.Resources?.MergedDictionaries != null)
         {
             foreach (var md in Microsoft.UI.Xaml.Application.Current.Resources.MergedDictionaries)
             {
-                if (md.ThemeDictionaries.TryGetValue(themeKey, out var tdObj) &&
-                    tdObj is ResourceDictionary td &&
-                    td.TryGetValue(key, out var bObj) &&
-                    bObj is Brush b)
+                foreach (var th in targetThemes)
                 {
-                    // Guard against dark accent brush (#60CDFF) leaking into light mode
-                    if (isLight && key == "AccentTextFillColorPrimaryBrush" && b is SolidColorBrush scb && scb.Color.R > 50 && scb.Color.G > 180 && scb.Color.B > 240)
+                    if (md.ThemeDictionaries.TryGetValue(th, out var tdObj) &&
+                        tdObj is ResourceDictionary td &&
+                        td.TryGetValue(key, out var bObj) &&
+                        bObj is Brush b)
                     {
-                        return LightAccentText;
+                        // Guard against dark accent brush (#60CDFF) leaking into light mode
+                        if (isLight && key == "AccentTextFillColorPrimaryBrush" && b is SolidColorBrush scb && scb.Color.R > 50 && scb.Color.G > 180 && scb.Color.B > 240)
+                        {
+                            return LightAccentText;
+                        }
+                        return b;
                     }
-                    return b;
                 }
             }
         }
@@ -73,12 +84,15 @@ public static class ThemeResourceHelper
         // 2. Search root ThemeDictionaries
         if (Microsoft.UI.Xaml.Application.Current?.Resources?.ThemeDictionaries != null)
         {
-            if (Microsoft.UI.Xaml.Application.Current.Resources.ThemeDictionaries.TryGetValue(themeKey, out var rootTdObj) &&
-                rootTdObj is ResourceDictionary rootTd &&
-                rootTd.TryGetValue(key, out var rbObj) &&
-                rbObj is Brush rb)
+            foreach (var th in targetThemes)
             {
-                return rb;
+                if (Microsoft.UI.Xaml.Application.Current.Resources.ThemeDictionaries.TryGetValue(th, out var rootTdObj) &&
+                    rootTdObj is ResourceDictionary rootTd &&
+                    rootTd.TryGetValue(key, out var rbObj) &&
+                    rbObj is Brush rb)
+                {
+                    return rb;
+                }
             }
         }
 
