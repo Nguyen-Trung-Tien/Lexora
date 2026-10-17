@@ -927,6 +927,7 @@ public partial class LearningStorageViewModel : ObservableObject, IDisposable
     {
         _localizationService.LanguageChanged -= _languageChangedHandler;
         _storageService.StorageChanged -= OnStorageChanged;
+        _dbLock.Dispose();
         GC.SuppressFinalize(this);
     }
 }

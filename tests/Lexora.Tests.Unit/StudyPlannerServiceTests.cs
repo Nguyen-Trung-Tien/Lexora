@@ -101,4 +101,47 @@ public class StudyPlannerServiceTests : IDisposable
         retrieved.DailyNewWordsGoal.Should().Be(15);
         retrieved.IsConfigured.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task SaveUserGoalAsync_UsesAtomicWrite_AndLeavesNoTempFiles()
+    {
+        // Arrange
+        var targetDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
+        var goal = new StudyGoalDto(
+            TargetExam: ExamType.Toeic,
+            TargetScore: "850+",
+            TargetDate: targetDate,
+            DailyMinutesGoal: 20,
+            DailyNewWordsGoal: 10,
+            DailyReviewTarget: 20,
+            IsConfigured: true
+        );
+
+        // Act
+        await _plannerService.SaveUserGoalAsync(goal);
+
+        // Assert
+        File.Exists(_tempStoragePath).Should().BeTrue();
+        var dir = Path.GetDirectoryName(_tempStoragePath)!;
+        var tempFiles = Directory.GetFiles(dir, $"{Path.GetFileName(_tempStoragePath)}.*.tmp");
+        tempFiles.Should().BeEmpty();
+
+        var retrieved = await _plannerService.GetUserGoalAsync();
+        retrieved.TargetScore.Should().Be("850+");
+    }
+
+    [Fact]
+    public async Task LoadStorageModelAsync_CorruptedOrEmptyFile_FallsBackGracefully()
+    {
+        // Arrange - write invalid/corrupted JSON
+        await File.WriteAllTextAsync(_tempStoragePath, "{ broken json content !!!");
+
+        // Act - should not throw, should return unconfigured default
+        var retrieved = await _plannerService.GetUserGoalAsync();
+
+        // Assert
+        retrieved.Should().NotBeNull();
+        retrieved.IsConfigured.Should().BeFalse();
+        retrieved.TargetExam.Should().Be(ExamType.Toeic);
+    }
 }

@@ -120,13 +120,15 @@ public sealed partial class DashboardPage : Page, ILocalizableView
         _soundFeedback.PlaySoftTapSound();
         try
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
             var plannerService = App.Current.Services.GetRequiredService<IStudyPlannerService>();
             var navService = App.Current.Services.GetService<INavigationService>();
             var dialog = new StudyPlannerDialog(plannerService, Loc, navService)
             {
-                XamlRoot = this.XamlRoot
+                XamlRoot = xamlRoot
             };
-            await dialog.ShowAsync();
+            await dialog.ShowAsyncSafe(xamlRoot);
         }
         catch (Exception ex)
         {

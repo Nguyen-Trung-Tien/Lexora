@@ -457,13 +457,15 @@ public sealed partial class TestPage : Page, ILocalizableView
     {
         try
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
             var labService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IPronunciationListeningLabService>();
             var audioService = App.Current.Services.GetService<Lexora.Application.Interfaces.IAudioPlayerService>();
             var dialog = new ListeningLabDialog(labService, Loc, audioService)
             {
-                XamlRoot = this.XamlRoot
+                XamlRoot = xamlRoot
             };
-            await dialog.ShowAsync();
+            await dialog.ShowAsyncSafe(xamlRoot);
         }
         catch (Exception ex)
         {

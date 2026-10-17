@@ -1113,13 +1113,15 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         if (ViewModel.SelectedWord == null) return;
         try
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
             var graphService = App.Current.Services.GetRequiredService<IVocabularyKnowledgeGraphService>();
             var audioService = App.Current.Services.GetService<IAudioPlayerService>();
             var dialog = new KnowledgeGraphDialog(ViewModel.SelectedWord.Id, graphService, Loc, audioService)
             {
-                XamlRoot = this.XamlRoot
+                XamlRoot = xamlRoot
             };
-            await dialog.ShowAsync();
+            await dialog.ShowAsyncSafe(xamlRoot);
         }
         catch (Exception ex)
         {
@@ -1131,13 +1133,15 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
     {
         try
         {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
             var labService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IPronunciationListeningLabService>();
             var audioService = App.Current.Services.GetService<IAudioPlayerService>();
             var dialog = new ListeningLabDialog(labService, Loc, audioService)
             {
-                XamlRoot = this.XamlRoot
+                XamlRoot = xamlRoot
             };
-            await dialog.ShowAsync();
+            await dialog.ShowAsyncSafe(xamlRoot);
         }
         catch (Exception ex)
         {

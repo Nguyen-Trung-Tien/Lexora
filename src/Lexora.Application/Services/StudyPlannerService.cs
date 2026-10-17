@@ -275,7 +275,21 @@ public class StudyPlannerService : IStudyPlannerService
             Directory.CreateDirectory(dir);
         }
 
-        using var stream = File.Create(_storageFilePath);
-        await JsonSerializer.SerializeAsync(stream, model, cancellationToken: cancellationToken);
+        var tempPath = $"{_storageFilePath}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            using (var stream = File.Create(tempPath))
+            {
+                await JsonSerializer.SerializeAsync(stream, model, cancellationToken: cancellationToken);
+            }
+            File.Move(tempPath, _storageFilePath, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(tempPath))
+            {
+                try { File.Delete(tempPath); } catch { }
+            }
+        }
     }
 }
