@@ -111,7 +111,10 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     public partial string ClozeSentenceVi { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsClozePromptVisible))]
     public partial bool HasClozeSentence { get; set; } = false;
+
+    public bool IsClozePromptVisible => HasClozeSentence && !IsAnswerVisible;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCardActive))]
@@ -124,6 +127,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(IsStandardFrontActive))]
     [NotifyPropertyChangedFor(nameof(IsShowMeaningButtonVisible))]
     [NotifyPropertyChangedFor(nameof(CanRate))]
+    [NotifyPropertyChangedFor(nameof(IsClozePromptVisible))]
     public partial bool IsAnswerVisible { get; set; } = false;
 
     [ObservableProperty]
