@@ -403,6 +403,11 @@ public sealed partial class TestPage : Page, ILocalizableView
                     icon.Foreground = primaryText;
                     title.Foreground = primaryText;
                 }
+                else
+                {
+                    icon.ClearValue(FontIcon.ForegroundProperty);
+                    title.ClearValue(TextBlock.ForegroundProperty);
+                }
                 checkBadge.Visibility = Visibility.Collapsed;
             }
         }

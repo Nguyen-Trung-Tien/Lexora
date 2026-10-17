@@ -31,28 +31,72 @@ public static class ThemeResourceHelper
     private static readonly Brush DarkCriticalBackground = new SolidColorBrush(Color.FromArgb(255, 68, 39, 38)); // #442726 dark-red
     private static readonly Brush DarkCautionBackground = new SolidColorBrush(Color.FromArgb(255, 67, 53, 25));  // #433519 dark-amber
 
+    public static bool DetermineIsLight(FrameworkElement? element = null)
+    {
+        // 1. Explicit theme preference from IThemeService
+        try
+        {
+            var themeService = App.Current?.Services?.GetService<IThemeService>();
+            if (themeService != null && themeService.CurrentTheme != ElementTheme.Default)
+            {
+                return themeService.CurrentTheme == ElementTheme.Light;
+            }
+        }
+        catch { }
+
+        // 2. Element's own ActualTheme (if not Default)
+        if (element != null && element.ActualTheme != ElementTheme.Default)
+        {
+            return element.ActualTheme == ElementTheme.Light;
+        }
+
+        // 3. Element's XamlRoot content ActualTheme
+        if (element?.XamlRoot?.Content is FrameworkElement xamlRootElement && xamlRootElement.ActualTheme != ElementTheme.Default)
+        {
+            return xamlRootElement.ActualTheme == ElementTheme.Light;
+        }
+
+        // 4. MainWindow root content ActualTheme
+        try
+        {
+            if (App.Current?.MainWindow?.Content is FrameworkElement root && root.ActualTheme != ElementTheme.Default)
+            {
+                return root.ActualTheme == ElementTheme.Light;
+            }
+        }
+        catch { }
+
+        // 5. Query Windows system theme via UISettings (Background color luminosity)
+        // In Windows Light mode: Background is pure White (255, 255, 255) -> sum = 765 > 384
+        // In Windows Dark mode: Background is pure Black (0, 0, 0) -> sum = 0 < 384
+        try
+        {
+            var uiSettings = new Windows.UI.ViewManagement.UISettings();
+            var bg = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Background);
+            return (bg.R + bg.G + bg.B) > 384;
+        }
+        catch { }
+
+        // 6. Query Windows Registry for AppsUseLightTheme
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            if (key?.GetValue("AppsUseLightTheme") is int val)
+            {
+                return val != 0;
+            }
+        }
+        catch { }
+
+        // 7. Ultimate fallback
+        return App.Current?.RequestedTheme == ApplicationTheme.Light;
+    }
+
     public static Brush GetThemeBrush(string key) => GetThemeBrush(null, key);
 
     public static Brush GetThemeBrush(FrameworkElement? element, string key)
     {
-        bool isLight = false;
-        var themeService = App.Current?.Services?.GetService<IThemeService>();
-        if (themeService != null && themeService.CurrentTheme != ElementTheme.Default)
-        {
-            isLight = themeService.CurrentTheme == ElementTheme.Light;
-        }
-        else if (element != null && element.IsLoaded && element.ActualTheme != ElementTheme.Default)
-        {
-            isLight = element.ActualTheme == ElementTheme.Light;
-        }
-        else if (App.Current?.MainWindow?.Content is FrameworkElement root && root.ActualTheme != ElementTheme.Default)
-        {
-            isLight = root.ActualTheme == ElementTheme.Light;
-        }
-        else
-        {
-            isLight = (App.Current?.RequestedTheme == ApplicationTheme.Light);
-        }
+        bool isLight = DetermineIsLight(element);
 
         // Keys in WinUI 3 / XamlControlsResources: "Light" vs "Default" (Dark)
         // Keys in custom DesignSystem.xaml: "Light" vs "Dark"
@@ -71,10 +115,23 @@ public static class ThemeResourceHelper
                         bObj is Brush b)
                     {
                         // Guard against dark accent brush (#60CDFF) leaking into light mode
-                        if (isLight && key == "AccentTextFillColorPrimaryBrush" && b is SolidColorBrush scb && scb.Color.R > 50 && scb.Color.G > 180 && scb.Color.B > 240)
+                        if (isLight && key == "AccentTextFillColorPrimaryBrush" && b is SolidColorBrush scbAccent && scbAccent.Color.R > 50 && scbAccent.Color.G > 180 && scbAccent.Color.B > 240)
                         {
                             return LightAccentText;
                         }
+
+                        // Guard against white/light primary text leaking into light mode
+                        if (isLight && key == "TextFillColorPrimaryBrush" && b is SolidColorBrush scbPrim && scbPrim.Color.R > 200 && scbPrim.Color.G > 200 && scbPrim.Color.B > 200)
+                        {
+                            return LightPrimaryText;
+                        }
+
+                        // Guard against faint secondary text leaking into light mode
+                        if (isLight && key == "TextFillColorSecondaryBrush" && b is SolidColorBrush scbSec && scbSec.Color.R > 180 && scbSec.Color.G > 180 && scbSec.Color.B > 180)
+                        {
+                            return LightSecondaryText;
+                        }
+
                         return b;
                     }
                 }
@@ -91,6 +148,18 @@ public static class ThemeResourceHelper
                     rootTd.TryGetValue(key, out var rbObj) &&
                     rbObj is Brush rb)
                 {
+                    if (isLight && key == "AccentTextFillColorPrimaryBrush" && rb is SolidColorBrush scbAccent && scbAccent.Color.R > 50 && scbAccent.Color.G > 180 && scbAccent.Color.B > 240)
+                    {
+                        return LightAccentText;
+                    }
+                    if (isLight && key == "TextFillColorPrimaryBrush" && rb is SolidColorBrush scbPrim && scbPrim.Color.R > 200 && scbPrim.Color.G > 200 && scbPrim.Color.B > 200)
+                    {
+                        return LightPrimaryText;
+                    }
+                    if (isLight && key == "TextFillColorSecondaryBrush" && rb is SolidColorBrush scbSec && scbSec.Color.R > 180 && scbSec.Color.G > 180 && scbSec.Color.B > 180)
+                    {
+                        return LightSecondaryText;
+                    }
                     return rb;
                 }
             }
