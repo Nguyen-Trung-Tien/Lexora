@@ -119,6 +119,23 @@ public sealed partial class GrammarPage : Page, ILocalizableView
         }
     }
 
+    private async void ResetFiltersButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            GrammarSearchBox.Text = string.Empty;
+            if (CefrFilterCombo != null) CefrFilterCombo.SelectedItem = null;
+            if (ExamFilterCombo != null) ExamFilterCombo.SelectedItem = null;
+            if (TopicFilterCombo != null) TopicFilterCombo.SelectedItem = null;
+            ViewModel.ResetFilters();
+            await ViewModel.LoadRulesAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarPage] ResetFilters error: {ex.Message}");
+        }
+    }
+
     private void BtnSelectMode_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.ToggleSelectionMode();
