@@ -13,6 +13,7 @@ public sealed partial class ToastOverlayControl : UserControl
     private int _totalDurationMs = 4000;
     private bool _isPaused;
     private bool _isDismissing;
+    private Action? _currentActionCallback;
 
     public ToastOverlayControl()
     {
@@ -70,6 +71,18 @@ public sealed partial class ToastOverlayControl : UserControl
 
         MessageTextBlock.Text = notification.Message;
         ToolTipService.SetToolTip(MessageTextBlock, notification.Message);
+
+        if (!string.IsNullOrWhiteSpace(notification.ActionText))
+        {
+            ActionButton.Content = notification.ActionText;
+            ActionButton.Visibility = Visibility.Visible;
+            _currentActionCallback = notification.ActionCallback;
+        }
+        else
+        {
+            ActionButton.Visibility = Visibility.Collapsed;
+            _currentActionCallback = null;
+        }
 
         ApplyToastTheme(notification.Type);
 
@@ -181,8 +194,17 @@ public sealed partial class ToastOverlayControl : UserControl
         }
     }
 
+    private void ActionButton_Click(object sender, RoutedEventArgs e)
+    {
+        var callback = _currentActionCallback;
+        _currentActionCallback = null;
+        Dismiss();
+        callback?.Invoke();
+    }
+
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
+        _currentActionCallback = null;
         Dismiss();
     }
 

@@ -41,6 +41,9 @@ public class UpdateService : IUpdateService
     }
 
     /// <inheritdoc/>
+    public UpdateInfo? LatestDiscoveredUpdate { get; private set; }
+
+    /// <inheritdoc/>
     public Version GetCurrentVersion()
     {
         var asm = Assembly.GetEntryAssembly() ?? typeof(UpdateService).Assembly;
@@ -126,7 +129,7 @@ public class UpdateService : IUpdateService
                 }
             }
 
-            return new UpdateInfo(
+            var info = new UpdateInfo(
                 CurrentVersion: curVerStr,
                 NewVersion: tagName,
                 ReleaseTitle: string.IsNullOrWhiteSpace(releaseTitle) ? tagName : releaseTitle,
@@ -135,6 +138,9 @@ public class UpdateService : IUpdateService
                 FileSizeBytes: fileSize,
                 Sha256Checksum: sha256Checksum,
                 PublishedAt: publishedAt);
+
+            LatestDiscoveredUpdate = info;
+            return info;
         }
         catch (OperationCanceledException)
         {

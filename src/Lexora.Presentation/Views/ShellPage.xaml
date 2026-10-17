@@ -63,6 +63,11 @@
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Setting" />
                     </NavigationViewItem.Icon>
+                    <NavigationViewItem.InfoBadge>
+                        <InfoBadge x:Name="SettingsInfoBadge"
+                                   Style="{ThemeResource AttentionDotInfoBadgeStyle}"
+                                   Visibility="{x:Bind ViewModel.HasUpdateAvailable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </NavigationViewItem.InfoBadge>
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
 

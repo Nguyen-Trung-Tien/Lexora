@@ -13,15 +13,17 @@ public record ToastNotification(
     ToastType Type,
     string Title,
     string Message,
-    int DurationMs = 4000
+    int DurationMs = 4000,
+    string? ActionText = null,
+    Action? ActionCallback = null
 );
 
 public interface IToastNotificationService
 {
     event Action<ToastNotification>? ToastRequested;
-    void Show(ToastType type, string message, string? title = null, int durationMs = 4000);
+    void Show(ToastType type, string message, string? title = null, int durationMs = 4000, string? actionText = null, Action? actionCallback = null);
     void ShowSuccess(string message, string? title = null, int durationMs = 4000);
     void ShowError(string message, string? title = null, int durationMs = 5000);
     void ShowWarning(string message, string? title = null, int durationMs = 4500);
-    void ShowInfo(string message, string? title = null, int durationMs = 4000);
+    void ShowInfo(string message, string? title = null, int durationMs = 4000, string? actionText = null, Action? actionCallback = null);
 }

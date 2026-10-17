@@ -13,6 +13,11 @@ public interface IUpdateService
     Version GetCurrentVersion();
 
     /// <summary>
+    /// Returns the most recently discovered update metadata, if any.
+    /// </summary>
+    UpdateInfo? LatestDiscoveredUpdate { get; }
+
+    /// <summary>
     /// Checks the release channel (e.g. GitHub Releases) for newly published versions.
     /// </summary>
     /// <param name="isManualCheck">True if invoked directly by user action, false if background periodic check.</param>

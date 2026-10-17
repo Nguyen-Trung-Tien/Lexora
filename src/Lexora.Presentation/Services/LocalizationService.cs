@@ -706,6 +706,11 @@ public class LocalizationService : ILocalizationService
             ["Settings_UpdateFailed"] = "Không thể kiểm tra hoặc tải bản cập nhật.",
             ["Settings_ReleaseNotes"] = "Ghi chú phát hành:",
             ["Settings_AutoBackupNote"] = "Lexora sẽ tự động sao lưu dữ liệu học tập trước khi áp dụng bản cập nhật.",
+            ["Settings_AutoCheckUpdates"] = "Tự động kiểm tra bản cập nhật",
+            ["Settings_AutoCheckUpdatesDesc"] = "Tự động kiểm tra phiên bản mới khi khởi động ứng dụng và thông báo cho bạn.",
+            ["Update_Notification_Title"] = "Đã có bản cập nhật mới!",
+            ["Update_Notification_Body"] = "Phiên bản {0} đã sẵn sàng. Cập nhật ngay để trải nghiệm các tính năng mới nhất.",
+            ["Update_Notification_Action"] = "Xem cập nhật",
 
             // Settings - Restore Dialogs
             ["Settings_DlgRestorePathTitle"] = "Nhập Đường Dẫn Tệp Sao Lưu",
@@ -1899,6 +1904,11 @@ public class LocalizationService : ILocalizationService
             ["Settings_UpdateFailed"] = "Failed to check or download update.",
             ["Settings_ReleaseNotes"] = "Release Notes:",
             ["Settings_AutoBackupNote"] = "Lexora will automatically snapshot your study database before updating.",
+            ["Settings_AutoCheckUpdates"] = "Automatically check for updates",
+            ["Settings_AutoCheckUpdatesDesc"] = "Automatically check for newer releases when the app starts and notify you.",
+            ["Update_Notification_Title"] = "A new update is available!",
+            ["Update_Notification_Body"] = "Version {0} is available. Update now to get the latest features and fixes.",
+            ["Update_Notification_Action"] = "View Update",
 
             // Settings - Restore Dialogs
             ["Settings_DlgRestorePathTitle"] = "Specify Backup File Path",

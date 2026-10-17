@@ -631,6 +631,18 @@
                         </Button>
                     </Grid>
 
+                    <!-- Auto-check for updates Toggle Row -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" Padding="4,0">
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_AutoCheckUpdates')}" FontWeight="SemiBold" FontSize="13" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_AutoCheckUpdatesDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1"
+                                      IsOn="{x:Bind ViewModel.AutoCheckUpdates, Mode=TwoWay}"
+                                      OnContent="" OffContent=""
+                                      VerticalAlignment="Center" Margin="0" />
+                    </Grid>
+
                     <!-- Version Status Bar -->
                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="14,10">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">

@@ -18,6 +18,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IAudioPlayerService _audioService;
     private readonly IUserPreferencesService _preferencesService;
     private readonly IUpdateService _updateService;
+    private readonly IToastNotificationService _toastService;
     private readonly DispatcherQueue? _dispatcherQueue;
 
     [ObservableProperty]
@@ -69,6 +70,9 @@ public partial class SettingsViewModel : ObservableObject
     public partial bool EnableTypingPractice { get; set; }
 
     [ObservableProperty]
+    public partial bool AutoCheckUpdates { get; set; } = true;
+
+    [ObservableProperty]
     public partial string BackupStatusMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -118,7 +122,8 @@ public partial class SettingsViewModel : ObservableObject
         IGrammarService grammarService,
         IAudioPlayerService audioService,
         IUserPreferencesService preferencesService,
-        IUpdateService updateService)
+        IUpdateService updateService,
+        IToastNotificationService toastService)
     {
         _themeService = themeService;
         _locService = locService;
@@ -128,6 +133,7 @@ public partial class SettingsViewModel : ObservableObject
         _audioService = audioService;
         _preferencesService = preferencesService;
         _updateService = updateService;
+        _toastService = toastService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
             ?? App.Current?.UIDispatcherQueue
             ?? App.Current?.MainWindow?.DispatcherQueue;
@@ -139,12 +145,20 @@ public partial class SettingsViewModel : ObservableObject
         EnableReviewReminder = prefs.EnableReviewReminder;
         SpeechRate = prefs.SpeechRate;
         EnableTypingPractice = prefs.EnableTypingPractice;
+        AutoCheckUpdates = prefs.AutoCheckUpdates;
         PreferredAccent = string.IsNullOrWhiteSpace(prefs.PreferredAccent) ? "uk" : prefs.PreferredAccent;
 
         DatabasePath = _backupService.DatabasePath;
 
         var curVer = _updateService.GetCurrentVersion();
         CurrentAppVersion = $"{curVer.Major}.{curVer.Minor}.{curVer.Build}";
+
+        if (_updateService.LatestDiscoveredUpdate != null && _updateService.LatestDiscoveredUpdate.HasUpdate)
+        {
+            AvailableUpdate = _updateService.LatestDiscoveredUpdate;
+            UpdateAvailable = true;
+            UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
+        }
 
         UpdateVoiceStatus();
     }
@@ -221,6 +235,23 @@ public partial class SettingsViewModel : ObservableObject
         EnableTypingPractice = enabled;
         var current = _preferencesService.GetPreferences();
         await _preferencesService.SavePreferencesAsync(current with { EnableTypingPractice = enabled });
+    }
+
+    [RelayCommand]
+    public async Task SetAutoCheckUpdatesAsync(bool enabled)
+    {
+        AutoCheckUpdates = enabled;
+        var current = _preferencesService.GetPreferences();
+        await _preferencesService.SavePreferencesAsync(current with { AutoCheckUpdates = enabled });
+    }
+
+    partial void OnAutoCheckUpdatesChanged(bool value)
+    {
+        var current = _preferencesService.GetPreferences();
+        if (current.AutoCheckUpdates != value)
+        {
+            _ = _preferencesService.SavePreferencesAsync(current with { AutoCheckUpdates = value });
+        }
     }
 
     private void RunOnUI(Action action)
@@ -434,10 +465,15 @@ public partial class SettingsViewModel : ObservableObject
                     AvailableUpdate = updateInfo;
                     UpdateAvailable = true;
                     UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
+
+                    var template = _locService.GetString("Update_Notification_Body");
+                    var msg = string.Format(template, updateInfo.NewVersion);
+                    _toastService.ShowInfo(msg, _locService.GetString("Settings_UpdateAvailable"), durationMs: 6000);
                 }
                 else
                 {
                     UpdateStatusMessage = _locService.GetString("Settings_UpdateUpToDate");
+                    _toastService.ShowSuccess(_locService.GetString("Settings_UpdateUpToDate"), _locService.GetString("Settings_UpdateTitle"));
                 }
             });
         }
@@ -446,6 +482,7 @@ public partial class SettingsViewModel : ObservableObject
             RunOnUI(() =>
             {
                 UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+                _toastService.ShowError($"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}", _locService.GetString("Settings_UpdateTitle"));
             });
         }
         finally
@@ -486,6 +523,7 @@ public partial class SettingsViewModel : ObservableObject
                 DownloadedInstallerPath = installerPath;
                 UpdateReadyToInstall = true;
                 UpdateStatusMessage = _locService.GetString("Settings_UpdateDownloaded");
+                _toastService.ShowSuccess(_locService.GetString("Settings_UpdateDownloaded"), _locService.GetString("Settings_UpdateTitle"));
             });
         }
         catch (Exception ex)
@@ -493,6 +531,7 @@ public partial class SettingsViewModel : ObservableObject
             RunOnUI(() =>
             {
                 UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+                _toastService.ShowError($"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}", _locService.GetString("Settings_UpdateTitle"));
             });
         }
         finally

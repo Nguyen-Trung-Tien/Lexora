@@ -180,4 +180,60 @@ public class UpdateServiceTests
         await act.Should().ThrowAsync<InvalidDataException>()
             .WithMessage("*SHA-256 checksum mismatch*");
     }
+
+    [Fact]
+    public async Task CheckForUpdatesAsync_WhenSuccessful_PopulatesLatestDiscoveredUpdate()
+    {
+        // Arrange
+        var fakeJson = """
+        {
+          "tag_name": "v1.3.0",
+          "name": "Lexora v1.3.0 Autumn",
+          "body": "Bugfixes and notifications",
+          "published_at": "2026-10-17T00:00:00Z",
+          "assets": [
+            {
+              "name": "Lexora-Setup-v1.3.0.exe",
+              "browser_download_url": "https://github.com/Nguyen-Trung-Tien/Lexora/releases/download/v1.3.0/Lexora-Setup-v1.3.0.exe",
+              "size": 1024
+            }
+          ]
+        }
+        """;
+
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(fakeJson, Encoding.UTF8, "application/json")
+            });
+
+        var httpClient = new HttpClient(mockHandler.Object);
+        var mockBackup = new Mock<IDatabaseBackupService>();
+        var mockLogger = new Mock<ILogger<UpdateService>>();
+
+        var service = new UpdateService(mockBackup.Object, mockLogger.Object, httpClient);
+        service.LatestDiscoveredUpdate.Should().BeNull();
+
+        // Act
+        var result = await service.CheckForUpdatesAsync();
+
+        // Assert
+        result.Should().NotBeNull();
+        service.LatestDiscoveredUpdate.Should().NotBeNull();
+        service.LatestDiscoveredUpdate.Should().BeSameAs(result);
+        service.LatestDiscoveredUpdate!.NewVersion.Should().Be("v1.3.0");
+    }
+
+    [Fact]
+    public void UserPreferences_AutoCheckUpdates_DefaultsToTrue()
+    {
+        var prefs = new UserPreferences();
+        prefs.AutoCheckUpdates.Should().BeTrue();
+    }
 }

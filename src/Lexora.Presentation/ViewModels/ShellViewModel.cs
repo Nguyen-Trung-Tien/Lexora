@@ -11,6 +11,8 @@ public partial class ShellViewModel : ObservableObject, IDisposable
     private readonly ILocalizationService _localizationService;
     private readonly IReviewService _reviewService;
     private readonly IUserPreferencesService _preferencesService;
+    private readonly IUpdateService _updateService;
+    private readonly IToastNotificationService _toastService;
     private readonly EventHandler? _languageChangedHandler;
     private readonly EventHandler<Lexora.Application.DTOs.UserPreferences>? _prefsChangedHandler;
 
@@ -39,16 +41,26 @@ public partial class ShellViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial int DueCardsCount { get; set; } = 0;
 
+    [ObservableProperty]
+    public partial bool HasUpdateAvailable { get; set; } = false;
+
+    [ObservableProperty]
+    public partial Lexora.Application.DTOs.UpdateInfo? AvailableUpdate { get; set; }
+
     public ShellViewModel(
         INavigationService navigationService,
         ILocalizationService localizationService,
         IReviewService reviewService,
-        IUserPreferencesService preferencesService)
+        IUserPreferencesService preferencesService,
+        IUpdateService updateService,
+        IToastNotificationService toastService)
     {
         _navigationService = navigationService;
         _localizationService = localizationService;
         _reviewService = reviewService;
         _preferencesService = preferencesService;
+        _updateService = updateService;
+        _toastService = toastService;
 
         UpdateLocalizedTexts();
         _languageChangedHandler = async (s, e) =>
@@ -94,6 +106,44 @@ public partial class ShellViewModel : ObservableObject, IDisposable
             DueReviewMessage = count > 0 
                 ? (template.Contains("{0}") ? string.Format(template, count) : $"{template} {count}") 
                 : string.Empty;
+        }
+        catch
+        {
+            // Ignore background check failure
+        }
+    }
+
+    public async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            var prefs = _preferencesService.GetPreferences();
+            if (!prefs.AutoCheckUpdates)
+            {
+                return;
+            }
+
+            var update = await _updateService.CheckForUpdatesAsync(isManualCheck: false);
+            if (update != null && update.HasUpdate)
+            {
+                AvailableUpdate = update;
+                HasUpdateAvailable = true;
+
+                var title = _localizationService.GetString("Update_Notification_Title");
+                var template = _localizationService.GetString("Update_Notification_Body");
+                var msg = string.Format(template, update.NewVersion);
+                var actionText = _localizationService.GetString("Update_Notification_Action");
+
+                _toastService.ShowInfo(
+                    msg,
+                    title,
+                    durationMs: 7000,
+                    actionText: actionText,
+                    actionCallback: () =>
+                    {
+                        _navigationService.Navigate(typeof(Views.SettingsPage));
+                    });
+            }
         }
         catch
         {

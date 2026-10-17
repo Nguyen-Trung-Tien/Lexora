@@ -13,7 +13,13 @@ public class ToastNotificationService : IToastNotificationService
 
     private (string Message, ToastType Type, DateTime Timestamp)? _lastNotification;
 
-    public void Show(ToastType type, string message, string? title = null, int durationMs = 4000)
+    public void Show(
+        ToastType type,
+        string message,
+        string? title = null,
+        int durationMs = 4000,
+        string? actionText = null,
+        Action? actionCallback = null)
     {
         if (string.IsNullOrWhiteSpace(message)) return;
 
@@ -45,7 +51,9 @@ public class ToastNotificationService : IToastNotificationService
             type,
             resolvedTitle,
             cleanMessage,
-            durationMs);
+            durationMs,
+            actionText,
+            actionCallback);
 
         ToastRequested?.Invoke(notification);
     }
@@ -59,6 +67,11 @@ public class ToastNotificationService : IToastNotificationService
     public void ShowWarning(string message, string? title = null, int durationMs = 4500)
         => Show(ToastType.Warning, message, title, durationMs);
 
-    public void ShowInfo(string message, string? title = null, int durationMs = 4000)
-        => Show(ToastType.Information, message, title, durationMs);
+    public void ShowInfo(
+        string message,
+        string? title = null,
+        int durationMs = 4000,
+        string? actionText = null,
+        Action? actionCallback = null)
+        => Show(ToastType.Information, message, title, durationMs, actionText, actionCallback);
 }

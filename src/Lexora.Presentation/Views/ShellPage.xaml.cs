@@ -115,6 +115,15 @@ public sealed partial class ShellPage : Page
 
             UpdateNavigationLabels();
             await ViewModel.CheckDueReviewsAsync();
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(2500);
+                DispatcherQueue.TryEnqueue(async () =>
+                {
+                    await ViewModel.CheckForUpdatesAsync();
+                });
+            });
         }
         catch (Exception ex)
         {
