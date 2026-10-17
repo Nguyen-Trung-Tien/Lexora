@@ -1318,6 +1318,7 @@ public class LocalizationService : ILocalizationService
             ["AdaptiveQuiz_ReviewWeakWords"] = "Thêm các từ sai vào Ôn tập",
 
             // Smart Review & Memory Stability
+            ["SmartReview_Presets"] = "Chế độ ôn tập thông minh",
             ["SmartReview_PresetsTitle"] = "Chế độ Ôn tập Thông minh",
             ["SmartReview_MemoryStability"] = "Độ bền trí nhớ",
             ["SmartReview_Retrievability"] = "Khả năng nhớ",
@@ -1345,6 +1346,11 @@ public class LocalizationService : ILocalizationService
             ["LearningIntel_MasteryVelocity"] = "Tốc độ thành thạo",
             ["LearningIntel_ExamReadiness"] = "Độ sẵn sàng thi",
             ["LearningIntel_MemoryHealth"] = "Sức khỏe trí nhớ",
+            ["LearningIntel_AccuracySuffix"] = "chính xác",
+            ["LearningIntel_InsufficientData"] = "Chưa đủ dữ liệu",
+            ["LearningIntel_VelocityFormat"] = "+{0} từ/tuần ({1} đã học, {2} thành thạo)",
+            ["LearningIntel_VelocityZero"] = "+0 từ/tuần",
+            ["LearningIntel_Evaluating"] = "Đang đánh giá",
             ["AdaptiveQuiz_CatModeTitle"] = "Kiểm tra thích ứng (CAT)",
             ["AdaptiveQuiz_CatModeDesc"] = "Thuật toán tự động hiệu chỉnh độ khó CEFR của câu hỏi tiếp theo dựa trên độ chính xác",
             ["AdaptiveQuiz_CurrentLevel"] = "Trình độ hiện tại",
@@ -2674,6 +2680,7 @@ public class LocalizationService : ILocalizationService
             ["AdaptiveQuiz_ReviewWeakWords"] = "Add Weak Words to Review",
 
             // Smart Review & Memory Stability
+            ["SmartReview_Presets"] = "Smart Presets",
             ["SmartReview_PresetsTitle"] = "Smart Review Presets",
             ["SmartReview_MemoryStability"] = "Memory Stability",
             ["SmartReview_Retrievability"] = "Retrievability",
@@ -2701,6 +2708,11 @@ public class LocalizationService : ILocalizationService
             ["LearningIntel_MasteryVelocity"] = "Mastery Velocity",
             ["LearningIntel_ExamReadiness"] = "Exam Readiness",
             ["LearningIntel_MemoryHealth"] = "Memory Health",
+            ["LearningIntel_AccuracySuffix"] = "accuracy",
+            ["LearningIntel_InsufficientData"] = "Insufficient data",
+            ["LearningIntel_VelocityFormat"] = "+{0} words/wk ({1} learned, {2} mastered)",
+            ["LearningIntel_VelocityZero"] = "+0 words/wk",
+            ["LearningIntel_Evaluating"] = "Evaluating",
             ["AdaptiveQuiz_CatModeTitle"] = "Computerized Adaptive Testing (CAT)",
             ["AdaptiveQuiz_CatModeDesc"] = "Algorithm automatically recalibrates question CEFR difficulty based on real-time accuracy",
             ["AdaptiveQuiz_CurrentLevel"] = "Estimated Level",

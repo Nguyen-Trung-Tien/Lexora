@@ -75,13 +75,14 @@ public record StudySessionDto(
     int CorrectCards,
     int IncorrectCards,
     double AccuracyRate,
-    string? SessionType
+    string? SessionType,
+    string? CustomDurationText = null
 )
 {
     public string StartedAtText => StartedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
-    public string DurationText => CompletedAt.HasValue
+    public string DurationText => CustomDurationText ?? (CompletedAt.HasValue
         ? $"{(CompletedAt.Value - StartedAt).Minutes:D2}:{(CompletedAt.Value - StartedAt).Seconds:D2}"
-        : "In progress";
+        : (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? "Đang diễn ra" : "In progress"));
 }
 
 public record StudyLogDto(

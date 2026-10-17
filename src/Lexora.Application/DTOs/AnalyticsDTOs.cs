@@ -63,7 +63,8 @@ public record StudyHistoryDayDto(
     string DayOfWeek,
     int ReviewsCount,
     int CorrectCount,
-    int HeatmapLevel
+    int HeatmapLevel,
+    string? CustomTooltip = null
 )
 {
     public string ColorHex => HeatmapLevel switch
@@ -77,24 +78,30 @@ public record StudyHistoryDayDto(
 
     public string TextColorHex => HeatmapLevel >= 3 ? "#FFFFFF" : "#202020";
 
-    public string TooltipText => $"{Date:dd/MM/yyyy}: {ReviewsCount} reviews ({CorrectCount} correct)";
+    public string TooltipText => CustomTooltip ?? (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase)
+        ? $"{Date:dd/MM/yyyy}: {ReviewsCount} lượt ôn ({CorrectCount} chính xác)"
+        : $"{Date:dd/MM/yyyy}: {ReviewsCount} reviews ({CorrectCount} correct)");
 }
 
 public record RetentionCurvePointDto(
     int IntervalDays,
     double RetentionRate,
-    int WordCount
+    int WordCount,
+    string? CustomLabel = null,
+    string? CustomWordCountDisplay = null
 )
 {
-    public string Label => IntervalDays switch
-    {
-        <= 1 => "Day 1",
-        <= 3 => "Day 3",
-        <= 7 => "Day 7",
-        <= 14 => "Day 14",
-        <= 30 => "Day 30",
-        _ => "60d+"
-    };
+    public string Label => CustomLabel ?? (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase)
+        ? (IntervalDays <= 30 ? $"Ngày {IntervalDays}" : "60 ngày+")
+        : (IntervalDays switch
+        {
+            <= 1 => "Day 1",
+            <= 3 => "Day 3",
+            <= 7 => "Day 7",
+            <= 14 => "Day 14",
+            <= 30 => "Day 30",
+            _ => "60d+"
+        }));
 
     public double TheoreticalRate => IntervalDays switch
     {
@@ -110,7 +117,9 @@ public record RetentionCurvePointDto(
     public string RetentionAdvantageDisplay => $"+{RetentionAdvantage:F1}%";
     public string ActualRateDisplay => $"{RetentionRate:F1}%";
     public string TheoreticalRateDisplay => $"{TheoreticalRate:F1}%";
-    public string WordCountDisplay => $"{WordCount} words";
+    public string WordCountDisplay => CustomWordCountDisplay ?? (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase)
+        ? $"{WordCount} từ"
+        : $"{WordCount} words");
 }
 
 public record DetailedAnalyticsDto(

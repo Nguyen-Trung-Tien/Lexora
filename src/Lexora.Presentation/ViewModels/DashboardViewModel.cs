@@ -111,6 +111,10 @@ public partial class DashboardViewModel : ObservableObject
 
     private List<LearningStatusDistributionDto>? _rawStatusBreakdown;
     private List<ExamProgressDto>? _rawExamProgress;
+    private List<CefrLevelDistributionDto>? _rawCefrDistribution;
+    private List<PosDistributionDto>? _rawPosDistribution;
+    private List<StudyHistoryDayDto>? _rawHeatmap;
+    private List<StudySessionDto>? _rawRecentSessions;
 
     public DashboardViewModel(
         IStatisticsService statsService,
@@ -133,6 +137,9 @@ public partial class DashboardViewModel : ObservableObject
         UpdateForecastDisplay();
         UpdateIntelligenceDisplay();
         UpdateLocalizedStatusAndExams();
+        UpdateLocalizedDistributions();
+        UpdateLocalizedHeatmap();
+        UpdateLocalizedRecentSessions();
         OnPropertyChanged(nameof(DueReviewMessage));
     }
 
@@ -238,6 +245,50 @@ public partial class DashboardViewModel : ObservableObject
         }
     }
 
+    private void UpdateLocalizedDistributions()
+    {
+        if (_rawCefrDistribution != null)
+        {
+            CefrDistributionList.Clear();
+            foreach (var c in _rawCefrDistribution) CefrDistributionList.Add(c);
+        }
+
+        if (_rawPosDistribution != null)
+        {
+            PosDistributionList.Clear();
+            foreach (var p in _rawPosDistribution) PosDistributionList.Add(p);
+        }
+    }
+
+    private void UpdateLocalizedHeatmap()
+    {
+        if (_rawHeatmap == null) return;
+        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+        StudyHeatmapList.Clear();
+        foreach (var h in _rawHeatmap)
+        {
+            var tooltip = isVi
+                ? $"{h.Date:dd/MM/yyyy}: {h.ReviewsCount} lượt ôn ({h.CorrectCount} chính xác)"
+                : $"{h.Date:dd/MM/yyyy}: {h.ReviewsCount} reviews ({h.CorrectCount} correct)";
+            StudyHeatmapList.Add(h with { CustomTooltip = tooltip });
+        }
+    }
+
+    private void UpdateLocalizedRecentSessions()
+    {
+        if (_rawRecentSessions == null) return;
+        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+        RecentSessionsList.Clear();
+        foreach (var rs in _rawRecentSessions)
+        {
+            var duration = rs.CompletedAt.HasValue
+                ? $"{(rs.CompletedAt.Value - rs.StartedAt).Minutes:D2}:{(rs.CompletedAt.Value - rs.StartedAt).Seconds:D2}"
+                : (isVi ? "Đang diễn ra" : "In progress");
+            RecentSessionsList.Add(rs with { CustomDurationText = duration });
+        }
+        HasRecentSessions = RecentSessionsList.Count > 0;
+    }
+
     private void UpdateIntelligenceDisplay()
     {
         if (IntelligenceReport == null) return;
@@ -248,23 +299,23 @@ public partial class DashboardViewModel : ObservableObject
         if (slot != null)
         {
             string slotName = isVi ? slot.SlotNameVi : slot.SlotNameEn;
-            PeakEfficiencyDisplay = $"{slotName} ({slot.AccuracyRate:F0}% {(isVi ? "chính xác" : "accuracy")})";
+            string accSuffix = _localizationService.GetString("LearningIntel_AccuracySuffix");
+            PeakEfficiencyDisplay = $"{slotName} ({slot.AccuracyRate:F0}% {accSuffix})";
         }
         else
         {
-            PeakEfficiencyDisplay = isVi ? "Chưa đủ dữ liệu" : "Insufficient data";
+            PeakEfficiencyDisplay = _localizationService.GetString("LearningIntel_InsufficientData");
         }
 
         var vel = IntelligenceReport.WeeklyVelocity.LastOrDefault();
         if (vel != null)
         {
-            VelocitySummaryDisplay = isVi
-                ? $"+{vel.NetGrowth} từ/tuần ({vel.WordsLearned} đã học, {vel.WordsMastered} thành thạo)"
-                : $"+{vel.NetGrowth} words/wk ({vel.WordsLearned} learned, {vel.WordsMastered} mastered)";
+            var format = _localizationService.GetString("LearningIntel_VelocityFormat");
+            VelocitySummaryDisplay = string.Format(format, vel.NetGrowth, vel.WordsLearned, vel.WordsMastered);
         }
         else
         {
-            VelocitySummaryDisplay = isVi ? "+0 từ/tuần" : "+0 words/wk";
+            VelocitySummaryDisplay = _localizationService.GetString("LearningIntel_VelocityZero");
         }
 
         if (IntelligenceReport.ExamReadiness.Count > 0)
@@ -274,13 +325,17 @@ public partial class DashboardViewModel : ObservableObject
         }
         else
         {
-            ExamReadinessDisplay = isVi ? "Đang đánh giá" : "Evaluating";
+            ExamReadinessDisplay = _localizationService.GetString("LearningIntel_Evaluating");
         }
 
         MemoryHealthList.Clear();
         foreach (var seg in IntelligenceReport.MemoryHealthBreakdown)
         {
-            MemoryHealthList.Add(seg);
+            MemoryHealthList.Add(seg with
+            {
+                CustomTitle = isVi ? seg.TitleVi : seg.TitleEn,
+                CustomDescription = isVi ? seg.DescriptionVi : seg.DescriptionEn
+            });
         }
 
         HighImpactRecommendation = isVi
@@ -290,7 +345,15 @@ public partial class DashboardViewModel : ObservableObject
         RetentionCurveList.Clear();
         foreach (var pt in IntelligenceReport.EmpiricalVsTheoreticalRetention)
         {
-            RetentionCurveList.Add(pt);
+            string label = isVi 
+                ? (pt.IntervalDays <= 30 ? $"Ngày {pt.IntervalDays}" : "60 ngày+")
+                : (pt.IntervalDays <= 30 ? $"Day {pt.IntervalDays}" : "60d+");
+            string wordCount = isVi ? $"{pt.WordCount} từ" : $"{pt.WordCount} words";
+            RetentionCurveList.Add(pt with
+            {
+                CustomLabel = label,
+                CustomWordCountDisplay = wordCount
+            });
         }
     }
 
@@ -324,23 +387,18 @@ public partial class DashboardViewModel : ObservableObject
 
             _rawStatusBreakdown = analytics.StatusBreakdown;
             _rawExamProgress = analytics.ExamProgress;
+            _rawCefrDistribution = analytics.CefrDistribution;
+            _rawPosDistribution = analytics.PosDistribution;
+            _rawHeatmap = analytics.Last30DaysHeatmap;
+            _rawRecentSessions = analytics.RecentSessions;
+
             UpdateLocalizedStatusAndExams();
-
-            CefrDistributionList.Clear();
-            foreach (var c in analytics.CefrDistribution) CefrDistributionList.Add(c);
-
-            PosDistributionList.Clear();
-            foreach (var p in analytics.PosDistribution) PosDistributionList.Add(p);
+            UpdateLocalizedDistributions();
+            UpdateLocalizedHeatmap();
+            UpdateLocalizedRecentSessions();
 
             TopicProgressList.Clear();
             foreach (var tp in analytics.TopicProgress) TopicProgressList.Add(tp);
-
-            StudyHeatmapList.Clear();
-            foreach (var h in analytics.Last30DaysHeatmap) StudyHeatmapList.Add(h);
-
-            RecentSessionsList.Clear();
-            foreach (var rs in analytics.RecentSessions) RecentSessionsList.Add(rs);
-            HasRecentSessions = RecentSessionsList.Count > 0;
         }
         catch (Exception ex)
         {

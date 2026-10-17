@@ -51,6 +51,12 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
             ViewModel.UpdateLanguageState();
             UpdateSegmentedButtons();
             UpdateSelectionModeUI();
+            if (StorageListView != null)
+            {
+                var prevItems = StorageListView.ItemsSource;
+                StorageListView.ItemsSource = null;
+                StorageListView.ItemsSource = prevItems;
+            }
             Bindings.Update();
         }
 

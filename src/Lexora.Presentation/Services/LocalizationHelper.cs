@@ -195,5 +195,12 @@ public static class LocalizationHelper
         var isVi = loc?.CurrentLanguage?.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ?? true;
         return isVi ? (descVi ?? string.Empty) : (descEn ?? descVi ?? string.Empty);
     }
+
+    public static string FormatBilingual(string? textVi, string? textEn)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        var isVi = loc?.CurrentLanguage?.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ?? true;
+        return isVi ? (textVi ?? string.Empty) : (textEn ?? textVi ?? string.Empty);
+    }
 }
 

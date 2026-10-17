@@ -40,12 +40,14 @@ public record MemoryHealthSegmentDto(
     double Percentage,
     string DescriptionVi,
     string DescriptionEn,
-    string ColorHex
+    string ColorHex,
+    string? CustomTitle = null,
+    string? CustomDescription = null
 )
 {
-    public string StatusName => TitleVi;
+    public string StatusName => CustomTitle ?? (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? TitleVi : TitleEn);
     public int WordCount => WordsCount;
-    public string Recommendation => DescriptionVi;
+    public string Recommendation => CustomDescription ?? (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? DescriptionVi : DescriptionEn);
 };
 
 public record LearningIntelligenceReportDto(

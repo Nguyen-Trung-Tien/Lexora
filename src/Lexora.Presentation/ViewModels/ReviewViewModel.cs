@@ -27,6 +27,20 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
 
     public void UpdateActiveSessionTitle()
     {
+        if (CurrentSmartPreset.HasValue)
+        {
+            ActiveSessionTitle = CurrentSmartPreset.Value switch
+            {
+                SmartReviewPresetMode.UrgentOverdue => _localizationService.GetString("SmartReview_UrgentOverdue"),
+                SmartReviewPresetMode.HighForgettingRisk => _localizationService.GetString("SmartReview_HighForgettingRisk"),
+                SmartReviewPresetMode.ExamHighYield => _localizationService.GetString("SmartReview_ExamHighYield"),
+                SmartReviewPresetMode.FreshLearned => _localizationService.GetString("SmartReview_FreshLearned"),
+                SmartReviewPresetMode.LongTermConsolidation => _localizationService.GetString("SmartReview_LongTermConsolidation"),
+                _ => _customTitle ?? string.Empty
+            };
+            return;
+        }
+
         ActiveSessionTitle = _customTitle ?? CurrentMode switch
         {
             ReviewSessionMode.LearnNew => _localizationService.GetString("Review_Session_LearnNew"),
