@@ -51,7 +51,7 @@ public sealed partial class ReviewPage : Page, ILocalizableView
     private void UpdateResponsiveLayout(double width)
     {
         if (FlashcardWorkspaceGrid == null || FlashcardSidebarPanel == null || FlashcardMainBorder == null) return;
-        if (width < 1000)
+        if (width < 1080)
         {
             if (FlashcardWorkspaceGrid.ColumnDefinitions.Count > 1)
             {

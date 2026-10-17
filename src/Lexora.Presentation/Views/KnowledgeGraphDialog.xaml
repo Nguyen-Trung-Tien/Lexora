@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dto="using:Lexora.Application.DTOs"
+    xmlns:services="using:Lexora.Presentation.Services"
     mc:Ignorable="d"
     Title="{x:Bind Loc.GetString('KnowledgeGraph_Title')}"
     PrimaryButtonText="{x:Bind Loc.GetString('Action_Close')}"
@@ -29,7 +30,7 @@
             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center"
                         Visibility="{x:Bind IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <ProgressRing IsActive="True" Width="20" Height="20" />
-                <TextBlock Text="Generating semantic graph..." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Generating')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
             </StackPanel>
 
             <!-- Center Word Hero Card -->
@@ -40,7 +41,7 @@
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,2">
-                                <TextBlock Text="Core Concept" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
+                                <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_CoreConcept')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
                             </Border>
                             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="6,2">
                                 <TextBlock Text="{x:Bind Graph.CenterNode.PartOfSpeech, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -109,7 +110,7 @@
                                         ToolTipService.ToolTip="{x:Bind RelationshipLabel}" CornerRadius="6" Padding="10,6">
                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                         <FontIcon Glyph="&#xE895;" FontSize="12" />
-                                        <TextBlock Text="Pivot" FontSize="11" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('KnowledgeGraph_Pivot')}" FontSize="11" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Button>
                             </Grid>

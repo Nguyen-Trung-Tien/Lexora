@@ -87,6 +87,7 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_CefrBreakdown"] = "Phân bố theo cấp độ CEFR",
             ["Dashboard_PosBreakdown"] = "Phân bố theo từ loại",
             ["Dashboard_RecentSessions"] = "Lịch sử học tập & kiểm tra gần đây",
+            ["Dashboard_NoRecentSessions"] = "Chưa có phiên học nào gần đây. Hãy bắt đầu ôn tập hoặc luyện tập ngay!",
             ["Dashboard_SessionCards"] = "Số thẻ:",
             ["Dashboard_SessionCorrect"] = "Chính xác:",
             ["Dashboard_AdvisorTitle"] = "Cố Vấn Học Tập Thông Minh",
@@ -1256,6 +1257,7 @@ public class LocalizationService : ILocalizationService
             ["StudyPlanner_PacingOnTrack"] = "Đúng tiến độ",
             ["StudyPlanner_PacingBehind"] = "Cần tăng tốc",
             ["StudyPlanner_PacingAhead"] = "Vượt tiến độ",
+            ["StudyPlanner_OpenTask"] = "Mở",
 
             // Vocabulary Knowledge Graph
             ["KnowledgeGraph_Title"] = "Mạng lưới Ngữ nghĩa Từ vựng",
@@ -1268,6 +1270,9 @@ public class LocalizationService : ILocalizationService
             ["KnowledgeGraph_TopicTab"] = "Cùng chủ đề",
             ["KnowledgeGraph_AllTab"] = "Tất cả ({0})",
             ["KnowledgeGraph_PivotToNode"] = "Tập trung mạng lưới vào từ này",
+            ["KnowledgeGraph_Pivot"] = "Tập trung",
+            ["KnowledgeGraph_CoreConcept"] = "Khái niệm trung tâm",
+            ["KnowledgeGraph_Generating"] = "Đang khởi tạo mạng lưới ngữ nghĩa...",
             ["KnowledgeGraph_Connections"] = "liên kết ngữ nghĩa",
 
             // Adaptive Quiz (CAT)
@@ -1405,6 +1410,7 @@ public class LocalizationService : ILocalizationService
             ["Dashboard_CefrBreakdown"] = "CEFR Level Breakdown",
             ["Dashboard_PosBreakdown"] = "Part of Speech Breakdown",
             ["Dashboard_RecentSessions"] = "Recent Learning & Test Sessions",
+            ["Dashboard_NoRecentSessions"] = "No recent study sessions yet. Start reviewing or practicing today!",
             ["Dashboard_SessionCards"] = "Cards:",
             ["Dashboard_SessionCorrect"] = "Correct:",
             ["Dashboard_AdvisorTitle"] = "Smart Study Advisor",
@@ -2575,6 +2581,7 @@ public class LocalizationService : ILocalizationService
             ["StudyPlanner_PacingOnTrack"] = "On Track",
             ["StudyPlanner_PacingBehind"] = "Behind Schedule",
             ["StudyPlanner_PacingAhead"] = "Ahead of Schedule",
+            ["StudyPlanner_OpenTask"] = "Open",
 
             // Vocabulary Knowledge Graph
             ["KnowledgeGraph_Title"] = "Vocabulary Knowledge Graph",
@@ -2587,6 +2594,9 @@ public class LocalizationService : ILocalizationService
             ["KnowledgeGraph_TopicTab"] = "Topic Cluster",
             ["KnowledgeGraph_AllTab"] = "All ({0})",
             ["KnowledgeGraph_PivotToNode"] = "Pivot graph to this word",
+            ["KnowledgeGraph_Pivot"] = "Pivot",
+            ["KnowledgeGraph_CoreConcept"] = "Core Concept",
+            ["KnowledgeGraph_Generating"] = "Generating semantic graph...",
             ["KnowledgeGraph_Connections"] = "semantic connections",
 
             // Adaptive Quiz (CAT)

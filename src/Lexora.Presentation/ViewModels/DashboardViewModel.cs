@@ -102,6 +102,8 @@ public partial class DashboardViewModel : ObservableObject
     public ObservableCollection<TopicProgressDto> TopicProgressList { get; } = new();
     public ObservableCollection<StudyHistoryDayDto> StudyHeatmapList { get; } = new();
     public ObservableCollection<StudySessionDto> RecentSessionsList { get; } = new();
+    [ObservableProperty]
+    public partial bool HasRecentSessions { get; set; }
 
     private List<LearningStatusDistributionDto>? _rawStatusBreakdown;
     private List<ExamProgressDto>? _rawExamProgress;
@@ -324,6 +326,7 @@ public partial class DashboardViewModel : ObservableObject
 
             RecentSessionsList.Clear();
             foreach (var rs in analytics.RecentSessions) RecentSessionsList.Add(rs);
+            HasRecentSessions = RecentSessionsList.Count > 0;
         }
         catch (Exception ex)
         {

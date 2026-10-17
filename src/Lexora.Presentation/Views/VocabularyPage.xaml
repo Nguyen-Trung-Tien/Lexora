@@ -633,15 +633,15 @@
                             <!-- Header with Title & Word Management Actions -->
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalAlignment="Top">
                                 <!-- Term & CEFR Level Badge -->
-                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center" HorizontalAlignment="Left">
                                     <TextBlock Text="{x:Bind ViewModel.SelectedWord.Term, Mode=OneWay}"
                                                Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26"
-                                               TextTrimming="CharacterEllipsis" MaxLines="2" VerticalAlignment="Center" />
-                                    <Border Background="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay, Converter={StaticResource CefrToBrushConverter}}"
+                                               TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay, Converter={StaticResource CefrToBrushConverter}}"
                                             CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="11" />
                                     </Border>
-                                </StackPanel>
+                                </Grid>
 
                                 <!-- Management Buttons (Copy, Edit, Delete) -->
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
@@ -1174,33 +1174,33 @@
                                         <Grid Grid.Row="3" ColumnDefinitions="*,*,*,*" ColumnSpacing="6">
                                             <Button HorizontalAlignment="Stretch" Click="ViewUnitWords_Click" Tag="{x:Bind}" CornerRadius="8" Padding="4,8"
                                                     ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Vocab_TooltipViewUnitWords')}">
-                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE8C0;" FontSize="11" />
-                                                    <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Action_View')}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE8C0;" FontSize="11" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind services:LocalizationHelper.GetString('Action_View')}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                </Grid>
                                             </Button>
                                             <Button Grid.Column="1" HorizontalAlignment="Stretch" Click="AddWordToUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="4,8"
                                                     ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Vocab_TooltipAddWordToUnit')}">
-                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE710;" FontSize="11" />
-                                                    <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Vocab_AddWordShort')}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE710;" FontSize="11" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind services:LocalizationHelper.GetString('Vocab_AddWordShort')}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                </Grid>
                                             </Button>
                                             <Button Grid.Column="2" Style="{ThemeResource AccentButtonStyle}"
                                                     HorizontalAlignment="Stretch" Click="ReviewUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="4,8"
                                                     ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Vocab_TooltipReviewUnit')}">
-                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE823;" FontSize="11" />
-                                                    <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Action_Review')}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE823;" FontSize="11" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind services:LocalizationHelper.GetString('Action_Review')}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                </Grid>
                                             </Button>
                                             <Button Grid.Column="3"
                                                     HorizontalAlignment="Stretch" Click="TestUnit_Click" Tag="{x:Bind}" CornerRadius="8" Padding="4,8"
                                                     ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Vocab_TooltipQuizUnit')}">
-                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE765;" FontSize="11" />
-                                                    <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Action_Quiz')}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE765;" FontSize="11" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind services:LocalizationHelper.GetString('Action_Quiz')}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                </Grid>
                                             </Button>
                                         </Grid>
 

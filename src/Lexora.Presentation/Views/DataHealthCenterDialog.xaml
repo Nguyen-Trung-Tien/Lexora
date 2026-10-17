@@ -21,6 +21,15 @@
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        FontSize="13" TextWrapping="Wrap" />
 
+            <!-- Diagnostic & Repair Results InfoBar -->
+            <InfoBar x:Name="ResultInfoBar"
+                     IsOpen="{x:Bind HasResultFeedback, Mode=OneWay}"
+                     Severity="{x:Bind FeedbackSeverity, Mode=OneWay}"
+                     Title="{x:Bind FeedbackTitle, Mode=OneWay}"
+                     Message="{x:Bind FeedbackMessage, Mode=OneWay}"
+                     CornerRadius="8"
+                     IsClosable="True" />
+
             <!-- Progress Ring while diagnostics running -->
             <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center"
                         Visibility="{x:Bind IsBusy, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -158,15 +167,6 @@
                     </Button>
                 </Grid>
             </Border>
-
-            <!-- Results InfoBar -->
-            <InfoBar x:Name="ResultInfoBar"
-                     IsOpen="{x:Bind HasResultFeedback, Mode=OneWay}"
-                     Severity="{x:Bind FeedbackSeverity, Mode=OneWay}"
-                     Title="{x:Bind FeedbackTitle, Mode=OneWay}"
-                     Message="{x:Bind FeedbackMessage, Mode=OneWay}"
-                     CornerRadius="8"
-                     IsClosable="True" />
 
         </StackPanel>
     </ScrollViewer>

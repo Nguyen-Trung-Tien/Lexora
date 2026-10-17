@@ -118,7 +118,7 @@
                                FontSize="14"
                                FontWeight="SemiBold"
                                TextAlignment="Center"
-                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="Wrap"
                                Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
                     <!-- Granular Detail Pill -->
@@ -133,7 +133,7 @@
                                    Text="Vui lòng đợi trong giây lát..."
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="Wrap"
                                    TextAlignment="Center" />
                     </Border>
                 </StackPanel>

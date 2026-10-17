@@ -1,3 +1,4 @@
+using Lexora.Application.DTOs;
 using Lexora.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -167,6 +168,32 @@ public static class LocalizationHelper
             "Test_Listening" => loc.GetString("Session_TestListening"),
             _ => sessionType
         };
+    }
+
+    public static string FormatCurriculumTaskTitle(CurriculumTaskDto? task)
+    {
+        if (task == null) return string.Empty;
+        return FormatTaskTitle(task.TitleVi, task.TitleEn);
+    }
+
+    public static string FormatCurriculumTaskDescription(CurriculumTaskDto? task)
+    {
+        if (task == null) return string.Empty;
+        return FormatTaskDescription(task.DescriptionVi, task.DescriptionEn);
+    }
+
+    public static string FormatTaskTitle(string? titleVi, string? titleEn)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        var isVi = loc?.CurrentLanguage?.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ?? true;
+        return isVi ? (titleVi ?? string.Empty) : (titleEn ?? titleVi ?? string.Empty);
+    }
+
+    public static string FormatTaskDescription(string? descVi, string? descEn)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        var isVi = loc?.CurrentLanguage?.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ?? true;
+        return isVi ? (descVi ?? string.Empty) : (descEn ?? descVi ?? string.Empty);
     }
 }
 
