@@ -223,6 +223,22 @@ public partial class SettingsViewModel : ObservableObject
         await _preferencesService.SavePreferencesAsync(current with { EnableTypingPractice = enabled });
     }
 
+    private void RunOnUI(Action action)
+    {
+        var dq = _dispatcherQueue 
+            ?? App.Current?.UIDispatcherQueue 
+            ?? App.Current?.MainWindow?.DispatcherQueue;
+
+        if (dq == null || dq.HasThreadAccess)
+        {
+            action();
+        }
+        else
+        {
+            dq.TryEnqueue(() => action());
+        }
+    }
+
     [RelayCommand]
     public async Task InitializeAsync()
     {
@@ -232,8 +248,7 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadDatabaseStatsAsync()
     {
-        await _dispatcherQueue.EnsureOnUIThreadAsync();
-        IsLoadingStats = true;
+        RunOnUI(() => IsLoadingStats = true);
         try
         {
             DatabasePath = _backupService.DatabasePath;
@@ -254,20 +269,23 @@ public partial class SettingsViewModel : ObservableObject
             var wordCount = await _vocabService.CountWordsAsync();
             var grammarRules = await _grammarService.GetAllRulesAsync();
 
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            DatabaseSizeFormatted = formatted;
-            TotalWordsCount = wordCount;
-            TotalGrammarCount = grammarRules.Count;
+            RunOnUI(() =>
+            {
+                DatabaseSizeFormatted = formatted;
+                TotalWordsCount = wordCount;
+                TotalGrammarCount = grammarRules.Count;
+            });
         }
         catch (Exception ex)
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            BackupStatusMessage = string.Format(_locService.GetString("Settings_FailedLoadStatsFormat"), ex.Message);
+            RunOnUI(() =>
+            {
+                BackupStatusMessage = string.Format(_locService.GetString("Settings_FailedLoadStatsFormat"), ex.Message);
+            });
         }
         finally
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            IsLoadingStats = false;
+            RunOnUI(() => IsLoadingStats = false);
         }
     }
 
@@ -319,15 +337,19 @@ public partial class SettingsViewModel : ObservableObject
                 backupPath = await _backupService.CreateBackupAsync(desktop);
             }
 
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupSuccess"), backupPath);
+            RunOnUI(() =>
+            {
+                BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupSuccess"), backupPath);
+            });
             await LoadDatabaseStatsAsync();
             return backupPath;
         }
         catch (Exception ex)
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupFailed"), ex.Message);
+            RunOnUI(() =>
+            {
+                BackupStatusMessage = string.Format(_locService.GetString("Settings_BackupFailed"), ex.Message);
+            });
             return null;
         }
         finally
@@ -351,21 +373,27 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             await _backupService.RestoreBackupAsync(backupFilePath, progress, cancellationToken);
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreSuccessStatus"), Path.GetFileName(backupFilePath));
+            RunOnUI(() =>
+            {
+                BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreSuccessStatus"), Path.GetFileName(backupFilePath));
+            });
             await LoadDatabaseStatsAsync();
             return true;
         }
         catch (OperationCanceledException)
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            BackupStatusMessage = _locService.GetString("Common_OperationCancelled") ?? "Operation cancelled.";
+            RunOnUI(() =>
+            {
+                BackupStatusMessage = _locService.GetString("Common_OperationCancelled") ?? "Operation cancelled.";
+            });
             return false;
         }
         catch (Exception ex)
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreFailedStatus"), ex.Message);
+            RunOnUI(() =>
+            {
+                BackupStatusMessage = string.Format(_locService.GetString("Settings_RestoreFailedStatus"), ex.Message);
+            });
             return false;
         }
         finally
@@ -387,37 +415,42 @@ public partial class SettingsViewModel : ObservableObject
     public async Task CheckForUpdatesAsync()
     {
         if (IsCheckingUpdate || IsDownloadingUpdate) return;
-        IsCheckingUpdate = true;
-        UpdateStatusMessage = _locService.GetString("Settings_CheckingForUpdates");
-        UpdateAvailable = false;
-        AvailableUpdate = null;
-        UpdateReadyToInstall = false;
+        RunOnUI(() =>
+        {
+            IsCheckingUpdate = true;
+            UpdateStatusMessage = _locService.GetString("Settings_CheckingForUpdates");
+            UpdateAvailable = false;
+            AvailableUpdate = null;
+            UpdateReadyToInstall = false;
+        });
 
         try
         {
             var updateInfo = await _updateService.CheckForUpdatesAsync(isManualCheck: true);
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-
-            if (updateInfo != null && updateInfo.HasUpdate)
+            RunOnUI(() =>
             {
-                AvailableUpdate = updateInfo;
-                UpdateAvailable = true;
-                UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
-            }
-            else
-            {
-                UpdateStatusMessage = _locService.GetString("Settings_UpdateUpToDate");
-            }
+                if (updateInfo != null && updateInfo.HasUpdate)
+                {
+                    AvailableUpdate = updateInfo;
+                    UpdateAvailable = true;
+                    UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
+                }
+                else
+                {
+                    UpdateStatusMessage = _locService.GetString("Settings_UpdateUpToDate");
+                }
+            });
         }
         catch (Exception ex)
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+            RunOnUI(() =>
+            {
+                UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+            });
         }
         finally
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            IsCheckingUpdate = false;
+            RunOnUI(() => IsCheckingUpdate = false);
         }
     }
 
@@ -425,15 +458,18 @@ public partial class SettingsViewModel : ObservableObject
     public async Task DownloadUpdateAsync()
     {
         if (AvailableUpdate == null || IsDownloadingUpdate) return;
-        IsDownloadingUpdate = true;
-        UpdateReadyToInstall = false;
-        DownloadProgressPercentage = 0;
-        DownloadProgressText = "0%";
-        UpdateStatusMessage = _locService.GetString("Settings_DownloadingUpdate");
+        RunOnUI(() =>
+        {
+            IsDownloadingUpdate = true;
+            UpdateReadyToInstall = false;
+            DownloadProgressPercentage = 0;
+            DownloadProgressText = "0%";
+            UpdateStatusMessage = _locService.GetString("Settings_DownloadingUpdate");
+        });
 
         var progress = new Progress<UpdateDownloadProgress>(p =>
         {
-            _dispatcherQueue?.TryEnqueue(() =>
+            RunOnUI(() =>
             {
                 DownloadProgressPercentage = p.ProgressPercentage;
                 var mbReceived = (double)p.BytesReceived / (1024 * 1024);
@@ -445,20 +481,23 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             var installerPath = await _updateService.DownloadUpdateAsync(AvailableUpdate, progress);
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            DownloadedInstallerPath = installerPath;
-            UpdateReadyToInstall = true;
-            UpdateStatusMessage = _locService.GetString("Settings_UpdateDownloaded");
+            RunOnUI(() =>
+            {
+                DownloadedInstallerPath = installerPath;
+                UpdateReadyToInstall = true;
+                UpdateStatusMessage = _locService.GetString("Settings_UpdateDownloaded");
+            });
         }
         catch (Exception ex)
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+            RunOnUI(() =>
+            {
+                UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+            });
         }
         finally
         {
-            await _dispatcherQueue.EnsureOnUIThreadAsync();
-            IsDownloadingUpdate = false;
+            RunOnUI(() => IsDownloadingUpdate = false);
         }
     }
 
@@ -468,6 +507,16 @@ public partial class SettingsViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(DownloadedInstallerPath) || !File.Exists(DownloadedInstallerPath))
             return;
 
-        await _updateService.LaunchInstallerAndExitAsync(DownloadedInstallerPath, silent: true);
+        try
+        {
+            await _updateService.LaunchInstallerAndExitAsync(DownloadedInstallerPath, silent: true);
+        }
+        catch (Exception ex)
+        {
+            RunOnUI(() =>
+            {
+                UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+            });
+        }
     }
 }
