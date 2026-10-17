@@ -906,4 +906,15 @@ public sealed partial class SettingsPage : Page, ILocalizableView
 
         return panel;
     }
+
+    private async void OpenDataHealthCenter_Click(object sender, RoutedEventArgs e)
+    {
+        if (this.XamlRoot == null) return;
+        var healthService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IDataHealthService>();
+        var dialog = new DataHealthCenterDialog(healthService, Loc)
+        {
+            XamlRoot = this.XamlRoot
+        };
+        await dialog.ShowAsync();
+    }
 }

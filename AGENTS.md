@@ -191,7 +191,7 @@ Before completing any task, committing code, or declaring an issue resolved, dev
 # 1. Build the entire solution (Must finish with 0 warnings and 0 errors)
 dotnet build Lexora.slnx
 
-# 2. Run all unit and integration test suites (All 343 tests MUST pass)
+# 2. Run all unit and integration test suites (All 365 tests MUST pass)
 dotnet test Lexora.slnx --no-build
 
 # 3. Packaging & Installer Verification (When modifying deployment scripts)
@@ -200,7 +200,7 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.0.0"
 
 ### Current Quality Gate Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)`.
-- **Test Suite**: **343 / 343 Tests Passing** (292 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+- **Test Suite**: **365 / 365 Tests Passing** (314 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
 
 ---
 
@@ -298,7 +298,7 @@ Before marking any task as complete, verify:
 - [ ] **Token Economy Enforced**: Only targeted file slices viewed (`grep_search` + `view_file`); in-place diff edits instead of full-file overwrites; no unpaged output dumps.
 - [ ] **Anti-Hallucination & Type Reusability**: Existing types and services verified before declaring new contracts; Clean Architecture cascade strictly followed.
 - [ ] **Clean Build**: `dotnet build Lexora.slnx` completes with **0 warnings and 0 errors**.
-- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 343 tests**.
+- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 365 tests**.
 
 ---
 

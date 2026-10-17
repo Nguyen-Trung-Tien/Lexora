@@ -41,6 +41,20 @@ public partial class DashboardViewModel : ObservableObject
     public ObservableCollection<DailyForecastItemDto> ForecastDaysList { get; } = new();
 
     [ObservableProperty]
+    public partial LearningIntelligenceReportDto? IntelligenceReport { get; set; }
+
+    [ObservableProperty]
+    public partial string PeakEfficiencyDisplay { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string VelocitySummaryDisplay { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ExamReadinessDisplay { get; set; } = string.Empty;
+
+    public ObservableCollection<MemoryHealthSegmentDto> MemoryHealthList { get; } = new();
+
+    [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
 
     [ObservableProperty]
@@ -111,6 +125,7 @@ public partial class DashboardViewModel : ObservableObject
         UpdateGreeting();
         UpdateAdviceDisplay();
         UpdateForecastDisplay();
+        UpdateIntelligenceDisplay();
         UpdateLocalizedStatusAndExams();
         OnPropertyChanged(nameof(DueReviewMessage));
     }
@@ -217,6 +232,52 @@ public partial class DashboardViewModel : ObservableObject
         }
     }
 
+    private void UpdateIntelligenceDisplay()
+    {
+        if (IntelligenceReport == null) return;
+        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+        
+        var slot = IntelligenceReport.CognitiveTimeEfficiency.FirstOrDefault(s => s.IsPeakPerformanceSlot) 
+                   ?? IntelligenceReport.CognitiveTimeEfficiency.FirstOrDefault();
+        if (slot != null)
+        {
+            string slotName = isVi ? slot.SlotNameVi : slot.SlotNameEn;
+            PeakEfficiencyDisplay = $"{slotName} ({slot.AccuracyRate:F0}% {(isVi ? "chính xác" : "accuracy")})";
+        }
+        else
+        {
+            PeakEfficiencyDisplay = isVi ? "Chưa đủ dữ liệu" : "Insufficient data";
+        }
+
+        var vel = IntelligenceReport.WeeklyVelocity.LastOrDefault();
+        if (vel != null)
+        {
+            VelocitySummaryDisplay = isVi
+                ? $"+{vel.NetGrowth} từ/tuần ({vel.WordsLearned} đã học, {vel.WordsMastered} thành thạo)"
+                : $"+{vel.NetGrowth} words/wk ({vel.WordsLearned} learned, {vel.WordsMastered} mastered)";
+        }
+        else
+        {
+            VelocitySummaryDisplay = isVi ? "+0 từ/tuần" : "+0 words/wk";
+        }
+
+        if (IntelligenceReport.ExamReadiness.Count > 0)
+        {
+            var ex = IntelligenceReport.ExamReadiness[0];
+            ExamReadinessDisplay = $"{ex.ExamTitle}: {ex.ReadinessScore:F0}% ({ex.TargetScoreRange})";
+        }
+        else
+        {
+            ExamReadinessDisplay = isVi ? "Đang đánh giá" : "Evaluating";
+        }
+
+        MemoryHealthList.Clear();
+        foreach (var seg in IntelligenceReport.MemoryHealthBreakdown)
+        {
+            MemoryHealthList.Add(seg);
+        }
+    }
+
     [RelayCommand]
     public async Task LoadDashboardAsync()
     {
@@ -228,9 +289,11 @@ public partial class DashboardViewModel : ObservableObject
             var analytics = await _statsService.GetDetailedAnalyticsAsync();
             DailyAdvice = await _advisorService.GetDailyAdviceAsync(analytics.Summary);
             WorkloadForecast = await _advisorService.Get7DayForecastAsync();
+            IntelligenceReport = await _statsService.GetLearningIntelligenceReportAsync();
 
             UpdateAdviceDisplay();
             UpdateForecastDisplay();
+            UpdateIntelligenceDisplay();
 
             var summary = analytics.Summary;
 

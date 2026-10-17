@@ -1108,6 +1108,25 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         }
     }
 
+    private async void OpenKnowledgeGraph_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWord == null) return;
+        try
+        {
+            var graphService = App.Current.Services.GetRequiredService<IVocabularyKnowledgeGraphService>();
+            var audioService = App.Current.Services.GetService<IAudioPlayerService>();
+            var dialog = new KnowledgeGraphDialog(ViewModel.SelectedWord.Id, graphService, Loc, audioService)
+            {
+                XamlRoot = this.XamlRoot
+            };
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+        }
+    }
+
     private async void QuickListenButton_Click(object sender, RoutedEventArgs e)
     {
         try

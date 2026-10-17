@@ -23,6 +23,9 @@ public interface IReviewService
 
     IntervalPreviewDto GetCardIntervalPreview(ReviewCardDto card);
     double GetRetentionProbability(ReviewCardDto card);
+    MemoryStabilityMetricsDto GetMemoryStabilityMetrics(ReviewCardDto card);
+    Task<IReadOnlyList<SmartReviewPresetInfo>> GetSmartPresetsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ReviewCardDto>> GetPresetQueueAsync(SmartReviewPresetMode mode, int limit = 30, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StudySessionDto>> GetRecentSessionsAsync(int limit = 10, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StudyLogDto>> GetRecentLogsAsync(int limit = 20, CancellationToken cancellationToken = default);
 }

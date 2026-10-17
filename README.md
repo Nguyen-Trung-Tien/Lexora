@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/Architecture-Clean%20Architecture-107C41?style=flat-square" alt="Clean Architecture" />
   <img src="https://img.shields.io/badge/Database-SQLite%20WAL%20%2F%20EF%20Core%2010-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
   <img src="https://img.shields.io/badge/Algorithm-SuperMemo%20SM--2-E3008C?style=flat-square" alt="SM-2" />
-  <img src="https://img.shields.io/badge/Tests-64%2F64%20Passed-2EA44F?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-365%2F365%20Passed-2EA44F?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/Installer-Inno%20Setup%206-FF8C00?style=flat-square" alt="Inno Setup" />
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
 </p>
@@ -58,6 +58,12 @@
 | 📚 **Vocabulary** | **Rich Multi-Meaning Dictionary** | Comprehensive word entries with CEFR levels (A1–C2), POS categorization, UK/US IPA phonetics, contextual examples, and exam tags (TOEIC, VSTEP, IELTS). |
 | 🔊 **Audio** | **Native Pronunciation Caching** | Offline-cached English audio with automatic local storage fallback, thread-safe background playback, and input path traversal sanitization. |
 | 📝 **Practice** | **Interactive 4-Mode Quiz Simulator** | 4 customizable modes: *Word-to-Meaning*, *Meaning-to-Word*, *Fill-in-the-Blank*, and *Multiple Choice* with authentic POS-matched distractors. |
+| 💡 **Learning Intelligence** | **Cognitive Memory & At-Risk Analytics** | Ebbinghaus Retrievability modeling ($R = e^{-t/S}$), at-risk vocabulary detector, 7-day cognitive load forecast, and circadian retention analysis. |
+| ⚡ **Smart Review** | **High-Yield Adaptive Review Presets** | Instant queue filters for High-Yield items, Stale Memory ($R < 70\%$), Weakest CEFR Tiers, and Cram Sessions with real-time memory stability metrics. |
+| 🎯 **Adaptive Testing** | **Computerized Adaptive Testing (CAT)** | Real-time question difficulty recalibration dynamically adjusting to user accuracy, dynamic CEFR scoring, and detailed post-test diagnostic breakdown. |
+| 📅 **Study Planner** | **Daily Curriculum & Pacing Manager** | Interactive daily task checklist (new words, reviews, quizzes, grammar), target pacing indicators, streak protection, and offline JSON persistence. |
+| 🕸️ **Knowledge Graph** | **Interactive Semantic Vocabulary Network** | Semantic graph traversal across Synonyms, Antonyms, Topics, and CEFR tiers with dynamic node pivoting, instant preview flyout, and native audio. |
+| 🩺 **Data Health Center** | **SQLite Diagnostics & Self-Healing** | PRAGMA integrity check, WAL/SHM maintenance, orphan record cleanup, database vacuuming, and pronunciation audio cache management. |
 | 📐 **Grammar** | **Structured Grammar Engine** | Structural formula highlighting, in-depth bilingual explanations (Vietnamese & English), and prominent *Common Mistakes* guidance. |
 | 📊 **Analytics** | **Dashboard & Activity Heatmap** | GitHub-style 365-day review activity heatmap, streak counters, CEFR level distribution charts, and exam certification readiness meters. |
 | 🔄 **Data** | **Robust Import / Export & Backup** | High-throughput RFC-4180 multiline CSV and JSON exchange, 20MB payload ceiling, and 16-byte header verified database backup/restore. |

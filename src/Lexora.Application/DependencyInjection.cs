@@ -25,6 +25,9 @@ public static class DependencyInjection
         services.AddScoped<IVocabularySuggestionService, VocabularySuggestionService>();
         services.AddScoped<IGrammarSuggestionService, GrammarSuggestionService>();
         services.AddScoped<IStudyAdvisorService, StudyAdvisorService>();
+        services.AddScoped<IStudyPlannerService, StudyPlannerService>();
+        services.AddScoped<IVocabularyKnowledgeGraphService, VocabularyKnowledgeGraphService>();
+        services.AddScoped<IAdaptiveQuizService, AdaptiveQuizService>();
         services.AddSingleton<IPronunciationVoiceResolver, PronunciationVoiceResolver>();
 
         return services;

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Lexora.Presentation.Views.StudyPlannerDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:dto="using:Lexora.Application.DTOs"
+    mc:Ignorable="d"
+    Title="{x:Bind Loc.GetString('StudyPlanner_Title')}"
+    PrimaryButtonText="{x:Bind Loc.GetString('Action_Close')}"
+    DefaultButton="Primary"
+    CornerRadius="16"
+    MaxWidth="760">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="620">
+        <StackPanel Spacing="18" Margin="0,8,0,0">
+
+            <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_Subtitle')}"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       FontSize="13" TextWrapping="Wrap" />
+
+            <TabView x:Name="PlannerTabView" IsAddTabButtonVisible="False" CanReorderTabs="False">
+                <TabView.TabItems>
+                    <!-- TAB 1: Today's Curriculum -->
+                    <TabViewItem Header="{x:Bind Loc.GetString('StudyPlanner_TodayPlan')}" IsClosable="False">
+                        <StackPanel Spacing="16" Margin="0,14,0,0">
+                            <!-- Daily Milestone & Progress Card -->
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="12" Padding="20">
+                                <Grid ColumnDefinitions="*,Auto" RowSpacing="12">
+                                    <StackPanel Spacing="8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3">
+                                                <TextBlock Text="{x:Bind PacingBadgeText, Mode=OneWay}"
+                                                           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                           FontSize="11" FontWeight="Bold" />
+                                            </Border>
+                                            <TextBlock Text="{x:Bind DaysRemainingText, Mode=OneWay}"
+                                                       FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       VerticalAlignment="Center" FontWeight="SemiBold" />
+                                        </StackPanel>
+
+                                        <TextBlock Text="{x:Bind MotivationalTip, Mode=OneWay}"
+                                                   Style="{StaticResource LexoraBodyStyle}" TextWrapping="Wrap" MaxWidth="520" />
+                                    </StackPanel>
+
+                                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                            CornerRadius="10" Padding="16,8" VerticalAlignment="Center">
+                                        <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                            <TextBlock Text="{x:Bind OverallProgressText, Mode=OneWay}" FontSize="24" FontWeight="Bold"
+                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_OverallProgress')}" FontSize="11"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <ProgressBar Value="{x:Bind Curriculum.OverallProgressPercent, Mode=OneWay}" Maximum="100" Height="8" CornerRadius="4" />
+
+                            <!-- Daily Tasks Repeater -->
+                            <ItemsControl ItemsSource="{x:Bind Curriculum.Tasks, Mode=OneWay}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:CurriculumTaskDto">
+                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1" CornerRadius="10" Padding="16,12" Margin="0,4">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12" VerticalAlignment="Center">
+                                                <!-- Status Icon -->
+                                                <FontIcon Glyph="{x:Bind StatusGlyph}"
+                                                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                          FontSize="18" VerticalAlignment="Center" />
+
+                                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind TitleVi}" FontWeight="SemiBold" FontSize="13" />
+                                                    <TextBlock Text="{x:Bind DescriptionVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" TextWrapping="Wrap" />
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind CompletedCount}" FontWeight="Bold" FontSize="13" />
+                                                    <TextBlock Text="/" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="13" />
+                                                    <TextBlock Text="{x:Bind TargetCount}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                                                </StackPanel>
+
+                                                <Button Grid.Column="3" Content="Mở" Tag="{x:Bind NavigationTag}"
+                                                        Click="TaskNavigate_Click" CornerRadius="6" Padding="12,4" FontSize="12" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </TabViewItem>
+
+                    <!-- TAB 2: Goal Configuration -->
+                    <TabViewItem Header="{x:Bind Loc.GetString('StudyPlanner_GoalCardTitle')}" IsClosable="False">
+                        <StackPanel Spacing="16" Margin="0,14,0,0">
+                            <!-- Exam & Target Score -->
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_ExamTarget')}" FontSize="12" FontWeight="SemiBold" />
+                                    <ComboBox x:Name="ExamTargetCombo" HorizontalAlignment="Stretch" SelectedIndex="0">
+                                        <ComboBoxItem Content="TOEIC" Tag="Toeic" />
+                                        <ComboBoxItem Content="IELTS" Tag="Ielts" />
+                                        <ComboBoxItem Content="VSTEP" Tag="Vstep" />
+                                        <ComboBoxItem Content="General English" Tag="General" />
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="6">
+                                    <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_TargetScore')}" FontSize="12" FontWeight="SemiBold" />
+                                    <TextBox x:Name="TargetScoreBox" PlaceholderText="e.g. 750+, 7.0, B2" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Target Date Picker -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_TargetDate')}" FontSize="12" FontWeight="SemiBold" />
+                                <CalendarDatePicker x:Name="TargetDatePicker" HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                            <!-- Daily Study Minutes -->
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_DailyMinutes')}" FontSize="12" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind MinutesSlider.Value, Mode=OneWay}" FontWeight="Bold" FontSize="13" />
+                                </Grid>
+                                <Slider x:Name="MinutesSlider" Minimum="10" Maximum="90" StepFrequency="5" Value="25" />
+                            </StackPanel>
+
+                            <!-- Daily New Words -->
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_DailyNewWords')}" FontSize="12" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind NewWordsSlider.Value, Mode=OneWay}" FontWeight="Bold" FontSize="13" />
+                                </Grid>
+                                <Slider x:Name="NewWordsSlider" Minimum="5" Maximum="40" StepFrequency="5" Value="10" />
+                            </StackPanel>
+
+                            <!-- Daily Reviews Target -->
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_DailyReviews')}" FontSize="12" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind ReviewsSlider.Value, Mode=OneWay}" FontWeight="Bold" FontSize="13" />
+                                </Grid>
+                                <Slider x:Name="ReviewsSlider" Minimum="10" Maximum="60" StepFrequency="5" Value="20" />
+                            </StackPanel>
+
+                            <!-- Save Button -->
+                            <Button Click="SaveGoal_Click" Style="{ThemeResource AccentButtonStyle}"
+                                    CornerRadius="8" Padding="20,10" HorizontalAlignment="Right" FontWeight="SemiBold">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE74E;" FontSize="13" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_SaveGoal')}" />
+                                </StackPanel>
+                            </Button>
+
+                            <InfoBar x:Name="GoalSavedInfoBar"
+                                     IsOpen="False"
+                                     Severity="Success"
+                                     Title="{x:Bind Loc.GetString('Toast_SuccessTitle')}"
+                                     Message="{x:Bind Loc.GetString('StudyPlanner_GoalSaved')}"
+                                     CornerRadius="8" />
+                        </StackPanel>
+                    </TabViewItem>
+                </TabView.TabItems>
+            </TabView>
+
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

@@ -143,6 +143,14 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     public partial ReviewSessionMode CurrentMode { get; set; } = ReviewSessionMode.TodayDue;
 
     [ObservableProperty]
+    public partial SmartReviewPresetMode? CurrentSmartPreset { get; set; }
+
+    [ObservableProperty]
+    public partial MemoryStabilityMetricsDto? CurrentCardMemoryStability { get; set; }
+
+    public ObservableCollection<SmartReviewPresetInfo> SmartPresetsList { get; } = new();
+
+    [ObservableProperty]
     public partial string AgainIntervalText { get; set; } = "< 1d";
 
     [ObservableProperty]
@@ -243,7 +251,24 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     [RelayCommand]
     public async Task StartReviewAsync(ReviewSessionMode mode)
     {
+        CurrentSmartPreset = null;
         await StartReviewWithFilterAsync(mode, null, null, null);
+    }
+
+    [RelayCommand]
+    public async Task StartSmartReviewPresetAsync(SmartReviewPresetMode presetMode)
+    {
+        CurrentSmartPreset = presetMode;
+        var title = presetMode switch
+        {
+            SmartReviewPresetMode.UrgentOverdue => _localizationService.GetString("SmartReview_UrgentOverdue"),
+            SmartReviewPresetMode.HighForgettingRisk => _localizationService.GetString("SmartReview_HighForgettingRisk"),
+            SmartReviewPresetMode.ExamHighYield => _localizationService.GetString("SmartReview_ExamHighYield"),
+            SmartReviewPresetMode.FreshLearned => _localizationService.GetString("SmartReview_FreshLearned"),
+            SmartReviewPresetMode.LongTermConsolidation => _localizationService.GetString("SmartReview_LongTermConsolidation"),
+            _ => null
+        };
+        await StartReviewWithFilterAsync(ReviewSessionMode.TodayDue, null, null, title);
     }
 
     private bool _isStartingReview = false;
@@ -266,14 +291,22 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
 
         try
         {
-            IReadOnlyList<ReviewCardDto> cards = mode switch
+            IReadOnlyList<ReviewCardDto> cards;
+            if (CurrentSmartPreset.HasValue)
             {
-                ReviewSessionMode.LearnNew => await _reviewService.GetNewCardsAsync(limit: 20),
-                ReviewSessionMode.Difficult => await _reviewService.GetDifficultCardsAsync(limit: 20),
-                ReviewSessionMode.ByTopic when topicId.HasValue => await _reviewService.GetCardsByTopicIdAsync(topicId.Value, limit: 50),
-                ReviewSessionMode.CustomSelection when wordIds != null && wordIds.Count > 0 => await _reviewService.GetCardsByWordIdsAsync(wordIds),
-                _ => await _reviewService.GetBalancedReviewQueueAsync(limit: 30)
-            };
+                cards = await _reviewService.GetPresetQueueAsync(CurrentSmartPreset.Value, limit: 30);
+            }
+            else
+            {
+                cards = mode switch
+                {
+                    ReviewSessionMode.LearnNew => await _reviewService.GetNewCardsAsync(limit: 20),
+                    ReviewSessionMode.Difficult => await _reviewService.GetDifficultCardsAsync(limit: 20),
+                    ReviewSessionMode.ByTopic when topicId.HasValue => await _reviewService.GetCardsByTopicIdAsync(topicId.Value, limit: 50),
+                    ReviewSessionMode.CustomSelection when wordIds != null && wordIds.Count > 0 => await _reviewService.GetCardsByWordIdsAsync(wordIds),
+                    _ => await _reviewService.GetBalancedReviewQueueAsync(limit: 30)
+                };
+            }
 
             // If in TodayDue mode and empty, fallback to new cards automatically
             if (mode == ReviewSessionMode.TodayDue && cards.Count == 0)
@@ -617,6 +650,8 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         HardIntervalText = preview.HardText;
         GoodIntervalText = preview.GoodText;
         EasyIntervalText = preview.EasyText;
+
+        CurrentCardMemoryStability = _reviewService.GetMemoryStabilityMetrics(card);
 
         if (card.Examples != null && card.Examples.Count > 0)
         {

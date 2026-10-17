@@ -6,4 +6,5 @@ public interface IStatisticsService
 {
     Task<DashboardSummaryDto> GetDashboardSummaryAsync(CancellationToken cancellationToken = default);
     Task<DetailedAnalyticsDto> GetDetailedAnalyticsAsync(CancellationToken cancellationToken = default);
+    Task<LearningIntelligenceReportDto> GetLearningIntelligenceReportAsync(CancellationToken cancellationToken = default);
 }

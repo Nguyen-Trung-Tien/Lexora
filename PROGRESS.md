@@ -2,7 +2,7 @@
 
 ## 📊 Quality Gates Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
-- **Automated Tests**: **343 / 343 Tests Passing** (292 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+- **Automated Tests**: **365 / 365 Tests Passing** (314 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
 
 ---
@@ -38,3 +38,26 @@
   - Configurable target retention probability (default $0.90$) and mathematically grounded forgetting curves.
   - Provided full backward compatibility mapping to SM-2 `EaseFactor` ($\ge 1.3$) and registered as a Singleton in `DependencyInjection.cs`.
   - Added 7 comprehensive unit tests in `FsrsSpacedRepetitionEngineTests.cs`.
+
+### 4. Learning Intelligence Suite & Self-Healing Data Center
+- **Learning Intelligence Dashboard & Cognitive Memory Analytics**:
+  - Implemented `GetLearningIntelligenceAsync` in `StatisticsService.cs` calculating Ebbinghaus Retrievability curves ($R = e^{-t/S}$), cognitive load forecast for 7 days ahead, hourly circadian learning retention rates, and identification of critical at-risk vocabulary.
+  - Added cognitive memory cards, circadian retention metrics, and at-risk vocabulary table to `DashboardPage.xaml` and `DashboardViewModel.cs`.
+- **Smart Review Presets**:
+  - Implemented `GetSmartPresetsAsync` and `GetCardsByPresetAsync` in `ReviewService.cs` supporting high-yield cards, cards with $R < 70\%$, weak CEFR tiers, and cram sessions.
+  - Integrated preset selector into `ReviewPage.xaml` with dynamic card memory stability and retrievability indicators.
+- **Adaptive Quiz Engine (Computerized Adaptive Testing - CAT)**:
+  - Implemented `IAdaptiveQuizService` and `AdaptiveQuizService.cs` recalibrating question CEFR tiers in real-time based on cumulative score, generating POS-matched distractors, and evaluating estimated user CEFR level.
+  - Integrated CAT mode selector and adaptive testing workflow in `TestPage.xaml` and `TestViewModel.cs`.
+- **Study Planner & Daily Pacing Manager**:
+  - Implemented `IStudyPlannerService` and `StudyPlannerService.cs` managing daily curriculum checklists (new words, reviews, quizzes, grammar rules), streak preservation, weekly targets, and offline JSON persistence (`%LocalAppData%/Lexora/data/study_plan.json`).
+  - Created `StudyPlannerDialog.xaml` accessible from Shell navigation and Dashboard.
+- **Vocabulary Knowledge Graph**:
+  - Implemented `IVocabularyKnowledgeGraphService` and `VocabularyKnowledgeGraphService.cs` extracting semantic connections across synonyms, antonyms, topics, and CEFR tiers.
+  - Created interactive `KnowledgeGraphDialog.xaml` with dynamic node pivoting, preview card, and native UK/US audio pronunciation.
+- **Data Health Center & Self-Healing Maintenance**:
+  - Implemented `IDataHealthService` and `DataHealthService.cs` providing SQLite PRAGMA integrity verification, orphan entity cleanup, WAL checkpointing, database vacuuming, and audio cache management.
+  - Created `DataHealthCenterDialog.xaml` accessible from Settings and Shell quick actions.
+- **Quality Gates Benchmark**:
+  - Added 22 new unit tests across all 6 services (`LearningIntelligenceServiceTests.cs`, `AdaptiveQuizServiceTests.cs`, `StudyPlannerServiceTests.cs`, `KnowledgeGraphServiceTests.cs`, `DataHealthServiceTests.cs`).
+  - Total test count expanded to **365 / 365 tests passing** with 0 warnings and 0 errors.

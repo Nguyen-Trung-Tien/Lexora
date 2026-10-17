@@ -1,3 +1,4 @@
+using Lexora.Application.Interfaces;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -90,5 +91,24 @@ public sealed partial class DashboardPage : Page, ILocalizableView
     private void StreakCard_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
     {
         _soundFeedback.PlayStreakSound();
+    }
+
+    private async void OpenStudyPlanner_Click(object sender, RoutedEventArgs e)
+    {
+        _soundFeedback.PlaySoftTapSound();
+        try
+        {
+            var plannerService = App.Current.Services.GetRequiredService<IStudyPlannerService>();
+            var navService = App.Current.Services.GetService<INavigationService>();
+            var dialog = new StudyPlannerDialog(plannerService, Loc, navService)
+            {
+                XamlRoot = this.XamlRoot
+            };
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardPage] OpenStudyPlanner error: {ex.Message}");
+        }
     }
 }

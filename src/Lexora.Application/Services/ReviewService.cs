@@ -441,6 +441,141 @@ public class ReviewService : IReviewService
         return _srEngine.CalculateRetentionProbability(dummyCard);
     }
 
+    public MemoryStabilityMetricsDto GetMemoryStabilityMetrics(ReviewCardDto card)
+    {
+        double retrievability = GetRetentionProbability(card);
+        double stabilityDays = Math.Max(1.0, card.IntervalDays * (card.EaseFactor / 2.5));
+        var preview = GetCardIntervalPreview(card);
+
+        string healthLevel = retrievability switch
+        {
+            >= 85.0 => "Permanent",
+            >= 70.0 => "Stable",
+            >= 50.0 => "Developing",
+            _ => "Fragile"
+        };
+
+        return new MemoryStabilityMetricsDto(
+            WordId: card.WordId,
+            Term: card.Term,
+            StabilityDays: Math.Round(stabilityDays, 1),
+            RetrievabilityPercent: retrievability,
+            EaseFactor: card.EaseFactor,
+            Repetitions: card.Repetitions,
+            Lapses: card.Lapses,
+            IntervalIfAgain: preview.AgainText,
+            IntervalIfHard: preview.HardText,
+            IntervalIfGood: preview.GoodText,
+            IntervalIfEasy: preview.EasyText,
+            MemoryHealthLevel: healthLevel
+        );
+    }
+
+    public async Task<IReadOnlyList<SmartReviewPresetInfo>> GetSmartPresetsAsync(CancellationToken cancellationToken = default)
+    {
+        int dueCount = await _reviewRepo.CountDueCardsAsync(DateTime.UtcNow, cancellationToken);
+        var difficult = await _reviewRepo.GetDifficultCardsAsync(50, cancellationToken);
+        var newCards = await _reviewRepo.GetNewCardsAsync(50, cancellationToken);
+
+        var presets = new List<SmartReviewPresetInfo>
+        {
+            new SmartReviewPresetInfo(
+                Mode: SmartReviewPresetMode.StandardDue,
+                TitleVi: "Ôn tập định kỳ SM-2",
+                TitleEn: "Spaced Repetition Due",
+                DescriptionVi: "Ôn các từ đã chạm ngưỡng lãng quên Ebbinghaus theo thuật toán chuẩn.",
+                DescriptionEn: "Review words reaching the forgetting threshold based on SM-2.",
+                IconGlyph: "\uE895",
+                AvailableCardsCount: dueCount
+            ),
+            new SmartReviewPresetInfo(
+                Mode: SmartReviewPresetMode.SpeedBlitz,
+                TitleVi: "Speed Blitz (Phản xạ siêu tốc)",
+                TitleEn: "Speed Blitz Reflex",
+                DescriptionVi: "Luyện phản xạ tức thì 3 giây/từ cho các từ vựng đã nắm bắt.",
+                DescriptionEn: "High-speed 3-second rapid recall drills to achieve fluency.",
+                IconGlyph: "\uE945",
+                AvailableCardsCount: Math.Max(dueCount, 25)
+            ),
+            new SmartReviewPresetInfo(
+                Mode: SmartReviewPresetMode.LeechRescue,
+                TitleVi: "Leech Rescue (Giải cứu từ khó)",
+                TitleEn: "Leech & Difficult Word Rescue",
+                DescriptionVi: "Tập trung giải cứu các từ hay quên (Lapses ≥ 1) bằng gợi ý chuyên sâu.",
+                DescriptionEn: "Rescue stubborn words with past lapses and low ease factors.",
+                IconGlyph: "\uE7BA",
+                AvailableCardsCount: difficult?.Count ?? 0
+            ),
+            new SmartReviewPresetInfo(
+                Mode: SmartReviewPresetMode.HighYieldExam,
+                TitleVi: "Trọng tâm Đề thi (High-Yield)",
+                TitleEn: "High-Yield Exam Focus",
+                DescriptionVi: "Ưu tiên ôn luyện từ vựng xuất hiện nhiều trong TOEIC / IELTS / VSTEP.",
+                DescriptionEn: "Focus exclusively on frequent exam-tagged vocabulary.",
+                IconGlyph: "\uE7BE",
+                AvailableCardsCount: Math.Min(30, dueCount + (newCards?.Count ?? 0))
+            ),
+            new SmartReviewPresetInfo(
+                Mode: SmartReviewPresetMode.ContextImmersion,
+                TitleVi: "Đắm chìm Ngữ cảnh (Context)",
+                TitleEn: "Contextual Immersion",
+                DescriptionVi: "Luyện tập kèm câu ví dụ mẫu, cụm từ kết hợp và nghe phát âm.",
+                DescriptionEn: "Practice words accompanied by authentic example sentences.",
+                IconGlyph: "\uE8D2",
+                AvailableCardsCount: Math.Min(30, dueCount + 10)
+            )
+        };
+
+        return presets.Where(p => p != null).ToList();
+    }
+
+    public async Task<IReadOnlyList<ReviewCardDto>> GetPresetQueueAsync(SmartReviewPresetMode mode, int limit = 30, CancellationToken cancellationToken = default)
+    {
+        switch (mode)
+        {
+            case SmartReviewPresetMode.UrgentOverdue:
+            case SmartReviewPresetMode.StandardDue:
+            {
+                var due = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit, cancellationToken);
+                return due.Select(MapToDto).ToList();
+            }
+            case SmartReviewPresetMode.HighForgettingRisk:
+            case SmartReviewPresetMode.LeechRescue:
+            {
+                var difficult = await _reviewRepo.GetDifficultCardsAsync(limit, cancellationToken);
+                return difficult.Select(MapToDto).ToList();
+            }
+            case SmartReviewPresetMode.ExamHighYield:
+            case SmartReviewPresetMode.HighYieldExam:
+            {
+                var allDue = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit * 2, cancellationToken);
+                var examCards = allDue.Where(c => c.Word?.WordExamTags != null && c.Word.WordExamTags.Count > 0).Take(limit).ToList();
+                if (examCards.Count > 0) return examCards.Select(MapToDto).ToList();
+                return allDue.Take(limit).Select(MapToDto).ToList();
+            }
+            case SmartReviewPresetMode.FreshLearned:
+            case SmartReviewPresetMode.SpeedBlitz:
+            {
+                var due = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit, cancellationToken);
+                if (due.Count >= 5) return due.Select(MapToDto).ToList();
+                return await GetBalancedReviewQueueAsync(limit, cancellationToken);
+            }
+            case SmartReviewPresetMode.LongTermConsolidation:
+            case SmartReviewPresetMode.ContextImmersion:
+            {
+                var allDue = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit * 2, cancellationToken);
+                var withExamples = allDue.Where(c => c.Word?.Meanings != null && c.Word.Meanings.Any(m => m.Examples.Count > 0)).Take(limit).ToList();
+                if (withExamples.Count > 0) return withExamples.Select(MapToDto).ToList();
+                return allDue.Take(limit).Select(MapToDto).ToList();
+            }
+            default:
+            {
+                var due = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit, cancellationToken);
+                return due.Select(MapToDto).ToList();
+            }
+        }
+    }
+
     public async Task<IReadOnlyList<StudySessionDto>> GetRecentSessionsAsync(int limit = 10, CancellationToken cancellationToken = default)
     {
         var sessions = await _reviewRepo.GetRecentSessionsAsync(limit, cancellationToken);

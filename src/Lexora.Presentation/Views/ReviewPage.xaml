@@ -49,6 +49,43 @@
                             </StackPanel>
                         </Button>
 
+                        <!-- Smart Review Presets Dropdown -->
+                        <DropDownButton x:Name="SmartPresetsDropDown" CornerRadius="8" Padding="12,7">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE946;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Name="SmartPresetsBtnText" Text="Smart Presets" FontWeight="SemiBold" FontSize="13" />
+                            </StackPanel>
+                            <DropDownButton.Flyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem x:Name="PresetUrgentItem" Text="Urgent Overdue" Tag="UrgentOverdue" Click="SmartPresetItem_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE7BA;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="PresetHighRiskItem" Text="High Forgetting Risk" Tag="HighForgettingRisk" Click="SmartPresetItem_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE814;" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="PresetExamYieldItem" Text="Exam High-Yield" Tag="ExamHighYield" Click="SmartPresetItem_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE734;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="PresetFreshItem" Text="Fresh Learned" Tag="FreshLearned" Click="SmartPresetItem_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE710;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="PresetConsolidationItem" Text="Long-Term Consolidation" Tag="LongTermConsolidation" Click="SmartPresetItem_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE73E;" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </DropDownButton.Flyout>
+                        </DropDownButton>
+
                         <!-- Unit / Topic Dropdown -->
                         <ComboBox x:Name="ReviewUnitCombo"
                                   PlaceholderText="{x:Bind Loc.GetString('Vocab_TopicFilter')}"
@@ -388,6 +425,43 @@
                                                    FontStyle="Italic"
                                                    Visibility="{x:Bind ViewModel.CurrentCard.PrimaryDefinitionEn, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" />
                                     </StackPanel>
+                                </Border>
+
+                                <!-- Memory Stability & Retrievability Metrics Badge -->
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="10" Padding="14,10"
+                                        Visibility="{x:Bind ViewModel.CurrentCardMemoryStability, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
+                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,4">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <FontIcon Glyph="&#xE946;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.CurrentCardMemoryStability.HealthLevel, Mode=OneWay}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="{x:Bind Loc.GetString('SmartReview_Stability')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.CurrentCardMemoryStability.StabilityDays, Mode=OneWay, FallbackValue='1'}" FontSize="12" FontWeight="Bold" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Day_Unit')}" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="{x:Bind Loc.GetString('SmartReview_Retrievability')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.CurrentCardMemoryStability.RetrievabilityPercent, Mode=OneWay, FallbackValue='90'}" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="%" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="{x:Bind Loc.GetString('SmartReview_HalfLife')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.CurrentCardMemoryStability.HalfLifeDays, Mode=OneWay, FallbackValue='1'}" FontSize="12" FontWeight="Bold" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Day_Unit')}" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="2" Text="{x:Bind ViewModel.CurrentCardMemoryStability.OptimalRecallWindow, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                    </Grid>
                                 </Border>
 
                                 <!-- Bilingual Contextual Examples -->

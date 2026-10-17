@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddSingleton<IAudioStorageService, LocalAudioStorageService>();
         services.AddSingleton<IDatabaseBackupService>(sp =>
             new DatabaseBackupService(dbPath, sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<DatabaseBackupService>>()));
+        services.AddScoped<IDataHealthService, DataHealthService>();
 
         // Review reminder & notifications
         services.AddScoped<IReviewReminderService, ReviewReminderService>();

@@ -19,6 +19,7 @@ public partial class TestViewModel : ObservableObject
     private readonly INavigationService _navService;
     private readonly ILocalizationService _localizationService;
     private readonly IUserPreferencesService _preferencesService;
+    private readonly IAdaptiveQuizService? _adaptiveQuizService;
 
     private Guid _sessionId;
     private List<TestQuestionDto> _allQuestions = new();
@@ -69,6 +70,31 @@ public partial class TestViewModel : ObservableObject
     public ObservableCollection<TopicDto> Topics { get; } = new();
     public ObservableCollection<ExamType> ExamTypes { get; } = new();
     public ObservableCollection<CefrLevel> CefrLevels { get; } = new();
+
+    // Adaptive CAT Mode properties
+    [ObservableProperty]
+    public partial bool EnableAdaptiveCatMode { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool IsAdaptiveMode { get; set; } = false;
+
+    [ObservableProperty]
+    public partial CefrLevel CalibratedLevel { get; set; } = CefrLevel.B1;
+
+    [ObservableProperty]
+    public partial string CalibratedLevelDisplay { get; set; } = "B1";
+
+    [ObservableProperty]
+    public partial string EstimatedToeicDisplay { get; set; } = "450 - 695";
+
+    [ObservableProperty]
+    public partial string EstimatedIeltsDisplay { get; set; } = "4.0 - 5.0";
+
+    [ObservableProperty]
+    public partial string EstimatedVstepDisplay { get; set; } = "B1 Intermediate";
+
+    [ObservableProperty]
+    public partial AdaptiveQuizSummaryDto? AdaptiveSummary { get; set; }
 
     // Custom Word List Mode properties
     [ObservableProperty]
@@ -154,7 +180,8 @@ public partial class TestViewModel : ObservableObject
         IAudioPlayerService audioPlayer,
         INavigationService navService,
         ILocalizationService localizationService,
-        IUserPreferencesService preferencesService)
+        IUserPreferencesService preferencesService,
+        IAdaptiveQuizService? adaptiveQuizService = null)
     {
         _testService = testService;
         _vocabService = vocabService;
@@ -163,6 +190,7 @@ public partial class TestViewModel : ObservableObject
         _navService = navService;
         _localizationService = localizationService;
         _preferencesService = preferencesService;
+        _adaptiveQuizService = adaptiveQuizService;
     }
 
     [RelayCommand]
@@ -368,6 +396,15 @@ public partial class TestViewModel : ObservableObject
     public async Task StartTestAsync()
     {
         if (IsLoading) return;
+
+        if (EnableAdaptiveCatMode && _adaptiveQuizService != null)
+        {
+            await StartAdaptiveTestAsync();
+            return;
+        }
+
+        IsAdaptiveMode = false;
+        AdaptiveSummary = null;
         IsLoading = true;
         StatusSeverity = InfoBarSeverity.Informational;
         StatusMessage = _localizationService.GetString("Test_Status_Preparing");
@@ -554,6 +591,36 @@ public partial class TestViewModel : ObservableObject
             answer,
             responseTime
         ));
+
+        if (IsAdaptiveMode && _adaptiveQuizService != null)
+        {
+            int selectedOptIndex = 0;
+            for (int i = 0; i < CurrentOptions.Count; i++)
+            {
+                if (string.Equals(CurrentOptions[i].Text.Trim(), answer.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    selectedOptIndex = i;
+                    break;
+                }
+            }
+
+            _ = SubmitAdaptiveAnswerAsync(selectedOptIndex, responseTime);
+        }
+    }
+
+    private async Task SubmitAdaptiveAnswerAsync(int selectedOptionIndex, int responseTime)
+    {
+        if (_adaptiveQuizService == null || CurrentQuestion == null) return;
+        try
+        {
+            var eval = await _adaptiveQuizService.SubmitAnswerAsync(_sessionId, CurrentQuestion.QuestionNumber, selectedOptionIndex, responseTime);
+            CalibratedLevel = eval.NewCalibratedLevel;
+            CalibratedLevelDisplay = eval.NewCalibratedLevel.ToString();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TestViewModel] Adaptive submit error: {ex.Message}");
+        }
     }
 
     private bool _isNextInProgress;
@@ -576,6 +643,18 @@ public partial class TestViewModel : ObservableObject
             {
                 LoadQuestion(CurrentQuestionIndex + 1);
             }
+            else if (IsAdaptiveMode && _adaptiveQuizService != null)
+            {
+                var nextQ = await _adaptiveQuizService.GetNextQuestionAsync(_sessionId);
+                if (nextQ != null)
+                {
+                    LoadAdaptiveQuestion(nextQ);
+                }
+                else
+                {
+                    await FinishAdaptiveTestAsync();
+                }
+            }
             else
             {
                 await FinishTestAsync();
@@ -584,6 +663,156 @@ public partial class TestViewModel : ObservableObject
         finally
         {
             _isNextInProgress = false;
+        }
+    }
+
+    public async Task StartAdaptiveTestAsync()
+    {
+        if (_adaptiveQuizService == null) return;
+        IsLoading = true;
+        StatusSeverity = InfoBarSeverity.Informational;
+        StatusMessage = _localizationService.GetString("Test_Status_Preparing");
+
+        try
+        {
+            var config = new AdaptiveQuizConfigDto(
+                QuestionCount: QuestionCount > 0 ? QuestionCount : 10,
+                ExamTarget: SelectedExamType ?? ExamType.General,
+                InitialLevel: SelectedLevel ?? CefrLevel.B1,
+                FocusWeakWords: WeakWordsOnly
+            );
+
+            var firstQuestion = await _adaptiveQuizService.StartQuizAsync(config);
+            if (firstQuestion == null)
+            {
+                StatusSeverity = InfoBarSeverity.Warning;
+                StatusMessage = _localizationService.GetString("Test_Status_NoQuestions");
+                return;
+            }
+
+            IsAdaptiveMode = true;
+            AdaptiveSummary = null;
+            IsSetupMode = false;
+            IsResultMode = false;
+            IsTestingMode = true;
+
+            _sessionId = firstQuestion.SessionId;
+            TotalQuestions = config.QuestionCount;
+            _userAnswers.Clear();
+            _totalTestTimer.Restart();
+
+            LoadAdaptiveQuestion(firstQuestion);
+        }
+        catch (Exception ex)
+        {
+            StatusSeverity = InfoBarSeverity.Error;
+            StatusMessage = string.Format(_localizationService.GetString("Test_ErrorFormat"), ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void LoadAdaptiveQuestion(AdaptiveQuestionDto adaptiveQ)
+    {
+        CurrentQuestionIndex = adaptiveQ.QuestionIndex;
+        var dummyWord = new WordDto(
+            Id: adaptiveQ.WordId,
+            Term: adaptiveQ.PromptTerm,
+            PhoneticUk: null,
+            PhoneticUs: null,
+            AudioUkPath: null,
+            AudioUsPath: adaptiveQ.AudioPath,
+            Level: adaptiveQ.DifficultyLevel,
+            PrimaryPartOfSpeech: PartOfSpeech.Noun,
+            Notes: null,
+            Meanings: [],
+            Topics: [],
+            ExamTags: [],
+            LearningStatus: null,
+            NextReviewAt: null,
+            Confidence: 0.0
+        );
+
+        var testQ = new TestQuestionDto(
+            WordId: adaptiveQ.WordId,
+            QuestionNumber: adaptiveQ.QuestionIndex,
+            QuestionType: adaptiveQ.QuestionType,
+            Prompt: adaptiveQ.QuestionText,
+            SubPrompt: adaptiveQ.ExampleSentence,
+            AudioPath: adaptiveQ.AudioPath,
+            CorrectAnswer: adaptiveQ.Options[adaptiveQ.CorrectOptionIndex],
+            Options: adaptiveQ.Options.ToList(),
+            Explanation: adaptiveQ.Explanation,
+            TargetWord: dummyWord
+        );
+
+        CurrentQuestion = testQ;
+        CalibratedLevel = adaptiveQ.DifficultyLevel;
+        CalibratedLevelDisplay = adaptiveQ.DifficultyLevel.ToString();
+
+        ProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), adaptiveQ.QuestionIndex, TotalQuestions);
+        ProgressPercent = (double)adaptiveQ.QuestionIndex / TotalQuestions * 100.0;
+
+        CurrentOptions.Clear();
+        foreach (var opt in adaptiveQ.Options)
+        {
+            CurrentOptions.Add(new TestOptionItem
+            {
+                Text = opt,
+                State = TestOptionState.Default,
+                Glyph = "\uE739"
+            });
+        }
+
+        SelectedOption = null;
+        UserTextInput = string.Empty;
+        IsAnswerSubmitted = false;
+        IsAnswerCorrect = false;
+        ExplanationText = string.Empty;
+        HasAudio = !string.IsNullOrEmpty(testQ.AudioPath);
+        _questionTimer.Restart();
+    }
+
+    private async Task FinishAdaptiveTestAsync()
+    {
+        if (_adaptiveQuizService == null) return;
+        IsLoading = true;
+        _totalTestTimer.Stop();
+
+        try
+        {
+            var summary = await _adaptiveQuizService.FinishQuizAsync(_sessionId);
+            AdaptiveSummary = summary;
+
+            ScorePercentage = summary.AccuracyPercentage;
+            CorrectCount = summary.CorrectCount;
+            IncorrectCount = summary.IncorrectCount;
+            TimeTakenText = _totalTestTimer.Elapsed.ToString(@"mm\:ss");
+
+            ResultMessage = string.Format(_localizationService.GetString("AdaptiveQuiz_FinalLevelFormat"), summary.FinalEstimatedLevel);
+            EstimatedToeicDisplay = summary.EstimatedToeicBand;
+            EstimatedIeltsDisplay = summary.EstimatedIeltsBand;
+            EstimatedVstepDisplay = summary.EstimatedVstepLevel;
+
+            WeakWordsList.Clear();
+            foreach (var w in summary.DifficultWordsToReview)
+            {
+                WeakWordsList.Add(w);
+            }
+
+            IsTestingMode = false;
+            IsResultMode = true;
+        }
+        catch (Exception ex)
+        {
+            StatusSeverity = InfoBarSeverity.Error;
+            StatusMessage = string.Format(_localizationService.GetString("Test_ErrorFormat"), ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 

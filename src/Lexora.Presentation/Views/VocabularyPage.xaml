@@ -730,6 +730,12 @@
                                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_BtnTest')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
+                                    <Button Click="OpenKnowledgeGraph_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_Title')}" CornerRadius="8" Padding="8,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon Glyph="&#xE81E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_SemanticGraph')}" FontSize="12" />
+                                        </StackPanel>
+                                    </Button>
                                     <Button x:Name="BtnCopyWord" Click="CopyWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Copy')}" CornerRadius="8" Padding="8,6">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon x:Name="IconCopyWord" Glyph="&#xE8C8;" FontSize="13" />

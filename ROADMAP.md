@@ -36,7 +36,7 @@ gantt
 - [x] **Quality Gate Benchmark**: Đạt **343/343 Automated Tests** (292 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
 - [x] **Bilingual Localization (i18n)**: Hỗ trợ chuyển đổi tức thời giữa Tiếng Việt (`vi-VN`) và English (`en-US`) qua `ILocalizationService`.
 
-### 🟡 Phase 2: Production Hardening & Advanced UX (Đang triển khai)
+### 🟡 Phase 2: Production Hardening, Advanced UX & Learning Intelligence Suite (Đang hoàn thiện)
 - [x] **Free Spaced Repetition Scheduler (FSRS v5)**:
   - Cài đặt `IFsrsSpacedRepetitionEngine` mô hình hóa độ nhớ qua 3 tham số $S$ (Stability), $D$ (Difficulty), $R$ (Retrievability).
   - Khả năng tương thích ngược hoàn toàn với dữ liệu SM-2 lịch sử.
@@ -47,6 +47,20 @@ gantt
   - Trải nghiệm lật thẻ 3D (`PlaneProjection`) với góc lật mượt mà 300ms inflection point tại 90°.
 - [x] **Responsive Layout Adaptability**:
   - Tự động chuyển đổi layout Review từ 2 cột sang 1 cột xếp chồng khi màn hình dưới 880px, chống clipping nút bấm.
+- [x] **Learning Intelligence Dashboard & Cognitive Memory Analytics**:
+  - Phân tích độ nhớ Ebbinghaus ($R = e^{-t/S}$), cảnh báo từ vựng có nguy cơ quên lãng (At-Risk), dự báo tải nhận thức 7 ngày và biểu đồ retention theo khung giờ sinh học.
+- [x] **Smart Review Presets**:
+  - Bộ lọc hàng đợi thích ứng: High-Yield, Từ vựng sắp quên ($R < 70\%$), Trình độ CEFR yếu nhất và Cram Mode trước kỳ thi.
+- [x] **Adaptive Quiz CAT Engine (Computerized Adaptive Testing)**:
+  - Tự động điều chỉnh độ khó câu hỏi (A1–C2) theo thời gian thực dựa trên điểm accuracy tích lũy, tính điểm năng lực CEFR động.
+- [x] **Study Planner & Daily Curriculum Manager**:
+  - Checklist mục tiêu học tập hàng ngày (Từ mới, ôn tập, quiz, ngữ pháp), theo dõi tiến độ tuần và bảo vệ streak học tập.
+- [x] **Vocabulary Knowledge Graph**:
+  - Khám phá mạng lưới ngữ nghĩa tương tác: Từ đồng nghĩa, trái nghĩa, chủ đề và cấp độ CEFR với cơ chế pivot node động và phát âm audio.
+- [x] **Data Health Center & Self-Healing Maintenance**:
+  - Chẩn đoán SQLite PRAGMA integrity, dọn dẹp orphan records, tối ưu hóa WAL checkpointing, VACUUM và quản lý bộ nhớ đệm âm thanh.
+- [x] **Quality Gate Benchmark**:
+  - Nâng cấp bộ kiểm thử lên **365/365 Automated Tests** (314 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
 - [ ] **Automated CI/CD Quality Gates**:
   - Thiết lập GitHub Actions tự động kiểm thử định dạng CHANGELOG và chạy Skill Smoke Tests.
 
