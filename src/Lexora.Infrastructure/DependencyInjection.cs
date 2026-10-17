@@ -54,9 +54,6 @@ public static class DependencyInjection
         // Production Software Update Service
         services.AddSingleton<IUpdateService, UpdateService>();
 
-        // Community Vocabulary & Grammar Download Center Service
-        services.AddScoped<ICommunityDataService, CommunityDataService>();
-
         return services;
     }
 }

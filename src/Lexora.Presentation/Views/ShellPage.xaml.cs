@@ -115,7 +115,6 @@ public sealed partial class ShellPage : Page
                         TestPage => NavItemTest,
                         GrammarPage => NavItemGrammar,
                         LearningStoragePage => NavItemLearningStorage,
-                        DownloadCenterPage => NavItemDownloadCenter,
                         SettingsPage => NavItemSettings,
                         _ => null
                     };
@@ -191,7 +190,6 @@ public sealed partial class ShellPage : Page
             "Test" => typeof(TestPage),
             "Grammar" => typeof(GrammarPage),
             "LearningStorage" => typeof(LearningStoragePage),
-            "DownloadCenter" => typeof(DownloadCenterPage),
             "Settings" => typeof(SettingsPage),
             _ => null
         };
@@ -214,7 +212,6 @@ public sealed partial class ShellPage : Page
         NavItemTest.Content = _localizationService.GetString("Nav_Test");
         NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
         NavItemLearningStorage.Content = _localizationService.GetString("Nav_LearningStorage");
-        NavItemDownloadCenter.Content = _localizationService.GetString("Nav_DownloadCenter");
         NavItemSettings.Content = _localizationService.GetString("Nav_Settings");
         GlobalSearchBox.PlaceholderText = _localizationService.GetString("Search_Placeholder");
 
@@ -224,7 +221,6 @@ public sealed partial class ShellPage : Page
         ToolTipService.SetToolTip(NavItemTest, _localizationService.GetString("Shell_TooltipTest"));
         ToolTipService.SetToolTip(NavItemGrammar, _localizationService.GetString("Shell_TooltipGrammar"));
         ToolTipService.SetToolTip(NavItemLearningStorage, _localizationService.GetString("Shell_TooltipLearningStorage"));
-        ToolTipService.SetToolTip(NavItemDownloadCenter, _localizationService.GetString("Shell_TooltipDownloadCenter"));
         ToolTipService.SetToolTip(NavItemSettings, _localizationService.GetString("Shell_TooltipSettings"));
         ToolTipService.SetToolTip(GlobalSearchBox, _localizationService.GetString("Shell_SearchTooltip"));
 
@@ -301,7 +297,6 @@ public sealed partial class ShellPage : Page
             (Key: "test", Page: "Test", Title: _localizationService.GetString("Nav_Test"), Subtitle: _localizationService.GetString("Search_SmartNav_Test"), Glyph: "\uE765"),
             (Key: "grammar", Page: "Grammar", Title: _localizationService.GetString("Nav_Grammar"), Subtitle: _localizationService.GetString("Search_SmartNav_Grammar"), Glyph: "\uE8D2"),
             (Key: "storage", Page: "LearningStorage", Title: _localizationService.GetString("Nav_LearningStorage"), Subtitle: _localizationService.GetString("Search_SmartNav_LearningStorage"), Glyph: "\uE7B8"),
-            (Key: "download", Page: "DownloadCenter", Title: _localizationService.GetString("Nav_DownloadCenter"), Subtitle: _localizationService.GetString("DownloadCenter_Subtitle"), Glyph: "\uE896"),
             (Key: "settings", Page: "Settings", Title: _localizationService.GetString("Nav_Settings"), Subtitle: _localizationService.GetString("Search_SmartNav_Settings"), Glyph: "\uE713")
         };
 
@@ -463,10 +458,6 @@ public sealed partial class ShellPage : Page
                     case "Settings":
                         _navigationService.Navigate(typeof(SettingsPage));
                         NavView.SelectedItem = NavItemSettings;
-                        break;
-                    case "DownloadCenter":
-                        _navigationService.Navigate(typeof(DownloadCenterPage));
-                        NavView.SelectedItem = NavItemDownloadCenter;
                         break;
                 }
                 return;

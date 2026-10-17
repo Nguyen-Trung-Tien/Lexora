@@ -93,7 +93,6 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<TestViewModel>();
                 services.AddTransient<GrammarViewModel>();
                 services.AddTransient<LearningStorageViewModel>();
-                services.AddTransient<DownloadCenterViewModel>();
                 services.AddTransient<SettingsViewModel>();
 
                 // Views
@@ -104,7 +103,6 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<TestPage>();
                 services.AddTransient<GrammarPage>();
                 services.AddTransient<LearningStoragePage>();
-                services.AddTransient<DownloadCenterPage>();
                 services.AddTransient<SettingsPage>();
             })
             .Build();

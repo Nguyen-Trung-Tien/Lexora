@@ -83,29 +83,18 @@
   - **UK vs US Accent Comparison Lab**: Side-by-side pronunciation playback with phonetic transcription and linguistic variation notes (rhoticity, tapped 't', vowel shifts).
   - **Integrated Entry Points**: Seamlessly wired into `VocabularyPage.xaml` command bar, `TestPage.xaml` title banner, and shell quick actions.
   - **Automated Regression Suite**: Added 13 new unit tests in `PronunciationListeningLabServiceTests.cs`.
-### 7. Lexora v1.2.1 — Download Center & Community Sharing
+### 7. Lexora v1.2.1 — Version Stabilization & Decommission of Download Center
 - **Synchronized Version 1.2.1 Across All Artifacts**:
   - `Directory.Build.props`: Centralized `<Version>1.2.1</Version>`, `<AssemblyVersion>1.2.1.0</AssemblyVersion>`, `<FileVersion>1.2.1.0</FileVersion>`.
   - `Package.appxmanifest`: Windows App SDK MSIX package identity version set to `1.2.1.0`.
   - `build-installer.ps1`: Default distribution package version updated to `1.2.1`.
   - `SettingsViewModel.cs`: About section updated to version `1.2.1`.
   - User identity, database schema, and existing study records 100% preserved.
-- **Download Center (`DownloadCenterPage.xaml`, `DownloadCenterViewModel.cs`)**:
-  - Tightly integrated into `ShellPage.xaml` navigation (`NavItemDownloadCenter`, glyph `\uE896`, shortcut `Ctrl+7`).
-  - 4 segmented tabs: `Vocabulary`, `Grammar`, `My Downloads`, and `Import & Share`.
-  - Rich metadata display: package name, description, author, level (CEFR A1–C2), exam target (TOEIC, IELTS, VSTEP, General), item counts, file sizes, and tags.
-  - Search and filter bar for level, exam type, and term queries.
-  - Full Fluent 2 states: Loading progress ring, empty states, offline indicator info bar, and inline progress bars for downloads/imports.
-- **Repository Catalog & Offline Fallback Architecture**:
-  - `ICommunityDataService` and `CommunityDataService`: Fetches catalog from remote repository with optional GitHub Personal Access Token (PAT) support without hardcoding secrets.
-  - Embedded/bundled local catalog (`community/catalog.json`) and starter packages for TOEIC 600, IELTS Academic, VSTEP B1/B2, English Tenses, and Relative Clauses.
-  - Seamless offline fallback when repository is unreachable or private (no internet required).
-- **Secure Community Sharing**:
-  - Package export to `.lexpkg` / JSON format without leaking private user history, study logs, or full database files.
-  - Direct HTTPS URL download and file import with 20MB safety ceiling, SHA-256 cryptographic checksum verification, and path traversal prevention.
-  - Configurable duplicate resolution (`Skip` untouched vs `Overwrite` update).
-  - Atomic database transactions with rollback capability on error.
+- **Decommissioned Download Center**:
+  - Fully removed UI, ViewModels, and navigation entries (`NavItemDownloadCenter`, `DownloadCenterPage`, `DownloadCenterViewModel`, shortcut `Ctrl+7`).
+  - Removed `CommunityDataService` and community catalog files.
+  - Retained all core learning suites (Vocabulary, Grammar, Review with FSRS v5 / SM-2, Adaptive Quiz, Pronunciation & Listening Lab, Learning Intelligence, and Learning Storage).
 - **Quality Benchmark**:
-  - **395 / 395 Tests Passing** (344 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
   - Clean build: **0 Warnings, 0 Errors**.
-  - **100% Localization Parity** (1,274 keys across `vi-VN` and `en-US`).
+  - **100% Localization Parity** across `vi-VN` and `en-US`.
+
