@@ -34,11 +34,51 @@ public sealed partial class SplashScreenOverlay : UserControl
     public void UpdateLocalizedText()
     {
         TaglineTextBlock.Text = LocalizationHelper.GetString("Splash_Tagline");
+        EditionBadgeTextBlock.Text = LocalizationHelper.GetString("Splash_Badge");
         StatusTextBlock.Text = LocalizationHelper.GetString("Splash_StatusStarting");
+        Step1TextBlock.Text = LocalizationHelper.GetString("Splash_StepServices");
+        Step2TextBlock.Text = LocalizationHelper.GetString("Splash_StepDatabase");
+        Step3TextBlock.Text = LocalizationHelper.GetString("Splash_StepData");
+        Step4TextBlock.Text = LocalizationHelper.GetString("Splash_StepReady");
         ErrorTitleTextBlock.Text = LocalizationHelper.GetString("Splash_InitFailed");
         ErrorDetailsTextBlock.Text = LocalizationHelper.GetString("Splash_InitFailedDesc");
         RetryButton.Content = LocalizationHelper.GetString("Splash_Retry");
         ExitButton.Content = LocalizationHelper.GetString("Splash_Exit");
+    }
+
+    public void UpdateProgress(double progress)
+    {
+        if (DispatcherQueue != null && !DispatcherQueue.HasThreadAccess)
+        {
+            DispatcherQueue.TryEnqueue(() => UpdateProgress(progress));
+            return;
+        }
+
+        var percent = Math.Clamp(progress, 0.0, 1.0);
+        StartupProgressBar.Value = percent * 100.0;
+        ProgressPercentageTextBlock.Text = $"{(int)Math.Round(percent * 100)}%";
+
+        UpdateStepIndicator(Step1Dot, Step1TextBlock, percent >= 0.10);
+        UpdateStepIndicator(Step2Dot, Step2TextBlock, percent >= 0.35);
+        UpdateStepIndicator(Step3Dot, Step3TextBlock, percent >= 0.70);
+        UpdateStepIndicator(Step4Dot, Step4TextBlock, percent >= 0.98);
+    }
+
+    private static void UpdateStepIndicator(Microsoft.UI.Xaml.Shapes.Ellipse dot, TextBlock text, bool isActive)
+    {
+        if (App.Current.Resources.TryGetValue(
+            isActive ? "AccentFillColorDefaultBrush" : "SubtleFillColorSecondaryBrush",
+            out var dotBrushObj) && dotBrushObj is Microsoft.UI.Xaml.Media.Brush dotBrush)
+        {
+            dot.Fill = dotBrush;
+        }
+
+        if (App.Current.Resources.TryGetValue(
+            isActive ? "AccentTextFillColorPrimaryBrush" : "TextFillColorTertiaryBrush",
+            out var textBrushObj) && textBrushObj is Microsoft.UI.Xaml.Media.Brush textBrush)
+        {
+            text.Foreground = textBrush;
+        }
     }
 
     public async Task PlayEntranceAsync()

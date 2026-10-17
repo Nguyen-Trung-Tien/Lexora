@@ -31,6 +31,8 @@
     <Compile Include="..\..\src\Lexora.Presentation\Services\ShortcutResolver.cs" Link="Services\ShortcutResolver.cs" />
     <Compile Include="..\..\src\Lexora.Presentation\Services\IToastNotificationService.cs" Link="Services\IToastNotificationService.cs" />
     <Compile Include="..\..\src\Lexora.Presentation\Services\ToastNotificationService.cs" Link="Services\ToastNotificationService.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\IStartupOrchestrator.cs" Link="Services\IStartupOrchestrator.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\StartupOrchestrator.cs" Link="Services\StartupOrchestrator.cs" />
   </ItemGroup>
 
 </Project>

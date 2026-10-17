@@ -11,14 +11,17 @@ public class StartupOrchestrator : IStartupOrchestrator
 
     private StartupState _currentState = StartupState.Starting;
     private string _statusMessage = string.Empty;
+    private double _currentProgress = 0.0;
     private Exception? _lastError;
 
     public StartupState CurrentState => _currentState;
     public string StatusMessage => _statusMessage;
+    public double CurrentProgress => _currentProgress;
     public Exception? LastError => _lastError;
 
     public event EventHandler<StartupState>? StateChanged;
     public event EventHandler<string>? StatusMessageChanged;
+    public event EventHandler<double>? ProgressChanged;
 
     public StartupOrchestrator(
         IServiceProvider serviceProvider,
@@ -28,6 +31,7 @@ public class StartupOrchestrator : IStartupOrchestrator
         _logger = logger;
         var loc = _serviceProvider.GetService<ILocalizationService>();
         _statusMessage = loc?.GetString("Splash_StatusStarting") ?? "Initializing...";
+        _currentProgress = 0.12;
     }
 
     public async Task InitializeAppAsync(CancellationToken cancellationToken)
@@ -35,15 +39,17 @@ public class StartupOrchestrator : IStartupOrchestrator
         var loc = _serviceProvider.GetService<ILocalizationService>();
         _lastError = null;
         SetState(StartupState.Starting);
-        SetStatus(loc?.GetString("Splash_StatusBooting") ?? "Starting Lexora...");
+        SetProgress(0.12);
+        SetStatus(loc?.GetString("Splash_StatusBooting") ?? "Starting Lexora core systems...");
 
         try
         {
             // Step 1: Services setup & starting state
             cancellationToken.ThrowIfCancellationRequested();
             SetState(StartupState.Loading);
-            SetStatus(loc?.GetString("Splash_StatusCheckingDb") ?? "Checking database...");
-            await Task.Delay(120, cancellationToken);
+            SetProgress(0.35);
+            SetStatus(loc?.GetString("Splash_StatusCheckingDb") ?? "Checking SQLite database & schema...");
+            await Task.Delay(100, cancellationToken);
 
             // Step 2: Initialize SQLite Database & seed data
             using (var scope = _serviceProvider.CreateScope())
@@ -53,14 +59,16 @@ public class StartupOrchestrator : IStartupOrchestrator
             }
 
             cancellationToken.ThrowIfCancellationRequested();
+            SetProgress(0.70);
 
             // Step 3: Load Settings & Environment
-            SetStatus(loc?.GetString("Splash_StatusLoadingData") ?? "Loading study data & settings...");
-            await Task.Delay(150, cancellationToken);
+            SetStatus(loc?.GetString("Splash_StatusLoadingData") ?? "Loading study data & preferences...");
+            await Task.Delay(100, cancellationToken);
 
             // Step 4: Ready
+            SetProgress(1.00);
             SetStatus(loc?.GetString("Splash_StatusReady") ?? "Ready to launch!");
-            await Task.Delay(100, cancellationToken);
+            await Task.Delay(80, cancellationToken);
             SetState(StartupState.Ready);
             _logger.LogInformation("Lexora application initialization completed successfully.");
         }
@@ -95,5 +103,11 @@ public class StartupOrchestrator : IStartupOrchestrator
     {
         _statusMessage = message;
         StatusMessageChanged?.Invoke(this, message);
+    }
+
+    private void SetProgress(double progress)
+    {
+        _currentProgress = Math.Clamp(progress, 0.0, 1.0);
+        ProgressChanged?.Invoke(this, _currentProgress);
     }
 }

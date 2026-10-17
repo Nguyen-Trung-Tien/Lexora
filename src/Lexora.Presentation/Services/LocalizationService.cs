@@ -1012,15 +1012,20 @@ public class LocalizationService : ILocalizationService
 
             // Newly Added Splash Screen
             ["Splash_Tagline"] = "HỌC TỪ VỰNG THÔNG MINH & LẶP LẠI NGẮT QUÃNG",
+            ["Splash_Badge"] = "PHIÊN BẢN DESKTOP • NGOẠI TUYẾN",
+            ["Splash_StepServices"] = "Hệ thống",
+            ["Splash_StepDatabase"] = "Cơ sở dữ liệu",
+            ["Splash_StepData"] = "Dữ liệu học",
+            ["Splash_StepReady"] = "Sẵn sàng",
             ["Splash_InitFailed"] = "Không thể khởi tạo Lexora",
             ["Splash_InitFailedDesc"] = "Đã có lỗi xảy ra khi tải cơ sở dữ liệu SQLite hoặc cấu hình ứng dụng.",
             ["Splash_Retry"] = "Thử lại",
             ["Splash_Exit"] = "Đóng ứng dụng",
             ["Splash_StatusStarting"] = "Đang khởi tạo...",
-            ["Splash_StatusBooting"] = "Khởi động Lexora...",
-            ["Splash_StatusCheckingDb"] = "Đang kiểm tra cơ sở dữ liệu...",
-            ["Splash_StatusLoadingData"] = "Đang tải dữ liệu học tập & cài đặt...",
-            ["Splash_StatusReady"] = "Sẵn sàng khởi động!",
+            ["Splash_StatusBooting"] = "Khởi động hệ thống Lexora...",
+            ["Splash_StatusCheckingDb"] = "Đang kiểm tra cơ sở dữ liệu SQLite...",
+            ["Splash_StatusLoadingData"] = "Đang tải dữ liệu từ vựng & cài đặt...",
+            ["Splash_StatusReady"] = "Khởi động hoàn tất!",
             ["Splash_StatusErrorFormat"] = "Lỗi khởi tạo: {0}",
 
             // Newly Added Time & Relative Formatting
@@ -2375,14 +2380,19 @@ public class LocalizationService : ILocalizationService
 
             // Newly Added Splash Screen
             ["Splash_Tagline"] = "INTELLIGENT VOCABULARY & SPACED REPETITION",
+            ["Splash_Badge"] = "DESKTOP EDITION • OFFLINE FIRST",
+            ["Splash_StepServices"] = "Core",
+            ["Splash_StepDatabase"] = "Database",
+            ["Splash_StepData"] = "Study Data",
+            ["Splash_StepReady"] = "Ready",
             ["Splash_InitFailed"] = "Could not initialize Lexora",
             ["Splash_InitFailedDesc"] = "An error occurred while loading the SQLite database or configuration.",
             ["Splash_Retry"] = "Retry",
             ["Splash_Exit"] = "Exit App",
             ["Splash_StatusStarting"] = "Initializing...",
-            ["Splash_StatusBooting"] = "Starting Lexora...",
-            ["Splash_StatusCheckingDb"] = "Checking database...",
-            ["Splash_StatusLoadingData"] = "Loading study data & settings...",
+            ["Splash_StatusBooting"] = "Starting Lexora core systems...",
+            ["Splash_StatusCheckingDb"] = "Checking SQLite database & schema...",
+            ["Splash_StatusLoadingData"] = "Loading vocabulary & preferences...",
             ["Splash_StatusReady"] = "Ready to launch!",
             ["Splash_StatusErrorFormat"] = "Initialization error: {0}",
 

@@ -64,13 +64,19 @@ public sealed partial class MainWindow : Window
 
         _localizationService.LanguageChanged += (s, e) =>
         {
-            if (DispatcherQueue.HasThreadAccess)
+            void Update()
             {
                 UpdateAppTitle();
+                SplashOverlay.UpdateLocalizedText();
+            }
+
+            if (DispatcherQueue.HasThreadAccess)
+            {
+                Update();
             }
             else
             {
-                DispatcherQueue.TryEnqueue(UpdateAppTitle);
+                DispatcherQueue.TryEnqueue(Update);
             }
         };
 
@@ -84,6 +90,11 @@ public sealed partial class MainWindow : Window
         _startupOrchestrator.StatusMessageChanged += (s, msg) =>
         {
             DispatcherQueue.TryEnqueue(() => SplashOverlay.UpdateStatus(msg));
+        };
+
+        _startupOrchestrator.ProgressChanged += (s, progress) =>
+        {
+            DispatcherQueue.TryEnqueue(() => SplashOverlay.UpdateProgress(progress));
         };
 
         _startupOrchestrator.StateChanged += (s, state) =>
@@ -253,7 +264,9 @@ public sealed partial class MainWindow : Window
 
             // Run entrance animation and backend initialization concurrently
             var entranceTask = SplashOverlay.PlayEntranceAsync();
-            var minDisplayTask = Task.Delay(1600, ct);
+            var minDisplayTask = SplashOverlay.IsAnimationEnabled
+                ? Task.Delay(800, ct)
+                : Task.CompletedTask;
             var initTask = _startupOrchestrator.InitializeAppAsync(ct);
 
             // Wait for backend initialization
@@ -270,6 +283,9 @@ public sealed partial class MainWindow : Window
 
                 // Pre-navigate to ShellPage while splash is still covering
                 RootFrame.Navigate(typeof(ShellPage));
+
+                // Yield to allow WinUI 3 visual tree rendering of ShellPage to settle without jank
+                await Task.Yield();
 
                 // Seamless concurrent cross-fade: reveal main shell while fading out splash
                 if (SplashOverlay.IsAnimationEnabled)
@@ -289,7 +305,7 @@ public sealed partial class MainWindow : Window
                 try
                 {
                     var exitTask = SplashOverlay.PlayExitAsync();
-                    var timeoutTask = Task.Delay(500, ct);
+                    var timeoutTask = Task.Delay(450, ct);
                     await Task.WhenAny(exitTask, timeoutTask);
                 }
                 catch (Exception ex)
