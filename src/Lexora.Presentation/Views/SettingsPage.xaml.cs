@@ -33,14 +33,23 @@ public sealed partial class SettingsPage : Page, ILocalizableView
 
     public void OnLanguageChanged()
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void UpdateUI()
         {
             UpdateLanguageButtons();
             UpdateThemeButtons();
             UpdateAccentButtons();
-            ViewModel.UpdateVoiceStatus();
+            ViewModel.UpdateLanguageState();
             Bindings.Update();
-        });
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateUI);
+        }
     }
 
     protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
@@ -300,13 +309,13 @@ public sealed partial class SettingsPage : Page, ILocalizableView
     private void LangViButton_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.ChangeLanguage("vi-VN");
-        UpdateLanguageButtons();
+        OnLanguageChanged();
     }
 
     private void LangEnButton_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.ChangeLanguage("en-US");
-        UpdateLanguageButtons();
+        OnLanguageChanged();
     }
 
     private async void AutoPlayToggle_Toggled(object sender, RoutedEventArgs e)

@@ -1,0 +1,5 @@
+### Fixed
+- **Real-Time Language Switching (i18n)**: Resolved asynchronous dispatcher nesting lag during language changes by checking `DispatcherQueue.HasThreadAccess` across all localizable pages (`SettingsPage`, `VocabularyPage`, `DashboardPage`, `ReviewPage`, `TestPage`, `GrammarPage`, `LearningStoragePage`, `ShellPage`, and `MainWindow`).
+- **Settings ViewModel Localization Sync**: Implemented `UpdateLanguageState()` and `IDisposable` in `SettingsViewModel` subscribing to `ILocalizationService.LanguageChanged` to dynamically update update status, TTS voice diagnostic descriptions, and database status messages.
+- **Settings ToggleSwitch Parity**: Added localized string bindings (`Settings_Toggle_On` and `Settings_Toggle_Off`) to `AutoCheckUpdates` toggle switch in `SettingsPage.xaml`.
+- **Instant Language Button Refresh**: Wired instantaneous `OnLanguageChanged()` execution directly on language selection button clicks (`LangViButton_Click`, `LangEnButton_Click`) for immediate, zero-latency visual transition without requiring app restart.

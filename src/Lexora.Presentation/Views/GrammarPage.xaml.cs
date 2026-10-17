@@ -58,12 +58,21 @@ public sealed partial class GrammarPage : Page, ILocalizableView
 
     public void OnLanguageChanged()
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void UpdateUI()
         {
             ViewModel.UpdateLanguageState();
             Bindings.Update();
             UpdateSelectionModeUI();
-        });
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateUI);
+        }
     }
 
     private readonly DispatcherTimer _searchDebounceTimer;

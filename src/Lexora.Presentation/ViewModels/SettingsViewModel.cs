@@ -8,7 +8,7 @@ using Microsoft.UI.Xaml;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class SettingsViewModel : ObservableObject
+public partial class SettingsViewModel : ObservableObject, IDisposable
 {
     private readonly IThemeService _themeService;
     private readonly ILocalizationService _locService;
@@ -20,6 +20,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IUpdateService _updateService;
     private readonly IToastNotificationService _toastService;
     private readonly DispatcherQueue? _dispatcherQueue;
+    private readonly EventHandler? _languageChangedHandler;
 
     [ObservableProperty]
     public partial int SelectedThemeIndex { get; set; } = 0; // 0 = System, 1 = Light, 2 = Dark
@@ -161,6 +162,53 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         UpdateVoiceStatus();
+
+        _languageChangedHandler = (s, e) =>
+        {
+            RunOnUI(UpdateLanguageState);
+        };
+        _locService.LanguageChanged += _languageChangedHandler;
+    }
+
+    public void Dispose()
+    {
+        if (_languageChangedHandler != null)
+        {
+            _locService.LanguageChanged -= _languageChangedHandler;
+        }
+        GC.SuppressFinalize(this);
+    }
+
+    public void UpdateLanguageState()
+    {
+        CurrentLanguage = _locService.CurrentLanguage;
+        UpdateVoiceStatus();
+
+        if (UpdateReadyToInstall)
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_UpdateDownloaded");
+        }
+        else if (IsDownloadingUpdate)
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_DownloadingUpdate");
+        }
+        else if (IsCheckingUpdate)
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_CheckingForUpdates");
+        }
+        else if (UpdateAvailable && AvailableUpdate != null)
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
+        }
+        else if (!string.IsNullOrEmpty(UpdateStatusMessage))
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_UpdateUpToDate");
+        }
+
+        if (!File.Exists(DatabasePath))
+        {
+            DatabaseSizeFormatted = _locService.GetString("Settings_DbNotCreatedYet");
+        }
     }
 
     public void UpdateVoiceStatus()
@@ -339,6 +387,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         CurrentLanguage = langCode;
         _locService.SetLanguage(langCode);
+        UpdateLanguageState();
         var current = _preferencesService.GetPreferences();
         _ = _preferencesService.SavePreferencesAsync(current with { LanguageCode = langCode });
     }

@@ -62,8 +62,17 @@ public sealed partial class MainWindow : Window
         // 3. Apply saved window size & position (or center on first run)
         ApplyWindowPlacement();
 
-        UpdateAppTitle();
-        _localizationService.LanguageChanged += (s, e) => DispatcherQueue.TryEnqueue(UpdateAppTitle);
+        _localizationService.LanguageChanged += (s, e) =>
+        {
+            if (DispatcherQueue.HasThreadAccess)
+            {
+                UpdateAppTitle();
+            }
+            else
+            {
+                DispatcherQueue.TryEnqueue(UpdateAppTitle);
+            }
+        };
 
         // Wire up cancellation on window close
         Closed += OnWindowClosed;

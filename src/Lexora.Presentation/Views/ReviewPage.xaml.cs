@@ -100,12 +100,21 @@ public sealed partial class ReviewPage : Page, ILocalizableView
 
     public void OnLanguageChanged()
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void UpdateUI()
         {
             UpdateSpeedFlyoutLabels();
             ViewModel.UpdateActiveSessionTitle();
             Bindings.Update();
-        });
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateUI);
+        }
     }
 
     protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)

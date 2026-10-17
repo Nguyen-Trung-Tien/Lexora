@@ -25,11 +25,20 @@ public sealed partial class DashboardPage : Page, ILocalizableView
 
     public void OnLanguageChanged()
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void UpdateUI()
         {
             ViewModel.UpdateLanguageState();
             Bindings.Update();
-        });
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateUI);
+        }
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)

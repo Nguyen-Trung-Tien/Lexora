@@ -42,12 +42,21 @@ public sealed partial class TestPage : Page, ILocalizableView
 
     public void OnLanguageChanged()
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void UpdateUI()
         {
             ViewModel.UpdateLanguageState();
             Bindings.Update();
             UpdateCountButtonLabels();
-        });
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateUI);
+        }
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)

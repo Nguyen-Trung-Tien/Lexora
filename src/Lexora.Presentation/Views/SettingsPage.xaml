@@ -639,7 +639,8 @@
                         </StackPanel>
                         <ToggleSwitch Grid.Column="1"
                                       IsOn="{x:Bind ViewModel.AutoCheckUpdates, Mode=TwoWay}"
-                                      OnContent="" OffContent=""
+                                      OffContent="{x:Bind Loc.GetString('Settings_Toggle_Off')}"
+                                      OnContent="{x:Bind Loc.GetString('Settings_Toggle_On')}"
                                       VerticalAlignment="Center" Margin="0" />
                     </Grid>
 

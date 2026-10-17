@@ -81,7 +81,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
 
     public void OnLanguageChanged()
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void UpdateUI()
         {
             var wasInit = _isInitializing;
             _isInitializing = true;
@@ -89,7 +89,16 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
             PopulateTopicFilterCombo();
             _isInitializing = wasInit;
             Bindings.Update();
-        });
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateUI);
+        }
     }
 
     private void PopulateFilterCombos()

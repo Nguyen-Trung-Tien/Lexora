@@ -52,7 +52,7 @@ public sealed partial class ShellPage : Page
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
-        DispatcherQueue.TryEnqueue(() =>
+        void UpdateUI()
         {
             UpdateNavigationLabels();
             ViewModel.UpdateLocalizedTexts();
@@ -61,7 +61,16 @@ public sealed partial class ShellPage : Page
             {
                 localizableView.OnLanguageChanged();
             }
-        });
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateUI);
+        }
     }
 
     private bool _isNavInitialized;
