@@ -17,6 +17,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IGrammarService _grammarService;
     private readonly IAudioPlayerService _audioService;
     private readonly IUserPreferencesService _preferencesService;
+    private readonly IUpdateService _updateService;
     private readonly DispatcherQueue? _dispatcherQueue;
 
     [ObservableProperty]
@@ -24,6 +25,36 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     public partial string CurrentLanguage { get; set; }
+
+    [ObservableProperty]
+    public partial string CurrentAppVersion { get; set; } = "1.0.0";
+
+    [ObservableProperty]
+    public partial bool IsCheckingUpdate { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsDownloadingUpdate { get; set; }
+
+    [ObservableProperty]
+    public partial bool UpdateAvailable { get; set; }
+
+    [ObservableProperty]
+    public partial UpdateInfo? AvailableUpdate { get; set; }
+
+    [ObservableProperty]
+    public partial string UpdateStatusMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial double DownloadProgressPercentage { get; set; }
+
+    [ObservableProperty]
+    public partial string DownloadProgressText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool UpdateReadyToInstall { get; set; }
+
+    [ObservableProperty]
+    public partial string DownloadedInstallerPath { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial bool AutoPlayAudio { get; set; }
@@ -86,7 +117,8 @@ public partial class SettingsViewModel : ObservableObject
         IVocabularyService vocabService,
         IGrammarService grammarService,
         IAudioPlayerService audioService,
-        IUserPreferencesService preferencesService)
+        IUserPreferencesService preferencesService,
+        IUpdateService updateService)
     {
         _themeService = themeService;
         _locService = locService;
@@ -95,6 +127,7 @@ public partial class SettingsViewModel : ObservableObject
         _grammarService = grammarService;
         _audioService = audioService;
         _preferencesService = preferencesService;
+        _updateService = updateService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
             ?? App.Current?.UIDispatcherQueue
             ?? App.Current?.MainWindow?.DispatcherQueue;
@@ -109,6 +142,9 @@ public partial class SettingsViewModel : ObservableObject
         PreferredAccent = string.IsNullOrWhiteSpace(prefs.PreferredAccent) ? "uk" : prefs.PreferredAccent;
 
         DatabasePath = _backupService.DatabasePath;
+
+        var curVer = _updateService.GetCurrentVersion();
+        CurrentAppVersion = $"{curVer.Major}.{curVer.Minor}.{curVer.Build}";
 
         UpdateVoiceStatus();
     }
@@ -345,5 +381,93 @@ public partial class SettingsViewModel : ObservableObject
             TestVoiceTerm = "Welcome to Lexora English Learning";
 
         await _audioService.PlayPronunciationAsync(TestVoiceTerm, accent);
+    }
+
+    [RelayCommand]
+    public async Task CheckForUpdatesAsync()
+    {
+        if (IsCheckingUpdate || IsDownloadingUpdate) return;
+        IsCheckingUpdate = true;
+        UpdateStatusMessage = _locService.GetString("Settings_CheckingForUpdates");
+        UpdateAvailable = false;
+        AvailableUpdate = null;
+        UpdateReadyToInstall = false;
+
+        try
+        {
+            var updateInfo = await _updateService.CheckForUpdatesAsync(isManualCheck: true);
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+
+            if (updateInfo != null && updateInfo.HasUpdate)
+            {
+                AvailableUpdate = updateInfo;
+                UpdateAvailable = true;
+                UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
+            }
+            else
+            {
+                UpdateStatusMessage = _locService.GetString("Settings_UpdateUpToDate");
+            }
+        }
+        catch (Exception ex)
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+        }
+        finally
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            IsCheckingUpdate = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task DownloadUpdateAsync()
+    {
+        if (AvailableUpdate == null || IsDownloadingUpdate) return;
+        IsDownloadingUpdate = true;
+        UpdateReadyToInstall = false;
+        DownloadProgressPercentage = 0;
+        DownloadProgressText = "0%";
+        UpdateStatusMessage = _locService.GetString("Settings_DownloadingUpdate");
+
+        var progress = new Progress<UpdateDownloadProgress>(p =>
+        {
+            _dispatcherQueue?.TryEnqueue(() =>
+            {
+                DownloadProgressPercentage = p.ProgressPercentage;
+                var mbReceived = (double)p.BytesReceived / (1024 * 1024);
+                var mbTotal = (double)p.TotalBytesToReceive / (1024 * 1024);
+                DownloadProgressText = $"{mbReceived:F1} MB / {mbTotal:F1} MB ({p.ProgressPercentage:F0}%)";
+            });
+        });
+
+        try
+        {
+            var installerPath = await _updateService.DownloadUpdateAsync(AvailableUpdate, progress);
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            DownloadedInstallerPath = installerPath;
+            UpdateReadyToInstall = true;
+            UpdateStatusMessage = _locService.GetString("Settings_UpdateDownloaded");
+        }
+        catch (Exception ex)
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            UpdateStatusMessage = $"{_locService.GetString("Settings_UpdateFailed")}: {ex.Message}";
+        }
+        finally
+        {
+            await _dispatcherQueue.EnsureOnUIThreadAsync();
+            IsDownloadingUpdate = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task InstallUpdateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(DownloadedInstallerPath) || !File.Exists(DownloadedInstallerPath))
+            return;
+
+        await _updateService.LaunchInstallerAndExitAsync(DownloadedInstallerPath, silent: true);
     }
 }

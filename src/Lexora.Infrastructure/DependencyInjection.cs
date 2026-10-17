@@ -50,6 +50,9 @@ public static class DependencyInjection
         // User preferences persistence
         services.AddSingleton<IUserPreferencesService, UserPreferencesService>();
 
+        // Production Software Update Service
+        services.AddSingleton<IUpdateService, UpdateService>();
+
         return services;
     }
 }

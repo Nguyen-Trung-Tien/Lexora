@@ -690,6 +690,23 @@ public class LocalizationService : ILocalizationService
             ["Settings_AboutSubtitle"] = "Hệ thống Quản lý Học Từ vựng & Ngữ pháp Thông minh cho TOEIC / VSTEP / IELTS",
             ["Settings_AboutTech"] = "Phát triển bằng C# / .NET 10 • Windows App SDK / WinUI 3 • EF Core 10 SQLite • Clean Architecture.",
 
+            // Settings - Software Updates
+            ["Settings_UpdateTitle"] = "Cập nhật Phần mềm",
+            ["Settings_UpdateSubtitle"] = "Kiểm tra phiên bản mới, xem danh sách tính năng và cập nhật tự động an toàn.",
+            ["Settings_CurrentVersion"] = "Phiên bản hiện tại:",
+            ["Settings_LatestVersion"] = "Bản phát hành mới nhất:",
+            ["Settings_CheckForUpdates"] = "Kiểm tra cập nhật",
+            ["Settings_CheckingForUpdates"] = "Đang kiểm tra...",
+            ["Settings_UpdateUpToDate"] = "Bạn đang sử dụng phiên bản mới nhất.",
+            ["Settings_UpdateAvailable"] = "Đã có bản cập nhật mới!",
+            ["Settings_DownloadUpdate"] = "Tải xuống bản cập nhật",
+            ["Settings_DownloadingUpdate"] = "Đang tải xuống bản cập nhật...",
+            ["Settings_InstallUpdate"] = "Cài đặt & Khởi động lại",
+            ["Settings_UpdateDownloaded"] = "Đã tải xong bản cập nhật. Sẵn sàng cài đặt.",
+            ["Settings_UpdateFailed"] = "Không thể kiểm tra hoặc tải bản cập nhật.",
+            ["Settings_ReleaseNotes"] = "Ghi chú phát hành:",
+            ["Settings_AutoBackupNote"] = "Lexora sẽ tự động sao lưu dữ liệu học tập trước khi áp dụng bản cập nhật.",
+
             // Settings - Restore Dialogs
             ["Settings_DlgRestorePathTitle"] = "Nhập Đường Dẫn Tệp Sao Lưu",
             ["Settings_DlgRestorePathSelect"] = "Chọn tệp",
@@ -1865,6 +1882,23 @@ public class LocalizationService : ILocalizationService
             // Settings - About
             ["Settings_AboutSubtitle"] = "Intelligent Vocabulary & Grammar Manager for TOEIC / VSTEP / IELTS",
             ["Settings_AboutTech"] = "Built with C# / .NET 10 • Windows App SDK / WinUI 3 • EF Core 10 SQLite • Clean Architecture.",
+
+            // Settings - Software Updates
+            ["Settings_UpdateTitle"] = "Software Updates",
+            ["Settings_UpdateSubtitle"] = "Check for new releases, view changelog notes, and apply seamless updates.",
+            ["Settings_CurrentVersion"] = "Current Version:",
+            ["Settings_LatestVersion"] = "Latest Release:",
+            ["Settings_CheckForUpdates"] = "Check for Updates",
+            ["Settings_CheckingForUpdates"] = "Checking for updates...",
+            ["Settings_UpdateUpToDate"] = "You are running the latest version.",
+            ["Settings_UpdateAvailable"] = "A new update is available!",
+            ["Settings_DownloadUpdate"] = "Download Update",
+            ["Settings_DownloadingUpdate"] = "Downloading update...",
+            ["Settings_InstallUpdate"] = "Install & Restart",
+            ["Settings_UpdateDownloaded"] = "Update downloaded successfully. Ready to install.",
+            ["Settings_UpdateFailed"] = "Failed to check or download update.",
+            ["Settings_ReleaseNotes"] = "Release Notes:",
+            ["Settings_AutoBackupNote"] = "Lexora will automatically snapshot your study database before updating.",
 
             // Settings - Restore Dialogs
             ["Settings_DlgRestorePathTitle"] = "Specify Backup File Path",
