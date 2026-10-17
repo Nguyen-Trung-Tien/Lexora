@@ -94,10 +94,10 @@
 
                 <!-- Import / Export Dropdown -->
                 <DropDownButton Grid.Column="6" Padding="12,8" CornerRadius="10"
-                                ToolTipService.ToolTip="Import / Export">
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_ImportExport')}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE8B5;" FontSize="14" />
-                        <TextBlock Text="I/O" FontWeight="SemiBold" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontWeight="SemiBold" />
                     </StackPanel>
                     <DropDownButton.Flyout>
                         <MenuFlyout Placement="Bottom" Opening="ExportImportFlyout_Opening">

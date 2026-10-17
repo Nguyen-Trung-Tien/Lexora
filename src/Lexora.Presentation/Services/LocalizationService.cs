@@ -46,6 +46,7 @@ public class LocalizationService : ILocalizationService
             ["Action_DeselectAll"] = "Bỏ chọn",
             ["Action_DeleteSelected"] = "Xóa đã chọn ({0})",
             ["Action_CancelSelection"] = "Hủy chọn",
+            ["Action_Refresh"] = "Làm mới",
 
             // Toast Notifications
             ["Toast_SuccessTitle"] = "Thành công",
@@ -1363,6 +1364,7 @@ public class LocalizationService : ILocalizationService
             ["Action_DeselectAll"] = "Deselect All",
             ["Action_DeleteSelected"] = "Delete Selected ({0})",
             ["Action_CancelSelection"] = "Cancel Selection",
+            ["Action_Refresh"] = "Refresh",
 
             // Toast Notifications
             ["Toast_SuccessTitle"] = "Success",

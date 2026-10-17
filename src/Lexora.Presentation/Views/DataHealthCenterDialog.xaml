@@ -13,7 +13,7 @@
     CornerRadius="16"
     MaxWidth="760">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="500">
         <StackPanel Spacing="16" Margin="0,8,0,0">
 
             <!-- Subtitle Header -->

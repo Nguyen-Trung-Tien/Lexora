@@ -53,7 +53,7 @@
                         <DropDownButton x:Name="SmartPresetsDropDown" CornerRadius="8" Padding="12,7">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE946;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock x:Name="SmartPresetsBtnText" Text="Smart Presets" FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock x:Name="SmartPresetsBtnText" Text="{x:Bind Loc.GetString('SmartReview_Presets')}" FontWeight="SemiBold" FontSize="13" />
                             </StackPanel>
                             <DropDownButton.Flyout>
                                 <MenuFlyout>

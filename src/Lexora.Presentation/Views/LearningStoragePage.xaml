@@ -61,7 +61,7 @@
 
                         <Button CornerRadius="10" Padding="12,8"
                                 Click="RefreshBtn_Click"
-                                ToolTipService.ToolTip="Refresh">
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Refresh')}">
                             <FontIcon Glyph="&#xE72C;" FontSize="13" />
                         </Button>
                     </StackPanel>
