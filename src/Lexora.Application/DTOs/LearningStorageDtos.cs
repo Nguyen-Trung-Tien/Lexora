@@ -21,19 +21,43 @@ public record LearningStorageItemDto(
     double RetentionProbability,
     DateTime? LastReviewedAt,
     DateTime NextReviewAt,
-    DateTime CreatedAt)
+    DateTime CreatedAt,
+    string? CustomDefinitionOrExplanation = null,
+    string? CustomSubtitle = null)
 {
     public string Title => ItemType == StorageItemType.Vocabulary
         ? (Word?.Term ?? string.Empty)
         : (GrammarRule?.Title ?? string.Empty);
 
-    public string Subtitle => ItemType == StorageItemType.Vocabulary
-        ? $"{Word?.PhoneticUs ?? Word?.PhoneticUk ?? string.Empty} • {Word?.PrimaryPartOfSpeech.ToString() ?? string.Empty}"
-        : (GrammarRule?.Structure ?? string.Empty);
+    public string Subtitle => CustomSubtitle ?? (ItemType == StorageItemType.Vocabulary
+        ? $"{Word?.PhoneticUs ?? Word?.PhoneticUk ?? string.Empty} • {(Word?.PrimaryPartOfSpeech != null ? WordDto.GetAbbreviation(Word.PrimaryPartOfSpeech) : string.Empty)}"
+        : (GrammarRule?.Structure ?? string.Empty));
 
-    public string DefinitionOrExplanation => ItemType == StorageItemType.Vocabulary
-        ? (Word?.Meanings.FirstOrDefault()?.DefinitionVi ?? string.Empty)
-        : (GrammarRule?.ExplanationVi ?? string.Empty);
+    public string DefinitionOrExplanation
+    {
+        get
+        {
+            if (CustomDefinitionOrExplanation != null)
+                return CustomDefinitionOrExplanation;
+
+            bool isVi = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+            if (ItemType == StorageItemType.Vocabulary)
+            {
+                var meaning = Word?.Meanings.FirstOrDefault();
+                if (meaning == null) return string.Empty;
+                return (!isVi && !string.IsNullOrWhiteSpace(meaning.DefinitionEn))
+                    ? meaning.DefinitionEn
+                    : meaning.DefinitionVi;
+            }
+            else
+            {
+                if (GrammarRule == null) return string.Empty;
+                return (!isVi && !string.IsNullOrWhiteSpace(GrammarRule.ExplanationEn))
+                    ? GrammarRule.ExplanationEn
+                    : GrammarRule.ExplanationVi;
+            }
+        }
+    }
 
     public bool IsDueToday => NextReviewAt <= DateTime.UtcNow && Status != StorageLearningStatus.Mastered;
     public bool IsWeak => Status == StorageLearningStatus.Weak;

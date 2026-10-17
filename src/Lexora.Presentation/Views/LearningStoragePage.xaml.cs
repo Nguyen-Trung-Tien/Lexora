@@ -51,6 +51,11 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
             ViewModel.UpdateLanguageState();
             UpdateSegmentedButtons();
             UpdateSelectionModeUI();
+            PopulateStatusFilterComboBox();
+            if (StorageSearchBox != null)
+            {
+                StorageSearchBox.PlaceholderText = Loc.GetString("Storage_Search_Placeholder");
+            }
             if (StorageListView != null)
             {
                 var prevItems = StorageListView.ItemsSource;
@@ -88,6 +93,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
+        PopulateStatusFilterComboBox();
         UpdateSegmentedButtons();
         UpdateSelectionModeUI();
     }
@@ -113,8 +119,48 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         UpdateSelectionModeUI();
     }
 
+    private void PopulateStatusFilterComboBox()
+    {
+        if (StatusFilterComboBox == null) return;
+        var selectedTag = (StatusFilterComboBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "All";
+        var filters = new (string Tag, string Key)[]
+        {
+            ("All", "Storage_FilterAll"),
+            ("Weak", "Storage_FilterWeak"),
+            ("Learning", "Storage_FilterLearning"),
+            ("New", "Storage_FilterNew"),
+            ("Mastered", "Storage_FilterMastered"),
+            ("DueToday", "Storage_FilterDueToday")
+        };
+
+        StatusFilterComboBox.SelectionChanged -= FilterComboBox_SelectionChanged;
+        try
+        {
+            StatusFilterComboBox.Items.Clear();
+            int selectedIndex = 0;
+            for (int i = 0; i < filters.Length; i++)
+            {
+                var item = new ComboBoxItem
+                {
+                    Tag = filters[i].Tag,
+                    Content = Loc.GetString(filters[i].Key)
+                };
+                StatusFilterComboBox.Items.Add(item);
+                if (filters[i].Tag == selectedTag) selectedIndex = i;
+            }
+            StatusFilterComboBox.SelectedIndex = selectedIndex;
+        }
+        finally
+        {
+            StatusFilterComboBox.SelectionChanged += FilterComboBox_SelectionChanged;
+        }
+    }
+
     private void UpdateSegmentedButtons()
     {
+        if (TextVocabTab != null) TextVocabTab.Text = Loc.GetString("Vocab_NavTab");
+        if (TextGrammarTab != null) TextGrammarTab.Text = Loc.GetString("Grammar_NavTab");
+
         var cardBg = ThemeResourceHelper.GetThemeBrush(this, "CardBackgroundFillColorDefaultBrush");
         var cardStroke = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush");
         var accentText = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush");

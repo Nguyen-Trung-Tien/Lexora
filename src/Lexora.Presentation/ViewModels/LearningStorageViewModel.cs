@@ -898,6 +898,29 @@ public partial class LearningStorageViewModel : ObservableObject, IDisposable
                 _localizationService.GetString("Storage_Practice_ResultSummary"),
                 _lastPracticeResult.Correct, _lastPracticeResult.Total, _lastPracticeResult.ScorePercent);
         }
+
+        if (StorageItems.Count > 0)
+        {
+            bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+            var updated = StorageItems.Select(item =>
+            {
+                string def = item.ItemType == StorageItemType.Vocabulary
+                    ? (!isVi && !string.IsNullOrWhiteSpace(item.Word?.Meanings.FirstOrDefault()?.DefinitionEn)
+                        ? item.Word!.Meanings.First().DefinitionEn!
+                        : (item.Word?.Meanings.FirstOrDefault()?.DefinitionVi ?? string.Empty))
+                    : (!isVi && !string.IsNullOrWhiteSpace(item.GrammarRule?.ExplanationEn)
+                        ? item.GrammarRule!.ExplanationEn!
+                        : (item.GrammarRule?.ExplanationVi ?? string.Empty));
+
+                return item with { CustomDefinitionOrExplanation = def };
+            }).ToList();
+
+            StorageItems.Clear();
+            foreach (var it in updated)
+            {
+                StorageItems.Add(it);
+            }
+        }
     }
 
     public void Dispose()

@@ -1214,6 +1214,7 @@ public class LocalizationService : ILocalizationService
             ["Storage_Toast_OperationInProgress"] = "Hệ thống đang xử lý dữ liệu, vui lòng đợi trong giây lát...",
             ["Storage_Dialog_AllItemsAlreadyAdded"] = "Tất cả các mục phù hợp đã có trong Kho lưu trữ.",
             ["Storage_Dialog_NoItemsAvailable"] = "Không còn mục nào để thêm vào Kho lưu trữ.",
+            ["Storage_Tooltip_ListenPronunciation"] = "Nghe phát âm",
 
             // Smart Import Dialog Additions
             ["SmartImport_Step1_Source"] = "Nguồn dữ liệu",
@@ -2576,6 +2577,7 @@ public class LocalizationService : ILocalizationService
             ["Storage_Toast_OperationInProgress"] = "System is processing data, please wait a moment...",
             ["Storage_Dialog_AllItemsAlreadyAdded"] = "All matching items are already in Learning Storage.",
             ["Storage_Dialog_NoItemsAvailable"] = "No more items available to add to Learning Storage.",
+            ["Storage_Tooltip_ListenPronunciation"] = "Listen pronunciation",
 
             // Smart Import Dialog Additions
             ["SmartImport_Step1_Source"] = "Data Source",
@@ -2774,8 +2776,11 @@ public class LocalizationService : ILocalizationService
         if (_resources.ContainsKey(languageCode))
         {
             _currentLanguage = languageCode;
-            CultureInfo.CurrentUICulture = new CultureInfo(languageCode);
-            CultureInfo.CurrentCulture = new CultureInfo(languageCode);
+            var culture = new CultureInfo(languageCode);
+            CultureInfo.CurrentUICulture = culture;
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            CultureInfo.DefaultThreadCurrentCulture = culture;
 
             var currentPrefs = _preferencesService.GetPreferences();
             if (currentPrefs.LanguageCode != languageCode)

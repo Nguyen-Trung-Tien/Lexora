@@ -192,7 +192,7 @@
                             <Button x:Name="BtnVocabTab" Click="TabVocab_Click" CornerRadius="8" Padding="14,6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE82D;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_NavTab')}" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="TextVocabTab" Text="{x:Bind Loc.GetString('Vocab_NavTab')}" FontWeight="SemiBold" />
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="6,1">
                                         <TextBlock Text="{x:Bind ViewModel.VocabCount, Mode=OneWay}" FontSize="11" FontWeight="Bold" />
                                     </Border>
@@ -201,7 +201,7 @@
                             <Button x:Name="BtnGrammarTab" Click="TabGrammar_Click" CornerRadius="8" Padding="14,6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE8D2;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Grammar_NavTab')}" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="TextGrammarTab" Text="{x:Bind Loc.GetString('Grammar_NavTab')}" FontWeight="SemiBold" />
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="6,1">
                                         <TextBlock Text="{x:Bind ViewModel.GrammarCount, Mode=OneWay}" FontSize="11" FontWeight="Bold" />
                                     </Border>
@@ -325,14 +325,14 @@
                                         <!-- Status Badge -->
                                         <Border CornerRadius="6" Padding="8,3"
                                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                            <TextBlock Text="{x:Bind Status}" FontSize="11" FontWeight="Bold"
+                                            <TextBlock Text="{x:Bind services:LocalizationHelper.FormatStorageStatus(Status)}" FontSize="11" FontWeight="Bold"
                                                        Foreground="{x:Bind Status, Converter={StaticResource StatusToBrushConverter}}" />
                                         </Border>
 
                                         <!-- Reason Added Badge -->
                                         <Border CornerRadius="6" Padding="8,3"
                                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                            <TextBlock Text="{x:Bind ReasonAdded}" FontSize="11"
+                                            <TextBlock Text="{x:Bind services:LocalizationHelper.FormatAdditionReason(ReasonAdded)}" FontSize="11"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         </Border>
 
@@ -354,7 +354,7 @@
                                                 Tag="{x:Bind}"
                                                 Visibility="{x:Bind IsVocabulary, Converter={StaticResource BoolToVisibilityConverter}}"
                                                 Click="CardAudioBtn_Click"
-                                                ToolTipService.ToolTip="Listen pronunciation">
+                                                ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Storage_Tooltip_ListenPronunciation')}">
                                             <FontIcon Glyph="&#xE767;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         </Button>
 
@@ -514,7 +514,7 @@
 
                         <Button Grid.Column="2" Width="32" Height="32" Padding="0" CornerRadius="16"
                                 Click="ClosePractice_Click"
-                                ToolTipService.ToolTip="Close">
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Close')}">
                             <FontIcon Glyph="&#xE711;" FontSize="12" />
                         </Button>
                     </Grid>

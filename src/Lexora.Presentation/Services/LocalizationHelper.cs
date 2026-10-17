@@ -150,6 +150,20 @@ public static class LocalizationHelper
         };
     }
 
+    public static string FormatAdditionReason(StorageAdditionReason reason)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        if (loc == null) return reason.ToString();
+        return reason switch
+        {
+            StorageAdditionReason.Manual => loc.GetString("Storage_Reason_Manual"),
+            StorageAdditionReason.MultipleErrors => loc.GetString("Storage_Reason_MultipleErrors"),
+            StorageAdditionReason.LowRetention => loc.GetString("Storage_Reason_LowRetention"),
+            StorageAdditionReason.Lapsed => loc.GetString("Storage_Reason_Lapsed"),
+            _ => reason.ToString()
+        };
+    }
+
     public static string FormatSessionType(string? sessionType)
     {
         if (string.IsNullOrWhiteSpace(sessionType)) return string.Empty;

@@ -127,6 +127,8 @@ public partial class DashboardViewModel : ObservableObject
         _localizationService = localizationService;
         _advisorService = advisorService;
 
+        _localizationService.LanguageChanged += (s, e) => UpdateLanguageState();
+
         UpdateGreeting();
     }
 
