@@ -12,29 +12,8 @@
                 <ResourceDictionary Source="ms-appx:///Themes/DesignSystem.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="HeatmapLevel0Brush" Color="#E1DFDD" />
-                    <SolidColorBrush x:Key="HeatmapLevel1Brush" Color="#9BE9A8" />
-                    <SolidColorBrush x:Key="HeatmapLevel2Brush" Color="#40C463" />
-                    <SolidColorBrush x:Key="HeatmapLevel3Brush" Color="#30A14E" />
-                    <SolidColorBrush x:Key="HeatmapLevel4Brush" Color="#216E39" />
-                </ResourceDictionary>
-                <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="HeatmapLevel0Brush" Color="#2D333B" />
-                    <SolidColorBrush x:Key="HeatmapLevel1Brush" Color="#0E4429" />
-                    <SolidColorBrush x:Key="HeatmapLevel2Brush" Color="#006D32" />
-                    <SolidColorBrush x:Key="HeatmapLevel3Brush" Color="#26A641" />
-                    <SolidColorBrush x:Key="HeatmapLevel4Brush" Color="#39D353" />
-                </ResourceDictionary>
-                <ResourceDictionary x:Key="HighContrast">
-                    <SolidColorBrush x:Key="HeatmapLevel0Brush" Color="{ThemeResource SystemColorWindowColor}" />
-                    <SolidColorBrush x:Key="HeatmapLevel1Brush" Color="{ThemeResource SystemColorHighlightColor}" Opacity="0.3" />
-                    <SolidColorBrush x:Key="HeatmapLevel2Brush" Color="{ThemeResource SystemColorHighlightColor}" Opacity="0.5" />
-                    <SolidColorBrush x:Key="HeatmapLevel3Brush" Color="{ThemeResource SystemColorHighlightColor}" Opacity="0.8" />
-                    <SolidColorBrush x:Key="HeatmapLevel4Brush" Color="{ThemeResource SystemColorHighlightColor}" />
-                </ResourceDictionary>
-            </ResourceDictionary.ThemeDictionaries>
+            <!-- DesignSystem.xaml provides all theme tokens and heatmap brushes -->
+
 
             <!-- Converters -->
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />

@@ -1127,6 +1127,24 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         }
     }
 
+    private async void OpenListeningLab_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var labService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IPronunciationListeningLabService>();
+            var audioService = App.Current.Services.GetService<IAudioPlayerService>();
+            var dialog = new ListeningLabDialog(labService, Loc, audioService)
+            {
+                XamlRoot = this.XamlRoot
+            };
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+        }
+    }
+
     private async void QuickListenButton_Click(object sender, RoutedEventArgs e)
     {
         try

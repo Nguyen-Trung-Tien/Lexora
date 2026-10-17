@@ -90,8 +90,9 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             if (cachedPath != null && File.Exists(cachedPath))
             {
                 var bytes = await File.ReadAllBytesAsync(cachedPath).ConfigureAwait(false);
+                var mimeType = cachedPath.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ? "audio/mpeg" : "audio/wav";
                 var stream = new MemoryStream(bytes).AsRandomAccessStream();
-                _mediaPlayer.Source = MediaSource.CreateFromStream(stream, "audio/wav");
+                _mediaPlayer.Source = MediaSource.CreateFromStream(stream, mimeType);
                 _mediaPlayer.Play();
                 return;
             }

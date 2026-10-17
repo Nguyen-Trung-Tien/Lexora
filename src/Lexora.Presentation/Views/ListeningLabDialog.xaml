@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Lexora.Presentation.Views.ListeningLabDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:dto="using:Lexora.Application.DTOs"
+    mc:Ignorable="d"
+    Title="{x:Bind Loc.GetString('ListeningLab_Title')}"
+    PrimaryButtonText="{x:Bind Loc.GetString('Action_Close')}"
+    DefaultButton="Primary"
+    CornerRadius="16"
+    MaxWidth="840">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="660">
+        <StackPanel Spacing="16" Margin="0,8,0,0">
+
+            <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Subtitle')}"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       FontSize="13" TextWrapping="Wrap" />
+
+            <TabView x:Name="LabTabView" IsAddTabButtonVisible="False" CanReorderTabs="False">
+                <TabView.TabItems>
+                    <!-- TAB 1: Dictation Lab (Nghe - Chép chính tả) -->
+                    <TabViewItem Header="{x:Bind Loc.GetString('ListeningLab_TabDictation')}" IsClosable="False">
+                        <StackPanel Spacing="16" Margin="0,14,0,0">
+
+                            <!-- Prompt Audio Card -->
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="12" Padding="20">
+                                <StackPanel Spacing="16">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3">
+                                                <TextBlock Text="Audio Dictation"
+                                                           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                           FontSize="11" FontWeight="Bold" />
+                                            </Border>
+                                            <TextBlock Text="{x:Bind CurrentDictation.Level, Mode=OneWay}"
+                                                       FontSize="12" FontWeight="SemiBold"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <!-- Speed Selector -->
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Speed')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                            <ComboBox x:Name="SpeedComboBox" SelectedIndex="1" SelectionChanged="SpeedComboBox_SelectionChanged" MinWidth="90">
+                                                <ComboBoxItem Content="0.75x" Tag="0.75" />
+                                                <ComboBoxItem Content="1.0x" Tag="1.0" />
+                                                <ComboBoxItem Content="1.25x" Tag="1.25" />
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Big Audio Play Buttons -->
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                        <Button x:Name="BtnPlayUkAudio" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="10" Click="PlayUkAudio_Click">
+                                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                                <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_PlayUk')}" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button x:Name="BtnPlayUsAudio" Grid.Column="1" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="10" Click="PlayUsAudio_Click">
+                                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                                <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_PlayUs')}" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+
+                                    <!-- User Input and Check -->
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <TextBox x:Name="DictationInputBox"
+                                                 PlaceholderText="{x:Bind Loc.GetString('ListeningLab_TypeHeardWord')}"
+                                                 FontSize="15"
+                                                 KeyDown="DictationInputBox_KeyDown" />
+                                        <Button Grid.Column="1" Style="{ThemeResource AccentButtonStyle}"
+                                                Content="{x:Bind Loc.GetString('ListeningLab_CheckAnswer')}"
+                                                Padding="20,8"
+                                                Click="CheckDictation_Click" />
+                                    </Grid>
+
+                                    <!-- Evaluation Feedback Panel -->
+                                    <Border x:Name="DictationResultPanel"
+                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="10" Padding="16"
+                                            Visibility="Collapsed">
+                                        <StackPanel Spacing="10">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <FontIcon x:Name="DictationResultIcon" Glyph="&#xE73E;" FontSize="16" />
+                                                <TextBlock x:Name="DictationFeedbackText" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                                                <TextBlock Text="•" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Accuracy')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                                <TextBlock x:Name="DictationAccuracyText" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+
+                                            <!-- Revealed Term & Context -->
+                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="12,10">
+                                                <StackPanel Spacing="6">
+                                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                                        <TextBlock x:Name="DictationRevealedTerm" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                        <TextBlock x:Name="DictationRevealedPhonetic" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                    <TextBlock x:Name="DictationRevealedMeaning" FontSize="13" TextWrapping="Wrap" />
+                                                    <TextBlock x:Name="DictationRevealedExample" FontSize="12" FontStyle="Italic" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Button HorizontalAlignment="Right" Content="{x:Bind Loc.GetString('ListeningLab_NextWord')}" Click="NextDictation_Click" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabViewItem>
+
+                    <!-- TAB 2: Minimal Pairs (Phân biệt âm) -->
+                    <TabViewItem Header="{x:Bind Loc.GetString('ListeningLab_TabMinimalPairs')}" IsClosable="False">
+                        <StackPanel Spacing="16" Margin="0,14,0,0">
+                            <!-- Challenge Header Card -->
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="12" Padding="20">
+                                <StackPanel Spacing="16">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3">
+                                            <TextBlock Text="{x:Bind CurrentPair.PhonemePairLabel, Mode=OneWay}"
+                                                       Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                       FontSize="12" FontWeight="Bold" />
+                                        </Border>
+                                        <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_WhichWordHeard')}"
+                                                   FontSize="13" FontWeight="SemiBold"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+
+                                    <!-- Audio Prompt Button -->
+                                    <Button x:Name="BtnPlayPairPrompt"
+                                            HorizontalAlignment="Stretch" Padding="20,16"
+                                            Style="{ThemeResource AccentButtonStyle}"
+                                            CornerRadius="10" Click="PlayPairPrompt_Click">
+                                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE767;" FontSize="18" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ListenPrompt')}" FontWeight="Bold" FontSize="14" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- Choice Cards: Option A vs Option B -->
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                                        <!-- Option A Card -->
+                                        <Button x:Name="BtnChoiceA"
+                                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                                Padding="16,14" CornerRadius="10"
+                                                Click="ChoiceA_Click">
+                                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                                <TextBlock Text="{x:Bind CurrentPair.WordA, Mode=OneWay}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind CurrentPair.PhoneticA, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind CurrentPair.MeaningA, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+
+                                        <!-- Option B Card -->
+                                        <Button x:Name="BtnChoiceB" Grid.Column="1"
+                                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                                Padding="16,14" CornerRadius="10"
+                                                Click="ChoiceB_Click">
+                                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                                <TextBlock Text="{x:Bind CurrentPair.WordB, Mode=OneWay}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind CurrentPair.PhoneticB, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind CurrentPair.MeaningB, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+
+                                    <!-- Articulation Guide & Tip -->
+                                    <Border x:Name="PairFeedbackPanel"
+                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="10" Padding="16"
+                                            Visibility="Collapsed">
+                                        <StackPanel Spacing="10">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon x:Name="PairFeedbackIcon" Glyph="&#xE73E;" FontSize="16" />
+                                                <TextBlock x:Name="PairFeedbackText" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                                            </StackPanel>
+
+                                            <!-- Articulatory Tip -->
+                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="12,8">
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ArticulatoryTip')}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{x:Bind CurrentPair.Tip, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Button HorizontalAlignment="Right" Content="{x:Bind Loc.GetString('ListeningLab_NextPair')}" Click="NextPair_Click" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabViewItem>
+
+                    <!-- TAB 3: Accent Comparison (UK vs US) -->
+                    <TabViewItem Header="{x:Bind Loc.GetString('ListeningLab_TabAccentCompare')}" IsClosable="False">
+                        <StackPanel Spacing="12" Margin="0,14,0,0">
+                            <TextBlock Text="So sánh các từ có phát âm khác biệt rõ rệt giữa tiếng Anh - Anh (UK) và Anh - Mỹ (US):"
+                                       FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                            <ItemsControl ItemsSource="{x:Bind AccentComparisonList, Mode=OneWay}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:AccentComparisonItemDto">
+                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,4">
+                                            <Grid ColumnDefinitions="140,*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
+                                                <!-- Term & Meaning -->
+                                                <StackPanel Spacing="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind Term}" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{x:Bind DefinitionVi}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </StackPanel>
+
+                                                <!-- Linguistic Difference -->
+                                                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" Spacing="16">
+                                                        <TextBlock Text="{x:Bind PhoneticUk}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                        <TextBlock Text="vs" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                                        <TextBlock Text="{x:Bind PhoneticUs}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                    </StackPanel>
+                                                    <TextBlock Text="{x:Bind KeyDifferenceNote}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                                </StackPanel>
+
+                                                <!-- Audio Play Buttons -->
+                                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                    <Button Padding="8,6" CornerRadius="6" ToolTipService.ToolTip="Play UK Pronunciation" Click="PlayUkItem_Click" Tag="{x:Bind Term}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <FontIcon Glyph="&#xE767;" FontSize="12" />
+                                                            <TextBlock Text="UK" FontSize="11" FontWeight="Bold" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <Button Padding="8,6" CornerRadius="6" ToolTipService.ToolTip="Play US Pronunciation" Click="PlayUsItem_Click" Tag="{x:Bind Term}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <FontIcon Glyph="&#xE767;" FontSize="12" />
+                                                            <TextBlock Text="US" FontSize="11" FontWeight="Bold" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </TabViewItem>
+                </TabView.TabItems>
+            </TabView>
+
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

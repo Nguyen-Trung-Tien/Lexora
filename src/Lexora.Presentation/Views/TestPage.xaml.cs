@@ -452,4 +452,22 @@ public sealed partial class TestPage : Page, ILocalizableView
     {
         ViewModel.StatusMessage = string.Empty;
     }
+
+    private async void OpenListeningLab_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var labService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IPronunciationListeningLabService>();
+            var audioService = App.Current.Services.GetService<Lexora.Application.Interfaces.IAudioPlayerService>();
+            var dialog = new ListeningLabDialog(labService, Loc, audioService)
+            {
+                XamlRoot = this.XamlRoot
+            };
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TestPage] OpenListeningLab error: {ex.Message}");
+        }
+    }
 }

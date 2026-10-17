@@ -241,7 +241,7 @@
                 <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
                     <GradientStop Color="{ThemeResource SystemAccentColorLight2}" Offset="0" />
                     <GradientStop Color="{ThemeResource SystemAccentColorLight1}" Offset="0.45" />
-                    <GradientStop Color="#00000000" Offset="1" />
+                    <GradientStop Color="Transparent" Offset="1" />
                 </RadialGradientBrush>
             </Border.Background>
         </Border>
@@ -322,9 +322,9 @@
                     </Border.RenderTransform>
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Color="#00000000" Offset="0" />
+                            <GradientStop Color="Transparent" Offset="0" />
                             <GradientStop Color="{ThemeResource SystemAccentColorLight2}" Offset="0.5" />
-                            <GradientStop Color="#00000000" Offset="1" />
+                            <GradientStop Color="Transparent" Offset="1" />
                         </LinearGradientBrush>
                     </Border.Background>
                 </Border>

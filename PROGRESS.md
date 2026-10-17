@@ -2,8 +2,11 @@
 
 ## 📊 Quality Gates Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
-- **Automated Tests**: **365 / 365 Tests Passing** (314 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+- **Automated Tests**: **378 / 378 Tests Passing** (327 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
+- **Fluent UI Audit**: `0 Violations` (`audit_fluent_ui.ps1` scanned 84 files).
+- **Localization (i18n)**: `100% Parity` across 1,173 keys (`sync_localization.ps1 -CheckXaml`).
+- **Clean Architecture**: `0 Violations` (`lint_architecture.ps1`).
 
 ---
 
@@ -61,3 +64,24 @@
 - **Quality Gates Benchmark**:
   - Added 22 new unit tests across all 6 services (`LearningIntelligenceServiceTests.cs`, `AdaptiveQuizServiceTests.cs`, `StudyPlannerServiceTests.cs`, `KnowledgeGraphServiceTests.cs`, `DataHealthServiceTests.cs`).
   - Total test count expanded to **365 / 365 tests passing** with 0 warnings and 0 errors.
+
+### 5. Đợt 1 — Codebase Audit & Hardened Stabilization
+- **Fluent 2 Zero Hardcoded Hex Audit**:
+  - Resolved all 13 violations detected by `audit_fluent_ui.ps1`.
+  - Consolidated activity heatmap brushes (`HeatmapLevel0Brush` .. `HeatmapLevel4Brush`) into `Themes/DesignSystem.xaml` across Light, Dark, and HighContrast theme dictionaries.
+  - Replaced hardcoded alpha hex strings `#00000000` with `Transparent` in `SplashScreenOverlay.xaml`.
+- **Bilingual i18n Dictionary & XAML Audit**:
+  - Added 32 missing localization keys in `LocalizationService.cs` across `vi-VN` and `en-US` for Learning Intelligence, CAT Adaptive Quiz, Memory Stability, and Listening Lab.
+  - Achieved 100% bilingual parity and XAML reference integrity (1,173 keys, 0 discrepancies).
+- **Audio Stream MIME Type Resilience**:
+  - Hardened `WindowsAudioPlayerService.cs` to dynamically discern `.mp3` (`audio/mpeg`) vs `.wav` (`audio/wav`) for cached native human audio streams.
+
+### 6. Đợt 2 — Feature Expansion: Pronunciation & Listening Lab
+- **Pronunciation & Listening Lab (`ListeningLabDialog.xaml` & `PronunciationListeningLabService.cs`)**:
+  - **Audio Dictation & Spelling Drills**: Implemented native audio playback with accent switching (UK/US), playback speeds (0.75x, 1.0x, 1.25x), Levenshtein distance grading, and instant context/phonetic reveal.
+  - **Minimal Pairs Ear Discrimination**: Interactive training for easily confused English phonemes (/iː/ vs /ɪ/, /æ/ vs /e/, /θ/ vs /s/, /p/ vs /b/, /l/ vs /r/, /v/ vs /w/, /d/ vs /t/, /ʊ/ vs /uː/) with choice feedback and articulatory mouth-position guidance.
+  - **UK vs US Accent Comparison Lab**: Side-by-side pronunciation playback with phonetic transcription and linguistic variation notes (rhoticity, tapped 't', vowel shifts).
+  - **Integrated Entry Points**: Seamlessly wired into `VocabularyPage.xaml` command bar, `TestPage.xaml` title banner, and shell quick actions.
+  - **Automated Regression Suite**: Added 13 new unit tests in `PronunciationListeningLabServiceTests.cs`.
+  - **Current Quality Gate**: **378 / 378 tests passing** (327 Unit + 51 Integration, 0 Failed, 0 Skipped), 0 warnings, 0 errors.
+

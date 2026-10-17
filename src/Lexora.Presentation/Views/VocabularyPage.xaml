@@ -69,7 +69,7 @@
                      IsClosable="True"
                      CornerRadius="8" />
 
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="10">
             <!-- Segmented View Mode Switcher -->
             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
                 <StackPanel Orientation="Horizontal" Spacing="4">
@@ -176,6 +176,15 @@
                     </MenuFlyout>
                 </DropDownButton.Flyout>
             </DropDownButton>
+
+            <!-- Pronunciation & Listening Lab -->
+            <Button Grid.Column="5" Click="OpenListeningLab_Click" CornerRadius="10" Padding="14,8"
+                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_ListeningLab')}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE767;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                    <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_TabDictation')}" FontWeight="SemiBold" />
+                </StackPanel>
+            </Button>
         </Grid>
         </StackPanel>
 

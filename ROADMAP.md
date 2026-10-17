@@ -59,8 +59,10 @@ gantt
   - Khám phá mạng lưới ngữ nghĩa tương tác: Từ đồng nghĩa, trái nghĩa, chủ đề và cấp độ CEFR với cơ chế pivot node động và phát âm audio.
 - [x] **Data Health Center & Self-Healing Maintenance**:
   - Chẩn đoán SQLite PRAGMA integrity, dọn dẹp orphan records, tối ưu hóa WAL checkpointing, VACUUM và quản lý bộ nhớ đệm âm thanh.
+- [x] **Pronunciation & Listening Lab**:
+  - Luyện nghe chính tả (Audio Dictation) với chấm điểm Levenshtein distance, luyện phân biệt cặp âm tối thiểu (Minimal Pairs) và so sánh ngữ điệu Anh - Mỹ (UK vs US Accents).
 - [x] **Quality Gate Benchmark**:
-  - Nâng cấp bộ kiểm thử lên **365/365 Automated Tests** (314 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
+  - Nâng cấp bộ kiểm thử lên **378 / 378 Automated Tests** (327 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
 - [ ] **Automated CI/CD Quality Gates**:
   - Thiết lập GitHub Actions tự động kiểm thử định dạng CHANGELOG và chạy Skill Smoke Tests.
 
