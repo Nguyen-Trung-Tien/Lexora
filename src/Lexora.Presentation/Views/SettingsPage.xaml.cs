@@ -28,6 +28,29 @@ public sealed partial class SettingsPage : Page, ILocalizableView
             UpdateLanguageButtons();
             UpdateThemeButtons();
             UpdateAccentButtons();
+            UpdateAlgorithmButtons();
+        };
+
+        ViewModel.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(ViewModel.SelectedThemeIndex))
+            {
+                DispatcherQueue.TryEnqueue(UpdateThemeButtons);
+            }
+            else if (e.PropertyName == nameof(ViewModel.SelectedAlgorithmIndex) || e.PropertyName == nameof(ViewModel.SpacedRepetitionAlgorithm))
+            {
+                DispatcherQueue.TryEnqueue(UpdateAlgorithmButtons);
+            }
+            else if (e.PropertyName == nameof(ViewModel.SelectedRetentionIndex))
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (TargetRetentionCombo.SelectedIndex != ViewModel.SelectedRetentionIndex)
+                    {
+                        TargetRetentionCombo.SelectedIndex = ViewModel.SelectedRetentionIndex;
+                    }
+                });
+            }
         };
     }
 
@@ -38,6 +61,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView
             UpdateLanguageButtons();
             UpdateThemeButtons();
             UpdateAccentButtons();
+            UpdateAlgorithmButtons();
             ViewModel.UpdateLanguageState();
             Bindings.Update();
         }
@@ -70,6 +94,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView
             UpdateLanguageButtons();
             UpdateThemeButtons();
             UpdateAccentButtons();
+            UpdateAlgorithmButtons();
 
             SpeechRateCombo.SelectedIndex = ViewModel.SpeechRate switch
             {
@@ -78,6 +103,8 @@ public sealed partial class SettingsPage : Page, ILocalizableView
                 <= 1.35 => 2,
                 _ => 3
             };
+
+            TargetRetentionCombo.SelectedIndex = ViewModel.SelectedRetentionIndex;
         }
         catch (Exception ex)
         {
@@ -170,6 +197,60 @@ public sealed partial class SettingsPage : Page, ILocalizableView
     {
         await ViewModel.SetPreferredAccentAsync("us");
         DispatcherQueue.TryEnqueue(UpdateAccentButtons);
+    }
+
+    private void UpdateAlgorithmButtons()
+    {
+        bool isFsrs = string.Equals(ViewModel.SpacedRepetitionAlgorithm, "FSRS", StringComparison.OrdinalIgnoreCase);
+        var activeBorder = GetThemeBrush("AccentFillColorDefaultBrush");
+        var inactiveBorder = GetThemeBrush("CardStrokeColorDefaultBrush");
+        var subtleBg = GetThemeBrush("SubtleFillColorSecondaryBrush");
+        var cardBg = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+
+        void ApplyAlgoBtn(Button btn, Border check, bool isActive)
+        {
+            btn.Style = null;
+            if (isActive)
+            {
+                if (cardBg != null) btn.Background = cardBg;
+                if (activeBorder != null) btn.BorderBrush = activeBorder;
+                btn.BorderThickness = new Thickness(2);
+                check.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                if (subtleBg != null) btn.Background = subtleBg;
+                if (inactiveBorder != null) btn.BorderBrush = inactiveBorder;
+                btn.BorderThickness = new Thickness(1);
+                check.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        ApplyAlgoBtn(AlgorithmSm2Button, AlgorithmSm2Check, !isFsrs);
+        ApplyAlgoBtn(AlgorithmFsrsButton, AlgorithmFsrsCheck, isFsrs);
+    }
+
+    private async void AlgorithmSm2Button_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.SetAlgorithmAsync("SM2");
+        DispatcherQueue.TryEnqueue(UpdateAlgorithmButtons);
+    }
+
+    private async void AlgorithmFsrsButton_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.SetAlgorithmAsync("FSRS");
+        DispatcherQueue.TryEnqueue(UpdateAlgorithmButtons);
+    }
+
+    private async void TargetRetentionCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (TargetRetentionCombo.SelectedItem is ComboBoxItem item && item.Tag is string tagStr && double.TryParse(tagStr, System.Globalization.CultureInfo.InvariantCulture, out double val))
+        {
+            if (Math.Abs(ViewModel.TargetRetention - val) > 0.001)
+            {
+                await ViewModel.SetTargetRetentionAsync(val);
+            }
+        }
     }
 
     private async void TestVoiceUk_Click(object sender, RoutedEventArgs e)
@@ -911,10 +992,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView
     {
         if (this.XamlRoot == null) return;
         var healthService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IDataHealthService>();
-        var dialog = new DataHealthCenterDialog(healthService, Loc)
-        {
-            XamlRoot = this.XamlRoot
-        };
-        await dialog.ShowAsync();
+        var dialog = new DataHealthCenterDialog(healthService, Loc);
+        await dialog.ShowAsyncSafe(App.Current?.MainWindow?.Content?.XamlRoot ?? this.XamlRoot);
     }
 }

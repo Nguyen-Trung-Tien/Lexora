@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -141,6 +142,23 @@ public sealed class ShortcutManager : IShortcutManager
             ExecuteAsync = () =>
             {
                 GlobalSearchRequested?.Invoke(this, EventArgs.Empty);
+                return Task.CompletedTask;
+            }
+        });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
+            Id = "Global.ToggleTheme",
+            Gesture = new ShortcutGesture(ShortcutKey.T, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Nav_ThemeToggle",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = true, // Enable theme toggle even while dialog is open
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                var themeService = App.Current?.Services?.GetService<IThemeService>();
+                themeService?.ToggleTheme();
                 return Task.CompletedTask;
             }
         });

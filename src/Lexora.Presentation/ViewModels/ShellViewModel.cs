@@ -15,6 +15,7 @@ public partial class ShellViewModel : ObservableObject, IDisposable
     private readonly IToastNotificationService _toastService;
     private readonly EventHandler? _languageChangedHandler;
     private readonly EventHandler<Lexora.Application.DTOs.UserPreferences>? _prefsChangedHandler;
+    private bool _hasShownDueReviewToast = false;
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
@@ -106,6 +107,22 @@ public partial class ShellViewModel : ObservableObject, IDisposable
             DueReviewMessage = count > 0 
                 ? (template.Contains("{0}") ? string.Format(template, count) : $"{template} {count}") 
                 : string.Empty;
+
+            if (count > 0 && !_hasShownDueReviewToast)
+            {
+                _hasShownDueReviewToast = true;
+                var title = _localizationService.GetString("Review_Reminder_Title");
+                var actionText = _localizationService.GetString("Review_Now");
+                _toastService.ShowInfo(
+                    DueReviewMessage,
+                    title,
+                    durationMs: 7000,
+                    actionText: actionText,
+                    actionCallback: () =>
+                    {
+                        _navigationService.Navigate(typeof(Views.ReviewPage));
+                    });
+            }
         }
         catch
         {

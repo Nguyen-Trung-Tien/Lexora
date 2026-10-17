@@ -13,17 +13,31 @@ public class ReviewService : IReviewService
     private readonly ISpacedRepetitionEngine _srEngine;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILearningStorageRepository? _storageRepo;
+    private readonly IFsrsSpacedRepetitionEngine? _fsrsEngine;
+    private readonly IUserPreferencesService? _preferencesService;
 
     public ReviewService(
         IReviewRepository reviewRepo,
         ISpacedRepetitionEngine srEngine,
         IUnitOfWork unitOfWork,
-        ILearningStorageRepository? storageRepo = null)
+        ILearningStorageRepository? storageRepo = null,
+        IFsrsSpacedRepetitionEngine? fsrsEngine = null,
+        IUserPreferencesService? preferencesService = null)
     {
         _reviewRepo = reviewRepo;
         _srEngine = srEngine;
         _unitOfWork = unitOfWork;
         _storageRepo = storageRepo;
+        _fsrsEngine = fsrsEngine;
+        _preferencesService = preferencesService;
+    }
+
+    private (ISpacedRepetitionEngine engine, double desiredRetention, bool isFsrs) GetActiveEngine()
+    {
+        var prefs = _preferencesService?.GetPreferences();
+        bool isFsrs = _fsrsEngine != null && string.Equals(prefs?.SpacedRepetitionAlgorithm, "FSRS", StringComparison.OrdinalIgnoreCase);
+        double retention = prefs?.TargetRetention > 0 ? prefs.TargetRetention : 0.90;
+        return (isFsrs ? (ISpacedRepetitionEngine)_fsrsEngine! : _srEngine, retention, isFsrs);
     }
 
     public async Task<IReadOnlyList<ReviewCardDto>> GetDueCardsAsync(int limit = 50, CancellationToken cancellationToken = default)
@@ -184,9 +198,30 @@ public class ReviewService : IReviewService
             throw new KeyNotFoundException($"ReviewCard with ID {reviewCardId} not found");
 
         var prevStatus = card.Status;
-        var result = _srEngine.CalculateNextReview(card, rating, DateTime.UtcNow);
+        var (engine, desiredRetention, isFsrs) = GetActiveEngine();
 
-        // Apply SM-2 results
+        SpacedRepetitionResult result;
+        if (isFsrs && _fsrsEngine != null)
+        {
+            var fsrsState = _fsrsEngine.CalculateFsrsNextReview(card, rating, DateTime.UtcNow, desiredRetention);
+            double mappedEaseFactor = Math.Clamp(1.3 + (10.0 - fsrsState.Difficulty) * 0.15, 1.3, 3.0);
+            mappedEaseFactor = Math.Round(mappedEaseFactor, 2);
+
+            result = new SpacedRepetitionResult(
+                NewEaseFactor: mappedEaseFactor,
+                NewIntervalDays: fsrsState.IntervalDays,
+                NewRepetitions: fsrsState.Repetitions,
+                NewLapses: fsrsState.Lapses,
+                NewStatus: fsrsState.Status,
+                NextReviewAt: fsrsState.NextReviewAt
+            );
+        }
+        else
+        {
+            result = _srEngine.CalculateNextReview(card, rating, DateTime.UtcNow);
+        }
+
+        // Apply algorithm results
         card.EaseFactor = result.NewEaseFactor;
         card.IntervalDays = result.NewIntervalDays;
         card.Repetitions = result.NewRepetitions;
@@ -235,7 +270,7 @@ public class ReviewService : IReviewService
                     IntervalDays = 1,
                     Repetitions = 0,
                     Lapses = card.Lapses,
-                    RetentionProbability = _srEngine.CalculateRetentionProbability(card),
+                    RetentionProbability = engine.CalculateRetentionProbability(card),
                     NextReviewAt = card.NextReviewAt,
                     LastReviewedAt = card.LastReviewedAt
                 };
@@ -247,7 +282,7 @@ public class ReviewService : IReviewService
                 existingStorage.Lapses = card.Lapses;
                 existingStorage.IntervalDays = 1;
                 existingStorage.NextReviewAt = card.NextReviewAt;
-                existingStorage.RetentionProbability = _srEngine.CalculateRetentionProbability(card);
+                existingStorage.RetentionProbability = engine.CalculateRetentionProbability(card);
                 existingStorage.UpdatedAt = DateTime.UtcNow;
                 await _storageRepo.UpdateAsync(existingStorage, cancellationToken);
             }
@@ -307,7 +342,7 @@ public class ReviewService : IReviewService
                         existingStorage.Lapses = previousLapses;
                         existingStorage.IntervalDays = previousInterval;
                         existingStorage.NextReviewAt = previousNextReviewAt;
-                        existingStorage.RetentionProbability = _srEngine.CalculateRetentionProbability(card);
+                        existingStorage.RetentionProbability = GetActiveEngine().engine.CalculateRetentionProbability(card);
                         existingStorage.UpdatedAt = DateTime.UtcNow;
                         await _storageRepo.UpdateAsync(existingStorage, cancellationToken);
                     }
@@ -386,7 +421,7 @@ public class ReviewService : IReviewService
                     IntervalDays = 1,
                     Repetitions = 0,
                     Lapses = card.Lapses,
-                    RetentionProbability = _srEngine.CalculateRetentionProbability(card),
+                    RetentionProbability = GetActiveEngine().engine.CalculateRetentionProbability(card),
                     NextReviewAt = card.NextReviewAt,
                     LastReviewedAt = card.LastReviewedAt
                 };
@@ -420,7 +455,8 @@ public class ReviewService : IReviewService
             Status = card.Status
         };
 
-        return _srEngine.GetIntervalPreview(dummyCard);
+        var (engine, _, _) = GetActiveEngine();
+        return engine.GetIntervalPreview(dummyCard);
     }
 
     public double GetRetentionProbability(ReviewCardDto card)
@@ -438,7 +474,8 @@ public class ReviewService : IReviewService
             NextReviewAt = card.NextReviewAt
         };
 
-        return _srEngine.CalculateRetentionProbability(dummyCard);
+        var (engine, _, _) = GetActiveEngine();
+        return engine.CalculateRetentionProbability(dummyCard);
     }
 
     public MemoryStabilityMetricsDto GetMemoryStabilityMetrics(ReviewCardDto card)
@@ -624,7 +661,7 @@ public class ReviewService : IReviewService
             ? c.Confidence
             : (c.TotalReviews > 0
                 ? Math.Round((double)c.CorrectReviews / c.TotalReviews * 100, 1)
-                : _srEngine.CalculateRetentionProbability(c));
+                : GetActiveEngine().engine.CalculateRetentionProbability(c));
 
         return new ReviewCardDto(
             c.Id,

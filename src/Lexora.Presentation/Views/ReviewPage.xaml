@@ -56,33 +56,53 @@
                                 <TextBlock x:Name="SmartPresetsBtnText" Text="{x:Bind Loc.GetString('SmartReview_Presets')}" FontWeight="SemiBold" FontSize="13" />
                             </StackPanel>
                             <DropDownButton.Flyout>
-                                <MenuFlyout>
-                                    <MenuFlyoutItem x:Name="PresetUrgentItem" Text="Urgent Overdue" Tag="UrgentOverdue" Click="SmartPresetItem_Click">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE7BA;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                    <MenuFlyoutItem x:Name="PresetHighRiskItem" Text="High Forgetting Risk" Tag="HighForgettingRisk" Click="SmartPresetItem_Click">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE814;" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                    <MenuFlyoutItem x:Name="PresetExamYieldItem" Text="Exam High-Yield" Tag="ExamHighYield" Click="SmartPresetItem_Click">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE734;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                    <MenuFlyoutItem x:Name="PresetFreshItem" Text="Fresh Learned" Tag="FreshLearned" Click="SmartPresetItem_Click">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE710;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                    <MenuFlyoutItem x:Name="PresetConsolidationItem" Text="Long-Term Consolidation" Tag="LongTermConsolidation" Click="SmartPresetItem_Click">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE73E;" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                </MenuFlyout>
+                                <Flyout x:Name="SmartPresetsFlyout" Placement="Bottom">
+                                    <Border Width="380" MaxHeight="450">
+                                        <StackPanel Spacing="10">
+                                            <!-- Flyout Header -->
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_PresetFlyoutTitle')}" FontWeight="Bold" FontSize="14" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_PresetFlyoutSubtitle')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <MenuFlyoutSeparator Margin="0,2" />
+                                            <!-- List of Presets -->
+                                            <ListView ItemsSource="{x:Bind ViewModel.SmartPresetsList, Mode=OneWay}"
+                                                      SelectionMode="None"
+                                                      IsItemClickEnabled="True"
+                                                      ItemClick="SmartPresetListView_ItemClick">
+                                                <ListView.ItemTemplate>
+                                                    <DataTemplate x:DataType="dto:SmartReviewPresetDisplayItem">
+                                                        <Border Padding="10,8" Margin="0,3" CornerRadius="8"
+                                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                BorderThickness="1">
+                                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                                <Border Width="34" Height="34" CornerRadius="17"
+                                                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                        VerticalAlignment="Center">
+                                                                    <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="14"
+                                                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Border>
+                                                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{x:Bind Title}" FontWeight="SemiBold" FontSize="13" />
+                                                                    <TextBlock Text="{x:Bind Description}" FontSize="11"
+                                                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                               TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                                                </StackPanel>
+                                                                <Border Grid.Column="2" Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                                        CornerRadius="10" Padding="8,3" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{x:Bind BadgeText}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                                               FontSize="11" FontWeight="Bold" />
+                                                                </Border>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ListView.ItemTemplate>
+                                            </ListView>
+                                        </StackPanel>
+                                    </Border>
+                                </Flyout>
                             </DropDownButton.Flyout>
                         </DropDownButton>
 

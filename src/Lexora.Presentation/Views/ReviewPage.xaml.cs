@@ -98,11 +98,6 @@ public sealed partial class ReviewPage : Page, ILocalizableView
         if (FlyoutSpeedVeryFast != null) FlyoutSpeedVeryFast.Text = Loc.GetString("Settings_Speed_VeryFast");
 
         if (SmartPresetsBtnText != null) SmartPresetsBtnText.Text = Loc.GetString("SmartReview_Presets");
-        if (PresetUrgentItem != null) PresetUrgentItem.Text = Loc.GetString("SmartReview_UrgentOverdue");
-        if (PresetHighRiskItem != null) PresetHighRiskItem.Text = Loc.GetString("SmartReview_HighForgettingRisk");
-        if (PresetExamYieldItem != null) PresetExamYieldItem.Text = Loc.GetString("SmartReview_ExamHighYield");
-        if (PresetFreshItem != null) PresetFreshItem.Text = Loc.GetString("SmartReview_FreshLearned");
-        if (PresetConsolidationItem != null) PresetConsolidationItem.Text = Loc.GetString("SmartReview_LongTermConsolidation");
     }
 
     public void OnLanguageChanged()
@@ -111,6 +106,7 @@ public sealed partial class ReviewPage : Page, ILocalizableView
         {
             UpdateSpeedFlyoutLabels();
             ViewModel.UpdateActiveSessionTitle();
+            _ = ViewModel.LoadSmartPresetsAsync();
             Bindings.Update();
         }
 
@@ -385,18 +381,18 @@ public sealed partial class ReviewPage : Page, ILocalizableView
         await ViewModel.StartReviewAsync(ReviewSessionMode.Difficult);
     }
 
-    private async void SmartPresetItem_Click(object sender, RoutedEventArgs e)
+    private async void SmartPresetListView_ItemClick(object sender, ItemClickEventArgs e)
     {
-        if (sender is FrameworkElement fe && fe.Tag is string tagStr &&
-            Enum.TryParse<SmartReviewPresetMode>(tagStr, out var presetMode))
+        if (e.ClickedItem is SmartReviewPresetDisplayItem item)
         {
+            SmartPresetsFlyout?.Hide();
             var defaultStyle = App.Current.Resources.TryGetValue("DefaultButtonStyle", out var d) ? (Style)d : null;
             ModeDueButton.Style = defaultStyle;
             ModeNewButton.Style = defaultStyle;
             ModeDifficultButton.Style = defaultStyle;
             if (ReviewUnitCombo != null) ReviewUnitCombo.SelectedItem = null;
 
-            await ViewModel.StartSmartReviewPresetAsync(presetMode);
+            await ViewModel.StartSmartReviewPresetAsync(item.Mode);
         }
     }
 

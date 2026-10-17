@@ -434,6 +434,90 @@
                 </StackPanel>
             </Border>
 
+            <!-- 4. Spaced Repetition Algorithm & Target Retention Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+                <StackPanel Spacing="16">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE895;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_Algorithm')}" FontWeight="Bold" FontSize="16" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_AlgorithmSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Algorithm Selection Grid (SM-2 vs FSRS v5) -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+                        <!-- Card 1: SM-2 -->
+                        <Button x:Name="AlgorithmSm2Button"
+                                Click="AlgorithmSm2Button_Click"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Padding="16,14"
+                                CornerRadius="10"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE735;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Settings_Algorithm_SM2')}" FontWeight="SemiBold" FontSize="14" />
+                                </StackPanel>
+                                <Border x:Name="AlgorithmSm2Check" Grid.Column="1" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Top" Visibility="Visible">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                                           Text="{x:Bind Loc.GetString('Settings_Algorithm_SM2Desc')}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                            </Grid>
+                        </Button>
+
+                        <!-- Card 2: FSRS v5 -->
+                        <Button x:Name="AlgorithmFsrsButton"
+                                Grid.Column="1"
+                                Click="AlgorithmFsrsButton_Click"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Padding="16,14"
+                                CornerRadius="10"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE958;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Settings_Algorithm_FSRS')}" FontWeight="SemiBold" FontSize="14" />
+                                </StackPanel>
+                                <Border x:Name="AlgorithmFsrsCheck" Grid.Column="1" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Top" Visibility="Collapsed">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                                           Text="{x:Bind Loc.GetString('Settings_Algorithm_FSRSDesc')}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                            </Grid>
+                        </Button>
+                    </Grid>
+
+                    <MenuFlyoutSeparator Margin="0,2,0,2" />
+
+                    <!-- Target Retention Selector Row -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" VerticalAlignment="Center">
+                        <StackPanel Spacing="3" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_TargetRetention')}" FontWeight="SemiBold" FontSize="14" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_TargetRetentionSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="TargetRetentionCombo" Grid.Column="1"
+                                  SelectionChanged="TargetRetentionCombo_SelectionChanged"
+                                  MinWidth="280" CornerRadius="8">
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Retention_85')}" Tag="0.85" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Retention_90')}" Tag="0.90" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Settings_Retention_95')}" Tag="0.95" />
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Database & Backup Management Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
                 <StackPanel Spacing="16">

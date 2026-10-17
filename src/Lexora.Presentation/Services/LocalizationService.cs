@@ -26,6 +26,11 @@ public class LocalizationService : ILocalizationService
             ["Nav_Test"] = "Luyện tập & Thi",
             ["Nav_Grammar"] = "Ngữ pháp",
             ["Nav_Settings"] = "Cài đặt",
+            ["Nav_ThemeLight"] = "Chế độ Sáng",
+            ["Nav_ThemeDark"] = "Chế độ Tối",
+            ["Nav_ThemeToggle"] = "Chuyển giao diện",
+            ["Shell_TooltipThemeToggleLight"] = "Chuyển sang Chế độ Sáng (Ctrl+T)",
+            ["Shell_TooltipThemeToggleDark"] = "Chuyển sang Chế độ Tối (Ctrl+T)",
             ["Search_Placeholder"] = "Tìm kiếm thông minh (Ctrl+K)...",
             ["Review_Reminder_Title"] = "Nhắc nhở ôn tập",
             ["Review_Now"] = "Ôn tập ngay",
@@ -978,6 +983,33 @@ public class LocalizationService : ILocalizationService
             ["Settings_TypingPracticeSubtitle"] = "Yêu cầu gõ chính tả từ vựng trước khi lật thẻ ghi nhớ",
             ["Settings_FailedLoadStatsFormat"] = "Không thể tải số liệu sao lưu: {0}",
 
+            // Spaced Repetition Algorithm Settings
+            ["Settings_Algorithm"] = "Thuật toán Ghi nhớ & Ôn tập (Spaced Repetition)",
+            ["Settings_AlgorithmSubtitle"] = "Tùy chọn mô hình giãn cách thời gian và tỷ lệ ghi nhớ mục tiêu",
+            ["Settings_Algorithm_SM2"] = "SM-2 (Cổ điển & Ổn định)",
+            ["Settings_Algorithm_SM2Desc"] = "Mô hình SuperMemo chuẩn mực dựa trên Hệ số Dễ (Ease Factor). Khoảng cách ôn tập tiến triển ổn định theo ngày.",
+            ["Settings_Algorithm_FSRS"] = "FSRS v5 (Mô hình Trí nhớ 3 Chiều)",
+            ["Settings_Algorithm_FSRSDesc"] = "Mô hình khoa học thần kinh hiện đại, tính toán dựa trên Độ ổn định (Stability), Độ khó (Difficulty) và Khả năng truy xuất (Retrievability).",
+            ["Settings_TargetRetention"] = "Tỷ lệ ghi nhớ mục tiêu (Target Retention)",
+            ["Settings_TargetRetentionSubtitle"] = "Tỷ lệ phần trăm từ vựng bạn muốn duy trì trong trí nhớ tại thời điểm đến hạn ôn",
+            ["Settings_Retention_85"] = "85% - Tiết kiệm thời gian (Khoảng cách ôn dài hơn)",
+            ["Settings_Retention_90"] = "90% - Cân bằng chuẩn (Khuyên dùng)",
+            ["Settings_Retention_95"] = "95% - Ghi nhớ tối đa (Ôn tập thường xuyên hơn)",
+
+            // Dashboard Intelligence & Forgetting Curve
+            ["Dashboard_HighImpactTitle"] = "Gợi ý Tối ưu hoá Học tập Đột phá",
+            ["Dashboard_ForgettingCurveTitle"] = "Đường cong Lãng quên Ebbinghaus vs Trí nhớ Thực tế",
+            ["Dashboard_ForgettingCurveSubtitle"] = "So sánh tỷ lệ duy trì kiến thức thực tế của bạn so với đường suy giảm tự nhiên",
+            ["Dashboard_RetentionTheoretical"] = "Lý thuyết tự nhiên",
+            ["Dashboard_RetentionEmpirical"] = "Thực tế của bạn",
+            ["Dashboard_RetentionExceeds"] = "Vượt trội +{0}%",
+            ["Dashboard_CardsAtStage"] = "{0} từ tại mốc này",
+
+            // Review Presets Dynamic Flyout
+            ["Review_PresetFlyoutTitle"] = "Bộ lọc Ôn tập Thông minh (Smart Presets)",
+            ["Review_PresetFlyoutSubtitle"] = "Chọn phương thức ôn tập tối ưu hoá theo mục tiêu hiện tại",
+            ["Review_CardsAvailableBadge"] = "{0} từ sẵn sàng",
+
             // Newly Added Splash Screen
             ["Splash_Tagline"] = "HỌC TỪ VỰNG THÔNG MINH & LẶP LẠI NGẮT QUÃNG",
             ["Splash_InitFailed"] = "Không thể khởi tạo Lexora",
@@ -1349,6 +1381,11 @@ public class LocalizationService : ILocalizationService
             ["Nav_Test"] = "Practice & Test",
             ["Nav_Grammar"] = "Grammar",
             ["Nav_Settings"] = "Settings",
+            ["Nav_ThemeLight"] = "Light Mode",
+            ["Nav_ThemeDark"] = "Dark Mode",
+            ["Nav_ThemeToggle"] = "Toggle Theme",
+            ["Shell_TooltipThemeToggleLight"] = "Switch to Light Mode (Ctrl+T)",
+            ["Shell_TooltipThemeToggleDark"] = "Switch to Dark Mode (Ctrl+T)",
             ["Search_Placeholder"] = "Smart search (Ctrl+K)...",
             ["Review_Reminder_Title"] = "Review Reminder",
             ["Review_Now"] = "Review Now",
@@ -2301,6 +2338,33 @@ public class LocalizationService : ILocalizationService
             ["Settings_DueReminderSubtitle"] = "Receive notifications when flashcards are due for SM-2 repetition",
             ["Settings_TypingPracticeSubtitle"] = "Require typing spelling recall before flipping flashcards",
             ["Settings_FailedLoadStatsFormat"] = "Failed to load backup stats: {0}",
+
+            // Spaced Repetition Algorithm Settings
+            ["Settings_Algorithm"] = "Spaced Repetition Scheduling Engine",
+            ["Settings_AlgorithmSubtitle"] = "Choose spaced repetition model and configure target memory retention rate",
+            ["Settings_Algorithm_SM2"] = "SM-2 (Classic & Stable)",
+            ["Settings_Algorithm_SM2Desc"] = "Standard SuperMemo model based on Ease Factor. Review intervals scale reliably over days and weeks.",
+            ["Settings_Algorithm_FSRS"] = "FSRS v5 (Modern 3D Memory Model)",
+            ["Settings_Algorithm_FSRSDesc"] = "Modern neurocognitive 3-variable model factoring Stability, Difficulty, and Retrievability for higher recall efficiency.",
+            ["Settings_TargetRetention"] = "Target Retention Rate",
+            ["Settings_TargetRetentionSubtitle"] = "Desired recall probability when cards become due for review",
+            ["Settings_Retention_85"] = "85% - Time Efficient (Longer intervals)",
+            ["Settings_Retention_90"] = "90% - Balanced Standard (Recommended)",
+            ["Settings_Retention_95"] = "95% - High Retention (More frequent reviews)",
+
+            // Dashboard Intelligence & Forgetting Curve
+            ["Dashboard_HighImpactTitle"] = "High-Impact Learning Recommendation",
+            ["Dashboard_ForgettingCurveTitle"] = "Ebbinghaus Forgetting Curve vs Real Retention",
+            ["Dashboard_ForgettingCurveSubtitle"] = "Compare your actual retention rate against natural cognitive forgetting decay",
+            ["Dashboard_RetentionTheoretical"] = "Theoretical Decay",
+            ["Dashboard_RetentionEmpirical"] = "Your Actual Retention",
+            ["Dashboard_RetentionExceeds"] = "+{0}% Superior",
+            ["Dashboard_CardsAtStage"] = "{0} words at this stage",
+
+            // Review Presets Dynamic Flyout
+            ["Review_PresetFlyoutTitle"] = "Smart Review Presets",
+            ["Review_PresetFlyoutSubtitle"] = "Choose an optimized review mode tailored to your current learning goal",
+            ["Review_CardsAvailableBadge"] = "{0} cards ready",
 
             // Newly Added Splash Screen
             ["Splash_Tagline"] = "INTELLIGENT VOCABULARY & SPACED REPETITION",

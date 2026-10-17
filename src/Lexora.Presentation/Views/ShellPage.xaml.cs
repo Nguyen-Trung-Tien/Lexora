@@ -11,12 +11,14 @@ public sealed partial class ShellPage : Page
     public ShellViewModel ViewModel { get; }
     private readonly INavigationService _navigationService;
     private readonly ILocalizationService _localizationService;
+    private readonly IThemeService _themeService;
 
     public ShellPage()
     {
         ViewModel = App.Current.Services.GetRequiredService<ShellViewModel>();
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
         _localizationService = App.Current.Services.GetRequiredService<ILocalizationService>();
+        _themeService = App.Current.Services.GetRequiredService<IThemeService>();
 
         InitializeComponent();
 
@@ -25,6 +27,8 @@ public sealed partial class ShellPage : Page
 
         UpdateNavigationLabels();
         _localizationService.LanguageChanged += OnLanguageChanged;
+        _themeService.ThemeChanged += OnThemeChanged;
+        ActualThemeChanged += OnActualThemeChanged;
 
         if (App.Current.Services.GetService<IShortcutManager>() is ShortcutManager sm)
         {
@@ -34,6 +38,8 @@ public sealed partial class ShellPage : Page
         Unloaded += (s, e) =>
         {
             _localizationService.LanguageChanged -= OnLanguageChanged;
+            _themeService.ThemeChanged -= OnThemeChanged;
+            ActualThemeChanged -= OnActualThemeChanged;
             if (App.Current.Services.GetService<IShortcutManager>() is ShortcutManager smClean)
             {
                 smClean.GlobalSearchRequested -= OnGlobalSearchRequested;
@@ -163,6 +169,12 @@ public sealed partial class ShellPage : Page
 
         if (item != null)
         {
+            if (string.Equals(item.Tag?.ToString(), "ThemeToggle", StringComparison.OrdinalIgnoreCase))
+            {
+                _themeService.ToggleTheme();
+                return;
+            }
+
             NavigateToItem(item);
         }
     }
@@ -211,6 +223,37 @@ public sealed partial class ShellPage : Page
         ToolTipService.SetToolTip(NavItemLearningStorage, _localizationService.GetString("Shell_TooltipLearningStorage"));
         ToolTipService.SetToolTip(NavItemSettings, _localizationService.GetString("Shell_TooltipSettings"));
         ToolTipService.SetToolTip(GlobalSearchBox, _localizationService.GetString("Shell_SearchTooltip"));
+
+        UpdateThemeToggleState();
+    }
+
+    private void OnThemeChanged(object? sender, ElementTheme theme)
+    {
+        DispatcherQueue.TryEnqueue(UpdateThemeToggleState);
+    }
+
+    private void OnActualThemeChanged(FrameworkElement sender, object args)
+    {
+        DispatcherQueue.TryEnqueue(UpdateThemeToggleState);
+    }
+
+    private void UpdateThemeToggleState()
+    {
+        var isDark = _themeService.CurrentTheme == ElementTheme.Dark
+            || (_themeService.CurrentTheme == ElementTheme.Default && ActualTheme == ElementTheme.Dark);
+
+        if (isDark)
+        {
+            ThemeToggleIcon.Glyph = "\uE706"; // Sun icon -> click to switch to light
+            NavItemThemeToggle.Content = _localizationService.GetString("Nav_ThemeLight");
+            ToolTipService.SetToolTip(NavItemThemeToggle, _localizationService.GetString("Shell_TooltipThemeToggleLight"));
+        }
+        else
+        {
+            ThemeToggleIcon.Glyph = "\uE708"; // Moon icon -> click to switch to dark
+            NavItemThemeToggle.Content = _localizationService.GetString("Nav_ThemeDark");
+            ToolTipService.SetToolTip(NavItemThemeToggle, _localizationService.GetString("Shell_TooltipThemeToggleDark"));
+        }
     }
 
     private CancellationTokenSource? _searchCts;

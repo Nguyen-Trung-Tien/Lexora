@@ -95,6 +95,22 @@ public record RetentionCurvePointDto(
         <= 30 => "Day 30",
         _ => "60d+"
     };
+
+    public double TheoreticalRate => IntervalDays switch
+    {
+        <= 1 => 33.7,
+        <= 3 => 27.8,
+        <= 7 => 25.4,
+        <= 14 => 21.1,
+        <= 30 => 18.5,
+        _ => 15.0
+    };
+
+    public double RetentionAdvantage => Math.Max(0, RetentionRate - TheoreticalRate);
+    public string RetentionAdvantageDisplay => $"+{RetentionAdvantage:F1}%";
+    public string ActualRateDisplay => $"{RetentionRate:F1}%";
+    public string TheoreticalRateDisplay => $"{TheoreticalRate:F1}%";
+    public string WordCountDisplay => $"{WordCount} words";
 }
 
 public record DetailedAnalyticsDto(

@@ -8,6 +8,7 @@ public interface IThemeService
     ElementTheme CurrentTheme { get; }
     void Initialize(Window window);
     void SetTheme(ElementTheme theme);
+    void ToggleTheme();
     event EventHandler<ElementTheme>? ThemeChanged;
 }
 
@@ -59,6 +60,20 @@ public class ThemeService : IThemeService
         ThemeChanged?.Invoke(this, theme);
     }
 
+    public void ToggleTheme()
+    {
+        var targetTheme = _currentTheme switch
+        {
+            ElementTheme.Light => ElementTheme.Dark,
+            ElementTheme.Dark => ElementTheme.Light,
+            _ => (_window?.Content as FrameworkElement)?.ActualTheme == ElementTheme.Dark
+                ? ElementTheme.Light
+                : ElementTheme.Dark
+        };
+
+        SetTheme(targetTheme);
+    }
+
     private void ApplyTheme(ElementTheme theme)
     {
         if (_window?.Content is FrameworkElement rootElement)
@@ -69,6 +84,12 @@ public class ThemeService : IThemeService
         if (_window is MainWindow mainWindow)
         {
             mainWindow.UpdateTitleBarButtons();
+        }
+
+        // Dynamically propagate theme change to any currently open modal ContentDialog
+        if (SafeDialogExtensions.CurrentlyActiveDialog is { } activeDialog)
+        {
+            activeDialog.RequestedTheme = theme;
         }
     }
 }

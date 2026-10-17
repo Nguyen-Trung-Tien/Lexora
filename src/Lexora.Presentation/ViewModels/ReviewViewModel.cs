@@ -148,7 +148,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial MemoryStabilityMetricsDto? CurrentCardMemoryStability { get; set; }
 
-    public ObservableCollection<SmartReviewPresetInfo> SmartPresetsList { get; } = new();
+    public ObservableCollection<SmartReviewPresetDisplayItem> SmartPresetsList { get; } = new();
 
     [ObservableProperty]
     public partial string AgainIntervalText { get; set; } = "< 1d";
@@ -214,8 +214,33 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     {
         await LoadAvailableTopicsAsync();
         await RefreshDueCountAsync();
+        await LoadSmartPresetsAsync();
         await StartReviewAsync(CurrentMode);
         await LoadHistoryAsync();
+    }
+
+    [RelayCommand]
+    public async Task LoadSmartPresetsAsync()
+    {
+        try
+        {
+            var presets = await _reviewService.GetSmartPresetsAsync();
+            bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+            var badgeTemplate = _localizationService.GetString("Review_CardsAvailableBadge");
+
+            SmartPresetsList.Clear();
+            foreach (var p in presets)
+            {
+                var title = isVi ? p.TitleVi : p.TitleEn;
+                var desc = isVi ? p.DescriptionVi : p.DescriptionEn;
+                var badge = badgeTemplate.Contains("{0}") ? string.Format(badgeTemplate, p.AvailableCardsCount) : $"{p.AvailableCardsCount} cards";
+                SmartPresetsList.Add(new SmartReviewPresetDisplayItem(p.Mode, title, desc, p.IconGlyph, p.AvailableCardsCount, badge));
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ReviewViewModel] LoadSmartPresetsAsync error: {ex.Message}");
+        }
     }
 
     public async Task LoadAvailableTopicsAsync()

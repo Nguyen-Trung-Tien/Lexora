@@ -11,6 +11,8 @@ public record UserPreferences
     public bool IsNavPaneOpen { get; init; } = true;
     public string PreferredAccent { get; init; } = "uk"; // "uk" (en-GB) or "us" (en-US)
     public bool AutoCheckUpdates { get; init; } = true;
+    public string SpacedRepetitionAlgorithm { get; init; } = "SM2"; // "SM2" or "FSRS"
+    public double TargetRetention { get; init; } = 0.90; // 0.85, 0.90, 0.95
 
     // Window state — restored on next launch
     public int WindowWidth { get; init; } = 1280;

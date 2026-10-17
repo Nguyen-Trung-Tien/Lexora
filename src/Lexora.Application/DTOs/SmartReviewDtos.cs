@@ -46,6 +46,15 @@ public record SmartReviewPresetInfo(
     int AvailableCardsCount
 );
 
+public record SmartReviewPresetDisplayItem(
+    SmartReviewPresetMode Mode,
+    string Title,
+    string Description,
+    string IconGlyph,
+    int AvailableCardsCount,
+    string BadgeText
+);
+
 public record SmartReviewSessionSummaryDto(
     Guid SessionId,
     SmartReviewPresetMode Mode,

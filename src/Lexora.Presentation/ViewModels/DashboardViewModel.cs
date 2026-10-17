@@ -53,6 +53,10 @@ public partial class DashboardViewModel : ObservableObject
     public partial string ExamReadinessDisplay { get; set; } = string.Empty;
 
     public ObservableCollection<MemoryHealthSegmentDto> MemoryHealthList { get; } = new();
+    public ObservableCollection<RetentionCurvePointDto> RetentionCurveList { get; } = new();
+
+    [ObservableProperty]
+    public partial string HighImpactRecommendation { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
@@ -277,6 +281,16 @@ public partial class DashboardViewModel : ObservableObject
         foreach (var seg in IntelligenceReport.MemoryHealthBreakdown)
         {
             MemoryHealthList.Add(seg);
+        }
+
+        HighImpactRecommendation = isVi
+            ? IntelligenceReport.HighImpactRecommendationVi
+            : IntelligenceReport.HighImpactRecommendationEn;
+
+        RetentionCurveList.Clear();
+        foreach (var pt in IntelligenceReport.EmpiricalVsTheoreticalRetention)
+        {
+            RetentionCurveList.Add(pt);
         }
     }
 

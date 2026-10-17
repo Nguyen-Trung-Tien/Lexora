@@ -26,6 +26,18 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     public partial int SelectedThemeIndex { get; set; } = 0; // 0 = System, 1 = Light, 2 = Dark
 
     [ObservableProperty]
+    public partial string SpacedRepetitionAlgorithm { get; set; } = "SM2"; // "SM2" or "FSRS"
+
+    [ObservableProperty]
+    public partial int SelectedAlgorithmIndex { get; set; } = 0; // 0 = SM-2, 1 = FSRS v5
+
+    [ObservableProperty]
+    public partial double TargetRetention { get; set; } = 0.90; // 0.85, 0.90, 0.95
+
+    [ObservableProperty]
+    public partial int SelectedRetentionIndex { get; set; } = 1; // 0 = 85%, 1 = 90%, 2 = 95%
+
+    [ObservableProperty]
     public partial string CurrentLanguage { get; set; }
 
     [ObservableProperty]
@@ -142,12 +154,32 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         CurrentLanguage = _locService.CurrentLanguage;
         var prefs = _preferencesService.GetPreferences();
         SelectedThemeIndex = prefs.ThemeIndex;
+        _themeService.ThemeChanged += (s, theme) =>
+        {
+            var idx = theme switch
+            {
+                ElementTheme.Light => 1,
+                ElementTheme.Dark => 2,
+                _ => 0
+            };
+            RunOnUI(() => SelectedThemeIndex = idx);
+        };
         AutoPlayAudio = prefs.AutoPlayAudio;
         EnableReviewReminder = prefs.EnableReviewReminder;
         SpeechRate = prefs.SpeechRate;
         EnableTypingPractice = prefs.EnableTypingPractice;
         AutoCheckUpdates = prefs.AutoCheckUpdates;
         PreferredAccent = string.IsNullOrWhiteSpace(prefs.PreferredAccent) ? "uk" : prefs.PreferredAccent;
+
+        SpacedRepetitionAlgorithm = string.Equals(prefs.SpacedRepetitionAlgorithm, "FSRS", StringComparison.OrdinalIgnoreCase) ? "FSRS" : "SM2";
+        SelectedAlgorithmIndex = SpacedRepetitionAlgorithm == "FSRS" ? 1 : 0;
+        TargetRetention = prefs.TargetRetention > 0 ? prefs.TargetRetention : 0.90;
+        SelectedRetentionIndex = TargetRetention switch
+        {
+            <= 0.86 => 0,
+            >= 0.94 => 2,
+            _ => 1
+        };
 
         DatabasePath = _backupService.DatabasePath;
 
@@ -390,6 +422,29 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         UpdateLanguageState();
         var current = _preferencesService.GetPreferences();
         _ = _preferencesService.SavePreferencesAsync(current with { LanguageCode = langCode });
+    }
+
+    [RelayCommand]
+    public async Task SetAlgorithmAsync(string algorithm)
+    {
+        SpacedRepetitionAlgorithm = string.Equals(algorithm, "FSRS", StringComparison.OrdinalIgnoreCase) ? "FSRS" : "SM2";
+        SelectedAlgorithmIndex = SpacedRepetitionAlgorithm == "FSRS" ? 1 : 0;
+        var current = _preferencesService.GetPreferences();
+        await _preferencesService.SavePreferencesAsync(current with { SpacedRepetitionAlgorithm = SpacedRepetitionAlgorithm });
+    }
+
+    [RelayCommand]
+    public async Task SetTargetRetentionAsync(double retentionRate)
+    {
+        TargetRetention = retentionRate;
+        SelectedRetentionIndex = retentionRate switch
+        {
+            <= 0.86 => 0,
+            >= 0.94 => 2,
+            _ => 1
+        };
+        var current = _preferencesService.GetPreferences();
+        await _preferencesService.SavePreferencesAsync(current with { TargetRetention = TargetRetention });
     }
 
     private bool _isCreatingBackup = false;

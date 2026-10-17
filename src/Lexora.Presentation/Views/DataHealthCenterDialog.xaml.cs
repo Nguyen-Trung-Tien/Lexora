@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Presentation.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -109,6 +110,11 @@ public sealed partial class DataHealthCenterDialog : ContentDialog, INotifyPrope
         _healthService = healthService;
         Loc = loc;
         this.InitializeComponent();
+
+        if (App.Current?.Services?.GetService<Services.IThemeService>() is { } themeService && themeService.CurrentTheme != ElementTheme.Default)
+        {
+            RequestedTheme = themeService.CurrentTheme;
+        }
 
         Loaded += async (s, e) =>
         {
