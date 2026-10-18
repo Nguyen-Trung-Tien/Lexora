@@ -266,7 +266,7 @@
 
                                     <!-- Prompt Definition -->
                                     <TextBlock Text="{x:Bind ViewModel.CurrentCard.PrimaryDefinitionVi, Mode=OneWay}"
-                                               FontSize="28" FontWeight="Bold" Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                               FontSize="28" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
 
                                     <!-- Cloze Sentence Context -->
@@ -779,9 +779,9 @@
                                                 HorizontalAlignment="Center">
                                         <FontIcon Glyph="{x:Bind RatingIcon}"
                                                   FontSize="11"
-                                                  Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                  Foreground="{x:Bind Rating, Converter={StaticResource ReviewRatingToForegroundConverter}}" />
                                         <TextBlock Text="{x:Bind services:LocalizationHelper.FormatRating(Rating)}"
-                                                   Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                   Foreground="{x:Bind Rating, Converter={StaticResource ReviewRatingToForegroundConverter}}"
                                                    FontSize="11" FontWeight="Bold" />
                                     </StackPanel>
                                 </Border>

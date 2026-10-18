@@ -574,14 +574,14 @@
                                                             </Border>
                                                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
                                                                 <TextBlock Text="{x:Bind LevelDisplay}" FontSize="10" FontWeight="Bold"
-                                                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                             </Border>
                                                         </StackPanel>
                                                         <TextBlock Text="{x:Bind Structure}" FontSize="12"
                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                    TextTrimming="CharacterEllipsis" />
                                                         <TextBlock Text="{x:Bind Reason}" FontSize="11" FontStyle="Italic"
-                                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                    TextWrapping="Wrap" />
                                                     </StackPanel>
 

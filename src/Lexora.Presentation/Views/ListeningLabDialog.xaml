@@ -199,7 +199,7 @@
                                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                                         <TextBlock Text="{x:Bind CurrentPair.WordA, Mode=OneWay}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Bind CurrentPair.PhoneticA, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
-                                        <TextBlock Text="{x:Bind CurrentPair.MeaningA, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind CurrentPair.MeaningA, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
 
@@ -211,7 +211,7 @@
                                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                                         <TextBlock Text="{x:Bind CurrentPair.WordB, Mode=OneWay}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
                                         <TextBlock Text="{x:Bind CurrentPair.PhoneticB, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
-                                        <TextBlock Text="{x:Bind CurrentPair.MeaningB, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind CurrentPair.MeaningB, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </Grid>

@@ -410,24 +410,24 @@
                                         <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
                                             <!-- Retention -->
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_RetentionLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_RetentionLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <TextBlock Text="{x:Bind FormattedRetention}" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             </StackPanel>
 
                                             <!-- Interval -->
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_IntervalLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_IntervalLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <TextBlock Text="{x:Bind FormattedInterval}" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             </StackPanel>
 
                                             <!-- Mistakes / Correct count -->
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_MistakesLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_MistakesLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <TextBlock Text="{x:Bind IncorrectCount}" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_CorrectLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Storage_CorrectLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <TextBlock Text="{x:Bind CorrectCount}" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                             </StackPanel>

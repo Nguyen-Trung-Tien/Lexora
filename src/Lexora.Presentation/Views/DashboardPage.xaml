@@ -274,7 +274,7 @@
                                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Border>
                                             <TextBlock Text="{x:Bind DisplayDate}" FontSize="11"
-                                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -362,7 +362,7 @@
                                                 <TextBlock Text="{x:Bind StatusName}" FontSize="12" FontWeight="Bold" />
                                                 <TextBlock Text="{x:Bind WordCount}" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind Recommendation}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" MaxWidth="150" />
+                                            <TextBlock Text="{x:Bind Recommendation}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxWidth="150" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -430,7 +430,7 @@
                                     <!-- Interval Label & Word Count -->
                                     <StackPanel Spacing="1" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind Label}" FontWeight="Bold" FontSize="13" />
-                                        <TextBlock Text="{x:Bind WordCountDisplay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{x:Bind WordCountDisplay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     </StackPanel>
 
                                     <!-- Dual Comparison ProgressBars -->
@@ -446,7 +446,7 @@
                                     <!-- Numerical Values -->
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ActualRateDisplay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                        <TextBlock Text=" vs " FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text=" vs " FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                         <TextBlock Text="{x:Bind TheoreticalRateDisplay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                     </StackPanel>
 
@@ -567,13 +567,13 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapLess')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapLess')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel0Brush}" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel1Brush}" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel2Brush}" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel3Brush}" />
                             <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel4Brush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapMore')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapMore')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Grid>
 

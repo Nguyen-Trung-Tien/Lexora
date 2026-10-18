@@ -11,6 +11,7 @@ public static class ThemeResourceHelper
     // High-contrast, theme-accurate fallback brushes to guarantee readability
     private static readonly Brush LightPrimaryText = new SolidColorBrush(Color.FromArgb(255, 24, 24, 24));
     private static readonly Brush LightSecondaryText = new SolidColorBrush(Color.FromArgb(255, 92, 92, 92));
+    private static readonly Brush LightTertiaryText = new SolidColorBrush(Color.FromArgb(255, 118, 118, 118)); // #767676 (WCAG AA 4.54:1 on white)
     private static readonly Brush LightAccentText = new SolidColorBrush(Color.FromArgb(255, 0, 95, 184)); // High-contrast Windows 11 Royal Blue
     private static readonly Brush LightCardBackground = new SolidColorBrush(Colors.White);
     private static readonly Brush LightCardStroke = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0));
@@ -22,6 +23,7 @@ public static class ThemeResourceHelper
 
     private static readonly Brush DarkPrimaryText = new SolidColorBrush(Colors.White);
     private static readonly Brush DarkSecondaryText = new SolidColorBrush(Color.FromArgb(255, 197, 197, 197));
+    private static readonly Brush DarkTertiaryText = new SolidColorBrush(Color.FromArgb(255, 160, 160, 160));
     private static readonly Brush DarkAccentText = new SolidColorBrush(Color.FromArgb(255, 96, 205, 255)); // Fluent Cyan
     private static readonly Brush DarkCardBackground = new SolidColorBrush(Color.FromArgb(255, 43, 43, 43));
     private static readonly Brush DarkCardStroke = new SolidColorBrush(Color.FromArgb(25, 255, 255, 255));
@@ -132,6 +134,12 @@ public static class ThemeResourceHelper
                             return LightSecondaryText;
                         }
 
+                        // Guard against faint tertiary text leaking into light mode
+                        if (isLight && key == "TextFillColorTertiaryBrush" && b is SolidColorBrush scbTer && (scbTer.Color.R > 140 || (scbTer.Color.R == scbTer.Color.G && scbTer.Color.G == scbTer.Color.B && scbTer.Color.R > 125)))
+                        {
+                            return LightTertiaryText;
+                        }
+
                         return b;
                     }
                 }
@@ -156,9 +164,13 @@ public static class ThemeResourceHelper
                     {
                         return LightPrimaryText;
                     }
-                    if (isLight && key == "TextFillColorSecondaryBrush" && rb is SolidColorBrush scbSec && scbSec.Color.R > 180 && scbSec.Color.G > 180 && scbSec.Color.B > 180)
+                    if (isLight && key == "TextFillColorSecondaryBrush" && rb is SolidColorBrush scbSec && rb is SolidColorBrush scbSec2 && scbSec2.Color.R > 180 && scbSec2.Color.G > 180 && scbSec2.Color.B > 180)
                     {
                         return LightSecondaryText;
+                    }
+                    if (isLight && key == "TextFillColorTertiaryBrush" && rb is SolidColorBrush scbTerRoot && (scbTerRoot.Color.R > 140 || (scbTerRoot.Color.R == scbTerRoot.Color.G && scbTerRoot.Color.G == scbTerRoot.Color.B && scbTerRoot.Color.R > 125)))
+                    {
+                        return LightTertiaryText;
                     }
                     return rb;
                 }
@@ -170,6 +182,7 @@ public static class ThemeResourceHelper
         {
             "TextFillColorPrimaryBrush" => isLight ? LightPrimaryText : DarkPrimaryText,
             "TextFillColorSecondaryBrush" => isLight ? LightSecondaryText : DarkSecondaryText,
+            "TextFillColorTertiaryBrush" => isLight ? LightTertiaryText : DarkTertiaryText,
             "AccentTextFillColorPrimaryBrush" => isLight ? LightAccentText : DarkAccentText,
             "CardBackgroundFillColorDefaultBrush" => isLight ? LightCardBackground : DarkCardBackground,
             "CardStrokeColorDefaultBrush" => isLight ? LightCardStroke : DarkCardStroke,

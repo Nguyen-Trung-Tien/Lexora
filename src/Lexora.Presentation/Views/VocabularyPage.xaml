@@ -517,7 +517,7 @@
                                                 <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
                                                     <TextBlock Text="{x:Bind PartsOfSpeechDisplay}" FontSize="10" FontWeight="SemiBold"
-                                                               Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </Border>
                                             </StackPanel>
                                             <TextBlock Text="{x:Bind PrimaryDefinition}" FontSize="12"
@@ -677,7 +677,7 @@
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PlayUkPronunciation')}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon x:Name="IconPlayUk" Glyph="&#xE768;" FontSize="13"
-                                                  Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="UK" FontWeight="Bold"
                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="{x:Bind ViewModel.SelectedWord.PhoneticUk, Mode=OneWay}"
@@ -976,14 +976,14 @@
                                                             </Border>
                                                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
                                                                 <TextBlock Text="{x:Bind PartOfSpeech}" FontSize="10"
-                                                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                             </Border>
                                                         </StackPanel>
                                                         <TextBlock Text="{x:Bind PrimaryDefinition}" FontSize="12"
                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                    TextTrimming="CharacterEllipsis" />
                                                         <TextBlock Text="{x:Bind Reason}" FontSize="11" FontStyle="Italic"
-                                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                    TextWrapping="Wrap" />
                                                     </StackPanel>
 

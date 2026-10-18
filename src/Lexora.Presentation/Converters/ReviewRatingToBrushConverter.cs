@@ -53,6 +53,23 @@ public sealed class ReviewRatingToForegroundConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, string language)
     {
         var rootElement = (Microsoft.UI.Xaml.Application.Current as App)?.MainWindow?.Content as Microsoft.UI.Xaml.FrameworkElement;
+        bool isLight = Services.ThemeResourceHelper.DetermineIsLight();
+
+        if (value is ReviewRating rating)
+        {
+            // In light mode, Hard (caution brush) and subtle backgrounds require dark text for WCAG compliance
+            if (isLight && rating == ReviewRating.Hard)
+            {
+                var darkText = Services.ThemeResourceHelper.GetThemeBrush(rootElement, "TextFillColorPrimaryBrush");
+                return darkText ?? new SolidColorBrush(Colors.Black);
+            }
+        }
+        else if (isLight)
+        {
+            var darkText = Services.ThemeResourceHelper.GetThemeBrush(rootElement, "TextFillColorPrimaryBrush");
+            return darkText ?? new SolidColorBrush(Colors.Black);
+        }
+
         var brush = Services.ThemeResourceHelper.GetThemeBrush(rootElement, "TextOnAccentFillColorPrimaryBrush");
         if (brush != null)
         {

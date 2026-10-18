@@ -11,25 +11,25 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
             <!-- Hero card border: soft accent-tinted stroke for depth vs Mica in light mode -->
-            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.28" />
+            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.35" />
             <!-- Metric stat card border: crisp edge so cards pop against light Mica -->
-            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.32" />
+            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="#000000" Opacity="0.10" />
             <!-- Advisor card accent border -->
             <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.65" />
             <!-- Subtle card stroke token -->
-            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.3" />
+            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="#000000" Opacity="0.08" />
             <!-- Input background & border tokens for crisp contrast -->
             <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="#FAFAFA" />
-            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.4" />
+            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="#000000" Opacity="0.18" />
             <!-- Flashcard crisp border for tactile elevation in light mode -->
-            <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.45" />
-            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.38" />
+            <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="#000000" Opacity="0.12" />
+            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="#000000" Opacity="0.12" />
             <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.45" />
+            <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="#000000" Opacity="0.15" />
             <!-- Modal Dialog & Floating Overlay tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraModalBackgroundBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="LexoraModalBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.4" />
+            <SolidColorBrush x:Key="LexoraModalBorderBrush" Color="#000000" Opacity="0.14" />
             <!-- Semantic state background fills -->
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#DFF6DD" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#FDE7E9" />

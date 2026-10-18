@@ -106,7 +106,7 @@
                                    Text="PROGRESS"
                                    FontSize="9"
                                    FontWeight="SemiBold"
-                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    HorizontalAlignment="Center" />
                     </StackPanel>
                 </Grid>

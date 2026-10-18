@@ -34,19 +34,11 @@ public class HeatmapLevelToBrushConverter : IValueConverter
             _ => "HeatmapLevel0Brush"
         };
 
-        bool isDark = false;
+        bool isLight = Services.ThemeResourceHelper.DetermineIsLight();
+        bool isDark = !isLight;
+
         if (XamlApplication.Current != null)
         {
-            if (XamlApplication.Current.RequestedTheme == ApplicationTheme.Dark)
-            {
-                isDark = true;
-            }
-            else if (XamlApplication.Current.Resources.TryGetValue("CardBackgroundFillColorDefaultBrush", out var cardBg) && cardBg is SolidColorBrush scb)
-            {
-                // Luminance threshold to detect dark theme
-                isDark = (scb.Color.R * 0.299 + scb.Color.G * 0.587 + scb.Color.B * 0.114) < 128;
-            }
-
             // Attempt to look inside ThemeDictionaries
             string themeKey = isDark ? "Dark" : "Light";
             if (XamlApplication.Current.Resources.ThemeDictionaries.TryGetValue(themeKey, out var dictObj) &&

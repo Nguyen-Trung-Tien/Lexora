@@ -58,7 +58,7 @@
                         </StackPanel>
 
                         <TextBlock Text="{x:Bind Graph.CenterNode.Term, Mode=OneWay}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="{x:Bind Graph.CenterNode.Ipa, Mode=OneWay}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="13" />
+                        <TextBlock Text="{x:Bind Graph.CenterNode.Ipa, Mode=OneWay}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                         <TextBlock Text="{x:Bind Graph.CenterNode.MeaningVi, Mode=OneWay}" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
                     </StackPanel>
 
@@ -103,7 +103,7 @@
                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="14" />
-                                        <TextBlock Text="{x:Bind Ipa}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind Ipa}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                     </StackPanel>
                                     <TextBlock Text="{x:Bind MeaningVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                                 </StackPanel>

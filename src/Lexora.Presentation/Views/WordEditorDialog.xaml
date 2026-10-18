@@ -338,7 +338,7 @@
                                         </ListView>
                                         <TextBlock x:Name="EmptyTopicsTextBlock"
                                                    Text="{x:Bind Loc.GetString('WordEditor_EmptyTopics')}"
-                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                    FontSize="12" FontStyle="Italic"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                                    Visibility="Collapsed" />
@@ -360,7 +360,7 @@
                                         </ListView>
                                         <TextBlock x:Name="EmptyExamTagsTextBlock"
                                                    Text="{x:Bind Loc.GetString('WordEditor_EmptyExams')}"
-                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                    FontSize="12" FontStyle="Italic"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                                    Visibility="Collapsed" />

@@ -116,40 +116,32 @@ public sealed partial class ToastOverlayControl : UserControl
         {
             case ToastType.Success:
                 glyph = "\uE73E"; // Checkmark
-                if (App.Current.Resources.TryGetValue("SystemFillColorSuccessBrush", out var sBrush))
-                    themeBrush = sBrush as Brush;
-                if (App.Current.Resources.TryGetValue("SystemFillColorSuccessBackgroundBrush", out var sBgBrush))
-                    badgeBgBrush = sBgBrush as Brush;
+                themeBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
+                badgeBgBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBackgroundBrush");
                 break;
 
             case ToastType.Error:
                 glyph = "\uE783"; // Critical error
-                if (App.Current.Resources.TryGetValue("SystemFillColorCriticalBrush", out var cBrush))
-                    themeBrush = cBrush as Brush;
-                if (App.Current.Resources.TryGetValue("SystemFillColorCriticalBackgroundBrush", out var cBgBrush))
-                    badgeBgBrush = cBgBrush as Brush;
+                themeBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+                badgeBgBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBackgroundBrush");
                 break;
 
             case ToastType.Warning:
                 glyph = "\uE7BA"; // Warning
-                if (App.Current.Resources.TryGetValue("SystemFillColorCautionBrush", out var wBrush))
-                    themeBrush = wBrush as Brush;
-                if (App.Current.Resources.TryGetValue("SystemFillColorCautionBackgroundBrush", out var wBgBrush))
-                    badgeBgBrush = wBgBrush as Brush;
+                themeBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush");
+                badgeBgBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBackgroundBrush");
                 break;
 
             case ToastType.Information:
             default:
                 glyph = "\uE946"; // Info
-                if (App.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var def))
-                    themeBrush = def as Brush;
-                if (App.Current.Resources.TryGetValue("SubtleFillColorSecondaryBrush", out var iBgBrush))
-                    badgeBgBrush = iBgBrush as Brush;
+                themeBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush");
+                badgeBgBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush");
                 break;
         }
 
-        themeBrush ??= (App.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var fallbackBrush) ? fallbackBrush as Brush : null);
-        badgeBgBrush ??= (App.Current.Resources.TryGetValue("SubtleFillColorSecondaryBrush", out var fallbackBg) ? fallbackBg as Brush : null);
+        themeBrush ??= Services.ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush");
+        badgeBgBrush ??= Services.ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush");
 
         TypeIcon.Glyph = glyph;
         if (themeBrush != null)
