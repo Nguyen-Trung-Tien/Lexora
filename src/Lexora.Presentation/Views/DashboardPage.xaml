@@ -346,28 +346,31 @@
                     <!-- Memory Health Segments -->
                     <StackPanel Spacing="8">
                         <TextBlock Text="{x:Bind Loc.GetString('LearningIntel_MemoryHealth')}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.MemoryHealthList}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="10" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="dto:MemoryHealthSegmentDto">
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1" CornerRadius="8" Padding="12,8" MinWidth="130">
-                                        <StackPanel Spacing="3">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <TextBlock Text="{x:Bind StatusName}" FontSize="12" FontWeight="Bold" />
-                                                <TextBlock Text="{x:Bind WordCount}" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                      HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.MemoryHealthList}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="10" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:MemoryHealthSegmentDto">
+                                        <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1" CornerRadius="8" Padding="12,8" MinWidth="130">
+                                            <StackPanel Spacing="3">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock Text="{x:Bind StatusName}" FontSize="12" FontWeight="Bold" />
+                                                    <TextBlock Text="{x:Bind WordCount}" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                </StackPanel>
+                                                <TextBlock Text="{x:Bind Recommendation}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxWidth="150" />
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind Recommendation}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxWidth="150" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
                     </StackPanel>
 
                     <!-- HIGH-IMPACT LEARNING RECOMMENDATION BANNER -->
@@ -635,9 +638,9 @@
             </Border>
 
             <!-- SECTION 4: CEFR & POS Breakdown -->
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+            <Grid x:Name="BreakdownGrid" ColumnDefinitions="*,*" ColumnSpacing="16">
                 <!-- CEFR Breakdown -->
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                <Border x:Name="CefrBreakdownBorder" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="12" Padding="20">
                     <StackPanel Spacing="14">
@@ -657,7 +660,7 @@
                 </Border>
 
                 <!-- POS Breakdown -->
-                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                <Border x:Name="PosBreakdownBorder" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="12" Padding="20">
                     <StackPanel Spacing="14">

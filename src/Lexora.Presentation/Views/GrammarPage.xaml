@@ -43,7 +43,7 @@
 
                 <!-- Action Controls Group -->
                 <ScrollViewer Grid.Column="1"
-                              HorizontalScrollBarVisibility="Hidden"
+                              HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Disabled"
                               HorizontalScrollMode="Enabled"
                               VerticalScrollMode="Disabled">
@@ -240,7 +240,7 @@
         <!-- ========================================== -->
         <!-- 1. MASTER-DETAIL VIEW (Main Mode)          -->
         <!-- ========================================== -->
-        <Grid Grid.Row="1" ColumnDefinitions="340,*" ColumnSpacing="16"
+        <Grid x:Name="GrammarMasterDetailGrid" Grid.Row="1" ColumnDefinitions="340,*" ColumnSpacing="16"
               Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             
             <!-- Left: Rules List -->

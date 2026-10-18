@@ -44,6 +44,44 @@ public sealed partial class DashboardPage : Page, ILocalizableView
             HeroActionsPanel.Margin = new Thickness(16, 0, 0, 0);
             HeroActionsPanel.HorizontalAlignment = HorizontalAlignment.Right;
         }
+
+        if (BreakdownGrid != null && CefrBreakdownBorder != null && PosBreakdownBorder != null)
+        {
+            if (width < 850)
+            {
+                if (BreakdownGrid.ColumnDefinitions.Count > 1)
+                {
+                    BreakdownGrid.ColumnDefinitions.Clear();
+                    BreakdownGrid.RowDefinitions.Clear();
+                    BreakdownGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    BreakdownGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    BreakdownGrid.RowSpacing = 16;
+
+                    Grid.SetColumn(CefrBreakdownBorder, 0);
+                    Grid.SetRow(CefrBreakdownBorder, 0);
+
+                    Grid.SetColumn(PosBreakdownBorder, 0);
+                    Grid.SetRow(PosBreakdownBorder, 1);
+                }
+            }
+            else
+            {
+                if (BreakdownGrid.ColumnDefinitions.Count <= 1)
+                {
+                    BreakdownGrid.RowDefinitions.Clear();
+                    BreakdownGrid.ColumnDefinitions.Clear();
+                    BreakdownGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    BreakdownGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    BreakdownGrid.RowSpacing = 0;
+
+                    Grid.SetColumn(CefrBreakdownBorder, 0);
+                    Grid.SetRow(CefrBreakdownBorder, 0);
+
+                    Grid.SetColumn(PosBreakdownBorder, 1);
+                    Grid.SetRow(PosBreakdownBorder, 0);
+                }
+            }
+        }
     }
 
     public void OnLanguageChanged()

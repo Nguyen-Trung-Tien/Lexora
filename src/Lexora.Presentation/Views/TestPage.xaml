@@ -107,10 +107,10 @@
                          CornerRadius="8" />
 
                 <!-- 2-Column Responsive Workspace for Test Setup -->
-                <Grid ColumnDefinitions="1.15*,1*" ColumnSpacing="18">
+                <Grid x:Name="TestSetupWorkspaceGrid" ColumnDefinitions="1.15*,1*" ColumnSpacing="18">
                     
                     <!-- Left Column: Choose Test Format -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border x:Name="TestFormatBorder" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="22"
                             VerticalAlignment="Stretch">
@@ -254,7 +254,7 @@
                     </Border>
 
                     <!-- Right Column: Settings, Question Count & Filters -->
-                    <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border x:Name="TestSettingsBorder" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="22"
                             VerticalAlignment="Stretch">

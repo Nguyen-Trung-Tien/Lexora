@@ -28,7 +28,7 @@
             <StackPanel Spacing="16" MaxWidth="1560" HorizontalAlignment="Stretch">
 
                 <!-- 1. Top Header -->
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <Grid x:Name="TopHeaderGrid" ColumnDefinitions="*,Auto" ColumnSpacing="16">
                     <StackPanel Spacing="4" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind Loc.GetString('Storage_Title')}"
                                    Style="{StaticResource LexoraHeroHeaderStyle}" />
@@ -38,7 +38,7 @@
                     </StackPanel>
 
                     <!-- Top Action Buttons -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <StackPanel x:Name="TopActionsPanel" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <Button Style="{ThemeResource AccentButtonStyle}"
                                 CornerRadius="10" Padding="16,8"
                                 Click="PracticeBtn_Click">
@@ -185,9 +185,9 @@
                 </ScrollViewer>
 
                 <!-- 3. Unified Streamlined Toolbar (Segmented Tabs, Search, Filter, Action) -->
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
+                <Grid x:Name="StorageToolbarGrid" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                     <!-- Segmented View Mode Switcher -->
-                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
+                    <Border x:Name="TabSwitcherBorder" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <Button x:Name="BtnVocabTab" Click="TabVocab_Click" CornerRadius="8" Padding="14,6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
@@ -217,39 +217,44 @@
                              TextChanged="SearchBox_TextChanged"
                              CornerRadius="10" Padding="14,8" />
 
-                    <!-- Status Filter Options -->
-                    <ComboBox Grid.Column="2" x:Name="StatusFilterComboBox"
-                              SelectedIndex="0" CornerRadius="8" MinWidth="150"
-                              SelectionChanged="FilterComboBox_SelectionChanged">
-                        <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterAll')}" Tag="All" />
-                        <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterWeak')}" Tag="Weak" />
-                        <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterLearning')}" Tag="Learning" />
-                        <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterNew')}" Tag="New" />
-                        <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterMastered')}" Tag="Mastered" />
-                        <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterDueToday')}" Tag="DueToday" />
-                    </ComboBox>
+                    <!-- Actions & Filters in ScrollViewer -->
+                    <ScrollViewer x:Name="StorageActionsScrollViewer" Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <!-- Status Filter Options -->
+                            <ComboBox x:Name="StatusFilterComboBox"
+                                      SelectedIndex="0" CornerRadius="8" MinWidth="140"
+                                      SelectionChanged="FilterComboBox_SelectionChanged">
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterAll')}" Tag="All" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterWeak')}" Tag="Weak" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterLearning')}" Tag="Learning" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterNew')}" Tag="New" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterMastered')}" Tag="Mastered" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterDueToday')}" Tag="DueToday" />
+                            </ComboBox>
 
-                    <!-- Multi-Select Toggle Button -->
-                    <Button Grid.Column="3" x:Name="BtnSelectMode"
-                            Click="BtnSelectMode_Click"
-                            CornerRadius="10" Padding="14,8"
-                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="14" />
-                            <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Button>
+                            <!-- Multi-Select Toggle Button -->
+                            <Button x:Name="BtnSelectMode"
+                                    Click="BtnSelectMode_Click"
+                                    CornerRadius="10" Padding="14,8"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="14" />
+                                    <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
 
-                    <!-- Add items primary button -->
-                    <Button Grid.Column="4" Click="OpenAddDialog_Click"
-                            Style="{ThemeResource AccentButtonStyle}"
-                            CornerRadius="10" Padding="16,8"
-                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_BtnAddToStorage')}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE710;" FontSize="14" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnAddToStorage')}" FontWeight="Bold" />
+                            <!-- Add items primary button -->
+                            <Button Click="OpenAddDialog_Click"
+                                    Style="{ThemeResource AccentButtonStyle}"
+                                    CornerRadius="10" Padding="16,8"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_BtnAddToStorage')}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE710;" FontSize="14" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnAddToStorage')}" FontWeight="Bold" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
-                    </Button>
+                    </ScrollViewer>
                 </Grid>
 
                 <!-- Multi-Selection Action Bar -->

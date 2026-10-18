@@ -30,7 +30,7 @@
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <Grid MinWidth="600" MaxWidth="820">
+    <Grid MinWidth="460" MaxWidth="820">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="620" Padding="0,4,8,8">
             <StackPanel Spacing="16" Margin="0,4,0,0">
 

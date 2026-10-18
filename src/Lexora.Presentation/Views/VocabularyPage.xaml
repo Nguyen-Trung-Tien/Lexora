@@ -69,9 +69,9 @@
                      IsClosable="True"
                      CornerRadius="8" />
 
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <Grid x:Name="TopCommandBarGrid" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
             <!-- Segmented View Mode Switcher -->
-            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
+            <Border x:Name="ViewModeContainer" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
                 <StackPanel Orientation="Horizontal" Spacing="4">
                     <Button x:Name="BtnViewList" Click="BtnViewList_Click" CornerRadius="8" Padding="14,6">
                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -114,7 +114,7 @@
             </AutoSuggestBox>
 
             <!-- Action Controls Row with Horizontal Scroll for Compact/1366x768 screens -->
-            <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+            <ScrollViewer x:Name="ActionControlsScrollViewer" Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <!-- Add Word Primary Button -->
                     <Button Style="{ThemeResource AccentButtonStyle}"
@@ -403,7 +403,7 @@
         <!-- ======================================================== -->
         <!-- MASTER-DETAIL CONTENT (Word List Mode: Non-Overlapping Layout) -->
         <!-- ======================================================== -->
-        <Grid Grid.Row="2" ColumnDefinitions="340,*" ColumnSpacing="16"
+        <Grid x:Name="WordMasterDetailGrid" Grid.Row="2" ColumnDefinitions="340,*" ColumnSpacing="16"
               Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
             
             <!-- Left: Word List -->
@@ -1090,7 +1090,7 @@
                     <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredContextUnits, Mode=OneWay}"
                                    Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                         <ItemsRepeater.Layout>
-                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="320" MinColumnSpacing="14" MinRowSpacing="14" ItemsStretch="Fill" />
+                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="290" MinColumnSpacing="14" MinRowSpacing="14" ItemsStretch="Fill" />
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate x:DataType="dto:ContextUnitDto">

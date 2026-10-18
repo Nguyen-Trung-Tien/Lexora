@@ -32,7 +32,13 @@ public sealed partial class TestPage : Page, ILocalizableView
             UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
         }
 
-        Loaded += (s, e) => RefreshAllStyles();
+        Loaded += (s, e) =>
+        {
+            RefreshAllStyles();
+            UpdateResponsiveLayout(ActualWidth);
+        };
+
+        SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
 
         var themeService = App.Current.Services.GetService<IThemeService>();
         if (themeService != null)
@@ -50,6 +56,46 @@ public sealed partial class TestPage : Page, ILocalizableView
         };
 
         ActualThemeChanged += (s, e) => RefreshAllStyles();
+    }
+
+    private void UpdateResponsiveLayout(double width)
+    {
+        if (TestSetupWorkspaceGrid == null || TestFormatBorder == null || TestSettingsBorder == null) return;
+
+        if (width < 1050)
+        {
+            if (TestSetupWorkspaceGrid.ColumnDefinitions.Count > 1)
+            {
+                TestSetupWorkspaceGrid.ColumnDefinitions.Clear();
+                TestSetupWorkspaceGrid.RowDefinitions.Clear();
+                TestSetupWorkspaceGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                TestSetupWorkspaceGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                TestSetupWorkspaceGrid.RowSpacing = 16;
+
+                Grid.SetColumn(TestFormatBorder, 0);
+                Grid.SetRow(TestFormatBorder, 0);
+
+                Grid.SetColumn(TestSettingsBorder, 0);
+                Grid.SetRow(TestSettingsBorder, 1);
+            }
+        }
+        else
+        {
+            if (TestSetupWorkspaceGrid.ColumnDefinitions.Count <= 1)
+            {
+                TestSetupWorkspaceGrid.RowDefinitions.Clear();
+                TestSetupWorkspaceGrid.ColumnDefinitions.Clear();
+                TestSetupWorkspaceGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.15, GridUnitType.Star) });
+                TestSetupWorkspaceGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) });
+                TestSetupWorkspaceGrid.RowSpacing = 0;
+
+                Grid.SetColumn(TestFormatBorder, 0);
+                Grid.SetRow(TestFormatBorder, 0);
+
+                Grid.SetColumn(TestSettingsBorder, 1);
+                Grid.SetRow(TestSettingsBorder, 0);
+            }
+        }
     }
 
     public void OnLanguageChanged()

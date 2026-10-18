@@ -42,6 +42,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
             _toastService?.ShowWarning(msg);
         };
         InitializeComponent();
+        SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
     }
 
     public void OnLanguageChanged()
@@ -96,6 +97,79 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         PopulateStatusFilterComboBox();
         UpdateSegmentedButtons();
         UpdateSelectionModeUI();
+        UpdateResponsiveLayout(ActualWidth);
+    }
+
+    private void UpdateResponsiveLayout(double width)
+    {
+        if (StorageToolbarGrid == null || TabSwitcherBorder == null || StorageSearchBox == null || StorageActionsScrollViewer == null) return;
+
+        if (width < 960)
+        {
+            if (StorageToolbarGrid.RowDefinitions.Count == 0)
+            {
+                StorageToolbarGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                StorageToolbarGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                StorageToolbarGrid.RowSpacing = 8;
+            }
+
+            Grid.SetRow(TabSwitcherBorder, 0);
+            Grid.SetColumn(TabSwitcherBorder, 0);
+            Grid.SetRow(StorageSearchBox, 0);
+            Grid.SetColumn(StorageSearchBox, 1);
+            Grid.SetColumnSpan(StorageSearchBox, 1);
+
+            Grid.SetRow(StorageActionsScrollViewer, 1);
+            Grid.SetColumn(StorageActionsScrollViewer, 0);
+            Grid.SetColumnSpan(StorageActionsScrollViewer, 3);
+        }
+        else
+        {
+            if (StorageToolbarGrid.RowDefinitions.Count > 0)
+            {
+                StorageToolbarGrid.RowDefinitions.Clear();
+                StorageToolbarGrid.RowSpacing = 0;
+            }
+
+            Grid.SetRow(TabSwitcherBorder, 0);
+            Grid.SetColumn(TabSwitcherBorder, 0);
+            Grid.SetRow(StorageSearchBox, 0);
+            Grid.SetColumn(StorageSearchBox, 1);
+            Grid.SetColumnSpan(StorageSearchBox, 1);
+
+            Grid.SetRow(StorageActionsScrollViewer, 0);
+            Grid.SetColumn(StorageActionsScrollViewer, 2);
+            Grid.SetColumnSpan(StorageActionsScrollViewer, 1);
+        }
+
+        if (TopHeaderGrid != null && TopActionsPanel != null)
+        {
+            if (width < 760)
+            {
+                if (TopHeaderGrid.RowDefinitions.Count == 0)
+                {
+                    TopHeaderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    TopHeaderGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    TopHeaderGrid.RowSpacing = 10;
+                }
+
+                Grid.SetColumn(TopActionsPanel, 0);
+                Grid.SetRow(TopActionsPanel, 1);
+                Grid.SetColumnSpan(TopActionsPanel, 2);
+            }
+            else
+            {
+                if (TopHeaderGrid.RowDefinitions.Count > 0)
+                {
+                    TopHeaderGrid.RowDefinitions.Clear();
+                    TopHeaderGrid.RowSpacing = 0;
+                }
+
+                Grid.SetColumn(TopActionsPanel, 1);
+                Grid.SetRow(TopActionsPanel, 0);
+                Grid.SetColumnSpan(TopActionsPanel, 1);
+            }
+        }
     }
 
     private async void RefreshBtn_Click(object sender, RoutedEventArgs e)

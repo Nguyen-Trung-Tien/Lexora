@@ -54,6 +54,26 @@ public sealed partial class GrammarPage : Page, ILocalizableView
                 System.Diagnostics.Debug.WriteLine($"[GrammarPage] Debounce load error: {ex.Message}");
             }
         };
+
+        Loaded += (s, e) => UpdateResponsiveLayout(ActualWidth);
+        SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
+    }
+
+    private void UpdateResponsiveLayout(double width)
+    {
+        if (GrammarMasterDetailGrid == null) return;
+
+        if (GrammarMasterDetailGrid.ColumnDefinitions.Count >= 2)
+        {
+            if (width < 960)
+            {
+                GrammarMasterDetailGrid.ColumnDefinitions[0].Width = new GridLength(285, GridUnitType.Pixel);
+            }
+            else
+            {
+                GrammarMasterDetailGrid.ColumnDefinitions[0].Width = new GridLength(340, GridUnitType.Pixel);
+            }
+        }
     }
 
     public void OnLanguageChanged()

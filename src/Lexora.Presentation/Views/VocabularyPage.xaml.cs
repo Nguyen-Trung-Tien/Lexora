@@ -65,6 +65,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
                     PopulateTopicFilterCombo();
                 }
                 UpdateViewModeButtons();
+                UpdateResponsiveLayout(ActualWidth);
             }
             catch (Exception ex)
             {
@@ -76,7 +77,62 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
             }
         };
 
+        SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
+
         ActualThemeChanged += (s, e) => UpdateViewModeButtons();
+    }
+
+    private void UpdateResponsiveLayout(double width)
+    {
+        if (TopCommandBarGrid == null || WordMasterDetailGrid == null || ViewModeContainer == null || SearchBox == null || ActionControlsScrollViewer == null) return;
+
+        if (width < 960)
+        {
+            if (TopCommandBarGrid.RowDefinitions.Count == 0)
+            {
+                TopCommandBarGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                TopCommandBarGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                TopCommandBarGrid.RowSpacing = 8;
+            }
+
+            Grid.SetRow(ViewModeContainer, 0);
+            Grid.SetColumn(ViewModeContainer, 0);
+            Grid.SetRow(SearchBox, 0);
+            Grid.SetColumn(SearchBox, 1);
+            Grid.SetColumnSpan(SearchBox, 1);
+
+            Grid.SetRow(ActionControlsScrollViewer, 1);
+            Grid.SetColumn(ActionControlsScrollViewer, 0);
+            Grid.SetColumnSpan(ActionControlsScrollViewer, 3);
+
+            if (WordMasterDetailGrid.ColumnDefinitions.Count >= 2)
+            {
+                WordMasterDetailGrid.ColumnDefinitions[0].Width = new GridLength(285, GridUnitType.Pixel);
+            }
+        }
+        else
+        {
+            if (TopCommandBarGrid.RowDefinitions.Count > 0)
+            {
+                TopCommandBarGrid.RowDefinitions.Clear();
+                TopCommandBarGrid.RowSpacing = 0;
+            }
+
+            Grid.SetRow(ViewModeContainer, 0);
+            Grid.SetColumn(ViewModeContainer, 0);
+            Grid.SetRow(SearchBox, 0);
+            Grid.SetColumn(SearchBox, 1);
+            Grid.SetColumnSpan(SearchBox, 1);
+
+            Grid.SetRow(ActionControlsScrollViewer, 0);
+            Grid.SetColumn(ActionControlsScrollViewer, 2);
+            Grid.SetColumnSpan(ActionControlsScrollViewer, 1);
+
+            if (WordMasterDetailGrid.ColumnDefinitions.Count >= 2)
+            {
+                WordMasterDetailGrid.ColumnDefinitions[0].Width = new GridLength(340, GridUnitType.Pixel);
+            }
+        }
     }
 
     public void OnLanguageChanged()
