@@ -58,27 +58,36 @@ public sealed partial class SplashScreenOverlay : UserControl
         StartupProgressBar.Value = percent * 100.0;
         ProgressPercentageTextBlock.Text = $"{(int)Math.Round(percent * 100)}%";
 
-        UpdateStepIndicator(Step1Dot, Step1TextBlock, percent >= 0.10);
-        UpdateStepIndicator(Step2Dot, Step2TextBlock, percent >= 0.35);
-        UpdateStepIndicator(Step3Dot, Step3TextBlock, percent >= 0.70);
-        UpdateStepIndicator(Step4Dot, Step4TextBlock, percent >= 0.98);
+        UpdateStepIndicator(Step1Dot, Step1TextBlock, isDone: percent >= 0.35, isCurrent: percent >= 0.10 && percent < 0.35);
+        UpdateStepIndicator(Step2Dot, Step2TextBlock, isDone: percent >= 0.70, isCurrent: percent >= 0.35 && percent < 0.70);
+        UpdateStepIndicator(Step3Dot, Step3TextBlock, isDone: percent >= 0.98, isCurrent: percent >= 0.70 && percent < 0.98);
+        UpdateStepIndicator(Step4Dot, Step4TextBlock, isDone: percent >= 1.0, isCurrent: percent >= 0.98);
     }
 
-    private static void UpdateStepIndicator(Microsoft.UI.Xaml.Shapes.Ellipse dot, TextBlock text, bool isActive)
+    private static void UpdateStepIndicator(Microsoft.UI.Xaml.Shapes.Ellipse dot, TextBlock text, bool isDone, bool isCurrent)
     {
-        if (App.Current.Resources.TryGetValue(
-            isActive ? "AccentFillColorDefaultBrush" : "SubtleFillColorSecondaryBrush",
-            out var dotBrushObj) && dotBrushObj is Microsoft.UI.Xaml.Media.Brush dotBrush)
+        string dotBrushKey = isDone
+            ? "SystemFillColorSuccessBrush"
+            : (isCurrent ? "AccentFillColorDefaultBrush" : "CardStrokeColorDefaultBrush");
+
+        string textBrushKey = isDone
+            ? "TextFillColorPrimaryBrush"
+            : (isCurrent ? "AccentTextFillColorPrimaryBrush" : "TextFillColorTertiaryBrush");
+
+        var rootElement = (App.Current as App)?.MainWindow?.Content as Microsoft.UI.Xaml.FrameworkElement;
+        var dotBrush = ThemeResourceHelper.GetThemeBrush(rootElement, dotBrushKey);
+        if (dotBrush != null)
         {
             dot.Fill = dotBrush;
         }
 
-        if (App.Current.Resources.TryGetValue(
-            isActive ? "AccentTextFillColorPrimaryBrush" : "TextFillColorTertiaryBrush",
-            out var textBrushObj) && textBrushObj is Microsoft.UI.Xaml.Media.Brush textBrush)
+        var textBrush = ThemeResourceHelper.GetThemeBrush(rootElement, textBrushKey);
+        if (textBrush != null)
         {
             text.Foreground = textBrush;
         }
+
+        text.FontWeight = (isDone || isCurrent) ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal;
     }
 
     public async Task PlayEntranceAsync()

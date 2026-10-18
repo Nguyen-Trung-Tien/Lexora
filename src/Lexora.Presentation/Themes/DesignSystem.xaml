@@ -12,12 +12,24 @@
         <ResourceDictionary x:Key="Light">
             <!-- Hero card border: soft accent-tinted stroke for depth vs Mica in light mode -->
             <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.35" />
+            <!-- Crisp border & surface tokens for Light mode (eliminates washed out cards, chips & badges) -->
+            <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#000000" Opacity="0.13" />
+            <SolidColorBrush x:Key="SubtleFillColorSecondaryBrush" Color="#EEF2F6" />
+            <SolidColorBrush x:Key="SubtleFillColorTertiaryBrush" Color="#E2E8F0" />
+            <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#475467" />
+            <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#667085" />
+            <!-- High-contrast semantic solid brushes for Light mode badges, chips & stats -->
+            <SolidColorBrush x:Key="SystemFillColorSuccessBrush" Color="#087443" />
+            <SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="#D92D20" />
+            <SolidColorBrush x:Key="SystemFillColorCautionBrush" Color="#B54708" />
+            <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#0066CC" />
+            <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#0052A3" />
             <!-- Metric stat card border: crisp edge so cards pop against light Mica -->
-            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="#000000" Opacity="0.10" />
+            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="#000000" Opacity="0.12" />
             <!-- Advisor card accent border -->
             <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.65" />
             <!-- Subtle card stroke token -->
-            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="#000000" Opacity="0.08" />
+            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="#000000" Opacity="0.10" />
             <!-- Input background & border tokens for crisp contrast -->
             <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="#FAFAFA" />
             <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="#000000" Opacity="0.18" />

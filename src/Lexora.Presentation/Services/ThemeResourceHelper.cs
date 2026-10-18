@@ -10,12 +10,12 @@ public static class ThemeResourceHelper
 {
     // High-contrast, theme-accurate fallback brushes to guarantee readability
     private static readonly Brush LightPrimaryText = new SolidColorBrush(Color.FromArgb(255, 24, 24, 24));
-    private static readonly Brush LightSecondaryText = new SolidColorBrush(Color.FromArgb(255, 92, 92, 92));
-    private static readonly Brush LightTertiaryText = new SolidColorBrush(Color.FromArgb(255, 118, 118, 118)); // #767676 (WCAG AA 4.54:1 on white)
-    private static readonly Brush LightAccentText = new SolidColorBrush(Color.FromArgb(255, 0, 95, 184)); // High-contrast Windows 11 Royal Blue
+    private static readonly Brush LightSecondaryText = new SolidColorBrush(Color.FromArgb(255, 71, 84, 103)); // #475467
+    private static readonly Brush LightTertiaryText = new SolidColorBrush(Color.FromArgb(255, 102, 112, 133)); // #667085 (WCAG AA 4.6:1 on white)
+    private static readonly Brush LightAccentText = new SolidColorBrush(Color.FromArgb(255, 0, 82, 163)); // #0052A3 High-contrast Royal Blue
     private static readonly Brush LightCardBackground = new SolidColorBrush(Colors.White);
-    private static readonly Brush LightCardStroke = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0));
-    private static readonly Brush LightSubtleBackground = new SolidColorBrush(Color.FromArgb(14, 0, 0, 0));
+    private static readonly Brush LightCardStroke = new SolidColorBrush(Color.FromArgb(33, 0, 0, 0)); // Opacity ~0.13
+    private static readonly Brush LightSubtleBackground = new SolidColorBrush(Color.FromArgb(255, 238, 242, 246)); // #EEF2F6 Crisp pill/chip surface
     // Semantic background fills — light mode: very light tinted fills (WinUI 3 system values)
     private static readonly Brush LightSuccessBackground = new SolidColorBrush(Color.FromArgb(255, 223, 246, 221)); // #DFF6DD
     private static readonly Brush LightCriticalBackground = new SolidColorBrush(Color.FromArgb(255, 253, 231, 233)); // #FDE7E9
@@ -187,12 +187,12 @@ public static class ThemeResourceHelper
             "CardBackgroundFillColorDefaultBrush" => isLight ? LightCardBackground : DarkCardBackground,
             "CardStrokeColorDefaultBrush" => isLight ? LightCardStroke : DarkCardStroke,
             "SubtleFillColorSecondaryBrush" => isLight ? LightSubtleBackground : DarkSubtleBackground,
-            "AccentFillColorDefaultBrush" => isLight ? LightAccentText : DarkAccentText,
+            "AccentFillColorDefaultBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 0, 102, 204)) : DarkAccentText,
             "TextOnAccentFillColorPrimaryBrush" => new SolidColorBrush(Colors.White),
             // Semantic state solid fills (High contrast AA standard)
-            "SystemFillColorSuccessBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 16, 124, 65)) : new SolidColorBrush(Color.FromArgb(255, 108, 203, 95)),
-            "SystemFillColorCriticalBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 196, 43, 28)) : new SolidColorBrush(Color.FromArgb(255, 255, 153, 164)),
-            "SystemFillColorCautionBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 157, 93, 0)) : new SolidColorBrush(Color.FromArgb(255, 255, 213, 128)),
+            "SystemFillColorSuccessBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 8, 116, 67)) : new SolidColorBrush(Color.FromArgb(255, 108, 203, 95)),
+            "SystemFillColorCriticalBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 217, 45, 32)) : new SolidColorBrush(Color.FromArgb(255, 255, 153, 164)),
+            "SystemFillColorCautionBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 181, 71, 8)) : new SolidColorBrush(Color.FromArgb(255, 255, 213, 128)),
             // Semantic state background fills
             "SystemFillColorSuccessBackgroundBrush" => isLight ? LightSuccessBackground : DarkSuccessBackground,
             "SystemFillColorCriticalBackgroundBrush" => isLight ? LightCriticalBackground : DarkCriticalBackground,
