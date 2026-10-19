@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:views="using:Lexora.Presentation.Views"
+    xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
@@ -78,8 +79,8 @@
 
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox x:Name="GlobalSearchBox"
-                                PlaceholderText="Search Lexora... (Ctrl+K)"
-                                ToolTipService.ToolTip="Smart Search (Ctrl+K, Ctrl+F)"
+                                PlaceholderText="{x:Bind services:LocalizationHelper.GetString('Search_Placeholder')}"
+                                ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Shell_SearchTooltip')}"
                                 QueryIcon="Find"
                                 TextChanged="GlobalSearchBox_TextChanged"
                                 SuggestionChosen="GlobalSearchBox_SuggestionChosen"

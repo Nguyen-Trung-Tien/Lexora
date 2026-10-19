@@ -113,13 +113,13 @@
                                         <ComboBoxItem Content="TOEIC" Tag="Toeic" />
                                         <ComboBoxItem Content="IELTS" Tag="Ielts" />
                                         <ComboBoxItem Content="VSTEP" Tag="Vstep" />
-                                        <ComboBoxItem Content="General English" Tag="General" />
+                                        <ComboBoxItem Content="{x:Bind Loc.GetString('Exam_Name_General')}" Tag="General" />
                                     </ComboBox>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="6">
                                     <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_TargetScore')}" FontSize="12" FontWeight="SemiBold" />
-                                    <TextBox x:Name="TargetScoreBox" PlaceholderText="e.g. 750+, 7.0, B2" />
+                                    <TextBox x:Name="TargetScoreBox" PlaceholderText="{x:Bind Loc.GetString('StudyPlanner_TargetScorePlaceholder')}" />
                                 </StackPanel>
                             </Grid>
 

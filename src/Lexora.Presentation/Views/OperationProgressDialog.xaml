@@ -103,7 +103,7 @@
                                    HorizontalAlignment="Center"
                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                         <TextBlock x:Name="ProgressBadgeText"
-                                   Text="PROGRESS"
+                                   Text="{x:Bind services:LocalizationHelper.GetString('Progress_Badge')}"
                                    FontSize="9"
                                    FontWeight="SemiBold"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -114,7 +114,7 @@
                 <!-- Status Step Description -->
                 <StackPanel Spacing="6" HorizontalAlignment="Stretch">
                     <TextBlock x:Name="StepMessageText"
-                               Text="Đang chuẩn bị dữ liệu..."
+                               Text="{x:Bind services:LocalizationHelper.GetString('Progress_DefaultPreparing')}"
                                FontSize="14"
                                FontWeight="SemiBold"
                                TextAlignment="Center"
@@ -130,7 +130,7 @@
                             HorizontalAlignment="Center"
                             MaxWidth="380">
                         <TextBlock x:Name="StepDetailText"
-                                   Text="Vui lòng đợi trong giây lát..."
+                                   Text="{x:Bind services:LocalizationHelper.GetString('Progress_PleaseWait')}"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    TextWrapping="Wrap"
@@ -164,13 +164,13 @@
 
                 <StackPanel Spacing="4" HorizontalAlignment="Center">
                     <TextBlock x:Name="CompletedTitleText"
-                               Text="Hoàn tất thành công!"
+                               Text="{x:Bind services:LocalizationHelper.GetString('Progress_CompletedTitle')}"
                                FontSize="18"
                                FontWeight="Bold"
                                TextAlignment="Center"
                                Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                     <TextBlock x:Name="CompletedSummaryText"
-                               Text="Toàn bộ dữ liệu đã được xử lý an toàn."
+                               Text="{x:Bind services:LocalizationHelper.GetString('Progress_CompletedSummary')}"
                                FontSize="13"
                                TextAlignment="Center"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -186,7 +186,7 @@
                                        FontSize="16" FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                            <TextBlock x:Name="StatImportedLabel" Text="Đã nhập" FontSize="11"
+                            <TextBlock x:Name="StatImportedLabel" Text="{x:Bind services:LocalizationHelper.GetString('Progress_StatImported')}" FontSize="11"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
@@ -200,7 +200,7 @@
                                        FontSize="16" FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock x:Name="StatSkippedLabel" Text="Bỏ qua" FontSize="11"
+                            <TextBlock x:Name="StatSkippedLabel" Text="{x:Bind services:LocalizationHelper.GetString('Progress_StatSkipped')}" FontSize="11"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
@@ -214,7 +214,7 @@
                                        FontSize="16" FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                            <TextBlock x:Name="StatErrorLabel" Text="Lỗi" FontSize="11"
+                            <TextBlock x:Name="StatErrorLabel" Text="{x:Bind services:LocalizationHelper.GetString('Progress_StatError')}" FontSize="11"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        HorizontalAlignment="Center" />
                         </StackPanel>

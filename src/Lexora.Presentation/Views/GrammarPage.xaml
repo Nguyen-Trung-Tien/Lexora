@@ -524,7 +524,7 @@
                                                     <TextBlock Text="{x:Bind Note}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontStyle="Italic" Margin="0,2,0,0" TextWrapping="Wrap" />
                                                 </StackPanel>
                                                 <Button Grid.Column="1" Click="PlayExampleAudio_Click" Tag="{x:Bind SentenceEn}"
-                                                        VerticalAlignment="Center" ToolTipService.ToolTip="Listen"
+                                                        VerticalAlignment="Center" ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Storage_Tooltip_ListenPronunciation')}"
                                                         Style="{ThemeResource CircleIconButton}" Width="32" Height="32">
                                                     <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                 </Button>

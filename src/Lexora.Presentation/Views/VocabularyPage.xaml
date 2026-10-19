@@ -427,30 +427,32 @@
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="0,0,0,1" Padding="12,8">
-                        <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="8">
-                            <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllWords_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
-                            <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllWords_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
-                            <Button Grid.Column="2" x:Name="BtnAssignSelectedToTopic"
-                                    Click="AssignSelectedToTopic_Click"
-                                    IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
-                                    CornerRadius="6" Padding="8,4" FontSize="12">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <FontIcon Glyph="&#xE8F1;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_AssignToTopic')}" />
-                                </StackPanel>
-                            </Button>
-                            <Button Grid.Column="4" x:Name="BtnDeleteSelectedWords"
-                                    Click="DeleteSelectedWords_Click"
-                                    IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
-                                    Background="{ThemeResource SystemFillColorCriticalBrush}"
-                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                    CornerRadius="6" Padding="10,4" FontSize="12" FontWeight="Bold">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE74D;" FontSize="11" />
-                                    <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" />
-                                </StackPanel>
-                            </Button>
-                        </Grid>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllWords_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
+                                <Button Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllWords_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
+                                <Button x:Name="BtnAssignSelectedToTopic"
+                                        Click="AssignSelectedToTopic_Click"
+                                        IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+                                        CornerRadius="6" Padding="8,4" FontSize="12">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <FontIcon Glyph="&#xE8F1;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Vocab_AssignToTopic')}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="BtnDeleteSelectedWords"
+                                        Click="DeleteSelectedWords_Click"
+                                        IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+                                        Background="{ThemeResource SystemFillColorCriticalBrush}"
+                                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                        CornerRadius="6" Padding="10,4" FontSize="12" FontWeight="Bold">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="11" />
+                                        <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Border>
 
                     <Grid Grid.Row="2">
@@ -514,7 +516,7 @@
 
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,8,0">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" MaxWidth="150" TextTrimming="CharacterEllipsis" />
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
                                                     <TextBlock Text="{x:Bind PartsOfSpeechDisplay}" FontSize="10" FontWeight="SemiBold"
                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -633,7 +635,7 @@
                             <!-- Header with Title & Word Management Actions -->
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalAlignment="Top">
                                 <!-- Term & CEFR Level Badge -->
-                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center" HorizontalAlignment="Left">
                                     <TextBlock Text="{x:Bind ViewModel.SelectedWord.Term, Mode=OneWay}"
                                                Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26"
                                                TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
@@ -981,6 +983,7 @@
                                                         </StackPanel>
                                                         <TextBlock Text="{x:Bind PrimaryDefinition}" FontSize="12"
                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                   TextWrapping="Wrap" MaxLines="2"
                                                                    TextTrimming="CharacterEllipsis" />
                                                         <TextBlock Text="{x:Bind Reason}" FontSize="11" FontStyle="Italic"
                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"

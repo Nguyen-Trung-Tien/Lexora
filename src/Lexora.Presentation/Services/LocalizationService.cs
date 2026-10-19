@@ -1296,6 +1296,7 @@ public class LocalizationService : ILocalizationService
             ["StudyPlanner_PacingBehind"] = "Cần tăng tốc",
             ["StudyPlanner_PacingAhead"] = "Vượt tiến độ",
             ["StudyPlanner_OpenTask"] = "Mở",
+            ["StudyPlanner_TargetScorePlaceholder"] = "VD: 750+, 7.0, B2",
 
             // Vocabulary Knowledge Graph
             ["KnowledgeGraph_Title"] = "Mạng lưới Ngữ nghĩa Từ vựng",
@@ -1368,6 +1369,12 @@ public class LocalizationService : ILocalizationService
             ["AdaptiveQuiz_CurrentLevel"] = "Trình độ hiện tại",
             ["AdaptiveQuiz_ReportTitle"] = "Báo cáo phân tích bài kiểm tra thích ứng",
             ["AdaptiveQuiz_ReportDesc"] = "Đánh giá chi tiết năng lực ngôn ngữ theo khung tham chiếu chuẩn CEFR",
+            ["AdaptiveQuiz_AiCalibrated"] = "Chuẩn hóa AI",
+            ["AdaptiveQuiz_CatCalibration"] = "Định chuẩn CAT",
+            ["AdaptiveQuiz_FinalCefr"] = "CEFR cuối cùng:",
+            ["AdaptiveQuiz_ToeicEstimated"] = "Dự đoán TOEIC",
+            ["AdaptiveQuiz_IeltsEstimated"] = "Dự đoán IELTS",
+            ["AdaptiveQuiz_VstepEstimated"] = "Dự đoán VSTEP",
             ["KnowledgeGraph_SemanticGraph"] = "Mạng lưới ngữ nghĩa",
 
             // Pronunciation & Listening Lab
@@ -1376,6 +1383,7 @@ public class LocalizationService : ILocalizationService
             ["ListeningLab_TabDictation"] = "Chép chính tả",
             ["ListeningLab_TabMinimalPairs"] = "Phân biệt cặp âm",
             ["ListeningLab_TabAccentCompare"] = "So sánh UK - US",
+            ["ListeningLab_AccentCompareDesc"] = "So sánh các từ có phát âm khác biệt rõ rệt giữa tiếng Anh - Anh (UK) và Anh - Mỹ (US):",
             ["ListeningLab_ListenPrompt"] = "Nghe phát âm từ vựng",
             ["ListeningLab_TypeHeardWord"] = "Nhập từ bạn nghe được...",
             ["ListeningLab_CheckAnswer"] = "Kiểm tra",
@@ -2670,6 +2678,7 @@ public class LocalizationService : ILocalizationService
             ["StudyPlanner_PacingBehind"] = "Behind Schedule",
             ["StudyPlanner_PacingAhead"] = "Ahead of Schedule",
             ["StudyPlanner_OpenTask"] = "Open",
+            ["StudyPlanner_TargetScorePlaceholder"] = "e.g. 750+, 7.0, B2",
 
             // Vocabulary Knowledge Graph
             ["KnowledgeGraph_Title"] = "Vocabulary Knowledge Graph",
@@ -2742,6 +2751,12 @@ public class LocalizationService : ILocalizationService
             ["AdaptiveQuiz_CurrentLevel"] = "Estimated Level",
             ["AdaptiveQuiz_ReportTitle"] = "Adaptive Diagnostic Quiz Report",
             ["AdaptiveQuiz_ReportDesc"] = "In-depth CEFR linguistic proficiency diagnosis and cognitive trajectory",
+            ["AdaptiveQuiz_AiCalibrated"] = "AI Calibrated",
+            ["AdaptiveQuiz_CatCalibration"] = "CAT Calibration",
+            ["AdaptiveQuiz_FinalCefr"] = "Final CEFR:",
+            ["AdaptiveQuiz_ToeicEstimated"] = "TOEIC Estimated",
+            ["AdaptiveQuiz_IeltsEstimated"] = "IELTS Estimated",
+            ["AdaptiveQuiz_VstepEstimated"] = "VSTEP Estimated",
             ["KnowledgeGraph_SemanticGraph"] = "Semantic Knowledge Graph",
 
             // Pronunciation & Listening Lab
@@ -2750,6 +2765,7 @@ public class LocalizationService : ILocalizationService
             ["ListeningLab_TabDictation"] = "Audio Dictation",
             ["ListeningLab_TabMinimalPairs"] = "Minimal Pairs",
             ["ListeningLab_TabAccentCompare"] = "UK vs US Accent Lab",
+            ["ListeningLab_AccentCompareDesc"] = "Compare words with distinctive British (UK) vs American (US) pronunciations:",
             ["ListeningLab_ListenPrompt"] = "Listen to pronunciation",
             ["ListeningLab_TypeHeardWord"] = "Type the word you hear...",
             ["ListeningLab_CheckAnswer"] = "Check",

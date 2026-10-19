@@ -344,11 +344,13 @@
                                         <!-- Word / Grammar Rule Title -->
                                         <TextBlock Text="{x:Bind Title}"
                                                    FontSize="16" FontWeight="SemiBold"
+                                                   MaxWidth="200" TextTrimming="CharacterEllipsis"
                                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
                                         <!-- Subtitle (Phonetic / Structure formula) -->
                                         <TextBlock Text="{x:Bind Subtitle}"
                                                    FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   MaxWidth="220" TextTrimming="CharacterEllipsis"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
 
