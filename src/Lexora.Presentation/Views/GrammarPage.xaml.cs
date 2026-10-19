@@ -12,7 +12,7 @@ using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class GrammarPage : Page, ILocalizableView
+public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareView
 {
     public GrammarViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -57,6 +57,7 @@ public sealed partial class GrammarPage : Page, ILocalizableView
 
         Loaded += (s, e) => UpdateResponsiveLayout(ActualWidth);
         SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
+        ActualThemeChanged += (s, e) => OnThemeChanged();
     }
 
     private void UpdateResponsiveLayout(double width)
@@ -95,12 +96,31 @@ public sealed partial class GrammarPage : Page, ILocalizableView
         }
     }
 
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            UpdateSelectionModeUI();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
+    }
+
     private readonly DispatcherTimer _searchDebounceTimer;
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
+        OnThemeChanged();
         try
         {
             RegisterShortcuts();

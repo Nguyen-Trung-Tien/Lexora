@@ -12,7 +12,7 @@ using Windows.System;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class ReviewPage : Page, ILocalizableView
+public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
 {
     public ReviewViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -37,6 +37,7 @@ public sealed partial class ReviewPage : Page, ILocalizableView
         };
 
         SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
+        ActualThemeChanged += (s, e) => OnThemeChanged();
 
         RegisterShortcuts();
 
@@ -120,10 +121,29 @@ public sealed partial class ReviewPage : Page, ILocalizableView
         }
     }
 
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            UpdateModeButtonStyles(ViewModel.CurrentMode);
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
+    }
+
     protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
+        OnThemeChanged();
         Focus(FocusState.Programmatic);
 
         try

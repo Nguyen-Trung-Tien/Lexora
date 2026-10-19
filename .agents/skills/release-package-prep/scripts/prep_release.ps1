@@ -12,12 +12,12 @@ Write-Host "=== Lexora Release Readiness Audit (Target Version: $TargetVersion) 
 $unreleasedDir = "changelog/unreleased"
 $fragments = @()
 if (Test-Path $unreleasedDir) {
-    $fragments = Get-ChildItem -Path $unreleasedDir -Filter "*.md" -File | Where-Object { $_.Name -ne ".gitkeep" }
+    $fragments = Get-ChildItem -Path $unreleasedDir -Filter "*.md" -File | Where-Object { $_.Name -ne ".gitkeep" -and $_.Name -ne "fragment-template.md" }
 }
 
 # 1. Check Quality Gates
-Write-Host "`n1. Running Quality Gates..." -ForegroundColor Yellow
-$qualityResult = & powershell -ExecutionPolicy Bypass -File .agents/skills/lexora-quality-audit/scripts/audit_quality_gates.ps1 -Mode (if ($SkipTests) { "BuildOnly" } else { "Full" })
+$auditMode = if ($SkipTests) { "BuildOnly" } else { "Full" }
+$qualityResult = & powershell -ExecutionPolicy Bypass -File .agents/skills/lexora-quality-audit/scripts/audit_quality_gates.ps1 -Mode $auditMode
 $buildOk = ($LASTEXITCODE -eq 0)
 
 # 2. Check Architecture

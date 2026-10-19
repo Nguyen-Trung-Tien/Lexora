@@ -110,6 +110,9 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        // 0. Pre-warm lightweight splash logo asset into memory
+        Lexora.Presentation.Views.SplashScreenOverlay.PreloadAsset();
+
         // 1. Setup Main Window (hosts the splash overlay and main shell)
         _window = new MainWindow();
 

@@ -32,6 +32,7 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
     <Content Include="Assets\brand\lexora-app-icon-1024.png" />
     <Content Include="Assets\brand\lexora-icon-only.png" />
+    <Content Include="Assets\brand\lexora-logo-splash.png" />
   </ItemGroup>
 
   <ItemGroup>

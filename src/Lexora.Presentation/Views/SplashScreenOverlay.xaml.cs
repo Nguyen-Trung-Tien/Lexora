@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.UI.ViewManagement;
 using Lexora.Presentation.Services;
 
@@ -7,6 +8,28 @@ namespace Lexora.Presentation.Views;
 
 public sealed partial class SplashScreenOverlay : UserControl
 {
+    private static BitmapImage? _preloadedLogo;
+
+    public static BitmapImage PreloadAsset()
+    {
+        if (_preloadedLogo != null) return _preloadedLogo;
+        try
+        {
+            _preloadedLogo = new BitmapImage
+            {
+                UriSource = new Uri("ms-appx:///Assets/brand/lexora-logo-splash.png"),
+                DecodePixelWidth = 256,
+                DecodePixelHeight = 256,
+                DecodePixelType = DecodePixelType.Logical
+            };
+        }
+        catch
+        {
+            // Graceful fallback
+        }
+        return _preloadedLogo!;
+    }
+
     private readonly UISettings _uiSettings = new();
     private TaskCompletionSource<bool>? _entranceTcs;
     private TaskCompletionSource<bool>? _exitTcs;
@@ -19,6 +42,18 @@ public sealed partial class SplashScreenOverlay : UserControl
     public SplashScreenOverlay()
     {
         InitializeComponent();
+        if (_preloadedLogo != null)
+        {
+            LogoTile.Source = _preloadedLogo;
+        }
+        else
+        {
+            var preloaded = PreloadAsset();
+            if (preloaded != null)
+            {
+                LogoTile.Source = preloaded;
+            }
+        }
         UpdateLocalizedText();
 
         EntranceStoryboard.Completed += (s, e) => _entranceTcs?.TrySetResult(true);

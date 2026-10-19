@@ -149,6 +149,14 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    public void SetRootTheme(ElementTheme theme)
+    {
+        if (RootFrame != null)
+        {
+            RootFrame.RequestedTheme = theme;
+        }
+    }
+
     private void SetWindowAndTaskbarIcon()
     {
         try
@@ -265,7 +273,7 @@ public sealed partial class MainWindow : Window
             // Run entrance animation and backend initialization concurrently
             var entranceTask = SplashOverlay.PlayEntranceAsync();
             var minDisplayTask = SplashOverlay.IsAnimationEnabled
-                ? Task.Delay(800, ct)
+                ? Task.Delay(450, ct)
                 : Task.CompletedTask;
             var initTask = _startupOrchestrator.InitializeAppAsync(ct);
 

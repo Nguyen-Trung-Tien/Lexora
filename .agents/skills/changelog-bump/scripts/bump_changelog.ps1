@@ -27,7 +27,7 @@ if ($Consolidate) {
         exit 1
     }
 
-    $fragments = Get-ChildItem -Path $unreleasedDir -Filter "*.md" -File | Where-Object { $_.Name -ne ".gitkeep" }
+    $fragments = Get-ChildItem -Path $unreleasedDir -Filter "*.md" -File | Where-Object { $_.Name -ne ".gitkeep" -and $_.Name -ne "fragment-template.md" }
     if ($fragments.Count -eq 0) {
         Write-Host "No pending changelog fragments to consolidate in $unreleasedDir." -ForegroundColor Yellow
         exit 0

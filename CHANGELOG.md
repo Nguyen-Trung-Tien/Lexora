@@ -1,4 +1,4 @@
-﻿# ðŸ““ Changelog
+# ðŸ““ Changelog
 All notable changes to the Lexora desktop application will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [Unreleased]
+
+
+## [1.2.2] - 2026-10-19
+
+### Added
+- [Presentation/Splash]: Generated and bundled lightweight pre-scaled asset `Assets/brand/lexora-logo-splash.png` (256x256, 68KB) with `BitmapImage` logical decoding properties and early preloading hook in `App.OnLaunched`.
+- [Presentation/Navigation]: Integrated Fluent Design `SlideNavigationTransitionInfo { Effect = SlideNavigationTransitionEffect.FromRight }` for buttery-smooth horizontal transitions across all pages.
+
+### Changed
+- [Presentation/Startup]: Removed artificial `Task.Delay` pauses in `StartupOrchestrator` and optimized splash screen entrance threshold in `MainWindow`, eliminating visual stutter and slow logo rendering.
+- [Presentation/Theme]: Dynamically resolved Fluent `{ThemeResource ...}` brushes for `HeatmapLevelToForegroundConverter`, maintaining 100% theme dictionary parity in Light and Dark modes.
+
+### Fixed
+- [Presentation/Theme]: Resolved abnormal color artifacts when switching bidirectionally between Dark and Light modes. Added standard WinUI 3 "Default" theme dictionary to `DesignSystem.xaml`, synchronized symmetrical Dark/Light custom tokens and system brush overrides, introduced bidirectional leakage guards in `ThemeResourceHelper`, implemented `IThemeAwareView` lifecycle across all cached pages (`DashboardPage`, `VocabularyPage`, `ReviewPage`, `TestPage`, `LearningStoragePage`, `SettingsPage`, `GrammarPage`), and enabled dynamic visual/segmented button re-styling on navigation and theme switching.
+- [Presentation/Responsive]: Optimized and fixed responsive layout adaptations across all major views (`VocabularyPage`, `TestPage`, `DashboardPage`, `GrammarPage`, `LearningStoragePage`) and dialogs (`ListeningLabDialog`, `DataHealthCenterDialog`) for compact viewports (< 960px and < 1050px) preventing toolbar clipping, squashed button stacks, and horizontal scroll overflows.
+- [Presentation/Theme]: Enhanced light mode visual contrast across all cards, badges, chips, and items (`SubtleFillColorSecondaryBrush`, `CardStrokeColorDefaultBrush`, high-contrast semantic brushes); enlarged startup splash milestone dots to 8px with vivid progression states (Current: Vibrant Blue, Done: Emerald Green, Pending: Defined Slate Gray) and rich aurora bloom.
+- [Presentation/Memory]: Fixed memory leaks in `DashboardViewModel` by replacing anonymous lambda event handlers with explicit `IDisposable` event unhooking from `ILocalizationService.LanguageChanged`.
+- [Presentation/Lifecycle]: Implemented `IDisposable` across `VocabularyViewModel`, `GrammarViewModel`, and `TestViewModel` to reliably cancel and dispose background tasks, search cancellation tokens, and timers.
+- [Infrastructure/Security]: Hardened canonical path traversal validation with trailing directory separators in `UpdateService.DownloadUpdateAsync`.
 
 ## [1.2.1] - 2026-10-17
 

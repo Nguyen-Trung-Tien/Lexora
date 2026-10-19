@@ -9,7 +9,7 @@ using Microsoft.UI.Dispatching;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class VocabularyViewModel : ObservableObject
+public partial class VocabularyViewModel : ObservableObject, IDisposable
 {
     private readonly IVocabularyService _vocabService;
     private readonly IReviewService _reviewService;
@@ -1306,5 +1306,13 @@ public partial class VocabularyViewModel : ObservableObject
             }
             SelectedWord = word;
         }
+    }
+
+    public void Dispose()
+    {
+        _suggestionsCts?.Cancel();
+        _suggestionsCts?.Dispose();
+        _suggestionsCts = null;
+        GC.SuppressFinalize(this);
     }
 }

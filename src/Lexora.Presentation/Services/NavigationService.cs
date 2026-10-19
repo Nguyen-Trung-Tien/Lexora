@@ -116,7 +116,7 @@ public class NavigationService : INavigationService
         {
             _isNavigating = true;
             _currentTargetPageType = pageType;
-            transitionInfo ??= new EntranceNavigationTransitionInfo();
+            transitionInfo ??= new SlideNavigationTransitionInfo { Effect = SlideNavigationTransitionEffect.FromRight };
             bool result = _frame.Navigate(pageType, parameter, transitionInfo);
             if (!result)
             {

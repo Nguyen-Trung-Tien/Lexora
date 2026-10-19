@@ -102,6 +102,11 @@ public sealed partial class ShellPage : Page
                 {
                     NavView.IsBackEnabled = _navigationService.CanGoBack;
 
+                    if (ContentFrame.Content is IThemeAwareView navThemeAwareView)
+                    {
+                        navThemeAwareView.OnThemeChanged();
+                    }
+
                     if (_navigationService.HasPendingNavigation)
                     {
                         return;
@@ -229,12 +234,53 @@ public sealed partial class ShellPage : Page
 
     private void OnThemeChanged(object? sender, ElementTheme theme)
     {
-        DispatcherQueue.TryEnqueue(UpdateThemeToggleState);
+        void UpdateThemeUI()
+        {
+            UpdateThemeToggleState();
+            if (ContentFrame != null)
+            {
+                ContentFrame.RequestedTheme = theme;
+                if (ContentFrame.Content is IThemeAwareView themeAwareView)
+                {
+                    themeAwareView.OnThemeChanged();
+                }
+            }
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
     }
 
     private void OnActualThemeChanged(FrameworkElement sender, object args)
     {
-        DispatcherQueue.TryEnqueue(UpdateThemeToggleState);
+        void UpdateActualThemeUI()
+        {
+            UpdateThemeToggleState();
+            if (ContentFrame != null)
+            {
+                if (ContentFrame.Content is IThemeAwareView themeAwareView)
+                {
+                    themeAwareView.OnThemeChanged();
+                }
+            }
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateActualThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateActualThemeUI);
+        }
     }
 
     private void UpdateThemeToggleState()

@@ -582,7 +582,7 @@
 
                     <!-- Heatmap Grid -->
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.StudyHeatmapList}">
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.StudyHeatmapList, Mode=OneWay}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="15" ItemWidth="36" ItemHeight="36" />

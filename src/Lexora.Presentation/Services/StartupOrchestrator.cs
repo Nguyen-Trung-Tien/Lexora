@@ -49,7 +49,6 @@ public class StartupOrchestrator : IStartupOrchestrator
             SetState(StartupState.Loading);
             SetProgress(0.35);
             SetStatus(loc?.GetString("Splash_StatusCheckingDb") ?? "Checking SQLite database & schema...");
-            await Task.Delay(100, cancellationToken);
 
             // Step 2: Initialize SQLite Database & seed data
             using (var scope = _serviceProvider.CreateScope())
@@ -63,12 +62,11 @@ public class StartupOrchestrator : IStartupOrchestrator
 
             // Step 3: Load Settings & Environment
             SetStatus(loc?.GetString("Splash_StatusLoadingData") ?? "Loading study data & preferences...");
-            await Task.Delay(100, cancellationToken);
 
             // Step 4: Ready
+            cancellationToken.ThrowIfCancellationRequested();
             SetProgress(1.00);
             SetStatus(loc?.GetString("Splash_StatusReady") ?? "Ready to launch!");
-            await Task.Delay(80, cancellationToken);
             SetState(StartupState.Ready);
             _logger.LogInformation("Lexora application initialization completed successfully.");
         }

@@ -10,7 +10,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class TestViewModel : ObservableObject
+public partial class TestViewModel : ObservableObject, IDisposable
 {
     private readonly ITestService _testService;
     private readonly IVocabularyService _vocabService;
@@ -950,5 +950,13 @@ public partial class TestViewModel : ObservableObject
                 ResultMessage = _localizationService.GetString("Test_Result_NeedsPractice");
             }
         }
+    }
+
+    public void Dispose()
+    {
+        _questionTimer.Stop();
+        _totalTestTimer.Stop();
+        _audioPlayer.Stop();
+        GC.SuppressFinalize(this);
     }
 }

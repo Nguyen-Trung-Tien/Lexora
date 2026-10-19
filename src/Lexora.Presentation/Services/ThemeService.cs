@@ -83,6 +83,7 @@ public class ThemeService : IThemeService
 
         if (_window is MainWindow mainWindow)
         {
+            mainWindow.SetRootTheme(theme);
             mainWindow.UpdateTitleBarButtons();
         }
 

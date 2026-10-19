@@ -9,12 +9,13 @@ using Lexora.Presentation.Views;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class DashboardViewModel : ObservableObject
+public partial class DashboardViewModel : ObservableObject, IDisposable
 {
     private readonly IStatisticsService _statsService;
     private readonly INavigationService _navService;
     private readonly ILocalizationService _localizationService;
     private readonly IStudyAdvisorService _advisorService;
+    private readonly EventHandler? _languageChangedHandler;
     private bool _isLoadingDashboard;
 
     [ObservableProperty]
@@ -126,8 +127,8 @@ public partial class DashboardViewModel : ObservableObject
         _navService = navService;
         _localizationService = localizationService;
         _advisorService = advisorService;
-
-        _localizationService.LanguageChanged += (s, e) => UpdateLanguageState();
+        _languageChangedHandler = (s, e) => UpdateLanguageState();
+        _localizationService.LanguageChanged += _languageChangedHandler;
 
         UpdateGreeting();
     }
@@ -143,6 +144,15 @@ public partial class DashboardViewModel : ObservableObject
         UpdateLocalizedHeatmap();
         UpdateLocalizedRecentSessions();
         OnPropertyChanged(nameof(DueReviewMessage));
+    }
+
+    public void Dispose()
+    {
+        if (_languageChangedHandler != null)
+        {
+            _localizationService.LanguageChanged -= _languageChangedHandler;
+        }
+        GC.SuppressFinalize(this);
     }
 
     private void UpdateGreeting()
@@ -260,6 +270,12 @@ public partial class DashboardViewModel : ObservableObject
             PosDistributionList.Clear();
             foreach (var p in _rawPosDistribution) PosDistributionList.Add(p);
         }
+    }
+
+    public void RefreshVisuals()
+    {
+        UpdateLocalizedHeatmap();
+        OnPropertyChanged(nameof(StudyHeatmapList));
     }
 
     private void UpdateLocalizedHeatmap()

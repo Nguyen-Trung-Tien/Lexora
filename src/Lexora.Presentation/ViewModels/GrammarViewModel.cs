@@ -9,7 +9,7 @@ using Microsoft.UI.Dispatching;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class GrammarViewModel : ObservableObject
+public partial class GrammarViewModel : ObservableObject, IDisposable
 {
     private readonly IGrammarService _grammarService;
     private readonly IGrammarExportImportService _grammarExportImportService;
@@ -923,5 +923,18 @@ public partial class GrammarViewModel : ObservableObject
             var template = _localizationService.GetString("Grammar_Practice_ResultSummaryFormat");
             ResultSummaryMessage = string.Format(template, PracticeResult.CorrectCount, PracticeResult.TotalQuestions, $"{PracticeResult.ScorePercentage:F0}");
         }
+    }
+
+    public void Dispose()
+    {
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        _loadCts = null;
+
+        _suggestionsCts?.Cancel();
+        _suggestionsCts?.Dispose();
+        _suggestionsCts = null;
+
+        GC.SuppressFinalize(this);
     }
 }

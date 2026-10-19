@@ -369,14 +369,21 @@
                     </Border.Shadow>
 
                     <Grid CornerRadius="34">
-                        <!-- High-Fidelity Brand Emblem -->
+                        <!-- High-Fidelity Brand Emblem (Lightweight Pre-scaled Asset with Direct Decoding) -->
                         <Image
                             x:Name="LogoTile"
-                            Source="ms-appx:///Assets/brand/lexora-app-icon-1024.png"
                             Width="126"
                             Height="126"
                             HorizontalAlignment="Center"
-                            VerticalAlignment="Center" />
+                            VerticalAlignment="Center">
+                            <Image.Source>
+                                <BitmapImage
+                                    UriSource="ms-appx:///Assets/brand/lexora-logo-splash.png"
+                                    DecodePixelWidth="256"
+                                    DecodePixelHeight="256"
+                                    DecodePixelType="Logical" />
+                            </Image.Source>
+                        </Image>
 
                         <!-- Specular Sheen Sweep Strip -->
                         <Rectangle

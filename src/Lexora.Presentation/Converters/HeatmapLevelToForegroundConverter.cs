@@ -23,16 +23,31 @@ public class HeatmapLevelToForegroundConverter : IValueConverter
 
         if (level == 0)
         {
+            var secondary = Services.ThemeResourceHelper.GetThemeBrush(null, "TextFillColorSecondaryBrush");
+            if (secondary != null) return secondary;
             return isDark ? MutedDarkText : MutedLightText;
         }
 
         if (level >= 3)
         {
+            var onAccent = Services.ThemeResourceHelper.GetThemeBrush(null, "TextOnAccentFillColorPrimaryBrush");
+            if (onAccent != null) return onAccent;
             return WhiteBrush;
         }
 
         // Level 1 and 2
-        return isDark ? WhiteBrush : DarkTextBrush;
+        if (isDark)
+        {
+            var onAccent = Services.ThemeResourceHelper.GetThemeBrush(null, "TextOnAccentFillColorPrimaryBrush");
+            if (onAccent != null) return onAccent;
+            return WhiteBrush;
+        }
+        else
+        {
+            var primary = Services.ThemeResourceHelper.GetThemeBrush(null, "TextFillColorPrimaryBrush");
+            if (primary != null) return primary;
+            return DarkTextBrush;
+        }
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

@@ -37,17 +37,10 @@ public class HeatmapLevelToBrushConverter : IValueConverter
         bool isLight = Services.ThemeResourceHelper.DetermineIsLight();
         bool isDark = !isLight;
 
-        if (XamlApplication.Current != null)
+        var themeBrush = Services.ThemeResourceHelper.GetThemeBrush(brushKey);
+        if (themeBrush != null)
         {
-            // Attempt to look inside ThemeDictionaries
-            string themeKey = isDark ? "Dark" : "Light";
-            if (XamlApplication.Current.Resources.ThemeDictionaries.TryGetValue(themeKey, out var dictObj) &&
-                dictObj is ResourceDictionary dict &&
-                dict.TryGetValue(brushKey, out var res) &&
-                res is Brush themeBrush)
-            {
-                return themeBrush;
-            }
+            return themeBrush;
         }
 
         // High-fidelity fallback

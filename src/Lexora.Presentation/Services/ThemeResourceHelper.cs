@@ -100,15 +100,16 @@ public static class ThemeResourceHelper
     {
         bool isLight = DetermineIsLight(element);
 
-        // Keys in WinUI 3 / XamlControlsResources: "Light" vs "Default" (Dark)
-        // Keys in custom DesignSystem.xaml: "Light" vs "Dark"
-        string[] targetThemes = isLight ? ["Light"] : ["Dark", "Default"];
+        // Keys in WinUI 3: "Light" vs "Default" (standard Dark) / "Dark"
+        string[] targetThemes = isLight ? ["Light"] : ["Default", "Dark"];
 
-        // 1. Search merged dictionaries (contains XamlControlsResources with system Light/Default dictionaries)
+        // 1. Search merged dictionaries in REVERSE order so DesignSystem.xaml takes precedence over XamlControlsResources
         if (Microsoft.UI.Xaml.Application.Current?.Resources?.MergedDictionaries != null)
         {
-            foreach (var md in Microsoft.UI.Xaml.Application.Current.Resources.MergedDictionaries)
+            var mds = Microsoft.UI.Xaml.Application.Current.Resources.MergedDictionaries;
+            for (int i = mds.Count - 1; i >= 0; i--)
             {
+                var md = mds[i];
                 foreach (var th in targetThemes)
                 {
                     if (md.ThemeDictionaries.TryGetValue(th, out var tdObj) &&
@@ -116,31 +117,7 @@ public static class ThemeResourceHelper
                         td.TryGetValue(key, out var bObj) &&
                         bObj is Brush b)
                     {
-                        // Guard against dark accent brush (#60CDFF) leaking into light mode
-                        if (isLight && key == "AccentTextFillColorPrimaryBrush" && b is SolidColorBrush scbAccent && scbAccent.Color.R > 50 && scbAccent.Color.G > 180 && scbAccent.Color.B > 240)
-                        {
-                            return LightAccentText;
-                        }
-
-                        // Guard against white/light primary text leaking into light mode
-                        if (isLight && key == "TextFillColorPrimaryBrush" && b is SolidColorBrush scbPrim && scbPrim.Color.R > 200 && scbPrim.Color.G > 200 && scbPrim.Color.B > 200)
-                        {
-                            return LightPrimaryText;
-                        }
-
-                        // Guard against faint secondary text leaking into light mode
-                        if (isLight && key == "TextFillColorSecondaryBrush" && b is SolidColorBrush scbSec && scbSec.Color.R > 180 && scbSec.Color.G > 180 && scbSec.Color.B > 180)
-                        {
-                            return LightSecondaryText;
-                        }
-
-                        // Guard against faint tertiary text leaking into light mode
-                        if (isLight && key == "TextFillColorTertiaryBrush" && b is SolidColorBrush scbTer && (scbTer.Color.R > 140 || (scbTer.Color.R == scbTer.Color.G && scbTer.Color.G == scbTer.Color.B && scbTer.Color.R > 125)))
-                        {
-                            return LightTertiaryText;
-                        }
-
-                        return b;
+                        return SanitizeBrushForTheme(b, key, isLight);
                     }
                 }
             }
@@ -156,28 +133,100 @@ public static class ThemeResourceHelper
                     rootTd.TryGetValue(key, out var rbObj) &&
                     rbObj is Brush rb)
                 {
-                    if (isLight && key == "AccentTextFillColorPrimaryBrush" && rb is SolidColorBrush scbAccent && scbAccent.Color.R > 50 && scbAccent.Color.G > 180 && scbAccent.Color.B > 240)
-                    {
-                        return LightAccentText;
-                    }
-                    if (isLight && key == "TextFillColorPrimaryBrush" && rb is SolidColorBrush scbPrim && scbPrim.Color.R > 200 && scbPrim.Color.G > 200 && scbPrim.Color.B > 200)
-                    {
-                        return LightPrimaryText;
-                    }
-                    if (isLight && key == "TextFillColorSecondaryBrush" && rb is SolidColorBrush scbSec && rb is SolidColorBrush scbSec2 && scbSec2.Color.R > 180 && scbSec2.Color.G > 180 && scbSec2.Color.B > 180)
-                    {
-                        return LightSecondaryText;
-                    }
-                    if (isLight && key == "TextFillColorTertiaryBrush" && rb is SolidColorBrush scbTerRoot && (scbTerRoot.Color.R > 140 || (scbTerRoot.Color.R == scbTerRoot.Color.G && scbTerRoot.Color.G == scbTerRoot.Color.B && scbTerRoot.Color.R > 125)))
-                    {
-                        return LightTertiaryText;
-                    }
-                    return rb;
+                    return SanitizeBrushForTheme(rb, key, isLight);
                 }
             }
         }
 
         // 3. Fallback to bulletproof theme-appropriate colors
+        return GetFallbackThemeBrush(key, isLight);
+    }
+
+    private static Brush SanitizeBrushForTheme(Brush b, string key, bool isLight)
+    {
+        if (isLight)
+        {
+            // Guard against dark accent brush (#60CDFF) leaking into light mode
+            if (key == "AccentTextFillColorPrimaryBrush" && b is SolidColorBrush scbAccent && scbAccent.Color.R > 50 && scbAccent.Color.G > 180 && scbAccent.Color.B > 240)
+            {
+                return LightAccentText;
+            }
+
+            // Guard against white/light primary text leaking into light mode
+            if (key == "TextFillColorPrimaryBrush" && b is SolidColorBrush scbPrim && scbPrim.Color.R > 200 && scbPrim.Color.G > 200 && scbPrim.Color.B > 200)
+            {
+                return LightPrimaryText;
+            }
+
+            // Guard against faint secondary text leaking into light mode
+            if (key == "TextFillColorSecondaryBrush" && b is SolidColorBrush scbSec && scbSec.Color.R > 180 && scbSec.Color.G > 180 && scbSec.Color.B > 180)
+            {
+                return LightSecondaryText;
+            }
+
+            // Guard against faint tertiary text leaking into light mode
+            if (key == "TextFillColorTertiaryBrush" && b is SolidColorBrush scbTer && (scbTer.Color.R > 140 || (scbTer.Color.R == scbTer.Color.G && scbTer.Color.G == scbTer.Color.B && scbTer.Color.R > 125)))
+            {
+                return LightTertiaryText;
+            }
+
+            // Guard against dark card background leaking into light mode
+            if (key == "CardBackgroundFillColorDefaultBrush" && b is SolidColorBrush scbCard && scbCard.Color.R < 100 && scbCard.Color.G < 100 && scbCard.Color.B < 100)
+            {
+                return LightCardBackground;
+            }
+        }
+        else
+        {
+            // DARK MODE GUARDS: Prevent light brushes from leaking into dark mode!
+            // Guard against deep royal blue accent text (#0052A3) leaking into dark mode (unreadable on dark surfaces)
+            if (key == "AccentTextFillColorPrimaryBrush" && b is SolidColorBrush scbDarkAccent && scbDarkAccent.Color.R < 60 && scbDarkAccent.Color.G < 120 && scbDarkAccent.Color.B > 140)
+            {
+                return DarkAccentText;
+            }
+
+            // Guard against dark primary text leaking into dark mode
+            if (key == "TextFillColorPrimaryBrush" && b is SolidColorBrush scbDarkPrim && scbDarkPrim.Color.R < 80 && scbDarkPrim.Color.G < 80 && scbDarkPrim.Color.B < 80)
+            {
+                return DarkPrimaryText;
+            }
+
+            // Guard against dark secondary text leaking into dark mode
+            if (key == "TextFillColorSecondaryBrush" && b is SolidColorBrush scbDarkSec && scbDarkSec.Color.R < 100 && scbDarkSec.Color.G < 100 && scbDarkSec.Color.B < 100)
+            {
+                return DarkSecondaryText;
+            }
+
+            // Guard against dark tertiary text leaking into dark mode
+            if (key == "TextFillColorTertiaryBrush" && b is SolidColorBrush scbDarkTer && scbDarkTer.Color.R < 120 && scbDarkTer.Color.G < 120 && scbDarkTer.Color.B < 120)
+            {
+                return DarkTertiaryText;
+            }
+
+            // Guard against pure white card background leaking into dark mode
+            if (key == "CardBackgroundFillColorDefaultBrush" && b is SolidColorBrush scbDarkCard && scbDarkCard.Color.R > 230 && scbDarkCard.Color.G > 230 && scbDarkCard.Color.B > 230)
+            {
+                return DarkCardBackground;
+            }
+
+            // Guard against light gray subtle background (#EEF2F6) leaking into dark mode
+            if (key == "SubtleFillColorSecondaryBrush" && b is SolidColorBrush scbDarkSubtle && scbDarkSubtle.Color.A > 200 && scbDarkSubtle.Color.R > 200)
+            {
+                return DarkSubtleBackground;
+            }
+
+            // Guard against white modal/toast leaking into dark mode
+            if ((key == "LexoraModalBackgroundBrush" || key == "LexoraToastBackgroundBrush") && b is SolidColorBrush scbDarkModal && scbDarkModal.Color.R > 200)
+            {
+                return DarkCardBackground;
+            }
+        }
+
+        return b;
+    }
+
+    private static Brush GetFallbackThemeBrush(string key, bool isLight)
+    {
         return key switch
         {
             "TextFillColorPrimaryBrush" => isLight ? LightPrimaryText : DarkPrimaryText,
@@ -189,6 +238,7 @@ public static class ThemeResourceHelper
             "SubtleFillColorSecondaryBrush" => isLight ? LightSubtleBackground : DarkSubtleBackground,
             "AccentFillColorDefaultBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 0, 102, 204)) : DarkAccentText,
             "TextOnAccentFillColorPrimaryBrush" => new SolidColorBrush(Colors.White),
+            "LexoraThemeCardSelectedBorderBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 0, 102, 204)) : DarkAccentText,
             // Semantic state solid fills (High contrast AA standard)
             "SystemFillColorSuccessBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 8, 116, 67)) : new SolidColorBrush(Color.FromArgb(255, 108, 203, 95)),
             "SystemFillColorCriticalBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 217, 45, 32)) : new SolidColorBrush(Color.FromArgb(255, 255, 153, 164)),
@@ -199,6 +249,15 @@ public static class ThemeResourceHelper
             "SystemFillColorCautionBackgroundBrush" => isLight ? LightCautionBackground : DarkCautionBackground,
             "LexoraModalBackgroundBrush" => isLight ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Color.FromArgb(255, 40, 40, 40)),
             "LexoraModalBorderBrush" => isLight ? LightCardStroke : DarkCardStroke,
+            "LexoraToastBackgroundBrush" => isLight ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Color.FromArgb(255, 40, 40, 40)),
+            "LexoraToastBorderBrush" => isLight ? LightCardStroke : DarkCardStroke,
+            "LexoraFormulaCardBackgroundBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 240, 246, 255)) : new SolidColorBrush(Color.FromArgb(255, 10, 25, 47)),
+            "LexoraOptionSelectedBackgroundBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 235, 243, 252)) : new SolidColorBrush(Color.FromArgb(255, 12, 37, 72)),
+            "HeatmapLevel0Brush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 225, 223, 221)) : new SolidColorBrush(Color.FromArgb(255, 45, 51, 59)),
+            "HeatmapLevel1Brush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 155, 233, 168)) : new SolidColorBrush(Color.FromArgb(255, 14, 68, 41)),
+            "HeatmapLevel2Brush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 64, 196, 99)) : new SolidColorBrush(Color.FromArgb(255, 0, 109, 50)),
+            "HeatmapLevel3Brush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 48, 161, 78)) : new SolidColorBrush(Color.FromArgb(255, 38, 166, 65)),
+            "HeatmapLevel4Brush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 33, 110, 57)) : new SolidColorBrush(Color.FromArgb(255, 57, 211, 83)),
             _ => isLight ? LightCardBackground : DarkCardBackground
         };
     }

@@ -172,8 +172,8 @@ public class UpdateService : IUpdateService
 
         // Verify canonical path to enforce Path Traversal Defense (AGENTS.md 6.1)
         var fullPath = Path.GetFullPath(targetFilePath);
-        var canonicalBaseDir = Path.GetFullPath(baseTempDir);
-        if (!fullPath.StartsWith(canonicalBaseDir, StringComparison.OrdinalIgnoreCase))
+        var safeBaseDir = Path.GetFullPath(baseTempDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        if (!fullPath.StartsWith(safeBaseDir, StringComparison.OrdinalIgnoreCase))
         {
             throw new SecurityException("Potential path traversal attempt detected in download target path.");
         }

@@ -53,6 +53,7 @@
             <SolidColorBrush x:Key="LexoraCodeTokenResultBrush" Color="#107C41" />
             <SolidColorBrush x:Key="LexoraOptionSelectedBorderBrush" Color="{ThemeResource SystemAccentColor}" />
             <SolidColorBrush x:Key="LexoraOptionSelectedBackgroundBrush" Color="#EBF3FC" />
+            <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColor}" />
             <!-- Activity Heatmap Level Brushes -->
             <SolidColorBrush x:Key="HeatmapLevel0Brush" Color="#E1DFDD" />
             <SolidColorBrush x:Key="HeatmapLevel1Brush" Color="#9BE9A8" />
@@ -60,9 +61,72 @@
             <SolidColorBrush x:Key="HeatmapLevel3Brush" Color="#30A14E" />
             <SolidColorBrush x:Key="HeatmapLevel4Brush" Color="#216E39" />
         </ResourceDictionary>
+        <!-- In WinUI 3, 'Default' is the standard theme dictionary key representing the Dark theme -->
+        <ResourceDictionary x:Key="Default">
+            <!-- Hero card border: glowing accent stroke for depth in dark mode -->
+            <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.42" />
+            <!-- Fluent 2 surface & text depth tokens for Dark / Default mode -->
+            <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#FFFFFF" Opacity="0.09" />
+            <SolidColorBrush x:Key="SubtleFillColorSecondaryBrush" Color="#FFFFFF" Opacity="0.06" />
+            <SolidColorBrush x:Key="SubtleFillColorTertiaryBrush" Color="#FFFFFF" Opacity="0.09" />
+            <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#C5C5C5" />
+            <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#A0A0A0" />
+            <SolidColorBrush x:Key="SystemFillColorSuccessBrush" Color="#6CCB5F" />
+            <SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="#FF99A4" />
+            <SolidColorBrush x:Key="SystemFillColorCautionBrush" Color="#FFD580" />
+            <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#60CDFF" />
+            <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#60CDFF" />
+            <!-- Metric stat card border: luminous edge so cards don't dissolve in dark background -->
+            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
+            <!-- Advisor card accent border -->
+            <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.65" />
+            <!-- Subtle card stroke token -->
+            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.5" />
+            <!-- Input background & border tokens for dark mode -->
+            <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="#242424" />
+            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.55" />
+            <!-- Flashcard glowing border for tactile elevation in dark mode -->
+            <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.7" />
+            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
+            <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+            <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
+            <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="#282828" />
+            <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
+            <!-- Modal Dialog & Floating Overlay tokens (100% opaque, zero bleed-through) -->
+            <SolidColorBrush x:Key="LexoraModalBackgroundBrush" Color="#282828" />
+            <SolidColorBrush x:Key="LexoraModalBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
+            <!-- Semantic state background fills -->
+            <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#393D1B" />
+            <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#442726" />
+            <SolidColorBrush x:Key="SystemFillColorCautionBackgroundBrush" Color="#433519" />
+            <!-- Formula card & syntax tokens for Grammar & Test -->
+            <SolidColorBrush x:Key="LexoraFormulaCardBackgroundBrush" Color="#0A192F" />
+            <SolidColorBrush x:Key="LexoraFormulaCardBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.45" />
+            <SolidColorBrush x:Key="LexoraCodeTokenConditionBrush" Color="#60CDFF" />
+            <SolidColorBrush x:Key="LexoraCodeTokenResultBrush" Color="#39D353" />
+            <SolidColorBrush x:Key="LexoraOptionSelectedBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" />
+            <SolidColorBrush x:Key="LexoraOptionSelectedBackgroundBrush" Color="#0C2548" />
+            <!-- Activity Heatmap Level Brushes -->
+            <SolidColorBrush x:Key="HeatmapLevel0Brush" Color="#2D333B" />
+            <SolidColorBrush x:Key="HeatmapLevel1Brush" Color="#0E4429" />
+            <SolidColorBrush x:Key="HeatmapLevel2Brush" Color="#006D32" />
+            <SolidColorBrush x:Key="HeatmapLevel3Brush" Color="#26A641" />
+            <SolidColorBrush x:Key="HeatmapLevel4Brush" Color="#39D353" />
+        </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <!-- Hero card border: glowing accent stroke for depth in dark mode -->
             <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.42" />
+            <!-- Fluent 2 surface & text depth tokens for Dark / Default mode -->
+            <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#FFFFFF" Opacity="0.09" />
+            <SolidColorBrush x:Key="SubtleFillColorSecondaryBrush" Color="#FFFFFF" Opacity="0.06" />
+            <SolidColorBrush x:Key="SubtleFillColorTertiaryBrush" Color="#FFFFFF" Opacity="0.09" />
+            <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#C5C5C5" />
+            <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#A0A0A0" />
+            <SolidColorBrush x:Key="SystemFillColorSuccessBrush" Color="#6CCB5F" />
+            <SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="#FF99A4" />
+            <SolidColorBrush x:Key="SystemFillColorCautionBrush" Color="#FFD580" />
+            <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#60CDFF" />
+            <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#60CDFF" />
             <!-- Metric stat card border: luminous edge so cards don't dissolve in dark background -->
             <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
             <!-- Advisor card accent border -->

@@ -8,7 +8,7 @@ using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class SettingsPage : Page, ILocalizableView
+public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareView
 {
     public SettingsViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -23,13 +23,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView
 
         InitializeComponent();
 
-        ActualThemeChanged += (s, e) =>
-        {
-            UpdateLanguageButtons();
-            UpdateThemeButtons();
-            UpdateAccentButtons();
-            UpdateAlgorithmButtons();
-        };
+        ActualThemeChanged += (s, e) => OnThemeChanged();
 
         ViewModel.PropertyChanged += (s, e) =>
         {
@@ -76,10 +70,32 @@ public sealed partial class SettingsPage : Page, ILocalizableView
         }
     }
 
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            UpdateLanguageButtons();
+            UpdateThemeButtons();
+            UpdateAccentButtons();
+            UpdateAlgorithmButtons();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
+    }
+
     protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
+        OnThemeChanged();
     }
 
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)

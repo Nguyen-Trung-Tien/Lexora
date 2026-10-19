@@ -8,7 +8,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class DashboardPage : Page, ILocalizableView
+public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareView
 {
     public DashboardViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
@@ -25,6 +25,7 @@ public sealed partial class DashboardPage : Page, ILocalizableView
 
         Loaded += (s, e) => UpdateResponsiveHero(ActualWidth);
         SizeChanged += (s, e) => UpdateResponsiveHero(e.NewSize.Width);
+        ActualThemeChanged += (s, e) => OnThemeChanged();
     }
 
     private void UpdateResponsiveHero(double width)
@@ -102,10 +103,29 @@ public sealed partial class DashboardPage : Page, ILocalizableView
         }
     }
 
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            ViewModel.RefreshVisuals();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
+    }
+
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
+        OnThemeChanged();
         try
         {
             if (ViewModel.TotalWords == 0)

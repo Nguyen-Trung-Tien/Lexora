@@ -11,7 +11,7 @@ using Windows.System;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class TestPage : Page, ILocalizableView
+public sealed partial class TestPage : Page, ILocalizableView, IThemeAwareView
 {
     public TestViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -25,13 +25,6 @@ public sealed partial class TestPage : Page, ILocalizableView
         InitializeComponent();
         RegisterShortcuts();
 
-        void RefreshAllStyles()
-        {
-            UpdateTypeButtonStyles(ViewModel.SelectedTestType);
-            UpdateCountButtonStyles(ViewModel.QuestionCount);
-            UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
-        }
-
         Loaded += (s, e) =>
         {
             RefreshAllStyles();
@@ -43,9 +36,9 @@ public sealed partial class TestPage : Page, ILocalizableView
         var themeService = App.Current.Services.GetService<IThemeService>();
         if (themeService != null)
         {
-            void OnThemeChanged(object? sender, ElementTheme theme) => DispatcherQueue.TryEnqueue(RefreshAllStyles);
-            themeService.ThemeChanged += OnThemeChanged;
-            Unloaded += (s, e) => themeService.ThemeChanged -= OnThemeChanged;
+            void OnThemeChangedHandler(object? sender, ElementTheme theme) => OnThemeChanged();
+            themeService.ThemeChanged += OnThemeChangedHandler;
+            Unloaded += (s, e) => themeService.ThemeChanged -= OnThemeChangedHandler;
         }
 
         Unloaded += (s, e) =>
@@ -55,7 +48,7 @@ public sealed partial class TestPage : Page, ILocalizableView
             sm?.UnregisterPageShortcuts(typeof(TestPage));
         };
 
-        ActualThemeChanged += (s, e) => RefreshAllStyles();
+        ActualThemeChanged += (s, e) => OnThemeChanged();
     }
 
     private void UpdateResponsiveLayout(double width)
@@ -117,10 +110,36 @@ public sealed partial class TestPage : Page, ILocalizableView
         }
     }
 
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            RefreshAllStyles();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
+    }
+
+    public void RefreshAllStyles()
+    {
+        UpdateTypeButtonStyles(ViewModel.SelectedTestType);
+        UpdateCountButtonStyles(ViewModel.QuestionCount);
+        UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
+    }
+
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
+        OnThemeChanged();
         try
         {
             RegisterShortcuts();

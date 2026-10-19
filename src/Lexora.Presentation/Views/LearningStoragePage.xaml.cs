@@ -11,7 +11,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class LearningStoragePage : Page, ILocalizableView
+public sealed partial class LearningStoragePage : Page, ILocalizableView, IThemeAwareView
 {
     public LearningStorageViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -43,6 +43,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         };
         InitializeComponent();
         SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
+        ActualThemeChanged += (s, e) => OnThemeChanged();
     }
 
     public void OnLanguageChanged()
@@ -76,10 +77,30 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView
         }
     }
 
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            UpdateSegmentedButtons();
+            UpdateSelectionModeUI();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
+    }
+
     protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
+        OnThemeChanged();
         try
         {
             await ViewModel.InitializeAsync();

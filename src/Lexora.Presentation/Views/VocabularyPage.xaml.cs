@@ -11,7 +11,7 @@ using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class VocabularyPage : Page, ILocalizableView
+public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAwareView
 {
     public VocabularyViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
@@ -79,7 +79,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
 
         SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
 
-        ActualThemeChanged += (s, e) => UpdateViewModeButtons();
+        ActualThemeChanged += (s, e) => OnThemeChanged();
     }
 
     private void UpdateResponsiveLayout(double width)
@@ -154,6 +154,24 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
         else
         {
             DispatcherQueue.TryEnqueue(UpdateUI);
+        }
+    }
+
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            UpdateViewModeButtons();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
         }
     }
 
@@ -252,6 +270,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView
     {
         base.OnNavigatedTo(e);
         OnLanguageChanged();
+        OnThemeChanged();
         try
         {
             RegisterShortcuts();
