@@ -73,6 +73,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
     {
         var normalized = term.Trim().ToLowerInvariant();
         return await DbSet
+            .AsSplitQuery()
             .Include(w => w.Meanings)
                 .ThenInclude(m => m.Examples)
             .Include(w => w.WordTopics)

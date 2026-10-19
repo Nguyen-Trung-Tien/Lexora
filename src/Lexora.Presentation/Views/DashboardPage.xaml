@@ -104,6 +104,18 @@
                                 <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_Title')}" FontSize="14" />
                             </StackPanel>
                         </Button>
+
+                        <Button Click="OpenListeningLab_Click"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                FontWeight="SemiBold" Padding="18,12" CornerRadius="10"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Title')}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE767;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Title')}" FontSize="14" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>

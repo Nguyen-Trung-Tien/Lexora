@@ -18,7 +18,9 @@ public class UnitOfWork : IUnitOfWork
     {
         try
         {
-            return await _context.SaveChangesAsync(cancellationToken);
+            var result = await _context.SaveChangesAsync(cancellationToken);
+            _context.ChangeTracker.Clear();
+            return result;
         }
         catch
         {

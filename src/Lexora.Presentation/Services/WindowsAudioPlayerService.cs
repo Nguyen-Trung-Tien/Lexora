@@ -28,6 +28,8 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
     private readonly MediaPlayer _mediaPlayer;
     private readonly SemaphoreSlim _audioSemaphore = new(1, 1);
     private readonly EventHandler<UserPreferences> _preferencesChangedHandler;
+    private MediaSource? _currentMediaSource;
+    private IDisposable? _currentStream;
     private bool _disposed;
 
     public double PlaybackRate { get; set; } = 1.0;
@@ -92,7 +94,10 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
                 var bytes = await File.ReadAllBytesAsync(cachedPath).ConfigureAwait(false);
                 var mimeType = cachedPath.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ? "audio/mpeg" : "audio/wav";
                 var stream = new MemoryStream(bytes).AsRandomAccessStream();
-                _mediaPlayer.Source = MediaSource.CreateFromStream(stream, mimeType);
+                var mediaSource = MediaSource.CreateFromStream(stream, mimeType);
+                _currentMediaSource = mediaSource;
+                _currentStream = stream;
+                _mediaPlayer.Source = mediaSource;
                 _mediaPlayer.Play();
                 return;
             }
@@ -176,7 +181,10 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         }
 
         stream.Seek(0);
-        _mediaPlayer.Source = MediaSource.CreateFromStream(stream, stream.ContentType);
+        var mediaSource = MediaSource.CreateFromStream(stream, stream.ContentType);
+        _currentMediaSource = mediaSource;
+        _currentStream = stream;
+        _mediaPlayer.Source = mediaSource;
         _mediaPlayer.Play();
     }
 
@@ -190,6 +198,18 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
     {
         _mediaPlayer.Pause();
         _mediaPlayer.Source = null;
+
+        if (_currentMediaSource != null)
+        {
+            try { _currentMediaSource.Dispose(); } catch { }
+            _currentMediaSource = null;
+        }
+
+        if (_currentStream != null)
+        {
+            try { _currentStream.Dispose(); } catch { }
+            _currentStream = null;
+        }
     }
 
     public void Dispose()

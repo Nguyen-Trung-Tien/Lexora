@@ -193,4 +193,25 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
             System.Diagnostics.Debug.WriteLine($"[DashboardPage] OpenStudyPlanner error: {ex.Message}");
         }
     }
+
+    private async void OpenListeningLab_Click(object sender, RoutedEventArgs e)
+    {
+        _soundFeedback.PlaySoftTapSound();
+        try
+        {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
+            var labService = App.Current.Services.GetRequiredService<IPronunciationListeningLabService>();
+            var audioService = App.Current.Services.GetService<IAudioPlayerService>();
+            var dialog = new ListeningLabDialog(labService, Loc, audioService)
+            {
+                XamlRoot = xamlRoot
+            };
+            await dialog.ShowAsyncSafe(xamlRoot);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardPage] OpenListeningLab error: {ex.Message}");
+        }
+    }
 }

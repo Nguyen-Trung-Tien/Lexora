@@ -153,7 +153,9 @@ public class TestService : ITestService
             }
         }
 
-        ActiveTestSessions[createdSession.Id] = new ActiveSessionEntry(DateTime.UtcNow, questions);
+        var entry = new ActiveSessionEntry(DateTime.UtcNow, questions);
+        ActiveTestSessions[createdSession.Id] = entry;
+        SaveSessionToDisk(createdSession.Id, entry);
 
         return new TestSessionDto(
             createdSession.Id,
@@ -165,7 +167,14 @@ public class TestService : ITestService
 
     public async Task<TestResultDto> SubmitTestAsync(Guid sessionId, List<TestAnswerSubmissionDto> answers, CancellationToken cancellationToken = default)
     {
-        ActiveTestSessions.TryGetValue(sessionId, out var entry);
+        if (!ActiveTestSessions.TryGetValue(sessionId, out var entry))
+        {
+            entry = LoadSessionFromDisk(sessionId);
+            if (entry != null)
+            {
+                ActiveTestSessions[sessionId] = entry;
+            }
+        }
         var cachedQuestions = entry?.Questions;
 
         var session = await _reviewRepo.GetStudySessionByIdAsync(sessionId, cancellationToken);
@@ -371,6 +380,7 @@ public class TestService : ITestService
 
         // Clean up cache
         ActiveTestSessions.TryRemove(sessionId, out _);
+        DeleteSessionFromDisk(sessionId);
 
         var startedAt = session?.StartedAt ?? completedAt;
         var timeTaken = completedAt - startedAt;
@@ -668,5 +678,111 @@ public class TestService : ITestService
             w.ReviewCard?.NextReviewAt,
             w.ReviewCard?.Confidence ?? 0.0
         );
+    }
+
+    public Task<TestSessionDto?> GetActiveTestSessionAsync(CancellationToken cancellationToken = default)
+    {
+        // 1. Check in-memory active sessions
+        var latestEntry = ActiveTestSessions
+            .OrderByDescending(kvp => kvp.Value.CreatedAt)
+            .FirstOrDefault();
+
+        if (latestEntry.Key != Guid.Empty && latestEntry.Value != null)
+        {
+            var config = new TestConfigurationDto { QuestionCount = latestEntry.Value.Questions.Count };
+            return Task.FromResult<TestSessionDto?>(new TestSessionDto(
+                latestEntry.Key,
+                config,
+                latestEntry.Value.CreatedAt,
+                latestEntry.Value.Questions
+            ));
+        }
+
+        // 2. Check disk cache for interrupted session
+        try
+        {
+            var dir = GetSessionsDirectory();
+            var files = Directory.GetFiles(dir, "*.json");
+            var latestFile = files
+                .Select(f => new FileInfo(f))
+                .OrderByDescending(fi => fi.LastWriteTimeUtc)
+                .FirstOrDefault();
+
+            if (latestFile != null && Guid.TryParse(Path.GetFileNameWithoutExtension(latestFile.Name), out var sid))
+            {
+                var entry = LoadSessionFromDisk(sid);
+                if (entry != null && entry.CreatedAt > DateTime.UtcNow.AddHours(-12))
+                {
+                    ActiveTestSessions[sid] = entry;
+                    var config = new TestConfigurationDto { QuestionCount = entry.Questions.Count };
+                    return Task.FromResult<TestSessionDto?>(new TestSessionDto(
+                        sid,
+                        config,
+                        entry.CreatedAt,
+                        entry.Questions
+                    ));
+                }
+            }
+        }
+        catch { }
+
+        return Task.FromResult<TestSessionDto?>(null);
+    }
+
+    public Task CancelActiveTestSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    {
+        ActiveTestSessions.TryRemove(sessionId, out _);
+        DeleteSessionFromDisk(sessionId);
+        return Task.CompletedTask;
+    }
+
+    private static string GetSessionsDirectory()
+    {
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var dir = Path.Combine(localAppData, "Lexora", "sessions");
+        Directory.CreateDirectory(dir);
+        return dir;
+    }
+
+    private static void SaveSessionToDisk(Guid sessionId, ActiveSessionEntry entry)
+    {
+        try
+        {
+            var dir = GetSessionsDirectory();
+            var path = Path.Combine(dir, $"{sessionId}.json");
+            var json = System.Text.Json.JsonSerializer.Serialize(entry);
+            File.WriteAllText(path, json);
+        }
+        catch { }
+    }
+
+    private static ActiveSessionEntry? LoadSessionFromDisk(Guid sessionId)
+    {
+        try
+        {
+            var dir = GetSessionsDirectory();
+            var path = Path.Combine(dir, $"{sessionId}.json");
+            if (File.Exists(path))
+            {
+                var json = File.ReadAllText(path);
+                return System.Text.Json.JsonSerializer.Deserialize<ActiveSessionEntry>(json);
+            }
+        }
+        catch { }
+        return null;
+    }
+
+    private static void DeleteSessionFromDisk(Guid sessionId)
+    {
+        try
+        {
+            var dir = GetSessionsDirectory();
+            var path = Path.Combine(dir, $"{sessionId}.json");
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch { }
     }
 }
