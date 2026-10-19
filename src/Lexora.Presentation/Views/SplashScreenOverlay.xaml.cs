@@ -132,6 +132,10 @@ public sealed partial class SplashScreenOverlay : UserControl
 
         if (!IsAnimationEnabled)
         {
+            LogoTileCard.Opacity = 1.0;
+            TypographyContainer.Opacity = 1.0;
+            LoadingContainer.Opacity = 1.0;
+            GlowingDivider.Opacity = 1.0;
             ReducedMotionEntrance.Begin();
         }
         else
@@ -200,6 +204,14 @@ public sealed partial class SplashScreenOverlay : UserControl
 
         LoadingContainer.Visibility = Visibility.Visible;
         ErrorCard.Visibility = Visibility.Collapsed;
+
+        if (!IsAnimationEnabled)
+        {
+            LogoTileCard.Opacity = 1.0;
+            TypographyContainer.Opacity = 1.0;
+            LoadingContainer.Opacity = 1.0;
+            GlowingDivider.Opacity = 1.0;
+        }
     }
 
     public void ShowError(string errorMessage)
