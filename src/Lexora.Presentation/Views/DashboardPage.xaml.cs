@@ -23,28 +23,13 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
 
         InitializeComponent();
 
-        Loaded += (s, e) => UpdateResponsiveHero(ActualWidth);
-        SizeChanged += (s, e) => UpdateResponsiveHero(e.NewSize.Width);
+        Loaded += (s, e) => UpdateResponsiveLayout(ActualWidth);
+        SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
         ActualThemeChanged += (s, e) => OnThemeChanged();
     }
 
-    private void UpdateResponsiveHero(double width)
+    private void UpdateResponsiveLayout(double width)
     {
-        if (HeroGrid == null || HeroActionsPanel == null) return;
-        if (width < 1250)
-        {
-            Grid.SetColumn(HeroActionsPanel, 0);
-            Grid.SetRow(HeroActionsPanel, 1);
-            HeroActionsPanel.Margin = new Thickness(0, 16, 0, 0);
-            HeroActionsPanel.HorizontalAlignment = HorizontalAlignment.Left;
-        }
-        else
-        {
-            Grid.SetColumn(HeroActionsPanel, 1);
-            Grid.SetRow(HeroActionsPanel, 0);
-            HeroActionsPanel.Margin = new Thickness(16, 0, 0, 0);
-            HeroActionsPanel.HorizontalAlignment = HorizontalAlignment.Right;
-        }
 
         if (BreakdownGrid != null && CefrBreakdownBorder != null && PosBreakdownBorder != null)
         {
