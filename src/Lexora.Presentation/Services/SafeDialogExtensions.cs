@@ -123,6 +123,7 @@ public static class SafeDialogExtensions
             finally
             {
                 _currentlyActiveDialog = null;
+                await Task.Yield();
                 _dialogSemaphore.Release();
 
                 if (dispatcher != null && !dispatcher.HasThreadAccess)

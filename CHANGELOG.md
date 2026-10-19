@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- [Presentation/i18n]: Added missing localization keys in `LocalizationService.cs` across both `vi-VN` and `en-US` dictionaries for Smart Review preset titles (`SmartReview_UrgentOverdue`, `SmartReview_HighForgettingRisk`, `SmartReview_ExamHighYield`, `SmartReview_FreshLearned`, `SmartReview_LongTermConsolidation`) and Adaptive Quiz final proficiency level format (`AdaptiveQuiz_FinalLevelFormat`).
+- [Tests/Unit]: Added automated verification test cases in `LocalizationServiceTests.cs` for all newly added keys, achieving 100% dictionary coverage and parity across 1,223 keys.
+
+### Fixed
+- [Presentation/Dialogs]: Hardened `SafeDialogExtensions.ShowAsyncSafe` against WinUI 3 visual tree dialog closing collisions by awaiting `Task.Yield()` prior to releasing `_dialogSemaphore`, guaranteeing safe sequential dialog chaining and preventing `InvalidOperationException`.
+
 
 ## [1.2.2] - 2026-10-19
 

@@ -159,6 +159,12 @@ public class LocalizationServiceTests
     [InlineData("Storage_IntervalLabel", "Chu kỳ:", "Interval:")]
     [InlineData("Storage_MistakesLabel", "Lỗi:", "Mistakes:")]
     [InlineData("Storage_CorrectLabel", "• Đúng:", "• Correct:")]
+    [InlineData("SmartReview_UrgentOverdue", "Cần ôn gấp (Quá hạn)", "Urgent Overdue")]
+    [InlineData("SmartReview_HighForgettingRisk", "Nguy cơ quên cao (R < 70%)", "High Forgetting Risk (R < 70%)")]
+    [InlineData("SmartReview_ExamHighYield", "Trọng tâm bài thi (High-Yield)", "Exam High-Yield")]
+    [InlineData("SmartReview_FreshLearned", "Từ mới nạp (Củng cố)", "Recently Learned (Consolidation)")]
+    [InlineData("SmartReview_LongTermConsolidation", "Khắc sâu dài hạn", "Long-Term Consolidation")]
+    [InlineData("AdaptiveQuiz_FinalLevelFormat", "Trình độ ước tính: {0}", "Estimated Level: {0}")]
     public void NewlyAddedKeys_MustReturnAccurateTranslations(string key, string expectedVi, string expectedEn)
     {
         _loc.SetLanguage("vi-VN");

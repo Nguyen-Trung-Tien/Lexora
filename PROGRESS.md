@@ -2,10 +2,10 @@
 
 ## 📊 Quality Gates Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
-- **Automated Tests**: **395 / 395 Tests Passing** (344 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+- **Automated Tests**: **390 / 390 Tests Passing** (339 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
 - **Fluent UI Audit**: `0 Violations` (`audit_fluent_ui.ps1` scanned 85 files).
-- **Localization (i18n)**: `100% Parity` across 1,274 keys (`sync_localization.ps1 -CheckXaml`).
+- **Localization (i18n)**: `100% Parity` across 1,223 keys (`sync_localization.ps1 -CheckXaml`).
 - **Clean Architecture**: `0 Violations` (`lint_architecture.ps1`).
 
 ---
@@ -94,7 +94,16 @@
   - Fully removed UI, ViewModels, and navigation entries (`NavItemDownloadCenter`, `DownloadCenterPage`, `DownloadCenterViewModel`, shortcut `Ctrl+7`).
   - Removed `CommunityDataService` and community catalog files.
   - Retained all core learning suites (Vocabulary, Grammar, Review with FSRS v5 / SM-2, Adaptive Quiz, Pronunciation & Listening Lab, Learning Intelligence, and Learning Storage).
-- **Quality Benchmark**:
-  - Clean build: **0 Warnings, 0 Errors**.
-  - **100% Localization Parity** across `vi-VN` and `en-US`.
+### 8. Full-System Audit & Hardened Synchronization (v1.2.2+)
+- **Bilingual Dictionary 100% C# & XAML Synchronization**:
+  - Identified and added 6 missing localization keys in `LocalizationService.cs` across both `vi-VN` and `en-US` (`SmartReview_UrgentOverdue`, `SmartReview_HighForgettingRisk`, `SmartReview_ExamHighYield`, `SmartReview_FreshLearned`, `SmartReview_LongTermConsolidation`, `AdaptiveQuiz_FinalLevelFormat`).
+  - Achieved complete parity (1,223 keys) with 0 missing keys in either C# code-behind or XAML markup.
+- **WinUI 3 ContentDialog Chained Teardown Safety**:
+  - Hardened `SafeDialogExtensions.ShowAsyncSafe` by awaiting `Task.Yield()` immediately upon dialog dismissal before releasing `_dialogSemaphore`.
+  - Guarantees that the WinUI 3 visual tree completes popup teardown prior to unblocking queued or chained dialogs, preventing WinUI 3 re-entrant `InvalidOperationException`.
+- **Quality Gates Benchmark**:
+  - Clean build: **0 Warnings, 0 Errors** (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`).
+  - Automated test suite: **390 / 390 Tests Passing** (339 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+  - Clean Architecture boundary: **0 Violations**.
+  - WinUI 3 Fluent 2 audit: **0 Violations**.
 

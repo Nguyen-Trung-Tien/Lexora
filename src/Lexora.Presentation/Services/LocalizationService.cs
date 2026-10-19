@@ -1322,10 +1322,16 @@ public class LocalizationService : ILocalizationService
             ["AdaptiveQuiz_SummaryTitle"] = "Báo cáo Kết quả Trắc nghiệm Thích ứng",
             ["AdaptiveQuiz_EstimatedScores"] = "Dự đoán Điểm thi Chứng chỉ",
             ["AdaptiveQuiz_ReviewWeakWords"] = "Thêm các từ sai vào Ôn tập",
+            ["AdaptiveQuiz_FinalLevelFormat"] = "Trình độ ước tính: {0}",
 
             // Smart Review & Memory Stability
             ["SmartReview_Presets"] = "Chế độ ôn tập thông minh",
             ["SmartReview_PresetsTitle"] = "Chế độ Ôn tập Thông minh",
+            ["SmartReview_UrgentOverdue"] = "Cần ôn gấp (Quá hạn)",
+            ["SmartReview_HighForgettingRisk"] = "Nguy cơ quên cao (R < 70%)",
+            ["SmartReview_ExamHighYield"] = "Trọng tâm bài thi (High-Yield)",
+            ["SmartReview_FreshLearned"] = "Từ mới nạp (Củng cố)",
+            ["SmartReview_LongTermConsolidation"] = "Khắc sâu dài hạn",
             ["SmartReview_MemoryStability"] = "Độ bền trí nhớ",
             ["SmartReview_Retrievability"] = "Khả năng nhớ",
             ["SmartReview_HealthPermanent"] = "Vĩnh viễn",
@@ -2690,10 +2696,16 @@ public class LocalizationService : ILocalizationService
             ["AdaptiveQuiz_SummaryTitle"] = "Adaptive Diagnostic Quiz Report",
             ["AdaptiveQuiz_EstimatedScores"] = "Estimated Exam Score Projections",
             ["AdaptiveQuiz_ReviewWeakWords"] = "Add Weak Words to Review",
+            ["AdaptiveQuiz_FinalLevelFormat"] = "Estimated Level: {0}",
 
             // Smart Review & Memory Stability
             ["SmartReview_Presets"] = "Smart Presets",
             ["SmartReview_PresetsTitle"] = "Smart Review Presets",
+            ["SmartReview_UrgentOverdue"] = "Urgent Overdue",
+            ["SmartReview_HighForgettingRisk"] = "High Forgetting Risk (R < 70%)",
+            ["SmartReview_ExamHighYield"] = "Exam High-Yield",
+            ["SmartReview_FreshLearned"] = "Recently Learned (Consolidation)",
+            ["SmartReview_LongTermConsolidation"] = "Long-Term Consolidation",
             ["SmartReview_MemoryStability"] = "Memory Stability",
             ["SmartReview_Retrievability"] = "Retrievability",
             ["SmartReview_HealthPermanent"] = "Permanent",
