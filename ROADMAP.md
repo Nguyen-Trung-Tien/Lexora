@@ -17,8 +17,9 @@ gantt
     section Phase 2: Production Hardening & UX
     FSRS v5 Memory Engine Integration        :done, 2026-08, 2026-09
     Diacritic RAM & Memory Leak Elimination  :done, 2026-09, 2026-10
-    3D Flashcard Physics & Fluent 2 Polish  :active, 2026-10, 2026-11
-    CI/CD DevSecOps & Skill Automation      :active, 2026-10, 2026-12
+    3D Flashcard Physics & Fluent 2 Polish  :done, 2026-10, 2026-10
+    CI/CD DevSecOps & Skill Automation      :done, 2026-10, 2026-10
+    Learning Intelligence, Lab & Storage     :done, 2026-10, 2026-10
     section Phase 3: Autonomous Mesh & Cloud
     Encrypted Cloud Sync (WebDAV / P2P)      :2027-01, 2027-04
     Offline On-Device AI Assessment (SLM)    :2027-04, 2027-07
@@ -36,23 +37,24 @@ gantt
 - [x] **Quality Gate Benchmark**: Đạt **343/343 Automated Tests** (292 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
 - [x] **Bilingual Localization (i18n)**: Hỗ trợ chuyển đổi tức thời giữa Tiếng Việt (`vi-VN`) và English (`en-US`) qua `ILocalizationService`.
 
-### 🟡 Phase 2: Production Hardening, Advanced UX & Learning Intelligence Suite (Đang hoàn thiện)
+### 🟢 Phase 2: Production Hardening, Advanced UX & Learning Intelligence Suite (Hoàn thành)
 - [x] **Free Spaced Repetition Scheduler (FSRS v5)**:
   - Cài đặt `IFsrsSpacedRepetitionEngine` mô hình hóa độ nhớ qua 3 tham số $S$ (Stability), $D$ (Difficulty), $R$ (Retrievability).
   - Khả năng tương thích ngược hoàn toàn với dữ liệu SM-2 lịch sử.
 - [x] **Critical Resilience & RAM Optimization**:
-  - Triệt tiêu Memory Leak từ anonymous lambda event handlers trên toàn bộ các View.
+  - Triệt tiêu Memory Leak từ anonymous lambda event handlers trên toàn bộ các View qua `ILocalizableView` & `IThemeAwareView`.
   - Tối ưu `SearchDiacriticFallbackAsync`: Chuyển từ full-table load sang server-side projection, giảm 85% bộ nhớ RAM tiêu thụ khi tìm kiếm từ vựng tiếng Việt có dấu.
+  - Tối ưu truy vấn `GetByTermAsync` với `.AsSplitQuery()` loại bỏ Cartesian explosion và tự động dọn ChangeTracker trong UnitOfWork.
 - [x] **Flashcard 3D Spatial Physics**:
   - Trải nghiệm lật thẻ 3D (`PlaneProjection`) với góc lật mượt mà 300ms inflection point tại 90°.
 - [x] **Responsive Layout Adaptability**:
-  - Tự động chuyển đổi layout Review từ 2 cột sang 1 cột xếp chồng khi màn hình dưới 880px, chống clipping nút bấm.
+  - Tự động chuyển đổi layout Review từ 2 cột sang 1 cột xếp chồng khi màn hình dưới 880px, tối ưu toolbar và dialogs cho màn hình nhỏ (< 960px).
 - [x] **Learning Intelligence Dashboard & Cognitive Memory Analytics**:
   - Phân tích độ nhớ Ebbinghaus ($R = e^{-t/S}$), cảnh báo từ vựng có nguy cơ quên lãng (At-Risk), dự báo tải nhận thức 7 ngày và biểu đồ retention theo khung giờ sinh học.
 - [x] **Smart Review Presets**:
   - Bộ lọc hàng đợi thích ứng: High-Yield, Từ vựng sắp quên ($R < 70\%$), Trình độ CEFR yếu nhất và Cram Mode trước kỳ thi.
 - [x] **Adaptive Quiz CAT Engine (Computerized Adaptive Testing)**:
-  - Tự động điều chỉnh độ khó câu hỏi (A1–C2) theo thời gian thực dựa trên điểm accuracy tích lũy, tính điểm năng lực CEFR động.
+  - Tự động điều chỉnh độ khó câu hỏi (A1–C2) theo thời gian thực dựa trên điểm accuracy tích lũy, tính điểm năng lực CEFR động, lưu vết phiên test chống mất mát.
 - [x] **Study Planner & Daily Curriculum Manager**:
   - Checklist mục tiêu học tập hàng ngày (Từ mới, ôn tập, quiz, ngữ pháp), theo dõi tiến độ tuần và bảo vệ streak học tập.
 - [x] **Vocabulary Knowledge Graph**:
@@ -60,11 +62,15 @@ gantt
 - [x] **Data Health Center & Self-Healing Maintenance**:
   - Chẩn đoán SQLite PRAGMA integrity, dọn dẹp orphan records, tối ưu hóa WAL checkpointing, VACUUM và quản lý bộ nhớ đệm âm thanh.
 - [x] **Pronunciation & Listening Lab**:
-  - Luyện nghe chính tả (Audio Dictation) với chấm điểm Levenshtein distance, luyện phân biệt cặp âm tối thiểu (Minimal Pairs) và so sánh ngữ điệu Anh - Mỹ (UK vs US Accents).
+  - Luyện nghe chính tả (Audio Dictation) với chấm điểm Levenshtein distance, luyện phân biệt cặp âm tối thiểu (Minimal Pairs) và so sánh ngữ điệu Anh - Mỹ (UK vs US Accents) kèm launcher hero trên Dashboard.
+- [x] **Learning Storage Vault (`LearningStoragePage`)**:
+  - Kho lưu trữ chuyên biệt cho từ vựng và ngữ pháp trọng tâm theo lý do thêm, trạng thái ghi nhớ và chu kỳ ôn tập riêng biệt.
+- [x] **Production Software Update System**:
+  - Tự động kiểm tra bản cập nhật qua GitHub Releases, snapshot SQLite bảo vệ dữ liệu và bàn giao silent installer Inno Setup.
 - [x] **Quality Gate Benchmark**:
-  - Nâng cấp bộ kiểm thử lên **378 / 378 Automated Tests** (327 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
-- [ ] **Automated CI/CD Quality Gates**:
-  - Thiết lập GitHub Actions tự động kiểm thử định dạng CHANGELOG và chạy Skill Smoke Tests.
+  - Nâng cấp bộ kiểm thử lên **390 / 390 Automated Tests** (339 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
+- [x] **Automated CI/CD Quality Gates & DevSecOps Skills**:
+  - Thiết lập GitHub Actions workflow (`changelog-enforcer.yml`, `agent-quality-gate.yml`) cùng bộ 8 agent skills chuẩn hóa.
 
 ### 🔵 Phase 3: Autonomous Mesh, Cloud & AI Extensions (Kế hoạch tương lai)
 - [ ] **End-to-End Encrypted Sync**: Đồng bộ hóa dữ liệu học qua WebDAV / Nextcloud hoặc giao thức P2P an toàn.

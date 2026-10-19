@@ -101,9 +101,18 @@
 - **WinUI 3 ContentDialog Chained Teardown Safety**:
   - Hardened `SafeDialogExtensions.ShowAsyncSafe` by awaiting `Task.Yield()` immediately upon dialog dismissal before releasing `_dialogSemaphore`.
   - Guarantees that the WinUI 3 visual tree completes popup teardown prior to unblocking queued or chained dialogs, preventing WinUI 3 re-entrant `InvalidOperationException`.
+- **Vocabulary Query & EF Core Memory Optimization**:
+  - Applied `.AsSplitQuery()` to `GetByTermAsync` in `VocabularyRepository` to eliminate Cartesian explosion across multiple related child collections.
+  - Added automatic ChangeTracker clearance on `UnitOfWork.SaveChangesAsync()` to prevent entity graph retention and long-session RAM accumulation.
+- **Media & UI Lifecycle Hardening**:
+  - Tracked and safely released native COM `MediaSource` and `IRandomAccessStream` resources in `WindowsAudioPlayerService.StopInternal()`.
+  - Enforced minimum display duration (850ms) for `SplashScreenOverlay` regardless of OS animation settings, ensuring smooth opacity fallbacks.
+  - Added direct quick-action hero launcher for `ListeningLabDialog` on `DashboardPage`.
+  - Integrated local JSON persistence and recovery for active test sessions in `TestService`.
 - **Quality Gates Benchmark**:
   - Clean build: **0 Warnings, 0 Errors** (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`).
   - Automated test suite: **390 / 390 Tests Passing** (339 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
   - Clean Architecture boundary: **0 Violations**.
   - WinUI 3 Fluent 2 audit: **0 Violations**.
+
 

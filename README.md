@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/Architecture-Clean%20Architecture-107C41?style=flat-square" alt="Clean Architecture" />
   <img src="https://img.shields.io/badge/Database-SQLite%20WAL%20%2F%20EF%20Core%2010-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
   <img src="https://img.shields.io/badge/Version-1.2.2-0078D4?style=flat-square" alt="Version" />
-  <img src="https://img.shields.io/badge/Tests-395%2F395%20Passed-2EA44F?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-390%2F390%20Passed-2EA44F?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/Installer-Inno%20Setup%206-FF8C00?style=flat-square" alt="Inno Setup" />
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
 </p>
@@ -48,25 +48,28 @@
 
 ## ✨ Overview & Core Capabilities
 
-**Lexora** is an enterprise-grade, offline-first personal English learning platform engineered specifically for Windows desktop environments. Combining cognitive science (the Ebbinghaus forgetting curve & Piotr Woźniak's SuperMemo SM-2 algorithm) with Windows 11 Fluent Design, Lexora empowers learners to master English vocabulary and grammar with measurable, long-term retention.
+**Lexora** is an enterprise-grade, offline-first personal English learning platform engineered specifically for Windows desktop environments. Combining cognitive science (the Ebbinghaus forgetting curve, Piotr Woźniak's SuperMemo SM-2 algorithm, and FSRS v5) with Windows 11 Fluent Design, Lexora empowers learners to master English vocabulary and grammar with measurable, long-term retention.
 
 ### 🌟 Feature Matrix
 
 | Module | Feature | Technical Highlights |
 | :--- | :--- | :--- |
-| 🧠 **SRS Engine** | **SuperMemo SM-2 Spaced Repetition** | Mathematically bounded Ease Factor ($EF \ge 1.3$), automatic review queue scheduling, lapse management, and daily streak tracking. |
+| 🧠 **SRS Engine** | **Dual SM-2 & FSRS v5 Repetition** | Mathematically bounded Ease Factor ($EF \ge 1.3$), FSRS 3D memory modeling ($S, D, R$), automatic review queues, and daily streak tracking. |
 | 📚 **Vocabulary** | **Rich Multi-Meaning Dictionary** | Comprehensive word entries with CEFR levels (A1–C2), POS categorization, UK/US IPA phonetics, contextual examples, and exam tags (TOEIC, VSTEP, IELTS). |
+| 🎙️ **Listening Lab** | **Pronunciation & Listening Lab** | Audio Dictation with Levenshtein scoring, Minimal Pairs phoneme ear-training, articulatory mouth-position guides, and UK vs US accent comparison. |
+| 📦 **Learning Storage** | **Targeted Storage Vault** | Specialized repository (`LearningStoragePage`) for targeted vocabulary and grammar items with custom addition reasons and learning statuses. |
 | 🔊 **Audio** | **Native Pronunciation Caching** | Offline-cached English audio with automatic local storage fallback, thread-safe background playback, and input path traversal sanitization. |
 | 📝 **Practice** | **Interactive 4-Mode Quiz Simulator** | 4 customizable modes: *Word-to-Meaning*, *Meaning-to-Word*, *Fill-in-the-Blank*, and *Multiple Choice* with authentic POS-matched distractors. |
 | 💡 **Learning Intelligence** | **Cognitive Memory & At-Risk Analytics** | Ebbinghaus Retrievability modeling ($R = e^{-t/S}$), at-risk vocabulary detector, 7-day cognitive load forecast, and circadian retention analysis. |
 | ⚡ **Smart Review** | **High-Yield Adaptive Review Presets** | Instant queue filters for High-Yield items, Stale Memory ($R < 70\%$), Weakest CEFR Tiers, and Cram Sessions with real-time memory stability metrics. |
-| 🎯 **Adaptive Testing** | **Computerized Adaptive Testing (CAT)** | Real-time question difficulty recalibration dynamically adjusting to user accuracy, dynamic CEFR scoring, and detailed post-test diagnostic breakdown. |
+| 🎯 **Adaptive Testing** | **Computerized Adaptive Testing (CAT)** | Real-time question difficulty recalibration dynamically adjusting to user accuracy, dynamic CEFR scoring, and session crash recovery. |
 | 📅 **Study Planner** | **Daily Curriculum & Pacing Manager** | Interactive daily task checklist (new words, reviews, quizzes, grammar), target pacing indicators, streak protection, and offline JSON persistence. |
 | 🕸️ **Knowledge Graph** | **Interactive Semantic Vocabulary Network** | Semantic graph traversal across Synonyms, Antonyms, Topics, and CEFR tiers with dynamic node pivoting, instant preview flyout, and native audio. |
 | 🩺 **Data Health Center** | **SQLite Diagnostics & Self-Healing** | PRAGMA integrity check, WAL/SHM maintenance, orphan record cleanup, database vacuuming, and pronunciation audio cache management. |
 | 📐 **Grammar** | **Structured Grammar Engine** | Structural formula highlighting, in-depth bilingual explanations (Vietnamese & English), and prominent *Common Mistakes* guidance. |
 | 📊 **Analytics** | **Dashboard & Activity Heatmap** | GitHub-style 365-day review activity heatmap, streak counters, CEFR level distribution charts, and exam certification readiness meters. |
-| 🔄 **Data** | **Robust Import / Export & Backup** | High-throughput RFC-4180 multiline CSV and JSON exchange, 20MB payload ceiling, and 16-byte header verified database backup/restore. |
+| 🔄 **Data & Sync** | **Robust Import / Export & Backup** | High-throughput RFC-4180 multiline CSV and JSON exchange, 20MB payload ceiling, and 16-byte header verified database backup/restore. |
+| 🚀 **Updates** | **Production Software Updates** | Automatic background check via GitHub Releases API, pre-update SQLite safety snapshots, and Inno Setup silent install handoff. |
 | 🎨 **Design** | **Windows 11 Fluent Design** | Modern Mica backdrop, adaptive Light/Dark theme switching, responsive layouts, 250ms debounced search, and zero UI thread stalls. |
 
 ---
@@ -171,7 +174,7 @@ cd Lexora
 # 2. Build entire solution (must finish with 0 errors and 0 warnings)
 dotnet build Lexora.slnx
 
-# 3. Run all unit and integration tests (64 tests)
+# 3. Run all unit and integration tests (390 tests)
 dotnet test Lexora.slnx
 ```
 
@@ -214,8 +217,8 @@ Lexora/
 │   ├── architecture.md             # Clean Architecture & data flow diagrams
 │   ├── api_and_services.md         # Application services & DTO API reference
 │   ├── database_schema.md          # SQLite schema, ERD, indexes & cascades
-│   ├── spaced_repetition.md        # SM-2 mathematical model & worked proofs
-│   ├── testing_and_qa.md           # 64-test taxonomy & QA checklists
+│   ├── spaced_repetition.md        # SM-2 & FSRS v5 mathematical models & worked proofs
+│   ├── testing_and_qa.md           # 390-test taxonomy & QA checklists
 │   ├── installer_and_distribution.md # Packaging & Inno Setup specification
 │   └── contributing.md             # Contribution guide & Git workflow
 ├── .agents/                        # AI Agent Workspaces, Personas, Rules & Skills
@@ -229,12 +232,12 @@ Lexora/
 ├── publish/                        # Generated build artifacts & installers
 ├── src/
 │   ├── Lexora.Domain/              # Pure business entities, enums, repository contracts
-│   ├── Lexora.Application/         # SM-2 engine, service implementations, DTOs
-│   ├── Lexora.Infrastructure/      # EF Core 10, SQLite, caching, backup engines
+│   ├── Lexora.Application/         # SM-2 & FSRS v5 engine, service implementations, DTOs
+│   ├── Lexora.Infrastructure/      # EF Core 10, SQLite, caching, backup & update engines
 │   └── Lexora.Presentation/        # WinUI 3 Fluent UI, MVVM ViewModels, Pages, Dialogs
 ├── tests/
-│   ├── Lexora.Tests.Unit/          # 40 Unit tests (SM-2 math, security, business rules)
-│   └── Lexora.Tests.Integration/   # 24 Integration tests (EF Core SQLite in-memory)
+│   ├── Lexora.Tests.Unit/          # 339 Unit tests (SM-2, FSRS, Listening Lab, CAT, DTOs, Services)
+│   └── Lexora.Tests.Integration/   # 51 Integration tests (EF Core SQLite in-memory, Repositories)
 ├── AGENTS.md                       # Developer & AI Agent development guidelines
 ├── PROGRESS.md                     # Comprehensive phase completion tracking
 ├── build-installer.ps1             # Automated packaging & installer script

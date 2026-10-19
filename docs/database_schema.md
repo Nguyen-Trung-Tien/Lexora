@@ -34,6 +34,8 @@ erDiagram
     ReviewCards ||--o{ StudyLogs : "1:N (Cascade Delete)"
     StudySessions ||--o{ StudyLogs : "1:N (SetNull/Cascade)"
     GrammarRules ||--o{ GrammarExamples : "1:N (Cascade Delete)"
+    Words ||--o{ LearningStorageItems : "targets"
+    GrammarRules ||--o{ LearningStorageItems : "targets"
     UserStreaks
 ```
 
@@ -137,6 +139,31 @@ erDiagram
 
 - Single-row table tracking learner habit consistency:
   - `Id` (PK), `CurrentStreak` (Days), `LongestStreak` (Days), `LastActiveDate` (Date), `TotalReviewsCompleted`.
+
+---
+
+### 3.8. `LearningStorageItems` (Targeted Storage Vault)
+
+Dedicated repository holding words or grammar rules marked for focused review or remedial study.
+
+| Column | Type | Nullable | Constraints | Description |
+| :--- | :--- | :---: | :--- | :--- |
+| `Id` | `TEXT` (Guid) | No | **PK** | Unique identifier (UUIDv4) |
+| `ItemType` | `INTEGER` | No | | `0 = Word`, `1 = GrammarRule` |
+| `WordId` | `TEXT` (Guid) | Yes | **FK** -> `Words.Id` (SetNull) | Associated vocabulary word |
+| `GrammarRuleId` | `TEXT` (Guid) | Yes | **FK** -> `GrammarRules.Id` (SetNull) | Associated grammar rule |
+| `Status` | `INTEGER` | No | | `0=Learning`, `1=Reviewing`, `2=Mastered` |
+| `ReasonAdded` | `INTEGER` | No | | `0=Manual`, `1=FailedQuiz`, `2=LowRetention`, `3=HighYield` |
+| `Note` | `TEXT` | Yes | | Learner personal mnemonic or note |
+| `IncorrectCount` | `INTEGER` | No | Default `0` | Number of incorrect recalls |
+| `CorrectCount` | `INTEGER` | No | Default `0` | Number of correct recalls |
+| `EaseFactor` | `REAL` | No | Default `2.5` | Storage item difficulty multiplier |
+| `IntervalDays` | `INTEGER` | No | Default `1` | Interval days scheduled |
+| `Repetitions` | `INTEGER` | No | Default `0` | Repetition count |
+| `Lapses` | `INTEGER` | No | Default `0` | Forgetting lapses count |
+| `RetentionProbability` | `REAL` | No | Default `50.0` | Modeled retrievability percentage |
+| `NextReviewAt` | `TEXT` (ISO8601)| No | Indexed | Scheduled review timestamp |
+| `LastReviewedAt`| `TEXT` (ISO8601)| Yes | | Last review timestamp |
 
 ---
 

@@ -8,18 +8,27 @@ This document provides a comprehensive technical reference for the core service 
 
 ```text
 Lexora.Application
-├── IVocabularyService       # Vocabulary lifecycle, multi-meaning management, filtering
-├── IReviewService          # Spaced repetition queue retrieval, grading, streak orchestration
-├── ISpacedRepetitionEngine  # Pure SM-2 mathematical model calculations
-├── ITestService            # Practice quiz generation, question scoring, session maintenance
-├── IGrammarService         # Grammar rule catalog, formula lookups, rule practice
-├── IStatisticsService      # Retention analytics, streak queries, CEFR & exam readiness
-└── IExportImportService    # RFC-4180 CSV & JSON serialization, validation, deduplication
+├── IVocabularyService               # Vocabulary lifecycle, multi-meaning management, filtering
+├── IReviewService                  # Spaced repetition queue retrieval, grading, streak orchestration
+├── ISpacedRepetitionEngine          # Pure SM-2 mathematical model calculations
+├── IFsrsSpacedRepetitionEngine      # FSRS v5 3D memory model (Stability, Difficulty, Retrievability)
+├── IPronunciationListeningLabService # Dictation grading, minimal pairs ear training, UK/US accents
+├── IVocabularyKnowledgeGraphService # Semantic relationship network & node pivoting
+├── IAdaptiveQuizService             # Computerized Adaptive Testing (CAT) dynamic CEFR recalibration
+├── IStudyPlannerService             # Daily curriculum generation, pacing indicators, streak protection
+├── ILearningStorageService          # Targeted vault for marked words and grammar rules
+├── ITestService                    # Practice quiz generation, question scoring, session maintenance
+├── IGrammarService                 # Grammar rule catalog, formula lookups, rule practice
+├── IStatisticsService              # Retention analytics, streak queries, CEFR & exam readiness
+├── ISmartSearchService             # Intelligent cached & fuzzy multi-field search engine
+└── IExportImportService            # RFC-4180 CSV & JSON serialization, validation, deduplication
 
 Lexora.Infrastructure
-├── IDatabaseBackupService  # Snapshot creation, SQLite header verification, recovery
-├── ILocalAudioStorageService # Local audio file caching, filename traversal sanitization
-└── IUnitOfWork             # Atomic single-commit database transaction boundary
+├── IDatabaseBackupService          # Snapshot creation, SQLite header verification, recovery
+├── IDataHealthService              # SQLite PRAGMA integrity, vacuuming, WAL maintenance, audio cache
+├── IUpdateService                  # GitHub Releases update check, hash verification, silent installer
+├── ILocalAudioStorageService       # Local audio file caching, filename traversal sanitization
+└── IUnitOfWork                     # Atomic single-commit database transaction boundary
 ```
 
 ---
@@ -190,3 +199,61 @@ public interface ILocalAudioStorageService
 
 - `RestoreBackupAsync`: Checks the 16-byte SQLite magic header, clears connection pools, removes `-wal` and `-shm` companion files, and swaps the file safely.
 - `StoreAudioAsync`: Sanitizes the file name with regex whitelisting and validates directory canonical boundaries before writing.
+
+---
+
+## 8. `IPronunciationListeningLabService`
+
+Namespace: `Lexora.Application.Interfaces`
+
+Provides comprehensive listening, dictation, and phoneme discrimination drills:
+
+```csharp
+public interface IPronunciationListeningLabService
+{
+    Task<DictationResultDto> GradeDictationAsync(string expectedText, string submittedText, CancellationToken ct = default);
+    Task<IReadOnlyList<MinimalPairExerciseDto>> GetMinimalPairExercisesAsync(CancellationToken ct = default);
+    Task<AccentComparisonDto> GetAccentComparisonAsync(string wordOrPhrase, CancellationToken ct = default);
+}
+```
+
+- Calculates Levenshtein edit distance and similarity percentage for audio dictation drills.
+- Provides articulatory mouth-position guidance for minimal pair phoneme discrimination.
+- Resolves UK and US audio streams for side-by-side accent comparison.
+
+---
+
+## 9. `IVocabularyKnowledgeGraphService`
+
+Namespace: `Lexora.Application.Interfaces`
+
+Extracts and models semantic networks across vocabulary items:
+
+```csharp
+public interface IVocabularyKnowledgeGraphService
+{
+    Task<KnowledgeGraphDto> BuildGraphAsync(Guid rootWordId, int maxDepth = 2, CancellationToken ct = default);
+    Task<IReadOnlyList<WordNodeDto>> FindRelatedWordsAsync(string term, CancellationToken ct = default);
+}
+```
+
+- Traverses relationships across synonyms, antonyms, shared topics, and CEFR tiers.
+- Powers dynamic node pivoting and interactive preview cards in `KnowledgeGraphDialog`.
+
+---
+
+## 10. `IAdaptiveQuizService` & `IStudyPlannerService`
+
+Namespace: `Lexora.Application.Interfaces`
+
+- **`IAdaptiveQuizService`**: Computerized Adaptive Testing (CAT) dynamic CEFR recalibration (+1 level on consecutive correct answers, -1 level on errors), generating POS-matched distractors and post-quiz level estimation.
+- **`IStudyPlannerService`**: Generates daily curricula (due cards, new words, quizzes, grammar rules), tracks pacing against weekly goals, and manages streak preservation.
+
+---
+
+## 11. `ILearningStorageService` & `IDataHealthService`
+
+Namespace: `Lexora.Application.Interfaces` & `Lexora.Infrastructure.Services`
+
+- **`ILearningStorageService`**: Dedicated CRUD and status transition manager for `LearningStorageItem` entries.
+- **`IDataHealthService`**: Executes SQLite `PRAGMA integrity_check`, WAL checkpointing, database vacuuming, orphan record purging, and audio cache analysis.
