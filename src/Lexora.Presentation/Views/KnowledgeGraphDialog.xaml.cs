@@ -42,7 +42,7 @@ public sealed partial class KnowledgeGraphDialog : ContentDialog, INotifyPropert
         }
     }
 
-    public string AllTabText => $"{Loc.GetString("KnowledgeGraph_AllTab")} ({Graph.ConnectedNodes.Count})";
+    public string AllTabText => string.Format(Loc.GetString("KnowledgeGraph_AllTab"), Graph.ConnectedNodes.Count);
 
     public ObservableCollection<GraphNodeDto> FilteredNodes { get; } = [];
 

@@ -928,6 +928,8 @@ public class LocalizationService : ILocalizationService
             // Newly Added Dashboard
             ["Dashboard_HeroBadge"] = "SPACED REPETITION (SM-2)",
             ["Dashboard_DailyConsistency"] = "Thói quen hàng ngày",
+            ["Dashboard_StudyPlannerAction"] = "Lộ trình học",
+            ["Dashboard_ListeningLabAction"] = "Luyện nghe",
             ["Dashboard_Subtitle"] = "Chinh phục từ vựng tiếng Anh khoa học với phương pháp lặp lại ngắt quãng, truy xuất chủ động và theo dõi kỳ thi.",
             ["Dashboard_StatActive"] = "Đang học",
             ["Dashboard_StatUrgent"] = "Cần ôn",
@@ -2310,6 +2312,8 @@ public class LocalizationService : ILocalizationService
             // Newly Added Dashboard
             ["Dashboard_HeroBadge"] = "SPACED REPETITION (SM-2)",
             ["Dashboard_DailyConsistency"] = "Daily Consistency",
+            ["Dashboard_StudyPlannerAction"] = "Study Planner",
+            ["Dashboard_ListeningLabAction"] = "Listening Lab",
             ["Dashboard_Subtitle"] = "Master English vocabulary scientifically with active recall drills, spaced repetition, and exam readiness tracking.",
             ["Dashboard_StatActive"] = "Active",
             ["Dashboard_StatUrgent"] = "Urgent",

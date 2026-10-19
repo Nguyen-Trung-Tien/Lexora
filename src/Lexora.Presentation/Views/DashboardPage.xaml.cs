@@ -31,7 +31,7 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
     private void UpdateResponsiveHero(double width)
     {
         if (HeroGrid == null || HeroActionsPanel == null) return;
-        if (width < 1050)
+        if (width < 1250)
         {
             Grid.SetColumn(HeroActionsPanel, 0);
             Grid.SetRow(HeroActionsPanel, 1);
