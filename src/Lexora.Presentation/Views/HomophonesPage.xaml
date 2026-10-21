@@ -131,10 +131,10 @@
                                   CornerRadius="8"
                                   Margin="0,0,4,0"
                                   SelectionChanged="TypeFilterBox_SelectionChanged">
-                            <ComboBoxItem Content="Tất cả loại" Tag="All" IsSelected="True" />
-                            <ComboBoxItem Content="Đồng âm (Exact)" Tag="ExactHomophone" />
-                            <ComboBoxItem Content="Gần đồng âm (Near)" Tag="NearHomophone" />
-                            <ComboBoxItem Content="Cặp tối thiểu (Pair)" Tag="MinimalPair" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_FilterAllTypes')}" Tag="All" IsSelected="True" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypeExact')}" Tag="ExactHomophone" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypeNear')}" Tag="NearHomophone" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypePair')}" Tag="MinimalPair" />
                         </ComboBox>
 
                         <ComboBox x:Name="LevelFilterBox"
@@ -143,7 +143,7 @@
                                   CornerRadius="8"
                                   Margin="4,0,0,0"
                                   SelectionChanged="LevelFilterBox_SelectionChanged">
-                            <ComboBoxItem Content="Mọi cấp độ" Tag="All" IsSelected="True" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_FilterAllLevels')}" Tag="All" IsSelected="True" />
                             <ComboBoxItem Content="A1 - A2" Tag="A1" />
                             <ComboBoxItem Content="B1 - B2" Tag="B1" />
                             <ComboBoxItem Content="C1 - C2" Tag="C1" />
@@ -247,7 +247,7 @@
                                 Visibility="Collapsed"
                                 Padding="24">
                         <FontIcon Glyph="&#xE774;" FontSize="32" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
-                        <TextBlock Text="Không tìm thấy nhóm từ phù hợp" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Homophones_EmptyList')}" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -296,14 +296,14 @@
                                         CornerRadius="8" Padding="12,6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE70F;" FontSize="12" />
-                                        <TextBlock Text="Chỉnh sửa" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Action_Edit')}" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Button>
                                 <Button x:Name="BtnDeleteGroup" Click="BtnDeleteGroup_Click"
                                         CornerRadius="8" Padding="12,6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                        <TextBlock Text="Xóa" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -326,7 +326,7 @@
                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Grid.Column="1" Spacing="2">
-                                <TextBlock Text="Mẹo phân biệt &amp; Ngữ cảnh sử dụng" FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Homophones_TipTitle')}" FontWeight="SemiBold" FontSize="13" />
                                 <TextBlock x:Name="TextDifferentiationTip"
                                            Text="'Bare' là tính từ nghĩa là trần trụi..."
                                            TextWrapping="Wrap" FontSize="12"
@@ -336,7 +336,7 @@
                     </Border>
 
                     <!-- Side-by-Side Comparison Workspace -->
-                    <TextBlock Text="Đối chiếu các từ thành phần" FontWeight="Bold" FontSize="16" />
+                    <TextBlock Text="{x:Bind Loc.GetString('Homophones_ComparisonTitle')}" FontWeight="Bold" FontSize="16" />
 
                     <!-- Grid of 2 comparison cards -->
                     <Grid x:Name="ComparisonCardsGrid" ColumnDefinitions="*,*" ColumnSpacing="16">
@@ -384,12 +384,12 @@
                                 </Grid>
 
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="Nghĩa tiếng Việt" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Homophones_VietnameseMeaning')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
                                     <TextBlock x:Name="Word1MeaningVi" Text="trần trụi, trống không" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
                                 </StackPanel>
 
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="Câu ví dụ trong ngữ cảnh" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Homophones_ContextualExample')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="12,8">
                                         <StackPanel Spacing="4">
                                             <TextBlock x:Name="Word1Example" Text="He walked on the floor with bare feet." FontStyle="Italic" TextWrapping="Wrap" FontSize="13" />
@@ -444,12 +444,12 @@
                                 </Grid>
 
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="Nghĩa tiếng Việt" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Homophones_VietnameseMeaning')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
                                     <TextBlock x:Name="Word2MeaningVi" Text="chịu đựng" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
                                 </StackPanel>
 
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="Câu ví dụ trong ngữ cảnh" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Homophones_ContextualExample')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="12,8">
                                         <StackPanel Spacing="4">
                                             <TextBlock x:Name="Word2Example" Text="I can hardly bear the continuous noise." FontStyle="Italic" TextWrapping="Wrap" FontSize="13" />

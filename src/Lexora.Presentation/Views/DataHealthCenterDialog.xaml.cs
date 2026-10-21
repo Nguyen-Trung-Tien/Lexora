@@ -130,14 +130,14 @@ public sealed partial class DataHealthCenterDialog : ContentDialog, INotifyPrope
     private async Task RunDiagnosticsInternalAsync()
     {
         IsBusy = true;
-        StatusMessage = "Analyzing SQLite schema and records...";
+        StatusMessage = Loc.GetString("DataHealth_StatusAnalyzing");
         HasResultFeedback = false;
 
         try
         {
             Report = await _healthService.RunDiagnosticsAsync();
             FeedbackTitle = Loc.GetString("Toast_SuccessTitle");
-            FeedbackMessage = $"Diagnostics complete. Health score: {Report.HealthScore}/100 ({HealthRatingDescription}).";
+            FeedbackMessage = string.Format(Loc.GetString("DataHealth_DiagnosticsComplete"), Report.HealthScore, HealthRatingDescription);
             FeedbackSeverity = Report.HasIssues ? InfoBarSeverity.Warning : InfoBarSeverity.Success;
             HasResultFeedback = true;
         }
@@ -157,7 +157,7 @@ public sealed partial class DataHealthCenterDialog : ContentDialog, INotifyPrope
     private async void RepairAndOptimize_Click(object sender, RoutedEventArgs e)
     {
         IsBusy = true;
-        StatusMessage = "Optimizing, cleaning orphans and executing SQLite VACUUM...";
+        StatusMessage = Loc.GetString("DataHealth_StatusOptimizing");
         HasResultFeedback = false;
 
         try
@@ -187,7 +187,7 @@ public sealed partial class DataHealthCenterDialog : ContentDialog, INotifyPrope
     private async void ClearAudioCache_Click(object sender, RoutedEventArgs e)
     {
         IsBusy = true;
-        StatusMessage = "Clearing cached audio files...";
+        StatusMessage = Loc.GetString("DataHealth_StatusClearingAudio");
         HasResultFeedback = false;
 
         try

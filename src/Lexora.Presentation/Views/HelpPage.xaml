@@ -33,7 +33,7 @@
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="8,3">
                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                         <FontIcon Glyph="&#xE753;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                        <TextBlock Text="Offline-First &amp; SM-2/FSRS" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Help_OfflineBadge')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -203,7 +203,7 @@
                                         <StackPanel Spacing="6">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon Glyph="&#xE946;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                <TextBlock Text="Algorithm Formula / Chi tiết giải thuật:" FontWeight="Bold" FontSize="12" />
+                                                <TextBlock Text="{x:Bind FormulaHeader}" FontWeight="Bold" FontSize="12" />
                                             </StackPanel>
                                             <TextBlock Text="{x:Bind Formula}" FontFamily="Consolas, Cascadia Code, Segoe UI Variable"
                                                        FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
@@ -212,7 +212,7 @@
 
                                     <!-- Key Tips / Bullet Points -->
                                     <StackPanel Spacing="6" Visibility="{x:Bind TipsList, Converter={StaticResource NullToVisibilityConverter}}">
-                                        <TextBlock Text="Các điểm cốt lõi cần nhớ / Key Takeaways:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind KeyPointsHeader}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         <ItemsControl ItemsSource="{x:Bind TipsList}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="x:String">
@@ -227,7 +227,7 @@
 
                                     <!-- Keyboard Shortcuts Reference -->
                                     <StackPanel Spacing="6" Visibility="{x:Bind ShortcutKeys, Converter={StaticResource NullToVisibilityConverter}}">
-                                        <TextBlock Text="Phím tắt thao tác nhanh / Quick Shortcuts:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind ShortcutsHeader}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         <ItemsControl ItemsSource="{x:Bind ShortcutKeys}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="x:String">

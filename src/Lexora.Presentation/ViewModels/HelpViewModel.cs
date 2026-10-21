@@ -19,7 +19,10 @@ public sealed record HelpGuideDisplayItem(
     string? ActionLabel,
     string? Badge,
     IReadOnlyList<string> TipsList,
-    IReadOnlyList<string> ShortcutKeys);
+    IReadOnlyList<string> ShortcutKeys,
+    string FormulaHeader = "",
+    string KeyPointsHeader = "",
+    string ShortcutsHeader = "");
 
 internal sealed record HelpGuideDefinition(
     string Id,
@@ -233,7 +236,10 @@ public partial class HelpViewModel : ObservableObject
                 ActionLabel: def.ActionLabelKey != null ? _localizationService.GetString(def.ActionLabelKey) : null,
                 Badge: def.BadgeKey != null ? _localizationService.GetString(def.BadgeKey) : null,
                 TipsList: tips,
-                ShortcutKeys: def.ShortcutKeys
+                ShortcutKeys: def.ShortcutKeys,
+                FormulaHeader: _localizationService.GetString("Help_AlgorithmFormulaTitle"),
+                KeyPointsHeader: _localizationService.GetString("Help_KeyPointsTitle"),
+                ShortcutsHeader: _localizationService.GetString("Help_ShortcutsTitle")
             );
             _allDisplayItems.Add(item);
         }
