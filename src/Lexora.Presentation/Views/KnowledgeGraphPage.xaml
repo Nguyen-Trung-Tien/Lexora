@@ -329,10 +329,10 @@
 
                             <!-- Middle row: Term, IPA, Meaning -->
                             <StackPanel Grid.Row="1" Spacing="4">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Term, Mode=OneWay}" FontSize="28" FontWeight="Bold" TextWrapping="Wrap" />
-                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Ipa, Mode=OneWay}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="15" VerticalAlignment="Center" />
-                                </Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Term, Mode=OneWay}" FontSize="28" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Ipa, Mode=OneWay}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="15" VerticalAlignment="Center" />
+                                </StackPanel>
                                 <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningVi, Mode=OneWay}" FontSize="15" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
                                 <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningEn, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" FontStyle="Italic"
                                            Visibility="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningEn, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" />

@@ -4,4 +4,4 @@
 - [Homophone Form Proportions]: Allocated a dedicated column width (135px) for `Word1PosBox` and `Word2PosBox` in [HomophoneEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophoneEditorDialog.xaml), avoiding item clipping on long localized part-of-speech labels.
 
 ### Fixed
-- [Text & Title Overflow]: Resolved layout clipping and text overflow by replacing rigid horizontal containers with flexible grids and multi-line wrapping in [HomophonesPage.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophonesPage.xaml), [KnowledgeGraphPage.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/KnowledgeGraphPage.xaml), and all ContentDialog title templates.
+- [Text & Title Overflow]: Resolved layout clipping, text overflow, and aligned phonetic IPA badges directly adjacent to group titles in [HomophonesPage.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophonesPage.xaml) and [KnowledgeGraphPage.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/KnowledgeGraphPage.xaml).

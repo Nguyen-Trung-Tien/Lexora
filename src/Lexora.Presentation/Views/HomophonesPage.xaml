@@ -262,9 +262,9 @@
                             Padding="20,16">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="8" VerticalAlignment="Center">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
-                                    <TextBlock x:Name="DetailGroupTitle" Text="bare / bear" FontWeight="Bold" FontSize="22" TextWrapping="Wrap" />
-                                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                    <TextBlock x:Name="DetailGroupTitle" Text="bare / bear" FontWeight="Bold" FontSize="22" TextTrimming="CharacterEllipsis" />
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="6"
@@ -274,7 +274,7 @@
                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                    FontFamily="Consolas, Segoe UI" />
                                     </Border>
-                                </Grid>
+                                </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Border x:Name="BadgeType" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
