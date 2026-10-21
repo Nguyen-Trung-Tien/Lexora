@@ -354,16 +354,33 @@
                                         <TextBlock x:Name="Word1Pos" Text="Adjective" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </StackPanel>
 
-                                    <!-- Modern Circular Listen Button -->
-                                    <Button x:Name="BtnListenWord1" Grid.Column="1" Click="BtnListenWord1_Click"
-                                            Width="38" Height="38" Padding="0" CornerRadius="19"
-                                            VerticalAlignment="Center"
-                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1"
-                                            ToolTipService.ToolTip="Nghe phát âm chuẩn">
-                                        <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    </Button>
+                                    <!-- Action Buttons: Listen, View in Vocab, Save to Storage -->
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <Button x:Name="BtnListenWord1" Click="BtnListenWord1_Click"
+                                                Width="36" Height="36" Padding="0" CornerRadius="18"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PlayUsPronunciation')}">
+                                            <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        </Button>
+                                        <Button x:Name="BtnViewWord1" Click="ViewInVocab_Click"
+                                                Width="36" Height="36" Padding="0" CornerRadius="18"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Homophones_ViewInVocabulary')}">
+                                            <FontIcon Glyph="&#xE82D;" FontSize="13" />
+                                        </Button>
+                                        <Button x:Name="BtnSaveWord1" Click="SaveToStorage_Click"
+                                                Width="36" Height="36" Padding="0" CornerRadius="18"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Homophones_SaveToStorage')}">
+                                            <FontIcon Glyph="&#xE8B7;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                        </Button>
+                                    </StackPanel>
                                 </Grid>
 
                                 <StackPanel Spacing="4">
@@ -397,16 +414,33 @@
                                         <TextBlock x:Name="Word2Pos" Text="Verb" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </StackPanel>
 
-                                    <!-- Modern Circular Listen Button -->
-                                    <Button x:Name="BtnListenWord2" Grid.Column="1" Click="BtnListenWord2_Click"
-                                            Width="38" Height="38" Padding="0" CornerRadius="19"
-                                            VerticalAlignment="Center"
-                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1"
-                                            ToolTipService.ToolTip="Nghe phát âm chuẩn">
-                                        <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    </Button>
+                                    <!-- Action Buttons: Listen, View in Vocab, Save to Storage -->
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <Button x:Name="BtnListenWord2" Click="BtnListenWord2_Click"
+                                                Width="36" Height="36" Padding="0" CornerRadius="18"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PlayUsPronunciation')}">
+                                            <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        </Button>
+                                        <Button x:Name="BtnViewWord2" Click="ViewInVocab_Click"
+                                                Width="36" Height="36" Padding="0" CornerRadius="18"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Homophones_ViewInVocabulary')}">
+                                            <FontIcon Glyph="&#xE82D;" FontSize="13" />
+                                        </Button>
+                                        <Button x:Name="BtnSaveWord2" Click="SaveToStorage_Click"
+                                                Width="36" Height="36" Padding="0" CornerRadius="18"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Homophones_SaveToStorage')}">
+                                            <FontIcon Glyph="&#xE8B7;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                        </Button>
+                                    </StackPanel>
                                 </Grid>
 
                                 <StackPanel Spacing="4">

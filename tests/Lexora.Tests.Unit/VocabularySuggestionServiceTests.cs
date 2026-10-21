@@ -133,4 +133,27 @@ public class VocabularySuggestionServiceTests
 
         result.TotalSuggestionsCount.Should().Be(0, "No spurious suggestions should be generated for completely unrelated words");
     }
+
+    [Fact]
+    public void BuildSuggestions_DetectsSmartImportBracketTags_ForSynAntFamilyAndColloc()
+    {
+        var targetId = Guid.NewGuid();
+        var target = CreateWord(
+            targetId,
+            "abandon",
+            "từ bỏ",
+            notes: "[syn: desert] [ant: maintain] [family: abandonment] [colloc: abandon hope]");
+
+        var synWord = CreateWord(Guid.NewGuid(), "desert", "bỏ hoang, từ bỏ");
+        var antWord = CreateWord(Guid.NewGuid(), "maintain", "duy trì, giữ gìn");
+        var famWord = CreateWord(Guid.NewGuid(), "abandonment", "sự từ bỏ");
+        var colWord = CreateWord(Guid.NewGuid(), "abandon hope", "từ bỏ hy vọng");
+
+        var result = _sut.GetSuggestions(target, new[] { target, synWord, antWord, famWord, colWord });
+
+        result.Synonyms.Should().Contain(s => s.Word.Term == "desert");
+        result.Antonyms.Should().Contain(s => s.Word.Term == "maintain");
+        result.WordFamily.Should().Contain(s => s.Word.Term == "abandonment");
+        result.Collocations.Should().Contain(s => s.Word.Term == "abandon hope");
+    }
 }

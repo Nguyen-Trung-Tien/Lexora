@@ -11,7 +11,6 @@ namespace Lexora.Presentation.Views;
 public sealed partial class KnowledgeGraphImportDialog : ContentDialog
 {
     private readonly IKnowledgeGraphExportImportService _exportImportService;
-    private readonly ILocalizationService _loc;
 
     private int _currentStep = 1;
     private string _importContent = string.Empty;
@@ -20,16 +19,18 @@ public sealed partial class KnowledgeGraphImportDialog : ContentDialog
 
     public bool WasCommitted { get; private set; }
 
+    public ILocalizationService Loc { get; }
+
     public KnowledgeGraphImportDialog()
     {
         _exportImportService = App.Current.Services.GetRequiredService<IKnowledgeGraphExportImportService>();
-        _loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+        Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
 
         InitializeComponent();
 
-        Title = "Nhập thông minh — Semantic Knowledge Graph";
-        PrimaryButtonText = "Tiếp tục kiểm tra";
-        CloseButtonText = "Hủy bỏ";
+        Title = Loc.GetString("KnowledgeGraph_Import_Title");
+        PrimaryButtonText = Loc.GetString("KnowledgeGraph_Import_BtnNext");
+        CloseButtonText = Loc.GetString("KnowledgeGraph_Import_BtnCancel");
         DefaultButton = ContentDialogButton.Primary;
 
         PrimaryButtonClick += KnowledgeGraphImportDialog_PrimaryButtonClick;
@@ -105,7 +106,7 @@ public sealed partial class KnowledgeGraphImportDialog : ContentDialog
             if (string.IsNullOrWhiteSpace(content))
             {
                 Step1InfoBar.IsOpen = true;
-                Step1InfoBar.Message = "Vui lòng nhập nội dung JSON/CSV hoặc chọn tệp để tiếp tục.";
+                Step1InfoBar.Message = Loc.GetString("KnowledgeGraph_Import_ErrEmpty");
                 return;
             }
 
@@ -119,7 +120,7 @@ public sealed partial class KnowledgeGraphImportDialog : ContentDialog
                 if (_analysisResult.Items.Count == 0)
                 {
                     Step1InfoBar.IsOpen = true;
-                    Step1InfoBar.Message = "Không phát hiện được quan hệ ngữ nghĩa nào hợp lệ trong dữ liệu nhập.";
+                    Step1InfoBar.Message = Loc.GetString("KnowledgeGraph_Import_ErrNoValid");
                     IsPrimaryButtonEnabled = true;
                     return;
                 }
@@ -139,14 +140,14 @@ public sealed partial class KnowledgeGraphImportDialog : ContentDialog
 
                 PreviewListView.ItemsSource = _analysisResult.Items;
 
-                PrimaryButtonText = "Nhập vào Đồ thị";
-                SecondaryButtonText = "Quay lại";
-                CloseButtonText = "Hủy bỏ";
+                PrimaryButtonText = Loc.GetString("KnowledgeGraph_Import_BtnImport");
+                SecondaryButtonText = Loc.GetString("KnowledgeGraph_Import_BtnBack");
+                CloseButtonText = Loc.GetString("KnowledgeGraph_Import_BtnCancel");
             }
             catch (Exception ex)
             {
                 Step1InfoBar.IsOpen = true;
-                Step1InfoBar.Message = $"Lỗi phân tích cú pháp: {ex.Message}";
+                Step1InfoBar.Message = ex.Message;
             }
             finally
             {
@@ -184,7 +185,7 @@ public sealed partial class KnowledgeGraphImportDialog : ContentDialog
 
                     PrimaryButtonText = string.Empty;
                     SecondaryButtonText = string.Empty;
-                    CloseButtonText = "Hoàn tất";
+                    CloseButtonText = Loc.GetString("KnowledgeGraph_Import_BtnFinish");
                     IsPrimaryButtonEnabled = false;
                 }
                 else
@@ -222,9 +223,9 @@ public sealed partial class KnowledgeGraphImportDialog : ContentDialog
             Step2NumberBorder.Background = (Microsoft.UI.Xaml.Media.Brush)App.Current.Resources["LayerFillColorDefaultBrush"];
             Step2NumberText.Foreground = (Microsoft.UI.Xaml.Media.Brush)App.Current.Resources["TextFillColorSecondaryBrush"];
 
-            PrimaryButtonText = "Tiếp tục kiểm tra";
+            PrimaryButtonText = Loc.GetString("KnowledgeGraph_Import_BtnNext");
             SecondaryButtonText = string.Empty;
-            CloseButtonText = "Hủy bỏ";
+            CloseButtonText = Loc.GetString("KnowledgeGraph_Import_BtnCancel");
         }
     }
 }

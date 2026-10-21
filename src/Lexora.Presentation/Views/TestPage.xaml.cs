@@ -155,10 +155,21 @@ public sealed partial class TestPage : Page, ILocalizableView, IThemeAwareView
             {
                 ViewModel.StartTestWithSession(session);
             }
+            else if (e.Parameter is Guid singleWordId && singleWordId != Guid.Empty)
+            {
+                await ViewModel.SetCustomWordSelectionAsync(new[] { singleWordId });
+                UpdateModeSelectorStyles(true);
+            }
             else if (e.Parameter is IEnumerable<Guid> wordIds)
             {
                 await ViewModel.SetCustomWordSelectionAsync(wordIds);
                 UpdateModeSelectorStyles(true);
+            }
+            else if (e.Parameter is bool weakOnly && weakOnly)
+            {
+                ViewModel.WeakWordsOnly = true;
+                ViewModel.IsCustomListMode = false;
+                UpdateModeSelectorStyles(false);
             }
             else
             {

@@ -276,7 +276,15 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         try
         {
             RegisterShortcuts();
-            if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))
+            if (e.Parameter is Guid wordId && wordId != Guid.Empty)
+            {
+                await ViewModel.SelectWordByIdAsync(wordId);
+                if (ViewModel.SelectedWord != null)
+                {
+                    WordsListView.ScrollIntoView(ViewModel.SelectedWord);
+                }
+            }
+            else if (e.Parameter is string query && !string.IsNullOrWhiteSpace(query))
             {
                 SearchBox.Text = query;
                 ViewModel.SearchTerm = query;
@@ -1191,6 +1199,38 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         try
         {
             _navigationService.Navigate(typeof(KnowledgeGraphPage), ViewModel.SelectedWord.Id);
+        }
+        catch (Exception ex)
+        {
+            _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+        }
+    }
+
+    private async void OpenKnowledgeGraphPopup_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWord == null) return;
+        try
+        {
+            var graphService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IVocabularyKnowledgeGraphService>();
+            var audioService = App.Current.Services.GetService<IAudioPlayerService>();
+            var dialog = new KnowledgeGraphDialog(ViewModel.SelectedWord.Id, graphService, Loc, audioService)
+            {
+                XamlRoot = this.XamlRoot
+            };
+            await dialog.ShowAsyncSafe(this.XamlRoot);
+        }
+        catch (Exception ex)
+        {
+            _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+        }
+    }
+
+    private void ViewRelatedHomophones_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.RelatedHomophoneGroup == null) return;
+        try
+        {
+            _navigationService.Navigate(typeof(HomophonesPage), ViewModel.RelatedHomophoneGroup.Title);
         }
         catch (Exception ex)
         {

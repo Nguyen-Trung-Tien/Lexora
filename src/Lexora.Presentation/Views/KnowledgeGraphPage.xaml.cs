@@ -65,11 +65,29 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         }
     }
 
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var isCompact = e.NewSize.Width < 1200;
+        var btnTextVisibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
+
+        if (BtnRecommendationsText != null) BtnRecommendationsText.Visibility = btnTextVisibility;
+        if (BtnSmartImportText != null) BtnSmartImportText.Visibility = btnTextVisibility;
+        if (BtnExportText != null) BtnExportText.Visibility = btnTextVisibility;
+        if (BtnViewModeText != null) BtnViewModeText.Visibility = btnTextVisibility;
+
+        if (HeaderSearchBox != null)
+        {
+            HeaderSearchBox.MaxWidth = e.NewSize.Width < 1000 ? 180 : 280;
+        }
+    }
+
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ViewModel.ActiveGraph) ||
             e.PropertyName == nameof(ViewModel.FilteredConnectedNodes) ||
             e.PropertyName == nameof(ViewModel.SelectedCategoryFilter) ||
+            e.PropertyName == nameof(ViewModel.SelectedNode) ||
+            e.PropertyName == nameof(ViewModel.HasSelectedNode) ||
             e.PropertyName == nameof(ViewModel.IsVisualMapMode))
         {
             Bindings.Update();
@@ -154,13 +172,13 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
                 Y1 = cy,
                 X2 = nx,
                 Y2 = ny,
-                Stroke = (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"],
-                StrokeThickness = 1.2
+                Stroke = GetRelationLineBrush(nodes[i].NodeType),
+                StrokeThickness = 1.8
             };
 
             if (nodes[i].NodeType == KnowledgeGraphNodeType.Antonym)
             {
-                line.StrokeDashArray = new DoubleCollection { 3, 2 };
+                line.StrokeDashArray = new DoubleCollection { 4, 3 };
             }
 
             GraphCanvas.Children.Add(line);
@@ -174,42 +192,65 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             double nx = cx + (radius * Math.Cos(angle));
             double ny = cy + (radius * Math.Sin(angle));
 
+            bool isSelected = ViewModel.SelectedNode != null &&
+                              (ReferenceEquals(ViewModel.SelectedNode, node) || ViewModel.SelectedNode.Id == node.Id);
+
             var nodeBorder = new Border
             {
                 Background = (Brush)App.Current.Resources["CardBackgroundFillColorDefaultBrush"],
-                BorderBrush = ReferenceEquals(ViewModel.SelectedNode, node)
+                BorderBrush = isSelected
                     ? (Brush)App.Current.Resources["AccentFillColorDefaultBrush"]
                     : (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"],
-                BorderThickness = new Thickness(ReferenceEquals(ViewModel.SelectedNode, node) ? 2 : 1),
-                CornerRadius = new CornerRadius(8),
-                Padding = new Thickness(8, 4, 8, 4),
+                BorderThickness = new Thickness(isSelected ? 2.5 : 1.2),
+                CornerRadius = new CornerRadius(10),
+                Padding = new Thickness(10, 6, 10, 6),
                 Tag = node
             };
 
-            var nodePanel = new StackPanel { Spacing = 2 };
-            var topPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
+            var nodePanel = new StackPanel { Spacing = 3 };
+            var topPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4, VerticalAlignment = VerticalAlignment.Center };
 
             var relBadge = new Border
             {
-                Background = (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"],
+                Background = GetRelationBadgeBackground(node.NodeType),
                 CornerRadius = new CornerRadius(4),
-                Padding = new Thickness(4, 1, 4, 1)
+                Padding = new Thickness(5, 2, 5, 2)
             };
             var relText = new TextBlock
             {
                 Text = GetShortRelLabel(node.NodeType),
-                FontSize = 9,
+                FontSize = 9.5,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-                Foreground = (Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"]
+                Foreground = GetRelationTextForeground(node.NodeType)
             };
             relBadge.Child = relText;
             topPanel.Children.Add(relBadge);
 
+            if (node.Level != CefrLevel.None)
+            {
+                var lvlBadge = new Border
+                {
+                    Background = (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"],
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(4, 1, 4, 1)
+                };
+                var lvlText = new TextBlock
+                {
+                    Text = node.Level.ToString(),
+                    FontSize = 9,
+                    FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                    Foreground = (Brush)App.Current.Resources["TextFillColorSecondaryBrush"]
+                };
+                lvlBadge.Child = lvlText;
+                topPanel.Children.Add(lvlBadge);
+            }
+
             var termText = new TextBlock
             {
                 Text = node.Term,
-                FontSize = 12,
+                FontSize = 13,
                 FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                Foreground = (Brush)App.Current.Resources["TextFillColorPrimaryBrush"],
                 TextWrapping = TextWrapping.NoWrap
             };
 
@@ -231,14 +272,14 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             {
                 if (s is Border b && b.Tag is GraphNodeDto clickedNode)
                 {
-                    await ViewModel.PivotToNodeAsync(clickedNode.Id);
+                    await ViewModel.PivotToNodeInternalAsync(clickedNode.Id, clickedNode.Term);
                 }
             };
 
             // Measure & arrange
             nodeBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            double nw = Math.Max(nodeBorder.DesiredSize.Width + 8, 76);
-            double nh = Math.Max(nodeBorder.DesiredSize.Height, 38);
+            double nw = Math.Max(nodeBorder.DesiredSize.Width + 10, 82);
+            double nh = Math.Max(nodeBorder.DesiredSize.Height, 42);
 
             Canvas.SetLeft(nodeBorder, nx - (nw / 2.0));
             Canvas.SetTop(nodeBorder, ny - (nh / 2.0));
@@ -246,16 +287,23 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             GraphCanvas.Children.Add(nodeBorder);
         }
 
-        // 3. Draw Central Core Concept Node with Dynamic Auto-Sizing (avoids any text clipping)
+        // 3. Draw Central Core Concept Node with Click Selection & Dynamic Auto-Sizing
+        bool isCenterSelected = ViewModel.SelectedNode != null &&
+                                (ReferenceEquals(ViewModel.SelectedNode, ViewModel.ActiveGraph.CenterNode) ||
+                                 ViewModel.SelectedNode.Id == ViewModel.ActiveGraph.CenterNode.Id);
+
         var centerBorder = new Border
         {
             Background = (Brush)App.Current.Resources["AccentFillColorDefaultBrush"],
-            BorderBrush = (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"],
-            BorderThickness = new Thickness(2),
+            BorderBrush = isCenterSelected
+                ? (Brush)App.Current.Resources["SystemFillColorCautionBrush"]
+                : (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"],
+            BorderThickness = new Thickness(isCenterSelected ? 3.5 : 1.5),
             CornerRadius = new CornerRadius(14),
-            Padding = new Thickness(20, 9, 20, 9),
-            MinWidth = 140,
-            MinHeight = 58
+            Padding = new Thickness(22, 10, 22, 10),
+            MinWidth = 145,
+            MinHeight = 60,
+            Tag = ViewModel.ActiveGraph.CenterNode
         };
 
         var centerPanel = new StackPanel
@@ -278,7 +326,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         var centerTerm = new TextBlock
         {
             Text = ViewModel.ActiveGraph.CenterNode.Term,
-            FontSize = 14,
+            FontSize = 15,
             FontWeight = Microsoft.UI.Text.FontWeights.Bold,
             Foreground = (Brush)App.Current.Resources["TextOnAccentFillColorPrimaryBrush"],
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -289,14 +337,55 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         centerPanel.Children.Add(centerTerm);
         centerBorder.Child = centerPanel;
 
+        centerBorder.Tapped += (s, ev) =>
+        {
+            ViewModel.SelectNode(ViewModel.ActiveGraph.CenterNode);
+            RenderGraphCanvas();
+        };
+
+        centerBorder.DoubleTapped += (s, ev) =>
+        {
+            ViewModel.NavigateToVocabulary(ViewModel.ActiveGraph.CenterNode.Id);
+        };
+
         centerBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        double cw = Math.Max(centerBorder.DesiredSize.Width + 12, 140);
-        double ch = Math.Max(centerBorder.DesiredSize.Height, 58);
+        double cw = Math.Max(centerBorder.DesiredSize.Width + 14, 145);
+        double ch = Math.Max(centerBorder.DesiredSize.Height, 60);
 
         Canvas.SetLeft(centerBorder, cx - (cw / 2.0));
         Canvas.SetTop(centerBorder, cy - (ch / 2.0));
         GraphCanvas.Children.Add(centerBorder);
     }
+
+    private Brush GetRelationLineBrush(KnowledgeGraphNodeType type) => type switch
+    {
+        KnowledgeGraphNodeType.Synonym => (Brush)App.Current.Resources["SystemFillColorSuccessBrush"],
+        KnowledgeGraphNodeType.Antonym => (Brush)App.Current.Resources["SystemFillColorCriticalBrush"],
+        KnowledgeGraphNodeType.WordFamily => (Brush)App.Current.Resources["AccentFillColorDefaultBrush"],
+        KnowledgeGraphNodeType.Collocation => (Brush)App.Current.Resources["SystemFillColorCautionBrush"],
+        KnowledgeGraphNodeType.TopicCluster => (Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"],
+        _ => (Brush)App.Current.Resources["TextFillColorSecondaryBrush"]
+    };
+
+    private Brush GetRelationBadgeBackground(KnowledgeGraphNodeType type) => type switch
+    {
+        KnowledgeGraphNodeType.Synonym => (Brush)App.Current.Resources["SystemFillColorSuccessBackgroundBrush"],
+        KnowledgeGraphNodeType.Antonym => (Brush)App.Current.Resources["SystemFillColorCriticalBackgroundBrush"],
+        KnowledgeGraphNodeType.Collocation => (Brush)App.Current.Resources["SystemFillColorCautionBackgroundBrush"],
+        KnowledgeGraphNodeType.TopicCluster => (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"],
+        KnowledgeGraphNodeType.WordFamily => (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"],
+        _ => (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"]
+    };
+
+    private Brush GetRelationTextForeground(KnowledgeGraphNodeType type) => type switch
+    {
+        KnowledgeGraphNodeType.Synonym => (Brush)App.Current.Resources["SystemFillColorSuccessBrush"],
+        KnowledgeGraphNodeType.Antonym => (Brush)App.Current.Resources["SystemFillColorCriticalBrush"],
+        KnowledgeGraphNodeType.WordFamily => (Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"],
+        KnowledgeGraphNodeType.Collocation => (Brush)App.Current.Resources["SystemFillColorCautionBrush"],
+        KnowledgeGraphNodeType.TopicCluster => (Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"],
+        _ => (Brush)App.Current.Resources["TextFillColorSecondaryBrush"]
+    };
 
     private string GetShortRelLabel(KnowledgeGraphNodeType type) => type switch
     {
@@ -446,17 +535,40 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
     private async void PlayAudioUs_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.PlayPronunciationAsync("us");
+        await ViewModel.PlayCenterPronunciationAsync("us");
     }
 
     private async void PlayAudioUk_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.PlayPronunciationAsync("uk");
+        await ViewModel.PlayCenterPronunciationAsync("uk");
     }
 
     private async void PlaySelectedAudio_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.PlayPronunciationAsync("us");
+        await ViewModel.PlaySelectedPronunciationAsync("us");
+    }
+
+    private async void PlayNodeItemAudio_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn)
+        {
+            if (btn.Tag is string term)
+            {
+                await ViewModel.PlayTermPronunciationAsync(term, "us");
+            }
+            else if (btn.Tag is GraphNodeDto node)
+            {
+                await ViewModel.PlayTermPronunciationAsync(node.Term, "us");
+            }
+        }
+    }
+
+    private void CardItem_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && fe.Tag is GraphNodeDto node)
+        {
+            ViewModel.SelectNode(node);
+        }
     }
 
     private void ViewInVocab_Click(object sender, RoutedEventArgs e)
@@ -466,9 +578,17 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
     private async void PivotToNode_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Guid targetId)
+        if (sender is Button btn)
         {
-            await ViewModel.PivotToNodeAsync(targetId);
+            if (btn.Tag is Guid targetId)
+            {
+                var term = ViewModel.ActiveGraph?.ConnectedNodes?.FirstOrDefault(n => n.Id == targetId)?.Term;
+                await ViewModel.PivotToNodeInternalAsync(targetId, term);
+            }
+            else if (btn.Tag is GraphNodeDto node)
+            {
+                await ViewModel.PivotToNodeInternalAsync(node.Id, node.Term);
+            }
         }
     }
 
@@ -476,7 +596,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
     {
         if (ViewModel.SelectedNode != null)
         {
-            await ViewModel.PivotToNodeAsync(ViewModel.SelectedNode.Id);
+            await ViewModel.PivotToNodeInternalAsync(ViewModel.SelectedNode.Id, ViewModel.SelectedNode.Term);
         }
     }
 

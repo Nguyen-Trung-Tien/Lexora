@@ -329,9 +329,34 @@ public partial class KnowledgeGraphViewModel : ObservableObject
     [RelayCommand]
     public async Task PivotToNodeAsync(Guid nodeId)
     {
+        var node = ActiveGraph?.ConnectedNodes?.FirstOrDefault(n => n.Id == nodeId);
+        await PivotToNodeInternalAsync(nodeId, node?.Term);
+    }
+
+    public async Task PivotToNodeInternalAsync(Guid nodeId, string? term = null)
+    {
         if (nodeId != Guid.Empty && nodeId != CurrentCenterWordId)
         {
-            await LoadGraphAsync(nodeId, addToHistory: true);
+            var graph = await _graphService.BuildGraphAsync(nodeId);
+            if (graph != null)
+            {
+                if (CurrentCenterWordId.HasValue && CurrentCenterWordId.Value != graph.CenterNode.Id)
+                {
+                    _historyStack.Push(CurrentCenterWordId.Value);
+                    OnPropertyChanged(nameof(HasHistory));
+                }
+
+                CurrentCenterWordId = graph.CenterNode.Id;
+                ActiveGraph = graph;
+                SelectedNode = graph.CenterNode;
+                ApplyCategoryFilter();
+                return;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(term))
+        {
+            await LoadGraphForTermAsync(term);
         }
     }
 
@@ -382,9 +407,9 @@ public partial class KnowledgeGraphViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task PlayPronunciationAsync(string? accent = "us")
+    public async Task PlayCenterPronunciationAsync(string? accent = "us")
     {
-        var term = SelectedNode?.Term ?? ActiveGraph.CenterNode.Term;
+        var term = ActiveGraph?.CenterNode?.Term;
         if (string.IsNullOrWhiteSpace(term) || _audioPlayerService == null) return;
 
         try
@@ -393,8 +418,44 @@ public partial class KnowledgeGraphViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphViewModel] PlayPronunciationAsync error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphViewModel] PlayCenterPronunciationAsync error: {ex.Message}");
         }
+    }
+
+    [RelayCommand]
+    public async Task PlaySelectedPronunciationAsync(string? accent = "us")
+    {
+        var term = SelectedNode?.Term ?? ActiveGraph?.CenterNode?.Term;
+        if (string.IsNullOrWhiteSpace(term) || _audioPlayerService == null) return;
+
+        try
+        {
+            await _audioPlayerService.PlayPronunciationAsync(term, accent ?? "us");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphViewModel] PlaySelectedPronunciationAsync error: {ex.Message}");
+        }
+    }
+
+    public async Task PlayTermPronunciationAsync(string? term, string? accent = "us")
+    {
+        if (string.IsNullOrWhiteSpace(term) || _audioPlayerService == null) return;
+
+        try
+        {
+            await _audioPlayerService.PlayPronunciationAsync(term, accent ?? "us");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphViewModel] PlayTermPronunciationAsync error: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public async Task PlayPronunciationAsync(string? accent = "us")
+    {
+        await PlaySelectedPronunciationAsync(accent);
     }
 
     [RelayCommand]

@@ -439,6 +439,8 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
                 _navService.Navigate(typeof(ReviewPage));
                 break;
             case StudyAdviceActionType.WeakWordsQuiz:
+                _navService.Navigate(typeof(TestPage), true);
+                break;
             case StudyAdviceActionType.MilestonePractice:
                 _navService.Navigate(typeof(TestPage));
                 break;

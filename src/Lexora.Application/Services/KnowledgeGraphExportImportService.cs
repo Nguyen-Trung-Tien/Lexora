@@ -11,10 +11,6 @@ namespace Lexora.Application.Services;
 
 public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportService
 {
-    private readonly IVocabularyKnowledgeGraphService _graphService;
-    private readonly IVocabularyRepository _vocabRepo;
-    private readonly IUnitOfWork _unitOfWork;
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -22,14 +18,21 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
+    private readonly IVocabularyKnowledgeGraphService _graphService;
+    private readonly IVocabularyRepository _vocabRepo;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ISmartSearchCacheService? _cacheService;
+
     public KnowledgeGraphExportImportService(
         IVocabularyKnowledgeGraphService graphService,
         IVocabularyRepository vocabRepo,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ISmartSearchCacheService? cacheService = null)
     {
         _graphService = graphService;
         _vocabRepo = vocabRepo;
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<string> ExportToJsonAsync(Guid? centerWordId = null, CancellationToken cancellationToken = default)
@@ -458,7 +461,7 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
                 }
                 else if (autoCreateMissingWords)
                 {
-                    // Create minimal word entry
+                    // Create minimal word entry with fully initialized ReviewCard for spaced repetition
                     var newWord = new Word
                     {
                         Id = Guid.NewGuid(),
@@ -477,6 +480,17 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
                                 PartOfSpeech = PartOfSpeech.Noun
                             }
                         }
+                    };
+
+                    newWord.ReviewCard = new ReviewCard
+                    {
+                        WordId = newWord.Id,
+                        Status = LearningStatus.New,
+                        EaseFactor = 2.5,
+                        IntervalDays = 0,
+                        Repetitions = 0,
+                        Lapses = 0,
+                        NextReviewAt = DateTime.UtcNow
                     };
 
                     await _vocabRepo.AddAsync(newWord, cancellationToken);
@@ -520,6 +534,7 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
 
             updatedWordsCount = modifiedWords.Count;
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _cacheService?.InvalidateVocabulary();
 
             return new KnowledgeGraphImportCommitResultDto(
                 true,

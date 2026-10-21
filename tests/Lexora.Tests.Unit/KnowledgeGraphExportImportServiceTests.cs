@@ -165,4 +165,49 @@ abandon,maintain,Antonym,0.95,B2,Từ bỏ vs. Duy trì";
         relations.Should().Contain(r => r.RelatedTerm == "plentiful" && r.RelationType == "Synonym");
         relations.Should().Contain(r => r.RelatedTerm == "scarce" && r.RelationType == "Antonym");
     }
+
+    [Fact]
+    public async Task CommitImportAsync_WhenAutoCreateMissingWordsIsTrue_CreatesWordWithReviewCardAndInvalidatesCache()
+    {
+        var mockCache = new Mock<ISmartSearchCacheService>();
+        var serviceWithCache = new KnowledgeGraphExportImportService(
+            _mockGraphService.Object,
+            _mockVocabRepo.Object,
+            _mockUnitOfWork.Object,
+            mockCache.Object);
+
+        Word? capturedWord = null;
+        _mockVocabRepo.Setup(r => r.GetByTermAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word?)null);
+        _mockVocabRepo.Setup(r => r.AddAsync(It.IsAny<Word>(), It.IsAny<CancellationToken>()))
+            .Callback<Word, CancellationToken>((w, _) => capturedWord = w)
+            .ReturnsAsync((Word w, CancellationToken _) => w);
+
+        var items = new List<KnowledgeGraphImportItemDto>
+        {
+            new()
+            {
+                RowNumber = 1,
+                SourceTerm = "abandon",
+                TargetTerm = "desert",
+                RelationshipType = KnowledgeGraphNodeType.Synonym,
+                IsValid = true,
+                IsDuplicate = false
+            }
+        };
+
+        var analysis = new KnowledgeGraphImportAnalysisResultDto(items, 1, 1, 2, 0, Array.Empty<string>());
+        var commitResult = await serviceWithCache.CommitImportAsync(analysis, autoCreateMissingWords: true);
+
+        commitResult.Success.Should().BeTrue();
+        commitResult.CreatedWordsCount.Should().Be(2);
+
+        capturedWord.Should().NotBeNull();
+        capturedWord!.ReviewCard.Should().NotBeNull();
+        capturedWord.ReviewCard!.EaseFactor.Should().BeGreaterThanOrEqualTo(1.3);
+        capturedWord.ReviewCard.EaseFactor.Should().Be(2.5);
+        capturedWord.ReviewCard.IntervalDays.Should().Be(0);
+
+        mockCache.Verify(c => c.InvalidateVocabulary(), Times.Once);
+    }
 }

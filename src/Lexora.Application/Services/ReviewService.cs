@@ -287,10 +287,23 @@ public class ReviewService : IReviewService
                 await _storageRepo.UpdateAsync(existingStorage, cancellationToken);
             }
         }
+        else if (card.Status == LearningStatus.Mastered && _storageRepo != null)
+        {
+            var existingStorage = await _storageRepo.GetByWordIdAsync(card.WordId, cancellationToken);
+            if (existingStorage != null && existingStorage.Status != StorageLearningStatus.Mastered)
+            {
+                existingStorage.Status = StorageLearningStatus.Mastered;
+                existingStorage.IntervalDays = card.IntervalDays;
+                existingStorage.NextReviewAt = card.NextReviewAt;
+                existingStorage.RetentionProbability = engine.CalculateRetentionProbability(card);
+                existingStorage.UpdatedAt = DateTime.UtcNow;
+                await _storageRepo.UpdateAsync(existingStorage, cancellationToken);
+            }
+        }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        if (rating == ReviewRating.Again && _storageRepo != null)
+        if ((rating == ReviewRating.Again || card.Status == LearningStatus.Mastered) && _storageRepo != null)
         {
             LearningStorageService.NotifyGlobalStorageChanged();
         }

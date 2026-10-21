@@ -73,7 +73,31 @@ public class VocabularySuggestionService : IVocabularySuggestionService
             pageSize: 200,
             cancellationToken: cancellationToken);
 
-        return GetSuggestions(targetWord, pool);
+        var relations = ExtractExplicitRelationsFromNotes(targetWord);
+        var allExplicitTerms = relations.Synonyms
+            .Concat(relations.Antonyms)
+            .Concat(relations.WordFamily)
+            .Concat(relations.Collocations)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var poolList = pool.ToList();
+        var poolTerms = poolList.Select(w => w.Term.ToLowerInvariant()).ToHashSet();
+        foreach (var term in allExplicitTerms)
+        {
+            if (!poolTerms.Contains(term))
+            {
+                var matches = await _vocabService.SearchWordsAsync(search: term, pageSize: 5, cancellationToken: cancellationToken);
+                var exact = matches.FirstOrDefault(w => string.Equals(w.Term, term, StringComparison.OrdinalIgnoreCase));
+                if (exact != null && exact.Id != targetWord.Id && !poolTerms.Contains(exact.Term.ToLowerInvariant()))
+                {
+                    poolList.Add(exact);
+                    poolTerms.Add(exact.Term.ToLowerInvariant());
+                }
+            }
+        }
+
+        return GetSuggestions(targetWord, poolList);
     }
 
     public WordRelatedSuggestionsDto GetSuggestions(WordDto targetWord, IEnumerable<WordDto> vocabularyPool)
@@ -125,7 +149,7 @@ public class VocabularySuggestionService : IVocabularySuggestionService
             .ToDictionary(r => r.RelatedTerm, r => r, StringComparer.OrdinalIgnoreCase);
 
         // 2. Explicit notes annotations (e.g. syn: / opp: / ant:)
-        var (explicitSynonyms, explicitAntonyms) = ExtractExplicitRelationsFromNotes(targetWord);
+        var (explicitSynonyms, explicitAntonyms, _, _) = ExtractExplicitRelationsFromNotes(targetWord);
 
         // 3. Extract definition keywords for semantic context overlap
         var targetViTokens = ExtractDefinitionKeywords(targetWord, true);
@@ -230,6 +254,9 @@ public class VocabularySuggestionService : IVocabularySuggestionService
             .Where(r => r.RelationType == "WordFamily")
             .ToDictionary(r => r.RelatedTerm, r => r, StringComparer.OrdinalIgnoreCase);
 
+        // 2. Explicit notes annotations for word family
+        var explicitFamilies = ExtractExplicitRelationsFromNotes(targetWord).WordFamily;
+
         var targetStem = ExtractStem(targetTerm);
 
         foreach (var candidate in pool)
@@ -247,6 +274,17 @@ public class VocabularySuggestionService : IVocabularySuggestionService
                     SuggestionCategory.WordFamily,
                     curFam.Weight,
                     curFam.Explanation));
+                continue;
+            }
+
+            // Check explicit word family annotations
+            if (explicitFamilies.Contains(candTerm))
+            {
+                results.Add(new WordSuggestionItemDto(
+                    candidate,
+                    SuggestionCategory.WordFamily,
+                    0.92,
+                    $"Ghi chú họ từ trực tiếp với '{targetWord.Term}' ({candidate.PrimaryPartOfSpeech})"));
                 continue;
             }
 
@@ -291,11 +329,23 @@ public class VocabularySuggestionService : IVocabularySuggestionService
         var results = new List<WordSuggestionItemDto>();
         var targetTerm = targetWord.Term.Trim().ToLowerInvariant();
         var wordPattern = $@"\b{Regex.Escape(targetTerm)}\b";
+        var explicitCollocations = ExtractExplicitRelationsFromNotes(targetWord).Collocations;
 
         foreach (var candidate in pool)
         {
             if (candidate.Id == targetWord.Id) continue;
             var candTerm = candidate.Term.Trim().ToLowerInvariant();
+
+            // 0. Explicit collocation annotations from notes
+            if (explicitCollocations.Contains(candTerm))
+            {
+                results.Add(new WordSuggestionItemDto(
+                    candidate,
+                    SuggestionCategory.Collocation,
+                    0.92,
+                    $"Ghi chú cụm từ kết hợp trực tiếp với '{targetWord.Term}'"));
+                continue;
+            }
 
             // 1. Candidate is a phrase containing this word (e.g. "take off", "take care of")
             if (candidate.IsPhrase || candidate.IsIdiom || candidate.IsPhrasalVerb || candTerm.Contains(' '))
@@ -490,38 +540,60 @@ public class VocabularySuggestionService : IVocabularySuggestionService
         return keywords;
     }
 
-    private (HashSet<string> Synonyms, HashSet<string> Antonyms) ExtractExplicitRelationsFromNotes(WordDto word)
+    private (HashSet<string> Synonyms, HashSet<string> Antonyms, HashSet<string> WordFamily, HashSet<string> Collocations) ExtractExplicitRelationsFromNotes(WordDto word)
     {
         var syns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var ants = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var families = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var collocs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var text = (word.Notes ?? string.Empty) + " " + string.Join(" ", word.Meanings?.Select(m => m.Explanation ?? string.Empty) ?? Array.Empty<string>());
-        if (string.IsNullOrWhiteSpace(text)) return (syns, ants);
+        if (string.IsNullOrWhiteSpace(text)) return (syns, ants, families, collocs);
 
-        // Pattern: syn: word1, word2 or đồng nghĩa: word1
-        var synMatch = Regex.Match(text, @"(?:syn(?:onym)?|đồng nghĩa)\s*:\s*([^.;\n]+)", RegexOptions.IgnoreCase);
-        if (synMatch.Success)
+        // 1. Match bracketed tags: [syn: word], [ant: word], [family: word], [colloc: phrase]
+        var tagMatches = Regex.Matches(text, @"\[\s*(?<type>syn(?:onym)?|đồng nghĩa|ant(?:onym)?|opp(?:osite)?|trái nghĩa|family|wordfamily|họ từ|colloc(?:ation)?|cụm từ|rel)\s*:\s*(?<content>[^\]]+)\]", RegexOptions.IgnoreCase);
+        foreach (Match m in tagMatches)
         {
-            var parts = synMatch.Groups[1].Value.Split(new[] { ',', ';', '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var type = m.Groups["type"].Value.ToLowerInvariant();
+            var content = m.Groups["content"].Value;
+            var parts = content.Split(new[] { ',', ';', '/' }, StringSplitOptions.RemoveEmptyEntries);
+
             foreach (var p in parts)
             {
-                var clean = p.Trim().ToLowerInvariant();
-                if (!string.IsNullOrEmpty(clean)) syns.Add(clean);
+                var clean = p.Trim(' ', '[', ']', '"', '\'', '(', ')').ToLowerInvariant();
+                if (string.IsNullOrWhiteSpace(clean)) continue;
+
+                if (type.StartsWith("syn") || type == "đồng nghĩa") syns.Add(clean);
+                else if (type.StartsWith("ant") || type.StartsWith("opp") || type == "trái nghĩa") ants.Add(clean);
+                else if (type.StartsWith("fam") || type == "họ từ") families.Add(clean);
+                else if (type.StartsWith("colloc") || type == "cụm từ") collocs.Add(clean);
+                else syns.Add(clean);
             }
         }
 
-        // Pattern: ant: / opp: / trái nghĩa:
-        var antMatch = Regex.Match(text, @"(?:ant(?:onym)?|opp(?:osite)?|trái nghĩa)\s*:\s*([^.;\n]+)", RegexOptions.IgnoreCase);
-        if (antMatch.Success)
+        // 2. Fallback unbracketed matching: syn: word1, word2 or ant: word1
+        var unbracketedSynMatches = Regex.Matches(text, @"(?:^|[\s;,])(?:syn(?:onym)?|đồng nghĩa)\s*:\s*([^.;\n\[\]]+)", RegexOptions.IgnoreCase);
+        foreach (Match m in unbracketedSynMatches)
         {
-            var parts = antMatch.Groups[1].Value.Split(new[] { ',', ';', '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = m.Groups[1].Value.Split(new[] { ',', ';', '/' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var p in parts)
             {
-                var clean = p.Trim().ToLowerInvariant();
-                if (!string.IsNullOrEmpty(clean)) ants.Add(clean);
+                var clean = p.Trim(' ', '[', ']', '"', '\'', '(', ')').ToLowerInvariant();
+                if (!string.IsNullOrWhiteSpace(clean)) syns.Add(clean);
             }
         }
 
-        return (syns, ants);
+        var unbracketedAntMatches = Regex.Matches(text, @"(?:^|[\s;,])(?:ant(?:onym)?|opp(?:osite)?|trái nghĩa)\s*:\s*([^.;\n\[\]]+)", RegexOptions.IgnoreCase);
+        foreach (Match m in unbracketedAntMatches)
+        {
+            var parts = m.Groups[1].Value.Split(new[] { ',', ';', '/' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var p in parts)
+            {
+                var clean = p.Trim(' ', '[', ']', '"', '\'', '(', ')').ToLowerInvariant();
+                if (!string.IsNullOrWhiteSpace(clean)) ants.Add(clean);
+            }
+        }
+
+        return (syns, ants, families, collocs);
     }
 }

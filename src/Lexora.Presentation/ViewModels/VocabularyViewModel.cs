@@ -19,6 +19,7 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
     private readonly ISmartSearchService? _smartSearchService;
     private readonly ILocalizationService _localizationService;
     private readonly IUserPreferencesService _preferencesService;
+    private readonly IHomophoneService? _homophoneService;
     private readonly List<string> _knownTerms = new();
     // Captured on the UI thread so post-await mutations can be safely marshalled back.
     private readonly DispatcherQueue? _dispatcherQueue;
@@ -53,6 +54,12 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     public partial bool HasRelatedSuggestions { get; set; }
+
+    [ObservableProperty]
+    public partial HomophoneGroupDto? RelatedHomophoneGroup { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasRelatedHomophoneGroup { get; set; }
 
     [ObservableProperty]
     public partial string SelectedSuggestionTab { get; set; } = "All";
@@ -172,7 +179,8 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
         IFuzzySearchService fuzzySearchService,
         ILocalizationService localizationService,
         IUserPreferencesService preferencesService,
-        ISmartSearchService? smartSearchService = null)
+        ISmartSearchService? smartSearchService = null,
+        IHomophoneService? homophoneService = null)
     {
         _vocabService = vocabService;
         _reviewService = reviewService;
@@ -182,6 +190,7 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
         _localizationService = localizationService;
         _preferencesService = preferencesService;
         _smartSearchService = smartSearchService;
+        _homophoneService = homophoneService;
         // Must be captured on the UI thread (constructor is always called from UI thread).
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
             ?? App.Current?.UIDispatcherQueue
@@ -1243,6 +1252,32 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
         await ApplyClosestSuggestionAsync(term);
     }
 
+    public async Task SelectWordByIdAsync(Guid wordId)
+    {
+        if (wordId == Guid.Empty) return;
+
+        if (Words.Count == 0)
+        {
+            await LoadWordsAsync();
+        }
+
+        var matched = Words.FirstOrDefault(w => w.Id == wordId);
+        if (matched != null)
+        {
+            SelectedWord = matched;
+        }
+        else
+        {
+            var word = await _vocabService.GetWordByIdAsync(wordId);
+            if (word != null)
+            {
+                await _dispatcherQueue.EnsureOnUIThreadAsync();
+                Words.Insert(0, word);
+                SelectedWord = word;
+            }
+        }
+    }
+
     [RelayCommand]
     public async Task LoadWordSuggestionsAsync(WordDto? word = null)
     {
@@ -1251,6 +1286,8 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
         {
             RelatedSuggestions = null;
             HasRelatedSuggestions = false;
+            RelatedHomophoneGroup = null;
+            HasRelatedHomophoneGroup = false;
             return;
         }
 
@@ -1265,9 +1302,19 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
             var suggestions = await _vocabService.GetWordSuggestionsAsync(targetWord.Id, ct);
             if (ct.IsCancellationRequested) return;
 
+            HomophoneGroupDto? matchedHomophone = null;
+            if (_homophoneService != null && !string.IsNullOrWhiteSpace(targetWord.Term))
+            {
+                var groups = await _homophoneService.SearchAsync(targetWord.Term, ct);
+                matchedHomophone = groups.FirstOrDefault(g => g.Items.Any(i => i.Term.Equals(targetWord.Term, StringComparison.OrdinalIgnoreCase)));
+            }
+            if (ct.IsCancellationRequested) return;
+
             await _dispatcherQueue.EnsureOnUIThreadAsync();
             RelatedSuggestions = suggestions;
             HasRelatedSuggestions = suggestions != null && suggestions.TotalSuggestionsCount > 0;
+            RelatedHomophoneGroup = matchedHomophone;
+            HasRelatedHomophoneGroup = matchedHomophone != null;
         }
         catch (OperationCanceledException)
         {

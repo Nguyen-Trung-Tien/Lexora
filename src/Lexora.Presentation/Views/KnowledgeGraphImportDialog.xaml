@@ -26,7 +26,7 @@
                     <Border x:Name="Step1NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center">
                         <TextBlock Text="1" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <TextBlock x:Name="Step1Text" Text="Nguồn dữ liệu" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                    <TextBlock x:Name="Step1Text" Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_Step1')}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                 </StackPanel>
 
                 <FontIcon Grid.Column="1" Glyph="&#xE76C;" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="4,0" />
@@ -35,7 +35,7 @@
                     <Border x:Name="Step2NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
                         <TextBlock x:Name="Step2NumberText" Text="2" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <TextBlock x:Name="Step2Text" Text="Xem trước &amp; Kiểm tra" FontSize="12" FontWeight="Normal" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="Step2Text" Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_Step2')}" FontSize="12" FontWeight="Normal" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
 
                 <FontIcon Grid.Column="3" Glyph="&#xE76C;" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="4,0" />
@@ -44,7 +44,7 @@
                     <Border x:Name="Step3NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
                         <TextBlock x:Name="Step3NumberText" Text="3" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <TextBlock x:Name="Step3Text" Text="Kết quả" FontSize="12" FontWeight="Normal" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="Step3Text" Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_Step3')}" FontSize="12" FontWeight="Normal" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -53,20 +53,20 @@
         <Grid Grid.Row="1">
             <!-- ================= STEP 1: SOURCE SELECTION ================= -->
             <StackPanel x:Name="PanelStep1" Spacing="12" Visibility="Visible">
-                <TextBlock Text="Nhập các liên kết ngữ nghĩa (đồng nghĩa, trái nghĩa, họ từ, collocation) từ tệp JSON hoặc bảng CSV để mở rộng mạng lưới tri thức Lexora."
+                <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_Description')}"
                            TextWrapping="Wrap" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                     <Button x:Name="BtnModeFile" HorizontalAlignment="Stretch" CornerRadius="8" Padding="12,8" Click="BtnModeFile_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xED43;" FontSize="15" />
-                            <TextBlock Text="Chọn tệp (.json, .csv)" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_ModeFile')}" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnModePaste" Grid.Column="1" HorizontalAlignment="Stretch" CornerRadius="8" Padding="12,8" Click="BtnModePaste_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE77F;" FontSize="15" />
-                            <TextBlock Text="Dán trực tiếp văn bản" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_ModePaste')}" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
                 </Grid>
@@ -78,8 +78,8 @@
                             BorderThickness="1" CornerRadius="8" Padding="16">
                         <StackPanel Spacing="8" HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE8E5;" FontSize="28" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
-                            <TextBlock x:Name="SelectedFileNameText" Text="Chưa chọn tệp dữ liệu" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <Button Content="Duyệt tệp tin trên máy..." Click="BrowseFile_Click" HorizontalAlignment="Center" CornerRadius="8" />
+                            <TextBlock x:Name="SelectedFileNameText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_NoFileSelected')}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <Button Content="{x:Bind Loc.GetString('KnowledgeGraph_Import_Browse')}" Click="BrowseFile_Click" HorizontalAlignment="Center" CornerRadius="8" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -87,24 +87,24 @@
                 <!-- Paste Mode Panel -->
                 <StackPanel x:Name="PanelPasteMode" Spacing="8" Visibility="Visible">
                     <Grid ColumnDefinitions="Auto,*,Auto">
-                        <TextBlock Text="Định dạng dữ liệu:" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_DataFormat')}" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="12,0">
                             <RadioButton x:Name="RadioFormatJson" Content="JSON (.json)" IsChecked="True" Checked="FormatRadio_Checked" />
                             <RadioButton x:Name="RadioFormatCsv" Content="CSV (.csv)" Checked="FormatRadio_Checked" />
                         </StackPanel>
-                        <Button Grid.Column="2" Content="Dán dữ liệu mẫu" Click="PasteSample_Click" CornerRadius="6" Padding="8,4" FontSize="11" />
+                        <Button Grid.Column="2" Content="{x:Bind Loc.GetString('KnowledgeGraph_Import_PasteSample')}" Click="PasteSample_Click" CornerRadius="6" Padding="8,4" FontSize="11" />
                     </Grid>
 
                     <TextBox x:Name="InputTextBox" AcceptsReturn="True" TextWrapping="NoWrap"
-                             PlaceholderText="Dán nội dung JSON hoặc CSV vào đây..."
+                             PlaceholderText="{x:Bind Loc.GetString('KnowledgeGraph_Import_Placeholder')}"
                              Height="170" FontFamily="Consolas, Cascadia Code, monospace" FontSize="12" CornerRadius="8" />
                 </StackPanel>
 
                 <!-- Options -->
                 <CheckBox x:Name="CheckAutoCreateMissing" IsChecked="True" Margin="0,4,0,0">
                     <StackPanel Spacing="2">
-                        <TextBlock Text="Tự động tạo từ vựng mới nếu chưa có trong từ điển" FontWeight="SemiBold" FontSize="13" />
-                        <TextBlock Text="Tạo các thẻ từ vựng với định nghĩa liên kết để hiển thị ngay trên đồ thị"
+                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_AutoCreateTitle')}" FontWeight="SemiBold" FontSize="13" />
+                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_AutoCreateDesc')}"
                                    FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
                 </CheckBox>
@@ -120,22 +120,22 @@
                         BorderThickness="1" CornerRadius="8" Padding="12,8">
                     <Grid ColumnDefinitions="*,*,*">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="Tổng số liên kết" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_SummaryTotal')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="TextSummaryTotal" Text="0" FontSize="18" FontWeight="Bold" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                            <TextBlock Text="Hợp lệ" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_SummaryValid')}" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                             <TextBlock x:Name="TextSummaryValid" Text="0" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                            <TextBlock Text="Từ mới cần tạo" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_SummaryMissing')}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                             <TextBlock x:Name="TextSummaryMissing" Text="0" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- Preview List -->
-                <TextBlock Text="Danh sách liên kết được phát hiện:" FontWeight="SemiBold" FontSize="12" />
+                <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_PreviewHeader')}" FontWeight="SemiBold" FontSize="12" />
                 <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" MaxHeight="220">
                     <ListView x:Name="PreviewListView" SelectionMode="None">
                         <ListView.ItemTemplate>
@@ -161,22 +161,22 @@
             <!-- ================= STEP 3: RESULTS ================= -->
             <StackPanel x:Name="PanelStep3" Spacing="14" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <FontIcon Glyph="&#xE73E;" FontSize="44" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
-                <TextBlock Text="Nhập dữ liệu đồ thị thành công!" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
+                <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_SuccessTitle')}" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
 
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="8" Padding="16" Width="400">
                     <StackPanel Spacing="8">
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Số quan hệ ngữ nghĩa đã liên kết:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_ResRelations')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="ResultImportedCount" Grid.Column="1" FontWeight="Bold" Text="0" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Số từ vựng đã cập nhật ghi chú:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_ResUpdated')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="ResultUpdatedWordsCount" Grid.Column="1" FontWeight="Bold" Text="0" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Số từ vựng mới đã tạo:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_ResCreated')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="ResultCreatedWordsCount" Grid.Column="1" FontWeight="Bold" Text="0" />
                         </Grid>
                     </StackPanel>

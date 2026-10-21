@@ -1,5 +1,6 @@
 using Windows.Storage.Pickers;
 using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
@@ -13,6 +14,9 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
 {
     public HomophonesViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
+    private readonly INavigationService _navigationService;
+    private readonly ILearningStorageService _storageService;
+    private readonly Lexora.Application.Interfaces.IVocabularyService _vocabService;
 
     private readonly DispatcherTimer _searchDebounceTimer = new() { Interval = TimeSpan.FromMilliseconds(220) };
 
@@ -20,6 +24,9 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
     {
         ViewModel = App.Current.Services.GetRequiredService<HomophonesViewModel>();
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+        _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
+        _storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
+        _vocabService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IVocabularyService>();
 
         InitializeComponent();
 
@@ -53,6 +60,16 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
     {
         _searchDebounceTimer.Stop();
         ViewModel.SearchQuery = SearchBox.Text;
+    }
+
+    protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        if (e.Parameter is string searchTerm && !string.IsNullOrWhiteSpace(searchTerm))
+        {
+            SearchBox.Text = searchTerm;
+            ViewModel.SearchQuery = searchTerm;
+        }
     }
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
@@ -224,6 +241,8 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
             Word1Example.Text = !string.IsNullOrWhiteSpace(w1.ExampleSentence) ? w1.ExampleSentence : "(Không có câu ví dụ)";
             Word1Translation.Text = w1.ExampleTranslation ?? string.Empty;
             BtnListenWord1.Tag = w1.Term;
+            BtnViewWord1.Tag = w1.Term;
+            BtnSaveWord1.Tag = w1.Term;
         }
 
         if (group.Items.Count > 1)
@@ -235,6 +254,8 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
             Word2Example.Text = !string.IsNullOrWhiteSpace(w2.ExampleSentence) ? w2.ExampleSentence : "(Không có câu ví dụ)";
             Word2Translation.Text = w2.ExampleTranslation ?? string.Empty;
             BtnListenWord2.Tag = w2.Term;
+            BtnViewWord2.Tag = w2.Term;
+            BtnSaveWord2.Tag = w2.Term;
         }
     }
 
@@ -366,6 +387,60 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         if (BtnListenWord2.Tag is string term)
         {
             await ViewModel.PlayAudioAsync(term);
+        }
+    }
+
+    private void ViewInVocab_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is string term && !string.IsNullOrWhiteSpace(term))
+        {
+            _navigationService.Navigate(typeof(VocabularyPage), term);
+        }
+    }
+
+    private async void SaveToStorage_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is string term && !string.IsNullOrWhiteSpace(term))
+        {
+            try
+            {
+                var words = await _vocabService.SearchWordsAsync(search: term, pageSize: 5);
+                var matched = words.FirstOrDefault(w => w.Term.Equals(term, StringComparison.OrdinalIgnoreCase)) ?? words.FirstOrDefault();
+                if (matched != null)
+                {
+                    await _storageService.MoveWordToStorageAsync(matched.Id, StorageAdditionReason.Manual, "Added from Homophones");
+                    var toast = App.Current.Services.GetService<IToastNotificationService>();
+                    toast?.ShowSuccess(string.Format(Loc.GetString("Homophones_SavedToStorageSuccess"), term), Loc.GetString("Common_Success"));
+                }
+                else
+                {
+                    var newWord = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+                        Id: null,
+                        Term: term,
+                        PhoneticUk: null,
+                        PhoneticUs: null,
+                        AudioUkPath: null,
+                        AudioUsPath: null,
+                        Level: CefrLevel.B1,
+                        PrimaryPartOfSpeech: PartOfSpeech.Noun,
+                        Notes: null,
+                        Meanings: new List<WordMeaningCreateDto>
+                        {
+                            new(PartOfSpeech.Noun, "(Đồng âm)", null, null, new List<ExampleSentenceCreateDto>())
+                        },
+                        TopicIds: new List<Guid>(),
+                        ExamTagIds: new List<Guid>()
+                    ));
+                    await _storageService.MoveWordToStorageAsync(newWord.Id, StorageAdditionReason.Manual, "Added from Homophones");
+                    var toast = App.Current.Services.GetService<IToastNotificationService>();
+                    toast?.ShowSuccess(string.Format(Loc.GetString("Homophones_SavedToStorageSuccess"), term), Loc.GetString("Common_Success"));
+                }
+            }
+            catch (Exception ex)
+            {
+                var toast = App.Current.Services.GetService<IToastNotificationService>();
+                toast?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+            }
         }
     }
 }

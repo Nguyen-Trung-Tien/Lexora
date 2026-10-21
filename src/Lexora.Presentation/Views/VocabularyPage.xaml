@@ -773,6 +773,12 @@
                                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_BtnTest')}" FontSize="12" FontWeight="SemiBold" />
                                         </StackPanel>
                                     </Button>
+                                    <Button Click="OpenKnowledgeGraphPopup_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_OpenKnowledgeGraphPopup')}" CornerRadius="8" Padding="10,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE7B3;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_OpenKnowledgeGraphPopup')}" FontSize="12" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                    </Button>
                                     <Button Click="OpenKnowledgeGraph_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_Title')}" CornerRadius="8" Padding="10,6">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE81E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -814,6 +820,21 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </StackPanel>
+
+                            <!-- Related Homophones Linking Badge -->
+                            <Button Click="ViewRelatedHomophones_Click"
+                                    Visibility="{x:Bind ViewModel.HasRelatedHomophoneGroup, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8" Padding="12,6" HorizontalAlignment="Left" Margin="0,4,0,0">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_ViewRelatedHomophones')}" FontSize="12" FontWeight="SemiBold" />
+                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                        <TextBlock Text="{x:Bind ViewModel.RelatedHomophoneGroup.Title, Mode=OneWay}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                    </Border>
+                                </StackPanel>
+                            </Button>
 
                             <MenuFlyoutSeparator />
 

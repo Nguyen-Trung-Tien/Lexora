@@ -693,6 +693,14 @@
                     <Button Content="{x:Bind Loc.GetString('Test_ReviewWeakWords')}" Command="{x:Bind ViewModel.RetestWeakWordsCommand}"
                             Visibility="{x:Bind ViewModel.WeakWordsList.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}"
                             Padding="18,10" CornerRadius="8" />
+                    <Button Command="{x:Bind ViewModel.SaveWeakWordsToStorageCommand}"
+                            Visibility="{x:Bind ViewModel.WeakWordsList.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}"
+                            Padding="18,10" CornerRadius="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8B7;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_SaveWeakWordsToStorage')}" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
                     <Button Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.ReviewWeakWordsInSpacedRepetitionCommand}" Padding="22,10" CornerRadius="8">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE895;" FontSize="15" />

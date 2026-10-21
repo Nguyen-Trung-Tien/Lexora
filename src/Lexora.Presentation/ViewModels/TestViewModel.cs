@@ -20,6 +20,7 @@ public partial class TestViewModel : ObservableObject, IDisposable
     private readonly ILocalizationService _localizationService;
     private readonly IUserPreferencesService _preferencesService;
     private readonly IAdaptiveQuizService? _adaptiveQuizService;
+    private readonly ILearningStorageService? _storageService;
 
     private Guid _sessionId;
     private List<TestQuestionDto> _allQuestions = new();
@@ -181,7 +182,8 @@ public partial class TestViewModel : ObservableObject, IDisposable
         INavigationService navService,
         ILocalizationService localizationService,
         IUserPreferencesService preferencesService,
-        IAdaptiveQuizService? adaptiveQuizService = null)
+        IAdaptiveQuizService? adaptiveQuizService = null,
+        ILearningStorageService? storageService = null)
     {
         _testService = testService;
         _vocabService = vocabService;
@@ -191,6 +193,7 @@ public partial class TestViewModel : ObservableObject, IDisposable
         _localizationService = localizationService;
         _preferencesService = preferencesService;
         _adaptiveQuizService = adaptiveQuizService;
+        _storageService = storageService;
     }
 
     [RelayCommand]
@@ -908,8 +911,33 @@ public partial class TestViewModel : ObservableObject, IDisposable
     [RelayCommand]
     public void ReviewWeakWordsInSpacedRepetition()
     {
-        // Navigate directly to Spaced Review Page
-        _navService.Navigate(typeof(Views.ReviewPage));
+        var weakIds = WeakWordsList.Select(w => w.Id).ToList();
+        if (weakIds.Count > 0)
+        {
+            _navService.Navigate(typeof(Views.ReviewPage), weakIds);
+        }
+        else
+        {
+            _navService.Navigate(typeof(Views.ReviewPage));
+        }
+    }
+
+    [RelayCommand]
+    public async Task SaveWeakWordsToStorageAsync()
+    {
+        if (_storageService == null || WeakWordsList.Count == 0) return;
+        try
+        {
+            var weakIds = WeakWordsList.Select(w => w.Id).ToList();
+            var count = await _storageService.MoveWordsToStorageAsync(weakIds, StorageAdditionReason.MultipleErrors, "Failed during test session");
+            StatusSeverity = InfoBarSeverity.Success;
+            StatusMessage = string.Format(_localizationService.GetString("Test_SavedWeakWordsToStorageSuccess"), count);
+        }
+        catch (Exception ex)
+        {
+            StatusSeverity = InfoBarSeverity.Error;
+            StatusMessage = ex.Message;
+        }
     }
 
     [RelayCommand]
