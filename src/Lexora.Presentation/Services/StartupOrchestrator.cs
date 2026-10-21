@@ -47,6 +47,9 @@ public class StartupOrchestrator : IStartupOrchestrator
             // Step 1: Services setup & starting state
             cancellationToken.ThrowIfCancellationRequested();
             SetState(StartupState.Loading);
+            await Task.Delay(200, cancellationToken);
+
+            cancellationToken.ThrowIfCancellationRequested();
             SetProgress(0.35);
             SetStatus(loc?.GetString("Splash_StatusCheckingDb") ?? "Checking SQLite database & schema...");
 
@@ -57,11 +60,17 @@ public class StartupOrchestrator : IStartupOrchestrator
                 await dbInitializer.InitializeAsync(cancellationToken);
             }
 
+            await Task.Delay(250, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             SetProgress(0.70);
 
             // Step 3: Load Settings & Environment
             SetStatus(loc?.GetString("Splash_StatusLoadingData") ?? "Loading study data & preferences...");
+            await Task.Delay(250, cancellationToken);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            SetProgress(0.88);
+            await Task.Delay(180, cancellationToken);
 
             // Step 4: Ready
             cancellationToken.ThrowIfCancellationRequested();

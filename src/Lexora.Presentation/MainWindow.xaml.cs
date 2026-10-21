@@ -273,7 +273,7 @@ public sealed partial class MainWindow : Window
             // Run entrance animation and backend initialization concurrently
             var entranceTask = SplashOverlay.PlayEntranceAsync();
             var minDisplayTask = SplashOverlay.IsAnimationEnabled
-                ? Task.Delay(850, ct)
+                ? Task.Delay(1350, ct)
                 : Task.Delay(600, ct);
             var initTask = _startupOrchestrator.InitializeAppAsync(ct);
 
@@ -285,8 +285,10 @@ public sealed partial class MainWindow : Window
 
             if (_startupOrchestrator.CurrentState == StartupState.Ready)
             {
-                // Ensure entrance animation and minimal display timing finish smoothly
+                // Ensure entrance animation, minimal display timing, and progress animation finish smoothly
                 await Task.WhenAll(entranceTask, minDisplayTask);
+                await SplashOverlay.WaitForProgressCompletionAsync(ct);
+                await Task.Delay(150, ct);
                 await DispatcherQueue.EnsureOnUIThreadAsync();
 
                 // Pre-navigate to ShellPage while splash is still covering

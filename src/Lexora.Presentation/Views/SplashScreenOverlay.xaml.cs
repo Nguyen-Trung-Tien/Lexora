@@ -34,6 +34,11 @@ public sealed partial class SplashScreenOverlay : UserControl
     private TaskCompletionSource<bool>? _entranceTcs;
     private TaskCompletionSource<bool>? _exitTcs;
 
+    private double _currentVisualProgress = 0.12;
+    private double _targetProgress = 0.12;
+    private readonly DispatcherTimer _progressAnimationTimer = new();
+    private TaskCompletionSource<bool>? _progressCompletionTcs;
+
     public event EventHandler? RetryRequested;
     public event EventHandler? ExitRequested;
 
@@ -55,6 +60,9 @@ public sealed partial class SplashScreenOverlay : UserControl
             }
         }
         UpdateLocalizedText();
+
+        _progressAnimationTimer.Interval = TimeSpan.FromMilliseconds(16);
+        _progressAnimationTimer.Tick += OnProgressAnimationTick;
 
         EntranceStoryboard.Completed += (s, e) => _entranceTcs?.TrySetResult(true);
         ExitStoryboard.Completed += (s, e) =>
@@ -89,6 +97,71 @@ public sealed partial class SplashScreenOverlay : UserControl
             return;
         }
 
+        _targetProgress = Math.Clamp(progress, 0.0, 1.0);
+
+        if (!IsAnimationEnabled)
+        {
+            _currentVisualProgress = _targetProgress;
+            RenderProgress(_currentVisualProgress);
+            if (_currentVisualProgress >= 1.0)
+            {
+                _progressCompletionTcs?.TrySetResult(true);
+            }
+            return;
+        }
+
+        if (_targetProgress >= 1.0 && (_progressCompletionTcs == null || _progressCompletionTcs.Task.IsCompleted))
+        {
+            _progressCompletionTcs = new TaskCompletionSource<bool>();
+        }
+
+        if (!_progressAnimationTimer.IsEnabled)
+        {
+            _progressAnimationTimer.Start();
+        }
+    }
+
+    private void OnProgressAnimationTick(object? sender, object e)
+    {
+        var diff = _targetProgress - _currentVisualProgress;
+        if (Math.Abs(diff) < 0.003)
+        {
+            _currentVisualProgress = _targetProgress;
+            RenderProgress(_currentVisualProgress);
+            if (_currentVisualProgress >= 1.0)
+            {
+                _progressAnimationTimer.Stop();
+                _progressCompletionTcs?.TrySetResult(true);
+            }
+            else if (Math.Abs(_targetProgress - _currentVisualProgress) < 0.001)
+            {
+                _progressAnimationTimer.Stop();
+            }
+            return;
+        }
+
+        // Fluid ease-out step for smooth visual motion
+        double step = Math.Max(0.006, Math.Abs(diff) * 0.08);
+        if (diff > 0)
+        {
+            _currentVisualProgress = Math.Min(_targetProgress, _currentVisualProgress + step);
+        }
+        else
+        {
+            _currentVisualProgress = Math.Max(_targetProgress, _currentVisualProgress - step);
+        }
+
+        RenderProgress(_currentVisualProgress);
+
+        if (_currentVisualProgress >= 1.0)
+        {
+            _progressAnimationTimer.Stop();
+            _progressCompletionTcs?.TrySetResult(true);
+        }
+    }
+
+    private void RenderProgress(double progress)
+    {
         var percent = Math.Clamp(progress, 0.0, 1.0);
         StartupProgressBar.Value = percent * 100.0;
         ProgressPercentageTextBlock.Text = $"{(int)Math.Round(percent * 100)}%";
@@ -97,6 +170,20 @@ public sealed partial class SplashScreenOverlay : UserControl
         UpdateStepIndicator(Step2Dot, Step2TextBlock, isDone: percent >= 0.70, isCurrent: percent >= 0.35 && percent < 0.70);
         UpdateStepIndicator(Step3Dot, Step3TextBlock, isDone: percent >= 0.98, isCurrent: percent >= 0.70 && percent < 0.98);
         UpdateStepIndicator(Step4Dot, Step4TextBlock, isDone: percent >= 1.0, isCurrent: percent >= 0.98);
+    }
+
+    public async Task WaitForProgressCompletionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_currentVisualProgress >= 1.0) return;
+
+        if (_progressCompletionTcs == null || _progressCompletionTcs.Task.IsCompleted)
+        {
+            _progressCompletionTcs = new TaskCompletionSource<bool>();
+        }
+
+        using var reg = cancellationToken.Register(() => _progressCompletionTcs.TrySetCanceled());
+        var timeout = Task.Delay(2500, cancellationToken);
+        await Task.WhenAny(_progressCompletionTcs.Task, timeout);
     }
 
     private static void UpdateStepIndicator(Microsoft.UI.Xaml.Shapes.Ellipse dot, TextBlock text, bool isDone, bool isCurrent)
@@ -204,6 +291,10 @@ public sealed partial class SplashScreenOverlay : UserControl
 
         LoadingContainer.Visibility = Visibility.Visible;
         ErrorCard.Visibility = Visibility.Collapsed;
+
+        _currentVisualProgress = 0.12;
+        _targetProgress = 0.12;
+        RenderProgress(0.12);
 
         if (!IsAnimationEnabled)
         {
