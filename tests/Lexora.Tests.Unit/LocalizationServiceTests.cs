@@ -168,6 +168,8 @@ public class LocalizationServiceTests
     [InlineData("Nav_Help", "Trung tâm hướng dẫn", "Help & User Guide")]
     [InlineData("Help_HeroBadge", "TRUNG TÂM HƯỚNG DẪN & TRỢ GIÚP", "HELP & USER GUIDE HUB")]
     [InlineData("Help_Title", "Hướng dẫn sử dụng Lexora", "Lexora User Guide & Documentation")]
+    [InlineData("Help_ScrollLeft", "Cuộn danh mục sang trái", "Scroll categories left")]
+    [InlineData("Help_ScrollRight", "Cuộn danh mục sang phải", "Scroll categories right")]
     [InlineData("Dashboard_Help_Title", "Trợ giúp: Bảng tổng quan", "Quick Help: Dashboard")]
     [InlineData("Review_Help_Title", "Trợ giúp: Ôn tập Spaced Repetition", "Quick Help: Spaced Repetition")]
     public void NewlyAddedKeys_MustReturnAccurateTranslations(string key, string expectedVi, string expectedEn)

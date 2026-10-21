@@ -63,51 +63,86 @@
                     </Grid>
                 </Border>
 
-                <!-- 2. CATEGORY FILTER PILLS -->
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                              HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                    <StackPanel x:Name="CategoryPillsPanel" Orientation="Horizontal" Spacing="8">
-                        <Button x:Name="FilterBtnAll" Click="FilterButton_Click" Tag="All" CornerRadius="8" Padding="14,6">
-                            <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_All')}" FontWeight="SemiBold" />
-                        </Button>
-                        <Button x:Name="FilterBtnGettingStarted" Click="FilterButton_Click" Tag="GettingStarted" CornerRadius="8" Padding="14,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE80F;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_GettingStarted')}" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
-                        <Button x:Name="FilterBtnVocabulary" Click="FilterButton_Click" Tag="Vocabulary" CornerRadius="8" Padding="14,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE8D2;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_Vocabulary')}" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
-                        <Button x:Name="FilterBtnSpacedRepetition" Click="FilterButton_Click" Tag="SpacedRepetition" CornerRadius="8" Padding="14,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE81C;" FontSize="12" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_SpacedRepetition')}" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
-                        <Button x:Name="FilterBtnListeningLab" Click="FilterButton_Click" Tag="ListeningLab" CornerRadius="8" Padding="14,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE767;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_ListeningLab')}" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
-                        <Button x:Name="FilterBtnTestMode" Click="FilterButton_Click" Tag="TestMode" CornerRadius="8" Padding="14,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE7BE;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_TestMode')}" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
-                        <Button x:Name="FilterBtnBackupSettings" Click="FilterButton_Click" Tag="BackupAndSettings" CornerRadius="8" Padding="14,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE713;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_BackupSettings')}" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </ScrollViewer>
+                <!-- 2. CATEGORY FILTER PILLS (FLUENT 2 STRIP WITH CHEVRON SCROLLING) -->
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6" VerticalAlignment="Center">
+                    <!-- Scroll Left Chevron Button -->
+                    <Button x:Name="ScrollPillsLeftBtn" Grid.Column="0"
+                            Click="ScrollPillsLeft_Click"
+                            Width="32" Height="36" Padding="0" CornerRadius="8"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            VerticalAlignment="Center"
+                            Visibility="Collapsed"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ScrollLeft')}">
+                        <FontIcon Glyph="&#xE76B;" FontSize="11" />
+                    </Button>
+
+                    <ScrollViewer x:Name="CategoryScrollViewer" Grid.Column="1"
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  HorizontalScrollMode="Enabled"
+                                  VerticalScrollMode="Disabled"
+                                  PointerWheelChanged="CategoryScrollViewer_PointerWheelChanged"
+                                  ViewChanged="CategoryScrollViewer_ViewChanged"
+                                  SizeChanged="CategoryScrollViewer_SizeChanged"
+                                  Padding="0,2,0,4">
+                        <StackPanel x:Name="CategoryPillsPanel" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button x:Name="FilterBtnAll" Click="FilterButton_Click" Tag="All" CornerRadius="8" Padding="14,6">
+                                <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_All')}" FontWeight="SemiBold" />
+                            </Button>
+                            <Button x:Name="FilterBtnGettingStarted" Click="FilterButton_Click" Tag="GettingStarted" CornerRadius="8" Padding="14,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE80F;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_GettingStarted')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="FilterBtnVocabulary" Click="FilterButton_Click" Tag="Vocabulary" CornerRadius="8" Padding="14,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE8D2;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_Vocabulary')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="FilterBtnSpacedRepetition" Click="FilterButton_Click" Tag="SpacedRepetition" CornerRadius="8" Padding="14,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE81C;" FontSize="12" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_SpacedRepetition')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="FilterBtnListeningLab" Click="FilterButton_Click" Tag="ListeningLab" CornerRadius="8" Padding="14,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE767;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_ListeningLab')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="FilterBtnTestMode" Click="FilterButton_Click" Tag="TestMode" CornerRadius="8" Padding="14,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE7BE;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_TestMode')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="FilterBtnBackupSettings" Click="FilterButton_Click" Tag="BackupAndSettings" CornerRadius="8" Padding="14,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE713;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_BackupSettings')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Scroll Right Chevron Button -->
+                    <Button x:Name="ScrollPillsRightBtn" Grid.Column="2"
+                            Click="ScrollPillsRight_Click"
+                            Width="32" Height="36" Padding="0" CornerRadius="8"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            VerticalAlignment="Center"
+                            Visibility="Collapsed"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ScrollRight')}">
+                        <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                    </Button>
+                </Grid>
 
                 <!-- 3. LIST OF GUIDE CARDS -->
                 <ItemsControl ItemsSource="{x:Bind ViewModel.FilteredGuides, Mode=OneWay}">

@@ -3,6 +3,7 @@ using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.Foundation;
 
@@ -64,6 +65,50 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
     private void HelpPage_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateFilterPillsState();
+        DispatcherQueue.TryEnqueue(UpdateScrollButtonsVisibility);
+    }
+
+    private void UpdateScrollButtonsVisibility()
+    {
+        if (CategoryScrollViewer == null || ScrollPillsLeftBtn == null || ScrollPillsRightBtn == null) return;
+
+        double offset = CategoryScrollViewer.HorizontalOffset;
+        double maxOffset = CategoryScrollViewer.ScrollableWidth;
+
+        ScrollPillsLeftBtn.Visibility = offset > 4 ? Visibility.Visible : Visibility.Collapsed;
+        ScrollPillsRightBtn.Visibility = (maxOffset - offset) > 4 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void CategoryScrollViewer_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+    {
+        UpdateScrollButtonsVisibility();
+    }
+
+    private void CategoryScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateScrollButtonsVisibility();
+    }
+
+    private void CategoryScrollViewer_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    {
+        var delta = e.GetCurrentPoint(CategoryScrollViewer).Properties.MouseWheelDelta;
+        if (delta != 0)
+        {
+            CategoryScrollViewer.ChangeView(CategoryScrollViewer.HorizontalOffset - delta, null, null, true);
+            e.Handled = true;
+        }
+    }
+
+    private void ScrollPillsLeft_Click(object sender, RoutedEventArgs e)
+    {
+        if (CategoryScrollViewer == null) return;
+        CategoryScrollViewer.ChangeView(Math.Max(0, CategoryScrollViewer.HorizontalOffset - 220), null, null, false);
+    }
+
+    private void ScrollPillsRight_Click(object sender, RoutedEventArgs e)
+    {
+        if (CategoryScrollViewer == null) return;
+        CategoryScrollViewer.ChangeView(Math.Min(CategoryScrollViewer.ScrollableWidth, CategoryScrollViewer.HorizontalOffset + 220), null, null, false);
     }
 
     public void OnLanguageChanged()
@@ -71,6 +116,7 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         ViewModel.RebuildDisplayItems();
         ViewModel.ApplyFilter();
         UpdateFilterPillsState();
+        DispatcherQueue.TryEnqueue(UpdateScrollButtonsVisibility);
     }
 
     public void OnThemeChanged()
@@ -84,6 +130,7 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         {
             ViewModel.SelectCategory(category);
             UpdateFilterPillsState();
+            btn.StartBringIntoView();
         }
     }
 
