@@ -11,7 +11,7 @@
 
     <ContentDialog.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-        <x:Double x:Key="ContentDialogMaxWidth">680</x:Double>
+        <x:Double x:Key="ContentDialogMaxWidth">880</x:Double>
         <x:Double x:Key="ContentDialogMinWidth">480</x:Double>
     </ContentDialog.Resources>
 
@@ -26,15 +26,15 @@
                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                               HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <ScrollViewer MaxHeight="560" HorizontalAlignment="Stretch"
+    <ScrollViewer MaxHeight="580" HorizontalAlignment="Stretch"
                   VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   Padding="0,4,12,8">
-        <Grid MaxWidth="620" HorizontalAlignment="Stretch" RowDefinitions="Auto,*" RowSpacing="14">
+        <Grid MaxWidth="840" HorizontalAlignment="Stretch" RowDefinitions="Auto,*" RowSpacing="14">
         <!-- Step Breadcrumbs Header -->
         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -167,7 +167,8 @@
                             </Button>
                         </Grid>
                         <TextBox x:Name="InputTextBox"
-                                 Height="130"
+                                 MinHeight="200"
+                                 Height="220"
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
                                  TextChanged="InputTextBox_TextChanged"

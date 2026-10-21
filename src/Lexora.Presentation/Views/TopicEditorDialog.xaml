@@ -12,7 +12,7 @@
 
 
     <ContentDialog.Resources>
-        <x:Double x:Key="ContentDialogMaxWidth">540</x:Double>
+        <x:Double x:Key="ContentDialogMaxWidth">600</x:Double>
         <x:Double x:Key="ContentDialogMinWidth">440</x:Double>
     </ContentDialog.Resources>
 
@@ -27,7 +27,7 @@
                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                               HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
         </DataTemplate>
     </ContentDialog.TitleTemplate>
@@ -52,7 +52,7 @@
                     <TextBox x:Name="DescriptionTextBox"
                              Header="{x:Bind Loc.GetString('TopicEditor_HeaderDesc')}"
                              PlaceholderText="{x:Bind Loc.GetString('TopicEditor_PlaceholderDesc')}"
-                             TextWrapping="Wrap" AcceptsReturn="True" Height="72" />
+                             TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72" MaxHeight="140" />
 
                     <!-- Icon Selector -->
                     <StackPanel Spacing="8">

@@ -37,10 +37,10 @@
                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel VerticalAlignment="Center" MaxWidth="320">
+                    <StackPanel VerticalAlignment="Center" MaxWidth="440">
                         <TextBlock x:Name="PageTitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Title')}" FontWeight="Bold" FontSize="17" TextTrimming="CharacterEllipsis" />
                         <TextBlock x:Name="PageSubtitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Subtitle')}"
-                                   FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                   FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                     </StackPanel>
                 </StackPanel>
 
@@ -48,7 +48,8 @@
                 <AutoSuggestBox x:Name="HeaderSearchBox"
                                 Grid.Column="1"
                                 Margin="16,0,16,0"
-                                MaxWidth="280"
+                                MinWidth="180"
+                                MaxWidth="360"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
                                 PlaceholderText="{x:Bind Loc.GetString('KnowledgeGraph_SearchPlaceholder')}"
@@ -328,10 +329,10 @@
 
                             <!-- Middle row: Term, IPA, Meaning -->
                             <StackPanel Grid.Row="1" Spacing="4">
-                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Term, Mode=OneWay}" FontSize="28" FontWeight="Bold" />
-                                    <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Ipa, Mode=OneWay}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="15" VerticalAlignment="Center" />
-                                </StackPanel>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Term, Mode=OneWay}" FontSize="28" FontWeight="Bold" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Ipa, Mode=OneWay}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="15" VerticalAlignment="Center" />
+                                </Grid>
                                 <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningVi, Mode=OneWay}" FontSize="15" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
                                 <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningEn, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" FontStyle="Italic"
                                            Visibility="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningEn, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" />

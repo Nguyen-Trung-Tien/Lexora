@@ -10,7 +10,7 @@
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
-        <x:Double x:Key="ContentDialogMaxWidth">880</x:Double>
+        <x:Double x:Key="ContentDialogMaxWidth">960</x:Double>
         <x:Double x:Key="ContentDialogMinWidth">480</x:Double>
     </ContentDialog.Resources>
 
@@ -18,13 +18,13 @@
         <DataTemplate>
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="24" Height="24" VerticalAlignment="Center" />
-                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
     <Grid x:Name="DialogContentRoot">
-        <ScrollViewer MaxHeight="520"
+        <ScrollViewer MaxHeight="580"
                       HorizontalAlignment="Stretch"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
@@ -50,7 +50,8 @@
                             <TextBox x:Name="TermTextBox"
                                      Header="{x:Bind Loc.GetString('WordEditor_HeaderTerm')}"
                                      PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderTerm')}"
-                                     FontWeight="SemiBold" />
+                                     FontWeight="SemiBold"
+                                     TextWrapping="Wrap" />
                             <ComboBox Grid.Column="1" x:Name="LevelComboBox"
                                       Header="{x:Bind Loc.GetString('WordEditor_HeaderLevel')}"
                                       HorizontalAlignment="Stretch">
@@ -72,7 +73,10 @@
                                      PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderPhoneticUs')}" />
                             <TextBox Grid.Column="2" x:Name="NotesTextBox"
                                      Header="{x:Bind Loc.GetString('WordEditor_HeaderNotes')}"
-                                     PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderNotes')}" />
+                                     PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderNotes')}"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     MinHeight="38" />
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -209,17 +213,26 @@
                                                             <TextBox Header="{Binding HeaderDefinitionVi}"
                                                                      Text="{Binding DefinitionVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                      PlaceholderText="{Binding PlaceholderDefinitionVi}"
-                                                                     FontWeight="Medium" />
+                                                                     FontWeight="Medium"
+                                                                     TextWrapping="Wrap"
+                                                                     AcceptsReturn="True"
+                                                                     MinHeight="44" />
 
                                                             <!-- English Definition & Nuance/Explanation -->
                                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                                                                 <TextBox Header="{Binding HeaderDefinitionEn}"
                                                                          Text="{Binding DefinitionEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                         PlaceholderText="{Binding PlaceholderDefinitionEn}" />
+                                                                         PlaceholderText="{Binding PlaceholderDefinitionEn}"
+                                                                         TextWrapping="Wrap"
+                                                                         AcceptsReturn="True"
+                                                                         MinHeight="42" />
                                                                 <TextBox Grid.Column="1"
                                                                          Header="{Binding HeaderExplanation}"
                                                                          Text="{Binding Explanation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                         PlaceholderText="{Binding PlaceholderExplanation}" />
+                                                                         PlaceholderText="{Binding PlaceholderExplanation}"
+                                                                         TextWrapping="Wrap"
+                                                                         AcceptsReturn="True"
+                                                                         MinHeight="42" />
                                                             </Grid>
 
                                                             <!-- Examples for this meaning -->
@@ -234,10 +247,16 @@
                                                                                 </Border>
                                                                                 <TextBox Grid.Column="1"
                                                                                          PlaceholderText="{Binding PlaceholderExampleEn}"
-                                                                                         Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                         Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                                         TextWrapping="Wrap"
+                                                                                         AcceptsReturn="True"
+                                                                                         MinHeight="38" />
                                                                                 <TextBox Grid.Column="2"
                                                                                          PlaceholderText="{Binding PlaceholderExampleVi}"
-                                                                                         Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                         Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                                         TextWrapping="Wrap"
+                                                                                         AcceptsReturn="True"
+                                                                                         MinHeight="38" />
                                                                                 <Button Grid.Column="3"
                                                                                         ToolTipService.ToolTip="{Binding TooltipDeleteExample}"
                                                                                         Click="DeleteExampleButton_Click"
