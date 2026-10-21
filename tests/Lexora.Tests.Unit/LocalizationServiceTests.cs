@@ -180,6 +180,10 @@ public class LocalizationServiceTests
     [InlineData("Help_ScrollRight", "Cuộn danh mục sang phải", "Scroll categories right")]
     [InlineData("Dashboard_Help_Title", "Trợ giúp: Bảng tổng quan", "Quick Help: Dashboard")]
     [InlineData("Review_Help_Title", "Trợ giúp: Ôn tập Spaced Repetition", "Quick Help: Spaced Repetition")]
+    [InlineData("Homophones_Toast_GroupSaved", "Đã thêm nhóm từ '{0}' thành công!", "Homophone group '{0}' added successfully!")]
+    [InlineData("KnowledgeGraph_ExportSuccess", "Đã xuất đồ thị tri thức sang '{0}' thành công!", "Knowledge graph exported to '{0}' successfully!")]
+    [InlineData("SmartImport_Toast_Success", "Đã nhập thành công {0} mục dữ liệu!", "Successfully imported {0} items!")]
+    [InlineData("Review_UndoSuccess", "Đã hoàn tác đánh giá thẻ ôn tập vừa rồi.", "Last card rating undone successfully.")]
     public void NewlyAddedKeys_MustReturnAccurateTranslations(string key, string expectedVi, string expectedEn)
     {
         _loc.SetLanguage("vi-VN");

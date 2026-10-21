@@ -20,6 +20,22 @@
         <x:Double x:Key="ContentDialogMinWidth">560</x:Double>
     </ContentDialog.Resources>
 
+    <ContentDialog.TitleTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Border Width="32" Height="32" CornerRadius="8"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1">
+                    <FontIcon Glyph="&#xF1AD;" FontSize="16"
+                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="620">
         <StackPanel Spacing="16" Margin="0,8,0,0">
 

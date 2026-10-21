@@ -80,6 +80,10 @@ public class LocalizationService : ILocalizationService
             ["Homophones_ComparisonTitle"] = "Đối chiếu các từ thành phần",
             ["Homophones_VietnameseMeaning"] = "Nghĩa tiếng Việt",
             ["Homophones_ContextualExample"] = "Câu ví dụ trong ngữ cảnh",
+            ["Homophones_Toast_GroupSaved"] = "Đã thêm nhóm từ '{0}' thành công!",
+            ["Homophones_Toast_GroupUpdated"] = "Đã cập nhật nhóm từ '{0}' thành công!",
+            ["Homophones_Toast_GroupDeleted"] = "Đã xóa nhóm từ '{0}' thành công!",
+            ["Homophones_Toast_ExportSuccess"] = "Đã xuất tệp '{0}' thành công!",
 
             // Common Actions
             ["Action_Edit"] = "Chỉnh sửa",
@@ -365,6 +369,7 @@ public class LocalizationService : ILocalizationService
             // Spaced Review
             ["Review_Undo"] = "Hoàn tác",
             ["Review_UndoTooltip"] = "Hoàn tác đánh giá thẻ vừa rồi (Ctrl+Z)",
+            ["Review_UndoSuccess"] = "Đã hoàn tác đánh giá thẻ ôn tập vừa rồi.",
             ["Review_CardProgress"] = "Thẻ ôn tập",
             ["Review_FlipCard"] = "Nhấn Phím Cách (Space) hoặc Click để lật thẻ",
             ["Review_CompletedTitle"] = "Hoàn Thành Ôn Tập Hôm Nay! 🎉",
@@ -1405,10 +1410,12 @@ public class LocalizationService : ILocalizationService
             ["KnowledgeGraph_ExportCsv"] = "Xuất Bảng tính Quan hệ (.csv)",
             ["KnowledgeGraph_ExportMarkdown"] = "Xuất Markdown Mindmap (.md)",
             ["KnowledgeGraph_TermCopied"] = "Đã sao chép từ '{0}' vào bộ nhớ tạm",
+            ["KnowledgeGraph_ExportSuccess"] = "Đã xuất đồ thị tri thức sang '{0}' thành công!",
             ["KnowledgeGraph_CopyTerm"] = "Sao chép từ",
             ["KnowledgeGraph_ZoomIn"] = "Phóng to",
             ["KnowledgeGraph_ZoomOut"] = "Thu nhỏ",
             ["KnowledgeGraph_ResetZoom"] = "Đặt lại tỉ lệ",
+            ["SmartImport_Toast_Success"] = "Đã nhập thành công {0} mục dữ liệu!",
 
             // Smart Import Knowledge Graph
             ["KnowledgeGraph_Import_Title"] = "Nhập thông minh — Mạng lưới Ngữ nghĩa",
@@ -1715,6 +1722,10 @@ public class LocalizationService : ILocalizationService
             ["Homophones_ComparisonTitle"] = "Side-by-Side Word Comparison",
             ["Homophones_VietnameseMeaning"] = "Vietnamese Definition",
             ["Homophones_ContextualExample"] = "Contextual Example Sentence",
+            ["Homophones_Toast_GroupSaved"] = "Homophone group '{0}' added successfully!",
+            ["Homophones_Toast_GroupUpdated"] = "Homophone group '{0}' updated successfully!",
+            ["Homophones_Toast_GroupDeleted"] = "Homophone group '{0}' deleted successfully!",
+            ["Homophones_Toast_ExportSuccess"] = "Exported '{0}' successfully!",
 
             // Common Actions
             ["Action_Edit"] = "Edit",
@@ -2000,6 +2011,7 @@ public class LocalizationService : ILocalizationService
             // Spaced Review
             ["Review_Undo"] = "Undo",
             ["Review_UndoTooltip"] = "Undo last card rating (Ctrl+Z)",
+            ["Review_UndoSuccess"] = "Last card rating undone successfully.",
             ["Review_CardProgress"] = "Card",
             ["Review_FlipCard"] = "Press Spacebar or Click to Flip Card",
             ["Review_CompletedTitle"] = "Today's Review Completed! 🎉",
@@ -3041,10 +3053,12 @@ public class LocalizationService : ILocalizationService
             ["KnowledgeGraph_ExportCsv"] = "Export CSV Relations (.csv)",
             ["KnowledgeGraph_ExportMarkdown"] = "Export Markdown Mindmap (.md)",
             ["KnowledgeGraph_TermCopied"] = "Copied '{0}' to clipboard",
+            ["KnowledgeGraph_ExportSuccess"] = "Knowledge graph exported to '{0}' successfully!",
             ["KnowledgeGraph_CopyTerm"] = "Copy Term",
             ["KnowledgeGraph_ZoomIn"] = "Zoom In",
             ["KnowledgeGraph_ZoomOut"] = "Zoom Out",
             ["KnowledgeGraph_ResetZoom"] = "Reset Scale",
+            ["SmartImport_Toast_Success"] = "Successfully imported {0} items!",
 
             // Smart Import Knowledge Graph
             ["KnowledgeGraph_Import_Title"] = "Smart Import — Semantic Knowledge Graph",

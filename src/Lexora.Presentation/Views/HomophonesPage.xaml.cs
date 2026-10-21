@@ -17,6 +17,7 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
     private readonly INavigationService _navigationService;
     private readonly ILearningStorageService _storageService;
     private readonly Lexora.Application.Interfaces.IVocabularyService _vocabService;
+    private readonly IToastNotificationService? _toastService;
 
     private readonly DispatcherTimer _searchDebounceTimer = new() { Interval = TimeSpan.FromMilliseconds(220) };
 
@@ -27,6 +28,7 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
         _storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
         _vocabService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IVocabularyService>();
+        _toastService = App.Current.Services.GetService<IToastNotificationService>();
 
         InitializeComponent();
 
@@ -269,8 +271,16 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         var result = await dialog.ShowAsyncSafe();
         if (result == ContentDialogResult.Primary && dialog.CreatedGroupResult != null)
         {
-            await ViewModel.SaveGroupAsync(dialog.CreatedGroupResult);
-            UpdateDetailView();
+            try
+            {
+                await ViewModel.SaveGroupAsync(dialog.CreatedGroupResult);
+                UpdateDetailView();
+                _toastService?.ShowSuccess(string.Format(Loc.GetString("Homophones_Toast_GroupSaved"), dialog.CreatedGroupResult.Title));
+            }
+            catch (Exception ex)
+            {
+                _toastService?.ShowError(ex.Message);
+            }
         }
     }
 
@@ -287,8 +297,16 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         var result = await dialog.ShowAsyncSafe();
         if (result == ContentDialogResult.Primary && dialog.UpdatedGroupResult != null)
         {
-            await ViewModel.UpdateGroupAsync(dialog.UpdatedGroupResult);
-            UpdateDetailView();
+            try
+            {
+                await ViewModel.UpdateGroupAsync(dialog.UpdatedGroupResult);
+                UpdateDetailView();
+                _toastService?.ShowSuccess(string.Format(Loc.GetString("Homophones_Toast_GroupUpdated"), dialog.UpdatedGroupResult.Title));
+            }
+            catch (Exception ex)
+            {
+                _toastService?.ShowError(ex.Message);
+            }
         }
     }
 
@@ -310,8 +328,17 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         var result = await confirmDialog.ShowAsyncSafe();
         if (result == ContentDialogResult.Primary)
         {
-            await ViewModel.DeleteGroupAsync(group.Id);
-            UpdateDetailView();
+            try
+            {
+                var title = group.Title;
+                await ViewModel.DeleteGroupAsync(group.Id);
+                UpdateDetailView();
+                _toastService?.ShowSuccess(string.Format(Loc.GetString("Homophones_Toast_GroupDeleted"), title));
+            }
+            catch (Exception ex)
+            {
+                _toastService?.ShowError(ex.Message);
+            }
         }
     }
 
@@ -327,6 +354,8 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         {
             await ViewModel.LoadGroupsAsync();
             UpdateDetailView();
+            var count = (dialog.CommitResult?.TotalImported ?? 0) + (dialog.CommitResult?.TotalUpdated ?? 0);
+            _toastService?.ShowSuccess(string.Format(Loc.GetString("SmartImport_Toast_Success"), count));
         }
     }
 
@@ -360,11 +389,13 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
             if (file != null)
             {
                 await Windows.Storage.FileIO.WriteTextAsync(file, content);
+                _toastService?.ShowSuccess(string.Format(Loc.GetString("Homophones_Toast_ExportSuccess"), file.Name));
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[HomophonesPage] ExportToFileAsync error: {ex.Message}");
+            _toastService?.ShowError(ex.Message);
         }
     }
 
@@ -409,8 +440,7 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
                 if (matched != null)
                 {
                     await _storageService.MoveWordToStorageAsync(matched.Id, StorageAdditionReason.Manual, "Added from Homophones");
-                    var toast = App.Current.Services.GetService<IToastNotificationService>();
-                    toast?.ShowSuccess(string.Format(Loc.GetString("Homophones_SavedToStorageSuccess"), term), Loc.GetString("Common_Success"));
+                    _toastService?.ShowSuccess(string.Format(Loc.GetString("Homophones_SavedToStorageSuccess"), term), Loc.GetString("Common_Success"));
                 }
                 else
                 {
@@ -432,14 +462,12 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
                         ExamTagIds: new List<Guid>()
                     ));
                     await _storageService.MoveWordToStorageAsync(newWord.Id, StorageAdditionReason.Manual, "Added from Homophones");
-                    var toast = App.Current.Services.GetService<IToastNotificationService>();
-                    toast?.ShowSuccess(string.Format(Loc.GetString("Homophones_SavedToStorageSuccess"), term), Loc.GetString("Common_Success"));
+                    _toastService?.ShowSuccess(string.Format(Loc.GetString("Homophones_SavedToStorageSuccess"), term), Loc.GetString("Common_Success"));
                 }
             }
             catch (Exception ex)
             {
-                var toast = App.Current.Services.GetService<IToastNotificationService>();
-                toast?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+                _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
             }
         }
     }

@@ -550,6 +550,8 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
 
             int totalReviewed = SessionCorrectCount + SessionIncorrectCount;
             SessionAccuracyRate = totalReviewed == 0 ? 0.0 : Math.Round((double)SessionCorrectCount / totalReviewed * 100, 1);
+
+            _toastService?.ShowSuccess(_localizationService.GetString("Review_UndoSuccess"));
         }
         catch (Exception ex)
         {

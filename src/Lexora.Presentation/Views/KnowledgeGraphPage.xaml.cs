@@ -20,20 +20,24 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 {
     public KnowledgeGraphViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
+    private readonly IToastNotificationService? _toastService;
 
     public KnowledgeGraphPage()
         : this(
             App.Current.Services.GetRequiredService<KnowledgeGraphViewModel>(),
-            App.Current.Services.GetRequiredService<ILocalizationService>())
+            App.Current.Services.GetRequiredService<ILocalizationService>(),
+            App.Current.Services.GetService<IToastNotificationService>())
     {
     }
 
     public KnowledgeGraphPage(
         KnowledgeGraphViewModel viewModel,
-        ILocalizationService loc)
+        ILocalizationService loc,
+        IToastNotificationService? toastService = null)
     {
         ViewModel = viewModel;
         Loc = loc;
+        _toastService = toastService;
 
         this.InitializeComponent();
 
@@ -769,11 +773,13 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             if (file != null)
             {
                 await Windows.Storage.FileIO.WriteTextAsync(file, content);
+                _toastService?.ShowSuccess(string.Format(Loc.GetString("KnowledgeGraph_ExportSuccess"), file.Name));
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphPage] ExportToFileAsync error: {ex.Message}");
+            _toastService?.ShowError(ex.Message);
         }
     }
 }

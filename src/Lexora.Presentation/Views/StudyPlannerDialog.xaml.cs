@@ -4,6 +4,7 @@ using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -13,6 +14,7 @@ public sealed partial class StudyPlannerDialog : ContentDialog, INotifyPropertyC
 {
     private readonly IStudyPlannerService _plannerService;
     private readonly INavigationService? _navService;
+    private readonly IToastNotificationService? _toastService;
     public ILocalizationService Loc { get; }
 
     private DailyCurriculumDto? _curriculum;
@@ -48,11 +50,13 @@ public sealed partial class StudyPlannerDialog : ContentDialog, INotifyPropertyC
     public StudyPlannerDialog(
         IStudyPlannerService plannerService,
         ILocalizationService loc,
-        INavigationService? navService = null)
+        INavigationService? navService = null,
+        IToastNotificationService? toastService = null)
     {
         _plannerService = plannerService;
         _navService = navService;
         Loc = loc;
+        _toastService = toastService ?? App.Current.Services.GetService<IToastNotificationService>();
         this.InitializeComponent();
 
         Loaded += async (s, e) =>
@@ -86,32 +90,47 @@ public sealed partial class StudyPlannerDialog : ContentDialog, INotifyPropertyC
 
     private async void SaveGoal_Click(object sender, RoutedEventArgs e)
     {
-        var targetDate = TargetDatePicker.Date.HasValue
-            ? DateOnly.FromDateTime(TargetDatePicker.Date.Value.DateTime)
-            : DateOnly.FromDateTime(DateTime.Today.AddMonths(3));
-
-        var examType = ExamTargetCombo.SelectedIndex switch
+        try
         {
-            0 => ExamType.Toeic,
-            1 => ExamType.Ielts,
-            2 => ExamType.Vstep,
-            _ => ExamType.General
-        };
+            var targetDate = TargetDatePicker.Date.HasValue
+                ? DateOnly.FromDateTime(TargetDatePicker.Date.Value.DateTime)
+                : DateOnly.FromDateTime(DateTime.Today.AddMonths(3));
 
-        var goal = new StudyGoalDto(
-            TargetExam: examType,
-            TargetScore: string.IsNullOrWhiteSpace(TargetScoreBox.Text) ? "750+" : TargetScoreBox.Text.Trim(),
-            TargetDate: targetDate,
-            DailyMinutesGoal: (int)MinutesSlider.Value,
-            DailyNewWordsGoal: (int)NewWordsSlider.Value,
-            DailyReviewTarget: (int)ReviewsSlider.Value,
-            IsConfigured: true
-        );
+            var examType = ExamTargetCombo.SelectedIndex switch
+            {
+                0 => ExamType.Toeic,
+                1 => ExamType.Ielts,
+                2 => ExamType.Vstep,
+                _ => ExamType.General
+            };
 
-        await _plannerService.SaveUserGoalAsync(goal);
-        Curriculum = await _plannerService.GetTodayCurriculumAsync();
+            var goal = new StudyGoalDto(
+                TargetExam: examType,
+                TargetScore: string.IsNullOrWhiteSpace(TargetScoreBox.Text) ? "750+" : TargetScoreBox.Text.Trim(),
+                TargetDate: targetDate,
+                DailyMinutesGoal: (int)MinutesSlider.Value,
+                DailyNewWordsGoal: (int)NewWordsSlider.Value,
+                DailyReviewTarget: (int)ReviewsSlider.Value,
+                IsConfigured: true
+            );
 
-        GoalSavedInfoBar.IsOpen = true;
+            await _plannerService.SaveUserGoalAsync(goal);
+            Curriculum = await _plannerService.GetTodayCurriculumAsync();
+
+            GoalSavedInfoBar.Severity = InfoBarSeverity.Success;
+            GoalSavedInfoBar.Message = Loc.GetString("StudyPlanner_GoalSaved");
+            GoalSavedInfoBar.IsOpen = true;
+
+            _toastService?.ShowSuccess(Loc.GetString("StudyPlanner_GoalSaved"));
+        }
+        catch (Exception ex)
+        {
+            GoalSavedInfoBar.Severity = InfoBarSeverity.Error;
+            GoalSavedInfoBar.Message = ex.Message;
+            GoalSavedInfoBar.IsOpen = true;
+
+            _toastService?.ShowError(ex.Message);
+        }
     }
 
     private void TaskNavigate_Click(object sender, RoutedEventArgs e)
