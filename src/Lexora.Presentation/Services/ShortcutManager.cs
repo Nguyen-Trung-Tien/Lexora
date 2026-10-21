@@ -99,8 +99,24 @@ public sealed class ShortcutManager : IShortcutManager
 
         RegisterShortcut(new ShortcutDefinition
         {
-            Id = "Global.NavigateGrammar",
+            Id = "Global.NavigateKnowledgeGraph",
             Gesture = new ShortcutGesture(ShortcutKey.Number4, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Nav_KnowledgeGraph",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                _navigationService.Navigate(typeof(Views.KnowledgeGraphPage));
+                return Task.CompletedTask;
+            }
+        });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
+            Id = "Global.NavigateGrammar",
+            Gesture = new ShortcutGesture(ShortcutKey.Number5, ShortcutModifiers.Control),
             Scope = ShortcutScope.Global,
             DescriptionKey = "Shell_TooltipGrammar",
             Priority = ShortcutPriority.Global,
@@ -116,7 +132,7 @@ public sealed class ShortcutManager : IShortcutManager
         RegisterShortcut(new ShortcutDefinition
         {
             Id = "Global.NavigateReview",
-            Gesture = new ShortcutGesture(ShortcutKey.Number5, ShortcutModifiers.Control),
+            Gesture = new ShortcutGesture(ShortcutKey.Number6, ShortcutModifiers.Control),
             Scope = ShortcutScope.Global,
             DescriptionKey = "Shell_TooltipReview",
             Priority = ShortcutPriority.Global,
@@ -132,7 +148,7 @@ public sealed class ShortcutManager : IShortcutManager
         RegisterShortcut(new ShortcutDefinition
         {
             Id = "Global.NavigateTest",
-            Gesture = new ShortcutGesture(ShortcutKey.Number6, ShortcutModifiers.Control),
+            Gesture = new ShortcutGesture(ShortcutKey.Number7, ShortcutModifiers.Control),
             Scope = ShortcutScope.Global,
             DescriptionKey = "Shell_TooltipTest",
             Priority = ShortcutPriority.Global,
@@ -148,7 +164,7 @@ public sealed class ShortcutManager : IShortcutManager
         RegisterShortcut(new ShortcutDefinition
         {
             Id = "Global.NavigateLearningStorage",
-            Gesture = new ShortcutGesture(ShortcutKey.Number7, ShortcutModifiers.Control),
+            Gesture = new ShortcutGesture(ShortcutKey.Number8, ShortcutModifiers.Control),
             Scope = ShortcutScope.Global,
             DescriptionKey = "Shell_TooltipLearningStorage",
             Priority = ShortcutPriority.Global,

@@ -108,4 +108,92 @@ public class VocabularyKnowledgeGraphServiceTests
         // Assert
         graph.Should().BeNull();
     }
+
+    [Fact]
+    public async Task GetConceptsPagedAsync_ReturnsPagedConceptsWithCalculatedConnections()
+    {
+        // Arrange
+        var words = new List<Word>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Term = "comprehend",
+                Level = CefrLevel.B2,
+                PrimaryPartOfSpeech = PartOfSpeech.Verb,
+                Notes = "syn: understand; ant: misunderstand",
+                Meanings = new List<WordMeaning>
+                {
+                    new() { DefinitionVi = "thấu hiểu" }
+                }
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Term = "benevolent",
+                Level = CefrLevel.C1,
+                PrimaryPartOfSpeech = PartOfSpeech.Adjective,
+                Meanings = new List<WordMeaning>
+                {
+                    new() { DefinitionVi = "nhân từ, bao dung" }
+                }
+            }
+        };
+
+        _mockVocabRepo.Setup(r => r.CountFilteredAsync("comp", null, null, null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(2);
+
+        _mockVocabRepo.Setup(r => r.SearchAsync("comp", null, null, null, null, null, 0, 10, "term", true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(words);
+
+        // Act
+        var result = await _graphService.GetConceptsPagedAsync(new KnowledgeGraphQueryDto(SearchTerm: "comp", Page: 1, PageSize: 10));
+
+        // Assert
+        result.Should().NotBeNull();
+        result.TotalCount.Should().Be(2);
+        result.Items.Should().HaveCount(2);
+        result.Items[0].Term.Should().Be("comprehend");
+        result.Items[0].Level.Should().Be(CefrLevel.B2);
+        result.Items[0].TotalConnections.Should().BeGreaterThan(0);
+        result.HasPreviousPage.Should().BeFalse();
+        result.HasNextPage.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetSmartRecommendationsAsync_ReturnsRecommendations()
+    {
+        // Arrange
+        var words = new List<Word>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Term = "meticulous",
+                Level = CefrLevel.C1,
+                PrimaryPartOfSpeech = PartOfSpeech.Adjective,
+                Meanings = new List<WordMeaning> { new() { DefinitionVi = "tỉ mỉ, cẩn thận" } }
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Term = "advocate",
+                Level = CefrLevel.B2,
+                PrimaryPartOfSpeech = PartOfSpeech.Verb,
+                Meanings = new List<WordMeaning> { new() { DefinitionVi = "ủng hộ, tán thành" } }
+            }
+        };
+
+        _mockVocabRepo.Setup(r => r.SearchAsync(null, null, null, null, null, null, 0, It.IsAny<int>(), "term", true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(words);
+
+        // Act
+        var recs = await _graphService.GetSmartRecommendationsAsync(5);
+
+        // Assert
+        recs.Should().NotBeNull();
+        recs.Should().HaveCount(2);
+        recs[0].Term.Should().Be("meticulous");
+        recs[0].Reason.Should().NotBeNullOrWhiteSpace();
+    }
 }

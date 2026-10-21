@@ -52,11 +52,117 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         return results.Select(MapToWordDto).ToList();
     }
 
+    public async Task<KnowledgeGraphConceptsPagedResultDto> GetConceptsPagedAsync(KnowledgeGraphQueryDto query, CancellationToken cancellationToken = default)
+    {
+        var page = Math.Max(1, query.Page);
+        var pageSize = Math.Clamp(query.PageSize, 1, 100);
+        var skip = (page - 1) * pageSize;
+
+        var totalCount = await _vocabRepo.CountFilteredAsync(
+            searchTerm: query.SearchTerm,
+            level: query.Level,
+            partOfSpeech: query.PartOfSpeech,
+            cancellationToken: cancellationToken);
+
+        var words = await _vocabRepo.SearchAsync(
+            searchTerm: query.SearchTerm,
+            level: query.Level,
+            partOfSpeech: query.PartOfSpeech,
+            skip: skip,
+            take: pageSize,
+            sortBy: query.SortBy ?? "term",
+            isAscending: true,
+            cancellationToken: cancellationToken);
+
+        var wordList = words ?? Array.Empty<Word>();
+        var items = new List<KnowledgeGraphConceptSummaryDto>();
+        foreach (var w in wordList)
+        {
+            var firstMeaning = w.Meanings?.FirstOrDefault();
+            var topicsCount = w.WordTopics?.Count ?? 0;
+            var (synCount, antCount) = ExtractNotesRelationCounts(w.Notes);
+            var familyCount = EstimateWordFamilyCount(w.Term);
+            var collocationsCount = w.Meanings?.Sum(m => m.Examples?.Count ?? 0) ?? 0;
+            var totalConn = Math.Max(1, synCount + antCount + familyCount + (topicsCount * 2) + Math.Min(collocationsCount, 4));
+
+            items.Add(new KnowledgeGraphConceptSummaryDto(
+                Id: w.Id,
+                Term: w.Term,
+                Level: w.Level,
+                PartOfSpeech: w.PrimaryPartOfSpeech,
+                Ipa: w.PhoneticUs ?? w.PhoneticUk,
+                AudioPath: w.AudioUsPath ?? w.AudioUkPath,
+                MeaningVi: firstMeaning?.DefinitionVi ?? string.Empty,
+                TotalConnections: totalConn,
+                SynonymsCount: synCount,
+                AntonymsCount: antCount,
+                WordFamilyCount: familyCount,
+                CollocationsCount: Math.Min(collocationsCount, 5),
+                TopicCount: topicsCount,
+                IsMastered: w.ReviewCard?.Status == LearningStatus.Mastered
+            ));
+        }
+
+        return new KnowledgeGraphConceptsPagedResultDto(items, totalCount, page, pageSize);
+    }
+
+    public async Task<IReadOnlyList<KnowledgeGraphRecommendationDto>> GetSmartRecommendationsAsync(int count = 8, CancellationToken cancellationToken = default)
+    {
+        var candidates = await _vocabRepo.SearchAsync(
+            take: Math.Max(20, count * 3),
+            sortBy: "term",
+            isAscending: true,
+            cancellationToken: cancellationToken);
+
+        var candidateList = candidates ?? Array.Empty<Word>();
+        if (candidateList.Count == 0) return Array.Empty<KnowledgeGraphRecommendationDto>();
+
+        var selected = candidateList
+            .Where(w => w.Level >= CefrLevel.B1 && (w.Meanings?.Count ?? 0) > 0)
+            .OrderByDescending(w => w.WordTopics?.Count ?? 0)
+            .ThenByDescending(w => w.Meanings?.Count ?? 0)
+            .Take(count)
+            .ToList();
+
+        if (selected.Count < count)
+        {
+            selected.AddRange(candidateList.Except(selected).Take(count - selected.Count));
+        }
+
+        var list = new List<KnowledgeGraphRecommendationDto>();
+        foreach (var w in selected)
+        {
+            var firstMeaning = w.Meanings?.FirstOrDefault();
+            var reason = w.Level switch
+            {
+                CefrLevel.C1 or CefrLevel.C2 => "Khái niệm học thuật nâng cao với mạng nghĩa đa tầng",
+                CefrLevel.B2 => "Từ vựng trọng tâm kỳ thi (TOEIC 750+ / IELTS 6.5+)",
+                CefrLevel.B1 => "Khái niệm cốt lõi có nhiều từ đồng nghĩa và họ từ phong phú",
+                _ => "Từ vựng thông dụng với liên kết ngữ nghĩa phong phú"
+            };
+
+            int estimated = Math.Max(4, ((w.WordTopics?.Count ?? 0) * 2) + ((w.Meanings?.Count ?? 0) * 2));
+
+            list.Add(new KnowledgeGraphRecommendationDto(
+                w.Id,
+                w.Term,
+                firstMeaning?.DefinitionVi ?? string.Empty,
+                w.Level,
+                w.PrimaryPartOfSpeech,
+                reason,
+                estimated
+            ));
+        }
+
+        return list;
+    }
+
     private async Task<VocabularyKnowledgeGraphDto> BuildGraphInternalAsync(Word targetWord, CancellationToken cancellationToken)
     {
         var suggestions = await _suggestionService.GetSuggestionsAsync(targetWord.Id, cancellationToken);
 
         var firstMeaning = targetWord.Meanings.FirstOrDefault();
+        var firstExample = firstMeaning?.Examples.FirstOrDefault();
         var centerNode = new GraphNodeDto(
             Id: targetWord.Id,
             Term: targetWord.Term,
@@ -69,7 +175,11 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
             IsMastered: targetWord.ReviewCard?.Status == LearningStatus.Mastered,
             IsCenter: true,
             ConnectionWeight: 1.0,
-            RelationshipLabel: "Core Concept"
+            RelationshipLabel: "Core Concept",
+            MeaningEn: firstMeaning?.DefinitionEn ?? string.Empty,
+            Explanation: firstMeaning?.Explanation ?? string.Empty,
+            ExampleSentenceEn: firstExample?.SentenceEn ?? string.Empty,
+            ExampleSentenceVi: firstExample?.SentenceVi ?? string.Empty
         );
 
         var connectedNodes = new List<GraphNodeDto>();
@@ -170,11 +280,14 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         string relationshipLabel)
     {
         var word = item.Word;
+        var firstMeaning = word?.Meanings.FirstOrDefault();
+        var firstExample = firstMeaning?.Examples.FirstOrDefault();
+
         return new GraphNodeDto(
             Id: word?.Id ?? Guid.NewGuid(),
             Term: item.Term,
             NodeType: nodeType,
-            MeaningVi: item.PrimaryDefinition,
+            MeaningVi: !string.IsNullOrWhiteSpace(item.PrimaryDefinition) ? item.PrimaryDefinition : (firstMeaning?.DefinitionVi ?? string.Empty),
             Level: word?.Level ?? CefrLevel.None,
             PartOfSpeech: word?.PrimaryPartOfSpeech ?? PartOfSpeech.Noun,
             Ipa: word?.PhoneticUs ?? word?.PhoneticUk,
@@ -182,8 +295,30 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
             IsMastered: word?.LearningStatus == LearningStatus.Mastered,
             IsCenter: false,
             ConnectionWeight: weight,
-            RelationshipLabel: relationshipLabel
+            RelationshipLabel: relationshipLabel,
+            MeaningEn: firstMeaning?.DefinitionEn ?? string.Empty,
+            Explanation: item.Reason,
+            ExampleSentenceEn: firstExample?.SentenceEn ?? string.Empty,
+            ExampleSentenceVi: firstExample?.SentenceVi ?? string.Empty
         );
+    }
+
+    private static (int synCount, int antCount) ExtractNotesRelationCounts(string? notes)
+    {
+        if (string.IsNullOrWhiteSpace(notes)) return (0, 0);
+        int syn = 0, ant = 0;
+        var lower = notes.ToLowerInvariant();
+        if (lower.Contains("syn:") || lower.Contains("đồng nghĩa:"))
+            syn += 2;
+        if (lower.Contains("ant:") || lower.Contains("opp:") || lower.Contains("trái nghĩa:"))
+            ant += 2;
+        return (syn, ant);
+    }
+
+    private static int EstimateWordFamilyCount(string term)
+    {
+        if (string.IsNullOrWhiteSpace(term) || term.Length < 4) return 0;
+        return term.Length >= 6 ? 3 : 1;
     }
 
     private static WordDto MapToWordDto(Word w)

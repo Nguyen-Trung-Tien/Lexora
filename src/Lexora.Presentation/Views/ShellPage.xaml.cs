@@ -117,6 +117,7 @@ public sealed partial class ShellPage : Page
                         DashboardPage => NavItemDashboard,
                         VocabularyPage => NavItemVocabulary,
                         HomophonesPage => NavItemHomophones,
+                        KnowledgeGraphPage => NavItemKnowledgeGraph,
                         ReviewPage => NavItemReview,
                         TestPage => NavItemTest,
                         GrammarPage => NavItemGrammar,
@@ -198,6 +199,7 @@ public sealed partial class ShellPage : Page
             "Dashboard" => typeof(DashboardPage),
             "Vocabulary" => typeof(VocabularyPage),
             "Homophones" => typeof(HomophonesPage),
+            "KnowledgeGraph" => typeof(KnowledgeGraphPage),
             "Review" => typeof(ReviewPage),
             "Test" => typeof(TestPage),
             "Grammar" => typeof(GrammarPage),
@@ -226,6 +228,7 @@ public sealed partial class ShellPage : Page
         NavItemDashboard.Content = _localizationService.GetString("Nav_Dashboard");
         NavItemVocabulary.Content = _localizationService.GetString("Nav_Vocabulary");
         NavItemHomophones.Content = _localizationService.GetString("Nav_Homophones");
+        NavItemKnowledgeGraph.Content = _localizationService.GetString("Nav_KnowledgeGraph");
         NavItemReview.Content = _localizationService.GetString("Nav_Review");
         NavItemTest.Content = _localizationService.GetString("Nav_Test");
         NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
@@ -236,9 +239,10 @@ public sealed partial class ShellPage : Page
         ToolTipService.SetToolTip(NavItemDashboard, _localizationService.GetString("Shell_TooltipDashboard"));
         ToolTipService.SetToolTip(NavItemVocabulary, _localizationService.GetString("Shell_TooltipVocabulary"));
         ToolTipService.SetToolTip(NavItemHomophones, _localizationService.GetString("Shell_TooltipHomophones"));
+        ToolTipService.SetToolTip(NavItemKnowledgeGraph, $"{_localizationService.GetString("Nav_KnowledgeGraph")} (Ctrl+4)");
+        ToolTipService.SetToolTip(NavItemGrammar, _localizationService.GetString("Shell_TooltipGrammar"));
         ToolTipService.SetToolTip(NavItemReview, _localizationService.GetString("Shell_TooltipReview"));
         ToolTipService.SetToolTip(NavItemTest, _localizationService.GetString("Shell_TooltipTest"));
-        ToolTipService.SetToolTip(NavItemGrammar, _localizationService.GetString("Shell_TooltipGrammar"));
         ToolTipService.SetToolTip(NavItemLearningStorage, _localizationService.GetString("Shell_TooltipLearningStorage"));
         ToolTipService.SetToolTip(NavItemSettings, _localizationService.GetString("Shell_TooltipSettings"));
         ToolTipService.SetToolTip(GlobalSearchBox, _localizationService.GetString("Shell_SearchTooltip"));

@@ -43,7 +43,12 @@
                         <FontIcon Glyph="&#xE768;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="NavItemGrammar" Content="Grammar" Tag="Grammar" ToolTipService.ToolTip="Grammar (Ctrl+4)">
+                <NavigationViewItem x:Name="NavItemKnowledgeGraph" Content="Knowledge Graph" Tag="KnowledgeGraph" ToolTipService.ToolTip="Knowledge Graph (Ctrl+4)">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE81E;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemGrammar" Content="Grammar" Tag="Grammar" ToolTipService.ToolTip="Grammar (Ctrl+5)">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8D2;" />
                     </NavigationViewItem.Icon>
@@ -51,7 +56,7 @@
 
                 <!-- 3. Practice & Assessment Group -->
                 <NavigationViewItemHeader x:Name="NavHeaderPractice" Content="LUYỆN TẬP &amp; ĐÁNH GIÁ" />
-                <NavigationViewItem x:Name="NavItemReview" Content="Spaced Review" Tag="Review" ToolTipService.ToolTip="Spaced Review (Ctrl+5)">
+                <NavigationViewItem x:Name="NavItemReview" Content="Spaced Review" Tag="Review" ToolTipService.ToolTip="Spaced Review (Ctrl+6)">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE895;" />
                     </NavigationViewItem.Icon>
@@ -61,7 +66,7 @@
                                    Visibility="{x:Bind ViewModel.HasDueReviews, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </NavigationViewItem.InfoBadge>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="NavItemTest" Content="Practice &amp; Test" Tag="Test" ToolTipService.ToolTip="Practice &amp; Test (Ctrl+6)">
+                <NavigationViewItem x:Name="NavItemTest" Content="Practice &amp; Test" Tag="Test" ToolTipService.ToolTip="Practice &amp; Test (Ctrl+7)">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE765;" />
                     </NavigationViewItem.Icon>
@@ -69,7 +74,7 @@
 
                 <!-- 4. Storage & Archive Group -->
                 <NavigationViewItemHeader x:Name="NavHeaderArchive" Content="KHO LƯU TRỮ &amp; DỮ LIỆU" />
-                <NavigationViewItem x:Name="NavItemLearningStorage" Content="Learning Storage" Tag="LearningStorage" ToolTipService.ToolTip="Learning Storage (Ctrl+7)">
+                <NavigationViewItem x:Name="NavItemLearningStorage" Content="Learning Storage" Tag="LearningStorage" ToolTipService.ToolTip="Learning Storage (Ctrl+8)">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE81C;" />
                     </NavigationViewItem.Icon>

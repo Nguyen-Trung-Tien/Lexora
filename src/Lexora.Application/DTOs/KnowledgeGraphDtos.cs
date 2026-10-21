@@ -27,6 +27,11 @@ public class GraphNodeDto
     public double ConnectionWeight { get; set; }
     public string RelationshipLabel { get; set; } = string.Empty;
 
+    public string MeaningEn { get; set; } = string.Empty;
+    public string Explanation { get; set; } = string.Empty;
+    public string ExampleSentenceEn { get; set; } = string.Empty;
+    public string ExampleSentenceVi { get; set; } = string.Empty;
+
     public GraphNodeDto() { }
 
     public GraphNodeDto(
@@ -41,7 +46,11 @@ public class GraphNodeDto
         bool IsMastered,
         bool IsCenter,
         double ConnectionWeight,
-        string RelationshipLabel)
+        string RelationshipLabel,
+        string MeaningEn = "",
+        string Explanation = "",
+        string ExampleSentenceEn = "",
+        string ExampleSentenceVi = "")
     {
         this.Id = Id;
         this.Term = Term;
@@ -55,6 +64,10 @@ public class GraphNodeDto
         this.IsCenter = IsCenter;
         this.ConnectionWeight = ConnectionWeight;
         this.RelationshipLabel = RelationshipLabel;
+        this.MeaningEn = MeaningEn;
+        this.Explanation = Explanation;
+        this.ExampleSentenceEn = ExampleSentenceEn;
+        this.ExampleSentenceVi = ExampleSentenceVi;
     }
 }
 
@@ -85,4 +98,56 @@ public record VocabularyKnowledgeGraphDto(
         [],
         0, 0, 0, 0, 0, 0
     );
+
+    public bool HasConnections => TotalConnections > 0;
 }
+
+public record KnowledgeGraphQueryDto(
+    string? SearchTerm = null,
+    CefrLevel? Level = null,
+    PartOfSpeech? PartOfSpeech = null,
+    int Page = 1,
+    int PageSize = 10,
+    string? SortBy = "term"
+);
+
+public record KnowledgeGraphConceptSummaryDto(
+    Guid Id,
+    string Term,
+    CefrLevel Level,
+    PartOfSpeech PartOfSpeech,
+    string? Ipa,
+    string? AudioPath,
+    string MeaningVi,
+    int TotalConnections,
+    int SynonymsCount,
+    int AntonymsCount,
+    int WordFamilyCount,
+    int CollocationsCount,
+    int TopicCount,
+    bool IsMastered
+);
+
+public record KnowledgeGraphConceptsPagedResultDto(
+    IReadOnlyList<KnowledgeGraphConceptSummaryDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize
+)
+{
+    public int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalCount / Math.Max(1, PageSize)));
+    public bool HasPreviousPage => Page > 1;
+    public bool HasNextPage => Page < TotalPages;
+    public int FromItemIndex => TotalCount == 0 ? 0 : ((Page - 1) * PageSize) + 1;
+    public int ToItemIndex => TotalCount == 0 ? 0 : Math.Min(Page * PageSize, TotalCount);
+}
+
+public record KnowledgeGraphRecommendationDto(
+    Guid Id,
+    string Term,
+    string MeaningVi,
+    CefrLevel Level,
+    PartOfSpeech PartOfSpeech,
+    string Reason,
+    int EstimatedConnections
+);

@@ -17,6 +17,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
     private bool _isInitializing = true;
     private readonly IToastNotificationService? _toastService;
+    private readonly INavigationService _navigationService;
 
     public VocabularyPage()
     {
@@ -24,6 +25,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         ViewModel = App.Current.Services.GetRequiredService<VocabularyViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
+        _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
         _isInitializing = true;
 
         InitializeComponent();
@@ -1183,20 +1185,12 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         }
     }
 
-    private async void OpenKnowledgeGraph_Click(object sender, RoutedEventArgs e)
+    private void OpenKnowledgeGraph_Click(object sender, RoutedEventArgs e)
     {
         if (ViewModel.SelectedWord == null) return;
         try
         {
-            await DispatcherQueue.EnsureOnUIThreadAsync();
-            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
-            var graphService = App.Current.Services.GetRequiredService<IVocabularyKnowledgeGraphService>();
-            var audioService = App.Current.Services.GetService<IAudioPlayerService>();
-            var dialog = new KnowledgeGraphDialog(ViewModel.SelectedWord.Id, graphService, Loc, audioService)
-            {
-                XamlRoot = xamlRoot
-            };
-            await dialog.ShowAsyncSafe(xamlRoot);
+            _navigationService.Navigate(typeof(KnowledgeGraphPage), ViewModel.SelectedWord.Id);
         }
         catch (Exception ex)
         {
