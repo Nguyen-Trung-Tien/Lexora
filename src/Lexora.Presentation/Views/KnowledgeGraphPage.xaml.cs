@@ -161,42 +161,20 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             : ViewModel.ActiveGraph.ConnectedNodes;
 
         int count = nodes.Count;
-        double baseRadius = Math.Clamp(Math.Min(width, height) / 2.0 - 65.0, 110.0, 200.0);
-        double radius = Math.Clamp(baseRadius * ViewModel.CanvasScale, 60.0, 420.0);
+        if (count == 0) return;
 
-        // 1. Draw Connecting Lines first so they sit under the nodes
-        for (int i = 0; i < count; i++)
-        {
-            double angle = (2.0 * Math.PI * i / count) - (Math.PI / 2.0);
-            double nx = cx + (radius * Math.Cos(angle));
-            double ny = cy + (radius * Math.Sin(angle));
+        // Elliptical radii adapting to widescreen canvas and card dimensions
+        double baseRadiusX = Math.Clamp((width / 2.0) - 95.0, 190.0, 520.0);
+        double baseRadiusY = Math.Clamp((height / 2.0) - 55.0, 150.0, 240.0);
+        double radiusX = baseRadiusX * ViewModel.CanvasScale;
+        double radiusY = baseRadiusY * ViewModel.CanvasScale;
 
-            var line = new Line
-            {
-                X1 = cx,
-                Y1 = cy,
-                X2 = nx,
-                Y2 = ny,
-                Stroke = GetRelationLineBrush(nodes[i].NodeType),
-                StrokeThickness = 2.0
-            };
+        // Step 1: Pre-create and measure all node borders
+        var nodeItems = new (Border Border, GraphNodeDto Node, double Width, double Height, double X, double Y)[count];
 
-            if (nodes[i].NodeType == KnowledgeGraphNodeType.Antonym)
-            {
-                line.StrokeDashArray = new DoubleCollection { 4, 3 };
-            }
-
-            GraphCanvas.Children.Add(line);
-        }
-
-        // 2. Draw Surrounding Orbit Nodes
         for (int i = 0; i < count; i++)
         {
             var node = nodes[i];
-            double angle = (2.0 * Math.PI * i / count) - (Math.PI / 2.0);
-            double nx = cx + (radius * Math.Cos(angle));
-            double ny = cy + (radius * Math.Sin(angle));
-
             bool isSelected = ViewModel.SelectedNode != null &&
                               (ReferenceEquals(ViewModel.SelectedNode, node) || ViewModel.SelectedNode.Id == node.Id);
 
@@ -208,7 +186,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
                     : ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
                 BorderThickness = new Thickness(isSelected ? 2.5 : 1.2),
                 CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(12, 8, 12, 8),
+                Padding = new Thickness(12, 7, 12, 7),
                 Tag = node
             };
 
@@ -216,7 +194,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
                 ? node.Term
                 : $"{node.Term} ({node.PartOfSpeech}) — {node.MeaningVi}");
 
-            var nodePanel = new StackPanel { Spacing = 4, HorizontalAlignment = HorizontalAlignment.Center };
+            var nodePanel = new StackPanel { Spacing = 3, HorizontalAlignment = HorizontalAlignment.Center };
             var topPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
 
             var relBadge = new Border
@@ -228,7 +206,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             var relText = new TextBlock
             {
                 Text = GetShortRelLabel(node.NodeType),
-                FontSize = 10,
+                FontSize = 9.5,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                 Foreground = GetRelationTextForeground(node.NodeType)
             };
@@ -246,7 +224,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
                 var lvlText = new TextBlock
                 {
                     Text = node.Level.ToString(),
-                    FontSize = 9.5,
+                    FontSize = 9,
                     FontWeight = Microsoft.UI.Text.FontWeights.Bold,
                     Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush")
                 };
@@ -257,7 +235,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             var termText = new TextBlock
             {
                 Text = node.Term,
-                FontSize = 13.5,
+                FontSize = 13,
                 FontWeight = Microsoft.UI.Text.FontWeights.Bold,
                 Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorPrimaryBrush"),
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -289,17 +267,95 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             // Measure & arrange
             nodeBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             double nw = Math.Max(nodeBorder.DesiredSize.Width + 12, 88);
-            double nh = Math.Max(nodeBorder.DesiredSize.Height + 4, 46);
+            double nh = Math.Max(nodeBorder.DesiredSize.Height + 4, 44);
             nodeBorder.Width = nw;
             nodeBorder.Height = nh;
 
-            Canvas.SetLeft(nodeBorder, nx - (nw / 2.0));
-            Canvas.SetTop(nodeBorder, ny - (nh / 2.0));
+            // Initial position along the ellipse with subtle staggering if count >= 8 to maximize spacing
+            double angle = (2.0 * Math.PI * i / count) - (Math.PI / 2.0);
+            double stagger = (count >= 8) ? (i % 2 == 0 ? 0.94 : 1.06) : 1.0;
+            double nx = cx + (radiusX * Math.Cos(angle) * stagger);
+            double ny = cy + (radiusY * Math.Sin(angle) * stagger);
 
-            GraphCanvas.Children.Add(nodeBorder);
+            nodeItems[i] = (nodeBorder, node, nw, nh, nx, ny);
         }
 
-        // 3. Draw Central Core Concept Node with Click Selection & Dynamic Auto-Sizing
+        // Step 2: Collision avoidance relaxation pass (prevents cards from overlapping each other)
+        for (int iter = 0; iter < 4; iter++)
+        {
+            bool anyOverlap = false;
+            for (int i = 0; i < count; i++)
+            {
+                for (int j = i + 1; j < count; j++)
+                {
+                    double dx = nodeItems[j].X - nodeItems[i].X;
+                    double dy = nodeItems[j].Y - nodeItems[i].Y;
+                    double minSeparationX = (nodeItems[i].Width + nodeItems[j].Width) / 2.0 + 10.0;
+                    double minSeparationY = (nodeItems[i].Height + nodeItems[j].Height) / 2.0 + 8.0;
+
+                    double overlapX = minSeparationX - Math.Abs(dx);
+                    double overlapY = minSeparationY - Math.Abs(dy);
+
+                    if (overlapX > 0 && overlapY > 0)
+                    {
+                        anyOverlap = true;
+                        if (overlapX < overlapY)
+                        {
+                            double push = (overlapX / 2.0) + 2.0;
+                            double sign = dx >= 0 ? 1 : -1;
+                            nodeItems[j].X += sign * push;
+                            nodeItems[i].X -= sign * push;
+                        }
+                        else
+                        {
+                            double push = (overlapY / 2.0) + 2.0;
+                            double sign = dy >= 0 ? 1 : -1;
+                            nodeItems[j].Y += sign * push;
+                            nodeItems[i].Y -= sign * push;
+                        }
+                    }
+                }
+
+                // Keep nodes within canvas bounds with margin
+                double halfW = nodeItems[i].Width / 2.0;
+                double halfH = nodeItems[i].Height / 2.0;
+                nodeItems[i].X = Math.Clamp(nodeItems[i].X, halfW + 10.0, width - halfW - 10.0);
+                nodeItems[i].Y = Math.Clamp(nodeItems[i].Y, halfH + 10.0, height - halfH - 10.0);
+            }
+
+            if (!anyOverlap) break;
+        }
+
+        // Step 3: Draw Connecting Lines to final resolved coordinates
+        for (int i = 0; i < count; i++)
+        {
+            var line = new Line
+            {
+                X1 = cx,
+                Y1 = cy,
+                X2 = nodeItems[i].X,
+                Y2 = nodeItems[i].Y,
+                Stroke = GetRelationLineBrush(nodeItems[i].Node.NodeType),
+                StrokeThickness = 2.0
+            };
+
+            if (nodeItems[i].Node.NodeType == KnowledgeGraphNodeType.Antonym)
+            {
+                line.StrokeDashArray = new DoubleCollection { 4, 3 };
+            }
+
+            GraphCanvas.Children.Add(line);
+        }
+
+        // Step 4: Add node cards to canvas
+        for (int i = 0; i < count; i++)
+        {
+            Canvas.SetLeft(nodeItems[i].Border, nodeItems[i].X - (nodeItems[i].Width / 2.0));
+            Canvas.SetTop(nodeItems[i].Border, nodeItems[i].Y - (nodeItems[i].Height / 2.0));
+            GraphCanvas.Children.Add(nodeItems[i].Border);
+        }
+
+        // Step 5: Draw Central Core Concept Node with Click Selection & Dynamic Auto-Sizing
         bool isCenterSelected = ViewModel.SelectedNode != null &&
                                 (ReferenceEquals(ViewModel.SelectedNode, ViewModel.ActiveGraph.CenterNode) ||
                                  ViewModel.SelectedNode.Id == ViewModel.ActiveGraph.CenterNode.Id);
@@ -308,9 +364,9 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         {
             Background = ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush"),
             BorderBrush = isCenterSelected
-                ? ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush")
+                ? new SolidColorBrush(Microsoft.UI.Colors.White)
                 : ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
-            BorderThickness = new Thickness(isCenterSelected ? 3.5 : 1.5),
+            BorderThickness = new Thickness(isCenterSelected ? 3.0 : 1.5),
             CornerRadius = new CornerRadius(14),
             Padding = new Thickness(24, 12, 24, 12),
             MinWidth = 150,
@@ -659,20 +715,27 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
     private async void BtnSmartImport_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new KnowledgeGraphImportDialog
+        try
         {
-            XamlRoot = this.XamlRoot
-        };
-
-        await dialog.ShowAsyncSafe();
-        if (dialog.WasCommitted)
-        {
-            await ViewModel.LoadCatalogPageAsync(ViewModel.CurrentPage);
-            if (ViewModel.CurrentCenterWordId.HasValue)
+            var dialog = new KnowledgeGraphImportDialog
             {
-                await ViewModel.LoadGraphAsync(ViewModel.CurrentCenterWordId.Value, addToHistory: false);
+                XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
+            };
+
+            await dialog.ShowAsyncSafe();
+            if (dialog.WasCommitted)
+            {
+                await ViewModel.LoadCatalogPageAsync(ViewModel.CurrentPage);
+                if (ViewModel.CurrentCenterWordId.HasValue)
+                {
+                    await ViewModel.LoadGraphAsync(ViewModel.CurrentCenterWordId.Value, addToHistory: false);
+                }
+                RenderGraphCanvas();
             }
-            RenderGraphCanvas();
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("KnowledgeGraphPage.BtnSmartImport_Click", ex);
         }
     }
 

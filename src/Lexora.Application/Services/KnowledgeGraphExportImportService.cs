@@ -253,10 +253,34 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
         if (isJson)
         {
             ParseJsonImport(trimmed, items, warnings);
+            if (items.Count == 0 && (trimmed.Contains(',') || trimmed.Contains(';') || trimmed.Contains('\t') || trimmed.Contains('\n')))
+            {
+                // Fallback attempt with CSV if JSON parser yielded 0 items
+                var csvItems = new List<KnowledgeGraphImportItemDto>();
+                var csvWarnings = new List<string>();
+                ParseCsvImport(trimmed, csvItems, csvWarnings);
+                if (csvItems.Count > 0)
+                {
+                    items.AddRange(csvItems);
+                    warnings.Clear();
+                }
+            }
         }
         else
         {
             ParseCsvImport(trimmed, items, warnings);
+            if (items.Count == 0 && (trimmed.StartsWith("{") || trimmed.StartsWith("[")))
+            {
+                // Fallback attempt with JSON if CSV parser yielded 0 items
+                var jsonItems = new List<KnowledgeGraphImportItemDto>();
+                var jsonWarnings = new List<string>();
+                ParseJsonImport(trimmed, jsonItems, jsonWarnings);
+                if (jsonItems.Count > 0)
+                {
+                    items.AddRange(jsonItems);
+                    warnings.Clear();
+                }
+            }
         }
 
         // Validate items against database
@@ -470,21 +494,23 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
                         Level = CefrLevel.B1,
                         PrimaryPartOfSpeech = PartOfSpeech.Noun,
                         Notes = string.Empty,
-                        Meanings = new List<WordMeaning>
-                        {
-                            new()
-                            {
-                                Id = Guid.NewGuid(),
-                                DefinitionVi = $"Khái niệm liên kết trong Semantic Knowledge Graph: {term}",
-                                DefinitionEn = $"Semantic network concept: {term}",
-                                PartOfSpeech = PartOfSpeech.Noun
-                            }
-                        }
+                        Meanings = new List<WordMeaning>()
                     };
+
+                    newWord.Meanings.Add(new WordMeaning
+                    {
+                        Id = Guid.NewGuid(),
+                        WordId = newWord.Id,
+                        Word = newWord,
+                        DefinitionVi = $"Khái niệm liên kết trong Semantic Knowledge Graph: {term}",
+                        DefinitionEn = $"Semantic network concept: {term}",
+                        PartOfSpeech = PartOfSpeech.Noun
+                    });
 
                     newWord.ReviewCard = new ReviewCard
                     {
                         WordId = newWord.Id,
+                        Word = newWord,
                         Status = LearningStatus.New,
                         EaseFactor = 2.5,
                         IntervalDays = 0,
