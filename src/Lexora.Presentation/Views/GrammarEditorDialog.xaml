@@ -15,10 +15,10 @@
 
     <ContentDialog.TitleTemplate>
         <DataTemplate>
-            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
                 <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="24" Height="24" VerticalAlignment="Center" />
-                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
-            </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </Grid>
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
@@ -35,24 +35,25 @@
                         <TextBlock Text="{x:Bind Loc.GetString('Grammar_Structures')}" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                     </StackPanel>
 
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                        <TextBox x:Name="TitleTextBox"
-                                 Header="{x:Bind Loc.GetString('GrammarEditor_HeaderTitle')}"
-                                 PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderTitle')}"
-                                 FontWeight="SemiBold"
-                                 TextWrapping="Wrap" />
-                        
-                        <TextBox Grid.Column="1" x:Name="StructureTextBox"
-                                 PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderStructure')}"
-                                 FontFamily="Cascadia Code, Consolas"
-                                 TextWrapping="Wrap">
-                            <TextBox.Header>
-                                <TextBlock Text="{x:Bind Loc.GetString('GrammarEditor_HeaderStructure')}"
-                                           FontFamily="Segoe UI Variable, Segoe UI"
-                                           FontWeight="SemiBold" />
-                            </TextBox.Header>
-                        </TextBox>
-                    </Grid>
+                    <!-- Rule Title (Full width to comfortably accommodate long grammar names without truncation) -->
+                    <TextBox x:Name="TitleTextBox"
+                             Header="{x:Bind Loc.GetString('GrammarEditor_HeaderTitle')}"
+                             PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderTitle')}"
+                             FontWeight="SemiBold"
+                             TextWrapping="Wrap" />
+                    
+                    <!-- Structure Formula (Full width for clear, uninterrupted Cascadia Code syntax display) -->
+                    <TextBox x:Name="StructureTextBox"
+                             PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderStructure')}"
+                             FontFamily="Cascadia Code, Consolas"
+                             TextWrapping="Wrap"
+                             MinHeight="44">
+                        <TextBox.Header>
+                            <TextBlock Text="{x:Bind Loc.GetString('GrammarEditor_HeaderStructure')}"
+                                       FontFamily="Segoe UI Variable, Segoe UI"
+                                       FontWeight="SemiBold" />
+                        </TextBox.Header>
+                    </TextBox>
 
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                         <ComboBox x:Name="LevelComboBox"
@@ -108,8 +109,9 @@
                         <TextBlock Text="{x:Bind Loc.GetString('GrammarEditor_SectionMistakes')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" FontSize="13" />
                     </StackPanel>
                     <TextBox x:Name="CommonMistakesTextBox"
+                             Header="{x:Bind Loc.GetString('GrammarEditor_HeaderMistakes')}"
                              PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderMistakes')}"
-                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" />
+                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="65" />
                 </StackPanel>
             </Border>
 
@@ -164,22 +166,21 @@
                                              AcceptsReturn="True"
                                              MinHeight="40" />
 
-                                    <!-- Vietnamese Translation & Grammar Note -->
-                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                        <TextBox Header="{Binding HeaderSentenceVi}"
-                                                 Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 PlaceholderText="{Binding PlaceholderSentenceVi}"
-                                                 TextWrapping="Wrap"
-                                                 AcceptsReturn="True"
-                                                 MinHeight="40" />
-                                        <TextBox Grid.Column="1"
-                                                 Header="{Binding HeaderNote}"
-                                                 Text="{Binding Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 PlaceholderText="{Binding PlaceholderNote}"
-                                                 TextWrapping="Wrap"
-                                                 AcceptsReturn="True"
-                                                 MinHeight="40" />
-                                    </Grid>
+                                    <!-- Vietnamese Translation -->
+                                    <TextBox Header="{Binding HeaderSentenceVi}"
+                                             Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             PlaceholderText="{Binding PlaceholderSentenceVi}"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             MinHeight="40" />
+
+                                    <!-- Grammar Note -->
+                                    <TextBox Header="{Binding HeaderNote}"
+                                             Text="{Binding Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             PlaceholderText="{Binding PlaceholderNote}"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             MinHeight="40" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>

@@ -667,7 +667,7 @@
                             <!-- Header with Title & Word Management Actions -->
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalAlignment="Top">
                                 <!-- Term & CEFR Level Badge -->
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center" HorizontalAlignment="Stretch">
                                     <TextBlock Text="{x:Bind ViewModel.SelectedWord.Term, Mode=OneWay}"
                                                Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26"
                                                TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />

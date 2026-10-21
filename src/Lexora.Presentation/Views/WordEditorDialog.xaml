@@ -16,10 +16,10 @@
 
     <ContentDialog.TitleTemplate>
         <DataTemplate>
-            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
                 <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="24" Height="24" VerticalAlignment="Center" />
-                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
-            </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </Grid>
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
@@ -63,21 +63,23 @@
                             </ComboBox>
                         </Grid>
 
-                        <!-- Phonetics and Notes -->
-                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                        <!-- Phonetics (UK & US Pair) -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <TextBox x:Name="IpaUkTextBox"
                                      Header="{x:Bind Loc.GetString('WordEditor_HeaderPhoneticUk')}"
                                      PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderPhoneticUk')}" />
                             <TextBox Grid.Column="1" x:Name="IpaUsTextBox"
                                      Header="{x:Bind Loc.GetString('WordEditor_HeaderPhoneticUs')}"
                                      PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderPhoneticUs')}" />
-                            <TextBox Grid.Column="2" x:Name="NotesTextBox"
-                                     Header="{x:Bind Loc.GetString('WordEditor_HeaderNotes')}"
-                                     PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderNotes')}"
-                                     TextWrapping="Wrap"
-                                     AcceptsReturn="True"
-                                     MinHeight="38" />
                         </Grid>
+
+                        <!-- Additional Notes (Dedicated full width for clear, multi-line writing) -->
+                        <TextBox x:Name="NotesTextBox"
+                                 Header="{x:Bind Loc.GetString('WordEditor_HeaderNotes')}"
+                                 PlaceholderText="{x:Bind Loc.GetString('WordEditor_PlaceholderNotes')}"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 MinHeight="56" />
                     </StackPanel>
                 </Border>
 
@@ -236,42 +238,54 @@
                                                             </Grid>
 
                                                             <!-- Examples for this meaning -->
-                                                            <StackPanel Spacing="6" Margin="0,4,0,0">
+                                                            <StackPanel Spacing="8" Margin="0,4,0,0">
                                                                 <TextBlock Text="{Binding SectionExamples}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                                 <ItemsControl ItemsSource="{Binding Examples}">
                                                                     <ItemsControl.ItemTemplate>
                                                                         <DataTemplate>
-                                                                            <Grid ColumnDefinitions="Auto,*,*,Auto" ColumnSpacing="8" Margin="0,2,0,4" VerticalAlignment="Center">
-                                                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                                                                    <TextBlock Text="{Binding ExampleBadge}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
-                                                                                </Border>
-                                                                                <TextBox Grid.Column="1"
-                                                                                         PlaceholderText="{Binding PlaceholderExampleEn}"
-                                                                                         Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                                         TextWrapping="Wrap"
-                                                                                         AcceptsReturn="True"
-                                                                                         MinHeight="38" />
-                                                                                <TextBox Grid.Column="2"
-                                                                                         PlaceholderText="{Binding PlaceholderExampleVi}"
-                                                                                         Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                                         TextWrapping="Wrap"
-                                                                                         AcceptsReturn="True"
-                                                                                         MinHeight="38" />
-                                                                                <Button Grid.Column="3"
-                                                                                        ToolTipService.ToolTip="{Binding TooltipDeleteExample}"
-                                                                                        Click="DeleteExampleButton_Click"
-                                                                                        Padding="6,4" CornerRadius="4">
-                                                                                    <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                                                                </Button>
-                                                                            </Grid>
+                                                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                                    BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,2,0,8">
+                                                                                <StackPanel Spacing="8">
+                                                                                    <!-- Example Header: Badge + Remove Button -->
+                                                                                    <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                                                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+                                                                                            <TextBlock Text="{Binding ExampleBadge}" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" />
+                                                                                        </Border>
+                                                                                        <Border Grid.Column="1" />
+                                                                                        <Button Grid.Column="2"
+                                                                                                ToolTipService.ToolTip="{Binding TooltipDeleteExample}"
+                                                                                                Click="DeleteExampleButton_Click"
+                                                                                                Padding="6,4" CornerRadius="4">
+                                                                                            <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                                                                        </Button>
+                                                                                    </Grid>
+
+                                                                                    <!-- English Sentence Input -->
+                                                                                    <TextBox Header="{Binding HeaderSentenceEn}"
+                                                                                             PlaceholderText="{Binding PlaceholderExampleEn}"
+                                                                                             Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                                             TextWrapping="Wrap"
+                                                                                             AcceptsReturn="True"
+                                                                                             MinHeight="40" />
+
+                                                                                    <!-- Vietnamese Translation Input -->
+                                                                                    <TextBox Header="{Binding HeaderSentenceVi}"
+                                                                                             PlaceholderText="{Binding PlaceholderExampleVi}"
+                                                                                             Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                                             TextWrapping="Wrap"
+                                                                                             AcceptsReturn="True"
+                                                                                             MinHeight="40" />
+                                                                                </StackPanel>
+                                                                            </Border>
                                                                         </DataTemplate>
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
 
-                                                                <Button HorizontalAlignment="Left" Click="AddExampleButton_Click" Padding="10,4" CornerRadius="6">
+                                                                <Button HorizontalAlignment="Left" Click="AddExampleButton_Click" Padding="12,5" CornerRadius="6">
                                                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                                                         <FontIcon Glyph="&#xE710;" FontSize="11" />
-                                                                        <TextBlock Text="{Binding BtnAddExample}" FontSize="11" />
+                                                                        <TextBlock Text="{Binding BtnAddExample}" FontSize="12" FontWeight="SemiBold" />
                                                                     </StackPanel>
                                                                 </Button>
                                                             </StackPanel>

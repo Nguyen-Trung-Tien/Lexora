@@ -16,10 +16,10 @@
 
     <ContentDialog.TitleTemplate>
         <DataTemplate>
-            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
                 <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="24" Height="24" VerticalAlignment="Center" />
-                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
-            </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </Grid>
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 

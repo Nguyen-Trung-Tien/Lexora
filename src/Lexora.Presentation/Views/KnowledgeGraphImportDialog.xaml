@@ -16,7 +16,7 @@
 
     <ContentDialog.TitleTemplate>
         <DataTemplate>
-            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
                 <Border Width="32" Height="32" CornerRadius="8"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -25,8 +25,8 @@
                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                               HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
-            </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </Grid>
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 

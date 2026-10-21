@@ -27,7 +27,9 @@ public partial class EditableExample : ObservableObject
     [ObservableProperty]
     public partial string SentenceVi { get; set; } = string.Empty;
 
+    public string HeaderSentenceEn => Localization?.GetString("WordEditor_HeaderExampleEn") ?? "Câu ví dụ tiếng Anh";
     public string PlaceholderExampleEn => Localization?.GetString("WordEditor_PlaceholderExampleEn") ?? "Câu ví dụ tiếng Anh...";
+    public string HeaderSentenceVi => Localization?.GetString("WordEditor_HeaderExampleVi") ?? "Bản dịch tiếng Việt";
     public string PlaceholderExampleVi => Localization?.GetString("WordEditor_PlaceholderExampleVi") ?? "Bản dịch nghĩa tiếng Việt...";
     public string TooltipDeleteExample => Localization?.GetString("WordEditor_TooltipDeleteExample") ?? "Xóa câu ví dụ này";
 
