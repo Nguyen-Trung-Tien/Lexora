@@ -39,6 +39,11 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
+        ActualThemeChanged += (s, e) =>
+        {
+            RenderGraphCanvas();
+        };
+
         Loaded += async (s, e) =>
         {
             if (!ViewModel.HasActiveGraph)
@@ -156,8 +161,8 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             : ViewModel.ActiveGraph.ConnectedNodes;
 
         int count = nodes.Count;
-        double baseRadius = Math.Clamp(Math.Min(width, height) / 2.0 - 55.0, 110.0, 190.0);
-        double radius = Math.Clamp(baseRadius * ViewModel.CanvasScale, 60.0, 400.0);
+        double baseRadius = Math.Clamp(Math.Min(width, height) / 2.0 - 65.0, 110.0, 200.0);
+        double radius = Math.Clamp(baseRadius * ViewModel.CanvasScale, 60.0, 420.0);
 
         // 1. Draw Connecting Lines first so they sit under the nodes
         for (int i = 0; i < count; i++)
@@ -173,7 +178,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
                 X2 = nx,
                 Y2 = ny,
                 Stroke = GetRelationLineBrush(nodes[i].NodeType),
-                StrokeThickness = 1.8
+                StrokeThickness = 2.0
             };
 
             if (nodes[i].NodeType == KnowledgeGraphNodeType.Antonym)
@@ -197,29 +202,33 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
             var nodeBorder = new Border
             {
-                Background = (Brush)App.Current.Resources["CardBackgroundFillColorDefaultBrush"],
+                Background = ThemeResourceHelper.GetThemeBrush(this, "CardBackgroundFillColorDefaultBrush"),
                 BorderBrush = isSelected
-                    ? (Brush)App.Current.Resources["AccentFillColorDefaultBrush"]
-                    : (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"],
+                    ? ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush")
+                    : ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
                 BorderThickness = new Thickness(isSelected ? 2.5 : 1.2),
                 CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(10, 6, 10, 6),
+                Padding = new Thickness(12, 8, 12, 8),
                 Tag = node
             };
 
-            var nodePanel = new StackPanel { Spacing = 3 };
-            var topPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4, VerticalAlignment = VerticalAlignment.Center };
+            ToolTipService.SetToolTip(nodeBorder, string.IsNullOrWhiteSpace(node.MeaningVi)
+                ? node.Term
+                : $"{node.Term} ({node.PartOfSpeech}) — {node.MeaningVi}");
+
+            var nodePanel = new StackPanel { Spacing = 4, HorizontalAlignment = HorizontalAlignment.Center };
+            var topPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
 
             var relBadge = new Border
             {
                 Background = GetRelationBadgeBackground(node.NodeType),
                 CornerRadius = new CornerRadius(4),
-                Padding = new Thickness(5, 2, 5, 2)
+                Padding = new Thickness(6, 2, 6, 2)
             };
             var relText = new TextBlock
             {
                 Text = GetShortRelLabel(node.NodeType),
-                FontSize = 9.5,
+                FontSize = 10,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                 Foreground = GetRelationTextForeground(node.NodeType)
             };
@@ -230,16 +239,16 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             {
                 var lvlBadge = new Border
                 {
-                    Background = (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"],
+                    Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
                     CornerRadius = new CornerRadius(4),
-                    Padding = new Thickness(4, 1, 4, 1)
+                    Padding = new Thickness(5, 2, 5, 2)
                 };
                 var lvlText = new TextBlock
                 {
                     Text = node.Level.ToString(),
-                    FontSize = 9,
+                    FontSize = 9.5,
                     FontWeight = Microsoft.UI.Text.FontWeights.Bold,
-                    Foreground = (Brush)App.Current.Resources["TextFillColorSecondaryBrush"]
+                    Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush")
                 };
                 lvlBadge.Child = lvlText;
                 topPanel.Children.Add(lvlBadge);
@@ -248,9 +257,10 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             var termText = new TextBlock
             {
                 Text = node.Term,
-                FontSize = 13,
+                FontSize = 13.5,
                 FontWeight = Microsoft.UI.Text.FontWeights.Bold,
-                Foreground = (Brush)App.Current.Resources["TextFillColorPrimaryBrush"],
+                Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorPrimaryBrush"),
+                HorizontalAlignment = HorizontalAlignment.Center,
                 TextWrapping = TextWrapping.NoWrap
             };
 
@@ -278,8 +288,10 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
             // Measure & arrange
             nodeBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            double nw = Math.Max(nodeBorder.DesiredSize.Width + 10, 82);
-            double nh = Math.Max(nodeBorder.DesiredSize.Height, 42);
+            double nw = Math.Max(nodeBorder.DesiredSize.Width + 12, 88);
+            double nh = Math.Max(nodeBorder.DesiredSize.Height + 4, 46);
+            nodeBorder.Width = nw;
+            nodeBorder.Height = nh;
 
             Canvas.SetLeft(nodeBorder, nx - (nw / 2.0));
             Canvas.SetTop(nodeBorder, ny - (nh / 2.0));
@@ -294,17 +306,21 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
         var centerBorder = new Border
         {
-            Background = (Brush)App.Current.Resources["AccentFillColorDefaultBrush"],
+            Background = ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush"),
             BorderBrush = isCenterSelected
-                ? (Brush)App.Current.Resources["SystemFillColorCautionBrush"]
-                : (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"],
+                ? ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush")
+                : ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
             BorderThickness = new Thickness(isCenterSelected ? 3.5 : 1.5),
             CornerRadius = new CornerRadius(14),
-            Padding = new Thickness(22, 10, 22, 10),
-            MinWidth = 145,
-            MinHeight = 60,
+            Padding = new Thickness(24, 12, 24, 12),
+            MinWidth = 150,
+            MinHeight = 62,
             Tag = ViewModel.ActiveGraph.CenterNode
         };
+
+        ToolTipService.SetToolTip(centerBorder, string.IsNullOrWhiteSpace(ViewModel.ActiveGraph.CenterNode.MeaningVi)
+            ? ViewModel.ActiveGraph.CenterNode.Term
+            : $"{ViewModel.ActiveGraph.CenterNode.Term} ({ViewModel.ActiveGraph.CenterNode.PartOfSpeech}) — {ViewModel.ActiveGraph.CenterNode.MeaningVi}");
 
         var centerPanel = new StackPanel
         {
@@ -316,9 +332,9 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         var centerLabel = new TextBlock
         {
             Text = Loc.GetString("KnowledgeGraph_CoreConcept"),
-            FontSize = 10,
+            FontSize = 10.5,
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            Foreground = (Brush)App.Current.Resources["TextOnAccentFillColorPrimaryBrush"],
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextOnAccentFillColorPrimaryBrush"),
             HorizontalAlignment = HorizontalAlignment.Center,
             TextWrapping = TextWrapping.NoWrap
         };
@@ -326,9 +342,9 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         var centerTerm = new TextBlock
         {
             Text = ViewModel.ActiveGraph.CenterNode.Term,
-            FontSize = 15,
+            FontSize = 16,
             FontWeight = Microsoft.UI.Text.FontWeights.Bold,
-            Foreground = (Brush)App.Current.Resources["TextOnAccentFillColorPrimaryBrush"],
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextOnAccentFillColorPrimaryBrush"),
             HorizontalAlignment = HorizontalAlignment.Center,
             TextWrapping = TextWrapping.NoWrap
         };
@@ -349,8 +365,10 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         };
 
         centerBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        double cw = Math.Max(centerBorder.DesiredSize.Width + 14, 145);
-        double ch = Math.Max(centerBorder.DesiredSize.Height, 60);
+        double cw = Math.Max(centerBorder.DesiredSize.Width + 16, 150);
+        double ch = Math.Max(centerBorder.DesiredSize.Height, 62);
+        centerBorder.Width = cw;
+        centerBorder.Height = ch;
 
         Canvas.SetLeft(centerBorder, cx - (cw / 2.0));
         Canvas.SetTop(centerBorder, cy - (ch / 2.0));
@@ -359,32 +377,32 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
     private Brush GetRelationLineBrush(KnowledgeGraphNodeType type) => type switch
     {
-        KnowledgeGraphNodeType.Synonym => (Brush)App.Current.Resources["SystemFillColorSuccessBrush"],
-        KnowledgeGraphNodeType.Antonym => (Brush)App.Current.Resources["SystemFillColorCriticalBrush"],
-        KnowledgeGraphNodeType.WordFamily => (Brush)App.Current.Resources["AccentFillColorDefaultBrush"],
-        KnowledgeGraphNodeType.Collocation => (Brush)App.Current.Resources["SystemFillColorCautionBrush"],
-        KnowledgeGraphNodeType.TopicCluster => (Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"],
-        _ => (Brush)App.Current.Resources["TextFillColorSecondaryBrush"]
+        KnowledgeGraphNodeType.Synonym => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush"),
+        KnowledgeGraphNodeType.Antonym => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush"),
+        KnowledgeGraphNodeType.WordFamily => ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush"),
+        KnowledgeGraphNodeType.Collocation => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush"),
+        KnowledgeGraphNodeType.TopicCluster => ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush"),
+        _ => ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush")
     };
 
     private Brush GetRelationBadgeBackground(KnowledgeGraphNodeType type) => type switch
     {
-        KnowledgeGraphNodeType.Synonym => (Brush)App.Current.Resources["SystemFillColorSuccessBackgroundBrush"],
-        KnowledgeGraphNodeType.Antonym => (Brush)App.Current.Resources["SystemFillColorCriticalBackgroundBrush"],
-        KnowledgeGraphNodeType.Collocation => (Brush)App.Current.Resources["SystemFillColorCautionBackgroundBrush"],
-        KnowledgeGraphNodeType.TopicCluster => (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"],
-        KnowledgeGraphNodeType.WordFamily => (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"],
-        _ => (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"]
+        KnowledgeGraphNodeType.Synonym => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBackgroundBrush"),
+        KnowledgeGraphNodeType.Antonym => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBackgroundBrush"),
+        KnowledgeGraphNodeType.Collocation => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBackgroundBrush"),
+        KnowledgeGraphNodeType.TopicCluster => ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+        KnowledgeGraphNodeType.WordFamily => ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+        _ => ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush")
     };
 
     private Brush GetRelationTextForeground(KnowledgeGraphNodeType type) => type switch
     {
-        KnowledgeGraphNodeType.Synonym => (Brush)App.Current.Resources["SystemFillColorSuccessBrush"],
-        KnowledgeGraphNodeType.Antonym => (Brush)App.Current.Resources["SystemFillColorCriticalBrush"],
-        KnowledgeGraphNodeType.WordFamily => (Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"],
-        KnowledgeGraphNodeType.Collocation => (Brush)App.Current.Resources["SystemFillColorCautionBrush"],
-        KnowledgeGraphNodeType.TopicCluster => (Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"],
-        _ => (Brush)App.Current.Resources["TextFillColorSecondaryBrush"]
+        KnowledgeGraphNodeType.Synonym => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush"),
+        KnowledgeGraphNodeType.Antonym => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush"),
+        KnowledgeGraphNodeType.WordFamily => ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush"),
+        KnowledgeGraphNodeType.Collocation => ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush"),
+        KnowledgeGraphNodeType.TopicCluster => ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush"),
+        _ => ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush")
     };
 
     private string GetShortRelLabel(KnowledgeGraphNodeType type) => type switch

@@ -403,7 +403,7 @@
                             Visibility="{x:Bind ViewModel.IsVisualMapMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="14" Height="440" Padding="12">
+                            BorderThickness="1" CornerRadius="14" Height="480" Padding="12">
                         <Grid>
                             <Canvas x:Name="GraphCanvas" SizeChanged="GraphCanvas_SizeChanged" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                 <!-- Visual orbit nodes & connecting lines dynamically injected in code-behind -->
