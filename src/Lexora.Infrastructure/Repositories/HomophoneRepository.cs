@@ -58,8 +58,10 @@ public class HomophoneRepository : Repository<HomophoneGroup>, IHomophoneReposit
         if (!string.IsNullOrWhiteSpace(query))
         {
             var normalized = query.Trim().ToLowerInvariant();
+            var stripped = normalized.Trim('/', '[', ']', ' ');
             q = q.Where(g => g.Title.ToLower().Contains(normalized) ||
                              g.PhoneticIpa.ToLower().Contains(normalized) ||
+                             (!string.IsNullOrEmpty(stripped) && g.PhoneticIpa.ToLower().Contains(stripped)) ||
                              (g.DifferentiationTip != null && g.DifferentiationTip.ToLower().Contains(normalized)) ||
                              g.Items.Any(i => i.Term.ToLower().Contains(normalized) ||
                                               i.MeaningVi.ToLower().Contains(normalized) ||

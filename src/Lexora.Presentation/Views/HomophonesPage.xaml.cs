@@ -14,6 +14,8 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
     public HomophonesViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
 
+    private readonly DispatcherTimer _searchDebounceTimer = new() { Interval = TimeSpan.FromMilliseconds(220) };
+
     public HomophonesPage()
     {
         ViewModel = App.Current.Services.GetRequiredService<HomophonesViewModel>();
@@ -21,7 +23,36 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
 
         InitializeComponent();
 
+        _searchDebounceTimer.Tick += SearchDebounceTimer_Tick;
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+
         Loaded += OnPageLoaded;
+        Unloaded += OnPageUnloaded;
+    }
+
+    private void OnPageUnloaded(object sender, RoutedEventArgs e)
+    {
+        _searchDebounceTimer.Stop();
+        _searchDebounceTimer.Tick -= SearchDebounceTimer_Tick;
+        ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.SelectedGroup))
+        {
+            if (!Equals(GroupsListView.SelectedItem, ViewModel.SelectedGroup))
+            {
+                GroupsListView.SelectedItem = ViewModel.SelectedGroup;
+            }
+            UpdateDetailView();
+        }
+    }
+
+    private void SearchDebounceTimer_Tick(object? sender, object e)
+    {
+        _searchDebounceTimer.Stop();
+        ViewModel.SearchQuery = SearchBox.Text;
     }
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
@@ -47,9 +78,60 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         SearchBox.PlaceholderText = Loc.GetString("Homophones_SearchPlaceholder");
     }
 
-    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
     {
-        ViewModel.SearchQuery = SearchBox.Text;
+        if (e.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+        {
+            _searchDebounceTimer.Stop();
+            _searchDebounceTimer.Start();
+
+            if (!string.IsNullOrWhiteSpace(sender.Text))
+            {
+                var suggestions = await ViewModel.GetSearchSuggestionsAsync(sender.Text);
+                sender.ItemsSource = suggestions.Count > 0 ? suggestions : null;
+            }
+            else
+            {
+                sender.ItemsSource = null;
+            }
+        }
+        else if (e.Reason == AutoSuggestionBoxTextChangeReason.ProgrammaticChange)
+        {
+            ViewModel.SearchQuery = sender.Text;
+        }
+    }
+
+    private void SearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is SmartSearchSuggestion suggestion)
+        {
+            sender.Text = suggestion.Title;
+            if (Guid.TryParse(suggestion.TargetType, out var groupId))
+            {
+                ViewModel.SelectGroupById(groupId);
+                UpdateDetailView();
+            }
+            else
+            {
+                ViewModel.SearchQuery = suggestion.SearchTerm ?? suggestion.Title;
+            }
+        }
+    }
+
+    private void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is SmartSearchSuggestion suggestion)
+        {
+            if (Guid.TryParse(suggestion.TargetType, out var groupId))
+            {
+                ViewModel.SelectGroupById(groupId);
+                UpdateDetailView();
+                return;
+            }
+        }
+
+        var query = args.QueryText?.Trim();
+        ViewModel.SearchQuery = query ?? string.Empty;
     }
 
     private void TypeFilterBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

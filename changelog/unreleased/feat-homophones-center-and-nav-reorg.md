@@ -7,6 +7,7 @@
 - [Navigation Menu]: Restructured ShellPage navigation into four logical groups (Overview, Learning & Vocabulary, Practice & Review, Storage & Archive) with WinUI 3 Fluent 2 section headers.
 - [Global Shortcuts]: Harmonized application-wide Ctrl+1 through Ctrl+7 shortcuts across ShellPage and ShortcutManager.
 - [Startup Progress Bar]: Implemented 60fps smooth easing interpolation and graceful stage pacing for the splash screen progress bar, eliminating instantaneous progress jumping.
+- [Homophones UI & Search]: Synchronized button styles with VocabularyPage, integrated full pagination, and added intelligent AutoSuggestBox search with IPA/term/fuzzy suggestions.
 
 ### Fixed
 - [WinUI 3 Header Click Crash]: Added safe type checking in NavView_ItemInvoked to prevent crashes when clicking on NavigationViewItemHeader.

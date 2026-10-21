@@ -17,6 +17,8 @@ public partial class HomophonesViewModel : ObservableObject, IDisposable
     private readonly ILocalizationService _localizationService;
     private readonly DispatcherQueue? _dispatcherQueue;
 
+    private readonly List<HomophoneGroupDto> _allFilteredGroups = [];
+
     public ObservableCollection<HomophoneGroupDto> Groups { get; } = [];
 
     [ObservableProperty]
@@ -41,7 +43,47 @@ public partial class HomophonesViewModel : ObservableObject, IDisposable
     public bool HasSelectedGroup => SelectedGroup != null;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalPages))]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
     public partial int TotalCount { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalPages))]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalPages))]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
+    public partial int PageSize { get; set; } = 7;
+
+    public int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalCount / Math.Max(1, PageSize)));
+
+    public bool HasPreviousPage => CurrentPage > 1;
+
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    public string PageDisplayInfo => $"{CurrentPage} / {TotalPages}";
+
+    public string ItemsRangeDisplay
+    {
+        get
+        {
+            if (TotalCount == 0) return "0 nhóm";
+            int start = ((CurrentPage - 1) * PageSize) + 1;
+            int end = Math.Min(CurrentPage * PageSize, TotalCount);
+            return $"Hiển thị {start} - {end} trong {TotalCount} nhóm";
+        }
+    }
 
     public HomophonesViewModel(
         IHomophoneService homophoneService,
@@ -67,23 +109,16 @@ public partial class HomophonesViewModel : ObservableObject, IDisposable
                 levelFilter: SelectedLevelFilter,
                 searchTerm: SearchQuery);
 
-            Groups.Clear();
-            foreach (var group in results)
+            _allFilteredGroups.Clear();
+            _allFilteredGroups.AddRange(results);
+            TotalCount = _allFilteredGroups.Count;
+
+            if (CurrentPage > TotalPages)
             {
-                Groups.Add(group);
+                CurrentPage = 1;
             }
 
-            TotalCount = Groups.Count;
-
-            // Maintain or auto-select first item
-            if (SelectedGroup != null)
-            {
-                SelectedGroup = Groups.FirstOrDefault(g => g.Id == SelectedGroup.Id) ?? Groups.FirstOrDefault();
-            }
-            else
-            {
-                SelectedGroup = Groups.FirstOrDefault();
-            }
+            RefreshCurrentPageSlice();
         }
         catch (Exception ex)
         {
@@ -93,6 +128,154 @@ public partial class HomophonesViewModel : ObservableObject, IDisposable
         {
             IsLoading = false;
         }
+    }
+
+    private void RefreshCurrentPageSlice()
+    {
+        Groups.Clear();
+        var pageItems = _allFilteredGroups
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize);
+
+        foreach (var group in pageItems)
+        {
+            Groups.Add(group);
+        }
+
+        OnPropertyChanged(nameof(IsEmptyState));
+        OnPropertyChanged(nameof(TotalPages));
+        OnPropertyChanged(nameof(HasPreviousPage));
+        OnPropertyChanged(nameof(HasNextPage));
+        OnPropertyChanged(nameof(PageDisplayInfo));
+        OnPropertyChanged(nameof(ItemsRangeDisplay));
+
+        // Maintain or auto-select first item
+        if (SelectedGroup != null)
+        {
+            SelectedGroup = Groups.FirstOrDefault(g => g.Id == SelectedGroup.Id) ?? Groups.FirstOrDefault();
+        }
+        else
+        {
+            SelectedGroup = Groups.FirstOrDefault();
+        }
+    }
+
+    [RelayCommand]
+    public void FirstPage() => GoToPage(1);
+
+    [RelayCommand]
+    public void PreviousPage() => GoToPage(CurrentPage - 1);
+
+    [RelayCommand]
+    public void NextPage() => GoToPage(CurrentPage + 1);
+
+    [RelayCommand]
+    public void LastPage() => GoToPage(TotalPages);
+
+    public void GoToPage(int page)
+    {
+        int target = Math.Clamp(page, 1, TotalPages);
+        if (target == CurrentPage && Groups.Count > 0) return;
+        CurrentPage = target;
+        RefreshCurrentPageSlice();
+    }
+
+    public void SelectGroupById(Guid id)
+    {
+        var found = _allFilteredGroups.FirstOrDefault(g => g.Id == id);
+        if (found != null)
+        {
+            int index = _allFilteredGroups.IndexOf(found);
+            int targetPage = (index / PageSize) + 1;
+            if (targetPage != CurrentPage)
+            {
+                CurrentPage = targetPage;
+                RefreshCurrentPageSlice();
+            }
+            SelectedGroup = Groups.FirstOrDefault(g => g.Id == id) ?? found;
+        }
+    }
+
+    public async Task<IReadOnlyList<SmartSearchSuggestion>> GetSearchSuggestionsAsync(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return Array.Empty<SmartSearchSuggestion>();
+        }
+
+        var clean = query.Trim().ToLowerInvariant();
+        var cleanIpa = clean.Trim('/', '[', ']', ' ');
+        var suggestions = new List<SmartSearchSuggestion>();
+
+        var all = _allFilteredGroups.Count > 0 ? _allFilteredGroups : await _homophoneService.GetAllGroupsAsync();
+
+        foreach (var g in all)
+        {
+            bool titleMatch = g.Title.Contains(clean, StringComparison.OrdinalIgnoreCase);
+            bool ipaMatch = !string.IsNullOrEmpty(g.PhoneticIpa) &&
+                            (g.PhoneticIpa.Contains(clean, StringComparison.OrdinalIgnoreCase) ||
+                             (!string.IsNullOrEmpty(cleanIpa) && g.PhoneticIpa.Contains(cleanIpa, StringComparison.OrdinalIgnoreCase)));
+            bool itemMatch = g.Items.Any(i => i.Term.Contains(clean, StringComparison.OrdinalIgnoreCase) ||
+                                              i.MeaningVi.Contains(clean, StringComparison.OrdinalIgnoreCase));
+
+            if (titleMatch || ipaMatch || itemMatch)
+            {
+                string typeLabel = g.Type switch
+                {
+                    HomophoneType.ExactHomophone => "Đồng âm hoàn toàn",
+                    HomophoneType.NearHomophone => "Gần đồng âm",
+                    HomophoneType.MinimalPair => "Cặp âm tối thiểu",
+                    _ => "Đồng âm"
+                };
+
+                string termsDisplay = g.Items.Count > 0
+                    ? string.Join(" / ", g.Items.Select(i => i.Term))
+                    : g.Title;
+
+                string subtitle = !string.IsNullOrEmpty(g.PhoneticIpa)
+                    ? $"{g.PhoneticIpa} • {typeLabel}"
+                    : typeLabel;
+
+                suggestions.Add(new SmartSearchSuggestion
+                {
+                    Title = termsDisplay,
+                    Subtitle = subtitle,
+                    Glyph = "\uE8D6",
+                    SearchTerm = termsDisplay,
+                    TargetType = g.Id.ToString()
+                });
+
+                if (suggestions.Count >= 6) break;
+            }
+        }
+
+        // Fuzzy fallback if few results
+        if (suggestions.Count < 3)
+        {
+            foreach (var g in all)
+            {
+                foreach (var item in g.Items)
+                {
+                    if (item.Term.StartsWith(clean, StringComparison.OrdinalIgnoreCase) &&
+                        !suggestions.Any(s => s.TargetType == g.Id.ToString()))
+                    {
+                        suggestions.Add(new SmartSearchSuggestion
+                        {
+                            Title = $"{item.Term} ({g.Title})",
+                            Subtitle = $"Gợi ý: {g.PhoneticIpa}",
+                            Glyph = "\uE946",
+                            SearchTerm = item.Term,
+                            TargetType = g.Id.ToString()
+                        });
+
+                        if (suggestions.Count >= 6) break;
+                    }
+                }
+                if (suggestions.Count >= 6) break;
+            }
+        }
+
+        return suggestions;
     }
 
     [RelayCommand]
@@ -118,15 +301,16 @@ public partial class HomophonesViewModel : ObservableObject, IDisposable
             var success = await _homophoneService.DeleteGroupAsync(id);
             if (success)
             {
-                var existing = Groups.FirstOrDefault(g => g.Id == id);
+                var existing = _allFilteredGroups.FirstOrDefault(g => g.Id == id);
                 if (existing != null)
                 {
-                    Groups.Remove(existing);
-                    TotalCount = Groups.Count;
-                    if (SelectedGroup?.Id == id)
+                    _allFilteredGroups.Remove(existing);
+                    TotalCount = _allFilteredGroups.Count;
+                    if (CurrentPage > TotalPages)
                     {
-                        SelectedGroup = Groups.FirstOrDefault();
+                        CurrentPage = Math.Max(1, TotalPages);
                     }
+                    RefreshCurrentPageSlice();
                 }
             }
         }
