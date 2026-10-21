@@ -33,7 +33,12 @@
 
 ---
 
-## 🏆 Completed Milestones & Sprints (v1.0.0 - v1.2.2)
+## 🏆 Completed Milestones & Sprints (v1.0.0 - v1.3.0)
+
+### Feature: Comprehensive User Guide & Onboarding Hub (`HelpPage`, `HelpViewModel`)
+- **Layer**: `Lexora.Presentation`, `Lexora.Application`
+- **Delivered**: v1.3.0
+- **Results**: Centralized Help Hub in Shell navigation, 6 structured interactive guide modules, SM-2/FSRS algorithm formula breakdown, contextual TeachingTips across all 6 core pages, global F1/Ctrl+H shortcuts, 100% bilingual parity.
 
 ### Feature: Pronunciation & Listening Lab (`ListeningLabDialog`)
 - **Layer**: `Lexora.Application`, `Lexora.Presentation`

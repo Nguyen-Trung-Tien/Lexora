@@ -13,6 +13,7 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
     public DashboardViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
     private readonly ISoundFeedbackService _soundFeedback;
+    private readonly INavigationService _navigationService;
 
     public DashboardPage()
     {
@@ -20,6 +21,7 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
         ViewModel = App.Current.Services.GetRequiredService<DashboardViewModel>();
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
         _soundFeedback = App.Current.Services.GetRequiredService<ISoundFeedbackService>();
+        _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
 
         InitializeComponent();
 
@@ -198,5 +200,17 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
         {
             System.Diagnostics.Debug.WriteLine($"[DashboardPage] OpenListeningLab error: {ex.Message}");
         }
+    }
+
+    private void DashboardHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        DashboardHelpTeachingTip.IsOpen = true;
+    }
+
+    private void OpenFullGuide_Click(object sender, RoutedEventArgs e)
+    {
+        DashboardHelpTeachingTip.IsOpen = false;
+        var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "GettingStarted";
+        _navigationService.Navigate(typeof(HelpPage), tag);
     }
 }

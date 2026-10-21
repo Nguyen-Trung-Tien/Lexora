@@ -188,9 +188,41 @@
                             <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_TabDictation')}" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
+
+                    <!-- Contextual Help Button -->
+                    <Button x:Name="VocabHelpButton" Click="VocabHelpButton_Click" CornerRadius="10" Padding="12,8"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_Help_Title')}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE897;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Nav_Help')}" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </ScrollViewer>
         </Grid>
+
+        <TeachingTip x:Name="VocabHelpTeachingTip"
+                     Target="{x:Bind VocabHelpButton}"
+                     Title="{x:Bind Loc.GetString('Vocab_Help_Title')}"
+                     Subtitle="{x:Bind Loc.GetString('Vocab_Help_Subtitle')}"
+                     IsOpen="False"
+                     IsLightDismissEnabled="True"
+                     PreferredPlacement="BottomRight">
+            <TeachingTip.Content>
+                <StackPanel Spacing="10" MaxWidth="320">
+                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_Help_Content')}" TextWrapping="Wrap" FontSize="13" />
+                    <Button Style="{ThemeResource AccentButtonStyle}"
+                            Click="OpenFullGuide_Click"
+                            Tag="Vocabulary"
+                            CornerRadius="8" Padding="12,6">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{x:Bind Loc.GetString('Help_OpenFullGuide')}" FontWeight="SemiBold" FontSize="12" />
+                            <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </TeachingTip.Content>
+        </TeachingTip>
         </StackPanel>
 
         <!-- ========================================================= -->

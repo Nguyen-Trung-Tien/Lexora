@@ -88,15 +88,44 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Test_Subtitle')}"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                         </StackPanel>
-                        <Button Grid.Column="2" VerticalAlignment="Center" CornerRadius="10" Padding="14,10"
-                                Click="OpenListeningLab_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Subtitle')}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Title')}" FontWeight="SemiBold" FontSize="13" />
-                            </StackPanel>
-                        </Button>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button CornerRadius="10" Padding="14,10"
+                                    Click="OpenListeningLab_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Subtitle')}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Title')}" FontWeight="SemiBold" FontSize="13" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="TestHelpButton" Click="TestHelpButton_Click" CornerRadius="10" Padding="10"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_Help_Title')}">
+                                <FontIcon Glyph="&#xE897;" FontSize="16" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </Button>
+                        </StackPanel>
                     </Grid>
                 </Border>
+
+                <TeachingTip x:Name="TestHelpTeachingTip"
+                             Target="{x:Bind TestHelpButton}"
+                             Title="{x:Bind Loc.GetString('Test_Help_Title')}"
+                             Subtitle="{x:Bind Loc.GetString('Test_Help_Subtitle')}"
+                             IsOpen="False"
+                             IsLightDismissEnabled="True"
+                             PreferredPlacement="BottomRight">
+                    <TeachingTip.Content>
+                        <StackPanel Spacing="10" MaxWidth="320">
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_Help_Content')}" TextWrapping="Wrap" FontSize="13" />
+                            <Button Style="{ThemeResource AccentButtonStyle}"
+                                    Click="OpenFullGuide_Click"
+                                    Tag="TestMode"
+                                    CornerRadius="8" Padding="12,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_OpenFullGuide')}" FontWeight="SemiBold" FontSize="12" />
+                                    <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </TeachingTip.Content>
+                </TeachingTip>
 
                 <!-- Status InfoBar -->
                 <InfoBar IsOpen="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"

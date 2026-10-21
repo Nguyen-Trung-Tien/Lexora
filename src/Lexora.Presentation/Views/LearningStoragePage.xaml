@@ -64,8 +64,37 @@
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Refresh')}">
                             <FontIcon Glyph="&#xE72C;" FontSize="13" />
                         </Button>
+
+                        <Button x:Name="StorageHelpButton" CornerRadius="10" Padding="12,8"
+                                Click="StorageHelpButton_Click"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_Help_Title')}">
+                            <FontIcon Glyph="&#xE897;" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </Button>
                     </StackPanel>
                 </Grid>
+
+                <TeachingTip x:Name="StorageHelpTeachingTip"
+                             Target="{x:Bind StorageHelpButton}"
+                             Title="{x:Bind Loc.GetString('Storage_Help_Title')}"
+                             Subtitle="{x:Bind Loc.GetString('Storage_Help_Subtitle')}"
+                             IsOpen="False"
+                             IsLightDismissEnabled="True"
+                             PreferredPlacement="BottomRight">
+                    <TeachingTip.Content>
+                        <StackPanel Spacing="10" MaxWidth="320">
+                            <TextBlock Text="{x:Bind Loc.GetString('Storage_Help_Content')}" TextWrapping="Wrap" FontSize="13" />
+                            <Button Style="{ThemeResource AccentButtonStyle}"
+                                    Click="OpenFullGuide_Click"
+                                    Tag="Vocabulary"
+                                    CornerRadius="8" Padding="12,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_OpenFullGuide')}" FontWeight="SemiBold" FontSize="12" />
+                                    <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </TeachingTip.Content>
+                </TeachingTip>
 
                 <!-- 2. Overview Metrics Cards (Responsive with smooth fallback) -->
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"

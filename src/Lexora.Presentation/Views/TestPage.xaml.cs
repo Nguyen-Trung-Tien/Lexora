@@ -15,12 +15,14 @@ public sealed partial class TestPage : Page, ILocalizableView, IThemeAwareView
 {
     public TestViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
+    private readonly INavigationService _navigationService;
 
     public TestPage()
     {
         NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<TestViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
+        _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
 
         InitializeComponent();
         RegisterShortcuts();
@@ -562,5 +564,17 @@ public sealed partial class TestPage : Page, ILocalizableView, IThemeAwareView
         {
             System.Diagnostics.Debug.WriteLine($"[TestPage] OpenListeningLab error: {ex.Message}");
         }
+    }
+
+    private void TestHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        TestHelpTeachingTip.IsOpen = true;
+    }
+
+    private void OpenFullGuide_Click(object sender, RoutedEventArgs e)
+    {
+        TestHelpTeachingTip.IsOpen = false;
+        var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "TestMode";
+        _navigationService.Navigate(typeof(HelpPage), tag);
     }
 }

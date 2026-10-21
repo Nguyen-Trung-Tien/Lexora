@@ -123,6 +123,7 @@ public sealed partial class ShellPage : Page
                         GrammarPage => NavItemGrammar,
                         LearningStoragePage => NavItemLearningStorage,
                         SettingsPage => NavItemSettings,
+                        HelpPage => NavItemHelp,
                         _ => null
                     };
 
@@ -205,6 +206,7 @@ public sealed partial class ShellPage : Page
             "Grammar" => typeof(GrammarPage),
             "LearningStorage" => typeof(LearningStoragePage),
             "Settings" => typeof(SettingsPage),
+            "Help" => typeof(HelpPage),
             _ => null
         };
 
@@ -233,6 +235,7 @@ public sealed partial class ShellPage : Page
         NavItemTest.Content = _localizationService.GetString("Nav_Test");
         NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
         NavItemLearningStorage.Content = _localizationService.GetString("Nav_LearningStorage");
+        NavItemHelp.Content = _localizationService.GetString("Nav_Help");
         NavItemSettings.Content = _localizationService.GetString("Nav_Settings");
         GlobalSearchBox.PlaceholderText = _localizationService.GetString("Search_Placeholder");
 
@@ -244,6 +247,7 @@ public sealed partial class ShellPage : Page
         ToolTipService.SetToolTip(NavItemReview, _localizationService.GetString("Shell_TooltipReview"));
         ToolTipService.SetToolTip(NavItemTest, _localizationService.GetString("Shell_TooltipTest"));
         ToolTipService.SetToolTip(NavItemLearningStorage, _localizationService.GetString("Shell_TooltipLearningStorage"));
+        ToolTipService.SetToolTip(NavItemHelp, $"{_localizationService.GetString("Nav_Help")} (F1)");
         ToolTipService.SetToolTip(NavItemSettings, _localizationService.GetString("Shell_TooltipSettings"));
         ToolTipService.SetToolTip(GlobalSearchBox, _localizationService.GetString("Shell_SearchTooltip"));
 

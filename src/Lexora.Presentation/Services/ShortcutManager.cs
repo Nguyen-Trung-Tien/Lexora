@@ -210,6 +210,23 @@ public sealed class ShortcutManager : IShortcutManager
                 return Task.CompletedTask;
             }
         });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
+            Id = "Global.NavigateHelp",
+            Gesture = new ShortcutGesture(ShortcutKey.F1, ShortcutModifiers.None),
+            SecondaryGesture = new ShortcutGesture(ShortcutKey.H, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Nav_Help",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                _navigationService.Navigate(typeof(Views.HelpPage));
+                return Task.CompletedTask;
+            }
+        });
     }
 
     public void RegisterShortcut(ShortcutDefinition shortcut)

@@ -165,6 +165,11 @@ public class LocalizationServiceTests
     [InlineData("SmartReview_FreshLearned", "Từ mới nạp (Củng cố)", "Recently Learned (Consolidation)")]
     [InlineData("SmartReview_LongTermConsolidation", "Khắc sâu dài hạn", "Long-Term Consolidation")]
     [InlineData("AdaptiveQuiz_FinalLevelFormat", "Trình độ ước tính: {0}", "Estimated Level: {0}")]
+    [InlineData("Nav_Help", "Trung tâm hướng dẫn", "Help & User Guide")]
+    [InlineData("Help_HeroBadge", "TRUNG TÂM HƯỚNG DẪN & TRỢ GIÚP", "HELP & USER GUIDE HUB")]
+    [InlineData("Help_Title", "Hướng dẫn sử dụng Lexora", "Lexora User Guide & Documentation")]
+    [InlineData("Dashboard_Help_Title", "Trợ giúp: Bảng tổng quan", "Quick Help: Dashboard")]
+    [InlineData("Review_Help_Title", "Trợ giúp: Ôn tập Spaced Repetition", "Quick Help: Spaced Repetition")]
     public void NewlyAddedKeys_MustReturnAccurateTranslations(string key, string expectedVi, string expectedEn)
     {
         _loc.SetLanguage("vi-VN");

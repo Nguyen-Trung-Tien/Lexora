@@ -18,6 +18,7 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
 
     private readonly IUserPreferencesService _preferencesService;
+    private readonly INavigationService _navigationService;
 
     public ReviewPage()
     {
@@ -25,6 +26,7 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
         ViewModel = App.Current.Services.GetRequiredService<ReviewViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         _preferencesService = App.Current.Services.GetRequiredService<IUserPreferencesService>();
+        _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
 
         InitializeComponent();
 
@@ -543,5 +545,17 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
     private async void RestartReviewButton_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.StartReviewAsync(ViewModel.CurrentMode);
+    }
+
+    private void ReviewHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        ReviewHelpTeachingTip.IsOpen = true;
+    }
+
+    private void OpenFullGuide_Click(object sender, RoutedEventArgs e)
+    {
+        ReviewHelpTeachingTip.IsOpen = false;
+        var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "SpacedRepetition";
+        _navigationService.Navigate(typeof(HelpPage), tag);
     }
 }

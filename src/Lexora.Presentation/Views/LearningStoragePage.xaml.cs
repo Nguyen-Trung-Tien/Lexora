@@ -1228,6 +1228,18 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
     {
         ViewModel.ClosePractice();
     }
+
+    private void StorageHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        StorageHelpTeachingTip.IsOpen = true;
+    }
+
+    private void OpenFullGuide_Click(object sender, RoutedEventArgs e)
+    {
+        StorageHelpTeachingTip.IsOpen = false;
+        var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "Vocabulary";
+        _navigationService.Navigate(typeof(HelpPage), tag);
+    }
 }
 
 public partial class StorageCandidateItem : ObservableObject

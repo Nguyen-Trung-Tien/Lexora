@@ -2290,5 +2290,17 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
             ShowNotification(InfoBarSeverity.Error, Loc.GetString("Action_Delete"), ex.Message);
         }
     }
+
+    private void VocabHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        VocabHelpTeachingTip.IsOpen = true;
+    }
+
+    private void OpenFullGuide_Click(object sender, RoutedEventArgs e)
+    {
+        VocabHelpTeachingTip.IsOpen = false;
+        var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "Vocabulary";
+        _navigationService.Navigate(typeof(HelpPage), tag);
+    }
 }
 

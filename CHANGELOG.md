@@ -8,23 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-21
+
 ### Added
-- [Presentation/Dashboard]: Exposed direct hero launcher on Dashboard page for pronunciation and accent comparison laboratory (`ListeningLabDialog`).
-- [Application/Test]: Added active test session auto-save and interrupted session recovery in `TestService` via local JSON persistence.
-- [Presentation/i18n]: Added missing localization keys in `LocalizationService.cs` across both `vi-VN` and `en-US` dictionaries for Smart Review preset titles (`SmartReview_UrgentOverdue`, `SmartReview_HighForgettingRisk`, `SmartReview_ExamHighYield`, `SmartReview_FreshLearned`, `SmartReview_LongTermConsolidation`) and Adaptive Quiz final proficiency level format (`AdaptiveQuiz_FinalLevelFormat`).
-- [Tests/Unit]: Added automated verification test cases in `LocalizationServiceTests.cs` for all newly added keys, achieving 100% dictionary coverage and parity across 1,223 keys.
+- [Presentation/Help]: Comprehensive **User Guide & Onboarding Hub** (`HelpPage`, `HelpViewModel`) integrated into Shell Footer Navigation (`NavItemHelp`, shortcut `F1` and `Ctrl+H`).
+- [Presentation/Help]: 6 structured interactive guide modules covering:
+  - Getting Started & Dashboard Metrics
+  - Vocabulary & Grammar Management (Import/Export/Search)
+  - Spaced Repetition Mathematical Models (SM-2 & FSRS formulas, rating scales, intervals)
+  - Pronunciation & Listening Lab (Dictation, Minimal Pairs, Accents)
+  - Test & Adaptive Practice (CAT Engine, CEFR dynamic scaling)
+  - Database Backup & System Personalization
+- [Presentation/TeachingTip]: Contextual help buttons and interactive `TeachingTip` popups across all primary screens (`DashboardPage`, `VocabularyPage`, `ReviewPage`, `TestPage`, `LearningStoragePage`, `SettingsPage`) offering in-place guidance with direct 1-click jumps to the Help Hub.
+- [Presentation/Navigation]: Global shortcut registration (`F1` and `Ctrl+H`) in `ShortcutManager` and `ShellPage` to access the User Guide instantly from anywhere in the application.
+- [Presentation/i18n]: Full bilingual localization synchronization across `vi-VN` and `en-US` dictionaries for all User Guide categories, content, tips, and contextual help strings in `LocalizationService.cs`.
+- [Tests/Unit]: Expanded unit test coverage in `LocalizationServiceTests.cs` to verify 100% bilingual parity across all newly added help keys (raising total tests to 411 passing tests: 360 Unit + 51 Integration).
 
 ### Changed
-- [Infrastructure/Data]: Applied `.AsSplitQuery()` to `GetByTermAsync` in `VocabularyRepository` to eliminate Cartesian explosion across multiple related collections.
-- [Infrastructure/Data]: Added automatic ChangeTracker clearance on `UnitOfWork.SaveChangesAsync()` to prevent entity graph retention and memory accumulation during long desktop sessions.
+- [Configuration]: Bumped application version to `1.3.0` across `Directory.Build.props`, `Package.appxmanifest`, `build-installer.ps1`, and `SettingsViewModel`.
+- [Presentation/Shell]: Reordered and polished Shell Footer Navigation layout to gracefully house `Help` alongside `ThemeToggle` and `Settings`.
 
 ### Fixed
-- [Infrastructure/Audio]: Properly tracking and releasing native COM `MediaSource` and `IRandomAccessStream` resources in `WindowsAudioPlayerService.StopInternal()`.
-- [Presentation/Splash]: Enforced minimum display duration (850ms) regardless of OS animation settings and ensured opacity fallbacks for smooth startup transition in `SplashScreenOverlay`.
-- [Presentation/Dialogs]: Hardened `SafeDialogExtensions.ShowAsyncSafe` against WinUI 3 visual tree dialog closing collisions by awaiting `Task.Yield()` prior to releasing `_dialogSemaphore`, guaranteeing safe sequential dialog chaining and preventing `InvalidOperationException`.
-
-
-## [1.2.2] - 2026-10-19
+- [Presentation/Memory]: Ensured robust event handler unhooking (`ActualThemeChanged`, `PropertyChanged`) on `HelpPage.Unloaded` to prevent memory leaks during page navigation.
+- [Presentation/UI]: Enforced 100% Fluent 2 `{ThemeResource ...}` brushes with zero hardcoded colors across all guide cards, formula callouts, and contextual tips.
 
 ### Added
 - [Presentation/Splash]: Generated and bundled lightweight pre-scaled asset `Assets/brand/lexora-logo-splash.png` (256x256, 68KB) with `BitmapImage` logical decoding properties and early preloading hook in `App.OnLaunched`.

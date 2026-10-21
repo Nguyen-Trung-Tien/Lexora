@@ -54,9 +54,39 @@
                                     <TextBlock Text="{x:Bind Loc.GetString('Settings_DbGrammarUnit')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
+
+                            <!-- Contextual Help Button -->
+                            <Button x:Name="SettingsHelpButton" Click="SettingsHelpButton_Click" CornerRadius="12" Padding="10,8"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_Help_Title')}">
+                                <FontIcon Glyph="&#xE897;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
+
+                <TeachingTip x:Name="SettingsHelpTeachingTip"
+                             Target="{x:Bind SettingsHelpButton}"
+                             Title="{x:Bind Loc.GetString('Settings_Help_Title')}"
+                             Subtitle="{x:Bind Loc.GetString('Settings_Help_Subtitle')}"
+                             IsOpen="False"
+                             IsLightDismissEnabled="True"
+                             PreferredPlacement="BottomRight">
+                    <TeachingTip.Content>
+                        <StackPanel Spacing="10" MaxWidth="320">
+                            <TextBlock Text="{x:Bind Loc.GetString('Settings_Help_Content')}" TextWrapping="Wrap" FontSize="13" />
+                            <Button Style="{ThemeResource AccentButtonStyle}"
+                                    Click="OpenFullGuide_Click"
+                                    Tag="BackupAndSettings"
+                                    CornerRadius="8" Padding="12,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_OpenFullGuide')}" FontWeight="SemiBold" FontSize="12" />
+                                    <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </TeachingTip.Content>
+                </TeachingTip>
 
                 <!-- Appearance Theme Card -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">

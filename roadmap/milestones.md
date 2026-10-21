@@ -43,6 +43,23 @@
 
 ---
 
+## Milestone M2.5: User Guide, System Onboarding & Quality Maturation (v1.3.0) — COMPLETED ✅
+- **Status**: Completed (Release 1.3.0)
+- **Primary Deliverables**:
+  - Centralized User Guide & Onboarding Hub (`HelpPage`, `HelpViewModel`) in Shell Footer Navigation.
+  - 6 interactive structured guide modules with real-time search, category pills, and shortcut cheat sheet.
+  - Interactive mathematical algorithm specifications for SM-2 and FSRS spaced repetition engines.
+  - Contextual help buttons and interactive Fluent 2 `TeachingTip` popups across 6 core screens with 1-click jumps to guides.
+  - Global navigation shortcuts (`F1` and `Ctrl+H`) for instant help access.
+  - 100% bilingual parity across `vi-VN` and `en-US` dictionaries in `LocalizationService`.
+  - Comprehensive memory leak prevention with unhooked event listeners on `Unloaded`.
+- **Exit Criteria**:
+  - 411 / 411 automated unit & integration tests passing (360 Unit + 51 Integration, 0 failed, 0 skipped).
+  - Solution build verified with 0 warnings and 0 errors on .NET 10.
+  - 100% Fluent 2 `{ThemeResource ...}` compliance.
+
+---
+
 ## Milestone M3: Offline AI Inference & Encrypted Mesh Sync (v2.0.0) — ACTIVE PLANNING 🔮
 - **Status**: Active Planning / Next Milestone
 - **Primary Deliverables**:

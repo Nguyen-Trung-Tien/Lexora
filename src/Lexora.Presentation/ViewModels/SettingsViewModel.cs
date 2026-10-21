@@ -41,7 +41,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     public partial string CurrentLanguage { get; set; }
 
     [ObservableProperty]
-    public partial string CurrentAppVersion { get; set; } = "1.2.2";
+    public partial string CurrentAppVersion { get; set; } = "1.3.0";
 
     [ObservableProperty]
     public partial bool IsCheckingUpdate { get; set; }

@@ -12,6 +12,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
 {
     public SettingsViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
+    private readonly INavigationService _navigationService;
     private bool _isBackupOrRestoreInProgress;
     private bool _isInitialized;
 
@@ -20,6 +21,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
         NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<SettingsViewModel>();
         Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
+        _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
 
         InitializeComponent();
 
@@ -1010,5 +1012,17 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
         var healthService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IDataHealthService>();
         var dialog = new DataHealthCenterDialog(healthService, Loc);
         await dialog.ShowAsyncSafe(App.Current?.MainWindow?.Content?.XamlRoot ?? this.XamlRoot);
+    }
+
+    private void SettingsHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        SettingsHelpTeachingTip.IsOpen = true;
+    }
+
+    private void OpenFullGuide_Click(object sender, RoutedEventArgs e)
+    {
+        SettingsHelpTeachingTip.IsOpen = false;
+        var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "BackupAndSettings";
+        _navigationService.Navigate(typeof(HelpPage), tag);
     }
 }

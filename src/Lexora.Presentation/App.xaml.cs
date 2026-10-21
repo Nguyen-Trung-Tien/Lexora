@@ -96,6 +96,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<KnowledgeGraphViewModel>();
                 services.AddTransient<LearningStorageViewModel>();
                 services.AddTransient<SettingsViewModel>();
+                services.AddTransient<HelpViewModel>();
 
                 // Views
                 services.AddTransient<ShellPage>();
@@ -108,6 +109,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<GrammarPage>();
                 services.AddTransient<LearningStoragePage>();
                 services.AddTransient<SettingsPage>();
+                services.AddTransient<HelpPage>();
             })
             .Build();
     }
