@@ -84,7 +84,14 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
 
     public void OnLanguageChanged()
     {
-        ApplyLocalization();
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            ApplyLocalization();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(ApplyLocalization);
+        }
     }
 
     private void ApplyLocalization()
@@ -95,6 +102,8 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         TextSmartImport.Text = Loc.GetString("Homophones_SmartImport");
         TextExport.Text = Loc.GetString("Action_Export");
         SearchBox.PlaceholderText = Loc.GetString("Homophones_SearchPlaceholder");
+        Bindings.Update();
+        UpdateDetailView();
     }
 
     private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
@@ -214,13 +223,13 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         // Badges
         TextBadgeType.Text = group.Type switch
         {
-            HomophoneType.ExactHomophone => "Exact Homophone",
-            HomophoneType.NearHomophone => "Near Homophone",
-            HomophoneType.MinimalPair => "Minimal Pair",
+            HomophoneType.ExactHomophone => Loc.GetString("Homophones_TypeExact"),
+            HomophoneType.NearHomophone => Loc.GetString("Homophones_TypeNear"),
+            HomophoneType.MinimalPair => Loc.GetString("Homophones_TypePair"),
             _ => group.Type.ToString()
         };
-        TextBadgeLevel.Text = group.DifficultyLevel != CefrLevel.None ? $"CEFR {group.DifficultyLevel}" : "All Levels";
-        TextBadgeExam.Text = group.ExamTag.ToString();
+        TextBadgeLevel.Text = group.DifficultyLevel != CefrLevel.None ? $"CEFR {group.DifficultyLevel}" : Loc.GetString("Homophones_FilterAllLevels");
+        TextBadgeExam.Text = LocalizationHelper.FormatExamType(group.ExamTag);
 
         // Tip
         if (!string.IsNullOrWhiteSpace(group.DifferentiationTip))
@@ -238,9 +247,9 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         {
             var w1 = group.Items[0];
             Word1Term.Text = w1.Term;
-            Word1Pos.Text = w1.PartOfSpeech.ToString();
+            Word1Pos.Text = LocalizationHelper.FormatPartOfSpeech(w1.PartOfSpeech);
             Word1MeaningVi.Text = w1.MeaningVi;
-            Word1Example.Text = !string.IsNullOrWhiteSpace(w1.ExampleSentence) ? w1.ExampleSentence : "(Không có câu ví dụ)";
+            Word1Example.Text = !string.IsNullOrWhiteSpace(w1.ExampleSentence) ? w1.ExampleSentence : Loc.GetString("Homophones_NoExample");
             Word1Translation.Text = w1.ExampleTranslation ?? string.Empty;
             BtnListenWord1.Tag = w1.Term;
             BtnViewWord1.Tag = w1.Term;
@@ -251,9 +260,9 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         {
             var w2 = group.Items[1];
             Word2Term.Text = w2.Term;
-            Word2Pos.Text = w2.PartOfSpeech.ToString();
+            Word2Pos.Text = LocalizationHelper.FormatPartOfSpeech(w2.PartOfSpeech);
             Word2MeaningVi.Text = w2.MeaningVi;
-            Word2Example.Text = !string.IsNullOrWhiteSpace(w2.ExampleSentence) ? w2.ExampleSentence : "(Không có câu ví dụ)";
+            Word2Example.Text = !string.IsNullOrWhiteSpace(w2.ExampleSentence) ? w2.ExampleSentence : Loc.GetString("Homophones_NoExample");
             Word2Translation.Text = w2.ExampleTranslation ?? string.Empty;
             BtnListenWord2.Tag = w2.Term;
             BtnViewWord2.Tag = w2.Term;

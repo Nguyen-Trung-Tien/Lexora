@@ -10,6 +10,7 @@ public sealed partial class HomophoneEditorDialog : ContentDialog
     private readonly ILocalizationService _loc;
     private readonly HomophoneGroupDto? _existingGroup;
 
+    public ILocalizationService Loc => _loc;
     public CreateHomophoneGroupDto? CreatedGroupResult { get; private set; }
     public UpdateHomophoneGroupDto? UpdatedGroupResult { get; private set; }
 
@@ -26,6 +27,7 @@ public sealed partial class HomophoneEditorDialog : ContentDialog
 
         PrimaryButtonText = _loc.GetString("Action_Save");
         CloseButtonText = _loc.GetString("Action_Cancel");
+        DialogInfoBar.Title = _loc.GetString("WordEditor_ValidationTitle");
 
         PrimaryButtonClick += OnPrimaryButtonClick;
 

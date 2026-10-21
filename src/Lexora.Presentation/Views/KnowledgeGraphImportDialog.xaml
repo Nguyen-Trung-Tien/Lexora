@@ -51,7 +51,7 @@
                 <FontIcon Grid.Column="1" Glyph="&#xE76C;" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="4,0" />
 
                 <StackPanel x:Name="Step2Badge" Grid.Column="2" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                    <Border x:Name="Step2NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
+                    <Border x:Name="Step2NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
                         <TextBlock x:Name="Step2NumberText" Text="2" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <TextBlock x:Name="Step2Text" Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_Step2')}" FontSize="12" FontWeight="Normal" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -60,7 +60,7 @@
                 <FontIcon Grid.Column="3" Glyph="&#xE76C;" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="4,0" />
 
                 <StackPanel x:Name="Step3Badge" Grid.Column="4" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                    <Border x:Name="Step3NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
+                    <Border x:Name="Step3NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
                         <TextBlock x:Name="Step3NumberText" Text="3" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <TextBlock x:Name="Step3Text" Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_Step3')}" FontSize="12" FontWeight="Normal" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

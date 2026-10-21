@@ -6,24 +6,18 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     DefaultButton="Primary"
+    CornerRadius="16"
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
-        <x:Double x:Key="ContentDialogMaxWidth">640</x:Double>
-        <x:Double x:Key="ContentDialogMinWidth">480</x:Double>
+        <x:Double x:Key="ContentDialogMaxWidth">820</x:Double>
+        <x:Double x:Key="ContentDialogMinWidth">540</x:Double>
     </ContentDialog.Resources>
 
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Border Width="32" Height="32" CornerRadius="8"
-                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1">
-                    <FontIcon Glyph="&#xE768;" FontSize="16"
-                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                              HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Border>
+                <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="24" Height="24" VerticalAlignment="Center" />
                 <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" />
             </StackPanel>
         </DataTemplate>
@@ -34,34 +28,39 @@
             <!-- Validation Feedback InfoBar at Top -->
             <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" />
 
-            <!-- Group Metadata Card -->
+            <!-- Card 1: Group Metadata Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16">
-                <StackPanel Spacing="12">
-                    <TextBlock Text="Thông tin nhóm phát âm" FontWeight="SemiBold" FontSize="14"
-                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                    BorderThickness="1" CornerRadius="10" Padding="16">
+                <StackPanel Spacing="14">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE768;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorSectionInfo')}" FontWeight="SemiBold" FontSize="14"
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
 
                     <!-- Title & IPA -->
-                    <Grid ColumnDefinitions="*,*">
-                        <TextBox x:Name="TitleTextBox" Margin="0,0,8,0"
-                                 Header="Tên nhóm từ (vd: bare / bear)"
-                                 PlaceholderText="Từ 1 / Từ 2..." />
-                        <TextBox x:Name="IpaTextBox" Grid.Column="1" Margin="8,0,0,0"
-                                 Header="Phiên âm IPA chung"
-                                 PlaceholderText="/.../" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <TextBox x:Name="TitleTextBox"
+                                 Header="{x:Bind Loc.GetString('Homophones_EditorTitleHeader')}"
+                                 PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTitlePlaceholder')}"
+                                 FontWeight="SemiBold" />
+                        <TextBox x:Name="IpaTextBox" Grid.Column="1"
+                                 Header="{x:Bind Loc.GetString('Homophones_EditorIpaHeader')}"
+                                 PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorIpaPlaceholder')}"
+                                 FontFamily="Consolas, Cascadia Code, Segoe UI" />
                     </Grid>
 
                     <!-- Type, Level, Exam Tag -->
-                    <Grid ColumnDefinitions="*,*,*">
-                        <ComboBox x:Name="TypeComboBox" Header="Loại phân loại" HorizontalAlignment="Stretch" Margin="0,0,6,0">
-                            <ComboBoxItem Content="Đồng âm hoàn toàn (Exact)" Tag="ExactHomophone" IsSelected="True" />
-                            <ComboBoxItem Content="Gần đồng âm (Near)" Tag="NearHomophone" />
-                            <ComboBoxItem Content="Cặp âm tối thiểu (Pair)" Tag="MinimalPair" />
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                        <ComboBox x:Name="TypeComboBox" Header="{x:Bind Loc.GetString('Homophones_EditorTypeHeader')}" HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypeExact')}" Tag="ExactHomophone" IsSelected="True" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypeNear')}" Tag="NearHomophone" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypePair')}" Tag="MinimalPair" />
                         </ComboBox>
 
-                        <ComboBox x:Name="LevelComboBox" Grid.Column="1" Header="Cấp độ CEFR" HorizontalAlignment="Stretch" Margin="4,0,4,0">
-                            <ComboBoxItem Content="Tất cả (None)" Tag="None" IsSelected="True" />
+                        <ComboBox x:Name="LevelComboBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorLevelHeader')}" HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Cefr_None')}" Tag="None" IsSelected="True" />
                             <ComboBoxItem Content="A1" Tag="A1" />
                             <ComboBoxItem Content="A2" Tag="A2" />
                             <ComboBoxItem Content="B1" Tag="B1" />
@@ -70,79 +69,80 @@
                             <ComboBoxItem Content="C2" Tag="C2" />
                         </ComboBox>
 
-                        <ComboBox x:Name="ExamComboBox" Grid.Column="2" Header="Mục tiêu thi" HorizontalAlignment="Stretch" Margin="6,0,0,0">
-                            <ComboBoxItem Content="Tổng quát (General)" Tag="General" IsSelected="True" />
-                            <ComboBoxItem Content="TOEIC" Tag="Toeic" />
-                            <ComboBoxItem Content="IELTS" Tag="Ielts" />
-                            <ComboBoxItem Content="VSTEP" Tag="Vstep" />
+                        <ComboBox x:Name="ExamComboBox" Grid.Column="2" Header="{x:Bind Loc.GetString('Homophones_EditorExamHeader')}" HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Exam_Name_General')}" Tag="General" IsSelected="True" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Exam_Name_Toeic')}" Tag="Toeic" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Exam_Name_Ielts')}" Tag="Ielts" />
+                            <ComboBoxItem Content="{x:Bind Loc.GetString('Exam_Name_Vstep')}" Tag="Vstep" />
                         </ComboBox>
                     </Grid>
 
                     <!-- Differentiation Tip -->
                     <TextBox x:Name="TipTextBox"
-                             Header="Mẹo ghi nhớ phân biệt (Differentiation Tip)"
-                             PlaceholderText="Ghi chú điểm khác biệt về nghĩa, ngữ cảnh, cấu tạo từ để tránh nhầm..."
-                             TextWrapping="Wrap" AcceptsReturn="True" Height="64" />
+                             Header="{x:Bind Loc.GetString('Homophones_EditorTipHeader')}"
+                             PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTipPlaceholder')}"
+                             TextWrapping="Wrap" AcceptsReturn="True" Height="68" />
                 </StackPanel>
             </Border>
 
-            <!-- Word 1 Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16">
-                <StackPanel Spacing="10">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
-                            <TextBlock Text="Từ thứ 1 (Word A)" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+            <!-- Card 2: Side-by-Side Comparison Words (Word A & Word B) -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <!-- Word 1 Card -->
+                <Border Grid.Column="0"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="10" Padding="16">
+                    <StackPanel Spacing="12">
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
+                            <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorWord1Badge')}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                         </Border>
+
+                        <Grid ColumnDefinitions="2*,*" ColumnSpacing="8">
+                            <TextBox x:Name="Word1TermBox" Header="{x:Bind Loc.GetString('Homophones_EditorTermHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTerm1Placeholder')}" FontWeight="SemiBold" />
+                            <ComboBox x:Name="Word1PosBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorPosHeader')}" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosNoun')}" Tag="Noun" IsSelected="True" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosVerb')}" Tag="Verb" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosAdj')}" Tag="Adjective" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosAdv')}" Tag="Adverb" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosConjunction')}" Tag="Conjunction" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosPreposition')}" Tag="Preposition" />
+                            </ComboBox>
+                        </Grid>
+
+                        <TextBox x:Name="Word1MeaningBox" Header="{x:Bind Loc.GetString('Homophones_EditorMeaningHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorMeaning1Placeholder')}" />
+                        <TextBox x:Name="Word1ExampleBox" Header="{x:Bind Loc.GetString('Homophones_EditorExampleHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorExamplePlaceholder')}" />
+                        <TextBox x:Name="Word1ExampleTransBox" Header="{x:Bind Loc.GetString('Homophones_EditorExampleTransHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorExampleTransPlaceholder')}" />
                     </StackPanel>
+                </Border>
 
-                    <Grid ColumnDefinitions="2*,*">
-                        <TextBox x:Name="Word1TermBox" Header="Từ vựng" PlaceholderText="bare..." Margin="0,0,8,0" />
-                        <ComboBox x:Name="Word1PosBox" Grid.Column="1" Header="Từ loại" HorizontalAlignment="Stretch" Margin="8,0,0,0">
-                            <ComboBoxItem Content="Danh từ (Noun)" Tag="Noun" IsSelected="True" />
-                            <ComboBoxItem Content="Động từ (Verb)" Tag="Verb" />
-                            <ComboBoxItem Content="Tính từ (Adj)" Tag="Adjective" />
-                            <ComboBoxItem Content="Trạng từ (Adv)" Tag="Adverb" />
-                            <ComboBoxItem Content="Liên từ (Conj)" Tag="Conjunction" />
-                            <ComboBoxItem Content="Giới từ (Prep)" Tag="Preposition" />
-                        </ComboBox>
-                    </Grid>
-
-                    <TextBox x:Name="Word1MeaningBox" Header="Nghĩa tiếng Việt" PlaceholderText="Nghĩa của từ 1..." />
-                    <TextBox x:Name="Word1ExampleBox" Header="Câu ví dụ tiếng Anh" PlaceholderText="Example sentence..." />
-                    <TextBox x:Name="Word1ExampleTransBox" Header="Bản dịch câu ví dụ" PlaceholderText="Dịch nghĩa ví dụ..." />
-                </StackPanel>
-            </Border>
-
-            <!-- Word 2 Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16">
-                <StackPanel Spacing="10">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
-                            <TextBlock Text="Từ thứ 2 (Word B)" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                <!-- Word 2 Card -->
+                <Border Grid.Column="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="10" Padding="16">
+                    <StackPanel Spacing="12">
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
+                            <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorWord2Badge')}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                         </Border>
+
+                        <Grid ColumnDefinitions="2*,*" ColumnSpacing="8">
+                            <TextBox x:Name="Word2TermBox" Header="{x:Bind Loc.GetString('Homophones_EditorTermHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTerm2Placeholder')}" FontWeight="SemiBold" />
+                            <ComboBox x:Name="Word2PosBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorPosHeader')}" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosNoun')}" Tag="Noun" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosVerb')}" Tag="Verb" IsSelected="True" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosAdj')}" Tag="Adjective" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosAdv')}" Tag="Adverb" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosConjunction')}" Tag="Conjunction" />
+                                <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosPreposition')}" Tag="Preposition" />
+                            </ComboBox>
+                        </Grid>
+
+                        <TextBox x:Name="Word2MeaningBox" Header="{x:Bind Loc.GetString('Homophones_EditorMeaningHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorMeaning2Placeholder')}" />
+                        <TextBox x:Name="Word2ExampleBox" Header="{x:Bind Loc.GetString('Homophones_EditorExampleHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorExamplePlaceholder')}" />
+                        <TextBox x:Name="Word2ExampleTransBox" Header="{x:Bind Loc.GetString('Homophones_EditorExampleTransHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorExampleTransPlaceholder')}" />
                     </StackPanel>
-
-                    <Grid ColumnDefinitions="2*,*">
-                        <TextBox x:Name="Word2TermBox" Header="Từ vựng" PlaceholderText="bear..." Margin="0,0,8,0" />
-                        <ComboBox x:Name="Word2PosBox" Grid.Column="1" Header="Từ loại" HorizontalAlignment="Stretch" Margin="8,0,0,0">
-                            <ComboBoxItem Content="Danh từ (Noun)" Tag="Noun" />
-                            <ComboBoxItem Content="Động từ (Verb)" Tag="Verb" IsSelected="True" />
-                            <ComboBoxItem Content="Tính từ (Adj)" Tag="Adjective" />
-                            <ComboBoxItem Content="Trạng từ (Adv)" Tag="Adverb" />
-                            <ComboBoxItem Content="Liên từ (Conj)" Tag="Conjunction" />
-                            <ComboBoxItem Content="Giới từ (Prep)" Tag="Preposition" />
-                        </ComboBox>
-                    </Grid>
-
-                    <TextBox x:Name="Word2MeaningBox" Header="Nghĩa tiếng Việt" PlaceholderText="Nghĩa của từ 2..." />
-                    <TextBox x:Name="Word2ExampleBox" Header="Câu ví dụ tiếng Anh" PlaceholderText="Example sentence..." />
-                    <TextBox x:Name="Word2ExampleTransBox" Header="Bản dịch câu ví dụ" PlaceholderText="Dịch nghĩa ví dụ..." />
-                </StackPanel>
-            </Border>
+                </Border>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>

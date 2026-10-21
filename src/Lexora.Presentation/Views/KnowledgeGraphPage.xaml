@@ -8,7 +8,6 @@
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:views="using:Lexora.Presentation.Views"
     xmlns:services="using:Lexora.Presentation.Services"
-    Background="{ThemeResource LayerFillColorDefaultBrush}"
     SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
 
@@ -172,7 +171,7 @@
 
             <!-- LEFT PANE: Concept Catalog with Pagination & Filters -->
             <Border Grid.Column="0"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="0,0,1,0"
                     Padding="16,14,16,14">

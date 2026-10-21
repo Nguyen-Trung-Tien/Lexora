@@ -56,7 +56,7 @@
             </StackPanel>
 
             <!-- Center Word Hero Card -->
-            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="14" Padding="20">
                 <Grid ColumnDefinitions="*,Auto">
