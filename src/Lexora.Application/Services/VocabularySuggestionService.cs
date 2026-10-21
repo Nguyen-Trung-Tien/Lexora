@@ -26,13 +26,23 @@ public class VocabularySuggestionService : IVocabularySuggestionService
     private static readonly HashSet<string> StopWordsVi = new(StringComparer.OrdinalIgnoreCase)
     {
         "la", "mot", "nhung", "cac", "cua", "cho", "va", "hoac", "trong", "tren", "duoi", "khi",
-        "de", "nguoi", "su", "viec", "cai", "con", "co", "duoc", "bi", "rat", "qua"
+        "de", "nguoi", "su", "viec", "cai", "con", "co", "duoc", "bi", "rat", "qua",
+        "lam", "thuc", "hien", "tinh", "chat", "trang", "thai", "kha", "nang", "lien",
+        "quan", "dung", "thuong", "gay", "ra", "mang", "lai", "cach", "kieu", "chi",
+        "ve", "loai", "nhieu", "it", "den", "theo", "boi", "giup", "tao", "khong",
+        "người", "sự", "việc", "cái", "có", "được", "bị", "rất", "quá", "làm", "thực",
+        "hiện", "tính", "chất", "trạng", "thái", "khả", "năng", "liên", "quan", "dùng",
+        "thường", "gây", "mang", "lại", "cách", "kiểu", "chỉ", "về", "loại", "nhiều",
+        "ít", "đến", "theo", "bởi", "giúp", "tạo", "không", "một", "những", "các",
+        "của", "cho", "và", "hoặc", "trong", "trên", "dưới", "khi", "để"
     };
 
     private static readonly HashSet<string> StopWordsEn = new(StringComparer.OrdinalIgnoreCase)
     {
         "a", "an", "the", "and", "or", "but", "if", "in", "on", "at", "to", "for", "with",
-        "by", "about", "as", "of", "from", "is", "are", "was", "were", "be", "been", "being"
+        "by", "about", "as", "of", "from", "is", "are", "was", "were", "be", "been", "being",
+        "to", "do", "does", "did", "have", "has", "had", "can", "could", "will", "would",
+        "make", "cause", "act", "state", "quality", "person", "thing"
     };
 
     public VocabularySuggestionService(
@@ -105,19 +115,49 @@ public class VocabularySuggestionService : IVocabularySuggestionService
         var results = new List<WordSuggestionItemDto>();
         var targetTerm = targetWord.Term.Trim().ToLowerInvariant();
 
-        // Extract key definition words
+        // 1. Curated academic thesaurus check (highest accuracy benchmark)
+        var curated = CuratedAcademicThesaurus.GetRelationsForTerm(targetTerm);
+        var curatedSynonyms = curated
+            .Where(r => r.RelationType == "Synonym")
+            .ToDictionary(r => r.RelatedTerm, r => r, StringComparer.OrdinalIgnoreCase);
+        var curatedAntonyms = curated
+            .Where(r => r.RelationType == "Antonym")
+            .ToDictionary(r => r.RelatedTerm, r => r, StringComparer.OrdinalIgnoreCase);
+
+        // 2. Explicit notes annotations (e.g. syn: / opp: / ant:)
+        var (explicitSynonyms, explicitAntonyms) = ExtractExplicitRelationsFromNotes(targetWord);
+
+        // 3. Extract definition keywords for semantic context overlap
         var targetViTokens = ExtractDefinitionKeywords(targetWord, true);
         var targetEnTokens = ExtractDefinitionKeywords(targetWord, false);
-
-        // Check explicit notes annotations (e.g. syn: / opp: / ant:)
-        var (explicitSynonyms, explicitAntonyms) = ExtractExplicitRelationsFromNotes(targetWord);
 
         foreach (var candidate in pool)
         {
             if (candidate.Id == targetWord.Id) continue;
             var candidateTerm = candidate.Term.Trim().ToLowerInvariant();
 
-            // 1. Check explicit matches
+            // Check curated thesaurus
+            if (curatedSynonyms.TryGetValue(candidateTerm, out var curSyn))
+            {
+                results.Add(new WordSuggestionItemDto(
+                    candidate,
+                    SuggestionCategory.Synonym,
+                    curSyn.Weight,
+                    curSyn.Explanation));
+                continue;
+            }
+
+            if (curatedAntonyms.TryGetValue(candidateTerm, out var curAnt))
+            {
+                results.Add(new WordSuggestionItemDto(
+                    candidate,
+                    SuggestionCategory.Antonym,
+                    curAnt.Weight,
+                    curAnt.Explanation));
+                continue;
+            }
+
+            // Check explicit matches from notes
             if (explicitSynonyms.Contains(candidateTerm))
             {
                 results.Add(new WordSuggestionItemDto(
@@ -138,28 +178,31 @@ public class VocabularySuggestionService : IVocabularySuggestionService
                 continue;
             }
 
-            // 2. Definition keyword overlap (Vietnamese)
+            // Check part-of-speech compatibility: synonyms require compatible word class
+            bool posCompatible = targetWord.PrimaryPartOfSpeech == candidate.PrimaryPartOfSpeech ||
+                                 targetWord.PrimaryPartOfSpeech == PartOfSpeech.Noun && candidate.PrimaryPartOfSpeech == PartOfSpeech.Noun ||
+                                 targetWord.PrimaryPartOfSpeech == PartOfSpeech.Verb && candidate.PrimaryPartOfSpeech == PartOfSpeech.Verb ||
+                                 targetWord.PrimaryPartOfSpeech == PartOfSpeech.Adjective && candidate.PrimaryPartOfSpeech == PartOfSpeech.Adjective;
+
+            if (!posCompatible)
+            {
+                continue;
+            }
+
+            // Definition keyword overlap (Vietnamese)
             var candViTokens = ExtractDefinitionKeywords(candidate, true);
             var commonVi = targetViTokens.Intersect(candViTokens, StringComparer.OrdinalIgnoreCase).ToList();
 
-            // 3. Definition keyword overlap (English)
+            // Definition keyword overlap (English)
             var candEnTokens = ExtractDefinitionKeywords(candidate, false);
             var commonEn = targetEnTokens.Intersect(candEnTokens, StringComparer.OrdinalIgnoreCase).ToList();
 
-            if (commonVi.Count >= 2 || (commonVi.Count == 1 && commonVi[0].Length >= 4))
+            // Require strong overlap (at least 2 distinctive tokens) to eliminate false positives
+            if (commonVi.Count >= 2)
             {
-                // Check if candidate definition indicates antonym (trái nghĩa / không / ngược lại)
-                bool isAntonym = candidate.PrimaryDefinition.Contains("ngược lại", StringComparison.OrdinalIgnoreCase) ||
-                                 candidate.PrimaryDefinition.Contains("trái với", StringComparison.OrdinalIgnoreCase) ||
-                                 targetWord.PrimaryDefinition.Contains("trái với", StringComparison.OrdinalIgnoreCase);
-
-                var category = isAntonym ? SuggestionCategory.Antonym : SuggestionCategory.Synonym;
-                double score = Math.Min(0.88, 0.60 + (commonVi.Count * 0.10));
-                string reason = isAntonym
-                    ? $"Từ trái nghĩa (Nghĩa tương phản qua từ khóa '{commonVi[0]}')"
-                    : $"Gần nghĩa: chung khái niệm '{string.Join(", ", commonVi.Take(2))}'";
-
-                results.Add(new WordSuggestionItemDto(candidate, category, score, reason));
+                double score = Math.Min(0.86, 0.65 + (commonVi.Count * 0.08));
+                string reason = $"Đồng nghĩa/Gần nghĩa: chung ngữ nghĩa cốt lõi '{string.Join(", ", commonVi.Take(2))}'";
+                results.Add(new WordSuggestionItemDto(candidate, SuggestionCategory.Synonym, score, reason));
                 continue;
             }
 
@@ -168,7 +211,7 @@ public class VocabularySuggestionService : IVocabularySuggestionService
                 results.Add(new WordSuggestionItemDto(
                     candidate,
                     SuggestionCategory.Synonym,
-                    Math.Min(0.85, 0.55 + (commonEn.Count * 0.12)),
+                    Math.Min(0.85, 0.60 + (commonEn.Count * 0.10)),
                     $"Near-synonym: shares English context '{string.Join(", ", commonEn.Take(2))}'"));
             }
         }
@@ -180,9 +223,14 @@ public class VocabularySuggestionService : IVocabularySuggestionService
     {
         var results = new List<WordSuggestionItemDto>();
         var targetTerm = targetWord.Term.Trim().ToLowerInvariant();
-        var targetStem = ExtractStem(targetTerm);
 
-        if (targetStem.Length < 3) return Array.Empty<WordSuggestionItemDto>();
+        // 1. Curated academic word family check
+        var curated = CuratedAcademicThesaurus.GetRelationsForTerm(targetTerm);
+        var curatedFamilies = curated
+            .Where(r => r.RelationType == "WordFamily")
+            .ToDictionary(r => r.RelatedTerm, r => r, StringComparer.OrdinalIgnoreCase);
+
+        var targetStem = ExtractStem(targetTerm);
 
         foreach (var candidate in pool)
         {
@@ -192,13 +240,25 @@ public class VocabularySuggestionService : IVocabularySuggestionService
             // Skip exact duplicate terms
             if (candTerm == targetTerm) continue;
 
+            if (curatedFamilies.TryGetValue(candTerm, out var curFam))
+            {
+                results.Add(new WordSuggestionItemDto(
+                    candidate,
+                    SuggestionCategory.WordFamily,
+                    curFam.Weight,
+                    curFam.Explanation));
+                continue;
+            }
+
+            if (targetStem.Length < 3) continue;
+
             var candStem = ExtractStem(candTerm);
 
             bool isWordFamily = false;
             double score = 0.0;
             string reason = string.Empty;
 
-            // 1. Same stem extracted via morphological rules
+            // 2. Same stem extracted via morphological rules
             if (candStem.Length >= 3 && candStem == targetStem)
             {
                 isWordFamily = true;

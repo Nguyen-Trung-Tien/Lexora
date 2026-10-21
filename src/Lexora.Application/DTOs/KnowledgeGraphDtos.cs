@@ -151,3 +151,66 @@ public record KnowledgeGraphRecommendationDto(
     string Reason,
     int EstimatedConnections
 );
+
+public class KnowledgeGraphExportNodeDto
+{
+    public string Term { get; set; } = string.Empty;
+    public string Level { get; set; } = string.Empty;
+    public string PartOfSpeech { get; set; } = string.Empty;
+    public string MeaningVi { get; set; } = string.Empty;
+    public string MeaningEn { get; set; } = string.Empty;
+    public string? Ipa { get; set; }
+}
+
+public class KnowledgeGraphExportEdgeDto
+{
+    public string Source { get; set; } = string.Empty;
+    public string Target { get; set; } = string.Empty;
+    public string Relation { get; set; } = string.Empty;
+    public double Weight { get; set; } = 0.8;
+    public string Explanation { get; set; } = string.Empty;
+}
+
+public class KnowledgeGraphExportPackageDto
+{
+    public string Title { get; set; } = "Lexora Semantic Knowledge Network";
+    public string Version { get; set; } = "1.0";
+    public DateTime ExportedAt { get; set; } = DateTime.UtcNow;
+    public string? CenterTerm { get; set; }
+    public List<KnowledgeGraphExportNodeDto> Nodes { get; set; } = new();
+    public List<KnowledgeGraphExportEdgeDto> Edges { get; set; } = new();
+}
+
+public class KnowledgeGraphImportItemDto
+{
+    public int RowNumber { get; set; }
+    public string SourceTerm { get; set; } = string.Empty;
+    public string TargetTerm { get; set; } = string.Empty;
+    public KnowledgeGraphNodeType RelationshipType { get; set; } = KnowledgeGraphNodeType.Synonym;
+    public double Weight { get; set; } = 0.85;
+    public string Explanation { get; set; } = string.Empty;
+    public CefrLevel Level { get; set; } = CefrLevel.None;
+    public bool IsValid { get; set; } = true;
+    public bool SourceExists { get; set; }
+    public bool TargetExists { get; set; }
+    public bool IsDuplicate { get; set; }
+    public string? StatusMessage { get; set; }
+}
+
+public record KnowledgeGraphImportAnalysisResultDto(
+    IReadOnlyList<KnowledgeGraphImportItemDto> Items,
+    int TotalCount,
+    int ValidCount,
+    int DuplicateCount,
+    int MissingWordsCount,
+    IReadOnlyList<string> GlobalWarnings
+);
+
+public record KnowledgeGraphImportCommitResultDto(
+    bool Success,
+    int ImportedRelationsCount,
+    int UpdatedWordsCount,
+    int CreatedWordsCount,
+    IReadOnlyList<string> Errors
+);
+

@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddSingleton<IPronunciationVoiceResolver, PronunciationVoiceResolver>();
         services.AddScoped<IHomophoneService, HomophoneService>();
         services.AddScoped<IHomophoneExportImportService, HomophoneExportImportService>();
+        services.AddScoped<IKnowledgeGraphExportImportService, KnowledgeGraphExportImportService>();
 
         return services;
     }

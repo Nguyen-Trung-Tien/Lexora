@@ -15,6 +15,7 @@ public partial class KnowledgeGraphViewModel : ObservableObject
     private readonly IVocabularyKnowledgeGraphService _graphService;
     private readonly ILocalizationService _localizationService;
     private readonly INavigationService _navigationService;
+    private readonly IKnowledgeGraphExportImportService _exportImportService;
     private readonly IAudioPlayerService? _audioPlayerService;
     private readonly IToastNotificationService? _toastService;
     private readonly DispatcherQueue? _dispatcherQueue;
@@ -25,6 +26,18 @@ public partial class KnowledgeGraphViewModel : ObservableObject
     public ObservableCollection<GraphNodeDto> FilteredConnectedNodes { get; } = [];
     public ObservableCollection<KnowledgeGraphRecommendationDto> Recommendations { get; } = [];
     public ObservableCollection<WordDto> SearchSuggestions { get; } = [];
+
+    [ObservableProperty]
+    public partial double CanvasScale { get; set; } = 1.0;
+
+    [RelayCommand]
+    public void ZoomIn() => CanvasScale = Math.Min(2.5, Math.Round(CanvasScale + 0.15, 2));
+
+    [RelayCommand]
+    public void ZoomOut() => CanvasScale = Math.Max(0.4, Math.Round(CanvasScale - 0.15, 2));
+
+    [RelayCommand]
+    public void ResetZoom() => CanvasScale = 1.0;
 
     [ObservableProperty]
     public partial bool IsGraphLoading { get; set; }
@@ -129,12 +142,14 @@ public partial class KnowledgeGraphViewModel : ObservableObject
         IVocabularyKnowledgeGraphService graphService,
         ILocalizationService localizationService,
         INavigationService navigationService,
+        IKnowledgeGraphExportImportService exportImportService,
         IAudioPlayerService? audioPlayerService = null,
         IToastNotificationService? toastService = null)
     {
         _graphService = graphService;
         _localizationService = localizationService;
         _navigationService = navigationService;
+        _exportImportService = exportImportService;
         _audioPlayerService = audioPlayerService;
         _toastService = toastService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
@@ -434,6 +449,38 @@ public partial class KnowledgeGraphViewModel : ObservableObject
             FilteredConnectedNodes.Add(node);
         }
     }
+
+    [RelayCommand]
+    public void CopySelectedTerm()
+    {
+        var term = SelectedNode?.Term ?? ActiveGraph?.CenterNode?.Term;
+        if (string.IsNullOrWhiteSpace(term)) return;
+
+        try
+        {
+            var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
+            dataPackage.SetText(term);
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+            _toastService?.ShowSuccess(string.Format(_localizationService.GetString("KnowledgeGraph_TermCopied"), term));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphViewModel] CopySelectedTerm error: {ex.Message}");
+        }
+    }
+
+    public async Task<string> ExportAsync(string format)
+    {
+        var targetWordId = ActiveGraph?.CenterNode?.Id != Guid.Empty ? ActiveGraph?.CenterNode?.Id : null;
+        return format.ToLowerInvariant() switch
+        {
+            "csv" => await _exportImportService.ExportToCsvAsync(targetWordId),
+            "md" or "markdown" => await _exportImportService.ExportToMarkdownMindmapAsync(targetWordId),
+            _ => await _exportImportService.ExportToJsonAsync(targetWordId)
+        };
+    }
+
+    public string GetSampleTemplate(string format) => _exportImportService.GetSampleTemplate(format);
 
     public void UpdateLocalizedTexts()
     {

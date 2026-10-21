@@ -1374,6 +1374,16 @@ public class LocalizationService : ILocalizationService
             ["KnowledgeGraph_CoreConcept"] = "Khái niệm trung tâm",
             ["KnowledgeGraph_Generating"] = "Đang khởi tạo mạng lưới ngữ nghĩa...",
             ["KnowledgeGraph_Connections"] = "liên kết ngữ nghĩa",
+            ["KnowledgeGraph_SmartImport"] = "Nhập thông minh",
+            ["KnowledgeGraph_Export"] = "Xuất đồ thị",
+            ["KnowledgeGraph_ExportJson"] = "Xuất JSON Đồ thị (.json)",
+            ["KnowledgeGraph_ExportCsv"] = "Xuất Bảng tính Quan hệ (.csv)",
+            ["KnowledgeGraph_ExportMarkdown"] = "Xuất Markdown Mindmap (.md)",
+            ["KnowledgeGraph_TermCopied"] = "Đã sao chép từ '{0}' vào bộ nhớ tạm",
+            ["KnowledgeGraph_CopyTerm"] = "Sao chép từ",
+            ["KnowledgeGraph_ZoomIn"] = "Phóng to",
+            ["KnowledgeGraph_ZoomOut"] = "Thu nhỏ",
+            ["KnowledgeGraph_ResetZoom"] = "Đặt lại tỉ lệ",
 
             // Adaptive Quiz (CAT)
             ["AdaptiveQuiz_Title"] = "Trắc nghiệm Thích ứng Thông minh (CAT)",
@@ -2817,6 +2827,16 @@ public class LocalizationService : ILocalizationService
             ["KnowledgeGraph_CoreConcept"] = "Core Concept",
             ["KnowledgeGraph_Generating"] = "Generating semantic graph...",
             ["KnowledgeGraph_Connections"] = "semantic connections",
+            ["KnowledgeGraph_SmartImport"] = "Smart Import",
+            ["KnowledgeGraph_Export"] = "Export Graph",
+            ["KnowledgeGraph_ExportJson"] = "Export JSON Graph (.json)",
+            ["KnowledgeGraph_ExportCsv"] = "Export CSV Relations (.csv)",
+            ["KnowledgeGraph_ExportMarkdown"] = "Export Markdown Mindmap (.md)",
+            ["KnowledgeGraph_TermCopied"] = "Copied '{0}' to clipboard",
+            ["KnowledgeGraph_CopyTerm"] = "Copy Term",
+            ["KnowledgeGraph_ZoomIn"] = "Zoom In",
+            ["KnowledgeGraph_ZoomOut"] = "Zoom Out",
+            ["KnowledgeGraph_ResetZoom"] = "Reset Scale",
 
             // Adaptive Quiz (CAT)
             ["AdaptiveQuiz_Title"] = "Computerized Adaptive Testing (CAT)",

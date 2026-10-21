@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
 using Windows.Foundation;
+using Windows.Storage.Pickers;
 
 namespace Lexora.Presentation.Views;
 
@@ -137,7 +138,8 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             : ViewModel.ActiveGraph.ConnectedNodes;
 
         int count = nodes.Count;
-        double radius = Math.Clamp(Math.Min(width, height) / 2.0 - 55.0, 110.0, 190.0);
+        double baseRadius = Math.Clamp(Math.Min(width, height) / 2.0 - 55.0, 110.0, 190.0);
+        double radius = Math.Clamp(baseRadius * ViewModel.CanvasScale, 60.0, 400.0);
 
         // 1. Draw Connecting Lines first so they sit under the nodes
         for (int i = 0; i < count; i++)
@@ -207,7 +209,8 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             {
                 Text = node.Term,
                 FontSize = 12,
-                FontWeight = Microsoft.UI.Text.FontWeights.Bold
+                FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                TextWrapping = TextWrapping.NoWrap
             };
 
             nodePanel.Children.Add(topPanel);
@@ -234,8 +237,8 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
             // Measure & arrange
             nodeBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            double nw = Math.Max(nodeBorder.DesiredSize.Width, 70);
-            double nh = Math.Max(nodeBorder.DesiredSize.Height, 36);
+            double nw = Math.Max(nodeBorder.DesiredSize.Width + 8, 76);
+            double nh = Math.Max(nodeBorder.DesiredSize.Height, 38);
 
             Canvas.SetLeft(nodeBorder, nx - (nw / 2.0));
             Canvas.SetTop(nodeBorder, ny - (nh / 2.0));
@@ -243,32 +246,33 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             GraphCanvas.Children.Add(nodeBorder);
         }
 
-        // 3. Draw Central Core Concept Node
+        // 3. Draw Central Core Concept Node with Dynamic Auto-Sizing (avoids any text clipping)
         var centerBorder = new Border
         {
             Background = (Brush)App.Current.Resources["AccentFillColorDefaultBrush"],
             BorderBrush = (Brush)App.Current.Resources["CardStrokeColorDefaultBrush"],
             BorderThickness = new Thickness(2),
-            CornerRadius = new CornerRadius(12),
-            Padding = new Thickness(14, 8, 14, 8),
-            Width = 120,
-            Height = 56
+            CornerRadius = new CornerRadius(14),
+            Padding = new Thickness(20, 9, 20, 9),
+            MinWidth = 140,
+            MinHeight = 58
         };
 
         var centerPanel = new StackPanel
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
-            Spacing = 1
+            Spacing = 2
         };
 
         var centerLabel = new TextBlock
         {
             Text = Loc.GetString("KnowledgeGraph_CoreConcept"),
-            FontSize = 9,
-            FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+            FontSize = 10,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             Foreground = (Brush)App.Current.Resources["TextOnAccentFillColorPrimaryBrush"],
-            HorizontalAlignment = HorizontalAlignment.Center
+            HorizontalAlignment = HorizontalAlignment.Center,
+            TextWrapping = TextWrapping.NoWrap
         };
 
         var centerTerm = new TextBlock
@@ -277,15 +281,20 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             FontSize = 14,
             FontWeight = Microsoft.UI.Text.FontWeights.Bold,
             Foreground = (Brush)App.Current.Resources["TextOnAccentFillColorPrimaryBrush"],
-            HorizontalAlignment = HorizontalAlignment.Center
+            HorizontalAlignment = HorizontalAlignment.Center,
+            TextWrapping = TextWrapping.NoWrap
         };
 
         centerPanel.Children.Add(centerLabel);
         centerPanel.Children.Add(centerTerm);
         centerBorder.Child = centerPanel;
 
-        Canvas.SetLeft(centerBorder, cx - 60);
-        Canvas.SetTop(centerBorder, cy - 28);
+        centerBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        double cw = Math.Max(centerBorder.DesiredSize.Width + 12, 140);
+        double ch = Math.Max(centerBorder.DesiredSize.Height, 58);
+
+        Canvas.SetLeft(centerBorder, cx - (cw / 2.0));
+        Canvas.SetTop(centerBorder, cy - (ch / 2.0));
         GraphCanvas.Children.Add(centerBorder);
     }
 
@@ -476,6 +485,94 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         if (sender is Button btn && btn.Tag is GraphNodeDto node)
         {
             ViewModel.SelectNode(node);
+        }
+    }
+
+    private void ZoomIn_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ZoomIn();
+        RenderGraphCanvas();
+    }
+
+    private void ZoomOut_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ZoomOut();
+        RenderGraphCanvas();
+    }
+
+    private void ResetZoom_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ResetZoom();
+        RenderGraphCanvas();
+    }
+
+    private void CopySelectedTerm_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.CopySelectedTerm();
+    }
+
+    private void ViewSelectedInVocab_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedNode != null)
+        {
+            ViewModel.NavigateToVocabulary(ViewModel.SelectedNode.Id);
+        }
+    }
+
+    private async void BtnSmartImport_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new KnowledgeGraphImportDialog
+        {
+            XamlRoot = this.XamlRoot
+        };
+
+        await dialog.ShowAsyncSafe();
+        if (dialog.WasCommitted)
+        {
+            await ViewModel.LoadCatalogPageAsync(ViewModel.CurrentPage);
+            if (ViewModel.CurrentCenterWordId.HasValue)
+            {
+                await ViewModel.LoadGraphAsync(ViewModel.CurrentCenterWordId.Value, addToHistory: false);
+            }
+            RenderGraphCanvas();
+        }
+    }
+
+    private async void ExportJson_Click(object sender, RoutedEventArgs e) => await ExportToFileAsync("json");
+    private async void ExportCsv_Click(object sender, RoutedEventArgs e) => await ExportToFileAsync("csv");
+    private async void ExportMarkdown_Click(object sender, RoutedEventArgs e) => await ExportToFileAsync("md");
+
+    private async Task ExportToFileAsync(string format)
+    {
+        try
+        {
+            var content = await ViewModel.ExportAsync(format);
+            var picker = new FileSavePicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                SuggestedFileName = $"Lexora_SemanticGraph_{DateTime.Now:yyyyMMdd}"
+            };
+
+            var ext = format switch
+            {
+                "csv" => ".csv",
+                "md" or "markdown" => ".md",
+                _ => ".json"
+            };
+            picker.FileTypeChoices.Add($"Knowledge Graph Export ({ext})", [ext]);
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Current.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var file = await picker.PickSaveFileAsync();
+            if (file != null)
+            {
+                await Windows.Storage.FileIO.WriteTextAsync(file, content);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphPage] ExportToFileAsync error: {ex.Message}");
         }
     }
 }
