@@ -30,6 +30,8 @@ public static class DependencyInjection
         services.AddScoped<IAdaptiveQuizService, AdaptiveQuizService>();
         services.AddScoped<IPronunciationListeningLabService, PronunciationListeningLabService>();
         services.AddSingleton<IPronunciationVoiceResolver, PronunciationVoiceResolver>();
+        services.AddScoped<IHomophoneService, HomophoneService>();
+        services.AddScoped<IHomophoneExportImportService, HomophoneExportImportService>();
 
         return services;
     }

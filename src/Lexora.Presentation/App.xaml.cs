@@ -92,6 +92,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<ReviewViewModel>();
                 services.AddTransient<TestViewModel>();
                 services.AddTransient<GrammarViewModel>();
+                services.AddTransient<HomophonesViewModel>();
                 services.AddTransient<LearningStorageViewModel>();
                 services.AddTransient<SettingsViewModel>();
 
@@ -99,6 +100,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<ShellPage>();
                 services.AddTransient<DashboardPage>();
                 services.AddTransient<VocabularyPage>();
+                services.AddTransient<HomophonesPage>();
                 services.AddTransient<ReviewPage>();
                 services.AddTransient<TestPage>();
                 services.AddTransient<GrammarPage>();

@@ -86,9 +86,11 @@ public sealed partial class SmartImportDialog : ContentDialog
     private readonly IServiceScope? _scope;
     private readonly Func<string, string>? _sampleProvider;
     private readonly bool _isGrammarMode;
+    private readonly bool _isHomophoneMode;
     private readonly ILocalizationService _loc;
     private readonly IExportImportService _exportImportService;
     private readonly IGrammarExportImportService? _grammarExportImportService;
+    private readonly IHomophoneExportImportService? _homophoneExportImportService;
 
     private readonly ObservableCollection<SmartImportPreviewItem> _previewItems = new();
     private readonly ObservableCollection<SmartImportPreviewItem> _currentPagePreviewItems = new();
@@ -108,10 +110,11 @@ public sealed partial class SmartImportDialog : ContentDialog
     public bool WasCommitted { get; private set; }
     public SmartImportCommitResultDto? CommitResult { get; private set; }
 
-    public SmartImportDialog(Func<string, string>? sampleProvider = null, bool isGrammarMode = false)
+    public SmartImportDialog(Func<string, string>? sampleProvider = null, bool isGrammarMode = false, bool isHomophoneMode = false)
     {
         _sampleProvider = sampleProvider;
         _isGrammarMode = isGrammarMode;
+        _isHomophoneMode = isHomophoneMode;
 
         try
         {
@@ -119,12 +122,14 @@ public sealed partial class SmartImportDialog : ContentDialog
             _loc = _scope.ServiceProvider.GetRequiredService<ILocalizationService>();
             _exportImportService = _scope.ServiceProvider.GetRequiredService<IExportImportService>();
             _grammarExportImportService = _scope.ServiceProvider.GetService<IGrammarExportImportService>();
+            _homophoneExportImportService = _scope.ServiceProvider.GetService<IHomophoneExportImportService>();
         }
         catch
         {
             _loc = App.Current.Services.GetRequiredService<ILocalizationService>();
             _exportImportService = App.Current.Services.GetRequiredService<IExportImportService>();
             _grammarExportImportService = App.Current.Services.GetService<IGrammarExportImportService>();
+            _homophoneExportImportService = App.Current.Services.GetService<IHomophoneExportImportService>();
         }
 
         InitializeComponent();
@@ -198,7 +203,13 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     private void ApplyLocalization()
     {
-        if (_isGrammarMode)
+        if (_isHomophoneMode)
+        {
+            Title = _loc.GetString("Homophones_SmartImport_Title");
+            SubtitleText.Text = _loc.GetString("Homophones_SmartImport_Subtitle");
+            TextAnalyzeNext.Text = _loc.GetString("Homophones_SmartImport_AnalyzeBtn");
+        }
+        else if (_isGrammarMode)
         {
             Title = _loc.GetString("Grammar_SmartImport_Title");
             SubtitleText.Text = _loc.GetString("Grammar_SmartImport_Subtitle");
@@ -637,6 +648,89 @@ public sealed partial class SmartImportDialog : ContentDialog
             TextFormatBadge.Text = _loc.GetString("SmartImport_FormatUnknown");
             IconFormatBadge.Glyph = "\uEA39";
             IconFormatBadge.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+            return;
+        }
+
+        if (_isHomophoneMode)
+        {
+            if (_homophoneExportImportService == null)
+            {
+                TextFormatBadge.Text = _loc.GetString("Homophones_ServiceNotAvailable");
+                return;
+            }
+
+            BtnAnalyzeNext.IsEnabled = false;
+            GoToStep(3);
+            PanelImportProgress.Visibility = Visibility.Visible;
+            PanelImportReport.Visibility = Visibility.Collapsed;
+            CloseButtonText = string.Empty;
+
+            _importCts?.Dispose();
+            _importCts = new CancellationTokenSource();
+            BtnCancelImport.IsEnabled = true;
+
+            try
+            {
+                var content = ContentToImport;
+                var fileHint = FileNameHint;
+                var cr = ConflictResolution;
+                var token = _importCts.Token;
+
+                var analysis = await Task.Run(async () => await _homophoneExportImportService.AnalyzeImportAsync(content, fileHint, token));
+                var commitReq = new SmartHomophoneCommitRequestDto
+                {
+                    GroupsToCommit = analysis.PreviewItems.Where(p => p.IsValid).Select(p => p.RawGroup).ToList(),
+                    ConflictResolution = cr
+                };
+                var importResult = await Task.Run(async () => await _homophoneExportImportService.CommitImportAsync(commitReq, token));
+
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+
+                WasCommitted = true;
+                PanelImportProgress.Visibility = Visibility.Collapsed;
+                PanelImportReport.Visibility = Visibility.Visible;
+
+                IconReportStatus.Glyph = "\uE73E";
+                IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
+                TextReportTitle.Text = _loc.GetString("SmartImport_CommitSuccess");
+
+                TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), importResult.TotalImported);
+                TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), importResult.TotalUpdated);
+                TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), importResult.TotalSkipped);
+                TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), importResult.Errors.Count);
+            }
+            catch (OperationCanceledException)
+            {
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+                PanelImportProgress.Visibility = Visibility.Collapsed;
+                PanelImportReport.Visibility = Visibility.Visible;
+                IconReportStatus.Glyph = "\uE711";
+                IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush");
+                TextReportTitle.Text = _loc.GetString("SmartImport_CancelledTitle");
+                TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), 0);
+                TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
+                TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
+                TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 0);
+            }
+            catch (Exception ex)
+            {
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+                PanelImportProgress.Visibility = Visibility.Collapsed;
+                PanelImportReport.Visibility = Visibility.Visible;
+                IconReportStatus.Glyph = "\uEA39";
+                IconReportStatus.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+                var errorMsg = ex.InnerException?.Message ?? ex.Message;
+                TextReportTitle.Text = string.Format(_loc.GetString("SmartImport_ErrorTitleFormat"), errorMsg);
+                TextReportAdded.Text = string.Format(_loc.GetString("SmartImport_ImportedCount"), 0);
+                TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
+                TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
+                TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 1);
+            }
+            finally
+            {
+                CloseButtonText = _loc.GetString("Action_Cancel");
+                BtnAnalyzeNext.IsEnabled = true;
+            }
             return;
         }
 

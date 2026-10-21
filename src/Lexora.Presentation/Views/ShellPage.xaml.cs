@@ -116,6 +116,7 @@ public sealed partial class ShellPage : Page
                     {
                         DashboardPage => NavItemDashboard,
                         VocabularyPage => NavItemVocabulary,
+                        HomophonesPage => NavItemHomophones,
                         ReviewPage => NavItemReview,
                         TestPage => NavItemTest,
                         GrammarPage => NavItemGrammar,
@@ -153,6 +154,11 @@ public sealed partial class ShellPage : Page
 
     private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
+        if (args.InvokedItemContainer is NavigationViewItemHeader)
+        {
+            return;
+        }
+
         if (args.IsSettingsInvoked || args.InvokedItemContainer == NavItemSettings)
         {
             if (_navigationService.CurrentPageType == typeof(SettingsPage))
@@ -191,6 +197,7 @@ public sealed partial class ShellPage : Page
         {
             "Dashboard" => typeof(DashboardPage),
             "Vocabulary" => typeof(VocabularyPage),
+            "Homophones" => typeof(HomophonesPage),
             "Review" => typeof(ReviewPage),
             "Test" => typeof(TestPage),
             "Grammar" => typeof(GrammarPage),
@@ -211,8 +218,14 @@ public sealed partial class ShellPage : Page
 
     private void UpdateNavigationLabels()
     {
+        NavHeaderOverview.Content = _localizationService.GetString("NavHeader_Overview");
+        NavHeaderLearning.Content = _localizationService.GetString("NavHeader_Learning");
+        NavHeaderPractice.Content = _localizationService.GetString("NavHeader_Practice");
+        NavHeaderArchive.Content = _localizationService.GetString("NavHeader_Archive");
+
         NavItemDashboard.Content = _localizationService.GetString("Nav_Dashboard");
         NavItemVocabulary.Content = _localizationService.GetString("Nav_Vocabulary");
+        NavItemHomophones.Content = _localizationService.GetString("Nav_Homophones");
         NavItemReview.Content = _localizationService.GetString("Nav_Review");
         NavItemTest.Content = _localizationService.GetString("Nav_Test");
         NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
@@ -222,6 +235,7 @@ public sealed partial class ShellPage : Page
 
         ToolTipService.SetToolTip(NavItemDashboard, _localizationService.GetString("Shell_TooltipDashboard"));
         ToolTipService.SetToolTip(NavItemVocabulary, _localizationService.GetString("Shell_TooltipVocabulary"));
+        ToolTipService.SetToolTip(NavItemHomophones, _localizationService.GetString("Shell_TooltipHomophones"));
         ToolTipService.SetToolTip(NavItemReview, _localizationService.GetString("Shell_TooltipReview"));
         ToolTipService.SetToolTip(NavItemTest, _localizationService.GetString("Shell_TooltipTest"));
         ToolTipService.SetToolTip(NavItemGrammar, _localizationService.GetString("Shell_TooltipGrammar"));
@@ -339,6 +353,7 @@ public sealed partial class ShellPage : Page
         {
             (Key: "dashboard", Page: "Dashboard", Title: _localizationService.GetString("Nav_Dashboard"), Subtitle: _localizationService.GetString("Search_SmartNav_Dashboard"), Glyph: "\uE80F"),
             (Key: "vocabulary", Page: "Vocabulary", Title: _localizationService.GetString("Nav_Vocabulary"), Subtitle: _localizationService.GetString("Search_SmartNav_Vocab"), Glyph: "\uE82D"),
+            (Key: "homophones", Page: "Homophones", Title: _localizationService.GetString("Nav_Homophones"), Subtitle: _localizationService.GetString("Search_SmartNav_Homophones"), Glyph: "\uE768"),
             (Key: "review", Page: "Review", Title: _localizationService.GetString("Nav_Review"), Subtitle: _localizationService.GetString("Search_SmartNav_Review"), Glyph: "\uE895"),
             (Key: "test", Page: "Test", Title: _localizationService.GetString("Nav_Test"), Subtitle: _localizationService.GetString("Search_SmartNav_Test"), Glyph: "\uE765"),
             (Key: "grammar", Page: "Grammar", Title: _localizationService.GetString("Nav_Grammar"), Subtitle: _localizationService.GetString("Search_SmartNav_Grammar"), Glyph: "\uE8D2"),
@@ -489,6 +504,10 @@ public sealed partial class ShellPage : Page
                         _navigationService.Navigate(typeof(VocabularyPage));
                         NavView.SelectedItem = NavItemVocabulary;
                         break;
+                    case "Homophones":
+                        _navigationService.Navigate(typeof(HomophonesPage));
+                        NavView.SelectedItem = NavItemHomophones;
+                        break;
                     case "Review":
                         _navigationService.Navigate(typeof(ReviewPage));
                         NavView.SelectedItem = NavItemReview;
@@ -501,11 +520,22 @@ public sealed partial class ShellPage : Page
                         _navigationService.Navigate(typeof(GrammarPage));
                         NavView.SelectedItem = NavItemGrammar;
                         break;
+                    case "LearningStorage":
+                        _navigationService.Navigate(typeof(LearningStoragePage));
+                        NavView.SelectedItem = NavItemLearningStorage;
+                        break;
                     case "Settings":
                         _navigationService.Navigate(typeof(SettingsPage));
                         NavView.SelectedItem = NavItemSettings;
                         break;
                 }
+                return;
+            }
+
+            if (chosen.TargetType == "Homophone")
+            {
+                _navigationService.Navigate(typeof(HomophonesPage));
+                NavView.SelectedItem = NavItemHomophones;
                 return;
             }
 

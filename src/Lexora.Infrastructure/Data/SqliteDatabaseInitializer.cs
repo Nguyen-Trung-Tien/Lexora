@@ -35,6 +35,12 @@ public class SqliteDatabaseInitializer
                 _logger.LogInformation("Seeding initial starter pack data...");
                 await SeedInitialDataAsync(cancellationToken);
             }
+
+            if (!await _context.HomophoneGroups.AnyAsync(cancellationToken))
+            {
+                _logger.LogInformation("Seeding starter homophones and phonetic confusions...");
+                await SeedHomophoneStarterDataAsync(cancellationToken);
+            }
         }
         catch (Exception ex)
         {
@@ -364,10 +370,256 @@ public class SqliteDatabaseInitializer
                 CREATE INDEX IF NOT EXISTS "IX_StudyLogs_StudySessionId_CreatedAt" ON "StudyLogs" ("StudySessionId", "CreatedAt");
                 """;
             await _context.Database.ExecuteSqlRawAsync(createStorageTableSql, cancellationToken);
+
+            const string createHomophonesTablesSql = """
+                CREATE TABLE IF NOT EXISTS "HomophoneGroups" (
+                    "Id" TEXT NOT NULL CONSTRAINT "PK_HomophoneGroups" PRIMARY KEY,
+                    "Title" TEXT NOT NULL,
+                    "PhoneticIpa" TEXT NOT NULL DEFAULT '',
+                    "Type" INTEGER NOT NULL DEFAULT 0,
+                    "DifficultyLevel" INTEGER NOT NULL DEFAULT 0,
+                    "ExamTag" INTEGER NOT NULL DEFAULT 0,
+                    "DifferentiationTip" TEXT NULL,
+                    "Notes" TEXT NULL,
+                    "CreatedAt" TEXT NOT NULL,
+                    "UpdatedAt" TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS "IX_HomophoneGroups_Title" ON "HomophoneGroups" ("Title");
+                CREATE INDEX IF NOT EXISTS "IX_HomophoneGroups_Type" ON "HomophoneGroups" ("Type");
+                CREATE INDEX IF NOT EXISTS "IX_HomophoneGroups_DifficultyLevel" ON "HomophoneGroups" ("DifficultyLevel");
+                CREATE INDEX IF NOT EXISTS "IX_HomophoneGroups_ExamTag" ON "HomophoneGroups" ("ExamTag");
+                CREATE INDEX IF NOT EXISTS "IX_HomophoneGroups_CreatedAt" ON "HomophoneGroups" ("CreatedAt");
+
+                CREATE TABLE IF NOT EXISTS "HomophoneItems" (
+                    "Id" TEXT NOT NULL CONSTRAINT "PK_HomophoneItems" PRIMARY KEY,
+                    "HomophoneGroupId" TEXT NOT NULL,
+                    "Term" TEXT NOT NULL,
+                    "NormalizedTerm" TEXT NOT NULL,
+                    "PartOfSpeech" INTEGER NOT NULL DEFAULT 0,
+                    "MeaningVi" TEXT NOT NULL,
+                    "MeaningEn" TEXT NULL,
+                    "PhoneticSpecific" TEXT NULL,
+                    "ExampleSentence" TEXT NULL,
+                    "ExampleTranslation" TEXT NULL,
+                    "AudioPath" TEXT NULL,
+                    "CreatedAt" TEXT NOT NULL,
+                    "UpdatedAt" TEXT NOT NULL,
+                    CONSTRAINT "FK_HomophoneItems_HomophoneGroups_HomophoneGroupId" FOREIGN KEY ("HomophoneGroupId") REFERENCES "HomophoneGroups" ("Id") ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS "IX_HomophoneItems_HomophoneGroupId" ON "HomophoneItems" ("HomophoneGroupId");
+                CREATE INDEX IF NOT EXISTS "IX_HomophoneItems_Term" ON "HomophoneItems" ("Term");
+                CREATE INDEX IF NOT EXISTS "IX_HomophoneItems_NormalizedTerm" ON "HomophoneItems" ("NormalizedTerm");
+                """;
+            await _context.Database.ExecuteSqlRawAsync(createHomophonesTablesSql, cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Schema compatibility check encountered an issue (can be ignored if table does not exist yet).");
         }
+    }
+
+    private async Task SeedHomophoneStarterDataAsync(CancellationToken ct)
+    {
+        var groups = new List<HomophoneGroup>
+        {
+            new()
+            {
+                Title = "bare / bear",
+                PhoneticIpa = "/beə(r)/",
+                Type = HomophoneType.ExactHomophone,
+                DifficultyLevel = CefrLevel.B1,
+                ExamTag = ExamType.Toeic,
+                DifferentiationTip = "'Bare' là tính từ nghĩa là trần trụi, trống không (vd: bare feet). 'Bear' là động từ chịu đựng hoặc danh từ con gấu.",
+                Items =
+                {
+                    new HomophoneItem
+                    {
+                        Term = "bare",
+                        NormalizedTerm = "bare",
+                        PartOfSpeech = PartOfSpeech.Adjective,
+                        MeaningVi = "trần trụi, trống không, trọc",
+                        MeaningEn = "not clothed or covered",
+                        ExampleSentence = "He walked on the cold wooden floor with bare feet.",
+                        ExampleTranslation = "Anh ấy đi chân trần trên sàn gỗ lạnh lẽo."
+                    },
+                    new HomophoneItem
+                    {
+                        Term = "bear",
+                        NormalizedTerm = "bear",
+                        PartOfSpeech = PartOfSpeech.Verb,
+                        MeaningVi = "chịu đựng (hoặc danh từ: con gấu)",
+                        MeaningEn = "to endure, to carry or tolerate",
+                        ExampleSentence = "I can hardly bear the continuous construction noise.",
+                        ExampleTranslation = "Tôi khó lòng mà chịu đựng nổi tiếng ồn xây dựng liên tục này."
+                    }
+                }
+            },
+            new()
+            {
+                Title = "knight / night",
+                PhoneticIpa = "/naɪt/",
+                Type = HomophoneType.ExactHomophone,
+                DifficultyLevel = CefrLevel.B1,
+                ExamTag = ExamType.Ielts,
+                DifferentiationTip = "'Knight' bắt đầu bằng 'k' câm nghĩa là hiệp sĩ thời trung cổ. 'Night' nghĩa là ban đêm.",
+                Items =
+                {
+                    new HomophoneItem
+                    {
+                        Term = "knight",
+                        NormalizedTerm = "knight",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "hiệp sĩ, quân mã trong cờ vua",
+                        MeaningEn = "a medieval warrior of noble birth",
+                        ExampleSentence = "The brave knight pledged allegiance to the royal kingdom.",
+                        ExampleTranslation = "Người hiệp sĩ dũng cảm đã tuyên thệ trung thành với vương quốc hoàng gia."
+                    },
+                    new HomophoneItem
+                    {
+                        Term = "night",
+                        NormalizedTerm = "night",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "ban đêm, đêm tối",
+                        MeaningEn = "the period of darkness between sunset and sunrise",
+                        ExampleSentence = "The sky is filled with glowing stars tonight.",
+                        ExampleTranslation = "Bầu trời đêm nay tràn ngập những vì sao tỏa sáng."
+                    }
+                }
+            },
+            new()
+            {
+                Title = "flour / flower",
+                PhoneticIpa = "/flaʊ.ər/",
+                Type = HomophoneType.ExactHomophone,
+                DifficultyLevel = CefrLevel.A2,
+                ExamTag = ExamType.General,
+                DifferentiationTip = "'Flour' là bột mì làm bánh. 'Flower' là bông hoa tươi.",
+                Items =
+                {
+                    new HomophoneItem
+                    {
+                        Term = "flour",
+                        NormalizedTerm = "flour",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "bột mì (nguyên liệu nấu nướng/làm bánh)",
+                        MeaningEn = "powder made by grinding grain, used in baking",
+                        ExampleSentence = "Sift the flour carefully before mixing it with butter.",
+                        ExampleTranslation = "Hãy rây bột mì cẩn thận trước khi trộn cùng với bơ."
+                    },
+                    new HomophoneItem
+                    {
+                        Term = "flower",
+                        NormalizedTerm = "flower",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "bông hoa",
+                        MeaningEn = "the seed-bearing part of a plant, consisting of reproductive organs",
+                        ExampleSentence = "The garden is full of colourful spring flowers.",
+                        ExampleTranslation = "Khu vườn ngập tràn những bông hoa mùa xuân đầy màu sắc."
+                    }
+                }
+            },
+            new()
+            {
+                Title = "peace / piece",
+                PhoneticIpa = "/piːs/",
+                Type = HomophoneType.ExactHomophone,
+                DifficultyLevel = CefrLevel.A2,
+                ExamTag = ExamType.General,
+                DifferentiationTip = "'Peace' là hòa bình, bình yên. 'Piece' là mẩu, mảnh, tác phẩm (vd: a piece of cake).",
+                Items =
+                {
+                    new HomophoneItem
+                    {
+                        Term = "peace",
+                        NormalizedTerm = "peace",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "sự hòa bình, yên bình",
+                        MeaningEn = "freedom from disturbance; tranquility",
+                        ExampleSentence = "The ambassadors met to discuss lasting peace in the region.",
+                        ExampleTranslation = "Các vị đại sứ đã họp mặt để thảo luận về nền hòa bình lâu dài trong khu vực."
+                    },
+                    new HomophoneItem
+                    {
+                        Term = "piece",
+                        NormalizedTerm = "piece",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "mảnh, mẩu, khúc, tác phẩm",
+                        MeaningEn = "a portion of an object or of material",
+                        ExampleSentence = "Would you like another piece of chocolate cake?",
+                        ExampleTranslation = "Bạn có muốn ăn thêm một miếng bánh sô-cô-la nữa không?"
+                    }
+                }
+            },
+            new()
+            {
+                Title = "weather / whether",
+                PhoneticIpa = "/ˈweð.ər/",
+                Type = HomophoneType.ExactHomophone,
+                DifficultyLevel = CefrLevel.B1,
+                ExamTag = ExamType.Toeic,
+                DifferentiationTip = "'Weather' là thời tiết (nắng, mưa). 'Whether' là từ nối liên từ nghĩa là 'liệu rằng' (whether... or).",
+                Items =
+                {
+                    new HomophoneItem
+                    {
+                        Term = "weather",
+                        NormalizedTerm = "weather",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "thời tiết, khí hậu",
+                        MeaningEn = "the state of the atmosphere at a place and time",
+                        ExampleSentence = "We decided to postpone the picnic due to severe weather.",
+                        ExampleTranslation = "Chúng tôi quyết định hoãn buổi dã ngoại vì thời tiết khắc nghiệt."
+                    },
+                    new HomophoneItem
+                    {
+                        Term = "whether",
+                        NormalizedTerm = "whether",
+                        PartOfSpeech = PartOfSpeech.Conjunction,
+                        MeaningVi = "liệu rằng, có hay không",
+                        MeaningEn = "expressing a doubt or choice between alternatives",
+                        ExampleSentence = "He hasn't decided whether to accept the new job offer.",
+                        ExampleTranslation = "Anh ấy vẫn chưa quyết định liệu có nên nhận lời mời làm việc mới hay không."
+                    }
+                }
+            },
+            new()
+            {
+                Title = "desert / dessert",
+                PhoneticIpa = "/ˈdez.ət/ vs /dɪˈzɜːt/",
+                Type = HomophoneType.NearHomophone,
+                DifficultyLevel = CefrLevel.B1,
+                ExamTag = ExamType.Toeic,
+                DifferentiationTip = "Bẫy trọng âm: 'Desert' trọng âm 1 nghĩa là sa mạc (hoặc đt từ bỏ). 'Dessert' (2 chữ s - double sweet) trọng âm 2 nghĩa là món tráng miệng ngọt ngào.",
+                Items =
+                {
+                    new HomophoneItem
+                    {
+                        Term = "desert",
+                        NormalizedTerm = "desert",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "sa mạc (hoặc động từ: đào ngũ, rời bỏ)",
+                        MeaningEn = "a dry, barren area of land",
+                        PhoneticSpecific = "/ˈdez.ət/",
+                        ExampleSentence = "The Sahara is the largest hot desert in the world.",
+                        ExampleTranslation = "Sahara là sa mạc cát nóng lớn nhất trên thế giới."
+                    },
+                    new HomophoneItem
+                    {
+                        Term = "dessert",
+                        NormalizedTerm = "dessert",
+                        PartOfSpeech = PartOfSpeech.Noun,
+                        MeaningVi = "món tráng miệng (sau bữa ăn chính)",
+                        MeaningEn = "the sweet course eaten at the end of a meal",
+                        PhoneticSpecific = "/dɪˈzɜːt/",
+                        ExampleSentence = "We had fresh fruit and ice cream for dessert.",
+                        ExampleTranslation = "Chúng tôi đã thưởng thức trái cây tươi và kem cho món tráng miệng."
+                    }
+                }
+            }
+        };
+
+        await _context.HomophoneGroups.AddRangeAsync(groups, ct);
+        await _context.SaveChangesAsync(ct);
+        _logger.LogInformation("Successfully seeded {Count} starter homophone groups.", groups.Count);
     }
 }

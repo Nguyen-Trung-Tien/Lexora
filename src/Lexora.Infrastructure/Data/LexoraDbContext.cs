@@ -23,6 +23,8 @@ public class LexoraDbContext : DbContext
     public DbSet<GrammarExample> GrammarExamples => Set<GrammarExample>();
     public DbSet<UserStreak> UserStreaks => Set<UserStreak>();
     public DbSet<LearningStorageItem> LearningStorageItems => Set<LearningStorageItem>();
+    public DbSet<HomophoneGroup> HomophoneGroups => Set<HomophoneGroup>();
+    public DbSet<HomophoneItem> HomophoneItems => Set<HomophoneItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -194,6 +196,45 @@ public class LexoraDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(lsi => lsi.GrammarRuleId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // HomophoneGroup configuration
+        modelBuilder.Entity<HomophoneGroup>(b =>
+        {
+            b.HasKey(g => g.Id);
+            b.Property(g => g.Title).IsRequired().HasMaxLength(200);
+            b.Property(g => g.PhoneticIpa).HasMaxLength(100);
+            b.Property(g => g.DifferentiationTip).HasMaxLength(2000);
+            b.Property(g => g.Notes).HasMaxLength(2000);
+
+            b.HasIndex(g => g.Title);
+            b.HasIndex(g => g.Type);
+            b.HasIndex(g => g.DifficultyLevel);
+            b.HasIndex(g => g.ExamTag);
+            b.HasIndex(g => g.CreatedAt);
+
+            b.HasMany(g => g.Items)
+                .WithOne(i => i.Group)
+                .HasForeignKey(i => i.HomophoneGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // HomophoneItem configuration
+        modelBuilder.Entity<HomophoneItem>(b =>
+        {
+            b.HasKey(i => i.Id);
+            b.Property(i => i.Term).IsRequired().HasMaxLength(150);
+            b.Property(i => i.NormalizedTerm).IsRequired().HasMaxLength(150);
+            b.Property(i => i.MeaningVi).IsRequired().HasMaxLength(1000);
+            b.Property(i => i.MeaningEn).HasMaxLength(1000);
+            b.Property(i => i.PhoneticSpecific).HasMaxLength(100);
+            b.Property(i => i.ExampleSentence).HasMaxLength(2000);
+            b.Property(i => i.ExampleTranslation).HasMaxLength(2000);
+            b.Property(i => i.AudioPath).HasMaxLength(500);
+
+            b.HasIndex(i => i.HomophoneGroupId);
+            b.HasIndex(i => i.Term);
+            b.HasIndex(i => i.NormalizedTerm);
         });
     }
 }

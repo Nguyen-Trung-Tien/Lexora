@@ -1,0 +1,289 @@
+using Windows.Storage.Pickers;
+using Lexora.Application.DTOs;
+using Lexora.Domain.Enums;
+using Lexora.Presentation.Services;
+using Lexora.Presentation.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+
+namespace Lexora.Presentation.Views;
+
+public sealed partial class HomophonesPage : Page, ILocalizableView
+{
+    public HomophonesViewModel ViewModel { get; }
+    public ILocalizationService Loc { get; }
+
+    public HomophonesPage()
+    {
+        ViewModel = App.Current.Services.GetRequiredService<HomophonesViewModel>();
+        Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+
+        InitializeComponent();
+
+        Loaded += OnPageLoaded;
+    }
+
+    private async void OnPageLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnPageLoaded;
+        ApplyLocalization();
+        await ViewModel.LoadGroupsAsync();
+        UpdateDetailView();
+    }
+
+    public void OnLanguageChanged()
+    {
+        ApplyLocalization();
+    }
+
+    private void ApplyLocalization()
+    {
+        PageTitleText.Text = Loc.GetString("Homophones_Title");
+        PageSubtitleText.Text = Loc.GetString("Homophones_Subtitle");
+        TextAddGroup.Text = Loc.GetString("Homophones_AddGroup");
+        TextSmartImport.Text = Loc.GetString("Homophones_SmartImport");
+        TextExport.Text = Loc.GetString("Action_Export");
+        SearchBox.PlaceholderText = Loc.GetString("Homophones_SearchPlaceholder");
+    }
+
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ViewModel.SearchQuery = SearchBox.Text;
+    }
+
+    private void TypeFilterBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (TypeFilterBox.SelectedItem is ComboBoxItem item)
+        {
+            var tag = item.Tag?.ToString();
+            if (tag == "All" || string.IsNullOrEmpty(tag))
+            {
+                ViewModel.SelectedTypeFilter = null;
+            }
+            else if (Enum.TryParse<HomophoneType>(tag, out var t))
+            {
+                ViewModel.SelectedTypeFilter = t;
+            }
+        }
+    }
+
+    private void LevelFilterBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (LevelFilterBox.SelectedItem is ComboBoxItem item)
+        {
+            var tag = item.Tag?.ToString();
+            if (tag == "All" || string.IsNullOrEmpty(tag))
+            {
+                ViewModel.SelectedLevelFilter = null;
+            }
+            else if (Enum.TryParse<CefrLevel>(tag, out var l))
+            {
+                ViewModel.SelectedLevelFilter = l;
+            }
+        }
+    }
+
+    private void GroupsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (GroupsListView.SelectedItem is HomophoneGroupDto group)
+        {
+            ViewModel.SelectedGroup = group;
+            UpdateDetailView();
+        }
+    }
+
+    private void UpdateDetailView()
+    {
+        var group = ViewModel.SelectedGroup;
+        if (group == null)
+        {
+            DetailContentPanel.Visibility = Visibility.Collapsed;
+            EmptyListPanel.Visibility = ViewModel.Groups.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            return;
+        }
+
+        DetailContentPanel.Visibility = Visibility.Visible;
+        EmptyListPanel.Visibility = Visibility.Collapsed;
+
+        // Group Title & IPA
+        DetailGroupTitle.Text = group.Title;
+        DetailGroupIpa.Text = !string.IsNullOrWhiteSpace(group.PhoneticIpa) ? group.PhoneticIpa : "—";
+
+        // Badges
+        TextBadgeType.Text = group.Type switch
+        {
+            HomophoneType.ExactHomophone => "Exact Homophone",
+            HomophoneType.NearHomophone => "Near Homophone",
+            HomophoneType.MinimalPair => "Minimal Pair",
+            _ => group.Type.ToString()
+        };
+        TextBadgeLevel.Text = group.DifficultyLevel != CefrLevel.None ? $"CEFR {group.DifficultyLevel}" : "All Levels";
+        TextBadgeExam.Text = group.ExamTag.ToString();
+
+        // Tip
+        if (!string.IsNullOrWhiteSpace(group.DifferentiationTip))
+        {
+            TipBanner.Visibility = Visibility.Visible;
+            TextDifferentiationTip.Text = group.DifferentiationTip;
+        }
+        else
+        {
+            TipBanner.Visibility = Visibility.Collapsed;
+        }
+
+        // Comparison Cards
+        if (group.Items.Count > 0)
+        {
+            var w1 = group.Items[0];
+            Word1Term.Text = w1.Term;
+            Word1Pos.Text = w1.PartOfSpeech.ToString();
+            Word1MeaningVi.Text = w1.MeaningVi;
+            Word1Example.Text = !string.IsNullOrWhiteSpace(w1.ExampleSentence) ? w1.ExampleSentence : "(Không có câu ví dụ)";
+            Word1Translation.Text = w1.ExampleTranslation ?? string.Empty;
+            BtnListenWord1.Tag = w1.Term;
+        }
+
+        if (group.Items.Count > 1)
+        {
+            var w2 = group.Items[1];
+            Word2Term.Text = w2.Term;
+            Word2Pos.Text = w2.PartOfSpeech.ToString();
+            Word2MeaningVi.Text = w2.MeaningVi;
+            Word2Example.Text = !string.IsNullOrWhiteSpace(w2.ExampleSentence) ? w2.ExampleSentence : "(Không có câu ví dụ)";
+            Word2Translation.Text = w2.ExampleTranslation ?? string.Empty;
+            BtnListenWord2.Tag = w2.Term;
+        }
+    }
+
+    private async void BtnAddGroup_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new HomophoneEditorDialog(Loc)
+        {
+            XamlRoot = this.XamlRoot
+        };
+
+        var result = await dialog.ShowAsyncSafe();
+        if (result == ContentDialogResult.Primary && dialog.CreatedGroupResult != null)
+        {
+            await ViewModel.SaveGroupAsync(dialog.CreatedGroupResult);
+            UpdateDetailView();
+        }
+    }
+
+    private async void BtnEditGroup_Click(object sender, RoutedEventArgs e)
+    {
+        var group = ViewModel.SelectedGroup;
+        if (group == null) return;
+
+        var dialog = new HomophoneEditorDialog(Loc, group)
+        {
+            XamlRoot = this.XamlRoot
+        };
+
+        var result = await dialog.ShowAsyncSafe();
+        if (result == ContentDialogResult.Primary && dialog.UpdatedGroupResult != null)
+        {
+            await ViewModel.UpdateGroupAsync(dialog.UpdatedGroupResult);
+            UpdateDetailView();
+        }
+    }
+
+    private async void BtnDeleteGroup_Click(object sender, RoutedEventArgs e)
+    {
+        var group = ViewModel.SelectedGroup;
+        if (group == null) return;
+
+        var confirmDialog = new ContentDialog
+        {
+            XamlRoot = this.XamlRoot,
+            Title = Loc.GetString("Action_ConfirmDelete"),
+            Content = string.Format(Loc.GetString("Homophones_ConfirmDeleteMessage"), group.Title),
+            PrimaryButtonText = Loc.GetString("Action_Delete"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close
+        };
+
+        var result = await confirmDialog.ShowAsyncSafe();
+        if (result == ContentDialogResult.Primary)
+        {
+            await ViewModel.DeleteGroupAsync(group.Id);
+            UpdateDetailView();
+        }
+    }
+
+    private async void BtnSmartImport_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SmartImportDialog(fmt => ViewModel.GetSampleTemplate(fmt), isGrammarMode: false, isHomophoneMode: true)
+        {
+            XamlRoot = this.XamlRoot
+        };
+
+        var result = await dialog.ShowAsyncSafe();
+        if (dialog.WasCommitted)
+        {
+            await ViewModel.LoadGroupsAsync();
+            UpdateDetailView();
+        }
+    }
+
+    private async void ExportJson_Click(object sender, RoutedEventArgs e) => await ExportToFileAsync("json");
+    private async void ExportCsv_Click(object sender, RoutedEventArgs e) => await ExportToFileAsync("csv");
+    private async void ExportTxt_Click(object sender, RoutedEventArgs e) => await ExportToFileAsync("txt");
+
+    private async Task ExportToFileAsync(string format)
+    {
+        try
+        {
+            var content = await ViewModel.ExportAsync(format);
+            var picker = new FileSavePicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                SuggestedFileName = $"Lexora_Homophones_{DateTime.Now:yyyyMMdd}"
+            };
+
+            var ext = format switch
+            {
+                "csv" => ".csv",
+                "txt" => ".txt",
+                _ => ".json"
+            };
+            picker.FileTypeChoices.Add($"Homophones Export ({ext})", [ext]);
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Current.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var file = await picker.PickSaveFileAsync();
+            if (file != null)
+            {
+                await Windows.Storage.FileIO.WriteTextAsync(file, content);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[HomophonesPage] ExportToFileAsync error: {ex.Message}");
+        }
+    }
+
+    private async void BtnRefresh_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.LoadGroupsAsync();
+        UpdateDetailView();
+    }
+
+    private async void BtnListenWord1_Click(object sender, RoutedEventArgs e)
+    {
+        if (BtnListenWord1.Tag is string term)
+        {
+            await ViewModel.PlayAudioAsync(term);
+        }
+    }
+
+    private async void BtnListenWord2_Click(object sender, RoutedEventArgs e)
+    {
+        if (BtnListenWord2.Tag is string term)
+        {
+            await ViewModel.PlayAudioAsync(term);
+        }
+    }
+}

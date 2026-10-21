@@ -21,6 +21,7 @@ public class DependencyInjectionResolutionTests
         services.AddScoped(_ => new Mock<IReviewRepository>().Object);
         services.AddScoped(_ => new Mock<IGrammarRepository>().Object);
         services.AddScoped(_ => new Mock<ILearningStorageRepository>().Object);
+        services.AddScoped(_ => new Mock<IHomophoneRepository>().Object);
         services.AddScoped(_ => new Mock<IUnitOfWork>().Object);
         services.AddSingleton(_ => new Mock<IVoiceProvider>().Object);
 
@@ -56,6 +57,12 @@ public class DependencyInjectionResolutionTests
 
         var learningStorageService = scope.ServiceProvider.GetRequiredService<ILearningStorageService>();
         learningStorageService.Should().NotBeNull();
+
+        var homophoneService = scope.ServiceProvider.GetRequiredService<IHomophoneService>();
+        homophoneService.Should().NotBeNull();
+
+        var homophoneExportImportService = scope.ServiceProvider.GetRequiredService<IHomophoneExportImportService>();
+        homophoneExportImportService.Should().NotBeNull();
 
         var statsService = scope.ServiceProvider.GetRequiredService<IStatisticsService>();
         statsService.Should().NotBeNull();
