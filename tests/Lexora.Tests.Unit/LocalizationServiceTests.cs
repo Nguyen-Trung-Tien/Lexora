@@ -165,7 +165,7 @@ public class LocalizationServiceTests
     [InlineData("SmartReview_FreshLearned", "Từ mới nạp (Củng cố)", "Recently Learned (Consolidation)")]
     [InlineData("SmartReview_LongTermConsolidation", "Khắc sâu dài hạn", "Long-Term Consolidation")]
     [InlineData("AdaptiveQuiz_FinalLevelFormat", "Trình độ ước tính: {0}", "Estimated Level: {0}")]
-    [InlineData("Nav_Help", "Trung tâm hướng dẫn", "Help & User Guide")]
+    [InlineData("Nav_Help", "Trung tâm hướng dẫn", "Help & Guide")]
     [InlineData("Help_HeroBadge", "TRUNG TÂM HƯỚNG DẪN & TRỢ GIÚP", "HELP & USER GUIDE HUB")]
     [InlineData("Help_Title", "Hướng dẫn sử dụng Lexora", "Lexora User Guide & Documentation")]
     [InlineData("Help_OfflineBadge", "Hoạt động Ngoại tuyến & SM-2/FSRS", "Offline-First & SM-2/FSRS")]

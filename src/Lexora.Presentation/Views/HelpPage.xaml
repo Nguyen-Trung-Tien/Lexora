@@ -26,7 +26,7 @@
                                 </Border>
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="8,3">
                                     <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <FontIcon Glyph="&#xE897;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <FontIcon Glyph="&#xE9CE;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="{x:Bind Loc.GetString('Help_OnboardingSystem')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Border>

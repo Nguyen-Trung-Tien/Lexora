@@ -37,10 +37,10 @@
                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel VerticalAlignment="Center" MaxWidth="440">
+                    <StackPanel VerticalAlignment="Center" MaxWidth="300">
                         <TextBlock x:Name="PageTitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Title')}" FontWeight="Bold" FontSize="17" TextTrimming="CharacterEllipsis" />
                         <TextBlock x:Name="PageSubtitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Subtitle')}"
-                                   FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                   FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </StackPanel>
 
@@ -49,8 +49,8 @@
                                 Grid.Column="1"
                                 Margin="16,0,16,0"
                                 MinWidth="180"
-                                MaxWidth="360"
-                                HorizontalAlignment="Right"
+                                MaxWidth="320"
+                                HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"
                                 PlaceholderText="{x:Bind Loc.GetString('KnowledgeGraph_SearchPlaceholder')}"
                                 QueryIcon="Find"

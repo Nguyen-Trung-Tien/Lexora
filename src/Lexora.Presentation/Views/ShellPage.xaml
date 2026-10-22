@@ -86,9 +86,9 @@
                         <FontIcon x:Name="ThemeToggleIcon" Glyph="&#xE708;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="NavItemHelp" Content="Help &amp; Guide" Tag="Help" ToolTipService.ToolTip="Help &amp; User Guide (F1)">
+                <NavigationViewItem x:Name="NavItemHelp" Content="Help &amp; Guide" Tag="Help" ToolTipService.ToolTip="Help &amp; Guide (F1)">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE897;" />
+                        <FontIcon Glyph="&#xE9CE;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Name="NavItemSettings" Content="Settings" Tag="Settings" ToolTipService.ToolTip="Settings">

@@ -76,7 +76,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
     private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        var isCompact = e.NewSize.Width < 1200;
+        var isCompact = e.NewSize.Width < 1360;
         var btnTextVisibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
 
         if (BtnRecommendationsText != null) BtnRecommendationsText.Visibility = btnTextVisibility;
@@ -84,9 +84,14 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         if (BtnExportText != null) BtnExportText.Visibility = btnTextVisibility;
         if (BtnViewModeText != null) BtnViewModeText.Visibility = btnTextVisibility;
 
+        if (PageSubtitleText != null)
+        {
+            PageSubtitleText.Visibility = e.NewSize.Width < 1180 ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         if (HeaderSearchBox != null)
         {
-            HeaderSearchBox.MaxWidth = e.NewSize.Width < 1000 ? 180 : 280;
+            HeaderSearchBox.MaxWidth = e.NewSize.Width < 1100 ? 220 : 320;
         }
     }
 
