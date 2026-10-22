@@ -98,7 +98,7 @@
                             </Button>
                             <Button x:Name="TestHelpButton" Click="TestHelpButton_Click" CornerRadius="10" Padding="10"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_Help_Title')}">
-                                <FontIcon Glyph="&#xE897;" FontSize="16" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <FontIcon Glyph="&#xE9CE;" FontSize="16" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </Button>
                         </StackPanel>
                     </Grid>

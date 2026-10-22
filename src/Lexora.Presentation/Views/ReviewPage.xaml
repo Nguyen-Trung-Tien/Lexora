@@ -169,10 +169,7 @@
                         <!-- Contextual Help Button -->
                         <Button x:Name="ReviewHelpButton" Click="ReviewHelpButton_Click" CornerRadius="8" Padding="8,6"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_Help_Title')}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE897;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Nav_Help')}" FontWeight="SemiBold" FontSize="12" />
-                            </StackPanel>
+                            <FontIcon Glyph="&#xE9CE;" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </Button>
                     </StackPanel>
                 </Grid>

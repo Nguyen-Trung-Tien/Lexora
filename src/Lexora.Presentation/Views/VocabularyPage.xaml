@@ -192,10 +192,7 @@
                     <!-- Contextual Help Button -->
                     <Button x:Name="VocabHelpButton" Click="VocabHelpButton_Click" CornerRadius="10" Padding="12,8"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_Help_Title')}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE897;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Nav_Help')}" FontWeight="SemiBold" />
-                        </StackPanel>
+                        <FontIcon Glyph="&#xE9CE;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Button>
                 </StackPanel>
             </ScrollViewer>

@@ -59,7 +59,7 @@
                             <Button x:Name="SettingsHelpButton" Click="SettingsHelpButton_Click" CornerRadius="12" Padding="10,8"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_Help_Title')}">
-                                <FontIcon Glyph="&#xE897;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <FontIcon Glyph="&#xE9CE;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </Button>
                         </StackPanel>
                     </Grid>

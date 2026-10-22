@@ -74,7 +74,7 @@
                                 Background="Transparent" BorderThickness="0" CornerRadius="8" Padding="8"
                                 VerticalAlignment="Top"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Dashboard_Help_Title')}">
-                            <FontIcon Glyph="&#xE897;" FontSize="16" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <FontIcon Glyph="&#xE9CE;" FontSize="16" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </Button>
                     </Grid>
 

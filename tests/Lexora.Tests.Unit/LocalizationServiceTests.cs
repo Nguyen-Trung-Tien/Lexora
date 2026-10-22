@@ -184,6 +184,8 @@ public class LocalizationServiceTests
     [InlineData("KnowledgeGraph_ExportSuccess", "Đã xuất đồ thị tri thức sang '{0}' thành công!", "Knowledge graph exported to '{0}' successfully!")]
     [InlineData("SmartImport_Toast_Success", "Đã nhập thành công {0} mục dữ liệu!", "Successfully imported {0} items!")]
     [InlineData("Review_UndoSuccess", "Đã hoàn tác đánh giá thẻ ôn tập vừa rồi.", "Last card rating undone successfully.")]
+    [InlineData("Action_Export", "Xuất tệp", "Export")]
+    [InlineData("Action_Import", "Nhập tệp", "Import")]
     public void NewlyAddedKeys_MustReturnAccurateTranslations(string key, string expectedVi, string expectedEn)
     {
         _loc.SetLanguage("vi-VN");

@@ -68,7 +68,7 @@
                         <Button x:Name="StorageHelpButton" CornerRadius="10" Padding="12,8"
                                 Click="StorageHelpButton_Click"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_Help_Title')}">
-                            <FontIcon Glyph="&#xE897;" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <FontIcon Glyph="&#xE9CE;" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </Button>
                     </StackPanel>
                 </Grid>

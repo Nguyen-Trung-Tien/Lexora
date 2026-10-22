@@ -132,6 +132,8 @@ public class LocalizationService : ILocalizationService
             ["Action_DeleteSelected"] = "Xóa đã chọn ({0})",
             ["Action_CancelSelection"] = "Hủy chọn",
             ["Action_Refresh"] = "Làm mới",
+            ["Action_Export"] = "Xuất tệp",
+            ["Action_Import"] = "Nhập tệp",
 
             // Toast Notifications
             ["Toast_SuccessTitle"] = "Thành công",
@@ -1807,6 +1809,8 @@ public class LocalizationService : ILocalizationService
             ["Action_DeleteSelected"] = "Delete Selected ({0})",
             ["Action_CancelSelection"] = "Cancel Selection",
             ["Action_Refresh"] = "Refresh",
+            ["Action_Export"] = "Export",
+            ["Action_Import"] = "Import",
 
             // Toast Notifications
             ["Toast_SuccessTitle"] = "Success",
