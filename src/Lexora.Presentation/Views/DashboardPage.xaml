@@ -101,10 +101,8 @@
                         </TeachingTip.Content>
                     </TeachingTip>
 
-                    <!-- Bottom Action Bar: Always fully visible in Row 1 with smooth horizontal scroll fallback -->
-                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                                  HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                        <StackPanel x:Name="HeroActionsPanel" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <!-- Primary actions remain visible without requiring horizontal scrolling. -->
+                    <Grid Grid.Row="1" x:Name="HeroActionsPanel" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                             <Button Click="StartReviewButton_Click"
                                     Style="{ThemeResource AccentButtonStyle}"
                                     FontWeight="Bold" Padding="20,12" CornerRadius="10">
@@ -118,7 +116,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <Button Click="StartPracticeButton_Click"
+                            <Button Grid.Column="1" Click="StartPracticeButton_Click"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
@@ -129,7 +127,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <Button Click="OpenStudyPlanner_Click"
+                            <Button Grid.Row="1" Click="OpenStudyPlanner_Click"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
@@ -141,7 +139,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <Button Click="OpenListeningLab_Click"
+                            <Button Grid.Row="1" Grid.Column="1" Click="OpenListeningLab_Click"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
@@ -152,15 +150,12 @@
                                     <TextBlock Text="{x:Bind Loc.GetString('Dashboard_ListeningLabAction')}" FontSize="14" />
                                 </StackPanel>
                             </Button>
-                        </StackPanel>
-                    </ScrollViewer>
+                    </Grid>
                 </Grid>
             </Border>
 
-            <!-- 4 HERO METRIC CARDS (Interactive, responsive with scroll fallback) -->
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                          HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="16" MinWidth="680">
+            <!-- Priority metrics adapt to narrow windows without horizontal scrolling. -->
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Total Vocabulary -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -202,7 +197,7 @@
                     </Border>
 
                     <!-- Mastered Words -->
-                    <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border Grid.Row="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="20,18"
                             Tapped="TotalWordsCard_Tapped"
@@ -222,7 +217,7 @@
                     </Border>
 
                     <!-- Day Streak -->
-                    <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border Grid.Row="1" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="20,18"
                             Tapped="StreakCard_Tapped"
@@ -243,8 +238,7 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Dashboard_Streak')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
                         </StackPanel>
                     </Border>
-                </Grid>
-            </ScrollViewer>
+            </Grid>
 
             <!-- SMART STUDY ADVISOR: Adaptive Recommendation Hero Card -->
             <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
@@ -333,7 +327,14 @@
                 </StackPanel>
             </Border>
 
-            <!-- LEARNING INTELLIGENCE & COGNITIVE ANALYTICS -->
+            <!-- Detailed analytics stay available without competing with today's work. -->
+            <Expander Header="{x:Bind Loc.GetString('LearningIntel_Title')}"
+                      IsExpanded="False"
+                      Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                      BorderThickness="1"
+                      CornerRadius="14"
+                      Padding="16">
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="14" Padding="22,18">
@@ -444,6 +445,7 @@
                     </Border>
                 </StackPanel>
             </Border>
+            </Expander>
 
             <!-- FORGETTING CURVE & RETENTION COMPARISON CARD -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
