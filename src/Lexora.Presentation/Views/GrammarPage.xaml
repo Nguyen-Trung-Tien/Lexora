@@ -140,7 +140,7 @@
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="10" Padding="12,6">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
-                    <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Disabled"
                                   HorizontalScrollMode="Enabled"
                                   VerticalScrollMode="Disabled">
