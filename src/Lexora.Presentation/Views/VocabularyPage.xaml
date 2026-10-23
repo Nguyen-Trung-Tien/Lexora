@@ -61,15 +61,9 @@
         </Grid.Resources>
 
         <!-- ========================================================= -->
-        <!-- TOP COMMAND BAR & NOTIFICATION: Segmented Mode, Search, Actions -->
+        <!-- TOP COMMAND BAR: Segmented Mode, Search, Actions           -->
         <!-- ========================================================= -->
-        <StackPanel Grid.Row="0" Spacing="8">
-            <InfoBar x:Name="PageNotificationInfoBar"
-                     IsOpen="False"
-                     IsClosable="True"
-                     CornerRadius="8" />
-
-            <Grid x:Name="TopCommandBarGrid" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+        <Grid Grid.Row="0" x:Name="TopCommandBarGrid" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
             <!-- Segmented View Mode Switcher -->
             <Border x:Name="ViewModeContainer" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
                 <StackPanel Orientation="Horizontal" Spacing="4">
@@ -220,11 +214,7 @@
                 </StackPanel>
             </TeachingTip.Content>
         </TeachingTip>
-        </StackPanel>
 
-        <!-- ========================================================= -->
-        <!-- FILTERS & SORTING BAR (Clean, non-overflowing Row 1)      -->
-        <!-- ========================================================= -->
         <!-- ========================================================= -->
         <!-- FILTERS & SORTING BAR (Clean, non-overflowing Row 1)      -->
         <!-- ========================================================= -->

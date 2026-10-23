@@ -51,9 +51,39 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
         };
     }
 
+    private void FocusModeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateResponsiveLayout(ActualWidth);
+        if (ViewModel.IsFocusMode)
+        {
+            if (App.Current?.Services?.GetService<IToastNotificationService>() is { } toastService)
+            {
+                toastService.ShowInfo(Loc.GetString("Review_FocusModeTooltip"), Loc.GetString("Review_FocusMode"));
+            }
+        }
+    }
+
     private void UpdateResponsiveLayout(double width)
     {
         if (FlashcardWorkspaceGrid == null || FlashcardSidebarPanel == null || FlashcardMainBorder == null) return;
+
+        if (ViewModel.IsFocusMode)
+        {
+            FlashcardSidebarPanel.Visibility = Visibility.Collapsed;
+            FlashcardMainBorder.MaxWidth = 820;
+            FlashcardMainBorder.HorizontalAlignment = HorizontalAlignment.Center;
+            FlashcardWorkspaceGrid.ColumnDefinitions.Clear();
+            FlashcardWorkspaceGrid.RowDefinitions.Clear();
+            FlashcardWorkspaceGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            Grid.SetColumn(FlashcardMainBorder, 0);
+            Grid.SetRow(FlashcardMainBorder, 0);
+            return;
+        }
+
+        FlashcardSidebarPanel.Visibility = Visibility.Visible;
+        FlashcardMainBorder.MaxWidth = double.PositiveInfinity;
+        FlashcardMainBorder.HorizontalAlignment = HorizontalAlignment.Stretch;
+
         if (width < 1080)
         {
             if (FlashcardWorkspaceGrid.ColumnDefinitions.Count > 1)

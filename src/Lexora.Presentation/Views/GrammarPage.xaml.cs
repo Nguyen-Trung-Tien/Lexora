@@ -207,11 +207,10 @@ public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareVie
         }
     }
 
-    private DispatcherTimer? _notificationTimer;
-
     private void ShowNotification(InfoBarSeverity severity, string title, string message, int autoCloseMs = 4500)
     {
-        if (App.Current?.Services?.GetService<IToastNotificationService>() is { } toastService)
+        var toastService = _toastService ?? App.Current?.Services?.GetService<IToastNotificationService>();
+        if (toastService != null)
         {
             var type = severity switch
             {
@@ -221,28 +220,7 @@ public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareVie
                 _ => ToastType.Information
             };
             toastService.Show(type, message, title, autoCloseMs);
-            return;
         }
-
-        DispatcherQueue.TryEnqueue(() =>
-        {
-            _notificationTimer?.Stop();
-            PageNotificationInfoBar.Severity = severity;
-            PageNotificationInfoBar.Title = title;
-            PageNotificationInfoBar.Message = message;
-            PageNotificationInfoBar.IsOpen = true;
-
-            if (autoCloseMs > 0)
-            {
-                _notificationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(autoCloseMs) };
-                _notificationTimer.Tick += (s, e) =>
-                {
-                    _notificationTimer.Stop();
-                    PageNotificationInfoBar.IsOpen = false;
-                };
-                _notificationTimer.Start();
-            }
-        });
     }
 
     private void UpdateDeleteSelectedButtonText()

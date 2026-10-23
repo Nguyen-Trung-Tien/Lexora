@@ -56,12 +56,6 @@
                                         <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DailyConsistency')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Border>
-                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="8,3">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <FontIcon Glyph="&#xE753;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_OfflineReady')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
-                                    </StackPanel>
-                                </Border>
                             </StackPanel>
 
                             <TextBlock Text="{x:Bind ViewModel.GreetingText, Mode=OneWay}" Style="{StaticResource LexoraHeroHeaderStyle}" />
@@ -155,9 +149,9 @@
             </Border>
 
             <!-- Priority metrics adapt to narrow windows without horizontal scrolling. -->
-            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
+            <Grid x:Name="MetricsGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Total Vocabulary -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border x:Name="CardTotalWords" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="20,18"
                             Tapped="TotalWordsCard_Tapped"
@@ -177,7 +171,7 @@
                     </Border>
 
                     <!-- Due Today -->
-                    <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border x:Name="CardDueToday" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="20,18"
                             Tapped="DueTodayCard_Tapped"
@@ -197,7 +191,7 @@
                     </Border>
 
                     <!-- Mastered Words -->
-                    <Border Grid.Row="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border x:Name="CardMastered" Grid.Row="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="20,18"
                             Tapped="TotalWordsCard_Tapped"
@@ -217,7 +211,7 @@
                     </Border>
 
                     <!-- Day Streak -->
-                    <Border Grid.Row="1" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border x:Name="CardStreak" Grid.Row="1" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="14" Padding="20,18"
                             Tapped="StreakCard_Tapped"

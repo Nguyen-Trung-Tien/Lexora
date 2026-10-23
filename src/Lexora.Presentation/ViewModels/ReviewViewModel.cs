@@ -68,6 +68,15 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     public partial bool CanUndo { get; set; } = false;
 
     [ObservableProperty]
+    public partial bool IsFocusMode { get; set; } = false;
+
+    [RelayCommand]
+    private void ToggleFocusMode()
+    {
+        IsFocusMode = !IsFocusMode;
+    }
+
+    [ObservableProperty]
     public partial string WordScaffold { get; set; } = string.Empty;
 
     [ObservableProperty]

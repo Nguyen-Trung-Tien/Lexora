@@ -138,6 +138,18 @@
                             </StackPanel>
                         </Button>
 
+                        <!-- Focus Mode Toggle (Zen / Distraction-free) -->
+                        <ToggleButton x:Name="FocusModeToggle"
+                                      IsChecked="{x:Bind ViewModel.IsFocusMode, Mode=TwoWay}"
+                                      Click="FocusModeToggle_Click"
+                                      CornerRadius="8" Padding="10,6"
+                                      ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_FocusModeTooltip')}">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE740;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_FocusMode')}" FontWeight="SemiBold" FontSize="12" />
+                            </StackPanel>
+                        </ToggleButton>
+
                         <!-- Typing Recall Mode Toggle -->
                         <ToggleButton x:Name="TypingModeToggle"
                                       IsChecked="{x:Bind ViewModel.IsTypingPracticeEnabled, Mode=OneWay}"

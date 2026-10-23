@@ -21,14 +21,9 @@
                       Grid.RowSpan="2" Canvas.ZIndex="10" />
 
         <!-- ======================================================== -->
-        <!-- TOP STREAMLINED TOOLBAR & NOTIFICATION                   -->
+        <!-- TOP STREAMLINED TOOLBAR                                  -->
         <!-- ======================================================== -->
         <StackPanel Grid.Row="0" Spacing="8">
-            <InfoBar x:Name="PageNotificationInfoBar"
-                     IsOpen="False"
-                     IsClosable="True"
-                     CornerRadius="8" />
-
             <!-- Row 1: Search & Primary Action Buttons (Responsive & Clean) -->
             <Grid Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                   ColumnDefinitions="*,Auto" ColumnSpacing="12">

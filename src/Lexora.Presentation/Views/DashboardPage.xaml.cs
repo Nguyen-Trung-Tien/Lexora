@@ -33,6 +33,59 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
     private void UpdateResponsiveLayout(double width)
     {
 
+        if (MetricsGrid != null && CardTotalWords != null && CardDueToday != null && CardMastered != null && CardStreak != null)
+        {
+            if (width >= 1050)
+            {
+                if (MetricsGrid.ColumnDefinitions.Count != 4)
+                {
+                    MetricsGrid.ColumnDefinitions.Clear();
+                    MetricsGrid.RowDefinitions.Clear();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        MetricsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    }
+                    MetricsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    Grid.SetRow(CardTotalWords, 0);
+                    Grid.SetColumn(CardTotalWords, 0);
+
+                    Grid.SetRow(CardDueToday, 0);
+                    Grid.SetColumn(CardDueToday, 1);
+
+                    Grid.SetRow(CardMastered, 0);
+                    Grid.SetColumn(CardMastered, 2);
+
+                    Grid.SetRow(CardStreak, 0);
+                    Grid.SetColumn(CardStreak, 3);
+                }
+            }
+            else
+            {
+                if (MetricsGrid.ColumnDefinitions.Count != 2)
+                {
+                    MetricsGrid.ColumnDefinitions.Clear();
+                    MetricsGrid.RowDefinitions.Clear();
+                    MetricsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    MetricsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    MetricsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    MetricsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    Grid.SetRow(CardTotalWords, 0);
+                    Grid.SetColumn(CardTotalWords, 0);
+
+                    Grid.SetRow(CardDueToday, 0);
+                    Grid.SetColumn(CardDueToday, 1);
+
+                    Grid.SetRow(CardMastered, 1);
+                    Grid.SetColumn(CardMastered, 0);
+
+                    Grid.SetRow(CardStreak, 1);
+                    Grid.SetColumn(CardStreak, 1);
+                }
+            }
+        }
+
         if (BreakdownGrid != null && CefrBreakdownBorder != null && PosBreakdownBorder != null)
         {
             if (width < 850)

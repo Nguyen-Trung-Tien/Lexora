@@ -8,7 +8,7 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!-- Fluid Entrance Storyboard (Slides up gently into view) -->
+        <!-- Fluid Entrance Storyboard (Slides down gently from top into view) -->
         <Storyboard x:Name="EntranceStoryboard">
             <DoubleAnimation
                 Storyboard.TargetName="ToastRoot"
@@ -22,7 +22,7 @@
             <DoubleAnimation
                 Storyboard.TargetName="ToastTranslate"
                 Storyboard.TargetProperty="Y"
-                From="20" To="0"
+                From="-24" To="0"
                 Duration="0:0:0.25">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
@@ -52,7 +52,7 @@
             </DoubleAnimation>
         </Storyboard>
 
-        <!-- Fluid Exit Storyboard (Slides down gently) -->
+        <!-- Fluid Exit Storyboard (Slides up gently back into top) -->
         <Storyboard x:Name="ExitStoryboard">
             <DoubleAnimation
                 Storyboard.TargetName="ToastRoot"
@@ -66,7 +66,7 @@
             <DoubleAnimation
                 Storyboard.TargetName="ToastTranslate"
                 Storyboard.TargetProperty="Y"
-                From="0" To="16"
+                From="0" To="-24"
                 Duration="0:0:0.2">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseIn" />
@@ -89,8 +89,8 @@
             BorderBrush="{ThemeResource LexoraToastBorderBrush}"
             BorderThickness="1"
             Padding="16,14"
-            MinWidth="320"
-            MaxWidth="440"
+            MinWidth="340"
+            MaxWidth="500"
             Opacity="0"
             Visibility="Collapsed"
             Translation="0,0,32"
