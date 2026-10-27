@@ -13,7 +13,7 @@
         <Grid Padding="28,20" HorizontalAlignment="Stretch">
             <StackPanel Spacing="22" MaxWidth="1100" HorizontalAlignment="Stretch">
                 <!-- Page Title -->
-                <TextBlock Text="{x:Bind Loc.GetString('Settings_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />
+                <TextBlock Text="{x:Bind Loc.GetString('Settings_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" TextTrimming="CharacterEllipsis" />
 
                 <!-- Top Profile & System Status Hero Card -->
                 <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
@@ -56,10 +56,10 @@
                             </Border>
 
                             <!-- Contextual Help Button -->
-                            <Button x:Name="SettingsHelpButton" Click="SettingsHelpButton_Click" CornerRadius="12" Padding="10,8"
+                            <Button x:Name="SettingsHelpButton" Click="SettingsHelpButton_Click" CornerRadius="8" Width="34" Height="34" Padding="0"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_Help_Title')}">
-                                <FontIcon Glyph="&#xE9CE;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <FontIcon Glyph="&#xE9CE;" FontSize="13.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </Button>
                         </StackPanel>
                     </Grid>
@@ -596,23 +596,23 @@
                     </Border>
 
                     <!-- Backup Actions -->
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Button Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" CornerRadius="8" Padding="18,8">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" CornerRadius="8" Padding="12,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xEA35;" FontSize="13" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Settings_CreateBackupBtn')}" FontWeight="SemiBold" />
+                                <FontIcon Glyph="&#xEA35;" FontSize="12.5" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_CreateBackupBtn')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </Button>
-                        <Button Click="RestoreButton_Click" CornerRadius="8" Padding="16,8">
+                        <Button Click="RestoreButton_Click" CornerRadius="8" Padding="12,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE777;" FontSize="13" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Settings_RestoreBackupBtn')}" />
+                                <FontIcon Glyph="&#xE777;" FontSize="12.5" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_RestoreBackupBtn')}" FontSize="12" />
                             </StackPanel>
                         </Button>
-                        <Button Click="OpenDataHealthCenter_Click" CornerRadius="8" Padding="16,8">
+                        <Button Click="OpenDataHealthCenter_Click" CornerRadius="8" Padding="12,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE958;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('DataHealth_Title')}" FontWeight="SemiBold" />
+                                <FontIcon Glyph="&#xE958;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('DataHealth_Title')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -635,17 +635,17 @@
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
-                        <TextBox PlaceholderText="{x:Bind Loc.GetString('Settings_TtsPlaceholder')}" Text="{x:Bind ViewModel.TestVoiceTerm, Mode=TwoWay}" VerticalAlignment="Center" CornerRadius="8" Padding="12,8" />
-                        <Button Grid.Column="1" Click="TestUkVoice_Click" CornerRadius="8" Padding="14,8">
+                        <TextBox PlaceholderText="{x:Bind Loc.GetString('Settings_TtsPlaceholder')}" Text="{x:Bind ViewModel.TestVoiceTerm, Mode=TwoWay}" VerticalAlignment="Center" CornerRadius="8" Padding="10,6" />
+                        <Button Grid.Column="1" Click="TestUkVoice_Click" CornerRadius="8" Padding="12,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Settings_TestUkVoice')}" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_TestUkVoice')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </Button>
-                        <Button Grid.Column="2" Click="TestUsVoice_Click" CornerRadius="8" Padding="14,8">
+                        <Button Grid.Column="2" Click="TestUsVoice_Click" CornerRadius="8" Padding="12,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Settings_TestUsVoice')}" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_TestUsVoice')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </Button>
                     </Grid>

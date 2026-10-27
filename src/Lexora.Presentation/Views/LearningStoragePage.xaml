@@ -29,43 +29,43 @@
 
                 <!-- 1. Top Header -->
                 <Grid x:Name="TopHeaderGrid" ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                    <StackPanel Spacing="4" VerticalAlignment="Center">
+                    <StackPanel Spacing="3" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind Loc.GetString('Storage_Title')}"
-                                   Style="{StaticResource LexoraHeroHeaderStyle}" />
+                                   Style="{StaticResource LexoraHeroHeaderStyle}" TextTrimming="CharacterEllipsis" />
                         <TextBlock Text="{x:Bind Loc.GetString('Storage_Subtitle')}"
-                                   Style="{StaticResource LexoraBodyStyle}"
-                                   MaxWidth="640" />
+                                   Style="{StaticResource LexoraBodyStyle}" TextTrimming="CharacterEllipsis"
+                                   MaxWidth="560" />
                     </StackPanel>
 
                     <!-- Top Action Buttons -->
-                    <StackPanel x:Name="TopActionsPanel" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <StackPanel x:Name="TopActionsPanel" Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <Button Style="{ThemeResource AccentButtonStyle}"
-                                CornerRadius="10" Padding="16,8"
+                                CornerRadius="8" Padding="12,6"
                                 Click="PracticeBtn_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE768;" FontSize="14" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnPractice')}" FontWeight="Bold" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE768;" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnPractice')}" FontWeight="Bold" FontSize="12.5" />
                             </StackPanel>
                         </Button>
 
-                        <Button CornerRadius="10" Padding="16,8"
+                        <Button CornerRadius="8" Padding="12,6"
                                 Click="TestBtn_Click"
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE765;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnTest')}" FontWeight="SemiBold" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE765;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnTest')}" FontWeight="SemiBold" FontSize="12.5" />
                             </StackPanel>
                         </Button>
 
-                        <Button CornerRadius="10" Padding="12,8"
+                        <Button CornerRadius="8" Width="34" Height="34" Padding="0"
                                 Click="RefreshBtn_Click"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Refresh')}">
                             <FontIcon Glyph="&#xE72C;" FontSize="13" />
                         </Button>
 
-                        <Button x:Name="StorageHelpButton" CornerRadius="10" Padding="12,8"
+                        <Button x:Name="StorageHelpButton" CornerRadius="8" Width="34" Height="34" Padding="0"
                                 Click="StorageHelpButton_Click"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_Help_Title')}">
                             <FontIcon Glyph="&#xE9CE;" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

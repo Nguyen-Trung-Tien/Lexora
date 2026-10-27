@@ -83,22 +83,22 @@
                         <Border Width="48" Height="48" CornerRadius="12" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Padding="8" VerticalAlignment="Center">
                             <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="32" Height="32" />
                         </Border>
-                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="24" />
+                        <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="22" TextTrimming="CharacterEllipsis" />
                             <TextBlock Text="{x:Bind Loc.GetString('Test_Subtitle')}"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12.5" TextTrimming="CharacterEllipsis" MaxWidth="520" />
                         </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Button CornerRadius="10" Padding="14,10"
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <Button CornerRadius="8" Padding="10,6"
                                     Click="OpenListeningLab_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Subtitle')}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Title')}" FontWeight="SemiBold" FontSize="13" />
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE767;" FontSize="13.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Title')}" FontWeight="SemiBold" FontSize="12.5" />
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="TestHelpButton" Click="TestHelpButton_Click" CornerRadius="10" Padding="10"
+                            <Button x:Name="TestHelpButton" Click="TestHelpButton_Click" CornerRadius="8" Width="34" Height="34" Padding="0"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_Help_Title')}">
-                                <FontIcon Glyph="&#xE9CE;" FontSize="16" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <FontIcon Glyph="&#xE9CE;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </Button>
                         </StackPanel>
                     </Grid>
@@ -452,10 +452,10 @@
                         </StackPanel>
                         <Button Grid.Column="2" Command="{x:Bind ViewModel.StartTestCommand}"
                                 Style="{ThemeResource AccentButtonStyle}"
-                                Padding="28,12" CornerRadius="10">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE768;" FontSize="15" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Test_StartTest')}" FontWeight="Bold" FontSize="14" />
+                                Padding="20,9" CornerRadius="8">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <FontIcon Glyph="&#xE768;" FontSize="14" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Test_StartTest')}" FontWeight="Bold" FontSize="13" />
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -536,18 +536,18 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TestOptionItem">
                                     <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                                            Margin="0,0,0,10" Padding="16,14" CornerRadius="10"
+                                            Margin="0,0,0,8" Padding="14,10" CornerRadius="8"
                                             BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
                                             BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"
                                             Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBackground}"
                                             Click="OptionButton_Click" Tag="{x:Bind Text}">
                                         <Grid ColumnDefinitions="Auto,*">
                                             <Border Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Background}"
-                                                    CornerRadius="6" Width="28" Height="28" Margin="0,0,14,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <FontIcon Glyph="{x:Bind Glyph, Mode=OneWay}" FontSize="12"
+                                                    CornerRadius="6" Width="26" Height="26" Margin="0,0,12,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <FontIcon Glyph="{x:Bind Glyph, Mode=OneWay}" FontSize="11.5"
                                                           Foreground="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Foreground}" />
                                             </Border>
-                                            <TextBlock Grid.Column="1" Text="{x:Bind Text}" FontSize="15" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind Text}" FontSize="14" VerticalAlignment="Center" TextWrapping="Wrap" />
                                         </Grid>
                                     </Button>
                                 </DataTemplate>

@@ -38,8 +38,8 @@
                                 </Border>
                             </StackPanel>
 
-                            <TextBlock Text="{x:Bind Loc.GetString('Help_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Help_Subtitle')}" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Help_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Help_Subtitle')}" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxWidth="680" />
                         </StackPanel>
 
                         <!-- Search Box for Help Center -->
@@ -52,11 +52,11 @@
                                     <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
                                 </TextBox.Resources>
                             </TextBox>
-                            <Button Grid.Column="1" Click="ResetFilterButton_Click" CornerRadius="8" Padding="14,8"
+                            <Button Grid.Column="1" Click="ResetFilterButton_Click" CornerRadius="8" Padding="10,5"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ResetFilterTooltip')}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE72C;" FontSize="12" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Help_ResetFilter')}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_ResetFilter')}" FontWeight="SemiBold" FontSize="12" />
                                 </StackPanel>
                             </Button>
                         </Grid>
