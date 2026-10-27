@@ -60,6 +60,22 @@
 
 ---
 
+## Milestone M2.6: Homophones Hub, Dedicated Knowledge Graph & Fluent 2 UI Streamlining (v1.4.0) — COMPLETED ✅
+- **Status**: Completed (Release 1.4.0)
+- **Primary Deliverables**:
+  - Interactive Homophones Hub with confusion pair detection and phoneme drills.
+  - Full-screen dedicated Knowledge Graph Page with semantic relationship browsing and CEFR tier filtering.
+  - Comprehensive Fluent 2 UI anti-horizontal scroll optimization across all primary pages on 1366x768 and compact viewports.
+  - Iconography streamlining: consistent Segoe Fluent Icons, badge sizing, and button padding.
+  - Active test session auto-recovery and evaluation resilience.
+  - Zero hardcoded colors across all 98 XAML & presentation files.
+- **Exit Criteria**:
+  - 427 / 427 automated unit & integration tests passing (376 Unit + 51 Integration, 0 failed, 0 skipped).
+  - Solution build verified with 0 warnings and 0 errors on .NET 10.
+  - 100% bilingual parity across `vi-VN` and `en-US` dictionaries.
+
+---
+
 ## Milestone M3: Offline AI Inference & Encrypted Mesh Sync (v2.0.0) — ACTIVE PLANNING 🔮
 - **Status**: Active Planning / Next Milestone
 - **Primary Deliverables**:

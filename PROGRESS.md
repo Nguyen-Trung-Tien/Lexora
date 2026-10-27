@@ -2,10 +2,10 @@
 
 ## 📊 Quality Gates Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
-- **Automated Tests**: **390 / 390 Tests Passing** (339 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+- **Automated Tests**: **427 / 427 Tests Passing** (376 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
-- **Fluent UI Audit**: `0 Violations` (`audit_fluent_ui.ps1` scanned 85 files).
-- **Localization (i18n)**: `100% Parity` across 1,223 keys (`sync_localization.ps1 -CheckXaml`).
+- **Fluent UI Audit**: `0 Violations` (`audit_fluent_ui.ps1` scanned 98 files).
+- **Localization (i18n)**: `100% Parity` across all keys (`sync_localization.ps1 -CheckXaml`).
 - **Clean Architecture**: `0 Violations` (`lint_architecture.ps1`).
 
 ---
@@ -111,8 +111,26 @@
   - Integrated local JSON persistence and recovery for active test sessions in `TestService`.
 - **Quality Gates Benchmark**:
   - Clean build: **0 Warnings, 0 Errors** (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`).
-  - Automated test suite: **390 / 390 Tests Passing** (339 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+  - Automated test suite: **427 / 427 Tests Passing** (376 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
   - Clean Architecture boundary: **0 Violations**.
   - WinUI 3 Fluent 2 audit: **0 Violations**.
+
+### 9. Lexora v1.4.0 — Semantic Graph, Homophones Hub & Fluent 2 UI Streamlining
+- **Anti-Horizontal Scroll & Responsive Viewport Optimizations**:
+  - Streamlined ComboBox filter controls and action button paddings across `VocabularyPage`, `GrammarPage`, `LearningStoragePage`, and `TestPage` to prevent unwanted horizontal scrolling on 1366x768 and compact viewports.
+  - Hardened Multi-Selection floating command bars with `HorizontalScrollBarVisibility="Disabled"` and responsive text wrapping.
+  - Compacted 7-Day Forecast pills and Memory Health segment cards on `DashboardPage`.
+  - Streamlined `ReviewPage` top controls to prevent header bar wrapping and clipping.
+- **Iconography & Visual Hierarchy Refinement**:
+  - Standardized Segoe Fluent Icons (`FontIcon`) with consistent glyph codepoints and unified 12-14px sizing.
+  - Eliminated bulky button borders and streamlined chip badges.
+- **Dedicated Knowledge Graph Experience**:
+  - Standalone `KnowledgeGraphPage` with full-screen dynamic node pivoting, CEFR tier filter pills, and audio pronunciation.
+- **Interactive Homophones Hub**:
+  - Confusion pair detection, phonetic comparison, and sound-alike discrimination training.
+- **Test Session Resilience & Recovery**:
+  - Local JSON auto-saving and recovery for active test sessions to prevent loss of progress.
+- **Synchronized Version Bump to 1.4.0**:
+  - `Directory.Build.props`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
 
 

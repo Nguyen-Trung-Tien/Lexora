@@ -99,26 +99,26 @@
                 <!-- 2. Overview Metrics Cards (Responsive with smooth fallback) -->
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                               HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                    <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="12" MinWidth="760">
+                    <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="10" MinWidth="580">
                         
                         <!-- Weak (Needs Focus) Card -->
                         <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="14" Padding="18,14">
-                            <StackPanel Spacing="8">
+                                CornerRadius="10" Padding="12,10">
+                            <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatWeak')}"
-                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               FontSize="11.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                TextTrimming="CharacterEllipsis" />
-                                    <Border Grid.Column="1" Width="30" Height="30" CornerRadius="15"
+                                    <Border Grid.Column="1" Width="26" Height="26" CornerRadius="13"
                                             Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                        <FontIcon Glyph="&#xE7BA;" FontSize="13"
+                                        <FontIcon Glyph="&#xE7BA;" FontSize="12"
                                                   Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                 </Grid>
                                 <TextBlock Text="{x:Bind ViewModel.WeakCount, Mode=OneWay}"
-                                           FontSize="26" FontWeight="Bold"
+                                           FontSize="22" FontWeight="Bold"
                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                             </StackPanel>
                         </Border>
@@ -126,21 +126,21 @@
                         <!-- In Progress (Learning) Card -->
                         <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="14" Padding="18,14">
-                            <StackPanel Spacing="8">
+                                CornerRadius="10" Padding="12,10">
+                            <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatLearning')}"
-                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               FontSize="11.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                TextTrimming="CharacterEllipsis" />
-                                    <Border Grid.Column="1" Width="30" Height="30" CornerRadius="15"
+                                    <Border Grid.Column="1" Width="26" Height="26" CornerRadius="13"
                                             Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                        <FontIcon Glyph="&#xE82D;" FontSize="13"
+                                        <FontIcon Glyph="&#xE82D;" FontSize="12"
                                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                 </Grid>
                                 <TextBlock Text="{x:Bind ViewModel.LearningCount, Mode=OneWay}"
-                                           FontSize="26" FontWeight="Bold"
+                                           FontSize="22" FontWeight="Bold"
                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                             </StackPanel>
                         </Border>
@@ -148,21 +148,21 @@
                         <!-- Mastered Card -->
                         <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="14" Padding="18,14">
-                            <StackPanel Spacing="8">
+                                CornerRadius="10" Padding="12,10">
+                            <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatMastered')}"
-                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               FontSize="11.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                TextTrimming="CharacterEllipsis" />
-                                    <Border Grid.Column="1" Width="30" Height="30" CornerRadius="15"
+                                    <Border Grid.Column="1" Width="26" Height="26" CornerRadius="13"
                                             Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                        <FontIcon Glyph="&#xE73E;" FontSize="13"
+                                        <FontIcon Glyph="&#xE73E;" FontSize="12"
                                                   Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                 </Grid>
                                 <TextBlock Text="{x:Bind ViewModel.MasteredCount, Mode=OneWay}"
-                                           FontSize="26" FontWeight="Bold"
+                                           FontSize="22" FontWeight="Bold"
                                            Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                             </StackPanel>
                         </Border>
@@ -170,21 +170,21 @@
                         <!-- Due for Review Card -->
                         <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="14" Padding="18,14">
-                            <StackPanel Spacing="8">
+                                CornerRadius="10" Padding="12,10">
+                            <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatDueToday')}"
-                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               FontSize="11.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                TextTrimming="CharacterEllipsis" />
-                                    <Border Grid.Column="1" Width="30" Height="30" CornerRadius="15"
+                                    <Border Grid.Column="1" Width="26" Height="26" CornerRadius="13"
                                             Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                        <FontIcon Glyph="&#xE823;" FontSize="13"
+                                        <FontIcon Glyph="&#xE823;" FontSize="12"
                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                 </Grid>
                                 <TextBlock Text="{x:Bind ViewModel.DueTodayCount, Mode=OneWay}"
-                                           FontSize="26" FontWeight="Bold"
+                                           FontSize="22" FontWeight="Bold"
                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                             </StackPanel>
                         </Border>
@@ -192,21 +192,21 @@
                         <!-- Average Retention Card -->
                         <Border Grid.Column="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="14" Padding="18,14">
-                            <StackPanel Spacing="8">
+                                CornerRadius="10" Padding="12,10">
+                            <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatAvgRetention')}"
-                                               FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               FontSize="11.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                TextTrimming="CharacterEllipsis" />
-                                    <Border Grid.Column="1" Width="30" Height="30" CornerRadius="15"
+                                    <Border Grid.Column="1" Width="26" Height="26" CornerRadius="13"
                                             Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                        <FontIcon Glyph="&#xEC08;" FontSize="13"
+                                        <FontIcon Glyph="&#xEC08;" FontSize="12"
                                                   Foreground="{x:Bind ViewModel.AvgRetention, Mode=OneWay, Converter={StaticResource RetentionToBrushConverter}}"
                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                 </Grid>
                                 <TextBlock Text="{x:Bind ViewModel.FormattedAvgRetention, Mode=OneWay}"
-                                           FontSize="26" FontWeight="Bold"
+                                           FontSize="22" FontWeight="Bold"
                                            Foreground="{x:Bind ViewModel.AvgRetention, Mode=OneWay, Converter={StaticResource RetentionToBrushConverter}}" />
                             </StackPanel>
                         </Border>
@@ -246,12 +246,12 @@
                              TextChanged="SearchBox_TextChanged"
                              CornerRadius="10" Padding="14,8" />
 
-                    <!-- Actions & Filters in ScrollViewer -->
+                    <!-- Actions & Filters (Streamlined) -->
                     <ScrollViewer x:Name="StorageActionsScrollViewer" Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
                             <!-- Status Filter Options -->
                             <ComboBox x:Name="StatusFilterComboBox"
-                                      SelectedIndex="0" CornerRadius="8" MinWidth="140"
+                                      SelectedIndex="0" CornerRadius="6" MinWidth="115" Height="32" FontSize="11"
                                       SelectionChanged="FilterComboBox_SelectionChanged">
                                 <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterAll')}" Tag="All" />
                                 <ComboBoxItem Content="{x:Bind Loc.GetString('Storage_FilterWeak')}" Tag="Weak" />
@@ -264,22 +264,22 @@
                             <!-- Multi-Select Toggle Button -->
                             <Button x:Name="BtnSelectMode"
                                     Click="BtnSelectMode_Click"
-                                    CornerRadius="10" Padding="14,8"
+                                    CornerRadius="8" Padding="10,6"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="14" />
-                                    <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" />
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="13" />
+                                    <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" FontSize="12" />
                                 </StackPanel>
                             </Button>
 
                             <!-- Add items primary button -->
                             <Button Click="OpenAddDialog_Click"
                                     Style="{ThemeResource AccentButtonStyle}"
-                                    CornerRadius="10" Padding="16,8"
+                                    CornerRadius="8" Padding="12,6"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_BtnAddToStorage')}">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE710;" FontSize="14" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnAddToStorage')}" FontWeight="Bold" />
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon Glyph="&#xE710;" FontSize="13" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnAddToStorage')}" FontWeight="Bold" FontSize="12" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>

@@ -36,17 +36,17 @@
                          CornerRadius="10" Padding="14,8"
                          VerticalAlignment="Center" />
 
-                <!-- Action Controls Group -->
+                <!-- Action Controls Group (Streamlined) -->
                 <ScrollViewer Grid.Column="1"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Disabled"
                               HorizontalScrollMode="Enabled"
                               VerticalScrollMode="Disabled">
-                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <!-- Add Rule Primary Button -->
                         <Button Click="AddRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipAdd')}"
-                                Style="{ThemeResource AccentButtonStyle}" Padding="14,8" CornerRadius="10">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                Style="{ThemeResource AccentButtonStyle}" Padding="12,6" CornerRadius="8">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
                                 <FontIcon Glyph="&#xE710;" FontSize="13" />
                                 <TextBlock Text="{x:Bind Loc.GetString('Grammar_AddRule')}" FontWeight="Bold" />
                             </StackPanel>
@@ -54,8 +54,8 @@
 
                         <!-- Practice Secondary Button -->
                         <Button Click="PracticeButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipPractice')}"
-                                Padding="14,8" CornerRadius="10">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                Padding="12,6" CornerRadius="8">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
                                 <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                 <TextBlock Text="{x:Bind Loc.GetString('Grammar_Practice')}" FontWeight="SemiBold" />
                             </StackPanel>
@@ -64,18 +64,18 @@
                         <!-- Multi-Select Toggle Button -->
                         <Button x:Name="BtnSelectMode"
                                 Click="BtnSelectMode_Click"
-                                CornerRadius="10" Padding="12,8"
+                                CornerRadius="8" Padding="10,6"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
                                 <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="13" />
                                 <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" />
                             </StackPanel>
                         </Button>
 
                         <!-- Import / Export Dropdown -->
-                        <DropDownButton Padding="12,8" CornerRadius="10"
+                        <DropDownButton Padding="10,6" CornerRadius="8"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_ImportExport')}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
                                 <FontIcon Glyph="&#xE8B5;" FontSize="13" />
                                 <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontWeight="SemiBold" />
                             </StackPanel>
@@ -138,17 +138,17 @@
             <Border Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                     Background="{ThemeResource LayerFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="10" Padding="12,6">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
+                    BorderThickness="1" CornerRadius="8" Padding="10,4">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Disabled"
                                   HorizontalScrollMode="Enabled"
                                   VerticalScrollMode="Disabled">
-                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                             <!-- Filter Icon & Label -->
-                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Margin="0,0,4,0">
-                                <FontIcon Glyph="&#xE71C;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Action_Filter')}" FontSize="12" FontWeight="SemiBold"
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center" Margin="0,0,2,0">
+                                <FontIcon Glyph="&#xE71C;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Action_Filter')}" FontSize="11" FontWeight="SemiBold"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </StackPanel>
 
@@ -158,10 +158,10 @@
                                       ItemsSource="{x:Bind ViewModel.CefrLevels}"
                                       SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}"
                                       SelectionChanged="FilterChanged"
-                                      MinWidth="140" Height="34" CornerRadius="8" FontSize="12">
+                                      MinWidth="110" MaxWidth="130" Height="32" CornerRadius="6" FontSize="11">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="12" />
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11" />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
@@ -172,10 +172,10 @@
                                       ItemsSource="{x:Bind ViewModel.ExamTypes}"
                                       SelectedItem="{x:Bind ViewModel.SelectedExamTarget, Mode=TwoWay}"
                                       SelectionChanged="FilterChanged"
-                                      MinWidth="140" Height="34" CornerRadius="8" FontSize="12">
+                                      MinWidth="115" MaxWidth="135" Height="32" CornerRadius="6" FontSize="11">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="12" />
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11" />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
@@ -186,13 +186,13 @@
                                       ItemsSource="{x:Bind ViewModel.Topics}"
                                       SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}"
                                       SelectionChanged="FilterChanged"
-                                      MinWidth="150" Height="34" CornerRadius="8" FontSize="12" />
+                                      MinWidth="120" MaxWidth="150" Height="32" CornerRadius="6" FontSize="11" />
 
                             <!-- Reset Filters Button -->
                             <Button Click="ResetFiltersButton_Click"
-                                    Padding="10,5" CornerRadius="8" Height="34"
+                                    Padding="8,4" CornerRadius="6" Height="32"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_ResetFilters')}">
-                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
                                     <FontIcon Glyph="&#xE894;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind Loc.GetString('Test_ResetFilters')}" FontSize="11" FontWeight="SemiBold" />
                                 </StackPanel>

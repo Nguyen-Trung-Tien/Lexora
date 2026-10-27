@@ -23,37 +23,37 @@
             <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                           HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled" Margin="0,0,0,16">
                 <Grid ColumnDefinitions="Auto,*,Auto">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <Button x:Name="ModeDueButton" Click="ModeDueButton_Click" CornerRadius="8" Padding="12,7">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE823;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_TodayDue')}" FontWeight="SemiBold" FontSize="13" />
-                                <Border Background="{ThemeResource SystemFillColorCriticalBrush}" CornerRadius="10" Padding="5,1" Margin="2,0,0,0"
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <Button x:Name="ModeDueButton" Click="ModeDueButton_Click" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE823;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_TodayDue')}" FontWeight="SemiBold" FontSize="12" />
+                                <Border Background="{ThemeResource SystemFillColorCriticalBrush}" CornerRadius="10" Padding="4,1" Margin="2,0,0,0"
                                         Visibility="{x:Bind ViewModel.DueCardsCount, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                                     <TextBlock Text="{x:Bind ViewModel.DueCardsCount, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
                                 </Border>
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="ModeNewButton" Click="ModeNewButton_Click" CornerRadius="8" Padding="12,7">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE710;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_LearnNew')}" FontWeight="SemiBold" FontSize="13" />
+                        <Button x:Name="ModeNewButton" Click="ModeNewButton_Click" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE710;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_LearnNew')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="ModeDifficultButton" Click="ModeDifficultButton_Click" CornerRadius="8" Padding="12,7">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE7BA;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_Difficult')}" FontWeight="SemiBold" FontSize="13" />
+                        <Button x:Name="ModeDifficultButton" Click="ModeDifficultButton_Click" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE7BA;" FontSize="12" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_Difficult')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </Button>
 
                         <!-- Smart Review Presets Dropdown -->
-                        <DropDownButton x:Name="SmartPresetsDropDown" CornerRadius="8" Padding="12,7">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE946;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock x:Name="SmartPresetsBtnText" Text="{x:Bind Loc.GetString('SmartReview_Presets')}" FontWeight="SemiBold" FontSize="13" />
+                        <DropDownButton x:Name="SmartPresetsDropDown" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE946;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Name="SmartPresetsBtnText" Text="{x:Bind Loc.GetString('SmartReview_Presets')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                             <DropDownButton.Flyout>
                                 <Flyout x:Name="SmartPresetsFlyout" Placement="Bottom">
@@ -111,30 +111,30 @@
                                   PlaceholderText="{x:Bind Loc.GetString('Vocab_TopicFilter')}"
                                   SelectionChanged="ReviewUnitCombo_SelectionChanged"
                                   ItemsSource="{x:Bind ViewModel.AvailableTopics, Mode=OneWay}"
-                                  MinWidth="130" MaxWidth="210" CornerRadius="8"
+                                  MinWidth="110" MaxWidth="170" Height="32" CornerRadius="6" FontSize="11"
                                   ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TopicFilter')}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="dto:TopicDto">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Glyph="&#xE8EC;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE8EC;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind Name}" FontSize="11" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                     </StackPanel>
 
-                    <!-- Top Right: Audio & Typing Controls -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <!-- Top Right: Audio & Typing Controls (Streamlined) -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                         <!-- Undo Last Review Button -->
                         <Button x:Name="UndoReviewButton"
                                 Command="{x:Bind ViewModel.UndoLastReviewCommand}"
                                 IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
-                                CornerRadius="8" Padding="10,6"
+                                CornerRadius="6" Padding="8,5"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_UndoTooltip')}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE7A7;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_Undo')}" FontWeight="SemiBold" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE7A7;" FontSize="11" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_Undo')}" FontWeight="SemiBold" FontSize="11" />
                             </StackPanel>
                         </Button>
 
@@ -142,11 +142,11 @@
                         <ToggleButton x:Name="FocusModeToggle"
                                       IsChecked="{x:Bind ViewModel.IsFocusMode, Mode=TwoWay}"
                                       Click="FocusModeToggle_Click"
-                                      CornerRadius="8" Padding="10,6"
+                                      CornerRadius="6" Padding="8,5"
                                       ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_FocusModeTooltip')}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE740;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_FocusMode')}" FontWeight="SemiBold" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE740;" FontSize="11" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_FocusMode')}" FontWeight="SemiBold" FontSize="11" />
                             </StackPanel>
                         </ToggleButton>
 
@@ -154,19 +154,19 @@
                         <ToggleButton x:Name="TypingModeToggle"
                                       IsChecked="{x:Bind ViewModel.IsTypingPracticeEnabled, Mode=OneWay}"
                                       Click="TypingModeToggle_Click"
-                                      CornerRadius="8" Padding="10,6"
+                                      CornerRadius="6" Padding="8,5"
                                       ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_SpellingDrill')}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE765;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Review_TypingDrill')}" FontWeight="SemiBold" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE765;" FontSize="11" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_TypingDrill')}" FontWeight="SemiBold" FontSize="11" />
                             </StackPanel>
                         </ToggleButton>
 
                         <!-- Speech Rate DropDown -->
-                        <DropDownButton ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_Speed')}" CornerRadius="8" Padding="10,6">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE767;" FontSize="12" />
-                                <TextBlock Text="{x:Bind ViewModel.SpeechRateLabel, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
+                        <DropDownButton ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_Speed')}" CornerRadius="6" Padding="8,5">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE767;" FontSize="11" />
+                                <TextBlock Text="{x:Bind ViewModel.SpeechRateLabel, Mode=OneWay}" FontWeight="SemiBold" FontSize="11" />
                             </StackPanel>
                             <DropDownButton.Flyout>
                                 <MenuFlyout>
@@ -179,9 +179,9 @@
                         </DropDownButton>
 
                         <!-- Contextual Help Button -->
-                        <Button x:Name="ReviewHelpButton" Click="ReviewHelpButton_Click" CornerRadius="8" Padding="8,6"
+                        <Button x:Name="ReviewHelpButton" Click="ReviewHelpButton_Click" CornerRadius="6" Padding="8,5"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_Help_Title')}">
-                            <FontIcon Glyph="&#xE9CE;" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <FontIcon Glyph="&#xE9CE;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </Button>
                     </StackPanel>
                 </Grid>

@@ -619,42 +619,42 @@
                     </Grid>
                 </Border>
 
-                <!-- Statistics Metrics Grid -->
+                <!-- Statistics Metrics Grid (Streamlined) -->
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                               HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="14" MinWidth="560">
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10" MinWidth="440">
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_Correct')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                            <TextBlock Text="{x:Bind ViewModel.CorrectCount, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_Correct')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                            <TextBlock Text="{x:Bind ViewModel.CorrectCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_Incorrect')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                            <TextBlock Text="{x:Bind ViewModel.IncorrectCount, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_Incorrect')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                            <TextBlock Text="{x:Bind ViewModel.IncorrectCount, Mode=OneWay}" FontSize="22" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_Accuracy')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_Accuracy')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
                             <StackPanel Orientation="Horizontal" Spacing="2">
-                                <TextBlock Text="{x:Bind ViewModel.ScorePercentage, Mode=OneWay}" FontSize="26" FontWeight="Bold" />
-                                <TextBlock Text="%" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="1,2,0,0" />
+                                <TextBlock Text="{x:Bind ViewModel.ScorePercentage, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
+                                <TextBlock Text="%" FontSize="14" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="1,2,0,0" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="18">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_TimeTaken')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                            <TextBlock Text="{x:Bind ViewModel.TimeTakenText, Mode=OneWay}" FontSize="26" FontWeight="Bold" />
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_TimeTaken')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                            <TextBlock Text="{x:Bind ViewModel.TimeTakenText, Mode=OneWay}" FontSize="22" FontWeight="Bold" />
                         </StackPanel>
                     </Border>
                 </Grid>

@@ -196,17 +196,17 @@
                         </TextBox>
                     </StackPanel>
 
-                    <!-- CEFR Level Filter Pills -->
+                    <!-- CEFR Level Filter Pills (Streamlined) -->
                     <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                        <StackPanel Orientation="Horizontal" Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
                             <Button Content="{x:Bind Loc.GetString('KnowledgeGraph_FilterAll')}" Click="LevelFilter_Click" Tag="All"
-                                    Style="{ThemeResource AccentButtonStyle}" x:Name="LevelFilterAllBtn" CornerRadius="6" Padding="10,4" FontSize="11" />
-                            <Button Content="A1" Click="LevelFilter_Click" Tag="A1" x:Name="LevelFilterA1Btn" CornerRadius="6" Padding="10,4" FontSize="11" />
-                            <Button Content="A2" Click="LevelFilter_Click" Tag="A2" x:Name="LevelFilterA2Btn" CornerRadius="6" Padding="10,4" FontSize="11" />
-                            <Button Content="B1" Click="LevelFilter_Click" Tag="B1" x:Name="LevelFilterB1Btn" CornerRadius="6" Padding="10,4" FontSize="11" />
-                            <Button Content="B2" Click="LevelFilter_Click" Tag="B2" x:Name="LevelFilterB2Btn" CornerRadius="6" Padding="10,4" FontSize="11" />
-                            <Button Content="C1" Click="LevelFilter_Click" Tag="C1" x:Name="LevelFilterC1Btn" CornerRadius="6" Padding="10,4" FontSize="11" />
-                            <Button Content="C2" Click="LevelFilter_Click" Tag="C2" x:Name="LevelFilterC2Btn" CornerRadius="6" Padding="10,4" FontSize="11" />
+                                    Style="{ThemeResource AccentButtonStyle}" x:Name="LevelFilterAllBtn" CornerRadius="6" Padding="6,3" FontSize="11" />
+                            <Button Content="A1" Click="LevelFilter_Click" Tag="A1" x:Name="LevelFilterA1Btn" CornerRadius="6" Padding="6,3" FontSize="11" />
+                            <Button Content="A2" Click="LevelFilter_Click" Tag="A2" x:Name="LevelFilterA2Btn" CornerRadius="6" Padding="6,3" FontSize="11" />
+                            <Button Content="B1" Click="LevelFilter_Click" Tag="B1" x:Name="LevelFilterB1Btn" CornerRadius="6" Padding="6,3" FontSize="11" />
+                            <Button Content="B2" Click="LevelFilter_Click" Tag="B2" x:Name="LevelFilterB2Btn" CornerRadius="6" Padding="6,3" FontSize="11" />
+                            <Button Content="C1" Click="LevelFilter_Click" Tag="C1" x:Name="LevelFilterC1Btn" CornerRadius="6" Padding="6,3" FontSize="11" />
+                            <Button Content="C2" Click="LevelFilter_Click" Tag="C2" x:Name="LevelFilterC2Btn" CornerRadius="6" Padding="6,3" FontSize="11" />
                         </StackPanel>
                     </ScrollViewer>
 

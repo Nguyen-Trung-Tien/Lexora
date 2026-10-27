@@ -1,4 +1,4 @@
-# ðŸ““ Changelog
+﻿# Ã°Å¸â€œâ€œ Changelog
 All notable changes to the Lexora desktop application will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [Unreleased]
+
+
+## [1.4.0] - 2026-10-27
+
+### Added
+- [Toast Feedback]: Added success and failure toast notifications across Homophones (group create, update, delete, smart import, export), Knowledge Graph export, Study Planner goal configuration, and Spaced Repetition review action undoing.
+- [Localization]: Added synchronized bilingual localization keys for new operation feedback in both Tiáº¿ng Viá»‡t (`vi-VN`) and English (`en-US`).
+- [Localization]: Added 30+ comprehensive bilingual localization keys in `LocalizationService` (`vi-VN` and `en-US`) covering `HomophoneEditorDialog` form controls, `HomophonesPage` export formats, dynamic badges (POS, CEFR, exam types), and empty state text.
+- [Listening Lab Quick Action]: Exposed direct hero launcher on Dashboard page for pronunciation and accent comparison laboratory (`ListeningLabDialog`).
+- [Test Session Persistence]: Added active test session auto-save and interrupted session recovery in `TestService` via local JSON persistence.
+- [Homophones Center]: New interactive Homophones & Sound-Alikes learning module with comparison cards, audio pronunciation, and responsive master-detail layout.
+- [Smart Import/Export for Homophones]: Added multi-format (JSON, CSV, TXT) import/export with intelligent parsing, sample template generation, and conflict resolution.
+- [Starter Pack Seeds]: Seeded standard homophone sets (bare/bear, knight/night, flour/flower, etc.) with automatic database migration.
+- [Review Focus Mode]: Implemented dedicated distraction-free Zen study mode toggle on ReviewPage (`IsFocusMode`) that hides sidebars and centers flashcard with optimal cognitive ergonomics.
+- [Bilingual Localization]: Added `Review_FocusMode` and `Review_FocusModeTooltip` keys across both `vi-VN` and `en-US` dictionaries in `LocalizationService`.
+- Standardized cross-page parameter navigation across VocabularyPage, TestPage, and ReviewPage supporting direct selection by Guid wordId, string searchTerm, and ool weakOnly.
+- Connected Test completion flow to Spaced Repetition Review (passing weak words) and 1-click batch save of weak words into Learning Storage.
+- Implemented bidirectional synchronization between Review service and Learning Storage: words reaching Mastered status automatically update storage records with real-time UI notifications.
+- Integrated quick Knowledge Graph dialog popup button and dynamic Homophones badge detection directly in VocabularyPage.
+- Added direct action buttons ("Xem trong Từ điển", "Lưu vào Kho lưu trữ") on Homophone cards with automatic term matching and creation.
+
+### Changed
+- Streamline UI layouts, eliminate horizontal scrolling, and optimize iconography across Vocabulary, Review, Dashboard, Storage, Grammar, and Test views
+- Comprehensive multilingual localization optimization: replaced hardcoded strings across `HelpPage`, `HomophonesPage`, `DashboardPage`, and `DataHealthCenterDialog` with dynamic bilingual dictionary keys (`vi-VN` and `en-US`).
+- Enhanced `HelpGuideDisplayItem` with localized headers (`FormulaHeader`, `KeyPointsHeader`, `ShortcutsHeader`) ensuring 100% compliance with WinUI 3 DataTemplate binding scoping rules.
+- Added comprehensive unit tests in `LocalizationServiceTests` validating key existence, translation accuracy, and token formatting parity.
+- [Popup Dialogs]: Synchronized layout across all dialog components (`SmartImportDialog`, `KnowledgeGraphImportDialog`, `KnowledgeGraphDialog`, `StudyPlannerDialog`, `TopicEditorDialog`, `AssignTopicDialog`, `DataHealthCenterDialog`) with unified `CornerRadius="16"`, standardized 32x32 rounded icon badge `TitleTemplate`, and responsive `ScrollViewer` constraint wrappers.
+- [Popup Dialogs]: Redesigned `HomophoneEditorDialog` to a responsive side-by-side card layout (`MaxWidth="820"`, `CornerRadius="16"`, `TitleTemplate` with brand icon) eliminating vertical scrolling and visually aligning with `HomophonesPage`.
+- [Dialog Surface Consistency]: Synchronized interior card surface brushes across `KnowledgeGraphDialog` and `KnowledgeGraphImportDialog` to `CardBackgroundFillColorDefaultBrush` and `SubtleFillColorSecondaryBrush`, preventing visual wash-out.
+- [Page Background Synchronization]: Removed opaque `LayerFillColorDefaultBrush` backgrounds from `<Page>` in `HomophonesPage.xaml` and `KnowledgeGraphPage.xaml`, restoring native Windows Mica backdrop transparency consistent with all other pages.
+- [Catalog Pane Harmonization]: Standardized left navigation panes across `HomophonesPage` and `KnowledgeGraphPage` to `SubtleFillColorSecondaryBrush` with nested cards using `CardBackgroundFillColorDefaultBrush`.
+- [Vocabulary Query Optimization]: Applied `.AsSplitQuery()` to `GetByTermAsync` in `VocabularyRepository` to eliminate Cartesian explosion across multiple related collections.
+- [EF Core Memory Management]: Added automatic ChangeTracker clearance on `UnitOfWork.SaveChangesAsync()` to prevent entity graph retention and memory accumulation during long desktop sessions.
+- [Navigation Menu]: Restructured ShellPage navigation into four logical groups (Overview, Learning & Vocabulary, Practice & Review, Storage & Archive) with WinUI 3 Fluent 2 section headers.
+- [Global Shortcuts]: Harmonized application-wide Ctrl+1 through Ctrl+7 shortcuts across ShellPage and ShortcutManager.
+- [Startup Progress Bar]: Implemented 60fps smooth easing interpolation and graceful stage pacing for the splash screen progress bar, eliminating instantaneous progress jumping.
+- [Homophones UI & Search]: Synchronized button styles with VocabularyPage, integrated full pagination, and added intelligent AutoSuggestBox search with IPA/term/fuzzy suggestions.
+- [Top-Center Floating Toast]: Repositioned `ToastOverlayControl` in `ShellPage.xaml` to the top-center of the screen (`HorizontalAlignment="Center"`, `VerticalAlignment="Top"`), enhanced with fluid slide-down entrance from top and slide-up exit animations.
+- [Vocabulary & Grammar Toolbars]: Streamlined command bar layouts in `VocabularyPage` and `GrammarPage`, eliminating layout-shifting inline InfoBars in favor of non-blocking `IToastNotificationService` toasts.
+- [Dashboard Layout]: Streamlined Hero Section badge hierarchy to reduce cognitive noise, and introduced responsive 4-column KPI metric card layout on desktop viewports with seamless 2x2 fallback for compact widths.
+- [Dialog Dimensions & Widths]: Expanded `ContentDialogMaxWidth` globally to `960px` in [App.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/App.xaml) and customized widths across [HomophoneEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophoneEditorDialog.xaml) (940px), [WordEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/WordEditorDialog.xaml) (960px), [GrammarEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/GrammarEditorDialog.xaml) (920px), [SmartImportDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/SmartImportDialog.xaml) (880px), [KnowledgeGraphImportDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/KnowledgeGraphImportDialog.xaml) (880px), and [TopicEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/TopicEditorDialog.xaml) (600px).
+- [Vocabulary & Grammar Input Optimization]:
+- Re-arranged [WordEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/WordEditorDialog.xaml): paired UK & US IPA inputs into a 2-column row, allocated full-width multi-line input for Additional Notes (`NotesTextBox`), and refactored example sentences into dedicated card containers with full-width English and Vietnamese inputs and explicit labels.
+- Re-arranged [GrammarEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/GrammarEditorDialog.xaml): gave Rule Title and Structure Formula dedicated full-width rows with generous height, preventing formula cramming and title wrapping truncation, and converted example items into clean full-width cards.
+- [Homophone Form Proportions]: Allocated a dedicated column width (135px) for `Word1PosBox` and `Word2PosBox` in [HomophoneEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophoneEditorDialog.xaml), avoiding item clipping on long localized part-of-speech labels.
+
+### Fixed
+- [Windows Audio COM Leak]: Properly tracking and releasing native COM `MediaSource` and IRandomAccessStream resources in `WindowsAudioPlayerService.StopInternal()`.
+- [Splash Screen Display Bug]: Enforced minimum display duration (850ms) regardless of OS animation settings and ensured opacity fallbacks for smooth startup transition.
+- [WinUI 3 Header Click Crash]: Added safe type checking in NavView_ItemInvoked to prevent crashes when clicking on NavigationViewItemHeader.
+- [Bilingual Parity]: Added full bilingual localization keys across vi-VN and en-US in LocalizationService.
+- [Layout Shift Elimination]: Resolved vertical jumping of list content when notifications are triggered on core study pages.
+- [ContentDialog Title Wrapping]: Fixed `TitleTemplate` across [WordEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/WordEditorDialog.xaml), [GrammarEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/GrammarEditorDialog.xaml), [TopicEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/TopicEditorDialog.xaml), [SmartImportDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/SmartImportDialog.xaml), [HomophoneEditorDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophoneEditorDialog.xaml), and [KnowledgeGraphImportDialog.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/KnowledgeGraphImportDialog.xaml) by replacing unbounded horizontal `StackPanel` with `Grid ColumnDefinitions="Auto,*"`, ensuring long titles wrap cleanly without clipping.
+- [Text & Title Overflow]: Resolved layout clipping, text overflow, and aligned phonetic IPA badges directly adjacent to group titles in [HomophonesPage.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophonesPage.xaml), [KnowledgeGraphPage.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/KnowledgeGraphPage.xaml), and [VocabularyPage.xaml](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/VocabularyPage.xaml).
+- Fix toolbar layout clipping in Knowledge Graph and resolve tag parsing bugs in Smart Import
+- Standardize high-contrast visual canvas and card borders in Light Mode for Semantic Knowledge Graph
+- Support tapping/selecting Core Concept center node and inspecting its complete semantic details
+- Fix selection and tap interactions on linked nodes in both radial canvas and cards list mode
+- Fix audio pronunciation playback to accurately play selected linked words vs core concept without crosstalk
 
 ## [1.3.0] - 2026-10-21
 
@@ -56,7 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cinematic Startup Experience**: Upgraded `SplashScreenOverlay` into a premium cinematic Fluent 2 opening experience featuring dual-tier atmospheric aurora radial glow, specular light sheen sweep over the squircle brand emblem, energy shockwave ring pulse, and coordinated typography entrance.
 - **Deterministic Milestone Progress Feedback**: Introduced truthful, multi-stage progress tracking (`0.12 -> 0.35 -> 0.70 -> 1.00`) in `IStartupOrchestrator` and `SplashScreenOverlay`, accompanied by real-time percentage readout and 4 responsive milestone status pills (`Core`, `Database`, `Data`, `Ready`).
 - **Comprehensive Unit Test Suite**: Added `StartupOrchestratorTests.cs` verifying initial state, monotonic progress reporting, error handling, cancellation, and milestone event emission.
-- [Pronunciation & Listening Lab]: Implemented end-to-end `IPronunciationListeningLabService`, `PronunciationListeningLabService`, and `ListeningLabDialog` featuring Audio Dictation with Levenshtein grading, Minimal Pairs phoneme discrimination (/iË/ vs /Éª/, /Ã¦/ vs /e/, /Î¸/ vs /s/, etc.) with articulatory guides, and UK vs US side-by-side accent comparison.
+- [Pronunciation & Listening Lab]: Implemented end-to-end `IPronunciationListeningLabService`, `PronunciationListeningLabService`, and `ListeningLabDialog` featuring Audio Dictation with Levenshtein grading, Minimal Pairs phoneme discrimination (/iÃ‹Â/ vs /Ã‰Âª/, /ÃƒÂ¦/ vs /e/, /ÃŽÂ¸/ vs /s/, etc.) with articulatory guides, and UK vs US side-by-side accent comparison.
 - [Automated Tests]: Added 13 new unit tests in `PronunciationListeningLabServiceTests.cs`, raising total passing test suite to 378/378 tests.
 - [Learning Intelligence Dashboard]: Cognitive memory half-life calculations, peak circadian performance time slots, weekly mastery velocity tracking, and real-time exam readiness assessment indexes for TOEIC, IELTS, and VSTEP.
 - [Smart Review & Memory Dynamics]: Real-time stability ($S$ days) and retrievability ($R\%$) badges on active flashcards; 5 high-yield study preset queues (Urgent Overdue, High Forgetting Risk, Exam High-Yield, Fresh Learned, Long-Term Consolidation).
@@ -136,7 +195,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2026-10-16
 ### Added
 - **FSRS v5 Spaced Repetition Engine**: Introduced `IFsrsSpacedRepetitionEngine` implementing the Free Spaced Repetition Scheduler v5 algorithm with Stability ($S$), Difficulty ($D$), and Retrievability ($R$) metrics.
-- **Flashcard 3D Spatial Physics**: Implemented two-stage 300ms 3D flip animation using WinUI 3 `PlaneProjection` with smooth 90Â° content transition.
+- **Flashcard 3D Spatial Physics**: Implemented two-stage 300ms 3D flip animation using WinUI 3 `PlaneProjection` with smooth 90Ã‚Â° content transition.
 - **Adaptive Review Viewport**: Implemented dynamic single/dual-column layout switching in `ReviewPage` to prevent layout clipping on non-maximized viewports (< 880px).
 - **Test Session Cache Fallback**: Hardened `TestService.SubmitTestAsync` to dynamically reconstruct evaluation questions from the database if memory cache expires.
 
