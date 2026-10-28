@@ -12,7 +12,8 @@ public record UpdateInfo(
     long FileSizeBytes,
     string? Sha256Checksum,
     DateTimeOffset PublishedAt,
-    bool IsMandatory = false)
+    bool IsMandatory = false,
+    string? AssetApiUrl = null)
 {
     /// <summary>
     /// Checks whether the newly discovered version is strictly greater than the current version.

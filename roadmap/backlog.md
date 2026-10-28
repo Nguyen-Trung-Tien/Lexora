@@ -4,7 +4,7 @@
 
 ---
 
-## ⚡ Active Sprint: v1.3.0 / v2.0.0 Architecture & Resilience
+## ⚡ Active Sprint: v1.4.0 / v2.0.0 Architecture & Resilience
 
 ### Feature: SQLCipher Database Encryption at Rest
 - **Layer**: `Lexora.Infrastructure`, `Lexora.Domain`
@@ -33,7 +33,12 @@
 
 ---
 
-## 🏆 Completed Milestones & Sprints (v1.0.0 - v1.3.0)
+## 🏆 Completed Milestones & Sprints (v1.0.0 - v1.4.0)
+
+### Feature: Homophones Hub, Knowledge Graph & Fluent 2 UI Streamlining
+- **Layer**: `Lexora.Presentation`, `Lexora.Infrastructure`
+- **Delivered**: v1.4.0
+- **Results**: Interactive Homophones Hub, dedicated Semantic Knowledge Graph, auto-update with SHA-256 digest validation and fallback detection, zero hardcoded colors, 100% bilingual parity.
 
 ### Feature: Comprehensive User Guide & Onboarding Hub (`HelpPage`, `HelpViewModel`)
 - **Layer**: `Lexora.Presentation`, `Lexora.Application`

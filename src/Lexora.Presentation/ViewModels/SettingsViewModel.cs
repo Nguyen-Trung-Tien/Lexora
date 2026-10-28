@@ -574,10 +574,15 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                     var msg = string.Format(template, updateInfo.NewVersion);
                     _toastService.ShowInfo(msg, _locService.GetString("Settings_UpdateAvailable"), durationMs: 6000);
                 }
-                else
+                else if (updateInfo != null)
                 {
                     UpdateStatusMessage = _locService.GetString("Settings_UpdateUpToDate");
                     _toastService.ShowSuccess(_locService.GetString("Settings_UpdateUpToDate"), _locService.GetString("Settings_UpdateTitle"));
+                }
+                else
+                {
+                    UpdateStatusMessage = _locService.GetString("Settings_UpdateFailed");
+                    _toastService.ShowError(_locService.GetString("Settings_UpdateFailed"), _locService.GetString("Settings_UpdateTitle"));
                 }
             });
         }

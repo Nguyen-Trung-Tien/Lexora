@@ -35,9 +35,25 @@ public class UpdateService : IUpdateService
     {
         _backupService = backupService ?? throw new ArgumentNullException(nameof(backupService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _httpClient = httpClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        _httpClient = httpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(15) };
+        if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
+        {
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Lexora-Desktop-Client");
+        }
         _repoOwner = string.IsNullOrWhiteSpace(repoOwner) ? DefaultRepoOwner : repoOwner.Trim();
         _repoName = string.IsNullOrWhiteSpace(repoName) ? DefaultRepoName : repoName.Trim();
+    }
+
+    private static void AttachAuthHeader(HttpRequestMessage request)
+    {
+        var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+            ?? Environment.GetEnvironmentVariable("GH_TOKEN")
+            ?? Environment.GetEnvironmentVariable("LEXORA_GITHUB_TOKEN");
+
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Trim());
+        }
     }
 
     /// <inheritdoc/>
@@ -58,89 +74,160 @@ public class UpdateService : IUpdateService
             var curVersion = GetCurrentVersion();
             var curVerStr = $"{curVersion.Major}.{curVersion.Minor}.{curVersion.Build}";
 
+            // 1. Query /releases/latest
             var requestUri = $"https://api.github.com/repos/{_repoOwner}/{_repoName}/releases/latest";
             using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.UserAgent.ParseAdd("Lexora-Desktop-Client");
             request.Headers.Accept.ParseAdd("application/vnd.github.v3+json");
+            AttachAuthHeader(request);
 
             using var response = await _httpClient.SendAsync(request, cancellationToken);
-            if (!response.IsSuccessStatusCode)
+            JsonDocument? doc = null;
+
+            if (response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("GitHub Releases check returned status code {StatusCode}", response.StatusCode);
-                return null;
+                var jsonContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                doc = JsonDocument.Parse(jsonContent);
             }
-
-            var jsonContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            using var doc = JsonDocument.Parse(jsonContent);
-            var root = doc.RootElement;
-
-            var tagName = root.TryGetProperty("tag_name", out var tagProp) ? tagProp.GetString() ?? "" : "";
-            var releaseTitle = root.TryGetProperty("name", out var nameProp) ? nameProp.GetString() ?? tagName : tagName;
-            var releaseNotes = root.TryGetProperty("body", out var bodyProp) ? bodyProp.GetString() ?? "" : "";
-            var publishedAt = root.TryGetProperty("published_at", out var pubProp) && pubProp.TryGetDateTimeOffset(out var dt)
-                ? dt
-                : DateTimeOffset.UtcNow;
-
-            string downloadUrl = string.Empty;
-            long fileSize = 0;
-            string? sha256Checksum = null;
-
-            if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == JsonValueKind.Array)
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                foreach (var asset in assetsProp.EnumerateArray())
+                // Fallback: If /releases/latest returns 404 (e.g. only pre-releases exist or GitHub indexing delay),
+                // query /releases list and inspect the first non-draft release.
+                _logger.LogInformation("'/releases/latest' returned 404, falling back to '/releases' list");
+                var listUri = $"https://api.github.com/repos/{_repoOwner}/{_repoName}/releases";
+                using var listRequest = new HttpRequestMessage(HttpMethod.Get, listUri);
+                listRequest.Headers.UserAgent.ParseAdd("Lexora-Desktop-Client");
+                listRequest.Headers.Accept.ParseAdd("application/vnd.github.v3+json");
+                AttachAuthHeader(listRequest);
+
+                using var listResponse = await _httpClient.SendAsync(listRequest, cancellationToken);
+                if (listResponse.IsSuccessStatusCode)
                 {
-                    var assetName = asset.TryGetProperty("name", out var anProp) ? anProp.GetString() ?? "" : "";
-                    if (assetName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                    var listJson = await listResponse.Content.ReadAsStringAsync(cancellationToken);
+                    using var listDoc = JsonDocument.Parse(listJson);
+                    if (listDoc.RootElement.ValueKind == JsonValueKind.Array)
                     {
-                        downloadUrl = asset.TryGetProperty("browser_download_url", out var bdlProp) ? bdlProp.GetString() ?? "" : "";
-                        fileSize = asset.TryGetProperty("size", out var sProp) ? sProp.GetInt64() : 0;
-                    }
-                    else if (assetName.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase))
-                    {
-                        // In case a sha256 companion file is attached
-                        var shaUrl = asset.TryGetProperty("browser_download_url", out var bdlProp) ? bdlProp.GetString() ?? "" : "";
-                        if (!string.IsNullOrEmpty(shaUrl))
+                        foreach (var rel in listDoc.RootElement.EnumerateArray())
                         {
-                            try
+                            var isDraft = rel.TryGetProperty("draft", out var dProp) && dProp.GetBoolean();
+                            if (!isDraft)
                             {
-                                var shaText = await _httpClient.GetStringAsync(shaUrl, cancellationToken);
-                                var match = Regex.Match(shaText, @"[a-fA-F0-9]{64}");
-                                if (match.Success)
-                                {
-                                    sha256Checksum = match.Value;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogDebug(ex, "Failed to fetch companion .sha256 file from {Url}", shaUrl);
+                                doc = JsonDocument.Parse(rel.GetRawText());
+                                break;
                             }
                         }
                     }
                 }
             }
 
-            // If sha256 was not found in assets, check if it was specified in the release body
-            if (string.IsNullOrEmpty(sha256Checksum))
+            if (doc == null)
             {
-                var bodyShaMatch = Regex.Match(releaseNotes, @"(?:SHA256|sha256)[\s:]+([a-fA-F0-9]{64})");
-                if (bodyShaMatch.Success)
-                {
-                    sha256Checksum = bodyShaMatch.Groups[1].Value;
-                }
+                _logger.LogWarning("GitHub Releases check returned status code {StatusCode}", response.StatusCode);
+                return null;
             }
 
-            var info = new UpdateInfo(
-                CurrentVersion: curVerStr,
-                NewVersion: tagName,
-                ReleaseTitle: string.IsNullOrWhiteSpace(releaseTitle) ? tagName : releaseTitle,
-                ReleaseNotes: releaseNotes,
-                DownloadUrl: downloadUrl,
-                FileSizeBytes: fileSize,
-                Sha256Checksum: sha256Checksum,
-                PublishedAt: publishedAt);
+            using (doc)
+            {
+                var root = doc.RootElement;
+                var tagName = root.TryGetProperty("tag_name", out var tagProp) ? tagProp.GetString() ?? "" : "";
+                var releaseTitle = root.TryGetProperty("name", out var nameProp) ? nameProp.GetString() ?? tagName : tagName;
+                if (string.IsNullOrWhiteSpace(releaseTitle))
+                {
+                    releaseTitle = tagName;
+                }
+                var releaseNotes = root.TryGetProperty("body", out var bodyProp) ? bodyProp.GetString() ?? "" : "";
+                var publishedAt = root.TryGetProperty("published_at", out var pubProp) && pubProp.TryGetDateTimeOffset(out var dt)
+                    ? dt
+                    : DateTimeOffset.UtcNow;
 
-            LatestDiscoveredUpdate = info;
-            return info;
+                string downloadUrl = string.Empty;
+                string? assetApiUrl = null;
+                long fileSize = 0;
+                string? sha256Checksum = null;
+
+                if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var asset in assetsProp.EnumerateArray())
+                    {
+                        var assetName = asset.TryGetProperty("name", out var anProp) ? anProp.GetString() ?? "" : "";
+                        if (assetName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var isSetup = assetName.Contains("Lexora-Setup", StringComparison.OrdinalIgnoreCase)
+                                          || assetName.Contains("Setup", StringComparison.OrdinalIgnoreCase);
+
+                            if (string.IsNullOrEmpty(downloadUrl) || isSetup)
+                            {
+                                downloadUrl = asset.TryGetProperty("browser_download_url", out var bdlProp) ? bdlProp.GetString() ?? "" : "";
+                                assetApiUrl = asset.TryGetProperty("url", out var urlProp) ? urlProp.GetString() ?? null : null;
+                                fileSize = asset.TryGetProperty("size", out var sProp) ? sProp.GetInt64() : 0;
+
+                                // Parse native GitHub asset digest (e.g. "sha256:b794c417...")
+                                if (string.IsNullOrEmpty(sha256Checksum) && asset.TryGetProperty("digest", out var digProp))
+                                {
+                                    var digStr = digProp.GetString() ?? "";
+                                    var match = Regex.Match(digStr, @"[a-fA-F0-9]{64}");
+                                    if (match.Success)
+                                    {
+                                        sha256Checksum = match.Value;
+                                    }
+                                }
+                            }
+                        }
+                        else if (assetName.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // In case a sha256 companion file is attached
+                            var shaUrl = asset.TryGetProperty("browser_download_url", out var bdlProp) ? bdlProp.GetString() ?? "" : "";
+                            if (!string.IsNullOrEmpty(shaUrl))
+                            {
+                                try
+                                {
+                                    using var shaReq = new HttpRequestMessage(HttpMethod.Get, shaUrl);
+                                    shaReq.Headers.UserAgent.ParseAdd("Lexora-Desktop-Client");
+                                    AttachAuthHeader(shaReq);
+                                    using var shaResp = await _httpClient.SendAsync(shaReq, cancellationToken);
+                                    if (shaResp.IsSuccessStatusCode)
+                                    {
+                                        var shaText = await shaResp.Content.ReadAsStringAsync(cancellationToken);
+                                        var match = Regex.Match(shaText, @"[a-fA-F0-9]{64}");
+                                        if (match.Success)
+                                        {
+                                            sha256Checksum = match.Value;
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogDebug(ex, "Failed to fetch companion .sha256 file from {Url}", shaUrl);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // If sha256 was not found in assets, check if it was specified in the release body
+                if (string.IsNullOrEmpty(sha256Checksum))
+                {
+                    var bodyShaMatch = Regex.Match(releaseNotes, @"(?:SHA256|sha256)[\s:]+([a-fA-F0-9]{64})");
+                    if (bodyShaMatch.Success)
+                    {
+                        sha256Checksum = bodyShaMatch.Groups[1].Value;
+                    }
+                }
+
+                var info = new UpdateInfo(
+                    CurrentVersion: curVerStr,
+                    NewVersion: tagName,
+                    ReleaseTitle: releaseTitle,
+                    ReleaseNotes: releaseNotes,
+                    DownloadUrl: downloadUrl,
+                    FileSizeBytes: fileSize,
+                    Sha256Checksum: sha256Checksum,
+                    PublishedAt: publishedAt,
+                    AssetApiUrl: assetApiUrl);
+
+                LatestDiscoveredUpdate = info;
+                return info;
+            }
         }
         catch (OperationCanceledException)
         {
@@ -180,24 +267,50 @@ public class UpdateService : IUpdateService
 
         _logger.LogInformation("Downloading software update {Version} to {Path} from {Url}", update.NewVersion, fullPath, update.DownloadUrl);
 
-        using var response = await _httpClient.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        HttpResponseMessage response;
+        var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+            ?? Environment.GetEnvironmentVariable("GH_TOKEN")
+            ?? Environment.GetEnvironmentVariable("LEXORA_GITHUB_TOKEN");
 
-        var totalBytes = response.Content.Headers.ContentLength ?? update.FileSizeBytes;
-        await using (var remoteStream = await response.Content.ReadAsStreamAsync(cancellationToken))
-        await using (var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+        // Primary download attempt
+        var primaryReq = new HttpRequestMessage(HttpMethod.Get, update.DownloadUrl);
+        primaryReq.Headers.UserAgent.ParseAdd("Lexora-Desktop-Client");
+
+        response = await _httpClient.SendAsync(primaryReq, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+        // If primary download failed with 404 (e.g. private repo) and AssetApiUrl + token are available, fallback to GitHub API asset download
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound && !string.IsNullOrWhiteSpace(update.AssetApiUrl) && !string.IsNullOrWhiteSpace(token))
         {
-            var buffer = new byte[81920];
-            long totalRead = 0;
-            int bytesRead;
+            response.Dispose();
+            _logger.LogInformation("Primary download returned 404, attempting authenticated GitHub API asset download from {ApiUrl}", update.AssetApiUrl);
+            var apiReq = new HttpRequestMessage(HttpMethod.Get, update.AssetApiUrl);
+            apiReq.Headers.UserAgent.ParseAdd("Lexora-Desktop-Client");
+            apiReq.Headers.Accept.ParseAdd("application/octet-stream");
+            apiReq.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Trim());
 
-            while ((bytesRead = await remoteStream.ReadAsync(buffer, cancellationToken)) > 0)
+            response = await _httpClient.SendAsync(apiReq, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        }
+
+        using (response)
+        {
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength ?? update.FileSizeBytes;
+            await using (var remoteStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+            await using (var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
             {
-                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
-                totalRead += bytesRead;
+                var buffer = new byte[81920];
+                long totalRead = 0;
+                int bytesRead;
 
-                var percent = totalBytes > 0 ? (double)totalRead / totalBytes * 100 : 0;
-                progress?.Report(new UpdateDownloadProgress(totalRead, totalBytes, percent));
+                while ((bytesRead = await remoteStream.ReadAsync(buffer, cancellationToken)) > 0)
+                {
+                    await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                    totalRead += bytesRead;
+
+                    var percent = totalBytes > 0 ? (double)totalRead / totalBytes * 100 : 0;
+                    progress?.Report(new UpdateDownloadProgress(totalRead, totalBytes, percent));
+                }
             }
         }
 

@@ -22,6 +22,8 @@ public class UpdateServiceTests
     [InlineData("2.0.0", "1.9.9", false)]
     [InlineData("1.0.0", "1.0.1-beta", true)]
     [InlineData("1.0.0", "1.0.0+build123", false)]
+    [InlineData("1.3.0", "1.4.0", true)]
+    [InlineData("1.3.0", "v1.4.0", true)]
     public void UpdateInfo_HasUpdate_ComparesVersionsCorrectly(string current, string next, bool expected)
     {
         var info = new UpdateInfo(
@@ -228,6 +230,115 @@ public class UpdateServiceTests
         service.LatestDiscoveredUpdate.Should().NotBeNull();
         service.LatestDiscoveredUpdate.Should().BeSameAs(result);
         service.LatestDiscoveredUpdate!.NewVersion.Should().Be("v1.3.0");
+    }
+
+    [Fact]
+    public async Task CheckForUpdatesAsync_WhenDigestPresentInAsset_ParsesSha256Successfully()
+    {
+        // Arrange
+        var fakeJson = """
+        {
+          "tag_name": "v1.4.0",
+          "name": "Lexora v1.4.0 Final",
+          "body": "Major UI streamlining and performance improvements",
+          "published_at": "2026-10-28T00:00:00Z",
+          "assets": [
+            {
+              "name": "Lexora-Setup-v1.4.0.exe",
+              "browser_download_url": "https://github.com/Nguyen-Trung-Tien/Lexora/releases/download/v1.4.0/Lexora-Setup-v1.4.0.exe",
+              "size": 67212867,
+              "digest": "sha256:b794c417745828338f68f51d9e0b20f0931e3ee34d8456694823784d448c614d"
+            }
+          ]
+        }
+        """;
+
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(fakeJson, Encoding.UTF8, "application/json")
+            });
+
+        var httpClient = new HttpClient(mockHandler.Object);
+        var mockBackup = new Mock<IDatabaseBackupService>();
+        var mockLogger = new Mock<ILogger<UpdateService>>();
+
+        var service = new UpdateService(mockBackup.Object, mockLogger.Object, httpClient);
+
+        // Act
+        var result = await service.CheckForUpdatesAsync();
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.NewVersion.Should().Be("v1.4.0");
+        result.Sha256Checksum.Should().Be("b794c417745828338f68f51d9e0b20f0931e3ee34d8456694823784d448c614d");
+        result.DownloadUrl.Should().Be("https://github.com/Nguyen-Trung-Tien/Lexora/releases/download/v1.4.0/Lexora-Setup-v1.4.0.exe");
+    }
+
+    [Fact]
+    public async Task CheckForUpdatesAsync_WhenLatestReturns404_FallsBackToReleasesList()
+    {
+        // Arrange
+        var fakeListJson = """
+        [
+          {
+            "tag_name": "v1.4.0",
+            "name": "Lexora v1.4.0",
+            "body": "Fallback release notes",
+            "draft": false,
+            "published_at": "2026-10-28T00:00:00Z",
+            "assets": [
+              {
+                "name": "Lexora-Setup-v1.4.0.exe",
+                "browser_download_url": "https://github.com/Nguyen-Trung-Tien/Lexora/releases/download/v1.4.0/Lexora-Setup-v1.4.0.exe",
+                "size": 67212867
+              }
+            ]
+          }
+        ]
+        """;
+
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/releases/latest")),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.NotFound
+            });
+
+        mockHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().EndsWith("/releases")),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(fakeListJson, Encoding.UTF8, "application/json")
+            });
+
+        var httpClient = new HttpClient(mockHandler.Object);
+        var mockBackup = new Mock<IDatabaseBackupService>();
+        var mockLogger = new Mock<ILogger<UpdateService>>();
+
+        var service = new UpdateService(mockBackup.Object, mockLogger.Object, httpClient);
+
+        // Act
+        var result = await service.CheckForUpdatesAsync();
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.NewVersion.Should().Be("v1.4.0");
+        result.DownloadUrl.Should().Be("https://github.com/Nguyen-Trung-Tien/Lexora/releases/download/v1.4.0/Lexora-Setup-v1.4.0.exe");
     }
 
     [Fact]
