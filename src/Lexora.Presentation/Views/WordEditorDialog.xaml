@@ -24,7 +24,7 @@
     </ContentDialog.TitleTemplate>
 
     <Grid x:Name="DialogContentRoot">
-        <ScrollViewer MaxHeight="580"
+        <ScrollViewer MaxHeight="500"
                       HorizontalAlignment="Stretch"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"

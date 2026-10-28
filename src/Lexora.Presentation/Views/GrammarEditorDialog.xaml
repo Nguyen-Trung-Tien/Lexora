@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
-        <x:Double x:Key="ContentDialogMaxWidth">920</x:Double>
+        <x:Double x:Key="ContentDialogMaxWidth">880</x:Double>
         <x:Double x:Key="ContentDialogMinWidth">480</x:Double>
     </ContentDialog.Resources>
 
@@ -22,7 +22,7 @@
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <ScrollViewer MaxHeight="600" HorizontalAlignment="Stretch" Padding="0,4,12,8">
+    <ScrollViewer MaxHeight="500" HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,4,12,8">
         <StackPanel Spacing="16">
             <!-- Validation Error InfoBar -->
             <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" />

@@ -2,7 +2,7 @@
 
 ## 📊 Quality Gates Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
-- **Automated Tests**: **427 / 427 Tests Passing** (376 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+- **Automated Tests**: **431 / 431 Tests Passing** (380 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
 - **Fluent UI Audit**: `0 Violations` (`audit_fluent_ui.ps1` scanned 98 files).
 - **Localization (i18n)**: `100% Parity` across all keys (`sync_localization.ps1 -CheckXaml`).
@@ -132,5 +132,22 @@
   - Local JSON auto-saving and recovery for active test sessions to prevent loss of progress.
 - **Synchronized Version Bump to 1.4.0**:
   - `Directory.Build.props`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+
+### 10. Lexora v1.4.1 — Multi-Selection Ergonomics, Dialog Viewport Safety & Toast Polish
+- **Vocabulary Multi-Selection 2x2 Toolbar & Detail Persistence**:
+  - Refactored `SelectionActionBar` in `VocabularyPage` into a non-clipping 2x2 grid layout, eliminating truncation of the delete button on compact viewports.
+  - Preserved `ViewModel.SelectedWord` when entering selection mode and kept detail pane synchronized with interacted items, preventing loss of word details.
+- **Test Filters 2x2 Layout**:
+  - Converted cramped single-row filter controls in `TestPage` into a balanced 2x2 layout, eliminating ComboBox text clipping.
+- **Spaced Repetition Rating Ergonomics**:
+  - Fine-tuned 4-rating button spacing, font sizes, and min-heights in `ReviewPage` to guarantee label visibility on all screen widths.
+- **Universal ContentDialog MaxHeight Safety**:
+  - Standardized inner ScrollViewer bounds to `MaxHeight="500"` across all 10 dialogs, preventing action buttons from being pushed off-screen on 1366x768 / 720p laptop displays.
+  - Normalized horizontal bounds (`ContentDialogMinWidth="480"`) and locked horizontal scroll axes.
+- **Toast Notification Refinement**:
+  - Compacted `ToastOverlayControl` with adaptive `MinWidth="280"`, `MaxWidth="460"`, `Padding="14,10"`, and 32px icon badge.
+- **Synchronized Version Bump to 1.4.1**:
+  - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+
 
 

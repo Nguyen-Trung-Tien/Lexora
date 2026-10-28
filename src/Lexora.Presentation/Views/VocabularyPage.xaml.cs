@@ -598,9 +598,14 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
     {
         if (ViewModel.IsSelectionMode)
         {
+            var preservedWord = ViewModel.SelectedWord;
             if (!ViewModel.IsUnitViewMode)
             {
                 WordsListView.SelectionMode = ListViewSelectionMode.Multiple;
+                if (preservedWord != null)
+                {
+                    ViewModel.SelectedWord = preservedWord;
+                }
                 UpdateDeleteSelectedButtonText();
             }
             else
@@ -612,10 +617,21 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         }
         else
         {
+            var preservedWord = ViewModel.SelectedWord;
             try
             {
                 WordsListView.SelectedItems.Clear();
                 WordsListView.SelectionMode = ListViewSelectionMode.Single;
+                if (preservedWord != null)
+                {
+                    ViewModel.SelectedWord = preservedWord;
+                    WordsListView.SelectedItem = preservedWord;
+                }
+                else if (ViewModel.Words.Count > 0)
+                {
+                    ViewModel.SelectedWord = ViewModel.Words[0];
+                    WordsListView.SelectedItem = ViewModel.Words[0];
+                }
             }
             catch { }
             TextSelectMode.Text = Loc.GetString("Action_SelectMultiple");
@@ -803,6 +819,17 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
                 ViewModel.SelectedWordIds.Add(word.Id);
             }
         }
+
+        // Preserve and update detail pane: display newly clicked/selected word
+        if (e.AddedItems.Count > 0 && e.AddedItems[0] is WordDto newlySelectedWord)
+        {
+            ViewModel.SelectedWord = newlySelectedWord;
+        }
+        else if (WordsListView.SelectedItems.Count > 0 && WordsListView.SelectedItems[^1] is WordDto lastWord)
+        {
+            ViewModel.SelectedWord = lastWord;
+        }
+
         UpdateDeleteSelectedButtonText();
     }
 

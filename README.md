@@ -16,8 +16,8 @@
   <img src="https://img.shields.io/badge/UI-WinUI%203%20Windows%20App%20SDK-0078D4?style=flat-square&logo=windows&logoColor=white" alt="WinUI 3" />
   <img src="https://img.shields.io/badge/Architecture-Clean%20Architecture-107C41?style=flat-square" alt="Clean Architecture" />
   <img src="https://img.shields.io/badge/Database-SQLite%20WAL%20%2F%20EF%20Core%2010-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
-  <img src="https://img.shields.io/badge/Version-1.4.0-0078D4?style=flat-square" alt="Version" />
-  <img src="https://img.shields.io/badge/Tests-427%2F427%20Passed-2EA44F?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/Version-1.4.1-0078D4?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/Tests-431%2F431%20Passed-2EA44F?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/Installer-Inno%20Setup%206-FF8C00?style=flat-square" alt="Inno Setup" />
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
 </p>
@@ -193,11 +193,11 @@ Lexora provides an automated build and packaging pipeline using **Inno Setup 6**
 
 ```powershell
 # Run automated packaging pipeline (Tests -> Self-contained x64 publish -> Inno Setup compilation)
-powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.4.0"
+powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.4.1"
 ```
 
 ### Installer Characteristics
-- **Output Artifact**: `publish/installer/Lexora-Setup-v1.4.0.exe` (~73 MB).
+- **Output Artifact**: `publish/installer/Lexora-Setup-v1.4.1.exe` (~73 MB).
 - **Self-Contained Deployment**: Includes .NET 10 runtime and Windows App SDK binaries; runs out-of-the-box without requiring runtime installations on client machines.
 - **User Data Retention**: Upgrading or uninstalling prompts users to preserve their study progress and SQLite database (`%LocalAppData%\Lexora\data\lexora.db`).
 - **Silent Deployment**: Supports `/SILENT` and `/VERYSILENT` command-line switches for enterprise rollout.

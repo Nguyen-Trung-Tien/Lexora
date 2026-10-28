@@ -325,8 +325,9 @@
 
                             <!-- Option Area A: Regular Filters -->
                             <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsCustomListMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                                <Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="8">
-                                    <ComboBox PlaceholderText="{x:Bind Loc.GetString('Test_AllExams')}" HorizontalAlignment="Stretch"
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                                    <!-- Row 0: Exam Type & Topic Filters -->
+                                    <ComboBox Grid.Row="0" Grid.Column="0" PlaceholderText="{x:Bind Loc.GetString('Test_AllExams')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.ExamTypes}"
                                               SelectedItem="{x:Bind ViewModel.SelectedExamType, Mode=TwoWay}" CornerRadius="8">
                                         <ComboBox.ItemTemplate>
@@ -335,7 +336,7 @@
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
-                                    <ComboBox Grid.Column="1" PlaceholderText="{x:Bind Loc.GetString('Test_AllTopics')}" HorizontalAlignment="Stretch"
+                                    <ComboBox Grid.Row="0" Grid.Column="1" PlaceholderText="{x:Bind Loc.GetString('Test_AllTopics')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.Topics}"
                                               SelectedItem="{x:Bind ViewModel.SelectedTopic, Mode=TwoWay}" CornerRadius="8">
                                         <ComboBox.ItemTemplate>
@@ -347,7 +348,9 @@
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
-                                    <ComboBox Grid.Column="2" PlaceholderText="{x:Bind Loc.GetString('Test_AllLevels')}" HorizontalAlignment="Stretch"
+
+                                    <!-- Row 1: CEFR Level & Reset Action -->
+                                    <ComboBox Grid.Row="1" Grid.Column="0" PlaceholderText="{x:Bind Loc.GetString('Test_AllLevels')}" HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind ViewModel.CefrLevels}"
                                               SelectedItem="{x:Bind ViewModel.SelectedLevel, Mode=TwoWay}" CornerRadius="8">
                                         <ComboBox.ItemTemplate>
@@ -356,9 +359,12 @@
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
-                                    <Button Grid.Column="3" Command="{x:Bind ViewModel.ResetFiltersCommand}" CornerRadius="8" Padding="10,6"
+                                    <Button Grid.Row="1" Grid.Column="1" Command="{x:Bind ViewModel.ResetFiltersCommand}" CornerRadius="8" HorizontalAlignment="Stretch" Padding="8,6"
                                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_ResetFilters')}">
-                                        <FontIcon Glyph="&#xE777;" FontSize="12" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE777;" FontSize="12" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Test_ResetFilters')}" FontSize="12" />
+                                        </StackPanel>
                                     </Button>
                                 </Grid>
 

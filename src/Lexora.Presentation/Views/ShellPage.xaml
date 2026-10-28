@@ -135,7 +135,7 @@
         <views:ToastOverlayControl x:Name="ToastOverlay"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Top"
-                                   Margin="0,20,0,0"
+                                   Margin="0,16,0,0"
                                    IsHitTestVisible="False"
                                    Canvas.ZIndex="1000" />
     </Grid>

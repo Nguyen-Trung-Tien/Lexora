@@ -342,37 +342,37 @@
                             <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*,*" ColumnSpacing="8" Margin="0,4,0,0">
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10,6">
                                     <StackPanel Spacing="2">
-                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_SynonymsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_SynonymsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.SynonymsCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10,6">
                                     <StackPanel Spacing="2">
-                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_AntonymsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_AntonymsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.AntonymsCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10,6">
                                     <StackPanel Spacing="2">
-                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_FamilyTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_FamilyTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.WordFamilyCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="3" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10,6">
                                     <StackPanel Spacing="2">
-                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_CollocationsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_CollocationsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CollocationsCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="4" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10,6">
                                     <StackPanel Spacing="2">
-                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_TopicTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_TopicTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.TopicWordsCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="5" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10,6">
                                     <StackPanel Spacing="2">
-                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Connections')}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Connections')}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.TotalConnections, Mode=OneWay}" FontWeight="Bold" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </StackPanel>
                                 </Border>

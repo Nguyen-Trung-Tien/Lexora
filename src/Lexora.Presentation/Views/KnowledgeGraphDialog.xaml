@@ -17,7 +17,7 @@
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">840</x:Double>
-        <x:Double x:Key="ContentDialogMinWidth">560</x:Double>
+        <x:Double x:Key="ContentDialogMinWidth">480</x:Double>
     </ContentDialog.Resources>
 
     <ContentDialog.TitleTemplate>
@@ -36,7 +36,7 @@
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="620">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="500">
         <StackPanel Spacing="16" Margin="0,8,0,0">
 
             <!-- Search AutoSuggestBox -->

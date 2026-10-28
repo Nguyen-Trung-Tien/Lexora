@@ -405,7 +405,7 @@
             <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="12" Padding="28">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <Grid>
                         <!-- Detail Empty State -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14" Padding="40"
@@ -443,7 +443,7 @@
                                             <TextBlock Text="{x:Bind Loc.GetString('Action_Edit')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Click="DeleteRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipDelete')}" Padding="10,6" CornerRadius="8">
+                                    <Button Click="DeleteRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipDelete')}" Margin="4,0,0,0" Padding="10,6" CornerRadius="8">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE74D;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Action_Delete')}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="12" />

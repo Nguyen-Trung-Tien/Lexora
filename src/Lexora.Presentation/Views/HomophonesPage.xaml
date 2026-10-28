@@ -252,7 +252,7 @@
             </Border>
 
             <!-- Right Pane: Detail & Side-by-Side Comparison Workspace -->
-            <ScrollViewer Grid.Column="1" Padding="28,20,28,24">
+            <ScrollViewer Grid.Column="1" Padding="28,20,28,24" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel x:Name="DetailContentPanel" Spacing="20">
                     <!-- Selected Group Header Bar -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
