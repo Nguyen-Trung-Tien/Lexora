@@ -59,6 +59,18 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     public partial string UpdateStatusMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial string CurrentVersionNotes { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsShowingCurrentVersionNotes { get; set; } = false;
+
+    [ObservableProperty]
+    public partial string AvailableUpdateFileSizeText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AvailableUpdatePublishDateText { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial double DownloadProgressPercentage { get; set; }
 
     [ObservableProperty]
@@ -194,6 +206,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         }
 
         UpdateVoiceStatus();
+        UpdateCurrentVersionNotes();
 
         _languageChangedHandler = (s, e) =>
         {
@@ -241,6 +254,22 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         {
             DatabaseSizeFormatted = _locService.GetString("Settings_DbNotCreatedYet");
         }
+
+        UpdateCurrentVersionNotes();
+    }
+
+    public void UpdateCurrentVersionNotes()
+    {
+        var isVi = _locService.CurrentLanguage == "vi-VN";
+        CurrentVersionNotes = isVi
+            ? "• Lộ trình học tập tương tác (Interactive Roadmap Canvas): Hệ thống chặng học trực quan với đồ thị Bézier thông minh cho TOEIC, IELTS và VSTEP.\n• Thuật toán Spaced Repetition kép: Tích hợp SM-2 kinh điển và FSRS tiên tiến, tự động hiệu chuẩn Ease Factor.\n• Phòng Luyện Nghe & Phát Âm (Pronunciation Lab): Hỗ trợ giọng đọc chuẩn UK/US cùng hai tầng âm thanh (Cached Human Audio & Windows TTS).\n• Kiểm tra thích ứng (Adaptive Test Mode): Tự động cá nhân hóa bài thi và phân loại câu hỏi theo độ khó CEFR.\n• Tối ưu hóa giao diện Fluent 2: Hỗ trợ hoàn hảo chế độ Sáng (Light) và Tối (Dark), con trỏ chuột tương tác mượt mà."
+            : "• Interactive Learning Roadmap: Dynamic visual skill tree with smooth Bézier splines for TOEIC, IELTS, and VSTEP preparation.\n• Dual Spaced Repetition Engines: Classic SM-2 and next-generation FSRS with dynamic Ease Factor calibration.\n• Pronunciation & Listening Lab: High-fidelity UK/US audio playback with cached human pronunciation and speech synthesis fallback.\n• Adaptive Testing & Quizzes: Tailored difficulty calibration matching real CEFR proficiencies.\n• Fluent 2 Visual Enhancements: Flawless Light & Dark mode rendering, high-contrast clarity, and unified interactive cursor pointers.";
+    }
+
+    [RelayCommand]
+    public void ToggleCurrentVersionNotes()
+    {
+        IsShowingCurrentVersionNotes = !IsShowingCurrentVersionNotes;
     }
 
     public void UpdateVoiceStatus()
@@ -568,7 +597,20 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                 {
                     AvailableUpdate = updateInfo;
                     UpdateAvailable = true;
+                    IsShowingCurrentVersionNotes = false;
                     UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
+
+                    if (updateInfo.FileSizeBytes > 0)
+                    {
+                        var sizeMb = (double)updateInfo.FileSizeBytes / (1024 * 1024);
+                        AvailableUpdateFileSizeText = string.Format(_locService.GetString("Settings_SizeFormat"), sizeMb);
+                    }
+                    else
+                    {
+                        AvailableUpdateFileSizeText = string.Empty;
+                    }
+
+                    AvailableUpdatePublishDateText = $"{_locService.GetString("Settings_ReleaseDate")} {updateInfo.PublishedAt.LocalDateTime:dd/MM/yyyy}";
 
                     var template = _locService.GetString("Update_Notification_Body");
                     var msg = string.Format(template, updateInfo.NewVersion);

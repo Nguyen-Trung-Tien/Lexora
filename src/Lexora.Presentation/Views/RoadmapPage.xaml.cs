@@ -288,6 +288,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         root.Child = stack;
 
         // Interaction
+        Lexora.Presentation.Helpers.CursorHelper.SetCursor(root, "Hand");
         root.PointerPressed += (s, e) =>
         {
             if (s is Border b && b.Tag is RoadmapNodeDto clickedNode)

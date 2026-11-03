@@ -248,7 +248,7 @@
                             VerticalScrollBarVisibility="Auto">
                             <Canvas
                                 x:Name="RoadmapCanvas"
-                                Width="880"
+                                MinWidth="880"
                                 Height="1600"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top">
