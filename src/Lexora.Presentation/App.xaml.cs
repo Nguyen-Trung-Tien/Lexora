@@ -88,6 +88,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 // ViewModels
                 services.AddTransient<ShellViewModel>();
                 services.AddTransient<DashboardViewModel>();
+                services.AddTransient<RoadmapViewModel>();
                 services.AddTransient<VocabularyViewModel>();
                 services.AddTransient<ReviewViewModel>();
                 services.AddTransient<TestViewModel>();
@@ -101,6 +102,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 // Views
                 services.AddTransient<ShellPage>();
                 services.AddTransient<DashboardPage>();
+                services.AddTransient<RoadmapPage>();
                 services.AddTransient<VocabularyPage>();
                 services.AddTransient<HomophonesPage>();
                 services.AddTransient<KnowledgeGraphPage>();

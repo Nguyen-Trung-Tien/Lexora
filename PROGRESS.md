@@ -149,5 +149,27 @@
 - **Synchronized Version Bump to 1.4.1**:
   - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
 
+### 11. Lexora v1.5.0 — Interactive Learning Roadmap & Adaptive Study Pathways
+- **Interactive Learning Roadmap & Skill Tree Architecture**:
+  - Designed pure domain models (`StudyRoadmap`, `RoadmapMilestone`, `RoadmapNode`, `ExamTarget`, `RoadmapNodeType`, `NodeStatus`) strictly decoupled from EF Core and UI markup.
+  - Implemented `IRoadmapRepository` and EF Core Fluent configurations with cascade delete integrity and indexed queries.
+  - Built `RoadmapEngine` with S-Curve Sine Wave 2D coordinates synthesis (`CanvasX`, `CanvasY`) and initial SM-2 Ease Factor calibration based on exam score gaps.
+  - Created `RoadmapService` orchestrating single-commit UnitOfWork node advancement, progressive adjacent unlocking ($q \ge 3$ or 100% item completion), and milestone auto-completion.
+- **Fluent 2 Visual Canvas & Smooth Spline Rendering**:
+  - Built `RoadmapPage` with WinUI 3 Path-based Bézier splines (`TrackSplinePath` and `ActiveSplinePath`), connected animations (`ConnectedAnimationService`), responsive Inspector panel, and zero hardcoded colors.
+  - Integrated `ThemeResourceHelper.GetThemeBrush(this, ...)` and implemented `IThemeAwareView` and `ILocalizableView` ensuring instant reactivity to theme changes and runtime language switches.
+- **Reliability, Concurrency & Security Hardening**:
+  - Eliminated rapid double-click vulnerabilities using `SemaphoreSlim` action locks in `RoadmapViewModel`.
+  - Implemented `SafeDialogExtensions.ShowAsyncSafe` with sequential dialog safety (`await Task.Yield()`) for goal creation dialogs.
+  - Added page unhooking on unload to prevent event handler retention and memory leaks.
+- **Navigation & Centralized Shortcuts**:
+  - Registered global keyboard accelerator `Ctrl+9` for instant Roadmap navigation via `ShortcutManager`.
+  - Harmonized `ShellPage.ContentFrame.Navigated` handler to correctly highlight `NavItemRoadmap`.
+- **Synchronized Version Bump to 1.5.0**:
+  - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+- **Quality Gate Benchmark**:
+  - Verified clean build (`0 Warning(s)`, `0 Error(s)`) and expanded test suite to **439 / 439 Tests Passing** (388 Unit Tests + 51 Integration Tests).
+
+
 
 

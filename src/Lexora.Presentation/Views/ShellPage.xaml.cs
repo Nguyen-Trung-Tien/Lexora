@@ -115,6 +115,7 @@ public sealed partial class ShellPage : Page
                     NavigationViewItem? targetItem = ContentFrame.Content switch
                     {
                         DashboardPage => NavItemDashboard,
+                        RoadmapPage => NavItemRoadmap,
                         VocabularyPage => NavItemVocabulary,
                         HomophonesPage => NavItemHomophones,
                         KnowledgeGraphPage => NavItemKnowledgeGraph,
@@ -198,6 +199,7 @@ public sealed partial class ShellPage : Page
         var targetType = tag switch
         {
             "Dashboard" => typeof(DashboardPage),
+            "Roadmap" => typeof(RoadmapPage),
             "Vocabulary" => typeof(VocabularyPage),
             "Homophones" => typeof(HomophonesPage),
             "KnowledgeGraph" => typeof(KnowledgeGraphPage),
@@ -228,6 +230,7 @@ public sealed partial class ShellPage : Page
         NavHeaderArchive.Content = _localizationService.GetString("NavHeader_Archive");
 
         NavItemDashboard.Content = _localizationService.GetString("Nav_Dashboard");
+        NavItemRoadmap.Content = _localizationService.GetString("Nav_Roadmap");
         NavItemVocabulary.Content = _localizationService.GetString("Nav_Vocabulary");
         NavItemHomophones.Content = _localizationService.GetString("Nav_Homophones");
         NavItemKnowledgeGraph.Content = _localizationService.GetString("Nav_KnowledgeGraph");
@@ -240,6 +243,7 @@ public sealed partial class ShellPage : Page
         GlobalSearchBox.PlaceholderText = _localizationService.GetString("Search_Placeholder");
 
         ToolTipService.SetToolTip(NavItemDashboard, _localizationService.GetString("Shell_TooltipDashboard"));
+        ToolTipService.SetToolTip(NavItemRoadmap, _localizationService.GetString("Shell_TooltipRoadmap"));
         ToolTipService.SetToolTip(NavItemVocabulary, _localizationService.GetString("Shell_TooltipVocabulary"));
         ToolTipService.SetToolTip(NavItemHomophones, _localizationService.GetString("Shell_TooltipHomophones"));
         ToolTipService.SetToolTip(NavItemKnowledgeGraph, $"{_localizationService.GetString("Nav_KnowledgeGraph")} (Ctrl+4)");

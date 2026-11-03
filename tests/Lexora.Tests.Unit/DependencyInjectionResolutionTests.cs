@@ -22,6 +22,7 @@ public class DependencyInjectionResolutionTests
         services.AddScoped(_ => new Mock<IGrammarRepository>().Object);
         services.AddScoped(_ => new Mock<ILearningStorageRepository>().Object);
         services.AddScoped(_ => new Mock<IHomophoneRepository>().Object);
+        services.AddScoped(_ => new Mock<IRoadmapRepository>().Object);
         services.AddScoped(_ => new Mock<IUnitOfWork>().Object);
         services.AddSingleton(_ => new Mock<IVoiceProvider>().Object);
 
@@ -69,5 +70,8 @@ public class DependencyInjectionResolutionTests
 
         var fsrsEngine = scope.ServiceProvider.GetRequiredService<Lexora.Application.SpacedRepetition.IFsrsSpacedRepetitionEngine>();
         fsrsEngine.Should().NotBeNull();
+
+        var roadmapService = scope.ServiceProvider.GetRequiredService<IRoadmapService>();
+        roadmapService.Should().NotBeNull();
     }
 }

@@ -179,6 +179,22 @@ public sealed class ShortcutManager : IShortcutManager
 
         RegisterShortcut(new ShortcutDefinition
         {
+            Id = "Global.NavigateRoadmap",
+            Gesture = new ShortcutGesture(ShortcutKey.Number9, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Shell_TooltipRoadmap",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                _navigationService.Navigate(typeof(Views.RoadmapPage));
+                return Task.CompletedTask;
+            }
+        });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
             Id = "Global.SearchFocus",
             Gesture = new ShortcutGesture(ShortcutKey.K, ShortcutModifiers.Control),
             SecondaryGesture = new ShortcutGesture(ShortcutKey.F, ShortcutModifiers.Control),

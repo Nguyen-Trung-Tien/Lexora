@@ -380,4 +380,37 @@ public class ShortcutResolverTests
         bareA.Should().NotBeNull();
         bareA!.Id.Should().Be("Test.Option1");
     }
+
+    [Fact]
+    public void ShortcutResolver_Resolve_ShouldResolveNumber9WithControl()
+    {
+        var resolver = new ShortcutResolver();
+        bool executed = false;
+
+        resolver.Register(new ShortcutDefinition
+        {
+            Id = "Global.NavigateRoadmap",
+            Gesture = new ShortcutGesture(ShortcutKey.Number9, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Shell_TooltipRoadmap",
+            Priority = ShortcutPriority.Global,
+            ExecuteAsync = () =>
+            {
+                executed = true;
+                return Task.CompletedTask;
+            }
+        });
+
+        var resolved = resolver.Resolve(
+            key: ShortcutKey.Number9,
+            modifiers: ShortcutModifiers.Control,
+            isTextInputFocused: false,
+            isDialogOpen: false,
+            currentPageType: typeof(DummyDashboardPage));
+
+        resolved.Should().NotBeNull();
+        resolved!.Id.Should().Be("Global.NavigateRoadmap");
+        resolved.ExecuteAsync();
+        executed.Should().BeTrue();
+    }
 }

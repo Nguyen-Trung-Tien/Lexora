@@ -25,6 +25,9 @@ public class LexoraDbContext : DbContext
     public DbSet<LearningStorageItem> LearningStorageItems => Set<LearningStorageItem>();
     public DbSet<HomophoneGroup> HomophoneGroups => Set<HomophoneGroup>();
     public DbSet<HomophoneItem> HomophoneItems => Set<HomophoneItem>();
+    public DbSet<StudyRoadmap> StudyRoadmaps => Set<StudyRoadmap>();
+    public DbSet<RoadmapMilestone> RoadmapMilestones => Set<RoadmapMilestone>();
+    public DbSet<RoadmapNode> RoadmapNodes => Set<RoadmapNode>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -235,6 +238,65 @@ public class LexoraDbContext : DbContext
             b.HasIndex(i => i.HomophoneGroupId);
             b.HasIndex(i => i.Term);
             b.HasIndex(i => i.NormalizedTerm);
+        });
+
+        // StudyRoadmap configuration
+        modelBuilder.Entity<StudyRoadmap>(b =>
+        {
+            b.HasKey(r => r.Id);
+            b.Property(r => r.Title).IsRequired().HasMaxLength(200);
+            b.Property(r => r.Target).IsRequired();
+            b.Property(r => r.StartingScore).IsRequired();
+            b.Property(r => r.TargetScore).IsRequired();
+            b.Property(r => r.TargetDate).IsRequired();
+            b.Property(r => r.IsActive).IsRequired();
+
+            b.HasIndex(r => r.Target);
+            b.HasIndex(r => r.IsActive);
+            b.HasIndex(r => r.CreatedAt);
+
+            b.HasMany(r => r.Milestones)
+                .WithOne(m => m.Roadmap)
+                .HasForeignKey(m => m.RoadmapId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // RoadmapMilestone configuration
+        modelBuilder.Entity<RoadmapMilestone>(b =>
+        {
+            b.HasKey(m => m.Id);
+            b.Property(m => m.Title).IsRequired().HasMaxLength(200);
+            b.Property(m => m.Description).HasMaxLength(1000);
+            b.Property(m => m.OrderIndex).IsRequired();
+
+            b.HasIndex(m => m.RoadmapId);
+            b.HasIndex(m => m.OrderIndex);
+
+            b.HasMany(m => m.Nodes)
+                .WithOne(n => n.Milestone)
+                .HasForeignKey(n => n.MilestoneId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // RoadmapNode configuration
+        modelBuilder.Entity<RoadmapNode>(b =>
+        {
+            b.HasKey(n => n.Id);
+            b.Property(n => n.Title).IsRequired().HasMaxLength(200);
+            b.Property(n => n.Description).HasMaxLength(1000);
+            b.Property(n => n.Type).IsRequired();
+            b.Property(n => n.Status).IsRequired();
+            b.Property(n => n.OrderIndex).IsRequired();
+            b.Property(n => n.CanvasX).IsRequired();
+            b.Property(n => n.CanvasY).IsRequired();
+            b.Property(n => n.TargetItemCount).IsRequired();
+            b.Property(n => n.CompletedItemCount).IsRequired();
+            b.Property(n => n.EaseFactorWeight).IsRequired();
+
+            b.HasIndex(n => n.MilestoneId);
+            b.HasIndex(n => n.Status);
+            b.HasIndex(n => n.Type);
+            b.HasIndex(n => n.OrderIndex);
         });
     }
 }

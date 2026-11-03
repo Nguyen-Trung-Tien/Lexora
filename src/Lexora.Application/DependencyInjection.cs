@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IHomophoneService, HomophoneService>();
         services.AddScoped<IHomophoneExportImportService, HomophoneExportImportService>();
         services.AddScoped<IKnowledgeGraphExportImportService, KnowledgeGraphExportImportService>();
+        services.AddScoped<IRoadmapService, RoadmapService>();
 
         return services;
     }

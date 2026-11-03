@@ -411,6 +411,62 @@ public class SqliteDatabaseInitializer
                 CREATE INDEX IF NOT EXISTS "IX_HomophoneItems_NormalizedTerm" ON "HomophoneItems" ("NormalizedTerm");
                 """;
             await _context.Database.ExecuteSqlRawAsync(createHomophonesTablesSql, cancellationToken);
+
+            const string createRoadmapsTablesSql = """
+                CREATE TABLE IF NOT EXISTS "StudyRoadmaps" (
+                    "Id" TEXT NOT NULL CONSTRAINT "PK_StudyRoadmaps" PRIMARY KEY,
+                    "Title" TEXT NOT NULL,
+                    "Target" INTEGER NOT NULL,
+                    "StartingScore" REAL NOT NULL,
+                    "TargetScore" REAL NOT NULL,
+                    "TargetDate" TEXT NOT NULL,
+                    "IsActive" INTEGER NOT NULL DEFAULT 1,
+                    "CreatedAt" TEXT NOT NULL,
+                    "UpdatedAt" TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS "IX_StudyRoadmaps_Target" ON "StudyRoadmaps" ("Target");
+                CREATE INDEX IF NOT EXISTS "IX_StudyRoadmaps_IsActive" ON "StudyRoadmaps" ("IsActive");
+                CREATE INDEX IF NOT EXISTS "IX_StudyRoadmaps_CreatedAt" ON "StudyRoadmaps" ("CreatedAt");
+
+                CREATE TABLE IF NOT EXISTS "RoadmapMilestones" (
+                    "Id" TEXT NOT NULL CONSTRAINT "PK_RoadmapMilestones" PRIMARY KEY,
+                    "RoadmapId" TEXT NOT NULL,
+                    "Title" TEXT NOT NULL,
+                    "Description" TEXT NULL,
+                    "OrderIndex" INTEGER NOT NULL,
+                    "TargetCompletionDate" TEXT NULL,
+                    "IsCompleted" INTEGER NOT NULL DEFAULT 0,
+                    "CreatedAt" TEXT NOT NULL,
+                    "UpdatedAt" TEXT NOT NULL,
+                    CONSTRAINT "FK_RoadmapMilestones_StudyRoadmaps_RoadmapId" FOREIGN KEY ("RoadmapId") REFERENCES "StudyRoadmaps" ("Id") ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS "IX_RoadmapMilestones_RoadmapId" ON "RoadmapMilestones" ("RoadmapId");
+                CREATE INDEX IF NOT EXISTS "IX_RoadmapMilestones_OrderIndex" ON "RoadmapMilestones" ("OrderIndex");
+
+                CREATE TABLE IF NOT EXISTS "RoadmapNodes" (
+                    "Id" TEXT NOT NULL CONSTRAINT "PK_RoadmapNodes" PRIMARY KEY,
+                    "MilestoneId" TEXT NOT NULL,
+                    "Title" TEXT NOT NULL,
+                    "Description" TEXT NULL,
+                    "Type" INTEGER NOT NULL,
+                    "Status" INTEGER NOT NULL,
+                    "OrderIndex" INTEGER NOT NULL,
+                    "CanvasX" REAL NOT NULL,
+                    "CanvasY" REAL NOT NULL,
+                    "TargetItemCount" INTEGER NOT NULL,
+                    "CompletedItemCount" INTEGER NOT NULL,
+                    "EaseFactorWeight" REAL NOT NULL DEFAULT 2.5,
+                    "ReferenceId" TEXT NULL,
+                    "CreatedAt" TEXT NOT NULL,
+                    "UpdatedAt" TEXT NOT NULL,
+                    CONSTRAINT "FK_RoadmapNodes_RoadmapMilestones_MilestoneId" FOREIGN KEY ("MilestoneId") REFERENCES "RoadmapMilestones" ("Id") ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS "IX_RoadmapNodes_MilestoneId" ON "RoadmapNodes" ("MilestoneId");
+                CREATE INDEX IF NOT EXISTS "IX_RoadmapNodes_Status" ON "RoadmapNodes" ("Status");
+                CREATE INDEX IF NOT EXISTS "IX_RoadmapNodes_Type" ON "RoadmapNodes" ("Type");
+                CREATE INDEX IF NOT EXISTS "IX_RoadmapNodes_OrderIndex" ON "RoadmapNodes" ("OrderIndex");
+                """;
+            await _context.Database.ExecuteSqlRawAsync(createRoadmapsTablesSql, cancellationToken);
         }
         catch (Exception ex)
         {

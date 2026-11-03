@@ -40,6 +40,13 @@ graph TD
 - **Entity Configurations**: Fluent configurations reside exclusively in `LexoraDbContext.OnModelCreating`. Do **NOT** scatter table or column attributes across Domain entities.
 - **Single-Commit Atomic Operations**: Multi-entity mutations must be executed in a single atomic transaction (`await _unitOfWork.SaveChangesAsync(cancellationToken)`). Never perform intermediate commits that risk leaving the database in an inconsistent state.
 
+### 1.4 Learning Roadmap & Dynamic Pathway Domain Specifications
+The Interactive Learning Roadmap module models personalized, adaptive preparation tracks for TOEIC, IELTS, and VSTEP:
+- **Domain Layer Purity**: Entities (`StudyRoadmap`, `RoadmapMilestone`, `RoadmapNode`) and Enums (`ExamTarget`, `RoadmapNodeType`, `NodeStatus`) are pure POCOs in `Lexora.Domain`. They contain zero references to EF Core, SQLite, or WinUI 3 markup.
+- **Adaptive Engine Boundary**: Roadmap calculation and graph synthesis are isolated inside `Lexora.Application.Services.RoadmapEngine`. Score gap calibrations dynamically adjust initial SM-2 Ease Factors (EF $\in [2.0, 2.5]$) and generate serpentine 2D coordinates (`CanvasX`, `CanvasY`) for smooth visual presentation.
+- **Progressive Node Unlocking**: Mastery of a node ($q \ge 3$ or $100\%$ target items learned) unlocks adjacent downstream nodes atomically in `RoadmapService.UpdateNodeProgressAsync`, adhering to the single-commit UnitOfWork invariant.
+- **Repository Isolation**: Persistence is mediated strictly through `IRoadmapRepository` and EF Core Fluent configurations in `LexoraDbContext.OnModelCreating`, guaranteeing database indexing and cascade deletion integrity across Roadmap $\rightarrow$ Milestones $\rightarrow$ Nodes.
+
 ---
 
 ## 2. Coding Standards & C# 13 / .NET 10 Conventions
@@ -105,6 +112,23 @@ graph TD
 - **DataTemplate Scope**: WinUI 3 `{x:Bind}` within a `DataTemplate` cannot bind to elements outside the item's `DataType` via `ElementName` or page properties. Keep templates bound directly to item DTO properties.
 - **Flyout Scope**: Elements inside a `<Flyout>` or `<MenuFlyout>` cannot bind to page properties without triggering markup compiler exceptions (`Xaml Internal Error error WMC9999`). Use code-behind event handlers or placement in the main visual tree for complex bound controls.
 - **Assembly Qualification**: When accessing application resources or singletons in code-behind, use `App.Current` rather than unqualified `Application.Current` to avoid ambiguity with `Lexora.Application`.
+- **Anti-WMC9999 Indexer Rule**: WinUI 3 XAML compiler (`XamlCompiler.exe`) does not support string indexers in `{x:Bind}` (e.g. `Loc['Key']` causes parser null reference exception `WMC9999`). Always expose method bindings `{x:Bind Loc.GetString('Key')}` or typed DTO properties.
+- **ConverterParameter Invariant**: Never define `ConverterParameter` without an explicit `Converter={...}`. Never specify `TargetNullValue` on non-nullable value types (`double`, `int`).
+
+### 3.5 Fluent Motion, Visual Roadmap Canvas & Smooth Rendering
+- **Connected Animation Lifecycle**:
+  - Always use `ConnectedAnimationService.GetForCurrentView()` to bridge navigation transitions between visual nodes and detail views:
+    ```csharp
+    // Trigger on selection
+    var anim = ConnectedAnimationService.GetForCurrentView();
+    anim.PrepareToAnimate("nodeTransition", rootElement);
+    ```
+- **Virtual Spline & Track Generation**:
+  - Never instantiate hundreds of discrete line controls or heavy shapes in XAML. Use lightweight `Path` elements with `PathGeometry` and cubic `BezierSegment` connectors calculated from node center coordinates:
+    $cp_1 = (x_0, \frac{y_0 + y_1}{2}), \quad cp_2 = (x_1, \frac{y_0 + y_1}{2})$.
+- **Viewport Layout Budgeting**:
+  - All large custom canvases (`RoadmapCanvas`, `KnowledgeGraphCanvas`) must be hosted inside a scroll-isolated `ScrollViewer` (`HorizontalScrollBarVisibility="Auto"`, `VerticalScrollBarVisibility="Auto"`), dynamically adjusting canvas dimensions based on $\max(Y) + 200$.
+  - Cards and overview banners must stretch responsively with `MaxWidth="1240"` and `HorizontalAlignment="Stretch"` to prevent layout clipping on lower display resolutions (1366x768).
 
 ---
 
@@ -195,12 +219,12 @@ dotnet build Lexora.slnx
 dotnet test Lexora.slnx --no-build
 
 # 3. Packaging & Installer Verification (When modifying deployment scripts)
-powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.4.1"
+powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.5.0"
 ```
 
 ### Current Quality Gate Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)`.
-- **Test Suite**: **431 / 431 Tests Passing** (380 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
+- **Test Suite**: **439 / 439 Tests Passing** (388 Unit Tests + 51 Integration Tests, 0 Failed, 0 Skipped).
 
 ---
 
@@ -239,6 +263,7 @@ Lexora/
 │       ├── i18n-localization-sync/           # Bilingual (vi-VN / en-US) dictionary & XAML parity audit
 │       ├── lexora-quality-audit/             # Clean build (0 warnings) and test suite verification
 │       ├── release-package-prep/             # Version synchronization & release packaging readiness
+│       ├── roadmap-visual-builder/           # Interactive roadmap canvas, Bézier splines & adaptive pathways
 │       ├── sm2-algorithm-verify/             # Spaced Repetition (SM-2) engine invariant verification
 │       └── winui3-fluent-audit/              # Fluent 2 zero-hardcoded-colors & responsive layout audit
 ├── changelog/                                # Changelog fragment management
@@ -256,25 +281,26 @@ Lexora/
 │   └── backlog.md                            # Categorized backlog & acceptance criteria
 ├── src/
 │   ├── Lexora.Domain/                        # Pure domain layer (Entities, Enums, Exceptions)
-│   │   ├── Entities/                         # Word, WordMeaning, GrammarRule, LearningStorageItem, StudyLog
-│   │   ├── Enums/                            # CefrLevel, ExamType, LearningStatus, PartOfSpeech
+│   │   ├── Entities/                         # Word, WordMeaning, GrammarRule, LearningStorageItem, StudyLog, StudyRoadmap, RoadmapMilestone, RoadmapNode
+│   │   ├── Enums/                            # CefrLevel, ExamType, ExamTarget, RoadmapNodeType, NodeStatus, LearningStatus, PartOfSpeech
+│   │   ├── Interfaces/                       # IVocabularyRepository, IReviewRepository, IRoadmapRepository, IUnitOfWork
 │   │   └── Exceptions/                       # Domain-specific validation exceptions
 │   ├── Lexora.Application/                   # Application layer (Services, DTOs, Interfaces)
-│   │   ├── DTOs/                             # WordDto, GrammarRuleDto, StudySessionDto
-│   │   ├── Interfaces/                       # IVocabularyService, IReviewService, IPronunciationListeningLabService, etc.
-│   │   └── Services/                         # VocabularyService, Sm2SpacedRepetitionEngine, FsrsSpacedRepetitionEngine
+│   │   ├── DTOs/                             # WordDto, GrammarRuleDto, StudySessionDto, RoadmapNodeDto, MilestoneDto, StudyRoadmapDto
+│   │   ├── Interfaces/                       # IVocabularyService, IReviewService, IRoadmapService, IPronunciationListeningLabService, etc.
+│   │   └── Services/                         # VocabularyService, RoadmapEngine, RoadmapService, Sm2SpacedRepetitionEngine, FsrsSpacedRepetitionEngine
 │   ├── Lexora.Infrastructure/                # Infrastructure layer (EF Core, Audio, SQLite, Updates)
-│   │   ├── Data/                             # LexoraDbContext, UnitOfWork, Migrations
-│   │   ├── Repositories/                     # VocabularyRepository, ReviewRepository, LearningStorageRepository
+│   │   ├── Data/                             # LexoraDbContext, SqliteDatabaseInitializer, UnitOfWork
+│   │   ├── Repositories/                     # VocabularyRepository, ReviewRepository, RoadmapRepository, LearningStorageRepository
 │   │   └── Services/                         # AudioPlayerService, DatabaseBackupService, UpdateService
 │   └── Lexora.Presentation/                  # WinUI 3 client application
 │       ├── Assets/                           # App icons, splash screens, brand assets
 │       ├── Converters/                       # BoolToVisibility, HeatmapLevelToBrush, etc.
 │       ├── Services/                         # LocalizationService, ThemeService
-│       ├── ViewModels/                       # DashboardViewModel, VocabularyViewModel, LearningStorageViewModel, etc.
-│       └── Views/                            # ShellPage, DashboardPage, VocabularyPage, ListeningLabDialog, etc.
+│       ├── ViewModels/                       # DashboardViewModel, RoadmapViewModel, VocabularyViewModel, LearningStorageViewModel, etc.
+│       └── Views/                            # ShellPage, DashboardPage, RoadmapPage, VocabularyPage, ListeningLabDialog, etc.
 ├── tests/
-│   ├── Lexora.Tests.Unit/                    # 339 xUnit Unit Tests (SM-2, FSRS, Listening Lab, CAT, DTOs, Services)
+│   ├── Lexora.Tests.Unit/                    # 384 xUnit Unit Tests (Roadmap, SM-2, FSRS, Listening Lab, CAT, DTOs, Services)
 │   └── Lexora.Tests.Integration/             # 51 xUnit Integration Tests (SQLite in-memory, Repositories)
 └── .github/
     └── workflows/
@@ -298,7 +324,7 @@ Before marking any task as complete, verify:
 - [ ] **Token Economy Enforced**: Only targeted file slices viewed (`grep_search` + `view_file`); in-place diff edits instead of full-file overwrites; no unpaged output dumps.
 - [ ] **Anti-Hallucination & Type Reusability**: Existing types and services verified before declaring new contracts; Clean Architecture cascade strictly followed.
 - [ ] **Clean Build**: `dotnet build Lexora.slnx` completes with **0 warnings and 0 errors**.
-- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 390 tests**.
+- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 435 tests**.
 
 ---
 
@@ -346,4 +372,30 @@ Before marking any task as complete, verify:
    - Run relevant tests to confirm zero functional regression before presenting the solution.
 7. **Surgical Error Recovery**:
    - If a build fails, inspect only the $\pm 5$ lines surrounding the error line. Fix the exact type or syntax mismatch; never rewrite the entire file in panic.
+
+### 11.3 Self-Skill Generation Protocol (Antigravity & Project Skills)
+When encountering complex, recurring engineering challenges (e.g. WinUI 3 markup compilation exceptions, SQLite migration locks, Canvas Bézier geometry performance, or specialized spaced repetition tuning), AI agents **MUST** encapsulate the verified solution into a standardized, reusable skill in `.agents/skills/<skill-name>/`:
+
+1. **Standard Skill Directory Structure**:
+   ```
+   .agents/skills/<skill-name>/
+   ├── SKILL.md       # (Mandatory) YAML frontmatter metadata, trigger conditions, architectural invariants & workflow
+   ├── scripts/       # (Optional) Automated execution/verification scripts (PowerShell .ps1, C# script)
+   ├── examples/      # (Optional) Golden implementations and reference code samples
+   └── resources/     # (Optional) JSON schemas, calibration tables, templates
+   ```
+
+2. **Mandatory `SKILL.md` Specifications**:
+   - YAML frontmatter must specify `name`, `description`, `version`, and `tags`.
+   - Content must clearly articulate:
+     - **Capabilities & Purpose**: What technical problem this skill addresses.
+     - **Key Invariants Enforced**: Non-negotiable architectural rules.
+     - **Execution Workflow**: Step-by-step flowchart or instructions.
+     - **Validation Quality Gates**: Verification commands used to test the skill.
+
+3. **Verification Invariant Before Packaging**:
+   - Every skill script or golden implementation **MUST** be verified in the actual repository environment prior to declaration:
+     - `dotnet build Lexora.slnx -v q /clp:ErrorsOnly` completes with **0 warnings and 0 errors**.
+     - Relevant unit/integration test suites execute and pass.
+   - Never generate theoretical, unverified, or pseudo-code instructions.
 

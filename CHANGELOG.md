@@ -1,4 +1,4 @@
-﻿# Ã°Å¸â€œâ€œ Changelog
+# Ã°Å¸â€œâ€œ Changelog
 All notable changes to the Lexora desktop application will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -8,7 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-03
 
+### Added
+- [Roadmap]: Interactive Learning Roadmap & Dynamic Pathway Module (`RoadmapPage`, `RoadmapViewModel`, `RoadmapService`, `RoadmapEngine`, `RoadmapRepository`).
+- [Roadmap]: Adaptive examination tracks for TOEIC, IELTS, and VSTEP with customized milestones, competency nodes, and difficulty gradients.
+- [Roadmap Canvas]: Dynamic S-Curve Bézier spline rendering with dual-track progress visualization (dashed roadmap track and active accent track) and connected animations.
+- [Roadmap]: Progressive node unlocking engine linking mastery criteria ($q \ge 3$ or 100% target items completed) to adjacent downstream nodes and milestone completion.
+- [Roadmap]: Dynamic SM-2 initial Ease Factor calibration ($EF \in [2.1, 2.5]$) adjusting review difficulty based on the learner's score gap.
+- [Shortcuts]: Centralized shortcut routing with `Ctrl+9` for instant Roadmap navigation via `ShortcutManager`.
+- [Localization]: Added complete bilingual (`vi-VN` and `en-US`) parity for Roadmap keys (`Roadmap_TargetProgress`, `Roadmap_LessonsCount`, `Roadmap_SkillPlaceholder`, `Roadmap_SelectNodePlaceholder`, `Roadmap_SelectNodeDesc`, etc.).
+
+### Hardened & Fixed
+- [Concurrency & Race Conditions]: Eliminated rapid double-click vulnerabilities on roadmap actions using `SemaphoreSlim` action locks and `IsSubmittingAction` / `CanAdvanceProgress` property guarding.
+- [WinUI 3 Dialog Safety]: Applied `SafeDialogExtensions.ShowAsyncSafe` with `CornerRadius="16"` and sequential dialog safety chaining (`await Task.Yield()`) across roadmap creation workflows.
+- [Theme Resource Fidelity]: Replaced custom brush resolution with centralized `ThemeResourceHelper.GetThemeBrush(this, ...)` and implemented `IThemeAwareView` to guarantee high-contrast and light/dark theme fidelity.
+- [Real-Time Localization]: Implemented `ILocalizableView` on `RoadmapPage` with reactive re-rendering on runtime language switches.
+- [Memory Safety]: Added cleanup on page unloading, unhooking ViewModel `PropertyChanged` handlers to prevent memory leaks during long-running desktop sessions.
+- [Navigation Cohesion]: Synchronized `ShellPage.ContentFrame.Navigated` handler to reliably highlight `NavItemRoadmap` during forward/back navigation.
+
+### Tested & Verified
+- Upgraded automated test suite to **439 / 439 Tests Passing** (388 Unit Tests + 51 Integration Tests) with 0 compiler warnings and 0 errors.
 
 ## [1.4.1] - 2026-10-28
 

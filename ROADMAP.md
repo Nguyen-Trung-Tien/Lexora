@@ -67,8 +67,11 @@ gantt
   - Kho lưu trữ chuyên biệt cho từ vựng và ngữ pháp trọng tâm theo lý do thêm, trạng thái ghi nhớ và chu kỳ ôn tập riêng biệt.
 - [x] **Production Software Update System**:
   - Tự động kiểm tra bản cập nhật qua GitHub Releases, snapshot SQLite bảo vệ dữ liệu và bàn giao silent installer Inno Setup.
+- [x] **Interactive Learning Roadmap & Adaptive Study Pathways**:
+  - Trực quan hóa lộ trình học cá nhân hóa với đường cong Bézier spline mượt mà, phân hệ mục tiêu TOEIC / IELTS / VSTEP.
+  - Tự động mở khóa chặng học (Milestone unlocking) dựa trên điều kiện tiên quyết và hiệu chỉnh độ khó SM-2 Ease Factor ban đầu theo khoảng cách điểm mục tiêu.
 - [x] **Quality Gate Benchmark**:
-  - Nâng cấp bộ kiểm thử lên **390 / 390 Automated Tests** (339 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
+  - Nâng cấp bộ kiểm thử lên **439 / 439 Automated Tests** (388 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
 - [x] **Automated CI/CD Quality Gates & DevSecOps Skills**:
   - Thiết lập GitHub Actions workflow (`changelog-enforcer.yml`, `agent-quality-gate.yml`) cùng bộ 8 agent skills chuẩn hóa.
 

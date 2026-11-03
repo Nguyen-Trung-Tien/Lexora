@@ -30,6 +30,11 @@
                         <FontIcon Glyph="&#xE80F;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemRoadmap" Content="Roadmap" Tag="Roadmap" ToolTipService.ToolTip="Roadmap (Ctrl+9)">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE81C;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
 
                 <!-- 2. Knowledge & Vocabulary Group -->
                 <NavigationViewItemHeader x:Name="NavHeaderLearning" Content="HỌC TẬP &amp; KHO TỪ" />

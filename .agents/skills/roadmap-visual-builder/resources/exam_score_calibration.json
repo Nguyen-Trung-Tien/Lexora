@@ -1,0 +1,29 @@
+{
+  "calibrations": [
+    {
+      "target": "Toeic",
+      "bands": [
+        { "minScore": 0, "maxScore": 500, "initialEaseFactor": 2.5, "weeksRecommended": 8 },
+        { "minScore": 505, "maxScore": 750, "initialEaseFactor": 2.3, "weeksRecommended": 12 },
+        { "minScore": 755, "maxScore": 990, "initialEaseFactor": 2.1, "weeksRecommended": 16 }
+      ]
+    },
+    {
+      "target": "Ielts",
+      "bands": [
+        { "minScore": 4.0, "maxScore": 6.0, "initialEaseFactor": 2.5, "weeksRecommended": 10 },
+        { "minScore": 6.5, "maxScore": 7.5, "initialEaseFactor": 2.3, "weeksRecommended": 14 },
+        { "minScore": 8.0, "maxScore": 9.0, "initialEaseFactor": 2.0, "weeksRecommended": 20 }
+      ]
+    },
+    {
+      "target": "Vstep",
+      "bands": [
+        { "minScore": 0, "maxScore": 6.0, "initialEaseFactor": 2.5, "weeksRecommended": 8 },
+        { "minScore": 6.5, "maxScore": 8.0, "initialEaseFactor": 2.3, "weeksRecommended": 12 },
+        { "minScore": 8.5, "maxScore": 10.0, "initialEaseFactor": 2.1, "weeksRecommended": 16 }
+      ]
+    }
+  ]
+}
+

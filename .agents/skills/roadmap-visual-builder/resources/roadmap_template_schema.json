@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RoadmapTemplateSchema",
+  "type": "object",
+  "required": ["title", "target", "milestones"],
+  "properties": {
+    "title": { "type": "string" },
+    "target": { "type": "string", "enum": ["Toeic", "Ielts", "Vstep"] },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "nodes"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["title", "type", "targetItemCount"],
+              "properties": {
+                "title": { "type": "string" },
+                "description": { "type": "string" },
+                "type": { "type": "string", "enum": ["VocabularySet", "GrammarPoint", "MockTest", "Checkpoint"] },
+                "targetItemCount": { "type": "integer", "minimum": 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
