@@ -1,4 +1,4 @@
-using Lexora.Presentation.Services;
+﻿using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -364,12 +364,15 @@ public sealed partial class ShellPage : Page
         var navTargets = new[]
         {
             (Key: "dashboard", Page: "Dashboard", Title: _localizationService.GetString("Nav_Dashboard"), Subtitle: _localizationService.GetString("Search_SmartNav_Dashboard"), Glyph: "\uE80F"),
+            (Key: "roadmap", Page: "Roadmap", Title: _localizationService.GetString("Nav_Roadmap"), Subtitle: _localizationService.GetString("Roadmap_Subtitle"), Glyph: "\uE81C"),
             (Key: "vocabulary", Page: "Vocabulary", Title: _localizationService.GetString("Nav_Vocabulary"), Subtitle: _localizationService.GetString("Search_SmartNav_Vocab"), Glyph: "\uE82D"),
             (Key: "homophones", Page: "Homophones", Title: _localizationService.GetString("Nav_Homophones"), Subtitle: _localizationService.GetString("Search_SmartNav_Homophones"), Glyph: "\uE768"),
+            (Key: "knowledgegraph", Page: "KnowledgeGraph", Title: _localizationService.GetString("Nav_KnowledgeGraph"), Subtitle: _localizationService.GetString("KnowledgeGraph_Subtitle"), Glyph: "\uE81E"),
             (Key: "review", Page: "Review", Title: _localizationService.GetString("Nav_Review"), Subtitle: _localizationService.GetString("Search_SmartNav_Review"), Glyph: "\uE895"),
             (Key: "test", Page: "Test", Title: _localizationService.GetString("Nav_Test"), Subtitle: _localizationService.GetString("Search_SmartNav_Test"), Glyph: "\uE765"),
             (Key: "grammar", Page: "Grammar", Title: _localizationService.GetString("Nav_Grammar"), Subtitle: _localizationService.GetString("Search_SmartNav_Grammar"), Glyph: "\uE8D2"),
             (Key: "storage", Page: "LearningStorage", Title: _localizationService.GetString("Nav_LearningStorage"), Subtitle: _localizationService.GetString("Search_SmartNav_LearningStorage"), Glyph: "\uE7B8"),
+            (Key: "help", Page: "Help", Title: _localizationService.GetString("Nav_Help"), Subtitle: _localizationService.GetString("Help_Subtitle"), Glyph: "\uE9CE"),
             (Key: "settings", Page: "Settings", Title: _localizationService.GetString("Nav_Settings"), Subtitle: _localizationService.GetString("Search_SmartNav_Settings"), Glyph: "\uE713")
         };
 
@@ -407,7 +410,7 @@ public sealed partial class ShellPage : Page
                 suggestions.Add(new SmartSearchSuggestion
                 {
                     Title = word.Term,
-                    Subtitle = string.IsNullOrWhiteSpace(word.PrimaryDefinition) ? posLabel : $"{posLabel} • {word.PrimaryDefinition}",
+                    Subtitle = string.IsNullOrWhiteSpace(word.PrimaryDefinition) ? posLabel : $"{posLabel} â€¢ {word.PrimaryDefinition}",
                     Glyph = "\uE8BD",
                     SearchTerm = word.Term,
                     TargetType = "Word"
@@ -424,8 +427,8 @@ public sealed partial class ShellPage : Page
             foreach (var rule in matchingRules.Take(4))
             {
                 var sub = !string.IsNullOrWhiteSpace(rule.Structure)
-                    ? $"{prefix} • {rule.Structure}"
-                    : (!string.IsNullOrWhiteSpace(rule.ExplanationVi) ? $"{prefix} • {rule.ExplanationVi}" : prefix);
+                    ? $"{prefix} â€¢ {rule.Structure}"
+                    : (!string.IsNullOrWhiteSpace(rule.ExplanationVi) ? $"{prefix} â€¢ {rule.ExplanationVi}" : prefix);
 
                 suggestions.Add(new SmartSearchSuggestion
                 {
@@ -462,7 +465,7 @@ public sealed partial class ShellPage : Page
                         suggestions.Add(new SmartSearchSuggestion
                         {
                             Title = s,
-                            Subtitle = $"{closestLabel} • {prefix}",
+                            Subtitle = $"{closestLabel} â€¢ {prefix}",
                             Glyph = "\uE8D2",
                             SearchTerm = s,
                             TargetType = "Grammar"
@@ -511,6 +514,18 @@ public sealed partial class ShellPage : Page
                     case "Dashboard":
                         _navigationService.Navigate(typeof(DashboardPage));
                         NavView.SelectedItem = NavItemDashboard;
+                        break;
+                    case "Roadmap":
+                        _navigationService.Navigate(typeof(RoadmapPage));
+                        NavView.SelectedItem = NavItemRoadmap;
+                        break;
+                    case "KnowledgeGraph":
+                        _navigationService.Navigate(typeof(KnowledgeGraphPage));
+                        NavView.SelectedItem = NavItemKnowledgeGraph;
+                        break;
+                    case "Help":
+                        _navigationService.Navigate(typeof(HelpPage));
+                        NavView.SelectedItem = NavItemHelp;
                         break;
                     case "Vocabulary":
                         _navigationService.Navigate(typeof(VocabularyPage));

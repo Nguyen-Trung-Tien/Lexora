@@ -58,10 +58,24 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         }
     }
 
-    private void SearchDebounceTimer_Tick(object? sender, object e)
+    private async void SearchDebounceTimer_Tick(object? sender, object e)
     {
         _searchDebounceTimer.Stop();
-        ViewModel.SearchQuery = SearchBox.Text;
+        var query = SearchBox.Text;
+        ViewModel.SearchQuery = query;
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var suggestions = await ViewModel.GetSearchSuggestionsAsync(query);
+            if (string.Equals(SearchBox.Text, query, StringComparison.Ordinal))
+            {
+                SearchBox.ItemsSource = suggestions.Count > 0 ? suggestions : null;
+            }
+        }
+        else
+        {
+            SearchBox.ItemsSource = null;
+        }
     }
 
     protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
@@ -106,22 +120,16 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         UpdateDetailView();
     }
 
-    private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
+    private void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
     {
         if (e.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
         {
-            _searchDebounceTimer.Stop();
-            _searchDebounceTimer.Start();
-
-            if (!string.IsNullOrWhiteSpace(sender.Text))
-            {
-                var suggestions = await ViewModel.GetSearchSuggestionsAsync(sender.Text);
-                sender.ItemsSource = suggestions.Count > 0 ? suggestions : null;
-            }
-            else
+            if (string.IsNullOrWhiteSpace(sender.Text))
             {
                 sender.ItemsSource = null;
             }
+            _searchDebounceTimer.Stop();
+            _searchDebounceTimer.Start();
         }
         else if (e.Reason == AutoSuggestionBoxTextChangeReason.ProgrammaticChange)
         {

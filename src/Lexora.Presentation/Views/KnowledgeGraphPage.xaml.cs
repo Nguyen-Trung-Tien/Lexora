@@ -21,6 +21,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
     public KnowledgeGraphViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
     private readonly IToastNotificationService? _toastService;
+    private CancellationTokenSource? _headerSearchCts;
 
     public KnowledgeGraphPage()
         : this(
@@ -373,7 +374,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         {
             Background = ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush"),
             BorderBrush = isCenterSelected
-                ? new SolidColorBrush(Microsoft.UI.Colors.White)
+                ? ThemeResourceHelper.GetThemeBrush(this, "TextOnAccentFillColorPrimaryBrush")
                 : ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
             BorderThickness = new Thickness(isCenterSelected ? 3.0 : 1.5),
             CornerRadius = new CornerRadius(14),
@@ -485,8 +486,26 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
     {
         if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
         {
-            await ViewModel.SearchSuggestionsAsync(sender.Text);
-            sender.ItemsSource = ViewModel.SearchSuggestions;
+            _headerSearchCts?.Cancel();
+            _headerSearchCts?.Dispose();
+            var cts = new CancellationTokenSource();
+            _headerSearchCts = cts;
+
+            try
+            {
+                await Task.Delay(180, cts.Token);
+                if (cts.IsCancellationRequested) return;
+
+                await ViewModel.SearchSuggestionsAsync(sender.Text);
+                if (!cts.IsCancellationRequested)
+                {
+                    sender.ItemsSource = ViewModel.SearchSuggestions;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Ignore cancelled keystroke debounce
+            }
         }
     }
 

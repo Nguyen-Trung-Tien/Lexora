@@ -64,6 +64,12 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
 
     private void HelpPage_Loaded(object sender, RoutedEventArgs e)
     {
+        ActualThemeChanged -= _themeChangedHandler;
+        ActualThemeChanged += _themeChangedHandler;
+
+        ViewModel.PropertyChanged -= _propChangedHandler;
+        ViewModel.PropertyChanged += _propChangedHandler;
+
         UpdateFilterPillsState();
         DispatcherQueue.TryEnqueue(UpdateScrollButtonsVisibility);
     }

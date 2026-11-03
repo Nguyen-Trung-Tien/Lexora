@@ -64,6 +64,9 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         base.OnNavigatedTo(e);
         try
         {
+            ViewModel.PropertyChanged -= _propChangedHandler;
+            ViewModel.PropertyChanged += _propChangedHandler;
+
             OnLanguageChanged();
             await ViewModel.InitializeAsync();
             RenderRoadmapGraph();
@@ -78,12 +81,70 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
     {
         try
         {
-            await ViewModel.InitializeAsync();
+            ViewModel.PropertyChanged -= _propChangedHandler;
+            ViewModel.PropertyChanged += _propChangedHandler;
+
+            UpdateResponsiveLayout(ActualWidth);
+
+            if (!ViewModel.HasActiveRoadmap && ViewModel.VisualNodes.Count == 0 && !ViewModel.IsLoading)
+            {
+                await ViewModel.InitializeAsync();
+            }
             RenderRoadmapGraph();
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[RoadmapPage] Page_Loaded error: {ex.Message}");
+        }
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateResponsiveLayout(e.NewSize.Width);
+    }
+
+    private void UpdateResponsiveLayout(double width)
+    {
+        if (width <= 0 || OverviewCardsGrid == null || RoadmapWorkspaceGrid == null) return;
+
+        bool isCompact = width < 1050;
+
+        // 1. Overview Cards: 4-columns on wide screens, 2x2 grid on compact screens
+        OverviewCardsGrid.ColumnDefinitions[2].Width = isCompact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        OverviewCardsGrid.ColumnDefinitions[3].Width = isCompact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+
+        Grid.SetRow(OverviewCard1, 0);
+        Grid.SetColumn(OverviewCard1, 0);
+
+        Grid.SetRow(OverviewCard2, 0);
+        Grid.SetColumn(OverviewCard2, 1);
+
+        Grid.SetRow(OverviewCard3, isCompact ? 1 : 0);
+        Grid.SetColumn(OverviewCard3, isCompact ? 0 : 2);
+
+        Grid.SetRow(OverviewCard4, isCompact ? 1 : 0);
+        Grid.SetColumn(OverviewCard4, isCompact ? 1 : 3);
+
+        // 2. Canvas + Inspector Workspace: Side-by-side on wide screens, stacked vertically on compact screens
+        if (isCompact)
+        {
+            RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(0);
+            Grid.SetRow(CanvasHostBorder, 0);
+            Grid.SetColumn(CanvasHostBorder, 0);
+
+            Grid.SetRow(InspectorHostBorder, 1);
+            Grid.SetColumn(InspectorHostBorder, 0);
+            InspectorHostBorder.Margin = new Thickness(0, 16, 0, 0);
+        }
+        else
+        {
+            RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(380);
+            Grid.SetRow(CanvasHostBorder, 0);
+            Grid.SetColumn(CanvasHostBorder, 0);
+
+            Grid.SetRow(InspectorHostBorder, 0);
+            Grid.SetColumn(InspectorHostBorder, 1);
+            InspectorHostBorder.Margin = new Thickness(16, 0, 0, 0);
         }
     }
 
@@ -293,7 +354,30 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         {
             if (s is Border b && b.Tag is RoadmapNodeDto clickedNode)
             {
+                try
+                {
+                    var animService = ConnectedAnimationService.GetForCurrentView();
+                    animService.PrepareToAnimate("nodeTransition", b);
+                }
+                catch
+                {
+                    // Ignore connected animation preparation errors on rapid clicks
+                }
+
                 ViewModel.SelectNode(clickedNode);
+
+                if (InspectorTitle != null)
+                {
+                    try
+                    {
+                        var anim = ConnectedAnimationService.GetForCurrentView().GetAnimation("nodeTransition");
+                        anim?.TryStart(InspectorTitle);
+                    }
+                    catch
+                    {
+                        // Ignore connected animation start errors
+                    }
+                }
             }
         };
 
@@ -349,7 +433,9 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         var contentPanel = new StackPanel
         {
             Spacing = 16,
-            Width = 360
+            MinWidth = 320,
+            MaxWidth = 440,
+            HorizontalAlignment = HorizontalAlignment.Stretch
         };
 
         contentPanel.Children.Add(new TextBlock { Text = ViewModel.Loc.GetString("Roadmap_ExamTarget"), Style = (Style)App.Current.Resources["CaptionTextBlockStyle"] });

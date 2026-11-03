@@ -607,9 +607,11 @@ public partial class TestViewModel : ObservableObject, IDisposable
                 }
             }
 
-            _ = SubmitAdaptiveAnswerAsync(selectedOptIndex, responseTime);
+            _pendingAdaptiveSubmitTask = SubmitAdaptiveAnswerAsync(selectedOptIndex, responseTime);
         }
     }
+
+    private Task? _pendingAdaptiveSubmitTask;
 
     private async Task SubmitAdaptiveAnswerAsync(int selectedOptionIndex, int responseTime)
     {
@@ -648,6 +650,12 @@ public partial class TestViewModel : ObservableObject, IDisposable
             }
             else if (IsAdaptiveMode && _adaptiveQuizService != null)
             {
+                if (_pendingAdaptiveSubmitTask != null)
+                {
+                    await _pendingAdaptiveSubmitTask;
+                    _pendingAdaptiveSubmitTask = null;
+                }
+
                 var nextQ = await _adaptiveQuizService.GetNextQuestionAsync(_sessionId);
                 if (nextQ != null)
                 {

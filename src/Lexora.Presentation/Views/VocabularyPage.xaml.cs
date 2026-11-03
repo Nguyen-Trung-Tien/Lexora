@@ -47,6 +47,8 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
             try
             {
                 _searchDebounceTimer.Stop();
+                var currentQuery = SearchBox?.Text ?? string.Empty;
+                await UpdateSearchSuggestionsAsync(currentQuery);
                 await ViewModel.LoadWordsAsync();
                 ViewModel.ApplyUnitFilter();
             }
@@ -298,14 +300,17 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         }
     }
 
-    private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
+    private void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
     {
         if (e.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
         {
             ViewModel.SearchTerm = sender.Text;
+            if (string.IsNullOrWhiteSpace(sender.Text) || sender.Text.Length < 2)
+            {
+                sender.ItemsSource = null;
+            }
             _searchDebounceTimer.Stop();
             _searchDebounceTimer.Start();
-            await UpdateSearchSuggestionsAsync(sender.Text);
         }
         else if (e.Reason == AutoSuggestionBoxTextChangeReason.ProgrammaticChange)
         {
