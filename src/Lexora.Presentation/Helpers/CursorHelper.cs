@@ -24,11 +24,24 @@ public static class CursorHelper
             typeof(CursorHelper),
             new PropertyMetadata(null, OnCursorChanged));
 
-    public static string? GetCursor(UIElement element) =>
+    public static string? GetCursor(DependencyObject element) =>
         (string?)element.GetValue(CursorProperty);
 
-    public static void SetCursor(UIElement element, string? value) =>
+    public static void SetCursor(DependencyObject element, string? value) =>
         element.SetValue(CursorProperty, value);
+
+    /// <summary>
+    /// Directly applies a hand/pointer cursor to the target UIElement.
+    /// </summary>
+    public static void ApplyHandCursor(UIElement? element)
+    {
+        if (element == null) return;
+        try
+        {
+            ProtectedCursorProperty?.SetValue(element, HandCursor.Value);
+        }
+        catch { }
+    }
 
     private static void OnCursorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

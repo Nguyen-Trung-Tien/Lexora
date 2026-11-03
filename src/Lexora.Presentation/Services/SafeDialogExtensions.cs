@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace Lexora.Presentation.Services;
 
@@ -109,6 +110,24 @@ public static class SafeDialogExtensions
                 // Guarantee absolute centering within the window/XamlRoot
                 dialog.HorizontalAlignment = HorizontalAlignment.Center;
                 dialog.VerticalAlignment = VerticalAlignment.Center;
+
+                // Optimize standard confirmation/notification dialogs (direct ContentDialog instances)
+                if (dialog.GetType() == typeof(ContentDialog))
+                {
+                    // Apply compact, balanced proportions (320px - 420px wide instead of bloated default)
+                    dialog.Resources["ContentDialogMinWidth"] = 320.0;
+                    dialog.Resources["ContentDialogMaxWidth"] = 420.0;
+                    dialog.CornerRadius = new CornerRadius(14);
+
+                    // Enhance raw string message into an elegant Fluent 2 card layout with contextual state icon
+                    if (dialog.Content is string textContent && !string.IsNullOrWhiteSpace(textContent))
+                    {
+                        dialog.Content = CreateCompactConfirmationContent(dialog.Title?.ToString(), textContent);
+                    }
+                }
+
+                // Ensure all dialog buttons inherit the hand pointer cursor upon rendering
+                dialog.Opened += Dialog_Opened_ApplyPointerCursor;
 
                 _currentlyActiveDialog = dialog;
                 var result = await dialog.ShowAsync();
@@ -233,6 +252,137 @@ public static class SafeDialogExtensions
         catch
         {
             // Ignore
+        }
+    }
+
+    private static UIElement CreateCompactConfirmationContent(string? title, string textMessage)
+    {
+        var isDestructive = (title != null && (
+            title.Contains("Xóa", StringComparison.OrdinalIgnoreCase) ||
+            title.Contains("Delete", StringComparison.OrdinalIgnoreCase) ||
+            title.Contains("Hủy", StringComparison.OrdinalIgnoreCase) ||
+            title.Contains("CẢNH BÁO", StringComparison.OrdinalIgnoreCase) ||
+            title.Contains("Warning", StringComparison.OrdinalIgnoreCase) ||
+            title.Contains("Remove", StringComparison.OrdinalIgnoreCase) ||
+            title.Contains("Nguy hiểm", StringComparison.OrdinalIgnoreCase)
+        )) || textMessage.Contains("CẢNH BÁO", StringComparison.OrdinalIgnoreCase)
+           || textMessage.Contains("bị thay thế", StringComparison.OrdinalIgnoreCase)
+           || textMessage.Contains("xóa vĩnh viễn", StringComparison.OrdinalIgnoreCase)
+           || textMessage.Contains("ghi đè", StringComparison.OrdinalIgnoreCase);
+
+        var stack = new StackPanel
+        {
+            Spacing = 12,
+            Margin = new Thickness(0, 4, 0, 4),
+            MaxWidth = 380
+        };
+
+        var rowGrid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+            },
+            ColumnSpacing = 12
+        };
+
+        var iconBorder = new Border
+        {
+            Width = 36,
+            Height = 36,
+            CornerRadius = new CornerRadius(10),
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Thickness(0, 1, 0, 0)
+        };
+
+        var icon = new FontIcon
+        {
+            FontSize = 16,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        if (isDestructive)
+        {
+            iconBorder.Background = TryGetThemeBrush("SystemFillColorCriticalBackgroundBrush");
+            iconBorder.BorderBrush = TryGetThemeBrush("SystemFillColorCriticalBrush");
+            iconBorder.BorderThickness = new Thickness(1);
+            icon.Glyph = "\uE74D"; // Trash / Delete
+            icon.Foreground = TryGetThemeBrush("SystemFillColorCriticalBrush");
+        }
+        else
+        {
+            iconBorder.Background = TryGetThemeBrush("SubtleFillColorSecondaryBrush");
+            iconBorder.BorderBrush = TryGetThemeBrush("CardStrokeColorDefaultBrush");
+            iconBorder.BorderThickness = new Thickness(1);
+            icon.Glyph = "\uE9CE"; // Info / Question
+            icon.Foreground = TryGetThemeBrush("AccentTextFillColorPrimaryBrush");
+        }
+
+        iconBorder.Child = icon;
+        Grid.SetColumn(iconBorder, 0);
+        rowGrid.Children.Add(iconBorder);
+
+        var textBlock = new TextBlock
+        {
+            Text = textMessage,
+            FontSize = 13,
+            LineHeight = 19,
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = TryGetThemeBrush("TextFillColorPrimaryBrush"),
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        Grid.SetColumn(textBlock, 1);
+        rowGrid.Children.Add(textBlock);
+
+        stack.Children.Add(rowGrid);
+        return stack;
+    }
+
+    private static Brush TryGetThemeBrush(string resourceKey)
+    {
+        if (App.Current?.Resources?.TryGetValue(resourceKey, out var res) == true && res is Brush brush)
+        {
+            return brush;
+        }
+
+        return resourceKey switch
+        {
+            "SystemFillColorCriticalBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 217, 45, 32)),
+            "SystemFillColorCriticalBackgroundBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(40, 217, 45, 32)),
+            "AccentTextFillColorPrimaryBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 102, 204)),
+            "SubtleFillColorSecondaryBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(25, 128, 128, 128)),
+            "CardStrokeColorDefaultBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(30, 128, 128, 128)),
+            "TextFillColorPrimaryBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 32, 32, 32)),
+            _ => new SolidColorBrush(Microsoft.UI.Colors.Transparent)
+        };
+    }
+
+    private static void Dialog_Opened_ApplyPointerCursor(ContentDialog sender, ContentDialogOpenedEventArgs args)
+    {
+        try
+        {
+            ApplyHandCursorRecursive(sender);
+        }
+        catch { }
+    }
+
+    private static void ApplyHandCursorRecursive(DependencyObject root)
+    {
+        int count = VisualTreeHelper.GetChildrenCount(root);
+        for (int i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is Button btn)
+            {
+                Helpers.CursorHelper.ApplyHandCursor(btn);
+            }
+            else if (child != null)
+            {
+                ApplyHandCursorRecursive(child);
+            }
         }
     }
 }
