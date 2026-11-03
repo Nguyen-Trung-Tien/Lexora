@@ -16,20 +16,25 @@ namespace Lexora.Presentation.Views;
 public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareView
 {
     public RoadmapViewModel ViewModel { get; }
-    public Lexora.Presentation.Services.ILocalizationService Loc => ViewModel.Loc;
+    public Lexora.Presentation.Services.ILocalizationService Loc { get; }
     private readonly System.ComponentModel.PropertyChangedEventHandler _propChangedHandler;
 
     public RoadmapPage()
     {
-        InitializeComponent();
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<RoadmapViewModel>();
+        Loc = App.Current.Services.GetRequiredService<Lexora.Presentation.Services.ILocalizationService>();
         DataContext = ViewModel;
+
+        InitializeComponent();
 
         _propChangedHandler = (s, e) =>
         {
-            if (e.PropertyName == nameof(ViewModel.ActiveRoadmap) || e.PropertyName == nameof(ViewModel.HasActiveRoadmap))
+            if (e.PropertyName == nameof(ViewModel.ActiveRoadmap) 
+                || e.PropertyName == nameof(ViewModel.HasActiveRoadmap)
+                || e.PropertyName == nameof(ViewModel.VisualNodes))
             {
-                DispatcherQueue.TryEnqueue(RenderRoadmapGraph);
+                DispatcherQueue?.TryEnqueue(RenderRoadmapGraph);
             }
         };
         ViewModel.PropertyChanged += _propChangedHandler;
@@ -54,10 +59,32 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         RenderRoadmapGraph();
     }
 
+    protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        try
+        {
+            OnLanguageChanged();
+            await ViewModel.InitializeAsync();
+            RenderRoadmapGraph();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[RoadmapPage] OnNavigatedTo error: {ex.Message}");
+        }
+    }
+
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await ViewModel.InitializeAsync();
-        RenderRoadmapGraph();
+        try
+        {
+            await ViewModel.InitializeAsync();
+            RenderRoadmapGraph();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[RoadmapPage] Page_Loaded error: {ex.Message}");
+        }
     }
 
     private Brush GetThemeBrush(string key)
@@ -68,96 +95,109 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
 
     private void RenderRoadmapGraph()
     {
-        if (RoadmapCanvas == null || ViewModel.VisualNodes.Count == 0)
+        try
         {
-            return;
-        }
-
-        // 1. Remove previously dynamically added node controls (keep the 2 track paths)
-        var childrenToRemove = RoadmapCanvas.Children
-            .Where(c => c != TrackSplinePath && c != ActiveSplinePath)
-            .ToList();
-
-        foreach (var child in childrenToRemove)
-        {
-            RoadmapCanvas.Children.Remove(child);
-        }
-
-        var nodes = ViewModel.VisualNodes.OrderBy(n => n.OrderIndex).ToList();
-        if (nodes.Count == 0) return;
-
-        // 2. Adjust Canvas Height dynamically based on bottom-most node
-        double maxY = nodes.Max(n => n.CanvasY) + 200;
-        RoadmapCanvas.Height = Math.Max(700, maxY);
-
-        // 3. Construct Smooth Bézier Spline Geometry
-        var trackGeometry = new PathGeometry();
-        var trackFigure = new PathFigure
-        {
-            StartPoint = new Point(nodes[0].CanvasX + 36, nodes[0].CanvasY + 36),
-            IsClosed = false
-        };
-
-        var activeGeometry = new PathGeometry();
-        var activeFigure = new PathFigure
-        {
-            StartPoint = new Point(nodes[0].CanvasX + 36, nodes[0].CanvasY + 36),
-            IsClosed = false
-        };
-
-        bool stillInActivePrefix = true;
-
-        for (int i = 0; i < nodes.Count - 1; i++)
-        {
-            var p0 = new Point(nodes[i].CanvasX + 36, nodes[i].CanvasY + 36);
-            var p1 = new Point(nodes[i + 1].CanvasX + 36, nodes[i + 1].CanvasY + 36);
-
-            double midY = (p0.Y + p1.Y) / 2.0;
-            var cp1 = new Point(p0.X, midY);
-            var cp2 = new Point(p1.X, midY);
-
-            var segment = new BezierSegment
+            if (RoadmapCanvas == null || ViewModel?.VisualNodes == null || ViewModel.VisualNodes.Count == 0)
             {
-                Point1 = cp1,
-                Point2 = cp2,
-                Point3 = p1
+                return;
+            }
+
+            // 1. Remove previously dynamically added node controls (keep the 2 track paths)
+            var childrenToRemove = RoadmapCanvas.Children
+                .Where(c => c != TrackSplinePath && c != ActiveSplinePath)
+                .ToList();
+
+            foreach (var child in childrenToRemove)
+            {
+                RoadmapCanvas.Children.Remove(child);
+            }
+
+            var nodes = ViewModel.VisualNodes.OrderBy(n => n.OrderIndex).ToList();
+            if (nodes.Count == 0) return;
+
+            // 2. Adjust Canvas Height dynamically based on bottom-most node
+            double maxY = nodes.Max(n => n.CanvasY) + 200;
+            RoadmapCanvas.Height = Math.Max(700, maxY);
+
+            // 3. Construct Smooth Bézier Spline Geometry
+            var trackGeometry = new PathGeometry();
+            var trackFigure = new PathFigure
+            {
+                StartPoint = new Point(nodes[0].CanvasX + 36, nodes[0].CanvasY + 36),
+                IsClosed = false
             };
-            trackFigure.Segments.Add(segment);
 
-            if (stillInActivePrefix)
+            var activeGeometry = new PathGeometry();
+            var activeFigure = new PathFigure
             {
-                if (nodes[i + 1].Status == NodeStatus.Mastered || nodes[i + 1].Status == NodeStatus.InProgress)
+                StartPoint = new Point(nodes[0].CanvasX + 36, nodes[0].CanvasY + 36),
+                IsClosed = false
+            };
+
+            bool stillInActivePrefix = true;
+
+            for (int i = 0; i < nodes.Count - 1; i++)
+            {
+                var p0 = new Point(nodes[i].CanvasX + 36, nodes[i].CanvasY + 36);
+                var p1 = new Point(nodes[i + 1].CanvasX + 36, nodes[i + 1].CanvasY + 36);
+
+                double midY = (p0.Y + p1.Y) / 2.0;
+                var cp1 = new Point(p0.X, midY);
+                var cp2 = new Point(p1.X, midY);
+
+                var segment = new BezierSegment
                 {
-                    activeFigure.Segments.Add(segment);
+                    Point1 = cp1,
+                    Point2 = cp2,
+                    Point3 = p1
+                };
+                trackFigure.Segments.Add(segment);
+
+                if (stillInActivePrefix)
+                {
+                    if (nodes[i + 1].Status == NodeStatus.Mastered || nodes[i + 1].Status == NodeStatus.InProgress)
+                    {
+                        activeFigure.Segments.Add(segment);
+                    }
+                    else
+                    {
+                        stillInActivePrefix = false;
+                    }
+                }
+            }
+
+            trackGeometry.Figures.Add(trackFigure);
+            if (TrackSplinePath != null)
+            {
+                TrackSplinePath.Data = trackGeometry;
+            }
+
+            if (ActiveSplinePath != null)
+            {
+                if (activeFigure.Segments.Count > 0)
+                {
+                    activeGeometry.Figures.Add(activeFigure);
+                    ActiveSplinePath.Data = activeGeometry;
+                    ActiveSplinePath.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    stillInActivePrefix = false;
+                    ActiveSplinePath.Visibility = Visibility.Collapsed;
                 }
             }
-        }
 
-        trackGeometry.Figures.Add(trackFigure);
-        TrackSplinePath.Data = trackGeometry;
-
-        if (activeFigure.Segments.Count > 0)
-        {
-            activeGeometry.Figures.Add(activeFigure);
-            ActiveSplinePath.Data = activeGeometry;
-            ActiveSplinePath.Visibility = Visibility.Visible;
+            // 4. Render Node Visual Cards along the Spline
+            foreach (var node in nodes)
+            {
+                var nodeElement = CreateNodeVisual(node);
+                Canvas.SetLeft(nodeElement, node.CanvasX);
+                Canvas.SetTop(nodeElement, node.CanvasY);
+                RoadmapCanvas.Children.Add(nodeElement);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            ActiveSplinePath.Visibility = Visibility.Collapsed;
-        }
-
-        // 4. Render Node Visual Cards along the Spline
-        foreach (var node in nodes)
-        {
-            var nodeElement = CreateNodeVisual(node);
-            Canvas.SetLeft(nodeElement, node.CanvasX);
-            Canvas.SetTop(nodeElement, node.CanvasY);
-            RoadmapCanvas.Children.Add(nodeElement);
+            System.Diagnostics.Debug.WriteLine($"[RoadmapPage] RenderRoadmapGraph error: {ex.Message}");
         }
     }
 
@@ -247,15 +287,11 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         stack.Children.Add(titleBlock);
         root.Child = stack;
 
-        // Interaction & Connected Animation
+        // Interaction
         root.PointerPressed += (s, e) =>
         {
             if (s is Border b && b.Tag is RoadmapNodeDto clickedNode)
             {
-                // Fluent 2 Connected Animation from Node to Inspector
-                var anim = ConnectedAnimationService.GetForCurrentView();
-                anim.PrepareToAnimate("nodeTransition", root);
-
                 ViewModel.SelectNode(clickedNode);
             }
         };

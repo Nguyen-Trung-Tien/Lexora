@@ -15,16 +15,16 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
     public async Task<StudyRoadmap?> GetActiveRoadmapWithDetailsAsync(CancellationToken cancellationToken = default)
     {
         return await Context.StudyRoadmaps
-            .Include(r => r.Milestones.OrderBy(m => m.OrderIndex))
-                .ThenInclude(m => m.Nodes.OrderBy(n => n.OrderIndex))
+            .Include(r => r.Milestones)
+                .ThenInclude(m => m.Nodes)
             .FirstOrDefaultAsync(r => r.IsActive, cancellationToken);
     }
 
     public async Task<StudyRoadmap?> GetRoadmapWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await Context.StudyRoadmaps
-            .Include(r => r.Milestones.OrderBy(m => m.OrderIndex))
-                .ThenInclude(m => m.Nodes.OrderBy(n => n.OrderIndex))
+            .Include(r => r.Milestones)
+                .ThenInclude(m => m.Nodes)
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }
 

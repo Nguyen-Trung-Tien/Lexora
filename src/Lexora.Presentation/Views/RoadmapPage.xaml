@@ -84,7 +84,7 @@
                             </StackPanel>
                             <ProgressBar
                                 Maximum="100"
-                                Value="{x:Bind ViewModel.ActiveRoadmap.OverallProgress, Mode=OneWay}" />
+                                Value="{x:Bind ViewModel.ActiveRoadmap.OverallProgress, Mode=OneWay, FallbackValue=0}" />
                         </StackPanel>
                     </Border>
 
@@ -105,7 +105,7 @@
                                 <TextBlock
                                     FontWeight="SemiBold"
                                     Style="{ThemeResource SubtitleTextBlockStyle}"
-                                    Text="{x:Bind ViewModel.ActiveRoadmap.Target, Mode=OneWay}" />
+                                    Text="{x:Bind ViewModel.ActiveRoadmap.Target, Mode=OneWay, FallbackValue=''}" />
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
@@ -318,7 +318,7 @@
                                 </Grid>
                                 <ProgressBar
                                     Maximum="100"
-                                    Value="{x:Bind ViewModel.SelectedNode.ProgressPercentage, Mode=OneWay}" />
+                                    Value="{x:Bind ViewModel.SelectedNode.ProgressPercentage, Mode=OneWay, FallbackValue=0}" />
 
                                 <Grid Margin="0,8,0,0">
                                     <TextBlock

@@ -100,6 +100,65 @@ public class SqliteDatabaseTests : IDisposable
         streak.LastActiveDate.Should().Be(tomorrow);
     }
 
+    [Fact]
+    public async Task RoadmapRepository_GetActiveRoadmapWithDetailsAsync_ShouldPersistAndQueryCorrectly()
+    {
+        // Arrange
+        var initializer = new SqliteDatabaseInitializer(_context, NullLogger<SqliteDatabaseInitializer>.Instance);
+        await initializer.InitializeAsync();
+
+        var repo = new RoadmapRepository(_context);
+        var unitOfWork = new UnitOfWork(_context);
+
+        var roadmap = new StudyRoadmap
+        {
+            Title = "TOEIC 750 Test",
+            Target = ExamTarget.Toeic,
+            StartingScore = 450,
+            TargetScore = 750,
+            TargetDate = DateTime.UtcNow.AddMonths(3),
+            IsActive = true
+        };
+
+        var milestone = new RoadmapMilestone
+        {
+            RoadmapId = roadmap.Id,
+            Title = "Foundation Phase",
+            OrderIndex = 0,
+            IsCompleted = false
+        };
+
+        var node = new RoadmapNode
+        {
+            MilestoneId = milestone.Id,
+            Title = "Office Vocab",
+            Type = RoadmapNodeType.VocabularySet,
+            Status = NodeStatus.Available,
+            OrderIndex = 0,
+            CanvasX = 180,
+            CanvasY = 80,
+            TargetItemCount = 30,
+            CompletedItemCount = 10,
+            EaseFactorWeight = 2.5
+        };
+
+        milestone.Nodes.Add(node);
+        roadmap.Milestones.Add(milestone);
+
+        await repo.AddAsync(roadmap);
+        await unitOfWork.SaveChangesAsync();
+
+        // Act
+        var active = await repo.GetActiveRoadmapWithDetailsAsync();
+
+        // Assert
+        active.Should().NotBeNull();
+        active!.Title.Should().Be("TOEIC 750 Test");
+        active.Milestones.Should().HaveCount(1);
+        active.Milestones.First().Nodes.Should().HaveCount(1);
+        active.Milestones.First().Nodes.First().Title.Should().Be("Office Vocab");
+    }
+
     public void Dispose()
     {
         _context.Dispose();

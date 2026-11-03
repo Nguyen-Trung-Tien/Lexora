@@ -103,6 +103,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
                     }
                 }
             }
+            OnPropertyChanged(nameof(VisualNodes));
         }
         catch (Exception ex)
         {
@@ -143,6 +144,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
                     }
                 }
             }
+            OnPropertyChanged(nameof(VisualNodes));
 
             IsNodeDetailOpen = false;
             SelectedNode = null;
