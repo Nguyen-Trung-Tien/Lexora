@@ -48,13 +48,31 @@ public class Repository<T> : IRepository<T> where T : Entity
         var entry = Context.Entry(entity);
         if (entry.State == EntityState.Detached)
         {
-            DbSet.Update(entity);
+            var tracked = Context.ChangeTracker.Entries<T>().FirstOrDefault(e => e.Entity.Id == entity.Id);
+            if (tracked != null)
+            {
+                tracked.CurrentValues.SetValues(entity);
+            }
+            else
+            {
+                DbSet.Update(entity);
+            }
         }
         return Task.CompletedTask;
     }
 
     public virtual Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
     {
+        var entry = Context.Entry(entity);
+        if (entry.State == EntityState.Detached)
+        {
+            var tracked = Context.ChangeTracker.Entries<T>().FirstOrDefault(e => e.Entity.Id == entity.Id);
+            if (tracked != null)
+            {
+                DbSet.Remove(tracked.Entity);
+                return Task.CompletedTask;
+            }
+        }
         DbSet.Remove(entity);
         return Task.CompletedTask;
     }

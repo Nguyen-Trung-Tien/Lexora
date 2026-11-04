@@ -40,12 +40,7 @@ public class RoadmapService : IRoadmapService
         ArgumentNullException.ThrowIfNull(request);
 
         // 1. Deactivate all existing active roadmaps
-        var allActive = await _roadmapRepository.FindAsync(r => r.IsActive, cancellationToken);
-        foreach (var active in allActive)
-        {
-            active.IsActive = false;
-            await _roadmapRepository.UpdateAsync(active, cancellationToken);
-        }
+        await _roadmapRepository.DeactivateAllRoadmapsAsync(cancellationToken);
 
         // 2. Fetch available Topics & Grammar Rules to bind real entities
         IReadOnlyList<Topic>? availableTopics = null;
@@ -345,18 +340,13 @@ public class RoadmapService : IRoadmapService
 
     public async Task SetActiveRoadmapAsync(Guid roadmapId, CancellationToken cancellationToken = default)
     {
-        var roadmaps = await _roadmapRepository.GetAllAsync(cancellationToken);
-        foreach (var r in roadmaps)
-        {
-            r.IsActive = (r.Id == roadmapId);
-            await _roadmapRepository.UpdateAsync(r, cancellationToken);
-        }
+        await _roadmapRepository.SetActiveRoadmapAsync(roadmapId, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteRoadmapAsync(Guid roadmapId, CancellationToken cancellationToken = default)
     {
-        var roadmap = await _roadmapRepository.GetByIdAsync(roadmapId, cancellationToken);
+        var roadmap = await _roadmapRepository.GetRoadmapWithDetailsAsync(roadmapId, cancellationToken);
         if (roadmap != null)
         {
             await _roadmapRepository.DeleteAsync(roadmap, cancellationToken);

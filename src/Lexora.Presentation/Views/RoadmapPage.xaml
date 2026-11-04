@@ -367,21 +367,9 @@
                 <Grid
                     HorizontalAlignment="Stretch"
                     Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <Button
-                            Click="SwitchToMapView_Click"
-                            Style="{x:Bind ViewModel.IsMapView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <!-- Handled in code-behind for active button styling -->
-                        </Button>
-                    </StackPanel>
-
                     <!-- Mode Toggle Segmented Pills -->
                     <Border
+                        HorizontalAlignment="Left"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"

@@ -9,5 +9,7 @@ public interface IRoadmapRepository : IRepository<StudyRoadmap>
     Task<StudyRoadmap?> GetRoadmapWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StudyRoadmap>> GetRoadmapsByTargetAsync(ExamTarget target, CancellationToken cancellationToken = default);
     Task UpdateNodeStatusAsync(Guid nodeId, NodeStatus status, int completedItems, CancellationToken cancellationToken = default);
+    Task DeactivateAllRoadmapsAsync(CancellationToken cancellationToken = default);
+    Task SetActiveRoadmapAsync(Guid roadmapId, CancellationToken cancellationToken = default);
 }
 

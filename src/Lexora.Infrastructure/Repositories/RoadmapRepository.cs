@@ -48,5 +48,23 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
             await Context.SaveChangesAsync(cancellationToken);
         }
     }
+
+    public async Task DeactivateAllRoadmapsAsync(CancellationToken cancellationToken = default)
+    {
+        var activeRoadmaps = await Context.StudyRoadmaps.Where(r => r.IsActive).ToListAsync(cancellationToken);
+        foreach (var r in activeRoadmaps)
+        {
+            r.IsActive = false;
+        }
+    }
+
+    public async Task SetActiveRoadmapAsync(Guid roadmapId, CancellationToken cancellationToken = default)
+    {
+        var all = await Context.StudyRoadmaps.ToListAsync(cancellationToken);
+        foreach (var r in all)
+        {
+            r.IsActive = (r.Id == roadmapId);
+        }
+    }
 }
 
