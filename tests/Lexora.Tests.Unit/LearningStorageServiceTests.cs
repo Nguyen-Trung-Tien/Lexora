@@ -619,4 +619,64 @@ public class LearningStorageServiceTests
         // Assert
         callCount.Should().Be(0);
     }
+
+    [Fact]
+    public async Task MoveWordsToStorageAsync_WhenBatchAdded_ShouldExcludeAlreadyStoredWordFromSubsequentQueries()
+    {
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var word1 = new Word { Id = id1, Term = "perspicacious" };
+        var storedSet = new HashSet<Guid>();
+
+        _mockStorageRepo.Setup(r => r.GetByWordIdAsync(id1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => storedSet.Contains(id1) ? new LearningStorageItem { WordId = id1 } : null);
+        _mockVocabRepo.Setup(r => r.GetWithDetailsAsync(id1, It.IsAny<CancellationToken>())).ReturnsAsync(word1);
+        _mockStorageRepo.Setup(r => r.AddAsync(It.IsAny<LearningStorageItem>(), It.IsAny<CancellationToken>()))
+            .Callback<LearningStorageItem, CancellationToken>((item, _) => storedSet.Add(item.WordId!.Value))
+            .ReturnsAsync((LearningStorageItem item, CancellationToken _) => item);
+        _mockStorageRepo.Setup(r => r.GetStoredWordIdsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => storedSet);
+
+        // Act 1: Initial check
+        var initialIds = await _service.GetStoredWordIdsAsync();
+        initialIds.Should().NotContain(id1);
+
+        // Act 2: Add word to storage
+        var added = await _service.MoveWordsToStorageAsync(new[] { id1 }, StorageAdditionReason.Manual);
+        added.Should().Be(1);
+
+        // Act 3: Verify stored set now excludes it from candidates
+        var updatedIds = await _service.GetStoredWordIdsAsync();
+        updatedIds.Should().Contain(id1);
+    }
+
+    [Fact]
+    public async Task MoveGrammarsToStorageAsync_WhenBatchAdded_ShouldExcludeAlreadyStoredRuleFromSubsequentQueries()
+    {
+        // Arrange
+        var gId = Guid.NewGuid();
+        var rule = new GrammarRule { Id = gId, Title = "Inversion with Negative Adverbials", Structure = "Never + Aux + S + V" };
+        var storedSet = new HashSet<Guid>();
+
+        _mockStorageRepo.Setup(r => r.GetByGrammarRuleIdAsync(gId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => storedSet.Contains(gId) ? new LearningStorageItem { GrammarRuleId = gId } : null);
+        _mockGrammarRepo.Setup(r => r.GetWithExamplesAsync(gId, It.IsAny<CancellationToken>())).ReturnsAsync(rule);
+        _mockStorageRepo.Setup(r => r.AddAsync(It.IsAny<LearningStorageItem>(), It.IsAny<CancellationToken>()))
+            .Callback<LearningStorageItem, CancellationToken>((item, _) => storedSet.Add(item.GrammarRuleId!.Value))
+            .ReturnsAsync((LearningStorageItem item, CancellationToken _) => item);
+        _mockStorageRepo.Setup(r => r.GetStoredGrammarRuleIdsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => storedSet);
+
+        // Act 1: Initial check
+        var initialIds = await _service.GetStoredGrammarRuleIdsAsync();
+        initialIds.Should().NotContain(gId);
+
+        // Act 2: Add grammar rule to storage
+        var added = await _service.MoveGrammarsToStorageAsync(new[] { gId }, StorageAdditionReason.Manual);
+        added.Should().Be(1);
+
+        // Act 3: Verify stored set now excludes it from candidates
+        var updatedIds = await _service.GetStoredGrammarRuleIdsAsync();
+        updatedIds.Should().Contain(gId);
+    }
 }

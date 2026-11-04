@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Lexora.Presentation.Views.GrammarPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -258,8 +258,18 @@
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="0,0,0,1" Padding="12,8">
                         <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
-                            <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllRules_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
-                            <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllRules_Click" CornerRadius="6" Padding="8,4" FontSize="12" />
+                            <Button Click="SelectAllRules_Click" CornerRadius="6" Padding="8,4" FontSize="12">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon Glyph="&#xE762;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Action_SelectAll')}" />
+                                </StackPanel>
+                            </Button>
+                            <Button Grid.Column="1" Click="DeselectAllRules_Click" CornerRadius="6" Padding="8,4" FontSize="12">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon Glyph="&#xE894;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Action_DeselectAll')}" />
+                                </StackPanel>
+                            </Button>
                             <Button Grid.Column="3" x:Name="BtnDeleteSelectedRules"
                                     Click="DeleteSelectedRules_Click"
                                     IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"

@@ -179,7 +179,7 @@
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_ListeningLab')}">
                         <StackPanel Orientation="Horizontal" Spacing="5">
                             <FontIcon Glyph="&#xE767;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_TabDictation')}" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_BtnListeningLab')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                     </Button>
 
@@ -369,9 +369,14 @@
                         <Border Width="1" Height="20" Background="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" Margin="2,0" />
 
                         <!-- Reset + Word Count -->
-                        <Button Content="{x:Bind Loc.GetString('Action_Reset')}" Click="ResetFiltersButton_Click"
+                        <Button Click="ResetFiltersButton_Click"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Reset')}"
-                                CornerRadius="6" Padding="10,5" Height="32" FontSize="11" />
+                                CornerRadius="6" Padding="10,5" Height="32" FontSize="11">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE777;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Action_Reset')}" />
+                            </StackPanel>
+                        </Button>
 
                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6"
                                 Padding="8,0" Height="32" VerticalAlignment="Center">
@@ -1080,8 +1085,18 @@
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="10" Padding="12,8">
                         <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
-                            <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllUnits_Click" CornerRadius="6" Padding="10,5" FontSize="12" />
-                            <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllUnits_Click" CornerRadius="6" Padding="10,5" FontSize="12" />
+                            <Button Click="SelectAllUnits_Click" CornerRadius="6" Padding="10,5" FontSize="12">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon Glyph="&#xE762;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Action_SelectAll')}" />
+                                </StackPanel>
+                            </Button>
+                            <Button Grid.Column="1" Click="DeselectAllUnits_Click" CornerRadius="6" Padding="10,5" FontSize="12">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon Glyph="&#xE894;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Action_DeselectAll')}" />
+                                </StackPanel>
+                            </Button>
                             <TextBlock Grid.Column="2" x:Name="TextSelectedUnitsCount"
                                        VerticalAlignment="Center" Margin="8,0,0,0" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

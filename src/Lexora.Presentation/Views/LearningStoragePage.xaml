@@ -29,12 +29,22 @@
 
                 <!-- 1. Top Header -->
                 <Grid x:Name="TopHeaderGrid" ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                    <StackPanel Spacing="3" VerticalAlignment="Center">
-                        <TextBlock Text="{x:Bind Loc.GetString('Storage_Title')}"
-                                   Style="{StaticResource LexoraHeroHeaderStyle}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{x:Bind Loc.GetString('Storage_Subtitle')}"
-                                   Style="{StaticResource LexoraBodyStyle}" TextTrimming="CharacterEllipsis"
-                                   MaxWidth="560" />
+                    <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                        <Border Width="42" Height="42" CornerRadius="12"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1">
+                            <FontIcon Glyph="&#xE81C;" FontSize="20"
+                                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Loc.GetString('Storage_Title')}"
+                                       Style="{StaticResource LexoraHeroHeaderStyle}" FontSize="22" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Storage_Subtitle')}"
+                                       Style="{StaticResource LexoraBodyStyle}" TextTrimming="CharacterEllipsis"
+                                       MaxWidth="580" />
+                        </StackPanel>
                     </StackPanel>
 
                     <!-- Top Action Buttons -->
@@ -293,8 +303,18 @@
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="10" Padding="12,8">
                     <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
-                        <Button Content="{x:Bind Loc.GetString('Action_SelectAll')}" Click="SelectAllItems_Click" CornerRadius="6" Padding="10,5" FontSize="12" />
-                        <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Action_DeselectAll')}" Click="DeselectAllItems_Click" CornerRadius="6" Padding="10,5" FontSize="12" />
+                        <Button Click="SelectAllItems_Click" CornerRadius="6" Padding="10,5" FontSize="12">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE762;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Action_SelectAll')}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="1" Click="DeselectAllItems_Click" CornerRadius="6" Padding="10,5" FontSize="12">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE894;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Action_DeselectAll')}" />
+                            </StackPanel>
+                        </Button>
                         <Button Grid.Column="3" x:Name="BtnDeleteSelectedItems"
                                 Click="DeleteSelectedItems_Click"
                                 IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
@@ -618,18 +638,24 @@
                                 <!-- Bottom Controls in Practice -->
                                 <Grid Margin="0,6,0,0">
                                     <Button Style="{ThemeResource AccentButtonStyle}"
-                                            HorizontalAlignment="Right" CornerRadius="8" Padding="20,10"
+                                            HorizontalAlignment="Right" CornerRadius="8" Padding="18,8"
                                             IsEnabled="{x:Bind ViewModel.HasSelectedPracticeAnswer, Mode=OneWay}"
                                             Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                             Click="SubmitPractice_Click">
-                                        <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Submit')}" FontWeight="SemiBold" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="12.5" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Submit')}" FontWeight="SemiBold" FontSize="13" />
+                                        </StackPanel>
                                     </Button>
 
                                     <Button Style="{ThemeResource AccentButtonStyle}"
-                                            HorizontalAlignment="Right" CornerRadius="8" Padding="20,10"
+                                            HorizontalAlignment="Right" CornerRadius="8" Padding="18,8"
                                             Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                                             Click="NextPractice_Click">
-                                        <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Next')}" FontWeight="SemiBold" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Next')}" FontWeight="SemiBold" FontSize="13" />
+                                            <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                                        </StackPanel>
                                     </Button>
                                 </Grid>
                             </StackPanel>
@@ -653,9 +679,12 @@
                                 </Border>
 
                                 <Button Style="{ThemeResource AccentButtonStyle}"
-                                        HorizontalAlignment="Center" CornerRadius="8" Padding="24,10"
+                                        HorizontalAlignment="Center" CornerRadius="8" Padding="22,9"
                                         Click="ClosePractice_Click">
-                                    <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Finish')}" FontWeight="SemiBold" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE73E;" FontSize="13" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Finish')}" FontWeight="SemiBold" FontSize="13" />
+                                    </StackPanel>
                                 </Button>
                             </StackPanel>
 

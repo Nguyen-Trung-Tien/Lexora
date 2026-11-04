@@ -390,12 +390,16 @@
                                                 <TextBlock Text="{x:Bind Loc.GetString('Review_AudioUs')}" FontSize="12" />
                                             </StackPanel>
                                         </Button>
-                                        <Button Content="{x:Bind Loc.GetString('Review_BtnShowAnswer')}"
-                                                Background="Transparent"
+                                        <Button Background="Transparent"
                                                 BorderThickness="0"
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                 FontSize="12"
-                                                Click="SkipTypingButton_Click" />
+                                                Click="SkipTypingButton_Click">
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <FontIcon Glyph="&#xE890;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_BtnShowAnswer')}" />
+                                            </StackPanel>
+                                        </Button>
                                     </StackPanel>
                                 </StackPanel>
 
@@ -770,9 +774,24 @@
                         </Grid>
 
                         <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,12,0,0">
-                            <Button Content="{x:Bind Loc.GetString('Review_BtnMoreCards')}" Style="{ThemeResource AccentButtonStyle}" Padding="24,10" CornerRadius="8" Click="RestartReviewButton_Click" />
-                            <Button Content="{x:Bind Loc.GetString('Review_BtnLearnNew')}" Padding="24,10" CornerRadius="8" Click="ModeNewButton_Click" />
-                            <Button Content="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}" Padding="24,10" CornerRadius="8" Click="ReturnToRoadmapButton_Click" />
+                            <Button Style="{ThemeResource AccentButtonStyle}" Padding="20,9" CornerRadius="8" Click="RestartReviewButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE72C;" FontSize="12.5" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_BtnMoreCards')}" FontWeight="Bold" />
+                                </StackPanel>
+                            </Button>
+                            <Button Padding="20,9" CornerRadius="8" Click="ModeNewButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE710;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_BtnLearnNew')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Button Padding="20,9" CornerRadius="8" Click="ReturnToRoadmapButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE81C;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </Border>

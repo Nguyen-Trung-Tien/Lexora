@@ -135,15 +135,25 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock
-                            Style="{ThemeResource TitleTextBlockStyle}"
-                            Text="{x:Bind Loc.GetString('Roadmap_Title')}" />
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Style="{ThemeResource BodyTextBlockStyle}"
-                            Text="{x:Bind Loc.GetString('Roadmap_Subtitle')}"
-                            TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                        <Border Width="42" Height="42" CornerRadius="12"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1">
+                            <FontIcon Glyph="&#xE81C;" FontSize="20"
+                                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock
+                                Style="{ThemeResource TitleTextBlockStyle}"
+                                Text="{x:Bind Loc.GetString('Roadmap_Title')}" />
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource BodyTextBlockStyle}"
+                                Text="{x:Bind Loc.GetString('Roadmap_Subtitle')}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel

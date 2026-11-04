@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lexora.Application.DTOs;
@@ -20,6 +21,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
     private readonly IVocabularyService _vocabService;
     private readonly IGrammarService _grammarService;
     private readonly ILearningStorageService _storageService;
+    private readonly ISmartSearchService _smartSearchService;
     private readonly IToastNotificationService? _toastService;
     private CancellationTokenSource? _searchCts;
 
@@ -32,6 +34,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
         _vocabService = App.Current.Services.GetRequiredService<IVocabularyService>();
         _grammarService = App.Current.Services.GetRequiredService<IGrammarService>();
         _storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
+        _smartSearchService = App.Current.Services.GetRequiredService<ISmartSearchService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
         ViewModel.NoPracticeQuestionsAvailable += () =>
         {
@@ -674,33 +677,47 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
         var searchBox = new TextBox
         {
             PlaceholderText = Loc.GetString("Storage_Dialog_AddVocabPlaceholder"),
-            Margin = new Thickness(0, 0, 0, 8),
+            Margin = new Thickness(0, 0, 0, 6),
             CornerRadius = new CornerRadius(8)
         };
 
         var wordTemplate = (DataTemplate)Microsoft.UI.Xaml.Markup.XamlReader.Load(@"
             <DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
-                <Grid Padding=""6,6"" ColumnDefinitions=""Auto,Auto,*,Auto"" ColumnSpacing=""10"">
+                <Grid Padding=""6,6"" ColumnDefinitions=""Auto,Auto,*,Auto,Auto"" ColumnSpacing=""10"">
                     <CheckBox IsChecked=""{Binding IsSelected, Mode=TwoWay}"" VerticalAlignment=""Center"" Margin=""0,0,2,0"" MinWidth=""28"" />
-                    <Border Grid.Column=""1"" Width=""30"" Height=""30"" CornerRadius=""6"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" VerticalAlignment=""Center"">
+                    <Border Grid.Column=""1"" Width=""32"" Height=""32"" CornerRadius=""6"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" VerticalAlignment=""Center"">
                         <FontIcon Glyph=""&#xE82D;"" FontSize=""13"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" HorizontalAlignment=""Center"" VerticalAlignment=""Center"" />
                     </Border>
                     <StackPanel Grid.Column=""2"" VerticalAlignment=""Center"" Spacing=""2"">
-                        <TextBlock Text=""{Binding Title}"" FontWeight=""SemiBold"" FontSize=""14"" Foreground=""{ThemeResource TextFillColorPrimaryBrush}"" />
+                        <StackPanel Orientation=""Horizontal"" Spacing=""6"">
+                            <TextBlock Text=""{Binding Title}"" FontWeight=""SemiBold"" FontSize=""14"" Foreground=""{ThemeResource TextFillColorPrimaryBrush}"" VerticalAlignment=""Center"" />
+                            <Border Background=""{ThemeResource AccentFillColorDefaultBrush}"" CornerRadius=""4"" Padding=""5,1"" Visibility=""{Binding MatchReasonVisibility}"" VerticalAlignment=""Center"">
+                                <TextBlock Text=""{Binding MatchReason}"" FontSize=""9.5"" Foreground=""{ThemeResource TextOnAccentFillColorPrimaryBrush}"" FontWeight=""SemiBold"" />
+                            </Border>
+                        </StackPanel>
                         <TextBlock Text=""{Binding Subtitle}"" Foreground=""{ThemeResource TextFillColorSecondaryBrush}"" FontSize=""12"" TextTrimming=""CharacterEllipsis"" />
                     </StackPanel>
                     <Border Grid.Column=""3"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" CornerRadius=""4"" Padding=""6,2"" VerticalAlignment=""Center"">
                         <TextBlock Text=""{Binding Badge}"" FontSize=""10"" Foreground=""{ThemeResource TextFillColorTertiaryBrush}"" />
                     </Border>
+                    <Button x:Name=""QuickAddButton"" Grid.Column=""4"" Style=""{ThemeResource SubtleButtonStyle}"" CornerRadius=""6"" Padding=""8,4"" VerticalAlignment=""Center"">
+                        <StackPanel Orientation=""Horizontal"" Spacing=""4"">
+                            <FontIcon Glyph=""&#xE710;"" FontSize=""11"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
+                            <TextBlock Text=""" + Loc.GetString("Storage_Dialog_QuickAdd") + @""" FontSize=""11"" FontWeight=""SemiBold"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </DataTemplate>");
 
+        var candidateCollection = new ObservableCollection<StorageCandidateItem>();
+
         var listView = new ListView
         {
-            MaxHeight = 300,
+            MaxHeight = 320,
             SelectionMode = ListViewSelectionMode.None,
             IsItemClickEnabled = true,
-            ItemTemplate = wordTemplate
+            ItemTemplate = wordTemplate,
+            ItemsSource = candidateCollection
         };
 
         var selectedCandidateIds = new HashSet<Guid>();
@@ -766,8 +783,93 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
             CornerRadius = new CornerRadius(8)
         };
 
-        var panel = new StackPanel { Spacing = 6, MinWidth = 460 };
+        // Filter / Suggestion Chips
+        string activeFilterChip = "All";
+        var chipButtons = new List<Button>();
+        var filterChipsPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 6
+        };
+
+        Button CreateVocabChip(string tag, string text, bool isDefault = false)
+        {
+            var chip = new Button
+            {
+                Content = text,
+                Tag = tag,
+                CornerRadius = new CornerRadius(14),
+                Padding = new Thickness(10, 3, 10, 3),
+                FontSize = 11.5
+            };
+            chip.Style = isDefault
+                ? (Style)App.Current.Resources["AccentButtonStyle"]
+                : (Style)App.Current.Resources["SubtleButtonStyle"];
+            chipButtons.Add(chip);
+            return chip;
+        }
+
+        var chipAll = CreateVocabChip("All", Loc.GetString("Storage_Dialog_FilterAll"), true);
+        var chipWeak = CreateVocabChip("Weak", Loc.GetString("Storage_Dialog_FilterWeak"));
+        var chipExam = CreateVocabChip("Exam", Loc.GetString("Storage_Dialog_FilterExam"));
+        var chipA1A2 = CreateVocabChip("A1A2", Loc.GetString("Storage_Dialog_FilterA1A2"));
+        var chipB1B2 = CreateVocabChip("B1B2", Loc.GetString("Storage_Dialog_FilterB1B2"));
+        var chipC1C2 = CreateVocabChip("C1C2", Loc.GetString("Storage_Dialog_FilterC1C2"));
+
+        filterChipsPanel.Children.Add(chipAll);
+        filterChipsPanel.Children.Add(chipWeak);
+        filterChipsPanel.Children.Add(chipExam);
+        filterChipsPanel.Children.Add(chipA1A2);
+        filterChipsPanel.Children.Add(chipB1B2);
+        filterChipsPanel.Children.Add(chipC1C2);
+
+        var chipScrollViewer = new ScrollViewer
+        {
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            HorizontalScrollMode = ScrollMode.Enabled,
+            VerticalScrollMode = ScrollMode.Disabled,
+            Content = filterChipsPanel,
+            Margin = new Thickness(0, 0, 0, 6)
+        };
+
+        // Did-You-Mean Bar
+        var didYouMeanPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 6,
+            Margin = new Thickness(0, 0, 0, 6),
+            Visibility = Visibility.Collapsed
+        };
+        var didYouMeanIcon = new FontIcon
+        {
+            Glyph = "\uE7BE",
+            FontSize = 12,
+            Foreground = (Microsoft.UI.Xaml.Media.Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"],
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        var didYouMeanLabel = new TextBlock
+        {
+            Text = Loc.GetString("Storage_Dialog_DidYouMean"),
+            FontSize = 11.5,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = (Microsoft.UI.Xaml.Media.Brush)App.Current.Resources["TextFillColorSecondaryBrush"],
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        var didYouMeanButtonsPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 4,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        didYouMeanPanel.Children.Add(didYouMeanIcon);
+        didYouMeanPanel.Children.Add(didYouMeanLabel);
+        didYouMeanPanel.Children.Add(didYouMeanButtonsPanel);
+
+        var panel = new StackPanel { Spacing = 4, MinWidth = 480, MaxWidth = 560 };
         panel.Children.Add(searchBox);
+        panel.Children.Add(chipScrollViewer);
+        panel.Children.Add(didYouMeanPanel);
         panel.Children.Add(actionsBar);
         panel.Children.Add(txtEmpty);
         panel.Children.Add(listView);
@@ -789,45 +891,258 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
 
         void UpdateSelectionUI()
         {
-            txtSelectedCount.Text = string.Format(Loc.GetString("Storage_Dialog_SelectedCount"), selectedCandidateIds.Count);
+            txtSelectedCount.Text = string.Format(
+                "{0} • " + Loc.GetString("Storage_Dialog_SelectedCount"),
+                string.Format(Loc.GetString("Storage_Dialog_AvailableCount"), candidateCollection.Count),
+                selectedCandidateIds.Count);
+
             dialog.IsPrimaryButtonEnabled = selectedCandidateIds.Count > 0;
             dialog.PrimaryButtonText = selectedCandidateIds.Count > 0
                 ? string.Format(Loc.GetString("Storage_Dialog_AddMultipleBtn"), selectedCandidateIds.Count)
                 : Loc.GetString("Action_Add");
         }
 
-        void BindCandidates(IEnumerable<WordDto> words)
+        async Task ExecuteVocabQueryAsync(string? queryText, CancellationToken token = default)
         {
-            var list = words
-                .Where(w => !storedWordIds.Contains(w.Id))
-                .Select(w =>
+            var q = queryText?.Trim() ?? string.Empty;
+            var normQ = Lexora.Domain.Common.SearchTextHelper.Normalize(q);
+
+            IReadOnlyList<WordDto> fetchedWords;
+
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                fetchedWords = activeFilterChip switch
                 {
-                    var item = new StorageCandidateItem
+                    "Weak" => await _vocabService.SearchWordsAsync(isWeak: true, pageSize: 250, cancellationToken: token),
+                    "Exam" => await _vocabService.SearchWordsAsync(examType: ExamType.Ielts, pageSize: 200, cancellationToken: token),
+                    "A1A2" => await _vocabService.SearchWordsAsync(level: CefrLevel.A1, pageSize: 200, cancellationToken: token),
+                    "B1B2" => await _vocabService.SearchWordsAsync(level: CefrLevel.B1, pageSize: 200, cancellationToken: token),
+                    "C1C2" => await _vocabService.SearchWordsAsync(level: CefrLevel.C1, pageSize: 200, cancellationToken: token),
+                    _ => await _vocabService.SearchWordsAsync(pageSize: 250, cancellationToken: token)
+                };
+            }
+            else
+            {
+                fetchedWords = await _vocabService.SearchWordsAsync(search: q, pageSize: 300, cancellationToken: token);
+            }
+
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            if (token.IsCancellationRequested) return;
+
+            var candidates = fetchedWords.Where(w => !storedWordIds.Contains(w.Id)).ToList();
+
+            List<StorageCandidateItem> rankedList;
+
+            if (!string.IsNullOrWhiteSpace(normQ))
+            {
+                rankedList = candidates
+                    .Select(w =>
+                    {
+                        var normTerm = Lexora.Domain.Common.SearchTextHelper.Normalize(w.Term);
+                        double score = 0;
+                        string matchReason = string.Empty;
+
+                        if (string.Equals(normTerm, normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 1000.0;
+                            matchReason = Loc.GetString("Storage_Dialog_MatchExact");
+                        }
+                        else if (normTerm.StartsWith(normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 800.0 - Math.Min(100, (normTerm.Length - normQ.Length) * 2);
+                            matchReason = Loc.GetString("Storage_Dialog_MatchPrefix");
+                        }
+                        else if (IsWordBoundaryMatch(normTerm, normQ))
+                        {
+                            score = 650.0;
+                            matchReason = Loc.GetString("Storage_Dialog_MatchPrefix");
+                        }
+                        else if (normTerm.Contains(normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 500.0;
+                        }
+                        else
+                        {
+                            if (w.Meanings != null)
+                            {
+                                foreach (var m in w.Meanings)
+                                {
+                                    var normVi = Lexora.Domain.Common.SearchTextHelper.Normalize(m.DefinitionVi);
+                                    var normEn = Lexora.Domain.Common.SearchTextHelper.Normalize(m.DefinitionEn);
+                                    if (normVi.Equals(normQ, StringComparison.OrdinalIgnoreCase) || normEn.Equals(normQ, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        score = Math.Max(score, 450.0);
+                                        matchReason = Loc.GetString("Storage_Dialog_MatchMeaning");
+                                        break;
+                                    }
+                                    if (normVi.StartsWith(normQ, StringComparison.OrdinalIgnoreCase) || normEn.StartsWith(normQ, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        score = Math.Max(score, 400.0);
+                                        matchReason = Loc.GetString("Storage_Dialog_MatchMeaning");
+                                        break;
+                                    }
+                                    if (normVi.Contains(normQ, StringComparison.OrdinalIgnoreCase) || normEn.Contains(normQ, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        score = Math.Max(score, 300.0);
+                                        matchReason = Loc.GetString("Storage_Dialog_MatchMeaning");
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        return new StorageCandidateItem
+                        {
+                            Id = w.Id,
+                            Title = w.Term,
+                            Subtitle = w.Meanings?.FirstOrDefault()?.DefinitionVi ?? w.PhoneticUs ?? string.Empty,
+                            Badge = w.Level.ToString(),
+                            MatchReason = matchReason,
+                            RelevanceScore = score,
+                            IsSelected = selectedCandidateIds.Contains(w.Id)
+                        };
+                    })
+                    .OrderByDescending(item => item.RelevanceScore)
+                    .ThenBy(item => item.Title)
+                    .ToList();
+            }
+            else
+            {
+                rankedList = candidates
+                    .Select(w => new StorageCandidateItem
                     {
                         Id = w.Id,
                         Title = w.Term,
-                        Subtitle = w.Meanings.FirstOrDefault()?.DefinitionVi ?? w.PhoneticUs ?? string.Empty,
+                        Subtitle = w.Meanings?.FirstOrDefault()?.DefinitionVi ?? w.PhoneticUs ?? string.Empty,
                         Badge = w.Level.ToString(),
                         IsSelected = selectedCandidateIds.Contains(w.Id)
-                    };
-                    item.PropertyChanged += (sender, args) =>
-                    {
-                        if (args.PropertyName == nameof(StorageCandidateItem.IsSelected))
-                        {
-                            if (item.IsSelected) selectedCandidateIds.Add(item.Id);
-                            else selectedCandidateIds.Remove(item.Id);
-                            UpdateSelectionUI();
-                        }
-                    };
-                    return item;
-                }).ToList();
+                    })
+                    .OrderBy(item => item.Title)
+                    .ToList();
+            }
 
-            listView.ItemsSource = list;
+            candidateCollection.Clear();
+            foreach (var item in rankedList)
+            {
+                item.PropertyChanged += (sender, args) =>
+                {
+                    if (args.PropertyName == nameof(StorageCandidateItem.IsSelected))
+                    {
+                        if (item.IsSelected) selectedCandidateIds.Add(item.Id);
+                        else selectedCandidateIds.Remove(item.Id);
+                        UpdateSelectionUI();
+                    }
+                };
+                candidateCollection.Add(item);
+            }
+
+            UpdateSelectionUI();
+
             txtEmpty.Text = string.IsNullOrWhiteSpace(searchBox.Text)
                 ? Loc.GetString("Storage_Dialog_NoItemsAvailable")
                 : Loc.GetString("Storage_Dialog_AllItemsAlreadyAdded");
-            txtEmpty.Visibility = list.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            txtEmpty.Visibility = candidateCollection.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            if (candidateCollection.Count == 0 && !string.IsNullOrWhiteSpace(q))
+            {
+                var suggestions = await _vocabService.GetClosestSuggestionsAsync(q, 3, token);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+                if (suggestions != null && suggestions.Count > 0)
+                {
+                    didYouMeanButtonsPanel.Children.Clear();
+                    foreach (var sug in suggestions)
+                    {
+                        var sugBtn = new Button
+                        {
+                            Content = sug,
+                            Style = (Style)App.Current.Resources["SubtleButtonStyle"],
+                            Padding = new Thickness(8, 2, 8, 2),
+                            FontSize = 11,
+                            CornerRadius = new CornerRadius(10)
+                        };
+                        sugBtn.Click += (s, e) =>
+                        {
+                            searchBox.Text = sug;
+                            searchBox.SelectionStart = sug.Length;
+                        };
+                        didYouMeanButtonsPanel.Children.Add(sugBtn);
+                    }
+                    didYouMeanPanel.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    didYouMeanPanel.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                didYouMeanPanel.Visibility = Visibility.Collapsed;
+            }
         }
+
+        foreach (var chip in chipButtons)
+        {
+            chip.Click += async (s, e) =>
+            {
+                activeFilterChip = (string)chip.Tag;
+                foreach (var b in chipButtons)
+                {
+                    b.Style = (b == chip)
+                        ? (Style)App.Current.Resources["AccentButtonStyle"]
+                        : (Style)App.Current.Resources["SubtleButtonStyle"];
+                }
+                await ExecuteVocabQueryAsync(searchBox.Text);
+            };
+        }
+
+        async void OnVocabQuickAddClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is StorageCandidateItem candidate)
+            {
+                if (candidate.IsAdding) return;
+                candidate.IsAdding = true;
+                btn.IsEnabled = false;
+
+                try
+                {
+                    int added = await ViewModel.AddWordsToStorageAsync(new[] { candidate.Id }, string.IsNullOrWhiteSpace(noteBox.Text) ? null : noteBox.Text);
+                    if (added > 0)
+                    {
+                        storedWordIds.Add(candidate.Id);
+                        selectedCandidateIds.Remove(candidate.Id);
+                        candidateCollection.Remove(candidate);
+                        UpdateSelectionUI();
+                        txtEmpty.Visibility = candidateCollection.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                        _toastService?.ShowSuccess(string.Format(Loc.GetString("Storage_Dialog_AddedItemToast"), candidate.Title), Loc.GetString("Nav_LearningStorage"));
+                    }
+                    else
+                    {
+                        _toastService?.ShowWarning(Loc.GetString("Storage_Toast_AlreadyInStorage"), Loc.GetString("Nav_LearningStorage"));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] VocabQuickAdd error: {ex.Message}");
+                    _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+                    btn.IsEnabled = true;
+                    candidate.IsAdding = false;
+                }
+            }
+        }
+
+        listView.ContainerContentChanging += (sender, args) =>
+        {
+            if (args.ItemContainer?.ContentTemplateRoot is Grid root)
+            {
+                var quickAddBtn = root.FindName("QuickAddButton") as Button;
+                if (quickAddBtn != null)
+                {
+                    ToolTipService.SetToolTip(quickAddBtn, Loc.GetString("Storage_Dialog_QuickAddTooltip"));
+                    quickAddBtn.Click -= OnVocabQuickAddClick;
+                    quickAddBtn.Click += OnVocabQuickAddClick;
+                }
+            }
+        };
 
         listView.ItemClick += (s, e) =>
         {
@@ -839,33 +1154,23 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
 
         btnSelectAll.Click += (s, e) =>
         {
-            if (listView.ItemsSource is List<StorageCandidateItem> items)
+            foreach (var item in candidateCollection)
             {
-                foreach (var item in items)
-                {
-                    item.IsSelected = true;
-                    selectedCandidateIds.Add(item.Id);
-                }
-                UpdateSelectionUI();
+                item.IsSelected = true;
+                selectedCandidateIds.Add(item.Id);
             }
+            UpdateSelectionUI();
         };
 
         btnDeselectAll.Click += (s, e) =>
         {
-            if (listView.ItemsSource is List<StorageCandidateItem> items)
+            foreach (var item in candidateCollection)
             {
-                foreach (var item in items)
-                {
-                    item.IsSelected = false;
-                }
+                item.IsSelected = false;
             }
             selectedCandidateIds.Clear();
             UpdateSelectionUI();
         };
-
-        var initialWords = await _vocabService.SearchWordsAsync(pageSize: 150);
-        await DispatcherQueue.EnsureOnUIThreadAsync();
-        BindCandidates(initialWords);
 
         CancellationTokenSource? dialogSearchCts = null;
         DispatcherTimer? dialogDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
@@ -879,13 +1184,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
 
             try
             {
-                var q = searchBox.Text;
-                var words = await _vocabService.SearchWordsAsync(search: q, pageSize: 150, cancellationToken: token);
-                await DispatcherQueue.EnsureOnUIThreadAsync();
-                if (!token.IsCancellationRequested)
-                {
-                    BindCandidates(words);
-                }
+                await ExecuteVocabQueryAsync(searchBox.Text, token);
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
@@ -907,6 +1206,8 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
             dialogSearchCts?.Cancel();
             noteText = noteBox.Text;
         };
+
+        await ExecuteVocabQueryAsync(string.Empty);
 
         var res = await dialog.ShowAsyncSafe(this.XamlRoot);
         dialogDebounceTimer.Stop();
@@ -944,33 +1245,47 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
         var searchBox = new TextBox
         {
             PlaceholderText = Loc.GetString("Storage_Dialog_AddGrammarPlaceholder"),
-            Margin = new Thickness(0, 0, 0, 8),
+            Margin = new Thickness(0, 0, 0, 6),
             CornerRadius = new CornerRadius(8)
         };
 
         var grammarTemplate = (DataTemplate)Microsoft.UI.Xaml.Markup.XamlReader.Load(@"
             <DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
-                <Grid Padding=""6,6"" ColumnDefinitions=""Auto,Auto,*,Auto"" ColumnSpacing=""10"">
+                <Grid Padding=""6,6"" ColumnDefinitions=""Auto,Auto,*,Auto,Auto"" ColumnSpacing=""10"">
                     <CheckBox IsChecked=""{Binding IsSelected, Mode=TwoWay}"" VerticalAlignment=""Center"" Margin=""0,0,2,0"" MinWidth=""28"" />
-                    <Border Grid.Column=""1"" Width=""30"" Height=""30"" CornerRadius=""6"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" VerticalAlignment=""Center"">
+                    <Border Grid.Column=""1"" Width=""32"" Height=""32"" CornerRadius=""6"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" VerticalAlignment=""Center"">
                         <FontIcon Glyph=""&#xE8D2;"" FontSize=""13"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" HorizontalAlignment=""Center"" VerticalAlignment=""Center"" />
                     </Border>
                     <StackPanel Grid.Column=""2"" VerticalAlignment=""Center"" Spacing=""2"">
-                        <TextBlock Text=""{Binding Title}"" FontWeight=""SemiBold"" FontSize=""14"" Foreground=""{ThemeResource TextFillColorPrimaryBrush}"" />
+                        <StackPanel Orientation=""Horizontal"" Spacing=""6"">
+                            <TextBlock Text=""{Binding Title}"" FontWeight=""SemiBold"" FontSize=""14"" Foreground=""{ThemeResource TextFillColorPrimaryBrush}"" VerticalAlignment=""Center"" />
+                            <Border Background=""{ThemeResource AccentFillColorDefaultBrush}"" CornerRadius=""4"" Padding=""5,1"" Visibility=""{Binding MatchReasonVisibility}"" VerticalAlignment=""Center"">
+                                <TextBlock Text=""{Binding MatchReason}"" FontSize=""9.5"" Foreground=""{ThemeResource TextOnAccentFillColorPrimaryBrush}"" FontWeight=""SemiBold"" />
+                            </Border>
+                        </StackPanel>
                         <TextBlock Text=""{Binding Subtitle}"" Foreground=""{ThemeResource TextFillColorSecondaryBrush}"" FontSize=""12"" TextTrimming=""CharacterEllipsis"" />
                     </StackPanel>
                     <Border Grid.Column=""3"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" CornerRadius=""4"" Padding=""6,2"" VerticalAlignment=""Center"">
                         <TextBlock Text=""{Binding Badge}"" FontSize=""10"" Foreground=""{ThemeResource TextFillColorTertiaryBrush}"" />
                     </Border>
+                    <Button x:Name=""QuickAddButton"" Grid.Column=""4"" Style=""{ThemeResource SubtleButtonStyle}"" CornerRadius=""6"" Padding=""8,4"" VerticalAlignment=""Center"">
+                        <StackPanel Orientation=""Horizontal"" Spacing=""4"">
+                            <FontIcon Glyph=""&#xE710;"" FontSize=""11"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
+                            <TextBlock Text=""" + Loc.GetString("Storage_Dialog_QuickAdd") + @""" FontSize=""11"" FontWeight=""SemiBold"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </DataTemplate>");
 
+        var grammarCollection = new ObservableCollection<StorageCandidateItem>();
+
         var listView = new ListView
         {
-            MaxHeight = 300,
+            MaxHeight = 320,
             SelectionMode = ListViewSelectionMode.None,
             IsItemClickEnabled = true,
-            ItemTemplate = grammarTemplate
+            ItemTemplate = grammarTemplate,
+            ItemsSource = grammarCollection
         };
 
         var selectedCandidateIds = new HashSet<Guid>();
@@ -1036,8 +1351,91 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
             CornerRadius = new CornerRadius(8)
         };
 
-        var panel = new StackPanel { Spacing = 6, MinWidth = 460 };
+        // Filter / Suggestion Chips
+        string activeGrammarChip = "All";
+        var chipButtons = new List<Button>();
+        var filterChipsPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 6
+        };
+
+        Button CreateGrammarChip(string tag, string text, bool isDefault = false)
+        {
+            var chip = new Button
+            {
+                Content = text,
+                Tag = tag,
+                CornerRadius = new CornerRadius(14),
+                Padding = new Thickness(10, 3, 10, 3),
+                FontSize = 11.5
+            };
+            chip.Style = isDefault
+                ? (Style)App.Current.Resources["AccentButtonStyle"]
+                : (Style)App.Current.Resources["SubtleButtonStyle"];
+            chipButtons.Add(chip);
+            return chip;
+        }
+
+        var chipAll = CreateGrammarChip("All", Loc.GetString("Storage_Dialog_FilterAll"), true);
+        var chipCore = CreateGrammarChip("Core", Loc.GetString("Storage_Dialog_FilterCore"));
+        var chipA1A2 = CreateGrammarChip("A1A2", Loc.GetString("Storage_Dialog_FilterA1A2"));
+        var chipB1B2 = CreateGrammarChip("B1B2", Loc.GetString("Storage_Dialog_FilterB1B2"));
+        var chipC1C2 = CreateGrammarChip("C1C2", Loc.GetString("Storage_Dialog_FilterC1C2"));
+
+        filterChipsPanel.Children.Add(chipAll);
+        filterChipsPanel.Children.Add(chipCore);
+        filterChipsPanel.Children.Add(chipA1A2);
+        filterChipsPanel.Children.Add(chipB1B2);
+        filterChipsPanel.Children.Add(chipC1C2);
+
+        var chipScrollViewer = new ScrollViewer
+        {
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            HorizontalScrollMode = ScrollMode.Enabled,
+            VerticalScrollMode = ScrollMode.Disabled,
+            Content = filterChipsPanel,
+            Margin = new Thickness(0, 0, 0, 6)
+        };
+
+        // Did-You-Mean Bar
+        var didYouMeanPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 6,
+            Margin = new Thickness(0, 0, 0, 6),
+            Visibility = Visibility.Collapsed
+        };
+        var didYouMeanIcon = new FontIcon
+        {
+            Glyph = "\uE7BE",
+            FontSize = 12,
+            Foreground = (Microsoft.UI.Xaml.Media.Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"],
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        var didYouMeanLabel = new TextBlock
+        {
+            Text = Loc.GetString("Storage_Dialog_DidYouMean"),
+            FontSize = 11.5,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = (Microsoft.UI.Xaml.Media.Brush)App.Current.Resources["TextFillColorSecondaryBrush"],
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        var didYouMeanButtonsPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 4,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        didYouMeanPanel.Children.Add(didYouMeanIcon);
+        didYouMeanPanel.Children.Add(didYouMeanLabel);
+        didYouMeanPanel.Children.Add(didYouMeanButtonsPanel);
+
+        var panel = new StackPanel { Spacing = 4, MinWidth = 480, MaxWidth = 560 };
         panel.Children.Add(searchBox);
+        panel.Children.Add(chipScrollViewer);
+        panel.Children.Add(didYouMeanPanel);
         panel.Children.Add(actionsBar);
         panel.Children.Add(txtEmpty);
         panel.Children.Add(listView);
@@ -1057,9 +1455,13 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
             RequestedTheme = activeGrammarTheme
         };
 
-        void UpdateSelectionUI()
+        void UpdateGrammarSelectionUI()
         {
-            txtSelectedCount.Text = string.Format(Loc.GetString("Storage_Dialog_SelectedCount"), selectedCandidateIds.Count);
+            txtSelectedCount.Text = string.Format(
+                "{0} • " + Loc.GetString("Storage_Dialog_SelectedCount"),
+                string.Format(Loc.GetString("Storage_Dialog_AvailableCount"), grammarCollection.Count),
+                selectedCandidateIds.Count);
+
             dialog.IsPrimaryButtonEnabled = selectedCandidateIds.Count > 0;
             dialog.PrimaryButtonText = selectedCandidateIds.Count > 0
                 ? string.Format(Loc.GetString("Storage_Dialog_AddMultipleBtn"), selectedCandidateIds.Count)
@@ -1068,41 +1470,224 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
 
         var allRules = await _grammarService.GetAllRulesAsync();
         await DispatcherQueue.EnsureOnUIThreadAsync();
-        var candidateRules = allRules
-            .Where(r => !storedGrammarIds.Contains(r.Id))
-            .Select(r =>
+        var candidateRules = allRules.Where(r => !storedGrammarIds.Contains(r.Id)).ToList();
+
+        void ExecuteGrammarQuery(string? queryText)
+        {
+            var q = queryText?.Trim() ?? string.Empty;
+            var normQ = Lexora.Domain.Common.SearchTextHelper.Normalize(q);
+
+            var pool = candidateRules.Where(r => !storedGrammarIds.Contains(r.Id));
+
+            if (string.IsNullOrWhiteSpace(normQ))
             {
-                var item = new StorageCandidateItem
+                pool = activeGrammarChip switch
                 {
-                    Id = r.Id,
-                    Title = r.Title,
-                    Subtitle = $"{r.Structure} • {r.ExplanationVi}",
-                    Badge = r.Level.ToString(),
-                    IsSelected = false
+                    "Core" => pool.Where(r => IsCoreGrammarRule(r)),
+                    "A1A2" => pool.Where(r => r.Level == CefrLevel.A1 || r.Level == CefrLevel.A2),
+                    "B1B2" => pool.Where(r => r.Level == CefrLevel.B1 || r.Level == CefrLevel.B2),
+                    "C1C2" => pool.Where(r => r.Level == CefrLevel.C1 || r.Level == CefrLevel.C2),
+                    _ => pool
                 };
+            }
+
+            var poolList = pool.ToList();
+            List<StorageCandidateItem> rankedList;
+
+            if (!string.IsNullOrWhiteSpace(normQ))
+            {
+                rankedList = poolList
+                    .Select(r =>
+                    {
+                        var normTitle = Lexora.Domain.Common.SearchTextHelper.Normalize(r.Title);
+                        var normStruct = Lexora.Domain.Common.SearchTextHelper.Normalize(r.Structure);
+                        var normExpl = Lexora.Domain.Common.SearchTextHelper.Normalize(r.ExplanationVi);
+                        var normTopic = Lexora.Domain.Common.SearchTextHelper.Normalize(r.Topic);
+
+                        double score = 0;
+                        string matchReason = string.Empty;
+
+                        if (string.Equals(normTitle, normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 1000.0;
+                            matchReason = Loc.GetString("Storage_Dialog_MatchExact");
+                        }
+                        else if (normTitle.StartsWith(normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 800.0 - Math.Min(100, (normTitle.Length - normQ.Length) * 2);
+                            matchReason = Loc.GetString("Storage_Dialog_MatchPrefix");
+                        }
+                        else if (normStruct.Contains(normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 650.0;
+                            matchReason = Loc.GetString("Storage_Dialog_MatchStructure");
+                        }
+                        else if (normTitle.Contains(normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 550.0;
+                        }
+                        else if (normExpl.Contains(normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 450.0;
+                            matchReason = Loc.GetString("Storage_Dialog_MatchMeaning");
+                        }
+                        else if (!string.IsNullOrEmpty(normTopic) && normTopic.Contains(normQ, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score = 350.0;
+                        }
+
+                        return new StorageCandidateItem
+                        {
+                            Id = r.Id,
+                            Title = r.Title,
+                            Subtitle = $"{r.Structure} • {r.ExplanationVi}",
+                            Badge = r.Level.ToString(),
+                            MatchReason = matchReason,
+                            RelevanceScore = score,
+                            IsSelected = selectedCandidateIds.Contains(r.Id)
+                        };
+                    })
+                    .Where(item => item.RelevanceScore > 0)
+                    .OrderByDescending(item => item.RelevanceScore)
+                    .ThenBy(item => item.Title)
+                    .ToList();
+            }
+            else
+            {
+                rankedList = poolList
+                    .Select(r => new StorageCandidateItem
+                    {
+                        Id = r.Id,
+                        Title = r.Title,
+                        Subtitle = $"{r.Structure} • {r.ExplanationVi}",
+                        Badge = r.Level.ToString(),
+                        IsSelected = selectedCandidateIds.Contains(r.Id)
+                    })
+                    .OrderBy(item => item.Title)
+                    .ToList();
+            }
+
+            grammarCollection.Clear();
+            foreach (var item in rankedList)
+            {
                 item.PropertyChanged += (sender, args) =>
                 {
                     if (args.PropertyName == nameof(StorageCandidateItem.IsSelected))
                     {
                         if (item.IsSelected) selectedCandidateIds.Add(item.Id);
                         else selectedCandidateIds.Remove(item.Id);
-                        UpdateSelectionUI();
+                        UpdateGrammarSelectionUI();
                     }
                 };
-                return item;
-            }).ToList();
+                grammarCollection.Add(item);
+            }
 
-        void UpdateGrammarListView(IEnumerable<StorageCandidateItem> items)
-        {
-            var list = items.ToList();
-            listView.ItemsSource = list;
+            UpdateGrammarSelectionUI();
+
             txtEmpty.Text = string.IsNullOrWhiteSpace(searchBox.Text)
                 ? Loc.GetString("Storage_Dialog_NoItemsAvailable")
                 : Loc.GetString("Storage_Dialog_AllItemsAlreadyAdded");
-            txtEmpty.Visibility = list.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            txtEmpty.Visibility = grammarCollection.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            if (grammarCollection.Count == 0 && !string.IsNullOrWhiteSpace(q) && _smartSearchService != null)
+            {
+                var suggestions = _smartSearchService.FindClosestGrammarRuleSuggestions(q, candidateRules, maxSuggestions: 3);
+                if (suggestions != null && suggestions.Count > 0)
+                {
+                    didYouMeanButtonsPanel.Children.Clear();
+                    foreach (var sug in suggestions)
+                    {
+                        var sugBtn = new Button
+                        {
+                            Content = sug,
+                            Style = (Style)App.Current.Resources["SubtleButtonStyle"],
+                            Padding = new Thickness(8, 2, 8, 2),
+                            FontSize = 11,
+                            CornerRadius = new CornerRadius(10)
+                        };
+                        sugBtn.Click += (s, e) =>
+                        {
+                            searchBox.Text = sug;
+                            searchBox.SelectionStart = sug.Length;
+                        };
+                        didYouMeanButtonsPanel.Children.Add(sugBtn);
+                    }
+                    didYouMeanPanel.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    didYouMeanPanel.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                didYouMeanPanel.Visibility = Visibility.Collapsed;
+            }
         }
 
-        UpdateGrammarListView(candidateRules);
+        foreach (var chip in chipButtons)
+        {
+            chip.Click += (s, e) =>
+            {
+                activeGrammarChip = (string)chip.Tag;
+                foreach (var b in chipButtons)
+                {
+                    b.Style = (b == chip)
+                        ? (Style)App.Current.Resources["AccentButtonStyle"]
+                        : (Style)App.Current.Resources["SubtleButtonStyle"];
+                }
+                ExecuteGrammarQuery(searchBox.Text);
+            };
+        }
+
+        async void OnGrammarQuickAddClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is StorageCandidateItem candidate)
+            {
+                if (candidate.IsAdding) return;
+                candidate.IsAdding = true;
+                btn.IsEnabled = false;
+
+                try
+                {
+                    int added = await ViewModel.AddGrammarsToStorageAsync(new[] { candidate.Id }, string.IsNullOrWhiteSpace(noteBox.Text) ? null : noteBox.Text);
+                    if (added > 0)
+                    {
+                        storedGrammarIds.Add(candidate.Id);
+                        selectedCandidateIds.Remove(candidate.Id);
+                        grammarCollection.Remove(candidate);
+                        UpdateGrammarSelectionUI();
+                        txtEmpty.Visibility = grammarCollection.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                        _toastService?.ShowSuccess(string.Format(Loc.GetString("Storage_Dialog_AddedItemToast"), candidate.Title), Loc.GetString("Nav_LearningStorage"));
+                    }
+                    else
+                    {
+                        _toastService?.ShowWarning(Loc.GetString("Storage_Toast_AlreadyInStorage"), Loc.GetString("Nav_LearningStorage"));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LearningStoragePage] GrammarQuickAdd error: {ex.Message}");
+                    _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
+                    btn.IsEnabled = true;
+                    candidate.IsAdding = false;
+                }
+            }
+        }
+
+        listView.ContainerContentChanging += (sender, args) =>
+        {
+            if (args.ItemContainer?.ContentTemplateRoot is Grid root)
+            {
+                var quickAddBtn = root.FindName("QuickAddButton") as Button;
+                if (quickAddBtn != null)
+                {
+                    ToolTipService.SetToolTip(quickAddBtn, Loc.GetString("Storage_Dialog_QuickAddTooltip"));
+                    quickAddBtn.Click -= OnGrammarQuickAddClick;
+                    quickAddBtn.Click += OnGrammarQuickAddClick;
+                }
+            }
+        };
 
         listView.ItemClick += (s, e) =>
         {
@@ -1114,42 +1699,30 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
 
         btnSelectAll.Click += (s, e) =>
         {
-            if (listView.ItemsSource is IEnumerable<StorageCandidateItem> currentVisible)
+            foreach (var item in grammarCollection)
             {
-                foreach (var item in currentVisible)
-                {
-                    item.IsSelected = true;
-                    selectedCandidateIds.Add(item.Id);
-                }
-                UpdateSelectionUI();
+                item.IsSelected = true;
+                selectedCandidateIds.Add(item.Id);
             }
+            UpdateGrammarSelectionUI();
         };
 
         btnDeselectAll.Click += (s, e) =>
         {
-            foreach (var item in candidateRules)
+            foreach (var item in grammarCollection)
             {
                 item.IsSelected = false;
             }
             selectedCandidateIds.Clear();
-            UpdateSelectionUI();
+            UpdateGrammarSelectionUI();
         };
 
         searchBox.TextChanged += (s, e) =>
         {
-            var q = searchBox.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(q))
-            {
-                UpdateGrammarListView(candidateRules);
-            }
-            else
-            {
-                var filtered = candidateRules
-                    .Where(r => r.Title.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                                r.Subtitle.Contains(q, StringComparison.OrdinalIgnoreCase));
-                UpdateGrammarListView(filtered);
-            }
+            ExecuteGrammarQuery(searchBox.Text);
         };
+
+        ExecuteGrammarQuery(string.Empty);
 
         string? noteText = null;
         dialog.PrimaryButtonClick += (s, args) =>
@@ -1181,6 +1754,30 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
                 _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
             }
         }
+    }
+
+    private static bool IsWordBoundaryMatch(string text, string query)
+    {
+        if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(query)) return false;
+        int idx = text.IndexOf(query, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0) return false;
+        bool leftBoundary = idx == 0 || !char.IsLetterOrDigit(text[idx - 1]);
+        int endIdx = idx + query.Length;
+        bool rightBoundary = endIdx == text.Length || !char.IsLetterOrDigit(text[endIdx]);
+        return leftBoundary && rightBoundary;
+    }
+
+    private static bool IsCoreGrammarRule(GrammarRuleDto r)
+    {
+        var title = r.Title.ToLowerInvariant();
+        var topic = (r.Topic ?? string.Empty).ToLowerInvariant();
+        return title.Contains("tense") || title.Contains("thì") ||
+               title.Contains("present") || title.Contains("past") || title.Contains("perfect") ||
+               title.Contains("passive") || title.Contains("bị động") ||
+               title.Contains("condition") || title.Contains("điều kiện") ||
+               title.Contains("relative") || title.Contains("quan hệ") ||
+               title.Contains("modal") || title.Contains("inversion") ||
+               topic.Contains("tense") || topic.Contains("clause") || topic.Contains("passive");
     }
 
     private async void PracticeBtn_Click(object sender, RoutedEventArgs e)
@@ -1248,9 +1845,17 @@ public partial class StorageCandidateItem : ObservableObject
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
     public string Badge { get; set; } = string.Empty;
+    public string MatchReason { get; set; } = string.Empty;
+    public bool HasMatchReason => !string.IsNullOrEmpty(MatchReason);
+    public Visibility MatchReasonVisibility => HasMatchReason ? Visibility.Visible : Visibility.Collapsed;
+    public bool IsRecommended { get; set; } = false;
+    public double RelevanceScore { get; set; } = 0;
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool IsAdding { get; set; } = false;
 
     public override string ToString() => string.IsNullOrWhiteSpace(Subtitle) ? Title : $"{Title} — {Subtitle}";
 }
