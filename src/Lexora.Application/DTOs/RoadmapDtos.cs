@@ -15,7 +15,8 @@ public record RoadmapNodeDto(
     int TargetItemCount,
     int CompletedItemCount,
     double EaseFactorWeight,
-    Guid? ReferenceId)
+    Guid? ReferenceId,
+    string? ReferenceName = null)
 {
     public double ProgressPercentage => TargetItemCount > 0 
         ? Math.Clamp((double)CompletedItemCount / TargetItemCount * 100.0, 0.0, 100.0) 
@@ -24,6 +25,9 @@ public record RoadmapNodeDto(
     public string ProgressPercentageDisplay => $"{ProgressPercentage:F0}%";
     public string EaseFactorWeightDisplay => $"EF: {EaseFactorWeight:F2}";
     public bool IsActionable => Status == NodeStatus.Available || Status == NodeStatus.InProgress;
+    public bool CanStartPractice => Status == NodeStatus.Available || Status == NodeStatus.InProgress || Status == NodeStatus.Mastered;
+    public bool HasLinkedContent => ReferenceId.HasValue || !string.IsNullOrWhiteSpace(ReferenceName);
+    public string ReferenceDisplay => !string.IsNullOrWhiteSpace(ReferenceName) ? ReferenceName : Title;
 }
 
 public record MilestoneDto(
@@ -66,6 +70,11 @@ public record StudyRoadmapDto(
     public int DaysRemaining => Math.Max(0, (TargetDate.Date - DateTime.UtcNow.Date).Days);
     public int TotalNodes => Milestones.Sum(m => m.TotalNodesCount);
     public int MasteredNodes => Milestones.Sum(m => m.CompletedNodesCount);
+
+    public RoadmapNodeDto? NextActiveNode => Milestones
+        .OrderBy(m => m.OrderIndex)
+        .SelectMany(m => m.Nodes.OrderBy(n => n.OrderIndex))
+        .FirstOrDefault(n => n.Status == NodeStatus.InProgress || n.Status == NodeStatus.Available);
 }
 
 public record GenerateRoadmapRequestDto(
@@ -74,3 +83,20 @@ public record GenerateRoadmapRequestDto(
     double StartingScore,
     double TargetScore,
     int DurationWeeks);
+
+public record RoadmapNodeActionContextDto(
+    Guid NodeId,
+    string NodeTitle,
+    RoadmapNodeType NodeType,
+    Guid? TopicId,
+    string? TopicName,
+    IReadOnlyList<Guid> LinkedWordIds,
+    int TargetCount,
+    int CompletedCount,
+    string? GrammarQuery,
+    Guid? GrammarRuleId)
+{
+    public bool HasWords => LinkedWordIds.Count > 0;
+    public bool HasTopic => TopicId.HasValue;
+    public bool HasGrammar => GrammarRuleId.HasValue || !string.IsNullOrWhiteSpace(GrammarQuery);
+}

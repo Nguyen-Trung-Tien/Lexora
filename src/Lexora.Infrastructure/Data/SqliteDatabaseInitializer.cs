@@ -457,6 +457,7 @@ public class SqliteDatabaseInitializer
                     "CompletedItemCount" INTEGER NOT NULL,
                     "EaseFactorWeight" REAL NOT NULL DEFAULT 2.5,
                     "ReferenceId" TEXT NULL,
+                    "ReferenceName" TEXT NULL,
                     "CreatedAt" TEXT NOT NULL,
                     "UpdatedAt" TEXT NOT NULL,
                     CONSTRAINT "FK_RoadmapNodes_RoadmapMilestones_MilestoneId" FOREIGN KEY ("MilestoneId") REFERENCES "RoadmapMilestones" ("Id") ON DELETE CASCADE
@@ -467,6 +468,30 @@ public class SqliteDatabaseInitializer
                 CREATE INDEX IF NOT EXISTS "IX_RoadmapNodes_OrderIndex" ON "RoadmapNodes" ("OrderIndex");
                 """;
             await _context.Database.ExecuteSqlRawAsync(createRoadmapsTablesSql, cancellationToken);
+
+            // Ensure ReferenceName column exists on RoadmapNodes for existing databases
+            using (var checkCmd = connection.CreateCommand())
+            {
+                checkCmd.CommandText = "PRAGMA table_info(\"RoadmapNodes\");";
+                using var checkReader = await checkCmd.ExecuteReaderAsync(cancellationToken);
+                bool hasReferenceName = false;
+                while (await checkReader.ReadAsync(cancellationToken))
+                {
+                    if (string.Equals(checkReader.GetString(1), "ReferenceName", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasReferenceName = true;
+                        break;
+                    }
+                }
+                checkReader.Close();
+
+                if (!hasReferenceName)
+                {
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "ALTER TABLE \"RoadmapNodes\" ADD COLUMN \"ReferenceName\" TEXT NULL;",
+                        cancellationToken);
+                }
+            }
         }
         catch (Exception ex)
         {

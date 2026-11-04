@@ -292,6 +292,7 @@ public class LexoraDbContext : DbContext
             b.Property(n => n.TargetItemCount).IsRequired();
             b.Property(n => n.CompletedItemCount).IsRequired();
             b.Property(n => n.EaseFactorWeight).IsRequired();
+            b.Property(n => n.ReferenceName).HasMaxLength(200);
 
             b.HasIndex(n => n.MilestoneId);
             b.HasIndex(n => n.Status);

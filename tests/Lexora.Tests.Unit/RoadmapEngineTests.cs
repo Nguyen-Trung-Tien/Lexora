@@ -161,5 +161,116 @@ public class RoadmapEngineTests
         success.Should().BeFalse();
         mockUow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    [Fact]
+    public void GenerateAdaptiveRoadmap_WithAvailableTopics_ShouldBindReferenceIdsAndNames()
+    {
+        // Arrange
+        var topicId = Guid.NewGuid();
+        var topics = new List<Topic>
+        {
+            new() { Id = topicId, Name = "Business & Career" }
+        };
+        var grammarId = Guid.NewGuid();
+        var rules = new List<GrammarRule>
+        {
+            new() { Id = grammarId, Title = "Tenses", Topic = "Tenses" }
+        };
+
+        // Act
+        var roadmap = _engine.GenerateAdaptiveRoadmap("TOEIC Goal", ExamTarget.Toeic, 400, 700, 10, topics, rules);
+
+        // Assert
+        var firstNode = roadmap.Milestones.First().Nodes.First();
+        firstNode.ReferenceId.Should().Be(topicId);
+        firstNode.ReferenceName.Should().Be("Business & Career");
+
+        var grammarNode = roadmap.Milestones.First().Nodes.FirstOrDefault(n => n.Type == RoadmapNodeType.GrammarPoint);
+        grammarNode.Should().NotBeNull();
+        grammarNode!.ReferenceId.Should().Be(grammarId);
+        grammarNode.ReferenceName.Should().Be("Tenses");
+    }
+
+    [Fact]
+    public async Task RoadmapService_SyncRoadmapProgressAsync_CalculatesRealProgress_UnlocksNextNode()
+    {
+        // Arrange
+        var mockRepo = new Mock<IRoadmapRepository>();
+        var mockUow = new Mock<IUnitOfWork>();
+        var mockVocabRepo = new Mock<IVocabularyRepository>();
+
+        var topicId = Guid.NewGuid();
+        var testRoadmap = _engine.GenerateAdaptiveRoadmap("Test Goal", ExamTarget.Toeic, 400, 700, 8);
+        var firstNode = testRoadmap.Milestones.First().Nodes.First();
+        firstNode.ReferenceId = topicId;
+        firstNode.TargetItemCount = 2;
+        firstNode.CompletedItemCount = 0;
+
+        mockRepo.Setup(r => r.GetActiveRoadmapWithDetailsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(testRoadmap);
+
+        // Mock 2 words in this topic with status Mastered
+        var word1 = new Word { Id = Guid.NewGuid(), Term = "contract" };
+        word1.WordTopics.Add(new WordTopic { WordId = word1.Id, TopicId = topicId });
+        word1.ReviewCard = new ReviewCard { WordId = word1.Id, Status = LearningStatus.Mastered };
+
+        var word2 = new Word { Id = Guid.NewGuid(), Term = "negotiate" };
+        word2.WordTopics.Add(new WordTopic { WordId = word2.Id, TopicId = topicId });
+        word2.ReviewCard = new ReviewCard { WordId = word2.Id, Status = LearningStatus.Review };
+
+        mockVocabRepo.Setup(v => v.GetWordsForAnalyticsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Word> { word1, word2 });
+
+        var service = new RoadmapService(mockRepo.Object, mockUow.Object, mockVocabRepo.Object);
+
+        // Act
+        var result = await service.SyncRoadmapProgressAsync();
+
+        // Assert
+        result.Should().NotBeNull();
+        firstNode.CompletedItemCount.Should().Be(2);
+        firstNode.Status.Should().Be(NodeStatus.Mastered);
+        var secondNode = testRoadmap.Milestones.First().Nodes.ElementAt(1);
+        secondNode.Status.Should().Be(NodeStatus.Available, "Next node should be unlocked after sync detects completion");
+        mockUow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task RoadmapService_GetNodeActionContextAsync_ReturnsActionContextWithLinkedWords()
+    {
+        // Arrange
+        var mockRepo = new Mock<IRoadmapRepository>();
+        var mockUow = new Mock<IUnitOfWork>();
+        var mockVocabRepo = new Mock<IVocabularyRepository>();
+
+        var topicId = Guid.NewGuid();
+        var testRoadmap = _engine.GenerateAdaptiveRoadmap("Test Goal", ExamTarget.Toeic, 400, 700, 8);
+        var firstNode = testRoadmap.Milestones.First().Nodes.First();
+        firstNode.ReferenceId = topicId;
+        firstNode.ReferenceName = "Business & Career";
+
+        mockRepo.Setup(r => r.GetActiveRoadmapWithDetailsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(testRoadmap);
+
+        var wordId = Guid.NewGuid();
+        var word1 = new Word { Id = wordId, Term = "contract" };
+        word1.WordTopics.Add(new WordTopic { WordId = wordId, TopicId = topicId });
+
+        mockVocabRepo.Setup(v => v.GetWordsForAnalyticsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Word> { word1 });
+
+        var service = new RoadmapService(mockRepo.Object, mockUow.Object, mockVocabRepo.Object);
+
+        // Act
+        var context = await service.GetNodeActionContextAsync(firstNode.Id);
+
+        // Assert
+        context.Should().NotBeNull();
+        context!.NodeId.Should().Be(firstNode.Id);
+        context.TopicId.Should().Be(topicId);
+        context.TopicName.Should().Be("Business & Career");
+        context.LinkedWordIds.Should().Contain(wordId);
+        context.HasWords.Should().BeTrue();
+    }
 }
 

@@ -772,6 +772,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,12,0,0">
                             <Button Content="{x:Bind Loc.GetString('Review_BtnMoreCards')}" Style="{ThemeResource AccentButtonStyle}" Padding="24,10" CornerRadius="8" Click="RestartReviewButton_Click" />
                             <Button Content="{x:Bind Loc.GetString('Review_BtnLearnNew')}" Padding="24,10" CornerRadius="8" Click="ModeNewButton_Click" />
+                            <Button Content="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}" Padding="24,10" CornerRadius="8" Click="ReturnToRoadmapButton_Click" />
                         </StackPanel>
                     </StackPanel>
                 </Border>

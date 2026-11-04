@@ -74,10 +74,12 @@ public class VocabularySuggestionService : IVocabularySuggestionService
             cancellationToken: cancellationToken);
 
         var relations = ExtractExplicitRelationsFromNotes(targetWord);
+        var curatedRelations = CuratedAcademicThesaurus.GetRelationsForTerm(targetWord.Term);
         var allExplicitTerms = relations.Synonyms
             .Concat(relations.Antonyms)
             .Concat(relations.WordFamily)
             .Concat(relations.Collocations)
+            .Concat(curatedRelations.Select(c => c.RelatedTerm))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 

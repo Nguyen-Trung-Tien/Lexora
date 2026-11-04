@@ -31,6 +31,7 @@ public class GraphNodeDto
     public string Explanation { get; set; } = string.Empty;
     public string ExampleSentenceEn { get; set; } = string.Empty;
     public string ExampleSentenceVi { get; set; } = string.Empty;
+    public IReadOnlyList<WordMeaningDto> AllMeanings { get; set; } = [];
 
     public GraphNodeDto() { }
 
@@ -50,7 +51,8 @@ public class GraphNodeDto
         string MeaningEn = "",
         string Explanation = "",
         string ExampleSentenceEn = "",
-        string ExampleSentenceVi = "")
+        string ExampleSentenceVi = "",
+        IReadOnlyList<WordMeaningDto>? AllMeanings = null)
     {
         this.Id = Id;
         this.Term = Term;
@@ -68,6 +70,7 @@ public class GraphNodeDto
         this.Explanation = Explanation;
         this.ExampleSentenceEn = ExampleSentenceEn;
         this.ExampleSentenceVi = ExampleSentenceVi;
+        this.AllMeanings = AllMeanings ?? [];
     }
 }
 

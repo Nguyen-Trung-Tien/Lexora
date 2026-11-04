@@ -37,16 +37,26 @@
                             TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <Button
-                        Grid.Column="1"
-                        VerticalAlignment="Center"
-                        Click="OpenCreateRoadmapDialog_Click"
-                        Style="{ThemeResource AccentButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE710;" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" />
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button
+                            Command="{x:Bind ViewModel.SyncProgressCommand}"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_SyncProgress')}"
+                            Style="{ThemeResource DefaultButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE72C;" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_SyncProgress')}" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button
+                            Click="OpenCreateRoadmapDialog_Click"
+                            Style="{ThemeResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE710;" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </Grid>
 
                 <!-- 2. Active Roadmap Overview Cards -->
@@ -193,6 +203,63 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+
+                <!-- 2.5 Hero Banner: Up Next Lesson -->
+                <Border
+                    Padding="20,16"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Visibility="{x:Bind ViewModel.HasNextActiveNode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Width="44"
+                            Height="44"
+                            CornerRadius="22"
+                            Background="{ThemeResource AccentFillColorDefaultBrush}">
+                            <FontIcon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="20"
+                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                Glyph="&#xE768;" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                Text="{x:Bind Loc.GetString('Roadmap_UpNextTitle')}" />
+                            <TextBlock
+                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                Text="{x:Bind ViewModel.NextActiveNode.Title, Mode=OneWay, FallbackValue=''}" />
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.NextActiveNode.ReferenceDisplay, Mode=OneWay, FallbackValue=''}" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Command="{x:Bind ViewModel.StartLearningNodeCommand}"
+                            CommandParameter="{x:Bind ViewModel.NextActiveNode, Mode=OneWay}"
+                            Style="{ThemeResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE768;" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Border>
 
                 <!-- 3. Empty State (When no roadmap created yet) -->
                 <Border
@@ -353,6 +420,18 @@
 
                                 <!-- Progress & Status Info -->
                                 <StackPanel Spacing="12">
+                                    <!-- Linked Topic / Rule Context -->
+                                    <Grid Visibility="{x:Bind ViewModel.SelectedNode.HasLinkedContent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind Loc.GetString('Roadmap_LinkedTopic')}" />
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                            Text="{x:Bind ViewModel.SelectedNodeLinkedTopicDisplay, Mode=OneWay, FallbackValue=''}" />
+                                    </Grid>
+
                                     <Grid>
                                         <TextBlock
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -385,11 +464,12 @@
                                             Text="{x:Bind ViewModel.SelectedNode.EaseFactorWeightDisplay, Mode=OneWay, FallbackValue='EF: 2.50'}" />
                                     </Grid>
 
-                                    <!-- Action Buttons -->
+                                    <!-- Real Action Buttons -->
                                     <Button
                                         Margin="0,16,0,0"
                                         HorizontalAlignment="Stretch"
-                                        Command="{x:Bind ViewModel.AdvanceNodeProgressCommand}"
+                                        Command="{x:Bind ViewModel.StartLearningNodeCommand}"
+                                        CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
                                         IsEnabled="{x:Bind ViewModel.CanAdvanceProgress, Mode=OneWay}"
                                         Style="{ThemeResource AccentButtonStyle}">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
@@ -400,11 +480,12 @@
 
                                     <Button
                                         HorizontalAlignment="Stretch"
-                                        Command="{x:Bind ViewModel.NavigateToModuleCommand}"
+                                        Command="{x:Bind ViewModel.ViewInVocabularyCommand}"
+                                        CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
                                         Style="{ThemeResource DefaultButtonStyle}">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <FontIcon Glyph="&#xE8A7;" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionReview')}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ViewInVocab')}" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>

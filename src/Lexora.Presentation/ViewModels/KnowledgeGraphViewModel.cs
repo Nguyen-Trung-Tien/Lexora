@@ -56,6 +56,7 @@ public partial class KnowledgeGraphViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasActiveGraph))]
+    [NotifyPropertyChangedFor(nameof(HasMultipleMeaningsForCenterNode))]
     [NotifyPropertyChangedFor(nameof(AllTabText))]
     [NotifyPropertyChangedFor(nameof(SynonymsTabText))]
     [NotifyPropertyChangedFor(nameof(AntonymsTabText))]
@@ -65,12 +66,15 @@ public partial class KnowledgeGraphViewModel : ObservableObject
     public partial VocabularyKnowledgeGraphDto ActiveGraph { get; set; } = VocabularyKnowledgeGraphDto.Empty;
 
     public bool HasActiveGraph => ActiveGraph != null && ActiveGraph.CenterNode.Id != Guid.Empty;
+    public bool HasMultipleMeaningsForCenterNode => ActiveGraph?.CenterNode?.AllMeanings != null && ActiveGraph.CenterNode.AllMeanings.Count > 1;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedNode))]
+    [NotifyPropertyChangedFor(nameof(HasMultipleMeaningsForSelectedNode))]
     public partial GraphNodeDto? SelectedNode { get; set; }
 
     public bool HasSelectedNode => SelectedNode != null;
+    public bool HasMultipleMeaningsForSelectedNode => SelectedNode?.AllMeanings != null && SelectedNode.AllMeanings.Count > 1;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasHistory))]
@@ -527,6 +531,25 @@ public partial class KnowledgeGraphViewModel : ObservableObject
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphViewModel] CopySelectedTerm error: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public void CopySelectedMeaning()
+    {
+        var meaning = SelectedNode?.MeaningVi ?? ActiveGraph?.CenterNode?.MeaningVi;
+        if (string.IsNullOrWhiteSpace(meaning)) return;
+
+        try
+        {
+            var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage();
+            dataPackage.SetText(meaning);
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+            _toastService?.ShowSuccess(string.Format(_localizationService.GetString("KnowledgeGraph_MeaningCopied"), meaning));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphViewModel] CopySelectedMeaning error: {ex.Message}");
         }
     }
 

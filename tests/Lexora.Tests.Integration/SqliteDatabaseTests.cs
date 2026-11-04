@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Lexora.Application.Services;
 using Lexora.Domain.Entities;
 using Lexora.Domain.Enums;
 using Lexora.Infrastructure.Data;
@@ -163,5 +164,35 @@ public class SqliteDatabaseTests : IDisposable
     {
         _context.Dispose();
         _connection.Dispose();
+    }
+
+    [Fact]
+    public async Task RoadmapService_GenerateAdaptiveRoadmapAsync_OnRealSqlite_ShouldPersistSuccessfully()
+    {
+        // Arrange
+        var initializer = new SqliteDatabaseInitializer(_context, NullLogger<SqliteDatabaseInitializer>.Instance);
+        await initializer.InitializeAsync();
+
+        var roadmapRepo = new RoadmapRepository(_context);
+        var uow = new UnitOfWork(_context);
+        var vocabRepo = new VocabularyRepository(_context);
+        var grammarRepo = new GrammarRepository(_context);
+
+        var service = new RoadmapService(roadmapRepo, uow, vocabRepo, grammarRepo);
+        var request = new Lexora.Application.DTOs.GenerateRoadmapRequestDto(
+            string.Empty,
+            ExamTarget.Toeic,
+            450,
+            750,
+            12);
+
+        // Act
+        var result = await service.GenerateAdaptiveRoadmapAsync(request);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Milestones.Should().HaveCount(3);
+        result.TotalNodes.Should().BeGreaterThan(0);
+        result.Milestones.First().Nodes.First().ReferenceName.Should().NotBeNullOrWhiteSpace();
     }
 }

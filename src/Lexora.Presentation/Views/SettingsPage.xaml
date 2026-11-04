@@ -801,7 +801,7 @@
                             <Grid ColumnDefinitions="*,Auto">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Settings_CurrentVersionDetails')}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind ViewModel.CurrentVersionDetailsTitle, Mode=OneWay}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
                                 </StackPanel>
                                 <Button Grid.Column="1" Command="{x:Bind ViewModel.ToggleCurrentVersionNotesCommand}"
                                         Background="Transparent" BorderThickness="0" Padding="6,2" CornerRadius="4">

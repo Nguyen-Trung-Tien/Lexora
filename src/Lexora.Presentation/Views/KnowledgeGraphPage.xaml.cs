@@ -252,8 +252,23 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
                 TextWrapping = TextWrapping.NoWrap
             };
 
+            var meaningText = new TextBlock
+            {
+                Text = !string.IsNullOrWhiteSpace(node.MeaningVi) ? node.MeaningVi : node.MeaningEn,
+                FontSize = 10,
+                Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush"),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                TextWrapping = TextWrapping.NoWrap,
+                MaxWidth = 130
+            };
+
             nodePanel.Children.Add(topPanel);
             nodePanel.Children.Add(termText);
+            if (!string.IsNullOrWhiteSpace(meaningText.Text))
+            {
+                nodePanel.Children.Add(meaningText);
+            }
             nodeBorder.Child = nodePanel;
 
             // Interactive handlers
@@ -276,8 +291,8 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
             // Measure & arrange
             nodeBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            double nw = Math.Max(nodeBorder.DesiredSize.Width + 12, 88);
-            double nh = Math.Max(nodeBorder.DesiredSize.Height + 4, 44);
+            double nw = Math.Max(nodeBorder.DesiredSize.Width + 14, 110);
+            double nh = Math.Max(nodeBorder.DesiredSize.Height + 4, 52);
             nodeBorder.Width = nw;
             nodeBorder.Height = nh;
 
@@ -290,10 +305,38 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             nodeItems[i] = (nodeBorder, node, nw, nh, nx, ny);
         }
 
-        // Step 2: Collision avoidance relaxation pass (prevents cards from overlapping each other)
-        for (int iter = 0; iter < 4; iter++)
+        // Step 2: Collision avoidance relaxation pass (prevents cards from overlapping each other and center card)
+        for (int iter = 0; iter < 6; iter++)
         {
             bool anyOverlap = false;
+
+            // Repulsion from center card to prevent orbit nodes from occluding center concept
+            double minCenterDistX = 130.0;
+            double minCenterDistY = 65.0;
+
+            for (int i = 0; i < count; i++)
+            {
+                double cdx = nodeItems[i].X - cx;
+                double cdy = nodeItems[i].Y - cy;
+                double absCdx = Math.Abs(cdx);
+                double absCdy = Math.Abs(cdy);
+
+                if (absCdx < minCenterDistX && absCdy < minCenterDistY)
+                {
+                    anyOverlap = true;
+                    double pushX = minCenterDistX - absCdx;
+                    double pushY = minCenterDistY - absCdy;
+                    if (pushX < pushY)
+                    {
+                        nodeItems[i].X += (cdx >= 0 ? 1 : -1) * pushX;
+                    }
+                    else
+                    {
+                        nodeItems[i].Y += (cdy >= 0 ? 1 : -1) * pushY;
+                    }
+                }
+            }
+
             for (int i = 0; i < count; i++)
             {
                 for (int j = i + 1; j < count; j++)
@@ -329,8 +372,8 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
                 // Keep nodes within canvas bounds with margin
                 double halfW = nodeItems[i].Width / 2.0;
                 double halfH = nodeItems[i].Height / 2.0;
-                nodeItems[i].X = Math.Clamp(nodeItems[i].X, halfW + 10.0, width - halfW - 10.0);
-                nodeItems[i].Y = Math.Clamp(nodeItems[i].Y, halfH + 10.0, height - halfH - 10.0);
+                nodeItems[i].X = Math.Clamp(nodeItems[i].X, halfW + 12.0, width - halfW - 12.0);
+                nodeItems[i].Y = Math.Clamp(nodeItems[i].Y, halfH + 12.0, height - halfH - 12.0);
             }
 
             if (!anyOverlap) break;
@@ -415,8 +458,26 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             TextWrapping = TextWrapping.NoWrap
         };
 
+        var centerMeaning = new TextBlock
+        {
+            Text = !string.IsNullOrWhiteSpace(ViewModel.ActiveGraph.CenterNode.MeaningVi)
+                ? ViewModel.ActiveGraph.CenterNode.MeaningVi
+                : ViewModel.ActiveGraph.CenterNode.MeaningEn,
+            FontSize = 10.5,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextOnAccentFillColorPrimaryBrush"),
+            Opacity = 0.92,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            TextWrapping = TextWrapping.NoWrap,
+            MaxWidth = 180
+        };
+
         centerPanel.Children.Add(centerLabel);
         centerPanel.Children.Add(centerTerm);
+        if (!string.IsNullOrWhiteSpace(centerMeaning.Text))
+        {
+            centerPanel.Children.Add(centerMeaning);
+        }
         centerBorder.Child = centerPanel;
 
         centerBorder.Tapped += (s, ev) =>
@@ -431,8 +492,8 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         };
 
         centerBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        double cw = Math.Max(centerBorder.DesiredSize.Width + 16, 150);
-        double ch = Math.Max(centerBorder.DesiredSize.Height, 62);
+        double cw = Math.Max(centerBorder.DesiredSize.Width + 24, 160);
+        double ch = Math.Max(centerBorder.DesiredSize.Height + 6, 68);
         centerBorder.Width = cw;
         centerBorder.Height = ch;
 
@@ -731,6 +792,11 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
     private void CopySelectedTerm_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.CopySelectedTerm();
+    }
+
+    private void CopySelectedMeaning_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.CopySelectedMeaning();
     }
 
     private void ViewSelectedInVocab_Click(object sender, RoutedEventArgs e)

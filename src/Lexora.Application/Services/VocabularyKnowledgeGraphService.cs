@@ -161,13 +161,30 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
     {
         var suggestions = await _suggestionService.GetSuggestionsAsync(targetWord.Id, cancellationToken);
 
+        var allMeanings = targetWord.Meanings.Select(m => new WordMeaningDto(
+            m.Id,
+            m.PartOfSpeech,
+            m.DefinitionVi,
+            m.DefinitionEn,
+            m.Explanation,
+            m.OrderIndex,
+            m.Examples.Select(e => new ExampleSentenceDto(e.Id, e.SentenceEn, e.SentenceVi, e.AudioPath)).ToList()
+        )).ToList();
+
         var firstMeaning = targetWord.Meanings.FirstOrDefault();
         var firstExample = firstMeaning?.Examples.FirstOrDefault();
+
+        string centerMeaningVi = firstMeaning?.DefinitionVi ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(centerMeaningVi))
+        {
+            centerMeaningVi = CuratedAcademicThesaurus.GetCuratedMeaningForTerm(targetWord.Term) ?? string.Empty;
+        }
+
         var centerNode = new GraphNodeDto(
             Id: targetWord.Id,
             Term: targetWord.Term,
             NodeType: KnowledgeGraphNodeType.Center,
-            MeaningVi: firstMeaning?.DefinitionVi ?? string.Empty,
+            MeaningVi: centerMeaningVi,
             Level: targetWord.Level,
             PartOfSpeech: targetWord.PrimaryPartOfSpeech,
             Ipa: targetWord.PhoneticUs ?? targetWord.PhoneticUk,
@@ -179,15 +196,18 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
             MeaningEn: firstMeaning?.DefinitionEn ?? string.Empty,
             Explanation: firstMeaning?.Explanation ?? string.Empty,
             ExampleSentenceEn: firstExample?.SentenceEn ?? string.Empty,
-            ExampleSentenceVi: firstExample?.SentenceVi ?? string.Empty
+            ExampleSentenceVi: firstExample?.SentenceVi ?? string.Empty,
+            AllMeanings: allMeanings
         );
 
         var connectedNodes = new List<GraphNodeDto>();
         var edges = new List<GraphEdgeDto>();
+        var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { targetWord.Term };
 
         // 1. Synonyms
         foreach (var item in suggestions.Synonyms.Take(6))
         {
+            if (!seenTerms.Add(item.Term)) continue;
             var node = CreateNodeFromSuggestion(item, KnowledgeGraphNodeType.Synonym, 0.9, "Synonym (Đồng nghĩa)");
             connectedNodes.Add(node);
             edges.Add(new GraphEdgeDto(centerNode.Id, node.Id, centerNode.Term, node.Term, KnowledgeGraphNodeType.Synonym, "Synonym"));
@@ -196,6 +216,7 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         // 2. Antonyms
         foreach (var item in suggestions.Antonyms.Take(4))
         {
+            if (!seenTerms.Add(item.Term)) continue;
             var node = CreateNodeFromSuggestion(item, KnowledgeGraphNodeType.Antonym, 0.85, "Antonym (Trái nghĩa)");
             connectedNodes.Add(node);
             edges.Add(new GraphEdgeDto(centerNode.Id, node.Id, centerNode.Term, node.Term, KnowledgeGraphNodeType.Antonym, "Antonym"));
@@ -204,6 +225,7 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         // 3. Word Family / Derived Forms
         foreach (var item in suggestions.WordFamily.Take(5))
         {
+            if (!seenTerms.Add(item.Term)) continue;
             var node = CreateNodeFromSuggestion(item, KnowledgeGraphNodeType.WordFamily, 0.8, "Word Family (Họ từ)");
             connectedNodes.Add(node);
             edges.Add(new GraphEdgeDto(centerNode.Id, node.Id, centerNode.Term, node.Term, KnowledgeGraphNodeType.WordFamily, "Derived Form"));
@@ -212,6 +234,7 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         // 4. Collocations & Phrases
         foreach (var item in suggestions.Collocations.Take(5))
         {
+            if (!seenTerms.Add(item.Term)) continue;
             var node = CreateNodeFromSuggestion(item, KnowledgeGraphNodeType.Collocation, 0.75, "Collocation (Cụm kết hợp)");
             connectedNodes.Add(node);
             edges.Add(new GraphEdgeDto(centerNode.Id, node.Id, centerNode.Term, node.Term, KnowledgeGraphNodeType.Collocation, "Collocation"));
@@ -220,9 +243,62 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         // 5. Topic Semantic Cluster
         foreach (var item in suggestions.SameTopic.Take(4))
         {
+            if (!seenTerms.Add(item.Term)) continue;
             var node = CreateNodeFromSuggestion(item, KnowledgeGraphNodeType.TopicCluster, 0.65, "Topic Domain (Cùng chủ đề)");
             connectedNodes.Add(node);
             edges.Add(new GraphEdgeDto(centerNode.Id, node.Id, centerNode.Term, node.Term, KnowledgeGraphNodeType.TopicCluster, "Same Domain"));
+        }
+
+        // 6. Curated Academic Relations supplement (adds definitions & relations from curated academic thesaurus)
+        var curatedRelations = CuratedAcademicThesaurus.GetRelationsForTerm(targetWord.Term);
+        foreach (var cur in curatedRelations)
+        {
+            if (seenTerms.Contains(cur.RelatedTerm)) continue;
+
+            var nodeType = cur.RelationType switch
+            {
+                "Antonym" => KnowledgeGraphNodeType.Antonym,
+                "WordFamily" => KnowledgeGraphNodeType.WordFamily,
+                "Collocation" => KnowledgeGraphNodeType.Collocation,
+                _ => KnowledgeGraphNodeType.Synonym
+            };
+
+            var matches = await _vocabRepo.SearchAsync(searchTerm: cur.RelatedTerm, take: 1, cancellationToken: cancellationToken);
+            var dbMatch = matches?.FirstOrDefault(w => string.Equals(w.NormalizedTerm, cur.RelatedTerm.Trim().ToLowerInvariant(), StringComparison.OrdinalIgnoreCase))
+                          ?? matches?.FirstOrDefault(w => string.Equals(w.Term, cur.RelatedTerm.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            var dbFirstMeaning = dbMatch?.Meanings.FirstOrDefault();
+            var dbFirstExample = dbFirstMeaning?.Examples.FirstOrDefault();
+            string curMeaningVi = dbFirstMeaning?.DefinitionVi ?? cur.Explanation;
+
+            var dbAllMeanings = dbMatch?.Meanings.Select(m => new WordMeaningDto(
+                m.Id, m.PartOfSpeech, m.DefinitionVi, m.DefinitionEn, m.Explanation, m.OrderIndex,
+                m.Examples.Select(e => new ExampleSentenceDto(e.Id, e.SentenceEn, e.SentenceVi, e.AudioPath)).ToList()
+            )).ToList() ?? [];
+
+            var node = new GraphNodeDto(
+                Id: dbMatch?.Id ?? Guid.NewGuid(),
+                Term: cur.RelatedTerm,
+                NodeType: nodeType,
+                MeaningVi: curMeaningVi,
+                Level: dbMatch?.Level ?? targetWord.Level,
+                PartOfSpeech: dbMatch?.PrimaryPartOfSpeech ?? dbFirstMeaning?.PartOfSpeech ?? PartOfSpeech.Noun,
+                Ipa: dbMatch?.PhoneticUs ?? dbMatch?.PhoneticUk,
+                AudioPath: dbMatch?.AudioUsPath ?? dbMatch?.AudioUkPath,
+                IsMastered: dbMatch?.ReviewCard?.Status == LearningStatus.Mastered,
+                IsCenter: false,
+                ConnectionWeight: cur.Weight,
+                RelationshipLabel: $"{cur.RelationType} (Từ điển học thuật)",
+                MeaningEn: dbFirstMeaning?.DefinitionEn ?? string.Empty,
+                Explanation: cur.Explanation,
+                ExampleSentenceEn: dbFirstExample?.SentenceEn ?? string.Empty,
+                ExampleSentenceVi: dbFirstExample?.SentenceVi ?? string.Empty,
+                AllMeanings: dbAllMeanings
+            );
+
+            connectedNodes.Add(node);
+            edges.Add(new GraphEdgeDto(centerNode.Id, node.Id, centerNode.Term, node.Term, nodeType, cur.RelationType));
+            seenTerms.Add(cur.RelatedTerm);
         }
 
         // Fallback connections if sparse
@@ -238,9 +314,19 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
             var fallbackList = relatedFallback ?? Array.Empty<Word>();
             foreach (var fallback in fallbackList.Where(w => w.Id != targetWord.Id))
             {
-                if (connectedNodes.Any(n => n.Id == fallback.Id)) continue;
+                if (connectedNodes.Any(n => n.Id == fallback.Id) || seenTerms.Contains(fallback.Term)) continue;
 
                 var fMeaning = fallback.Meanings.FirstOrDefault();
+                var fAllMeanings = fallback.Meanings.Select(m => new WordMeaningDto(
+                    m.Id,
+                    m.PartOfSpeech,
+                    m.DefinitionVi,
+                    m.DefinitionEn,
+                    m.Explanation,
+                    m.OrderIndex,
+                    m.Examples.Select(e => new ExampleSentenceDto(e.Id, e.SentenceEn, e.SentenceVi, e.AudioPath)).ToList()
+                )).ToList();
+
                 var node = new GraphNodeDto(
                     Id: fallback.Id,
                     Term: fallback.Term,
@@ -253,22 +339,31 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
                     IsMastered: fallback.ReviewCard?.Status == LearningStatus.Mastered,
                     IsCenter: false,
                     ConnectionWeight: 0.6,
-                    RelationshipLabel: $"Same CEFR {fallback.Level}"
+                    RelationshipLabel: $"Same CEFR {fallback.Level}",
+                    MeaningEn: fMeaning?.DefinitionEn ?? string.Empty,
+                    AllMeanings: fAllMeanings
                 );
                 connectedNodes.Add(node);
                 edges.Add(new GraphEdgeDto(centerNode.Id, node.Id, centerNode.Term, node.Term, KnowledgeGraphNodeType.TopicCluster, "Shared Level"));
+                seenTerms.Add(fallback.Term);
             }
         }
+
+        int synCount = connectedNodes.Count(n => n.NodeType == KnowledgeGraphNodeType.Synonym);
+        int antCount = connectedNodes.Count(n => n.NodeType == KnowledgeGraphNodeType.Antonym);
+        int famCount = connectedNodes.Count(n => n.NodeType == KnowledgeGraphNodeType.WordFamily);
+        int colCount = connectedNodes.Count(n => n.NodeType == KnowledgeGraphNodeType.Collocation);
+        int topCount = connectedNodes.Count(n => n.NodeType == KnowledgeGraphNodeType.TopicCluster);
 
         return new VocabularyKnowledgeGraphDto(
             CenterNode: centerNode,
             ConnectedNodes: connectedNodes,
             Edges: edges,
-            SynonymsCount: suggestions.Synonyms.Count,
-            AntonymsCount: suggestions.Antonyms.Count,
-            WordFamilyCount: suggestions.WordFamily.Count,
-            CollocationsCount: suggestions.Collocations.Count,
-            TopicWordsCount: suggestions.SameTopic.Count,
+            SynonymsCount: synCount,
+            AntonymsCount: antCount,
+            WordFamilyCount: famCount,
+            CollocationsCount: colCount,
+            TopicWordsCount: topCount,
             TotalConnections: connectedNodes.Count
         );
     }
@@ -283,13 +378,27 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         var firstMeaning = word?.Meanings.FirstOrDefault();
         var firstExample = firstMeaning?.Examples.FirstOrDefault();
 
+        string meaningVi = !string.IsNullOrWhiteSpace(item.PrimaryDefinition)
+            ? item.PrimaryDefinition
+            : (firstMeaning?.DefinitionVi ?? string.Empty);
+
+        if (string.IsNullOrWhiteSpace(meaningVi))
+        {
+            meaningVi = CuratedAcademicThesaurus.GetCuratedMeaningForTerm(item.Term) ?? string.Empty;
+        }
+
+        if (string.IsNullOrWhiteSpace(meaningVi) && !string.IsNullOrWhiteSpace(item.Reason))
+        {
+            meaningVi = item.Reason;
+        }
+
         return new GraphNodeDto(
             Id: word?.Id ?? Guid.NewGuid(),
             Term: item.Term,
             NodeType: nodeType,
-            MeaningVi: !string.IsNullOrWhiteSpace(item.PrimaryDefinition) ? item.PrimaryDefinition : (firstMeaning?.DefinitionVi ?? string.Empty),
+            MeaningVi: meaningVi,
             Level: word?.Level ?? CefrLevel.None,
-            PartOfSpeech: word?.PrimaryPartOfSpeech ?? PartOfSpeech.Noun,
+            PartOfSpeech: word?.PrimaryPartOfSpeech ?? firstMeaning?.PartOfSpeech ?? PartOfSpeech.Noun,
             Ipa: word?.PhoneticUs ?? word?.PhoneticUk,
             AudioPath: word?.AudioUsPath ?? word?.AudioUkPath,
             IsMastered: word?.LearningStatus == LearningStatus.Mastered,
@@ -299,7 +408,8 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
             MeaningEn: firstMeaning?.DefinitionEn ?? string.Empty,
             Explanation: item.Reason,
             ExampleSentenceEn: firstExample?.SentenceEn ?? string.Empty,
-            ExampleSentenceVi: firstExample?.SentenceVi ?? string.Empty
+            ExampleSentenceVi: firstExample?.SentenceVi ?? string.Empty,
+            AllMeanings: word?.Meanings ?? []
         );
     }
 

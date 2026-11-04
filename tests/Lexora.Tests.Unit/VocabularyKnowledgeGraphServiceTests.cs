@@ -196,4 +196,85 @@ public class VocabularyKnowledgeGraphServiceTests
         recs[0].Term.Should().Be("meticulous");
         recs[0].Reason.Should().NotBeNullOrWhiteSpace();
     }
+
+    [Fact]
+    public async Task BuildGraphAsync_PopulatesMultiLayerMeaningsAndAllMeanings()
+    {
+        // Arrange
+        var wordId = Guid.NewGuid();
+        var word = new Word
+        {
+            Id = wordId,
+            Term = "innovative",
+            Level = CefrLevel.B2,
+            PrimaryPartOfSpeech = PartOfSpeech.Adjective,
+            Meanings = new List<WordMeaning>
+            {
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    WordId = wordId,
+                    PartOfSpeech = PartOfSpeech.Adjective,
+                    DefinitionVi = "đột phá, đổi mới sáng tạo",
+                    DefinitionEn = "featuring new methods; advanced and original",
+                    OrderIndex = 0
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    WordId = wordId,
+                    PartOfSpeech = PartOfSpeech.Noun,
+                    DefinitionVi = "sự tiên phong đổi mới",
+                    DefinitionEn = "groundbreaking approach",
+                    OrderIndex = 1
+                }
+            }
+        };
+
+        _mockVocabRepo.Setup(r => r.GetWithDetailsAsync(wordId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(word);
+
+        var suggestions = new WordRelatedSuggestionsDto(
+            SourceWordId: wordId,
+            SourceTerm: "innovative",
+            Synonyms: new List<WordSuggestionItemDto>(),
+            Antonyms: new List<WordSuggestionItemDto>(),
+            WordFamily: new List<WordSuggestionItemDto>(),
+            Collocations: new List<WordSuggestionItemDto>(),
+            SameTopic: new List<WordSuggestionItemDto>()
+        );
+
+        _mockSuggestionService.Setup(s => s.GetSuggestionsAsync(wordId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(suggestions);
+
+        // Act
+        var graph = await _graphService.BuildGraphAsync(wordId);
+
+        // Assert
+        graph.Should().NotBeNull();
+        graph!.CenterNode.MeaningVi.Should().Be("đột phá, đổi mới sáng tạo");
+        graph.CenterNode.MeaningEn.Should().Be("featuring new methods; advanced and original");
+        graph.CenterNode.AllMeanings.Should().HaveCount(2);
+
+        // Curated thesaurus should supplement relations for innovative (e.g. novel, groundbreaking, traditional)
+        graph.ConnectedNodes.Should().NotBeEmpty();
+        graph.ConnectedNodes.Should().Contain(n => n.Term == "novel" || n.Term == "traditional");
+        var novelNode = graph.ConnectedNodes.FirstOrDefault(n => n.Term == "novel");
+        if (novelNode != null)
+        {
+            novelNode.MeaningVi.Should().NotBeNullOrWhiteSpace();
+        }
+    }
+
+    [Fact]
+    public void CuratedAcademicThesaurus_EnrichedVocabulary_ReturnsDefinitions()
+    {
+        // Act
+        var meaningResilient = CuratedAcademicThesaurus.GetCuratedMeaningForTerm("resilient");
+        var meaningFeasible = CuratedAcademicThesaurus.GetCuratedMeaningForTerm("feasible");
+
+        // Assert
+        meaningResilient.Should().NotBeNullOrWhiteSpace();
+        meaningFeasible.Should().NotBeNullOrWhiteSpace();
+    }
 }

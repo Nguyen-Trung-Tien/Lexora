@@ -15,8 +15,15 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly INavigationService _navService;
     private readonly ILocalizationService _localizationService;
     private readonly IStudyAdvisorService _advisorService;
+    private readonly IRoadmapService? _roadmapService;
     private readonly EventHandler? _languageChangedHandler;
     private bool _isLoadingDashboard;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveRoadmap))]
+    public partial StudyRoadmapDto? ActiveRoadmap { get; set; }
+
+    public bool HasActiveRoadmap => ActiveRoadmap != null;
 
     [ObservableProperty]
     public partial string GreetingText { get; set; } = string.Empty;
@@ -121,12 +128,14 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         IStatisticsService statsService,
         INavigationService navService,
         ILocalizationService localizationService,
-        IStudyAdvisorService advisorService)
+        IStudyAdvisorService advisorService,
+        IRoadmapService? roadmapService = null)
     {
         _statsService = statsService;
         _navService = navService;
         _localizationService = localizationService;
         _advisorService = advisorService;
+        _roadmapService = roadmapService;
         _languageChangedHandler = (s, e) => UpdateLanguageState();
         _localizationService.LanguageChanged += _languageChangedHandler;
 
@@ -417,6 +426,11 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
             TopicProgressList.Clear();
             foreach (var tp in analytics.TopicProgress) TopicProgressList.Add(tp);
+
+            if (_roadmapService != null)
+            {
+                ActiveRoadmap = await _roadmapService.GetActiveRoadmapAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -427,6 +441,12 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
             _isLoadingDashboard = false;
             IsLoading = false;
         }
+    }
+
+    [RelayCommand]
+    public void NavigateToRoadmap()
+    {
+        _navService.Navigate(typeof(RoadmapPage));
     }
 
     [RelayCommand]

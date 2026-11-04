@@ -17,6 +17,7 @@ public class RoadmapNode : Entity
     public int CompletedItemCount { get; set; }
     public double EaseFactorWeight { get; set; } = 2.5;
     public Guid? ReferenceId { get; set; }
+    public string? ReferenceName { get; set; }
 
     // Navigation property
     public RoadmapMilestone? Milestone { get; set; }

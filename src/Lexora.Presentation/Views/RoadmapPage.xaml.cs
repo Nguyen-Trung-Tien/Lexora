@@ -34,18 +34,18 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                 || e.PropertyName == nameof(ViewModel.HasActiveRoadmap)
                 || e.PropertyName == nameof(ViewModel.VisualNodes))
             {
-                DispatcherQueue?.TryEnqueue(RenderRoadmapGraph);
+                DispatcherQueue?.TryEnqueue(() =>
+                {
+                    Bindings.Update();
+                    RenderRoadmapGraph();
+                });
             }
         };
         ViewModel.PropertyChanged += _propChangedHandler;
 
         Loaded += Page_Loaded;
-        Unloaded += Page_Unloaded;
-    }
-
-    private void Page_Unloaded(object sender, RoutedEventArgs e)
-    {
-        ViewModel.PropertyChanged -= _propChangedHandler;
+        SizeChanged += Page_SizeChanged;
+        ActualThemeChanged += (s, e) => OnThemeChanged();
     }
 
     public void OnLanguageChanged()
@@ -64,11 +64,22 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         base.OnNavigatedTo(e);
         try
         {
-            ViewModel.PropertyChanged -= _propChangedHandler;
-            ViewModel.PropertyChanged += _propChangedHandler;
-
             OnLanguageChanged();
-            await ViewModel.InitializeAsync();
+            OnThemeChanged();
+
+            if (!ViewModel.HasActiveRoadmap || ViewModel.VisualNodes.Count == 0)
+            {
+                await ViewModel.InitializeAsync();
+            }
+            else
+            {
+                // Instant render from cached in-memory state
+                RenderRoadmapGraph();
+                // Silent background sync so user never experiences UI lag or blank screens
+                _ = ViewModel.SyncProgressAsync();
+            }
+
+            Bindings.Update();
             RenderRoadmapGraph();
         }
         catch (Exception ex)
@@ -77,19 +88,12 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         }
     }
 
-    private async void Page_Loaded(object sender, RoutedEventArgs e)
+    private void Page_Loaded(object sender, RoutedEventArgs e)
     {
         try
         {
-            ViewModel.PropertyChanged -= _propChangedHandler;
-            ViewModel.PropertyChanged += _propChangedHandler;
-
             UpdateResponsiveLayout(ActualWidth);
-
-            if (!ViewModel.HasActiveRoadmap && ViewModel.VisualNodes.Count == 0 && !ViewModel.IsLoading)
-            {
-                await ViewModel.InitializeAsync();
-            }
+            Bindings.Update();
             RenderRoadmapGraph();
         }
         catch (Exception ex)
@@ -158,7 +162,13 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
     {
         try
         {
-            if (RoadmapCanvas == null || ViewModel?.VisualNodes == null || ViewModel.VisualNodes.Count == 0)
+            if (RoadmapCanvas == null || ViewModel?.VisualNodes == null)
+            {
+                return;
+            }
+
+            var nodes = ViewModel.VisualNodes.OrderBy(n => n.OrderIndex).ToList();
+            if (nodes.Count == 0)
             {
                 return;
             }
@@ -173,9 +183,6 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                 RoadmapCanvas.Children.Remove(child);
             }
 
-            var nodes = ViewModel.VisualNodes.OrderBy(n => n.OrderIndex).ToList();
-            if (nodes.Count == 0) return;
-
             // 2. Adjust Canvas Height dynamically based on bottom-most node
             double maxY = nodes.Max(n => n.CanvasY) + 200;
             RoadmapCanvas.Height = Math.Max(700, maxY);
@@ -184,14 +191,14 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             var trackGeometry = new PathGeometry();
             var trackFigure = new PathFigure
             {
-                StartPoint = new Point(nodes[0].CanvasX + 36, nodes[0].CanvasY + 36),
+                StartPoint = new Point(nodes[0].CanvasX + 75, nodes[0].CanvasY + 34),
                 IsClosed = false
             };
 
             var activeGeometry = new PathGeometry();
             var activeFigure = new PathFigure
             {
-                StartPoint = new Point(nodes[0].CanvasX + 36, nodes[0].CanvasY + 36),
+                StartPoint = new Point(nodes[0].CanvasX + 75, nodes[0].CanvasY + 34),
                 IsClosed = false
             };
 
@@ -199,8 +206,8 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
 
             for (int i = 0; i < nodes.Count - 1; i++)
             {
-                var p0 = new Point(nodes[i].CanvasX + 36, nodes[i].CanvasY + 36);
-                var p1 = new Point(nodes[i + 1].CanvasX + 36, nodes[i + 1].CanvasY + 36);
+                var p0 = new Point(nodes[i].CanvasX + 75, nodes[i].CanvasY + 34);
+                var p1 = new Point(nodes[i + 1].CanvasX + 75, nodes[i + 1].CanvasY + 34);
 
                 double midY = (p0.Y + p1.Y) / 2.0;
                 var cp1 = new Point(p0.X, midY);
@@ -266,10 +273,11 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
     {
         var root = new Border
         {
-            Width = 72,
-            Height = 72,
-            CornerRadius = new CornerRadius(36),
-            BorderThickness = new Thickness(node.Status == NodeStatus.Available ? 3 : 2),
+            Width = 150,
+            Height = 68,
+            CornerRadius = new CornerRadius(12),
+            BorderThickness = new Thickness(node.Status == NodeStatus.Available ? 2 : 1),
+            Padding = new Thickness(8, 6, 8, 6),
             Tag = node
         };
 
@@ -281,12 +289,12 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                 root.BorderBrush = GetThemeBrush("SystemFillColorSuccessBrush");
                 break;
             case NodeStatus.InProgress:
-                root.Background = GetThemeBrush("AccentFillColorDefaultBrush");
-                root.BorderBrush = GetThemeBrush("AccentTextFillColorPrimaryBrush");
+                root.Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+                root.BorderBrush = GetThemeBrush("AccentFillColorDefaultBrush");
                 break;
             case NodeStatus.Available:
                 root.Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
-                root.BorderBrush = GetThemeBrush("AccentFillColorDefaultBrush");
+                root.BorderBrush = GetThemeBrush("AccentTextFillColorPrimaryBrush");
                 break;
             case NodeStatus.Locked:
             default:
@@ -296,26 +304,50 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                 break;
         }
 
-        var stack = new StackPanel
+        var grid = new Grid
         {
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-            Spacing = 2
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(32) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+            },
+            ColumnSpacing = 8
         };
+
+        // Icon badge
+        var iconBadge = new Border
+        {
+            Width = 30,
+            Height = 30,
+            CornerRadius = new CornerRadius(15),
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+
+        if (node.Status == NodeStatus.Mastered)
+        {
+            iconBadge.Background = GetThemeBrush("SystemFillColorSuccessBrush");
+        }
+        else if (node.Status == NodeStatus.InProgress)
+        {
+            iconBadge.Background = GetThemeBrush("AccentFillColorDefaultBrush");
+        }
+        else
+        {
+            iconBadge.Background = GetThemeBrush("SubtleFillColorSecondaryBrush");
+        }
 
         var icon = new FontIcon
         {
-            FontSize = 20,
-            Glyph = GetGlyphForNode(node)
+            FontSize = 13,
+            Glyph = GetGlyphForNode(node),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
         };
 
-        if (node.Status == NodeStatus.InProgress)
+        if (node.Status == NodeStatus.Mastered || node.Status == NodeStatus.InProgress)
         {
             icon.Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush");
-        }
-        else if (node.Status == NodeStatus.Mastered)
-        {
-            icon.Foreground = GetThemeBrush("SystemFillColorSuccessBrush");
         }
         else if (node.Status == NodeStatus.Available)
         {
@@ -326,27 +358,51 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             icon.Foreground = GetThemeBrush("TextFillColorTertiaryBrush");
         }
 
-        stack.Children.Add(icon);
+        iconBadge.Child = icon;
+        Grid.SetColumn(iconBadge, 0);
+        grid.Children.Add(iconBadge);
+
+        // Text & Progress stack
+        var textStack = new StackPanel
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            Spacing = 2
+        };
 
         var titleBlock = new TextBlock
         {
-            Text = $"{node.ProgressPercentage:F0}%",
-            FontSize = 10,
+            Text = node.Title,
+            FontSize = 11,
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            HorizontalAlignment = HorizontalAlignment.Center
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            MaxLines = 1,
+            Foreground = GetThemeBrush("TextFillColorPrimaryBrush")
         };
+        textStack.Children.Add(titleBlock);
 
-        if (node.Status == NodeStatus.InProgress)
+        var subBlock = new TextBlock
         {
-            titleBlock.Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush");
-        }
-        else
-        {
-            titleBlock.Foreground = GetThemeBrush("TextFillColorSecondaryBrush");
-        }
+            Text = node.ReferenceDisplay,
+            FontSize = 9,
+            Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            MaxLines = 1
+        };
+        textStack.Children.Add(subBlock);
 
-        stack.Children.Add(titleBlock);
-        root.Child = stack;
+        var progressBar = new ProgressBar
+        {
+            Maximum = 100,
+            Value = node.ProgressPercentage,
+            Height = 3,
+            Margin = new Thickness(0, 2, 0, 0)
+        };
+        textStack.Children.Add(progressBar);
+
+        Grid.SetColumn(textStack, 1);
+        grid.Children.Add(textStack);
+
+        root.Child = grid;
 
         // Interaction
         Lexora.Presentation.Helpers.CursorHelper.SetCursor(root, "Hand");
@@ -381,7 +437,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             }
         };
 
-        ToolTipService.SetToolTip(root, $"{node.Title} ({node.Status})");
+        ToolTipService.SetToolTip(root, $"{node.Title}\n{node.ReferenceDisplay} ({node.Status} - {node.ProgressPercentage:F0}%)");
         return root;
     }
 
@@ -468,13 +524,26 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             {
                 ViewModel.SelectedExamTarget = target;
             }
-            ViewModel.StartingScore = startScoreBox.Value;
-            ViewModel.TargetScore = targetScoreBox.Value;
-            ViewModel.DurationWeeks = (int)Math.Max(2, durationBox.Value);
+            if (!double.IsNaN(startScoreBox.Value) && startScoreBox.Value >= 0)
+            {
+                ViewModel.StartingScore = startScoreBox.Value;
+            }
+            if (!double.IsNaN(targetScoreBox.Value) && targetScoreBox.Value > 0)
+            {
+                ViewModel.TargetScore = targetScoreBox.Value;
+            }
+            if (!double.IsNaN(durationBox.Value) && durationBox.Value >= 2)
+            {
+                ViewModel.DurationWeeks = (int)durationBox.Value;
+            }
 
             await Task.Yield(); // Sequential dialog safety invariant
             await ViewModel.GenerateRoadmapCommand.ExecuteAsync(null);
-            RenderRoadmapGraph();
+            
+            DispatcherQueue?.TryEnqueue(() =>
+            {
+                RenderRoadmapGraph();
+            });
         }
     }
 }

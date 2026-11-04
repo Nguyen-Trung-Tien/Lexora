@@ -577,6 +577,11 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
         await ViewModel.StartReviewAsync(ViewModel.CurrentMode);
     }
 
+    private void ReturnToRoadmapButton_Click(object sender, RoutedEventArgs e)
+    {
+        _navigationService.Navigate(typeof(RoadmapPage));
+    }
+
     private void ReviewHelpButton_Click(object sender, RoutedEventArgs e)
     {
         ReviewHelpTeachingTip.IsOpen = true;

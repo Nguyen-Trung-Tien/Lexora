@@ -117,11 +117,16 @@
                                 </Border>
 
                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="14" />
                                         <TextBlock Text="{x:Bind Ipa}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind PartOfSpeech}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Border>
                                     </StackPanel>
-                                    <TextBlock Text="{x:Bind MeaningVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                                    <TextBlock Text="{x:Bind MeaningVi}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                                    <TextBlock Text="{x:Bind MeaningEn}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" FontStyle="Italic" TextWrapping="Wrap"
+                                               Visibility="{x:Bind MeaningEn, Converter={StaticResource NullToVisibilityConverter}}" />
                                 </StackPanel>
 
                                 <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">

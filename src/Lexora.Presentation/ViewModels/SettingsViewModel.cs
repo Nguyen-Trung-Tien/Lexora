@@ -41,7 +41,11 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     public partial string CurrentLanguage { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentVersionDetailsTitle))]
     public partial string CurrentAppVersion { get; set; } = "1.5.0";
+
+    public string CurrentVersionDetailsTitle =>
+        string.Format(_locService.GetString("Settings_CurrentVersionDetails"), CurrentAppVersion);
 
     [ObservableProperty]
     public partial bool IsCheckingUpdate { get; set; }
@@ -256,6 +260,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         }
 
         UpdateCurrentVersionNotes();
+        OnPropertyChanged(nameof(CurrentVersionDetailsTitle));
     }
 
     public void UpdateCurrentVersionNotes()

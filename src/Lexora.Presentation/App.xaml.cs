@@ -88,7 +88,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 // ViewModels
                 services.AddTransient<ShellViewModel>();
                 services.AddTransient<DashboardViewModel>();
-                services.AddTransient<RoadmapViewModel>();
+                services.AddSingleton<RoadmapViewModel>();
                 services.AddTransient<VocabularyViewModel>();
                 services.AddTransient<ReviewViewModel>();
                 services.AddTransient<TestViewModel>();

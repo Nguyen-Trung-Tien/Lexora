@@ -457,10 +457,15 @@
                                                     <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="14" />
                                                     <TextBlock Text="{x:Bind Ipa}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                        <TextBlock Text="{x:Bind PartOfSpeech}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    </Border>
+                                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
                                                         <TextBlock Text="{x:Bind Level}" FontSize="10" FontWeight="Bold" />
                                                     </Border>
                                                 </StackPanel>
-                                                <TextBlock Text="{x:Bind MeaningVi}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                                                <TextBlock Text="{x:Bind MeaningVi}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                <TextBlock Text="{x:Bind MeaningEn}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" TextWrapping="Wrap" FontStyle="Italic"
+                                                           Visibility="{x:Bind MeaningEn, Converter={StaticResource NullToVisibilityConverter}}" />
                                                 <TextBlock Text="{x:Bind Explanation}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="11" TextWrapping="Wrap"
                                                            Visibility="{x:Bind Explanation, Converter={StaticResource NullToVisibilityConverter}}" />
                                             </StackPanel>
@@ -500,12 +505,15 @@
                         <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
                             <!-- Top row: Node Term, POS, Level, Actions -->
                             <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,4">
                                         <TextBlock Text="{x:Bind ViewModel.SelectedNode.RelationshipLabel, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </Border>
                                     <TextBlock Text="{x:Bind ViewModel.SelectedNode.Term, Mode=OneWay}" FontSize="20" FontWeight="Bold" />
                                     <TextBlock Text="{x:Bind ViewModel.SelectedNode.Ipa, Mode=OneWay}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" VerticalAlignment="Center" />
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedNode.PartOfSpeech, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </Border>
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ViewModel.SelectedNode.Level, Mode=OneWay}" FontSize="11" FontWeight="Bold" />
                                     </Border>
@@ -514,6 +522,9 @@
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
                                     <Button Click="CopySelectedTerm_Click" CornerRadius="6" Padding="8,6" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_CopyTerm')}">
                                         <FontIcon Glyph="&#xE8C8;" FontSize="12" />
+                                    </Button>
+                                    <Button Click="CopySelectedMeaning_Click" CornerRadius="6" Padding="8,6" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_CopyMeaning')}">
+                                        <FontIcon Glyph="&#xE8C4;" FontSize="12" />
                                     </Button>
                                     <Button Click="ViewSelectedInVocab_Click" CornerRadius="6" Padding="8,6" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_ViewInVocab')}">
                                         <FontIcon Glyph="&#xE82D;" FontSize="12" />
@@ -532,9 +543,33 @@
 
                             <!-- Meaning & Explanation -->
                             <StackPanel Grid.Row="1" Spacing="4">
-                                <TextBlock Text="{x:Bind ViewModel.SelectedNode.MeaningVi, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
-                                <TextBlock Text="{x:Bind ViewModel.SelectedNode.Explanation, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"
+                                <TextBlock Text="{x:Bind ViewModel.SelectedNode.MeaningVi, Mode=OneWay}" FontSize="14" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
+                                <TextBlock Text="{x:Bind ViewModel.SelectedNode.MeaningEn, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" FontStyle="Italic"
+                                           Visibility="{x:Bind ViewModel.SelectedNode.MeaningEn, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" />
+                                <TextBlock Text="{x:Bind ViewModel.SelectedNode.Explanation, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap"
                                            Visibility="{x:Bind ViewModel.SelectedNode.Explanation, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" />
+
+                                <!-- Additional Meanings (if word has multiple definitions) -->
+                                <StackPanel Spacing="4" Margin="0,6,0,0"
+                                            Visibility="{x:Bind ViewModel.HasMultipleMeaningsForSelectedNode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_MultipleMeanings')}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <ItemsControl ItemsSource="{x:Bind ViewModel.SelectedNode.AllMeanings, Mode=OneWay}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="dto:WordMeaningDto">
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,5" Margin="0,2">
+                                                    <StackPanel Spacing="1">
+                                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                                            <TextBlock Text="{x:Bind PartOfSpeech}" FontWeight="Bold" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                            <TextBlock Text="{x:Bind DefinitionVi}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                        </StackPanel>
+                                                        <TextBlock Text="{x:Bind DefinitionEn}" FontSize="11" FontStyle="Italic" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"
+                                                                   Visibility="{x:Bind DefinitionEn, Converter={StaticResource NullToVisibilityConverter}}" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                             </StackPanel>
 
                             <!-- Example Sentences -->

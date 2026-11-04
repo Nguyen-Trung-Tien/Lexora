@@ -148,6 +148,58 @@
                 </Grid>
             </Border>
 
+            <!-- 1.5 Active Roadmap Pathway Widget -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="14" Padding="20,16"
+                    Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Width="40" Height="40" CornerRadius="20"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE81C;" FontSize="18" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_DashboardWidgetTitle')}"
+                                       FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.Title, Mode=OneWay, FallbackValue=''}"
+                                       FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.NextActiveNode.Title, Mode=OneWay, FallbackValue=''}"
+                                   Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                   TextTrimming="CharacterEllipsis" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ProgressBar Maximum="100" Width="140" Height="4" VerticalAlignment="Center"
+                                         Value="{x:Bind ViewModel.ActiveRoadmap.OverallProgress, Mode=OneWay, FallbackValue=0}" />
+                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.OverallProgressDisplay, Mode=OneWay, FallbackValue='0%'}"
+                                       FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button Grid.Column="2" VerticalAlignment="Center"
+                            Command="{x:Bind ViewModel.NavigateToRoadmapCommand}"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE768;" FontSize="12" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ContinueRoadmap')}" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
             <!-- Priority metrics adapt to narrow windows without horizontal scrolling. -->
             <Grid x:Name="MetricsGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Total Vocabulary -->

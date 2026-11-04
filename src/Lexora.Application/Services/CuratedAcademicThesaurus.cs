@@ -67,6 +67,21 @@ public static class CuratedAcademicThesaurus
         AddSynonymPair("temporary", "transient", 0.93, "Tạm thời, mang tính ngắn hạn");
         AddSynonymPair("vague", "indistinct", 0.92, "Mơ hồ, mờ nhạt không rõ nét");
         AddSynonymPair("vital", "indispensable", 0.95, "Tối quan trọng, không thể thiếu được");
+        AddSynonymPair("innovative", "novel", 0.94, "Đột phá, đổi mới sáng tạo");
+        AddSynonymPair("innovative", "groundbreaking", 0.92, "Mang tính cách mạng, mở đường");
+        AddSynonymPair("collaborate", "cooperate", 0.95, "Hợp tác, đồng lòng phối hợp");
+        AddSynonymPair("efficient", "productive", 0.94, "Hiệu suất cao, năng suất tốt");
+        AddSynonymPair("comprehensive", "thorough", 0.95, "Toàn diện, sâu sát mọi mặt");
+        AddSynonymPair("comprehensive", "exhaustive", 0.92, "Bao quát trọn vẹn, không bỏ sót");
+        AddSynonymPair("feasible", "viable", 0.95, "Khả thi, có thể thực hiện thành công");
+        AddSynonymPair("feasible", "practical", 0.92, "Thực tế, ứng dụng cao");
+        AddSynonymPair("prevalent", "widespread", 0.95, "Thịnh hành, phổ biến rộng khắp");
+        AddSynonymPair("meticulous", "thorough", 0.94, "Tỉ mỉ, cẩn thận từng chi tiết");
+        AddSynonymPair("resilient", "tough", 0.94, "Kiên cường, bền bỉ trước khó khăn");
+        AddSynonymPair("resilient", "adaptable", 0.91, "Thích ứng nhanh, mau hồi phục");
+        AddSynonymPair("facilitate", "assist", 0.93, "Tạo điều kiện thuận lợi, trợ giúp");
+        AddSynonymPair("lucrative", "profitable", 0.95, "Sinh lời cao, đem lại lợi nhuận lớn");
+        AddSynonymPair("persevere", "persist", 0.95, "Kiên trì, nhẫn nại theo đuổi");
 
         // Antonyms bidirectional
         AddAntonymPair("abundant", "scarce", 0.95, "Dồi dào vs. Khan hiếm");
@@ -108,6 +123,11 @@ public static class CuratedAcademicThesaurus
         AddAntonymPair("subsequent", "prior", 0.95, "Kế tiếp vs. Trước đó");
         AddAntonymPair("temporary", "permanent", 0.96, "Tạm thời vs. Vĩnh viễn, trường cửu");
         AddAntonymPair("vital", "dispensable", 0.94, "Sống còn vs. Có thể bỏ qua được");
+        AddAntonymPair("innovative", "traditional", 0.93, "Đổi mới sáng tạo vs. Truyền thống");
+        AddAntonymPair("collaborate", "compete", 0.94, "Hợp tác vs. Cạnh tranh đối đầu");
+        AddAntonymPair("feasible", "impossible", 0.95, "Khả thi vs. Bất khả thi");
+        AddAntonymPair("prevalent", "rare", 0.95, "Phổ biến rộng rãi vs. Hiếm gặp");
+        AddAntonymPair("resilient", "fragile", 0.95, "Kiên cường, bền bỉ vs. Dễ vỡ, mỏng manh");
 
         // Word families
         AddWordFamilyGroup(
@@ -192,5 +212,19 @@ public static class CuratedAcademicThesaurus
         if (string.IsNullOrWhiteSpace(term)) return Array.Empty<CuratedRelation>();
         var key = term.Trim().ToLowerInvariant();
         return Relations.TryGetValue(key, out var list) ? list : Array.Empty<CuratedRelation>();
+    }
+
+    public static string? GetCuratedMeaningForTerm(string term)
+    {
+        if (string.IsNullOrWhiteSpace(term)) return null;
+        var relations = GetRelationsForTerm(term);
+        var firstSyn = relations.FirstOrDefault(r => r.RelationType == "Synonym");
+        if (firstSyn != null && !string.IsNullOrWhiteSpace(firstSyn.Explanation))
+        {
+            return firstSyn.Explanation;
+        }
+
+        var anyRel = relations.FirstOrDefault(r => !string.IsNullOrWhiteSpace(r.Explanation));
+        return anyRel?.Explanation;
     }
 }
