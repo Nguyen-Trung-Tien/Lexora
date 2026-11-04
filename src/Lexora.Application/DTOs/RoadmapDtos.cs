@@ -28,6 +28,41 @@ public record RoadmapNodeDto(
     public bool CanStartPractice => Status == NodeStatus.Available || Status == NodeStatus.InProgress || Status == NodeStatus.Mastered;
     public bool HasLinkedContent => ReferenceId.HasValue || !string.IsNullOrWhiteSpace(ReferenceName);
     public string ReferenceDisplay => !string.IsNullOrWhiteSpace(ReferenceName) ? ReferenceName : Title;
+    public string ItemCountDisplay => $"{CompletedItemCount} / {TargetItemCount}";
+
+    public string StatusGlyph => Status switch
+    {
+        NodeStatus.Mastered => "\uE73E",  // Checkmark
+        NodeStatus.InProgress => "\uE768",// Play / Current
+        NodeStatus.Available => "\uE72A", // Arrow / Ready
+        _ => "\uE72E"                     // Lock
+    };
+
+    public string TypeGlyph => Type switch
+    {
+        RoadmapNodeType.VocabularySet => "\uE82D", // Book
+        RoadmapNodeType.GrammarPoint => "\uE8D2",  // Grammar / List
+        RoadmapNodeType.MockTest => "\uE765",      // Test / Exam
+        RoadmapNodeType.Checkpoint => "\uE9D2",    // Trophy / Checkpoint
+        _ => "\uE768"
+    };
+
+    public string TypeDisplay => Type switch
+    {
+        RoadmapNodeType.VocabularySet => "Vocabulary Set",
+        RoadmapNodeType.GrammarPoint => "Grammar Rule",
+        RoadmapNodeType.MockTest => "Practice Test",
+        RoadmapNodeType.Checkpoint => "Checkpoint",
+        _ => Type.ToString()
+    };
+
+    public string StatusDisplay => Status switch
+    {
+        NodeStatus.Mastered => "Mastered",
+        NodeStatus.InProgress => "In Progress",
+        NodeStatus.Available => "Ready",
+        _ => "Locked"
+    };
 }
 
 public record MilestoneDto(
@@ -46,6 +81,9 @@ public record MilestoneDto(
 
     public int CompletedNodesCount => Nodes.Count(n => n.Status == NodeStatus.Mastered);
     public int TotalNodesCount => Nodes.Count;
+    public string PhaseDisplay => $"Phase {OrderIndex + 1}";
+    public string NodesSummaryDisplay => $"{CompletedNodesCount}/{TotalNodesCount} mastered";
+    public string TargetDateDisplay => TargetCompletionDate.HasValue ? $"Target: {TargetCompletionDate.Value:dd/MM/yyyy}" : string.Empty;
 }
 
 public record StudyRoadmapDto(
@@ -70,6 +108,13 @@ public record StudyRoadmapDto(
     public int DaysRemaining => Math.Max(0, (TargetDate.Date - DateTime.UtcNow.Date).Days);
     public int TotalNodes => Milestones.Sum(m => m.TotalNodesCount);
     public int MasteredNodes => Milestones.Sum(m => m.CompletedNodesCount);
+    public string ExamBadgeText => Target switch
+    {
+        ExamTarget.Toeic => "TOEIC",
+        ExamTarget.Ielts => "IELTS",
+        ExamTarget.Vstep => "VSTEP",
+        _ => "EXAM"
+    };
 
     public RoadmapNodeDto? NextActiveNode => Milestones
         .OrderBy(m => m.OrderIndex)

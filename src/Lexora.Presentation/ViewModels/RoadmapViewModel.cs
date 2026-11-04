@@ -14,6 +14,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     private readonly IRoadmapService _roadmapService;
     private readonly INavigationService _navService;
     private readonly ILocalizationService _localizationService;
+    private readonly IUserPreferencesService _preferencesService;
     private readonly EventHandler? _languageChangedHandler;
     private readonly SemaphoreSlim _actionLock = new(1, 1);
 
@@ -31,12 +32,32 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     public ObservableCollection<StudyRoadmapDto> AllRoadmaps { get; } = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsTrackView))]
     [NotifyPropertyChangedFor(nameof(IsMapView))]
     [NotifyPropertyChangedFor(nameof(IsTimelineView))]
+    [NotifyPropertyChangedFor(nameof(IsManageView))]
     public partial int SelectedViewMode { get; set; } = 0;
 
-    public bool IsMapView => SelectedViewMode == 0;
+    public bool IsTrackView => SelectedViewMode == 0;
+    public bool IsMapView => SelectedViewMode == 0; // Compatibility alias
     public bool IsTimelineView => SelectedViewMode == 1;
+    public bool IsManageView => SelectedViewMode == 2;
+
+    partial void OnSelectedViewModeChanged(int value)
+    {
+        try
+        {
+            var prefs = _preferencesService.GetPreferences();
+            if (prefs.RoadmapViewMode != value)
+            {
+                _ = _preferencesService.SavePreferencesAsync(prefs with { RoadmapViewMode = value });
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[RoadmapViewModel] Failed to save view mode preference: {ex.Message}");
+        }
+    }
 
     [ObservableProperty]
     public partial double CanvasZoom { get; set; } = 1.0;
@@ -73,7 +94,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     public string SelectedNodeLinkedTopicDisplay => SelectedNode?.ReferenceDisplay ?? string.Empty;
 
     [ObservableProperty]
-    public partial bool IsNodeDetailOpen { get; set; }
+    public partial bool IsNodeDetailOpen { get; set; } = true;
 
     [ObservableProperty]
     public partial string StatusMessage { get; set; } = string.Empty;
@@ -92,14 +113,32 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     public RoadmapViewModel(
         IRoadmapService roadmapService,
         INavigationService navService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IUserPreferencesService preferencesService)
     {
         _roadmapService = roadmapService ?? throw new ArgumentNullException(nameof(roadmapService));
         _navService = navService ?? throw new ArgumentNullException(nameof(navService));
         _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
+        _preferencesService = preferencesService ?? throw new ArgumentNullException(nameof(preferencesService));
 
         _languageChangedHandler = (s, e) => OnPropertyChanged(nameof(Loc));
         _localizationService.LanguageChanged += _languageChangedHandler;
+
+        // Restore saved view mode preference
+        var prefs = _preferencesService.GetPreferences();
+        if (prefs.RoadmapViewMode >= 0 && prefs.RoadmapViewMode <= 2)
+        {
+            SelectedViewMode = prefs.RoadmapViewMode;
+        }
+    }
+
+    [RelayCommand]
+    public void SetViewMode(int mode)
+    {
+        if (mode >= 0 && mode <= 2)
+        {
+            SelectedViewMode = mode;
+        }
     }
 
     [RelayCommand]
@@ -114,12 +153,18 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
         await _actionLock.WaitAsync(cancellationToken);
         try
         {
-            IsLoading = true;
+            // Only show full loading spinner if we don't have an active roadmap yet
+            if (ActiveRoadmap == null)
+            {
+                IsLoading = true;
+            }
             StatusMessage = string.Empty;
+
             // 1. Synchronize real progress from learning logs and words first
             var syncedRoadmap = await _roadmapService.SyncRoadmapProgressAsync(cancellationToken);
             ActiveRoadmap = syncedRoadmap ?? await _roadmapService.GetActiveRoadmapAsync(cancellationToken);
 
+            // 2. Cache visual nodes for backwards compatibility
             var newNodes = new List<RoadmapNodeDto>();
             if (ActiveRoadmap != null)
             {
@@ -130,23 +175,34 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
                         newNodes.Add(node);
                     }
                 }
+
+                // Default selection to next active node or first node
+                if (SelectedNode == null || !newNodes.Any(n => n.Id == SelectedNode.Id))
+                {
+                    SelectedNode = ActiveRoadmap.NextActiveNode ?? newNodes.FirstOrDefault();
+                }
+                else
+                {
+                    SelectedNode = newNodes.FirstOrDefault(n => n.Id == SelectedNode.Id) ?? SelectedNode;
+                }
+
+                if (SelectedNode != null)
+                {
+                    IsNodeDetailOpen = true;
+                }
+
+                // Persist active roadmap id
+                var prefs = _preferencesService.GetPreferences();
+                if (prefs.LastActiveRoadmapId != ActiveRoadmap.Id)
+                {
+                    _ = _preferencesService.SavePreferencesAsync(prefs with { LastActiveRoadmapId = ActiveRoadmap.Id });
+                }
             }
 
-            // In-place synchronization to prevent UI blanking or flickering on tab navigation
-            if (VisualNodes.Count == newNodes.Count && newNodes.Count > 0)
+            VisualNodes.Clear();
+            foreach (var node in newNodes)
             {
-                for (int i = 0; i < newNodes.Count; i++)
-                {
-                    VisualNodes[i] = newNodes[i];
-                }
-            }
-            else
-            {
-                VisualNodes.Clear();
-                foreach (var node in newNodes)
-                {
-                    VisualNodes.Add(node);
-                }
+                VisualNodes.Add(node);
             }
 
             OnPropertyChanged(nameof(VisualNodes));
@@ -154,6 +210,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             OnPropertyChanged(nameof(HasNextActiveNode));
             OnPropertyChanged(nameof(Milestones));
 
+            // 3. Load all roadmaps for switcher
             var all = await _roadmapService.GetAllRoadmapsAsync(cancellationToken);
             AllRoadmaps.Clear();
             foreach (var r in all)
@@ -179,7 +236,6 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
         await _actionLock.WaitAsync();
         try
         {
-            IsLoading = true;
             StatusMessage = string.Empty;
             var updated = await _roadmapService.SyncRoadmapProgressAsync();
             if (updated != null)
@@ -194,30 +250,20 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
                     }
                 }
 
-                // In-place synchronization to prevent UI blanking or flickering
-                if (VisualNodes.Count == newNodes.Count && newNodes.Count > 0)
+                VisualNodes.Clear();
+                foreach (var node in newNodes)
                 {
-                    for (int i = 0; i < newNodes.Count; i++)
-                    {
-                        VisualNodes[i] = newNodes[i];
-                    }
-                }
-                else
-                {
-                    VisualNodes.Clear();
-                    foreach (var node in newNodes)
-                    {
-                        VisualNodes.Add(node);
-                    }
+                    VisualNodes.Add(node);
                 }
 
                 OnPropertyChanged(nameof(VisualNodes));
                 OnPropertyChanged(nameof(NextActiveNode));
                 OnPropertyChanged(nameof(HasNextActiveNode));
+                OnPropertyChanged(nameof(Milestones));
 
                 if (SelectedNode != null)
                 {
-                    SelectedNode = VisualNodes.FirstOrDefault(n => n.Id == SelectedNode.Id);
+                    SelectedNode = newNodes.FirstOrDefault(n => n.Id == SelectedNode.Id) ?? SelectedNode;
                 }
             }
         }
@@ -228,7 +274,6 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            IsLoading = false;
             _actionLock.Release();
         }
     }
@@ -260,7 +305,19 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
                         VisualNodes.Add(node);
                     }
                 }
+
+                SelectedNode = ActiveRoadmap.NextActiveNode ?? VisualNodes.FirstOrDefault();
+                IsNodeDetailOpen = true;
+
+                // Save active id
+                var prefs = _preferencesService.GetPreferences();
+                _ = _preferencesService.SavePreferencesAsync(prefs with 
+                { 
+                    LastActiveRoadmapId = ActiveRoadmap.Id,
+                    RoadmapViewMode = 0 
+                });
             }
+
             OnPropertyChanged(nameof(VisualNodes));
             OnPropertyChanged(nameof(NextActiveNode));
             OnPropertyChanged(nameof(HasNextActiveNode));
@@ -273,8 +330,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
                 AllRoadmaps.Add(r);
             }
 
-            IsNodeDetailOpen = false;
-            SelectedNode = null;
+            SelectedViewMode = 0; // Switch to Track View immediately
         }
         catch (Exception ex)
         {
@@ -334,6 +390,112 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
+    public async Task ResetRoadmapProgressAsync(Guid? roadmapId = null)
+    {
+        var targetId = roadmapId ?? ActiveRoadmap?.Id;
+        if (!targetId.HasValue) return;
+
+        await _actionLock.WaitAsync();
+        try
+        {
+            IsLoading = true;
+            StatusMessage = string.Empty;
+            var updated = await _roadmapService.ResetRoadmapProgressAsync(targetId.Value);
+
+            if (updated != null && ActiveRoadmap?.Id == targetId.Value)
+            {
+                ActiveRoadmap = updated;
+                SelectedNode = updated.Milestones
+                    .OrderBy(m => m.OrderIndex)
+                    .SelectMany(m => m.Nodes.OrderBy(n => n.OrderIndex))
+                    .FirstOrDefault(n => n.Status == NodeStatus.Available)
+                    ?? updated.Milestones.SelectMany(m => m.Nodes).FirstOrDefault();
+            }
+
+            var all = await _roadmapService.GetAllRoadmapsAsync();
+            AllRoadmaps.Clear();
+            foreach (var r in all)
+            {
+                AllRoadmaps.Add(r);
+            }
+
+            StatusMessage = _localizationService.GetString("Roadmap_ResetProgressSuccess");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[RoadmapViewModel] ResetRoadmapProgressAsync error: {ex}");
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+            _actionLock.Release();
+        }
+    }
+
+    [RelayCommand]
+    public async Task ClearInactiveRoadmapsAsync()
+    {
+        await _actionLock.WaitAsync();
+        try
+        {
+            IsLoading = true;
+            StatusMessage = string.Empty;
+            int removedCount = await _roadmapService.ClearInactiveRoadmapsAsync();
+
+            var all = await _roadmapService.GetAllRoadmapsAsync();
+            AllRoadmaps.Clear();
+            foreach (var r in all)
+            {
+                AllRoadmaps.Add(r);
+            }
+
+            StatusMessage = string.Format(_localizationService.GetString("Roadmap_ClearInactiveSuccess"), removedCount);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[RoadmapViewModel] ClearInactiveRoadmapsAsync error: {ex}");
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+            _actionLock.Release();
+        }
+    }
+
+    [RelayCommand]
+    public async Task ClearAllRoadmapsAsync()
+    {
+        await _actionLock.WaitAsync();
+        try
+        {
+            IsLoading = true;
+            StatusMessage = string.Empty;
+            await _roadmapService.ClearAllRoadmapsAsync();
+
+            ActiveRoadmap = null;
+            SelectedNode = null;
+            AllRoadmaps.Clear();
+
+            var prefs = _preferencesService.GetPreferences();
+            await _preferencesService.SavePreferencesAsync(prefs with { LastActiveRoadmapId = null });
+
+            StatusMessage = _localizationService.GetString("Roadmap_ClearAllSuccess");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[RoadmapViewModel] ClearAllRoadmapsAsync error: {ex}");
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+            _actionLock.Release();
+        }
+    }
+
+    [RelayCommand]
     public async Task QuickCreateRoadmapAsync(string preset)
     {
         (ExamTarget target, double start, double goal, int weeks) = preset switch
@@ -374,7 +536,6 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     public void CloseNodeDetail()
     {
         IsNodeDetailOpen = false;
-        SelectedNode = null;
         OnPropertyChanged(nameof(CanAdvanceProgress));
     }
 
@@ -453,7 +614,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
 
             if (SelectedNode != null)
             {
-                SelectedNode = VisualNodes.FirstOrDefault(n => n.Id == target.Id);
+                SelectedNode = VisualNodes.FirstOrDefault(n => n.Id == target.Id) ?? SelectedNode;
             }
         }
         catch (Exception ex)
@@ -483,7 +644,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
 
             if (SelectedNode != null)
             {
-                SelectedNode = VisualNodes.FirstOrDefault(n => n.Id == target.Id);
+                SelectedNode = VisualNodes.FirstOrDefault(n => n.Id == target.Id) ?? SelectedNode;
             }
         }
         catch (Exception ex)

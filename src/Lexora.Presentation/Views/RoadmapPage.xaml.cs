@@ -7,9 +7,6 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Shapes;
-using Windows.Foundation;
 
 namespace Lexora.Presentation.Views;
 
@@ -18,8 +15,6 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
     public RoadmapViewModel ViewModel { get; }
     public Lexora.Presentation.Services.ILocalizationService Loc { get; }
     private readonly System.ComponentModel.PropertyChangedEventHandler _propChangedHandler;
-    private readonly ScaleTransform _canvasScaleTransform = new();
-    private readonly Dictionary<Guid, Border> _nodeVisuals = new();
 
     public RoadmapPage()
     {
@@ -30,46 +25,26 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
 
         InitializeComponent();
 
-        if (RoadmapCanvas != null)
-        {
-            RoadmapCanvas.RenderTransform = _canvasScaleTransform;
-        }
-
         _propChangedHandler = (s, e) =>
         {
-            if (e.PropertyName == nameof(ViewModel.ActiveRoadmap) 
+            if (e.PropertyName == nameof(ViewModel.ActiveRoadmap)
                 || e.PropertyName == nameof(ViewModel.HasActiveRoadmap)
-                || e.PropertyName == nameof(ViewModel.VisualNodes))
+                || e.PropertyName == nameof(ViewModel.SelectedViewMode))
             {
                 DispatcherQueue?.TryEnqueue(() =>
                 {
                     Bindings.Update();
-                    RenderRoadmapGraph();
                     UpdateTabButtonsState();
-                });
-            }
-            else if (e.PropertyName == nameof(ViewModel.CanvasZoom))
-            {
-                DispatcherQueue?.TryEnqueue(() =>
-                {
-                    _canvasScaleTransform.ScaleX = ViewModel.CanvasZoom;
-                    _canvasScaleTransform.ScaleY = ViewModel.CanvasZoom;
-                });
-            }
-            else if (e.PropertyName == nameof(ViewModel.SelectedViewMode))
-            {
-                DispatcherQueue?.TryEnqueue(() =>
-                {
-                    UpdateTabButtonsState();
-                    Bindings.Update();
+                    RenderMilestoneTrack();
+                    RenderTimelineView();
                 });
             }
             else if (e.PropertyName == nameof(ViewModel.SelectedNode))
             {
                 DispatcherQueue?.TryEnqueue(() =>
                 {
-                    UpdateNodeSelectionVisuals();
                     Bindings.Update();
+                    RenderMilestoneTrack();
                 });
             }
         };
@@ -83,14 +58,14 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
     public void OnLanguageChanged()
     {
         Bindings.Update();
-        RenderRoadmapGraph();
         UpdateTabButtonsState();
     }
 
     public void OnThemeChanged()
     {
-        RenderRoadmapGraph();
         UpdateTabButtonsState();
+        RenderMilestoneTrack();
+        RenderTimelineView();
     }
 
     protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
@@ -104,19 +79,19 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             OnLanguageChanged();
             OnThemeChanged();
 
-            if (!ViewModel.HasActiveRoadmap || ViewModel.VisualNodes.Count == 0)
+            if (!ViewModel.HasActiveRoadmap)
             {
                 await ViewModel.InitializeAsync();
             }
             else
             {
-                RenderRoadmapGraph();
                 await ViewModel.SyncProgressAsync();
             }
 
             Bindings.Update();
-            RenderRoadmapGraph();
             UpdateTabButtonsState();
+            RenderMilestoneTrack();
+            RenderTimelineView();
         }
         catch (Exception ex)
         {
@@ -137,8 +112,9 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         {
             UpdateResponsiveLayout(ActualWidth);
             Bindings.Update();
-            RenderRoadmapGraph();
             UpdateTabButtonsState();
+            RenderMilestoneTrack();
+            RenderTimelineView();
         }
         catch (Exception ex)
         {
@@ -150,7 +126,6 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
     private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         UpdateResponsiveLayout(e.NewSize.Width);
-        RenderRoadmapGraph();
     }
 
     private void UpdateResponsiveLayout(double width)
@@ -175,12 +150,13 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         Grid.SetRow(OverviewCard4, isCompact ? 1 : 0);
         Grid.SetColumn(OverviewCard4, isCompact ? 1 : 3);
 
-        // 2. Canvas + Inspector Workspace: Side-by-side on wide screens, stacked vertically on compact screens
+        // 2. Track List + Inspector Workspace: Side-by-side on wide screens, stacked vertically on compact screens
         if (isCompact)
         {
             RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(0);
-            Grid.SetRow(CanvasHostBorder, 0);
-            Grid.SetColumn(CanvasHostBorder, 0);
+            Grid.SetRow(TrackListContainer, 0);
+            Grid.SetColumn(TrackListContainer, 0);
+            TrackListContainer.Margin = new Thickness(0);
 
             Grid.SetRow(InspectorHostBorder, 1);
             Grid.SetColumn(InspectorHostBorder, 0);
@@ -189,33 +165,36 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         else
         {
             RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(380);
-            Grid.SetRow(CanvasHostBorder, 0);
-            Grid.SetColumn(CanvasHostBorder, 0);
+            Grid.SetRow(TrackListContainer, 0);
+            Grid.SetColumn(TrackListContainer, 0);
+            TrackListContainer.Margin = new Thickness(0, 0, 16, 0);
 
             Grid.SetRow(InspectorHostBorder, 0);
             Grid.SetColumn(InspectorHostBorder, 1);
-            InspectorHostBorder.Margin = new Thickness(16, 0, 0, 0);
+            InspectorHostBorder.Margin = new Thickness(0);
         }
     }
 
     private void UpdateTabButtonsState()
     {
-        if (MapViewTabButton == null || TimelineViewTabButton == null) return;
+        if (TrackViewTabButton == null || TimelineViewTabButton == null || ManageViewTabButton == null) return;
 
-        if (ViewModel.IsMapView)
-        {
-            MapViewTabButton.Background = GetThemeBrush("AccentFillColorDefaultBrush");
-            MapViewTabButton.Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush");
-            TimelineViewTabButton.Background = new SolidColorBrush(Colors.Transparent);
-            TimelineViewTabButton.Foreground = GetThemeBrush("TextFillColorPrimaryBrush");
-        }
-        else
-        {
-            TimelineViewTabButton.Background = GetThemeBrush("AccentFillColorDefaultBrush");
-            TimelineViewTabButton.Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush");
-            MapViewTabButton.Background = new SolidColorBrush(Colors.Transparent);
-            MapViewTabButton.Foreground = GetThemeBrush("TextFillColorPrimaryBrush");
-        }
+        var accentBg = GetThemeBrush("AccentFillColorDefaultBrush");
+        var accentFg = GetThemeBrush("TextOnAccentFillColorPrimaryBrush");
+        var transparent = new SolidColorBrush(Colors.Transparent);
+        var normalFg = GetThemeBrush("TextFillColorPrimaryBrush");
+
+        // Tab 1: Track View
+        TrackViewTabButton.Background = ViewModel.IsTrackView ? accentBg : transparent;
+        TrackViewTabButton.Foreground = ViewModel.IsTrackView ? accentFg : normalFg;
+
+        // Tab 2: Timeline View
+        TimelineViewTabButton.Background = ViewModel.IsTimelineView ? accentBg : transparent;
+        TimelineViewTabButton.Foreground = ViewModel.IsTimelineView ? accentFg : normalFg;
+
+        // Tab 3: Manage Goals View
+        ManageViewTabButton.Background = ViewModel.IsManageView ? accentBg : transparent;
+        ManageViewTabButton.Foreground = ViewModel.IsManageView ? accentFg : normalFg;
     }
 
     private Brush GetThemeBrush(string key)
@@ -224,26 +203,408 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             ?? new SolidColorBrush(Colors.Transparent);
     }
 
-    private void SwitchToMapView_Click(object sender, RoutedEventArgs e)
+    private void SwitchToTrackView_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.SelectedViewMode = 0;
+        ViewModel.SetViewMode(0);
         UpdateTabButtonsState();
-        RenderRoadmapGraph();
+        Bindings.Update();
     }
 
     private void SwitchToTimelineView_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.SelectedViewMode = 1;
+        ViewModel.SetViewMode(1);
         UpdateTabButtonsState();
+        Bindings.Update();
     }
 
-    private void CenterOnActiveNode_Click(object sender, RoutedEventArgs e)
+    private void SwitchToManageView_Click(object sender, RoutedEventArgs e)
     {
-        var targetNode = ViewModel.NextActiveNode ?? ViewModel.SelectedNode;
-        if (targetNode != null && CanvasScrollViewer != null)
+        ViewModel.SetViewMode(2);
+        UpdateTabButtonsState();
+        Bindings.Update();
+    }
+
+    private void RenderMilestoneTrack()
+    {
+        if (TrackListContainer == null) return;
+        TrackListContainer.Children.Clear();
+
+        if (ViewModel.ActiveRoadmap == null || ViewModel.Milestones.Count == 0) return;
+
+        foreach (var milestone in ViewModel.Milestones)
         {
-            double targetY = Math.Max(0, (targetNode.CanvasY * ViewModel.CanvasZoom) - 180);
-            CanvasScrollViewer.ChangeView(null, targetY, null);
+            var milestoneCard = new Border
+            {
+                Margin = new Thickness(0, 0, 0, 16),
+                Padding = new Thickness(20),
+                Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush"),
+                BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(12)
+            };
+
+            var cardStack = new StackPanel { Spacing = 14 };
+
+            // Milestone Header Grid
+            var headerGrid = new Grid { ColumnSpacing = 12 };
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var titleStack = new StackPanel { Spacing = 4 };
+            var phaseRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+
+            var phaseBorder = new Border
+            {
+                Padding = new Thickness(6, 2, 6, 2),
+                CornerRadius = new CornerRadius(4),
+                Background = GetThemeBrush("AccentFillColorDefaultBrush")
+            };
+            phaseBorder.Child = new TextBlock
+            {
+                Text = milestone.PhaseDisplay,
+                FontSize = 11,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush")
+            };
+            phaseRow.Children.Add(phaseBorder);
+
+            phaseRow.Children.Add(new TextBlock
+            {
+                Text = milestone.Title,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                Style = (Style)App.Current.Resources["SubtitleTextBlockStyle"]
+            });
+            titleStack.Children.Add(phaseRow);
+
+            if (!string.IsNullOrWhiteSpace(milestone.Description))
+            {
+                titleStack.Children.Add(new TextBlock
+                {
+                    Text = milestone.Description,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+                    Style = (Style)App.Current.Resources["CaptionTextBlockStyle"],
+                    TextWrapping = TextWrapping.Wrap
+                });
+            }
+            Grid.SetColumn(titleStack, 0);
+            headerGrid.Children.Add(titleStack);
+
+            // Right header stats
+            var statsStack = new StackPanel { HorizontalAlignment = HorizontalAlignment.Right, Spacing = 2 };
+            statsStack.Children.Add(new TextBlock
+            {
+                HorizontalAlignment = HorizontalAlignment.Right,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                FontSize = 13,
+                Text = milestone.NodesSummaryDisplay
+            });
+            if (!string.IsNullOrWhiteSpace(milestone.TargetDateDisplay))
+            {
+                statsStack.Children.Add(new TextBlock
+                {
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    FontSize = 11,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+                    Text = milestone.TargetDateDisplay
+                });
+            }
+            Grid.SetColumn(statsStack, 1);
+            headerGrid.Children.Add(statsStack);
+
+            cardStack.Children.Add(headerGrid);
+
+            // Progress bar
+            cardStack.Children.Add(new ProgressBar
+            {
+                Height = 4,
+                Maximum = 100,
+                Value = milestone.ProgressPercentage
+            });
+
+            // Nodes Container
+            var nodesPanel = new StackPanel { Spacing = 6, Margin = new Thickness(0, 4, 0, 0) };
+            foreach (var node in milestone.Nodes)
+            {
+                var isSelected = ViewModel.SelectedNode?.Id == node.Id;
+                var nodeBtn = CreateNodeButton(node, isSelected);
+                nodesPanel.Children.Add(nodeBtn);
+            }
+            cardStack.Children.Add(nodesPanel);
+
+            milestoneCard.Child = cardStack;
+            TrackListContainer.Children.Add(milestoneCard);
+        }
+    }
+
+    private Button CreateNodeButton(RoadmapNodeDto node, bool isSelected)
+    {
+        var btn = new Button
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            Margin = new Thickness(0, 3, 0, 3),
+            Padding = new Thickness(14, 12, 14, 12),
+            CornerRadius = new CornerRadius(8),
+            Tag = node,
+            Style = (Style)App.Current.Resources["SubtleButtonStyle"]
+        };
+
+        if (isSelected)
+        {
+            btn.Background = GetThemeBrush("SubtleFillColorSecondaryBrush");
+            btn.BorderBrush = GetThemeBrush("AccentFillColorDefaultBrush");
+            btn.BorderThickness = new Thickness(1.5);
+        }
+
+        btn.Click += NodeCard_Click;
+
+        var grid = new Grid { ColumnSpacing = 12 };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        // Status badge icon
+        var iconBorder = new Border
+        {
+            Width = 32,
+            Height = 32,
+            CornerRadius = new CornerRadius(16),
+            VerticalAlignment = VerticalAlignment.Center,
+            Background = GetThemeBrush("SubtleFillColorSecondaryBrush")
+        };
+        iconBorder.Child = new FontIcon
+        {
+            FontSize = 13,
+            Foreground = node.Status == NodeStatus.Mastered 
+                ? GetThemeBrush("SystemFillColorSuccessBrush") 
+                : GetThemeBrush("AccentTextFillColorPrimaryBrush"),
+            Glyph = node.StatusGlyph
+        };
+        Grid.SetColumn(iconBorder, 0);
+        grid.Children.Add(iconBorder);
+
+        // Center: Title + Type badge + Reference + Progress bar
+        var centerStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Spacing = 3 };
+        var topRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+        topRow.Children.Add(new TextBlock
+        {
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Text = node.Title,
+            TextTrimming = TextTrimming.CharacterEllipsis
+        });
+
+        var typeBadge = new Border
+        {
+            Padding = new Thickness(6, 1, 6, 1),
+            CornerRadius = new CornerRadius(4),
+            Background = GetThemeBrush("SubtleFillColorSecondaryBrush")
+        };
+        typeBadge.Child = new TextBlock
+        {
+            FontSize = 10,
+            Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+            Text = node.TypeDisplay
+        };
+        topRow.Children.Add(typeBadge);
+        centerStack.Children.Add(topRow);
+
+        centerStack.Children.Add(new TextBlock
+        {
+            FontSize = 11,
+            Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+            Text = node.ReferenceDisplay,
+            TextTrimming = TextTrimming.CharacterEllipsis
+        });
+
+        centerStack.Children.Add(new ProgressBar
+        {
+            Height = 3,
+            Maximum = 100,
+            Value = node.ProgressPercentage
+        });
+
+        Grid.SetColumn(centerStack, 1);
+        grid.Children.Add(centerStack);
+
+        // Right: Progress % + Count
+        var rightStack = new StackPanel { HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center, Spacing = 2 };
+        rightStack.Children.Add(new TextBlock
+        {
+            HorizontalAlignment = HorizontalAlignment.Right,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            FontSize = 12,
+            Text = node.ProgressPercentageDisplay
+        });
+        rightStack.Children.Add(new TextBlock
+        {
+            HorizontalAlignment = HorizontalAlignment.Right,
+            FontSize = 11,
+            Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+            Text = node.ItemCountDisplay
+        });
+        Grid.SetColumn(rightStack, 2);
+        grid.Children.Add(rightStack);
+
+        btn.Content = grid;
+        return btn;
+    }
+
+    private void RenderTimelineView()
+    {
+        if (TimelineListContainer == null) return;
+        TimelineListContainer.Children.Clear();
+
+        if (ViewModel.ActiveRoadmap == null || ViewModel.Milestones.Count == 0) return;
+
+        foreach (var milestone in ViewModel.Milestones)
+        {
+            var border = new Border
+            {
+                Margin = new Thickness(0, 0, 0, 16),
+                Padding = new Thickness(18),
+                Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush"),
+                BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(12)
+            };
+
+            var stack = new StackPanel { Spacing = 12 };
+
+            var header = new Grid { ColumnSpacing = 8 };
+            header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var titleRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+            var phasePill = new Border
+            {
+                Padding = new Thickness(6, 2, 6, 2),
+                CornerRadius = new CornerRadius(4),
+                Background = GetThemeBrush("AccentFillColorDefaultBrush")
+            };
+            phasePill.Child = new TextBlock
+            {
+                Text = milestone.PhaseDisplay,
+                FontSize = 11,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush")
+            };
+            titleRow.Children.Add(phasePill);
+
+            titleRow.Children.Add(new TextBlock
+            {
+                Text = milestone.Title,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                Style = (Style)App.Current.Resources["BodyStrongTextBlockStyle"]
+            });
+            Grid.SetColumn(titleRow, 0);
+            header.Children.Add(titleRow);
+
+            if (!string.IsNullOrWhiteSpace(milestone.TargetDateDisplay))
+            {
+                var dateText = new TextBlock
+                {
+                    Text = milestone.TargetDateDisplay,
+                    FontSize = 11,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+                    HorizontalAlignment = HorizontalAlignment.Right
+                };
+                Grid.SetColumn(dateText, 1);
+                header.Children.Add(dateText);
+            }
+            stack.Children.Add(header);
+
+            // Nodes timeline items
+            foreach (var node in milestone.Nodes)
+            {
+                var rowBorder = new Border
+                {
+                    Margin = new Thickness(0, 3, 0, 3),
+                    Padding = new Thickness(12, 10, 12, 10),
+                    Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
+                    BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(8)
+                };
+
+                var rowGrid = new Grid { ColumnSpacing = 12 };
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                var icon = new FontIcon
+                {
+                    FontSize = 14,
+                    Foreground = node.Status == NodeStatus.Mastered 
+                        ? GetThemeBrush("SystemFillColorSuccessBrush") 
+                        : GetThemeBrush("AccentTextFillColorPrimaryBrush"),
+                    Glyph = node.StatusGlyph
+                };
+                Grid.SetColumn(icon, 0);
+                rowGrid.Children.Add(icon);
+
+                var titleStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Spacing = 2 };
+                titleStack.Children.Add(new TextBlock { Text = node.Title, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+                titleStack.Children.Add(new TextBlock
+                {
+                    Text = node.ReferenceDisplay,
+                    FontSize = 11,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush")
+                });
+                Grid.SetColumn(titleStack, 1);
+                rowGrid.Children.Add(titleStack);
+
+                var progress = new ProgressBar
+                {
+                    Width = 80,
+                    Maximum = 100,
+                    Value = node.ProgressPercentage,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                Grid.SetColumn(progress, 2);
+                rowGrid.Children.Add(progress);
+
+                var selectBtn = new Button
+                {
+                    Padding = new Thickness(8, 6, 8, 6),
+                    CornerRadius = new CornerRadius(8),
+                    Tag = node,
+                    Style = (Style)App.Current.Resources["SubtleButtonStyle"]
+                };
+                ToolTipService.SetToolTip(selectBtn, Loc.GetString("Roadmap_ActionLearn"));
+                selectBtn.Content = new FontIcon { Glyph = "\uE76C", FontSize = 12 };
+                selectBtn.Click += TimelineNodeSelect_Click;
+                Grid.SetColumn(selectBtn, 3);
+                rowGrid.Children.Add(selectBtn);
+
+                rowBorder.Child = rowGrid;
+                stack.Children.Add(rowBorder);
+            }
+
+            border.Child = stack;
+            TimelineListContainer.Children.Add(border);
+        }
+    }
+
+    private void NodeCard_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is RoadmapNodeDto node)
+        {
+            ViewModel.SelectNode(node);
+            Bindings.Update();
+            RenderMilestoneTrack();
+        }
+    }
+
+    private void TimelineNodeSelect_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement elem && elem.Tag is RoadmapNodeDto node)
+        {
+            ViewModel.SelectNode(node);
+            ViewModel.SetViewMode(0); // Switch to Track view to see detail
+            UpdateTabButtonsState();
+            Bindings.Update();
+            RenderMilestoneTrack();
         }
     }
 
@@ -251,16 +612,16 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
     {
         if (sender is Button btn && btn.Tag is StudyRoadmapDto roadmap)
         {
-            RoadmapsFlyout?.Hide();
             await ViewModel.SwitchRoadmapCommand.ExecuteAsync(roadmap.Id);
+            UpdateTabButtonsState();
+            Bindings.Update();
         }
     }
 
     private async void DeleteCurrentRoadmap_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.ActiveRoadmap == null) return;
-
-        RoadmapsFlyout?.Hide();
+        var targetRoadmap = (sender as FrameworkElement)?.Tag as StudyRoadmapDto ?? ViewModel.ActiveRoadmap;
+        if (targetRoadmap == null) return;
 
         var confirmDialog = new ContentDialog
         {
@@ -277,472 +638,117 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         if (result == ContentDialogResult.Primary)
         {
             await Task.Yield();
-            await ViewModel.DeleteRoadmapCommand.ExecuteAsync(ViewModel.ActiveRoadmap.Id);
+            await ViewModel.DeleteRoadmapCommand.ExecuteAsync(targetRoadmap.Id);
+            UpdateTabButtonsState();
+            Bindings.Update();
+            RenderMilestoneTrack();
+            RenderTimelineView();
         }
     }
 
-    private void TimelineNodeSelect_Click(object sender, RoutedEventArgs e)
+    private async void ResetActiveRoadmapProgress_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is FrameworkElement elem && elem.Tag is RoadmapNodeDto node)
+        if (ViewModel.ActiveRoadmap == null) return;
+
+        var confirmDialog = new ContentDialog
         {
-            ViewModel.SelectNode(node);
-        }
-    }
-
-    private void TimelineNodeLearn_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is FrameworkElement elem && elem.Tag is RoadmapNodeDto node)
-        {
-            ViewModel.StartLearningNodeCommand.Execute(node);
-        }
-    }
-
-    private void UpdateNodeSelectionVisuals()
-    {
-        var selectedId = ViewModel.SelectedNode?.Id;
-        foreach (var (nodeId, border) in _nodeVisuals)
-        {
-            if (border.Tag is RoadmapNodeDto node)
-            {
-                bool isSelected = nodeId == selectedId;
-                border.BorderThickness = new Thickness(isSelected ? 3.0 : (node.Status == NodeStatus.Available ? 2.5 : 1.5));
-                if (isSelected)
-                {
-                    border.BorderBrush = GetThemeBrush("AccentFillColorDefaultBrush");
-                }
-                else
-                {
-                    border.BorderBrush = node.Status switch
-                    {
-                        NodeStatus.Mastered => GetThemeBrush("SystemFillColorSuccessBrush"),
-                        NodeStatus.InProgress => GetThemeBrush("AccentFillColorDefaultBrush"),
-                        NodeStatus.Available => GetThemeBrush("AccentFillColorDefaultBrush"),
-                        _ => GetThemeBrush("CardStrokeColorDefaultBrush")
-                    };
-                }
-            }
-        }
-    }
-
-    private void RenderRoadmapGraph()
-    {
-        try
-        {
-            if (RoadmapCanvas == null || ViewModel?.VisualNodes == null)
-            {
-                return;
-            }
-
-            var nodes = ViewModel.VisualNodes.OrderBy(n => n.CanvasY).ToList();
-            if (nodes.Count == 0)
-            {
-                return;
-            }
-
-            _nodeVisuals.Clear();
-
-            // 1. Remove previously dynamically added node controls (keep the 2 track paths)
-            var childrenToRemove = RoadmapCanvas.Children
-                .Where(c => c != TrackSplinePath && c != ActiveSplinePath)
-                .ToList();
-
-            foreach (var child in childrenToRemove)
-            {
-                RoadmapCanvas.Children.Remove(child);
-            }
-
-            // 2. Calculate dynamic available width & horizontal centering
-            double containerWidth = CanvasScrollViewer?.ActualWidth > 0 ? CanvasScrollViewer.ActualWidth : 900;
-            double availableWidth = Math.Max(760, containerWidth);
-            RoadmapCanvas.Width = availableWidth;
-
-            double centerX = availableWidth / 2.0;
-            double offsetX = centerX - 320.0;
-
-            // 3. Adjust Canvas Height dynamically based on bottom-most node
-            double maxY = nodes.Max(n => n.CanvasY) + 240;
-            RoadmapCanvas.Height = Math.Max(700, maxY);
-
-            // 4. Construct Smooth Bézier Spline Geometry
-            const double nodeHalfW = 84.0;
-            const double nodeHalfH = 38.0;
-
-            var trackGeometry = new PathGeometry();
-            var trackFigure = new PathFigure
-            {
-                StartPoint = new Point(nodes[0].CanvasX + offsetX + nodeHalfW, nodes[0].CanvasY + nodeHalfH),
-                IsClosed = false
-            };
-
-            var activeGeometry = new PathGeometry();
-            var activeFigure = new PathFigure
-            {
-                StartPoint = new Point(nodes[0].CanvasX + offsetX + nodeHalfW, nodes[0].CanvasY + nodeHalfH),
-                IsClosed = false
-            };
-
-            bool stillInActivePrefix = true;
-
-            for (int i = 0; i < nodes.Count - 1; i++)
-            {
-                var p0 = new Point(nodes[i].CanvasX + offsetX + nodeHalfW, nodes[i].CanvasY + nodeHalfH);
-                var p1 = new Point(nodes[i + 1].CanvasX + offsetX + nodeHalfW, nodes[i + 1].CanvasY + nodeHalfH);
-
-                double midY = (p0.Y + p1.Y) / 2.0;
-                var cp1 = new Point(p0.X, midY);
-                var cp2 = new Point(p1.X, midY);
-
-                var segment = new BezierSegment
-                {
-                    Point1 = cp1,
-                    Point2 = cp2,
-                    Point3 = p1
-                };
-                trackFigure.Segments.Add(segment);
-
-                if (stillInActivePrefix)
-                {
-                    if (nodes[i].Status == NodeStatus.Mastered ||
-                        nodes[i + 1].Status == NodeStatus.Mastered ||
-                        nodes[i + 1].Status == NodeStatus.InProgress)
-                    {
-                        activeFigure.Segments.Add(segment);
-                    }
-                    if (nodes[i + 1].Status == NodeStatus.Locked)
-                    {
-                        stillInActivePrefix = false;
-                    }
-                }
-            }
-
-            trackGeometry.Figures.Add(trackFigure);
-            if (TrackSplinePath != null)
-            {
-                TrackSplinePath.Data = trackGeometry;
-            }
-
-            if (ActiveSplinePath != null)
-            {
-                if (activeFigure.Segments.Count > 0)
-                {
-                    activeGeometry.Figures.Add(activeFigure);
-                    ActiveSplinePath.Data = activeGeometry;
-                    ActiveSplinePath.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    ActiveSplinePath.Visibility = Visibility.Collapsed;
-                }
-            }
-
-            // 5. Render Milestone Phase Dividers across the canvas
-            if (ViewModel.ActiveRoadmap?.Milestones != null)
-            {
-                foreach (var milestone in ViewModel.ActiveRoadmap.Milestones)
-                {
-                    try
-                    {
-                        var firstNode = milestone.Nodes.OrderBy(n => n.CanvasY).FirstOrDefault();
-                        if (firstNode != null)
-                        {
-                            var phaseBanner = CreateMilestoneBannerVisual(milestone, availableWidth);
-                            Canvas.SetLeft(phaseBanner, 24);
-                            Canvas.SetTop(phaseBanner, Math.Max(10, firstNode.CanvasY - 55));
-                            RoadmapCanvas.Children.Add(phaseBanner);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[RoadmapPage] Error creating milestone banner: {ex.Message}");
-                    }
-                }
-            }
-
-            // 6. Render Node Visual Cards along the Spline
-            foreach (var node in nodes)
-            {
-                try
-                {
-                    var nodeElement = CreateNodeVisual(node);
-                    Canvas.SetLeft(nodeElement, node.CanvasX + offsetX);
-                    Canvas.SetTop(nodeElement, node.CanvasY);
-                    RoadmapCanvas.Children.Add(nodeElement);
-                    _nodeVisuals[node.Id] = (Border)nodeElement;
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[RoadmapPage] Error creating node visual: {ex.Message}");
-                    App.LogCrash("RoadmapPage.CreateNodeVisual", ex);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[RoadmapPage] RenderRoadmapGraph error: {ex.Message}");
-            App.LogCrash("RoadmapPage.RenderRoadmapGraph", ex);
-        }
-    }
-
-    private FrameworkElement CreateMilestoneBannerVisual(MilestoneDto milestone, double canvasWidth)
-    {
-        var container = new Grid
-        {
-            Width = Math.Max(400, canvasWidth - 48),
-            Height = 44
-        };
-
-        var dividerLine = new Border
-        {
-            Height = 1,
-            Background = GetThemeBrush("CardStrokeColorDefaultBrush"),
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(20, 0, 20, 0)
-        };
-        container.Children.Add(dividerLine);
-
-        var badge = new Border
-        {
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-            CornerRadius = new CornerRadius(16),
-            Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush"),
-            BorderBrush = milestone.IsCompleted ? GetThemeBrush("SystemFillColorSuccessBrush") : GetThemeBrush("CardStrokeColorDefaultBrush"),
-            BorderThickness = new Thickness(milestone.IsCompleted ? 1.5 : 1),
-            Padding = new Thickness(16, 6, 16, 6)
-        };
-
-        var stack = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 8,
-            VerticalAlignment = VerticalAlignment.Center
-        };
-
-        var icon = new FontIcon
-        {
-            FontSize = 13,
-            Glyph = milestone.IsCompleted ? "\uE73E" : "\uE8D2",
-            Foreground = milestone.IsCompleted
-                ? GetThemeBrush("SystemFillColorSuccessBrush")
-                : GetThemeBrush("AccentTextFillColorPrimaryBrush")
-        };
-        stack.Children.Add(icon);
-
-        var title = new TextBlock
-        {
-            Text = (milestone.Title ?? string.Empty).ToUpperInvariant(),
-            FontSize = 11.5,
-            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            Foreground = GetThemeBrush("TextFillColorPrimaryBrush")
-        };
-        stack.Children.Add(title);
-
-        var countText = new TextBlock
-        {
-            Text = $"({milestone.CompletedNodesCount}/{milestone.TotalNodesCount})",
-            FontSize = 11,
-            Foreground = GetThemeBrush("TextFillColorSecondaryBrush")
-        };
-        stack.Children.Add(countText);
-
-        badge.Child = stack;
-        container.Children.Add(badge);
-        return container;
-    }
-
-    private FrameworkElement CreateNodeVisual(RoadmapNodeDto node)
-    {
-        bool isSelected = ViewModel.SelectedNode?.Id == node.Id;
-
-        var root = new Border
-        {
-            Width = 168,
-            Height = 76,
+            Title = Loc.GetString("Roadmap_ResetConfirmTitle"),
+            Content = Loc.GetString("Roadmap_ResetConfirmMessage"),
+            PrimaryButtonText = Loc.GetString("Roadmap_ResetProgress"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
             CornerRadius = new CornerRadius(14),
-            BorderThickness = new Thickness(isSelected ? 3.0 : (node.Status == NodeStatus.Available ? 2.5 : 1.5)),
-            Padding = new Thickness(10, 8, 10, 8),
-            Tag = node
+            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
         };
 
-        // ThemeResource based status styling
-        if (isSelected)
+        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+        if (result == ContentDialogResult.Primary)
         {
-            root.Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
-            root.BorderBrush = GetThemeBrush("AccentFillColorDefaultBrush");
+            await Task.Yield();
+            await ViewModel.ResetRoadmapProgressCommand.ExecuteAsync(ViewModel.ActiveRoadmap.Id);
+            Bindings.Update();
+            RenderMilestoneTrack();
+            RenderTimelineView();
         }
-        else
-        {
-            switch (node.Status)
-            {
-                case NodeStatus.Mastered:
-                    root.Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
-                    root.BorderBrush = GetThemeBrush("SystemFillColorSuccessBrush");
-                    break;
-                case NodeStatus.InProgress:
-                    root.Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
-                    root.BorderBrush = GetThemeBrush("AccentFillColorDefaultBrush");
-                    break;
-                case NodeStatus.Available:
-                    root.Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush");
-                    root.BorderBrush = GetThemeBrush("AccentFillColorDefaultBrush");
-                    break;
-                case NodeStatus.Locked:
-                default:
-                    root.Background = GetThemeBrush("SubtleFillColorSecondaryBrush");
-                    root.BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush");
-                    root.Opacity = 0.60;
-                    break;
-            }
-        }
-
-        var grid = new Grid
-        {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(34) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
-            },
-            ColumnSpacing = 10
-        };
-
-        // Icon badge
-        var iconBadge = new Border
-        {
-            Width = 32,
-            Height = 32,
-            CornerRadius = new CornerRadius(16),
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Center
-        };
-
-        if (node.Status == NodeStatus.Mastered)
-        {
-            iconBadge.Background = GetThemeBrush("SystemFillColorSuccessBrush");
-        }
-        else if (node.Status == NodeStatus.InProgress || node.Status == NodeStatus.Available)
-        {
-            iconBadge.Background = GetThemeBrush("AccentFillColorDefaultBrush");
-        }
-        else
-        {
-            iconBadge.Background = GetThemeBrush("SubtleFillColorSecondaryBrush");
-        }
-
-        var icon = new FontIcon
-        {
-            FontSize = 13,
-            Glyph = GetGlyphForNode(node),
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center
-        };
-
-        if (node.Status == NodeStatus.Mastered || node.Status == NodeStatus.InProgress || node.Status == NodeStatus.Available)
-        {
-            icon.Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush");
-        }
-        else
-        {
-            icon.Foreground = GetThemeBrush("TextFillColorTertiaryBrush");
-        }
-
-        iconBadge.Child = icon;
-        Grid.SetColumn(iconBadge, 0);
-        grid.Children.Add(iconBadge);
-
-        // Text & Progress stack
-        var textStack = new StackPanel
-        {
-            VerticalAlignment = VerticalAlignment.Center,
-            Spacing = 2
-        };
-
-        var titleBlock = new TextBlock
-        {
-            Text = node.Title,
-            FontSize = 11,
-            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            TextTrimming = TextTrimming.CharacterEllipsis,
-            MaxLines = 1,
-            Foreground = GetThemeBrush("TextFillColorPrimaryBrush")
-        };
-        textStack.Children.Add(titleBlock);
-
-        var subBlock = new TextBlock
-        {
-            Text = string.IsNullOrWhiteSpace(node.ReferenceDisplay) ? node.Type.ToString() : node.ReferenceDisplay,
-            FontSize = 9.5,
-            Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
-            TextTrimming = TextTrimming.CharacterEllipsis,
-            MaxLines = 1
-        };
-        textStack.Children.Add(subBlock);
-
-        var progressBar = new ProgressBar
-        {
-            Maximum = 100,
-            Value = node.ProgressPercentage,
-            Height = 3.5,
-            CornerRadius = new CornerRadius(2),
-            Margin = new Thickness(0, 3, 0, 0)
-        };
-        textStack.Children.Add(progressBar);
-
-        Grid.SetColumn(textStack, 1);
-        grid.Children.Add(textStack);
-
-        root.Child = grid;
-
-        // Interaction
-        Lexora.Presentation.Helpers.CursorHelper.ApplyHandCursor(root);
-        root.PointerPressed += (s, e) =>
-        {
-            if (s is Border b && b.Tag is RoadmapNodeDto clickedNode)
-            {
-                try
-                {
-                    var animService = ConnectedAnimationService.GetForCurrentView();
-                    animService.PrepareToAnimate("nodeTransition", b);
-                }
-                catch
-                {
-                    // Ignore connected animation preparation errors
-                }
-
-                ViewModel.SelectNode(clickedNode);
-
-                if (InspectorTitle != null)
-                {
-                    try
-                    {
-                        var anim = ConnectedAnimationService.GetForCurrentView().GetAnimation("nodeTransition");
-                        anim?.TryStart(InspectorTitle);
-                    }
-                    catch
-                    {
-                        // Ignore connected animation start errors
-                    }
-                }
-            }
-        };
-
-        ToolTipService.SetToolTip(root, $"{node.Title}\n{node.ReferenceDisplay} ({node.Status} - {node.ProgressPercentage:F0}%)");
-        return root;
     }
 
-    private static string GetGlyphForNode(RoadmapNodeDto node)
+    private async void ResetRoadmapItem_Click(object sender, RoutedEventArgs e)
     {
-        if (node.Status == NodeStatus.Locked) return "\uE72E"; // Lock
-        if (node.Status == NodeStatus.Mastered) return "\uE73E"; // Checkmark
+        var targetRoadmap = (sender as FrameworkElement)?.Tag as StudyRoadmapDto ?? ViewModel.ActiveRoadmap;
+        if (targetRoadmap == null) return;
 
-        return node.Type switch
+        var confirmDialog = new ContentDialog
         {
-            RoadmapNodeType.VocabularySet => "\uE82D",
-            RoadmapNodeType.GrammarPoint => "\uE8D2",
-            RoadmapNodeType.MockTest => "\uE765",
-            RoadmapNodeType.Checkpoint => "\uE9D2",
-            _ => "\uE768"
+            Title = Loc.GetString("Roadmap_ResetConfirmTitle"),
+            Content = Loc.GetString("Roadmap_ResetConfirmMessage"),
+            PrimaryButtonText = Loc.GetString("Roadmap_ResetProgress"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            CornerRadius = new CornerRadius(14),
+            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
         };
+
+        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+        if (result == ContentDialogResult.Primary)
+        {
+            await Task.Yield();
+            await ViewModel.ResetRoadmapProgressCommand.ExecuteAsync(targetRoadmap.Id);
+            Bindings.Update();
+            RenderMilestoneTrack();
+            RenderTimelineView();
+        }
+    }
+
+    private async void ClearInactiveRoadmaps_Click(object sender, RoutedEventArgs e)
+    {
+        var inactivesCount = ViewModel.AllRoadmaps.Count(r => !r.IsActive);
+        if (inactivesCount == 0) return;
+
+        var confirmDialog = new ContentDialog
+        {
+            Title = Loc.GetString("Roadmap_ClearInactiveConfirmTitle"),
+            Content = Loc.GetString("Roadmap_ClearInactiveConfirmMessage"),
+            PrimaryButtonText = Loc.GetString("Roadmap_ClearInactive"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            CornerRadius = new CornerRadius(14),
+            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
+        };
+
+        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+        if (result == ContentDialogResult.Primary)
+        {
+            await Task.Yield();
+            await ViewModel.ClearInactiveRoadmapsCommand.ExecuteAsync(null);
+            Bindings.Update();
+        }
+    }
+
+    private async void ClearAllRoadmaps_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.AllRoadmaps.Count == 0) return;
+
+        var confirmDialog = new ContentDialog
+        {
+            Title = Loc.GetString("Roadmap_ClearAllConfirmTitle"),
+            Content = Loc.GetString("Roadmap_ClearAllConfirmMessage"),
+            PrimaryButtonText = Loc.GetString("Roadmap_ClearAll"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            CornerRadius = new CornerRadius(14),
+            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
+        };
+
+        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+        if (result == ContentDialogResult.Primary)
+        {
+            await Task.Yield();
+            await ViewModel.ClearAllRoadmapsCommand.ExecuteAsync(null);
+            Bindings.Update();
+            UpdateTabButtonsState();
+            RenderMilestoneTrack();
+            RenderTimelineView();
+        }
     }
 
     private async void OpenCreateRoadmapDialog_Click(object sender, RoutedEventArgs e)
@@ -806,7 +812,8 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                     var btn = new Button
                     {
                         Content = $"{sc:F0}",
-                        Padding = new Thickness(8, 4, 8, 4),
+                        CornerRadius = new CornerRadius(6),
+                        Padding = new Thickness(10, 4, 10, 4),
                         Style = (Style)App.Current.Resources["DefaultButtonStyle"]
                     };
                     btn.Click += (s, args) =>
@@ -830,7 +837,8 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                     var btn = new Button
                     {
                         Content = $"{sc:F1}",
-                        Padding = new Thickness(8, 4, 8, 4),
+                        CornerRadius = new CornerRadius(6),
+                        Padding = new Thickness(10, 4, 10, 4),
                         Style = (Style)App.Current.Resources["DefaultButtonStyle"]
                     };
                     btn.Click += (s, args) =>
@@ -854,7 +862,8 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                     var btn = new Button
                     {
                         Content = label,
-                        Padding = new Thickness(8, 4, 8, 4),
+                        CornerRadius = new CornerRadius(6),
+                        Padding = new Thickness(10, 4, 10, 4),
                         Style = (Style)App.Current.Resources["DefaultButtonStyle"]
                     };
                     btn.Click += (s, args) =>
@@ -950,11 +959,10 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
 
             await Task.Yield(); // Sequential dialog safety invariant
             await ViewModel.GenerateRoadmapCommand.ExecuteAsync(null);
-            
+
             DispatcherQueue?.TryEnqueue(() =>
             {
                 Bindings.Update();
-                RenderRoadmapGraph();
                 UpdateTabButtonsState();
             });
         }

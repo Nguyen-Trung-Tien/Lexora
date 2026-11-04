@@ -354,6 +354,80 @@ public class RoadmapService : IRoadmapService
         }
     }
 
+    public async Task<StudyRoadmapDto?> ResetRoadmapProgressAsync(
+        Guid roadmapId,
+        CancellationToken cancellationToken = default)
+    {
+        var roadmap = await _roadmapRepository.GetRoadmapWithDetailsAsync(roadmapId, cancellationToken);
+        if (roadmap == null) return null;
+
+        var allNodesOrdered = roadmap.Milestones
+            .OrderBy(m => m.OrderIndex)
+            .SelectMany(m => m.Nodes.OrderBy(n => n.OrderIndex))
+            .ToList();
+
+        for (int i = 0; i < allNodesOrdered.Count; i++)
+        {
+            var node = allNodesOrdered[i];
+            node.CompletedItemCount = 0;
+            node.Status = (i == 0) ? NodeStatus.Available : NodeStatus.Locked;
+            node.EaseFactorWeight = 2.5;
+            node.UpdatedAt = DateTime.UtcNow;
+        }
+
+        foreach (var milestone in roadmap.Milestones)
+        {
+            milestone.IsCompleted = false;
+            milestone.UpdatedAt = DateTime.UtcNow;
+        }
+
+        roadmap.UpdatedAt = DateTime.UtcNow;
+        await _roadmapRepository.UpdateAsync(roadmap, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return MapToDto(roadmap);
+    }
+
+    public async Task<int> ClearInactiveRoadmapsAsync(CancellationToken cancellationToken = default)
+    {
+        var all = await _roadmapRepository.GetAllAsync(cancellationToken);
+        var inactives = all.Where(r => !r.IsActive).ToList();
+        int count = 0;
+
+        foreach (var item in inactives)
+        {
+            var details = await _roadmapRepository.GetRoadmapWithDetailsAsync(item.Id, cancellationToken);
+            if (details != null)
+            {
+                await _roadmapRepository.DeleteAsync(details, cancellationToken);
+                count++;
+            }
+        }
+
+        if (count > 0)
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        return count;
+    }
+
+    public async Task<bool> ClearAllRoadmapsAsync(CancellationToken cancellationToken = default)
+    {
+        var all = await _roadmapRepository.GetAllAsync(cancellationToken);
+        foreach (var item in all)
+        {
+            var details = await _roadmapRepository.GetRoadmapWithDetailsAsync(item.Id, cancellationToken);
+            if (details != null)
+            {
+                await _roadmapRepository.DeleteAsync(details, cancellationToken);
+            }
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private static StudyRoadmapDto MapToDto(StudyRoadmap entity)
     {
         var milestonesDto = entity.Milestones

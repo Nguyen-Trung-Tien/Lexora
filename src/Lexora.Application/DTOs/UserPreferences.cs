@@ -14,6 +14,10 @@ public record UserPreferences
     public string SpacedRepetitionAlgorithm { get; init; } = "SM2"; // "SM2" or "FSRS"
     public double TargetRetention { get; init; } = 0.90; // 0.85, 0.90, 0.95
 
+    // Roadmap view state persistence
+    public int RoadmapViewMode { get; init; } = 0; // 0 = Track, 1 = Timeline, 2 = Manage
+    public Guid? LastActiveRoadmapId { get; init; } = null;
+
     // Window state — restored on next launch
     public int WindowWidth { get; init; } = 1280;
     public int WindowHeight { get; init; } = 768;

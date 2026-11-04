@@ -14,11 +14,33 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
 
     public async Task<StudyRoadmap?> GetActiveRoadmapWithDetailsAsync(CancellationToken cancellationToken = default)
     {
-        return await Context.StudyRoadmaps
+        var active = await Context.StudyRoadmaps
             .Include(r => r.Milestones)
                 .ThenInclude(m => m.Nodes)
             .OrderByDescending(r => r.CreatedAt)
             .FirstOrDefaultAsync(r => r.IsActive, cancellationToken);
+
+        if (active != null)
+        {
+            return active;
+        }
+
+        // Fallback auto-recovery: If no roadmap is currently marked active, but roadmaps exist in DB,
+        // automatically activate and return the latest one to prevent UI blanking / state loss.
+        var latest = await Context.StudyRoadmaps
+            .Include(r => r.Milestones)
+                .ThenInclude(m => m.Nodes)
+            .OrderByDescending(r => r.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (latest != null)
+        {
+            latest.IsActive = true;
+            await Context.SaveChangesAsync(cancellationToken);
+            return latest;
+        }
+
+        return null;
     }
 
     public async Task<StudyRoadmap?> GetRoadmapWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
@@ -56,6 +78,10 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
         {
             r.IsActive = false;
         }
+        if (activeRoadmaps.Count > 0)
+        {
+            await Context.SaveChangesAsync(cancellationToken);
+        }
     }
 
     public async Task SetActiveRoadmapAsync(Guid roadmapId, CancellationToken cancellationToken = default)
@@ -65,6 +91,7 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
         {
             r.IsActive = (r.Id == roadmapId);
         }
+        await Context.SaveChangesAsync(cancellationToken);
     }
 }
 

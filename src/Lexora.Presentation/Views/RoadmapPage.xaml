@@ -11,7 +11,113 @@
     SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <!-- Independent Roadmap Card Template for Manage Goals View -->
+        <DataTemplate x:Key="RoadmapCardTemplate" x:DataType="dto:StudyRoadmapDto">
+            <Border
+                Margin="0,0,0,12"
+                Padding="18"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="12">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border
+                        Width="44"
+                        Height="44"
+                        CornerRadius="22"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                        <FontIcon
+                            FontSize="18"
+                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                            Glyph="&#xE81C;" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                Text="{x:Bind Title}" />
+                            <Border
+                                Padding="6,2"
+                                CornerRadius="4"
+                                Background="{ThemeResource AccentFillColorDefaultBrush}">
+                                <TextBlock
+                                    FontSize="10"
+                                    FontWeight="SemiBold"
+                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                    Text="{x:Bind ExamBadgeText}" />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind TargetScoreDisplay}" />
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind TargetDateDisplay}" />
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                Text="{x:Bind OverallProgressDisplay}" />
+                        </StackPanel>
+
+                        <ProgressBar
+                            Height="4"
+                            Maximum="100"
+                            Value="{x:Bind OverallProgress}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button
+                            Click="SwitchRoadmapItem_Click"
+                            Tag="{x:Bind}"
+                            CornerRadius="8"
+                            Padding="12,6"
+                            ToolTipService.ToolTip="Select Active Goal"
+                            Style="{ThemeResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE73E;" FontSize="12" />
+                                <TextBlock Text="Select" />
+                            </StackPanel>
+                        </Button>
+                        <Button
+                            Click="ResetRoadmapItem_Click"
+                            Tag="{x:Bind}"
+                            CornerRadius="8"
+                            Padding="8,6"
+                            ToolTipService.ToolTip="Reset Progress"
+                            Style="{ThemeResource SubtleButtonStyle}">
+                            <FontIcon Glyph="&#xE777;" FontSize="12" />
+                        </Button>
+                        <Button
+                            Click="DeleteCurrentRoadmap_Click"
+                            Tag="{x:Bind}"
+                            CornerRadius="8"
+                            Padding="8,6"
+                            ToolTipService.ToolTip="Delete Roadmap"
+                            Style="{ThemeResource SubtleButtonStyle}">
+                            <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
     <Grid Background="{ThemeResource LayerFillColorDefaultBrush}">
+        <!-- Single Root ScrollViewer with Smooth Scrolling -->
         <ScrollViewer
             x:Name="PageScrollViewer"
             HorizontalScrollBarVisibility="Disabled"
@@ -46,103 +152,29 @@
                         Spacing="8"
                         VerticalAlignment="Center">
 
-                        <!-- Roadmap Switcher Dropdown (when roadmaps exist) -->
-                        <DropDownButton
-                            x:Name="RoadmapSwitcherButton"
+                        <!-- Roadmap Switcher / Management Button (when roadmaps exist) -->
+                        <Button
+                            Click="SwitchToManageView_Click"
                             Style="{ThemeResource DefaultButtonStyle}"
+                            CornerRadius="8"
+                            Padding="12,6"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ManageRoadmaps')}"
                             Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE81C;" />
                                 <TextBlock
-                                    MaxWidth="200"
+                                    MaxWidth="180"
                                     TextTrimming="CharacterEllipsis"
                                     Text="{x:Bind ViewModel.ActiveRoadmap.Title, Mode=OneWay, FallbackValue=''}" />
                             </StackPanel>
-                            <DropDownButton.Flyout>
-                                <Flyout x:Name="RoadmapsFlyout" Placement="BottomEdgeAlignedRight">
-                                    <StackPanel MinWidth="280" MaxWidth="360" Spacing="10">
-                                        <TextBlock
-                                            FontWeight="SemiBold"
-                                            Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                            Text="{x:Bind Loc.GetString('Roadmap_ManageRoadmaps')}" />
+                        </Button>
 
-                                        <ListView
-                                            ItemsSource="{x:Bind ViewModel.AllRoadmaps, Mode=OneWay}"
-                                            SelectionMode="None"
-                                            MaxHeight="260">
-                                            <ListView.ItemTemplate>
-                                                <DataTemplate x:DataType="dto:StudyRoadmapDto">
-                                                    <Button
-                                                        HorizontalAlignment="Stretch"
-                                                        HorizontalContentAlignment="Left"
-                                                        Padding="8,6"
-                                                        Margin="0,2"
-                                                        Click="SwitchRoadmapItem_Click"
-                                                        Tag="{x:Bind}"
-                                                        Style="{ThemeResource SubtleButtonStyle}">
-                                                        <Grid HorizontalAlignment="Stretch" ColumnSpacing="8">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*" />
-                                                                <ColumnDefinition Width="Auto" />
-                                                            </Grid.ColumnDefinitions>
-                                                            <StackPanel Spacing="2">
-                                                                <TextBlock
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{x:Bind Title}"
-                                                                    TextTrimming="CharacterEllipsis" />
-                                                                <TextBlock
-                                                                    FontSize="11"
-                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                    Text="{x:Bind TargetScoreDisplay}" />
-                                                            </StackPanel>
-                                                            <Border
-                                                                Grid.Column="1"
-                                                                Padding="6,2"
-                                                                CornerRadius="4"
-                                                                Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                                                Visibility="{x:Bind IsActive, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                                <TextBlock
-                                                                    FontSize="10"
-                                                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                                                    Text="✓" />
-                                                            </Border>
-                                                        </Grid>
-                                                    </Button>
-                                                </DataTemplate>
-                                            </ListView.ItemTemplate>
-                                        </ListView>
-
-                                        <MenuFlyoutSeparator />
-
-                                        <Button
-                                            HorizontalAlignment="Stretch"
-                                            Click="OpenCreateRoadmapDialog_Click"
-                                            Style="{ThemeResource DefaultButtonStyle}">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <FontIcon Glyph="&#xE710;" />
-                                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" />
-                                            </StackPanel>
-                                        </Button>
-
-                                        <Button
-                                            HorizontalAlignment="Stretch"
-                                            Click="DeleteCurrentRoadmap_Click"
-                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                            Style="{ThemeResource SubtleButtonStyle}">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <FontIcon Glyph="&#xE74D;" />
-                                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_DeleteRoadmap')}" />
-                                            </StackPanel>
-                                        </Button>
-                                    </StackPanel>
-                                </Flyout>
-                            </DropDownButton.Flyout>
-                        </DropDownButton>
-
+                        <!-- Sync Progress Button -->
                         <Button
                             Command="{x:Bind ViewModel.SyncProgressCommand}"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_SyncProgress')}"
+                            CornerRadius="8"
+                            Padding="12,6"
                             Style="{ThemeResource DefaultButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE72C;" />
@@ -150,8 +182,25 @@
                             </StackPanel>
                         </Button>
 
+                        <!-- Reset Progress Button -->
+                        <Button
+                            Click="ResetActiveRoadmapProgress_Click"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ResetProgressTooltip')}"
+                            Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                            CornerRadius="8"
+                            Padding="12,6"
+                            Style="{ThemeResource DefaultButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE777;" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ResetProgress')}" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Create Roadmap Button -->
                         <Button
                             Click="OpenCreateRoadmapDialog_Click"
+                            CornerRadius="8"
+                            Padding="14,6"
                             Style="{ThemeResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE710;" />
@@ -161,7 +210,7 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- 2. Active Roadmap Overview Cards -->
+                <!-- 2. Active Roadmap Overview Metric Cards -->
                 <Grid
                     x:Name="OverviewCardsGrid"
                     HorizontalAlignment="Stretch"
@@ -187,7 +236,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="10">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -216,7 +265,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="10">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -226,7 +275,7 @@
                                 <TextBlock
                                     FontWeight="SemiBold"
                                     Style="{ThemeResource SubtitleTextBlockStyle}"
-                                    Text="{x:Bind ViewModel.ActiveRoadmap.Target, Mode=OneWay, FallbackValue=''}" />
+                                    Text="{x:Bind ViewModel.ActiveRoadmap.ExamBadgeText, Mode=OneWay, FallbackValue=''}" />
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
@@ -248,7 +297,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="10">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -270,7 +319,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Card 4: Mastered Nodes / SM-2 Engine -->
+                    <!-- Card 4: Mastered Lessons / Retention -->
                     <Border
                         x:Name="OverviewCard4"
                         Grid.Column="3"
@@ -278,7 +327,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="10">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -306,12 +355,12 @@
                     </Border>
                 </Grid>
 
-                <!-- 2.5 Hero Banner: Up Next Lesson -->
+                <!-- 3. Hero Banner: Up Next Lesson (When Available) -->
                 <Border
                     Padding="20,16"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
+                    BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                    BorderThickness="1.5"
                     CornerRadius="12"
                     Visibility="{x:Bind ViewModel.HasNextActiveNode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid ColumnSpacing="16">
@@ -329,7 +378,7 @@
                             <FontIcon
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontSize="20"
+                                FontSize="18"
                                 Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                                 Glyph="&#xE768;" />
                         </Border>
@@ -352,6 +401,9 @@
                         <Button
                             Grid.Column="2"
                             VerticalAlignment="Center"
+                            CornerRadius="8"
+                            Padding="16,8"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ActionLearn')}"
                             Command="{x:Bind ViewModel.StartLearningNodeCommand}"
                             CommandParameter="{x:Bind ViewModel.NextActiveNode, Mode=OneWay}"
                             Style="{ThemeResource AccentButtonStyle}">
@@ -363,11 +415,10 @@
                     </Grid>
                 </Border>
 
-                <!-- 3. View Mode Selector Bar (Path Map vs Timeline) -->
+                <!-- 4. Modern View Mode Selector Pills (Pathway Track / Timeline / Management) -->
                 <Grid
                     HorizontalAlignment="Stretch"
                     Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <!-- Mode Toggle Segmented Pills -->
                     <Border
                         HorizontalAlignment="Left"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
@@ -376,22 +427,24 @@
                         CornerRadius="8"
                         Padding="3">
                         <StackPanel Orientation="Horizontal" Spacing="4">
+                            <!-- Pill 1: Milestone Track -->
                             <Button
-                                x:Name="MapViewTabButton"
-                                Click="SwitchToMapView_Click"
-                                Padding="12,6"
+                                x:Name="TrackViewTabButton"
+                                Click="SwitchToTrackView_Click"
+                                Padding="14,6"
                                 CornerRadius="6"
                                 Style="{ThemeResource SubtleButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE81C;" FontSize="14" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ViewMap')}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ViewTrack')}" />
                                 </StackPanel>
                             </Button>
 
+                            <!-- Pill 2: Timeline Schedule -->
                             <Button
                                 x:Name="TimelineViewTabButton"
                                 Click="SwitchToTimelineView_Click"
-                                Padding="12,6"
+                                Padding="14,6"
                                 CornerRadius="6"
                                 Style="{ThemeResource SubtleButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
@@ -399,11 +452,43 @@
                                     <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ViewTimeline')}" />
                                 </StackPanel>
                             </Button>
+
+                            <!-- Pill 3: Manage Goals -->
+                            <Button
+                                x:Name="ManageViewTabButton"
+                                Click="SwitchToManageView_Click"
+                                Padding="14,6"
+                                CornerRadius="6"
+                                Style="{ThemeResource SubtleButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE713;" FontSize="14" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ViewManage')}" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <!-- 4. Empty State with Standard Goal Presets (When no roadmap created yet) -->
+                <!-- 5. Loading State Indicator (When Loading without cached active roadmap) -->
+                <Border
+                    Padding="48"
+                    HorizontalAlignment="Stretch"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel HorizontalAlignment="Center" Spacing="16">
+                        <ProgressRing IsActive="True" Width="48" Height="48" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{ThemeResource BodyTextBlockStyle}"
+                            Text="{x:Bind Loc.GetString('Progress_LoadingData')}"
+                            HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <!-- 6. Empty State with Presets (When no roadmap created yet and not loading) -->
                 <Border
                     Padding="32"
                     HorizontalAlignment="Stretch"
@@ -416,7 +501,7 @@
                         <StackPanel Spacing="8" HorizontalAlignment="Center">
                             <FontIcon
                                 HorizontalAlignment="Center"
-                                FontSize="44"
+                                FontSize="48"
                                 Foreground="{ThemeResource AccentFillColorDefaultBrush}"
                                 Glyph="&#xE81C;" />
                             <TextBlock
@@ -472,6 +557,9 @@
                                         TextWrapping="Wrap" />
                                     <Button
                                         HorizontalAlignment="Stretch"
+                                        CornerRadius="8"
+                                        Padding="12,6"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_QuickStartToeicTitle')}"
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
                                         CommandParameter="TOEIC_750"
                                         Style="{ThemeResource AccentButtonStyle}">
@@ -512,6 +600,9 @@
                                         TextWrapping="Wrap" />
                                     <Button
                                         HorizontalAlignment="Stretch"
+                                        CornerRadius="8"
+                                        Padding="12,6"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_QuickStartIeltsTitle')}"
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
                                         CommandParameter="IELTS_65"
                                         Style="{ThemeResource AccentButtonStyle}">
@@ -552,6 +643,9 @@
                                         TextWrapping="Wrap" />
                                     <Button
                                         HorizontalAlignment="Stretch"
+                                        CornerRadius="8"
+                                        Padding="12,6"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_QuickStartVstepTitle')}"
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
                                         CommandParameter="VSTEP_B2"
                                         Style="{ThemeResource AccentButtonStyle}">
@@ -563,6 +657,9 @@
 
                         <Button
                             HorizontalAlignment="Center"
+                            CornerRadius="8"
+                            Padding="14,6"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CreateGoal')}"
                             Click="OpenCreateRoadmapDialog_Click"
                             Style="{ThemeResource DefaultButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -573,11 +670,11 @@
                     </StackPanel>
                 </Border>
 
-                <!-- 5. Main Roadmap Workspace (Interactive Visual Canvas / Timeline + Inspector) -->
+                <!-- 7. Main Learning Pathway Track View -->
                 <Grid
                     x:Name="RoadmapWorkspaceGrid"
                     HorizontalAlignment="Stretch"
-                    Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    Visibility="{x:Bind ViewModel.IsTrackView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="380" />
@@ -587,376 +684,133 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <!-- Workspace View Host (Contains Map Canvas or Timeline View) -->
-                    <Grid Grid.Column="0" x:Name="CanvasHostBorder">
-                        <!-- A. Map View Host -->
-                        <Border
-                            Padding="20"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Visibility="{x:Bind ViewModel.IsMapView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <Grid>
-                                <ScrollViewer
-                                    x:Name="CanvasScrollViewer"
-                                    Height="720"
-                                    HorizontalScrollBarVisibility="Auto"
-                                    VerticalScrollBarVisibility="Auto">
-                                    <Canvas
-                                        x:Name="RoadmapCanvas"
-                                        MinWidth="760"
-                                        Height="1600"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top">
-                                        <!-- Dynamic Bézier Curves generated in code-behind -->
-                                        <Path
-                                            x:Name="TrackSplinePath"
-                                            Stroke="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            StrokeDashArray="3,3"
-                                            StrokeThickness="3" />
-                                        <Path
-                                            x:Name="ActiveSplinePath"
-                                            Stroke="{ThemeResource AccentFillColorDefaultBrush}"
-                                            StrokeThickness="4" />
-                                    </Canvas>
-                                </ScrollViewer>
+                    <!-- Left: Milestones & Lessons List -->
+                    <StackPanel
+                        x:Name="TrackListContainer"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Spacing="16"
+                        Margin="0,0,16,0" />
 
-                                <!-- Floating Map Navigation & Zoom Toolbar -->
-                                <Border
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Top"
-                                    Margin="0,12,12,0"
-                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Padding="4">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <Button
-                                            Click="CenterOnActiveNode_Click"
-                                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CenterOnActive')}"
-                                            Padding="8,6"
-                                            Style="{ThemeResource SubtleButtonStyle}">
-                                            <FontIcon Glyph="&#xE7C4;" FontSize="14" />
-                                        </Button>
-                                        <Button
-                                            Command="{x:Bind ViewModel.ZoomInCommand}"
-                                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ZoomIn')}"
-                                            Padding="8,6"
-                                            Style="{ThemeResource SubtleButtonStyle}">
-                                            <FontIcon Glyph="&#xE71E;" FontSize="14" />
-                                        </Button>
-                                        <Button
-                                            Command="{x:Bind ViewModel.ZoomOutCommand}"
-                                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ZoomOut')}"
-                                            Padding="8,6"
-                                            Style="{ThemeResource SubtleButtonStyle}">
-                                            <FontIcon Glyph="&#xE71F;" FontSize="14" />
-                                        </Button>
-                                        <Button
-                                            Command="{x:Bind ViewModel.ResetZoomCommand}"
-                                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ZoomReset')}"
-                                            Padding="8,6"
-                                            Style="{ThemeResource SubtleButtonStyle}">
-                                            <FontIcon Glyph="&#xE81D;" FontSize="14" />
-                                        </Button>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </Border>
-
-                        <!-- B. Milestone Timeline View Host -->
-                        <Border
-                            Padding="20"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Visibility="{x:Bind ViewModel.IsTimelineView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <ScrollViewer Height="720" VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.Milestones, Mode=OneWay}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="dto:MilestoneDto">
-                                            <Border
-                                                Margin="0,0,0,16"
-                                                Padding="18"
-                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="10">
-                                                <StackPanel Spacing="14">
-                                                    <!-- Milestone Header -->
-                                                    <Grid ColumnSpacing="12">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto" />
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <Border
-                                                            Width="36"
-                                                            Height="36"
-                                                            CornerRadius="18"
-                                                            Background="{ThemeResource AccentFillColorDefaultBrush}">
-                                                            <FontIcon
-                                                                FontSize="15"
-                                                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                                                Glyph="&#xE8D2;" />
-                                                        </Border>
-
-                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                                            <TextBlock
-                                                                FontWeight="SemiBold"
-                                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                                                Text="{x:Bind Title}" />
-                                                            <TextBlock
-                                                                FontSize="12"
-                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                Text="{x:Bind Description}"
-                                                                TextWrapping="Wrap" />
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="4">
-                                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
-                                                                <TextBlock
-                                                                    FontWeight="SemiBold"
-                                                                    Text="{x:Bind CompletedNodesCount}" />
-                                                                <TextBlock
-                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                    Text="/" />
-                                                                <TextBlock
-                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                    Text="{x:Bind TotalNodesCount}" />
-                                                            </StackPanel>
-                                                            <ProgressBar
-                                                                Width="80"
-                                                                Maximum="100"
-                                                                Value="{x:Bind ProgressPercentage}" />
-                                                        </StackPanel>
-                                                    </Grid>
-
-                                                    <!-- Nodes List inside Milestone -->
-                                                    <ItemsControl ItemsSource="{x:Bind Nodes}">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate x:DataType="dto:RoadmapNodeDto">
-                                                                <Border
-                                                                    Margin="0,4"
-                                                                    Padding="12,10"
-                                                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                                    BorderThickness="1"
-                                                                    CornerRadius="8">
-                                                                    <Grid ColumnSpacing="12">
-                                                                        <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="Auto" />
-                                                                            <ColumnDefinition Width="*" />
-                                                                            <ColumnDefinition Width="Auto" />
-                                                                            <ColumnDefinition Width="Auto" />
-                                                                        </Grid.ColumnDefinitions>
-
-                                                                        <Border
-                                                                            Width="28"
-                                                                            Height="28"
-                                                                            CornerRadius="14"
-                                                                            VerticalAlignment="Center"
-                                                                            Background="{x:Bind Status, Converter={StaticResource StatusToBrushConverter}}">
-                                                                            <FontIcon
-                                                                                FontSize="12"
-                                                                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                                                                Glyph="&#xE768;" />
-                                                                        </Border>
-
-                                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                                                            <TextBlock
-                                                                                FontWeight="SemiBold"
-                                                                                Text="{x:Bind Title}" />
-                                                                            <TextBlock
-                                                                                FontSize="11"
-                                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                                Text="{x:Bind ReferenceDisplay}" />
-                                                                        </StackPanel>
-
-                                                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2" Margin="0,0,12,0">
-                                                                            <TextBlock
-                                                                                FontSize="11"
-                                                                                HorizontalAlignment="Right"
-                                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                                Text="{x:Bind ProgressPercentageDisplay}" />
-                                                                            <ProgressBar
-                                                                                Width="60"
-                                                                                Maximum="100"
-                                                                                Value="{x:Bind ProgressPercentage}" />
-                                                                        </StackPanel>
-
-                                                                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                                                            <Button
-                                                                                Click="TimelineNodeSelect_Click"
-                                                                                Tag="{x:Bind}"
-                                                                                Padding="8,5"
-                                                                                Style="{ThemeResource SubtleButtonStyle}">
-                                                                                <FontIcon Glyph="&#xE946;" FontSize="12" />
-                                                                            </Button>
-                                                                            <Button
-                                                                                Click="TimelineNodeLearn_Click"
-                                                                                Tag="{x:Bind}"
-                                                                                IsEnabled="{x:Bind CanStartPractice}"
-                                                                                Padding="10,5"
-                                                                                Style="{ThemeResource AccentButtonStyle}">
-                                                                                <FontIcon Glyph="&#xE768;" FontSize="12" />
-                                                                            </Button>
-                                                                        </StackPanel>
-                                                                    </Grid>
-                                                                </Border>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </StackPanel>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </Border>
-                    </Grid>
-
-                    <!-- Node Detail & Action Inspector Panel -->
+                    <!-- Right: Master-Detail Lesson Inspector -->
                     <Border
                         x:Name="InspectorHostBorder"
+                        Grid.Row="0"
                         Grid.Column="1"
-                        Margin="16,0,0,0"
-                        Padding="24"
-                        VerticalAlignment="Stretch"
+                        VerticalAlignment="Top"
+                        Padding="20"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
                         CornerRadius="12">
                         <Grid>
-                            <!-- Empty State when no node is selected -->
+                            <!-- When Node is Selected -->
                             <StackPanel
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Spacing="12"
-                                Visibility="{x:Bind ViewModel.IsNodeDetailOpen, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                                <FontIcon
-                                    HorizontalAlignment="Center"
-                                    FontSize="36"
-                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                    Glyph="&#xE81C;" />
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Style="{ThemeResource SubtitleTextBlockStyle}"
-                                    Text="{x:Bind Loc.GetString('Roadmap_SelectNodePlaceholder')}"
-                                    TextAlignment="Center"
-                                    TextWrapping="Wrap" />
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource BodyTextBlockStyle}"
-                                    Text="{x:Bind Loc.GetString('Roadmap_SelectNodeDesc')}"
-                                    TextAlignment="Center"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <!-- Selected Node Details -->
-                            <StackPanel
-                                Spacing="18"
-                                Visibility="{x:Bind ViewModel.IsNodeDetailOpen, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-
-                                <!-- Selected Node Header with Close Button -->
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Spacing="4">
+                                Spacing="16"
+                                Visibility="{x:Bind ViewModel.SelectedNode, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                                <!-- Node Inspector Header -->
+                                <StackPanel Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Border
-                                            HorizontalAlignment="Left"
-                                            Padding="8,3"
+                                            Padding="6,2"
                                             CornerRadius="4"
                                             Background="{ThemeResource SubtleFillColorSecondaryBrush}">
                                             <TextBlock
-                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                Style="{ThemeResource CaptionTextBlockStyle}"
-                                                FontWeight="SemiBold"
-                                                Text="{x:Bind ViewModel.SelectedNode.Type, Mode=OneWay, FallbackValue='Skill'}" />
+                                                FontSize="11"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="{x:Bind ViewModel.SelectedNode.TypeDisplay, Mode=OneWay, FallbackValue=''}" />
                                         </Border>
-                                        <TextBlock
-                                            x:Name="InspectorTitle"
-                                            Style="{ThemeResource SubtitleTextBlockStyle}"
-                                            Text="{x:Bind ViewModel.SelectedNode.Title, Mode=OneWay, FallbackValue=''}"
-                                            TextWrapping="Wrap" />
+                                        <Border
+                                            Padding="6,2"
+                                            CornerRadius="4"
+                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                            <TextBlock
+                                                FontSize="11"
+                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                Text="{x:Bind ViewModel.SelectedNode.StatusDisplay, Mode=OneWay, FallbackValue=''}" />
+                                        </Border>
                                     </StackPanel>
 
-                                    <Button
-                                        Grid.Column="1"
-                                        VerticalAlignment="Top"
-                                        Command="{x:Bind ViewModel.CloseNodeDetailCommand}"
-                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CloseInspector')}"
-                                        Style="{ThemeResource SubtleButtonStyle}">
-                                        <FontIcon Glyph="&#xE711;" FontSize="12" />
-                                    </Button>
-                                </Grid>
+                                    <TextBlock
+                                        FontWeight="SemiBold"
+                                        Style="{ThemeResource SubtitleTextBlockStyle}"
+                                        Text="{x:Bind ViewModel.SelectedNode.Title, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
 
-                                <!-- Description -->
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource BodyTextBlockStyle}"
-                                    Text="{x:Bind ViewModel.SelectedNode.Description, Mode=OneWay, FallbackValue=''}"
-                                    TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Style="{ThemeResource BodyTextBlockStyle}"
+                                        Text="{x:Bind ViewModel.SelectedNode.Description, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
 
-                                <!-- Progress & Status Info -->
-                                <StackPanel Spacing="12">
-                                    <!-- Linked Topic / Rule Context -->
-                                    <Grid Visibility="{x:Bind ViewModel.SelectedNode.HasLinkedContent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,4" />
+
+                                <!-- Node Study Metrics & Targets -->
+                                <StackPanel Spacing="10">
+                                    <Grid>
                                         <TextBlock
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{x:Bind Loc.GetString('Roadmap_LinkedTopic')}" />
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind Loc.GetString('Roadmap_TargetWords')}" />
                                         <TextBlock
                                             HorizontalAlignment="Right"
                                             FontWeight="SemiBold"
-                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                            Text="{x:Bind ViewModel.SelectedNodeLinkedTopicDisplay, Mode=OneWay, FallbackValue=''}" />
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ViewModel.SelectedNode.ItemCountDisplay, Mode=OneWay, FallbackValue=''}" />
                                     </Grid>
 
                                     <Grid>
                                         <TextBlock
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{x:Bind Loc.GetString('Roadmap_TargetProgress')}" />
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind Loc.GetString('Roadmap_MasteryProgress')}" />
                                         <TextBlock
                                             HorizontalAlignment="Right"
                                             FontWeight="SemiBold"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
                                             Text="{x:Bind ViewModel.SelectedNode.ProgressPercentageDisplay, Mode=OneWay, FallbackValue='0%'}" />
                                     </Grid>
                                     <ProgressBar
                                         Maximum="100"
                                         Value="{x:Bind ViewModel.SelectedNode.ProgressPercentage, Mode=OneWay, FallbackValue=0}" />
 
-                                    <Grid Margin="0,4,0,0">
+                                    <Grid>
                                         <TextBlock
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{x:Bind Loc.GetString('Roadmap_LessonsCount')}" />
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4">
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedNode.CompletedItemCount, Mode=OneWay, FallbackValue=0}" />
-                                            <TextBlock Text="/" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedNode.TargetItemCount, Mode=OneWay, FallbackValue=0}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind Loc.GetString('Roadmap_EaseFactor')}" />
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            FontWeight="SemiBold"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ViewModel.SelectedNode.EaseFactorWeightDisplay, Mode=OneWay, FallbackValue=''}" />
                                     </Grid>
 
                                     <Grid>
                                         <TextBlock
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{x:Bind Loc.GetString('Roadmap_RetentionIndicator')}" />
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind Loc.GetString('Roadmap_LinkedTopic')}" />
                                         <TextBlock
                                             HorizontalAlignment="Right"
-                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                            Text="{x:Bind ViewModel.SelectedNode.EaseFactorWeightDisplay, Mode=OneWay, FallbackValue='EF: 2.50'}" />
+                                            FontWeight="SemiBold"
+                                            MaxWidth="180"
+                                            TextTrimming="CharacterEllipsis"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ViewModel.SelectedNodeLinkedTopicDisplay, Mode=OneWay}" />
                                     </Grid>
+                                </StackPanel>
 
-                                    <!-- Action Buttons -->
+                                <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,4" />
+
+                                <!-- Node Actions -->
+                                <StackPanel Spacing="8">
                                     <Button
-                                        Margin="0,12,0,0"
                                         HorizontalAlignment="Stretch"
+                                        CornerRadius="8"
+                                        Padding="14,8"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ActionLearn')}"
                                         Command="{x:Bind ViewModel.StartLearningNodeCommand}"
                                         CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
                                         IsEnabled="{x:Bind ViewModel.CanAdvanceProgress, Mode=OneWay}"
@@ -969,18 +823,9 @@
 
                                     <Button
                                         HorizontalAlignment="Stretch"
-                                        Command="{x:Bind ViewModel.AdvanceNodeProgressCommand}"
-                                        CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
-                                        IsEnabled="{x:Bind ViewModel.CanAdvanceProgress, Mode=OneWay}"
-                                        Style="{ThemeResource DefaultButtonStyle}">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE777;" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_AdvanceProgress')}" />
-                                        </StackPanel>
-                                    </Button>
-
-                                    <Button
-                                        HorizontalAlignment="Stretch"
+                                        CornerRadius="8"
+                                        Padding="14,8"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_MarkMastered')}"
                                         Command="{x:Bind ViewModel.MarkNodeCompletedCommand}"
                                         CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
                                         IsEnabled="{x:Bind ViewModel.CanAdvanceProgress, Mode=OneWay}"
@@ -993,29 +838,120 @@
 
                                     <Button
                                         HorizontalAlignment="Stretch"
-                                        Command="{x:Bind ViewModel.ViewInVocabularyCommand}"
+                                        CornerRadius="8"
+                                        Padding="14,8"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_AdvanceProgress')}"
+                                        Command="{x:Bind ViewModel.AdvanceNodeProgressCommand}"
                                         CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
-                                        Style="{ThemeResource DefaultButtonStyle}">
+                                        IsEnabled="{x:Bind ViewModel.CanAdvanceProgress, Mode=OneWay}"
+                                        Style="{ThemeResource SubtleButtonStyle}">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE8A7;" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ViewInVocab')}" />
+                                            <FontIcon Glyph="&#xE72A;" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_AdvanceProgress')}" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
                             </StackPanel>
+
+                            <!-- When No Node is Selected -->
+                            <StackPanel
+                                Spacing="12"
+                                Padding="16,32"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Visibility="{x:Bind ViewModel.SelectedNode, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
+                                <FontIcon
+                                    HorizontalAlignment="Center"
+                                    FontSize="36"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Glyph="&#xE81C;" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontWeight="SemiBold"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="{x:Bind Loc.GetString('Roadmap_SelectNodePlaceholder')}"
+                                    TextAlignment="Center" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind Loc.GetString('Roadmap_SelectNodeDesc')}"
+                                    TextAlignment="Center"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </Grid>
+
+                <!-- 8. Timeline View (Chronological Schedule) -->
+                <Grid
+                    HorizontalAlignment="Stretch"
+                    Visibility="{x:Bind ViewModel.IsTimelineView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel x:Name="TimelineListContainer" Spacing="16" />
+                </Grid>
+
+                <!-- 9. Manage Goals View -->
+                <Grid
+                    HorizontalAlignment="Stretch"
+                    Visibility="{x:Bind ViewModel.IsManageView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Spacing="16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="2">
+                                <TextBlock
+                                    Style="{ThemeResource SubtitleTextBlockStyle}"
+                                    Text="{x:Bind Loc.GetString('Roadmap_ManageRoadmaps')}" />
+                                <TextBlock
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind Loc.GetString('Roadmap_Subtitle')}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    Click="ClearInactiveRoadmaps_Click"
+                                    CornerRadius="8"
+                                    Padding="12,6"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ClearInactiveTooltip')}"
+                                    Style="{ThemeResource DefaultButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE75C;" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ClearInactive')}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    Click="ClearAllRoadmaps_Click"
+                                    CornerRadius="8"
+                                    Padding="12,6"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ClearAll')}"
+                                    Style="{ThemeResource SubtleButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE74D;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ClearAll')}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    Click="OpenCreateRoadmapDialog_Click"
+                                    CornerRadius="8"
+                                    Padding="14,6"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CreateGoal')}"
+                                    Style="{ThemeResource AccentButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE710;" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <ItemsControl
+                            ItemsSource="{x:Bind ViewModel.AllRoadmaps, Mode=OneWay}"
+                            ItemTemplate="{StaticResource RoadmapCardTemplate}" />
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </ScrollViewer>
-
-        <!-- Loading Ring Overlay -->
-        <ProgressRing
-            Width="56"
-            Height="56"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
     </Grid>
 </Page>

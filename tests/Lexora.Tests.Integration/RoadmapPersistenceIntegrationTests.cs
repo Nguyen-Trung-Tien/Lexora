@@ -110,6 +110,94 @@ public class RoadmapPersistenceIntegrationTests : IDisposable
         old!.IsActive.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task ResetRoadmapProgress_ShouldResetAllNodesAndMilestonesBackToInitialState()
+    {
+        // 1. Generate roadmap
+        var request = new GenerateRoadmapRequestDto(string.Empty, ExamTarget.Toeic, 450, 750, 12);
+        var generated = await _roadmapService.GenerateAdaptiveRoadmapAsync(request);
+        generated.Should().NotBeNull();
+
+        // 2. Advance progress on the first 2 nodes
+        var firstNode = generated.Milestones.First().Nodes.First();
+        await _roadmapService.UpdateNodeProgressAsync(firstNode.Id, 100, 2.8);
+
+        var afterFirst = await _roadmapService.GetActiveRoadmapAsync();
+        var secondNode = afterFirst!.Milestones.First().Nodes.Skip(1).First();
+        await _roadmapService.UpdateNodeProgressAsync(secondNode.Id, 50, 2.6);
+
+        // Verify progress is advanced
+        var beforeReset = await _roadmapService.GetActiveRoadmapAsync();
+        beforeReset!.OverallProgress.Should().BeGreaterThan(0);
+
+        // 3. Reset roadmap progress
+        var resetResult = await _roadmapService.ResetRoadmapProgressAsync(generated.Id);
+        resetResult.Should().NotBeNull();
+        resetResult!.OverallProgress.Should().Be(0);
+
+        // 4. Verify in DB: all nodes have CompletedItemCount == 0, only node 0 is Available, all others Locked
+        var fromDb = await _roadmapRepo.GetRoadmapWithDetailsAsync(generated.Id);
+        fromDb.Should().NotBeNull();
+        fromDb!.Milestones.Should().OnlyContain(m => !m.IsCompleted);
+
+        var allNodes = fromDb.Milestones
+            .OrderBy(m => m.OrderIndex)
+            .SelectMany(m => m.Nodes.OrderBy(n => n.OrderIndex))
+            .ToList();
+
+        allNodes.Should().OnlyContain(n => n.CompletedItemCount == 0);
+        allNodes.First().Status.Should().Be(NodeStatus.Available);
+        allNodes.Skip(1).Should().OnlyContain(n => n.Status == NodeStatus.Locked);
+        allNodes.Should().OnlyContain(n => n.EaseFactorWeight == 2.5);
+    }
+
+    [Fact]
+    public async Task ClearInactiveRoadmaps_ShouldDeleteOnlyInactiveRoadmapsAndPreserveActive()
+    {
+        // 1. Generate two roadmaps
+        var req1 = new GenerateRoadmapRequestDto("Roadmap 1", ExamTarget.Toeic, 450, 750, 12);
+        var first = await _roadmapService.GenerateAdaptiveRoadmapAsync(req1);
+
+        var req2 = new GenerateRoadmapRequestDto("Roadmap 2", ExamTarget.Ielts, 5.0, 6.5, 16);
+        var second = await _roadmapService.GenerateAdaptiveRoadmapAsync(req2);
+
+        // req2 is active, req1 is inactive
+        var allBefore = await _roadmapService.GetAllRoadmapsAsync();
+        allBefore.Should().HaveCount(2);
+
+        // 2. Clear inactive roadmaps
+        int removedCount = await _roadmapService.ClearInactiveRoadmapsAsync();
+        removedCount.Should().Be(1);
+
+        // 3. Verify only active roadmap remains
+        var allAfter = await _roadmapService.GetAllRoadmapsAsync();
+        allAfter.Should().HaveCount(1);
+        allAfter.First().Id.Should().Be(second.Id);
+        allAfter.First().IsActive.Should().BeTrue();
+
+        var deleted = await _roadmapRepo.GetRoadmapWithDetailsAsync(first.Id);
+        deleted.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ClearAllRoadmaps_ShouldDeleteAllRoadmapsInHistory()
+    {
+        // 1. Generate roadmaps
+        var req1 = new GenerateRoadmapRequestDto("Roadmap 1", ExamTarget.Toeic, 450, 750, 12);
+        await _roadmapService.GenerateAdaptiveRoadmapAsync(req1);
+
+        var req2 = new GenerateRoadmapRequestDto("Roadmap 2", ExamTarget.Ielts, 5.0, 6.5, 16);
+        await _roadmapService.GenerateAdaptiveRoadmapAsync(req2);
+
+        // 2. Clear all roadmaps
+        bool cleared = await _roadmapService.ClearAllRoadmapsAsync();
+        cleared.Should().BeTrue();
+
+        // 3. Verify DB has 0 roadmaps
+        var all = await _roadmapService.GetAllRoadmapsAsync();
+        all.Should().BeEmpty();
+    }
+
     public void Dispose()
     {
         _context.Dispose();
