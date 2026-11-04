@@ -20,10 +20,26 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NextActiveNode))]
     [NotifyPropertyChangedFor(nameof(HasNextActiveNode))]
+    [NotifyPropertyChangedFor(nameof(HasActiveRoadmap))]
+    [NotifyPropertyChangedFor(nameof(Milestones))]
     public partial StudyRoadmapDto? ActiveRoadmap { get; set; }
 
+    public bool HasActiveRoadmap => ActiveRoadmap != null;
+
+    public IReadOnlyList<MilestoneDto> Milestones => ActiveRoadmap?.Milestones ?? Array.Empty<MilestoneDto>();
+
+    public ObservableCollection<StudyRoadmapDto> AllRoadmaps { get; } = new();
+
     [ObservableProperty]
-    public partial bool HasActiveRoadmap { get; set; }
+    [NotifyPropertyChangedFor(nameof(IsMapView))]
+    [NotifyPropertyChangedFor(nameof(IsTimelineView))]
+    public partial int SelectedViewMode { get; set; } = 0;
+
+    public bool IsMapView => SelectedViewMode == 0;
+    public bool IsTimelineView => SelectedViewMode == 1;
+
+    [ObservableProperty]
+    public partial double CanvasZoom { get; set; } = 1.0;
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; }
@@ -103,7 +119,6 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             // 1. Synchronize real progress from learning logs and words first
             var syncedRoadmap = await _roadmapService.SyncRoadmapProgressAsync(cancellationToken);
             ActiveRoadmap = syncedRoadmap ?? await _roadmapService.GetActiveRoadmapAsync(cancellationToken);
-            HasActiveRoadmap = ActiveRoadmap != null;
 
             var newNodes = new List<RoadmapNodeDto>();
             if (ActiveRoadmap != null)
@@ -137,6 +152,14 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             OnPropertyChanged(nameof(VisualNodes));
             OnPropertyChanged(nameof(NextActiveNode));
             OnPropertyChanged(nameof(HasNextActiveNode));
+            OnPropertyChanged(nameof(Milestones));
+
+            var all = await _roadmapService.GetAllRoadmapsAsync(cancellationToken);
+            AllRoadmaps.Clear();
+            foreach (var r in all)
+            {
+                AllRoadmaps.Add(r);
+            }
         }
         catch (Exception ex)
         {
@@ -211,9 +234,9 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    public async Task GenerateRoadmapAsync()
+    public async Task GenerateRoadmapAsync(CancellationToken cancellationToken = default)
     {
-        await _actionLock.WaitAsync();
+        await _actionLock.WaitAsync(cancellationToken);
         try
         {
             IsLoading = true;
@@ -225,8 +248,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
                 TargetScore,
                 DurationWeeks);
 
-            ActiveRoadmap = await _roadmapService.GenerateAdaptiveRoadmapAsync(request);
-            HasActiveRoadmap = ActiveRoadmap != null;
+            ActiveRoadmap = await _roadmapService.GenerateAdaptiveRoadmapAsync(request, cancellationToken);
 
             VisualNodes.Clear();
             if (ActiveRoadmap != null)
@@ -242,6 +264,14 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             OnPropertyChanged(nameof(VisualNodes));
             OnPropertyChanged(nameof(NextActiveNode));
             OnPropertyChanged(nameof(HasNextActiveNode));
+            OnPropertyChanged(nameof(Milestones));
+
+            var all = await _roadmapService.GetAllRoadmapsAsync(cancellationToken);
+            AllRoadmaps.Clear();
+            foreach (var r in all)
+            {
+                AllRoadmaps.Add(r);
+            }
 
             IsNodeDetailOpen = false;
             SelectedNode = null;
@@ -258,6 +288,78 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             _actionLock.Release();
         }
     }
+
+    [RelayCommand]
+    public async Task SwitchRoadmapAsync(Guid roadmapId)
+    {
+        await _actionLock.WaitAsync();
+        try
+        {
+            IsLoading = true;
+            StatusMessage = string.Empty;
+            await _roadmapService.SetActiveRoadmapAsync(roadmapId);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+            _actionLock.Release();
+        }
+        await LoadActiveRoadmapAsync();
+    }
+
+    [RelayCommand]
+    public async Task DeleteRoadmapAsync(Guid roadmapId)
+    {
+        await _actionLock.WaitAsync();
+        try
+        {
+            IsLoading = true;
+            StatusMessage = string.Empty;
+            await _roadmapService.DeleteRoadmapAsync(roadmapId);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+            _actionLock.Release();
+        }
+        await LoadActiveRoadmapAsync();
+    }
+
+    [RelayCommand]
+    public async Task QuickCreateRoadmapAsync(string preset)
+    {
+        (ExamTarget target, double start, double goal, int weeks) = preset switch
+        {
+            "TOEIC_750" => (ExamTarget.Toeic, 450.0, 750.0, 12),
+            "IELTS_65" => (ExamTarget.Ielts, 5.0, 6.5, 16),
+            "VSTEP_B2" => (ExamTarget.Vstep, 4.0, 6.5, 10),
+            _ => (ExamTarget.Toeic, 450.0, 750.0, 12)
+        };
+
+        SelectedExamTarget = target;
+        StartingScore = start;
+        TargetScore = goal;
+        DurationWeeks = weeks;
+
+        await GenerateRoadmapAsync();
+    }
+
+    [RelayCommand]
+    public void ZoomIn() => CanvasZoom = Math.Min(1.4, Math.Round(CanvasZoom + 0.15, 2));
+
+    [RelayCommand]
+    public void ZoomOut() => CanvasZoom = Math.Max(0.65, Math.Round(CanvasZoom - 0.15, 2));
+
+    [RelayCommand]
+    public void ResetZoom() => CanvasZoom = 1.0;
 
     [RelayCommand]
     public void SelectNode(RoadmapNodeDto node)
@@ -347,6 +449,36 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             IsSubmittingAction = true;
             int batch = Math.Max(1, (int)Math.Ceiling(target.TargetItemCount * 0.25));
             await _roadmapService.UpdateNodeProgressAsync(target.Id, batch, 2.6);
+            await LoadActiveRoadmapAsync();
+
+            if (SelectedNode != null)
+            {
+                SelectedNode = VisualNodes.FirstOrDefault(n => n.Id == target.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsSubmittingAction = false;
+            _actionLock.Release();
+            OnPropertyChanged(nameof(CanAdvanceProgress));
+        }
+    }
+
+    [RelayCommand]
+    public async Task MarkNodeCompletedAsync(RoadmapNodeDto? node)
+    {
+        var target = node ?? SelectedNode;
+        if (target == null || target.Status == NodeStatus.Locked || !_actionLock.Wait(0)) return;
+
+        try
+        {
+            IsSubmittingAction = true;
+            int remaining = Math.Max(1, target.TargetItemCount - target.CompletedItemCount);
+            await _roadmapService.UpdateNodeProgressAsync(target.Id, remaining, 2.8);
             await LoadActiveRoadmapAsync();
 
             if (SelectedNode != null)

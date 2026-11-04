@@ -39,9 +39,9 @@ public class RoadmapService : IRoadmapService
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        // 1. Deactivate existing active roadmaps
-        var active = await _roadmapRepository.GetActiveRoadmapWithDetailsAsync(cancellationToken);
-        if (active != null)
+        // 1. Deactivate all existing active roadmaps
+        var allActive = await _roadmapRepository.FindAsync(r => r.IsActive, cancellationToken);
+        foreach (var active in allActive)
         {
             active.IsActive = false;
             await _roadmapRepository.UpdateAsync(active, cancellationToken);
@@ -183,9 +183,10 @@ public class RoadmapService : IRoadmapService
                     }
 
                     int target = node.TargetItemCount > 0 ? node.TargetItemCount : 30;
-                    if (learnedCount != node.CompletedItemCount)
+                    int newCount = Math.Min(target, Math.Max(node.CompletedItemCount, learnedCount));
+                    if (newCount != node.CompletedItemCount)
                     {
-                        node.CompletedItemCount = Math.Min(target, Math.Max(node.CompletedItemCount, learnedCount));
+                        node.CompletedItemCount = newCount;
                         anyUpdated = true;
                     }
 

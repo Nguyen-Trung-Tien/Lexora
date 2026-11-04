@@ -17,6 +17,7 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
         return await Context.StudyRoadmaps
             .Include(r => r.Milestones)
                 .ThenInclude(m => m.Nodes)
+            .OrderByDescending(r => r.CreatedAt)
             .FirstOrDefaultAsync(r => r.IsActive, cancellationToken);
     }
 
