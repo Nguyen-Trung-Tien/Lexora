@@ -76,7 +76,6 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         ViewModel.PropertyChanged += _propChangedHandler;
 
         Loaded += Page_Loaded;
-        Unloaded += (s, e) => ViewModel.PropertyChanged -= _propChangedHandler;
         SizeChanged += Page_SizeChanged;
         ActualThemeChanged += (s, e) => OnThemeChanged();
     }
@@ -99,6 +98,9 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         base.OnNavigatedTo(e);
         try
         {
+            ViewModel.PropertyChanged -= _propChangedHandler;
+            ViewModel.PropertyChanged += _propChangedHandler;
+
             OnLanguageChanged();
             OnThemeChanged();
 
@@ -119,7 +121,14 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[RoadmapPage] OnNavigatedTo error: {ex.Message}");
+            App.LogCrash("RoadmapPage.OnNavigatedTo", ex);
         }
+    }
+
+    protected override void OnNavigatedFrom(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        ViewModel.PropertyChanged -= _propChangedHandler;
     }
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -134,12 +143,14 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[RoadmapPage] Page_Loaded error: {ex.Message}");
+            App.LogCrash("RoadmapPage.Page_Loaded", ex);
         }
     }
 
     private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         UpdateResponsiveLayout(e.NewSize.Width);
+        RenderRoadmapGraph();
     }
 
     private void UpdateResponsiveLayout(double width)
@@ -429,13 +440,20 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             {
                 foreach (var milestone in ViewModel.ActiveRoadmap.Milestones)
                 {
-                    var firstNode = milestone.Nodes.OrderBy(n => n.CanvasY).FirstOrDefault();
-                    if (firstNode != null)
+                    try
                     {
-                        var phaseBanner = CreateMilestoneBannerVisual(milestone, availableWidth);
-                        Canvas.SetLeft(phaseBanner, 24);
-                        Canvas.SetTop(phaseBanner, Math.Max(10, firstNode.CanvasY - 55));
-                        RoadmapCanvas.Children.Add(phaseBanner);
+                        var firstNode = milestone.Nodes.OrderBy(n => n.CanvasY).FirstOrDefault();
+                        if (firstNode != null)
+                        {
+                            var phaseBanner = CreateMilestoneBannerVisual(milestone, availableWidth);
+                            Canvas.SetLeft(phaseBanner, 24);
+                            Canvas.SetTop(phaseBanner, Math.Max(10, firstNode.CanvasY - 55));
+                            RoadmapCanvas.Children.Add(phaseBanner);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[RoadmapPage] Error creating milestone banner: {ex.Message}");
                     }
                 }
             }
@@ -443,16 +461,25 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             // 6. Render Node Visual Cards along the Spline
             foreach (var node in nodes)
             {
-                var nodeElement = CreateNodeVisual(node);
-                Canvas.SetLeft(nodeElement, node.CanvasX + offsetX);
-                Canvas.SetTop(nodeElement, node.CanvasY);
-                RoadmapCanvas.Children.Add(nodeElement);
-                _nodeVisuals[node.Id] = (Border)nodeElement;
+                try
+                {
+                    var nodeElement = CreateNodeVisual(node);
+                    Canvas.SetLeft(nodeElement, node.CanvasX + offsetX);
+                    Canvas.SetTop(nodeElement, node.CanvasY);
+                    RoadmapCanvas.Children.Add(nodeElement);
+                    _nodeVisuals[node.Id] = (Border)nodeElement;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RoadmapPage] Error creating node visual: {ex.Message}");
+                    App.LogCrash("RoadmapPage.CreateNodeVisual", ex);
+                }
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[RoadmapPage] RenderRoadmapGraph error: {ex.Message}");
+            App.LogCrash("RoadmapPage.RenderRoadmapGraph", ex);
         }
     }
 
@@ -464,17 +491,15 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             Height = 44
         };
 
-        var line = new Line
+        var dividerLine = new Border
         {
-            X1 = 20,
-            Y1 = 22,
-            X2 = container.Width - 20,
-            Y2 = 22,
-            Stroke = GetThemeBrush("CardStrokeColorDefaultBrush"),
-            StrokeThickness = 1.5,
-            StrokeDashArray = new DoubleCollection { 4, 3 }
+            Height = 1,
+            Background = GetThemeBrush("CardStrokeColorDefaultBrush"),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(20, 0, 20, 0)
         };
-        container.Children.Add(line);
+        container.Children.Add(dividerLine);
 
         var badge = new Border
         {
@@ -506,7 +531,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
 
         var title = new TextBlock
         {
-            Text = milestone.Title.ToUpperInvariant(),
+            Text = (milestone.Title ?? string.Empty).ToUpperInvariant(),
             FontSize = 11.5,
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             Foreground = GetThemeBrush("TextFillColorPrimaryBrush")
@@ -669,7 +694,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         root.Child = grid;
 
         // Interaction
-        Lexora.Presentation.Helpers.CursorHelper.SetCursor(root, "Hand");
+        Lexora.Presentation.Helpers.CursorHelper.ApplyHandCursor(root);
         root.PointerPressed += (s, e) =>
         {
             if (s is Border b && b.Tag is RoadmapNodeDto clickedNode)
