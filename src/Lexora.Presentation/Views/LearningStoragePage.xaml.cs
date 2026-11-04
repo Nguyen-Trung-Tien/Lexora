@@ -682,7 +682,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
         };
 
         var wordTemplate = (DataTemplate)Microsoft.UI.Xaml.Markup.XamlReader.Load(@"
-            <DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+            <DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
                 <Grid Padding=""6,6"" ColumnDefinitions=""Auto,Auto,*,Auto,Auto"" ColumnSpacing=""10"">
                     <CheckBox IsChecked=""{Binding IsSelected, Mode=TwoWay}"" VerticalAlignment=""Center"" Margin=""0,0,2,0"" MinWidth=""28"" />
                     <Border Grid.Column=""1"" Width=""32"" Height=""32"" CornerRadius=""6"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" VerticalAlignment=""Center"">
@@ -703,7 +703,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
                     <Button x:Name=""QuickAddButton"" Grid.Column=""4"" Style=""{ThemeResource SubtleButtonStyle}"" CornerRadius=""6"" Padding=""8,4"" VerticalAlignment=""Center"">
                         <StackPanel Orientation=""Horizontal"" Spacing=""4"">
                             <FontIcon Glyph=""&#xE710;"" FontSize=""11"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
-                            <TextBlock Text=""" + Loc.GetString("Storage_Dialog_QuickAdd") + @""" FontSize=""11"" FontWeight=""SemiBold"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
+                            <TextBlock Text=""" + System.Security.SecurityElement.Escape(Loc.GetString("Storage_Dialog_QuickAdd")) + @""" FontSize=""11"" FontWeight=""SemiBold"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
                         </StackPanel>
                     </Button>
                 </Grid>
@@ -1250,7 +1250,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
         };
 
         var grammarTemplate = (DataTemplate)Microsoft.UI.Xaml.Markup.XamlReader.Load(@"
-            <DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+            <DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
                 <Grid Padding=""6,6"" ColumnDefinitions=""Auto,Auto,*,Auto,Auto"" ColumnSpacing=""10"">
                     <CheckBox IsChecked=""{Binding IsSelected, Mode=TwoWay}"" VerticalAlignment=""Center"" Margin=""0,0,2,0"" MinWidth=""28"" />
                     <Border Grid.Column=""1"" Width=""32"" Height=""32"" CornerRadius=""6"" Background=""{ThemeResource SubtleFillColorSecondaryBrush}"" VerticalAlignment=""Center"">
@@ -1271,7 +1271,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
                     <Button x:Name=""QuickAddButton"" Grid.Column=""4"" Style=""{ThemeResource SubtleButtonStyle}"" CornerRadius=""6"" Padding=""8,4"" VerticalAlignment=""Center"">
                         <StackPanel Orientation=""Horizontal"" Spacing=""4"">
                             <FontIcon Glyph=""&#xE710;"" FontSize=""11"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
-                            <TextBlock Text=""" + Loc.GetString("Storage_Dialog_QuickAdd") + @""" FontSize=""11"" FontWeight=""SemiBold"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
+                            <TextBlock Text=""" + System.Security.SecurityElement.Escape(Loc.GetString("Storage_Dialog_QuickAdd")) + @""" FontSize=""11"" FontWeight=""SemiBold"" Foreground=""{ThemeResource AccentTextFillColorPrimaryBrush}"" />
                         </StackPanel>
                     </Button>
                 </Grid>

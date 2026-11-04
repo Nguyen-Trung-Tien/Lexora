@@ -81,32 +81,32 @@
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <Button
+                            Loaded="BtnSwitchRoadmap_Loaded"
                             Click="SwitchRoadmapItem_Click"
                             Tag="{x:Bind}"
                             CornerRadius="8"
                             Padding="12,6"
-                            ToolTipService.ToolTip="Select Active Goal"
                             Style="{ThemeResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE73E;" FontSize="12" />
-                                <TextBlock Text="Select" />
+                                <FontIcon Glyph="&#xE73E;" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                <TextBlock Text="Select" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
                             </StackPanel>
                         </Button>
                         <Button
+                            Loaded="BtnResetRoadmap_Loaded"
                             Click="ResetRoadmapItem_Click"
                             Tag="{x:Bind}"
                             CornerRadius="8"
                             Padding="8,6"
-                            ToolTipService.ToolTip="Reset Progress"
                             Style="{ThemeResource SubtleButtonStyle}">
-                            <FontIcon Glyph="&#xE777;" FontSize="12" />
+                            <FontIcon Glyph="&#xE777;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </Button>
                         <Button
+                            Loaded="BtnDeleteRoadmap_Loaded"
                             Click="DeleteCurrentRoadmap_Click"
                             Tag="{x:Bind}"
                             CornerRadius="8"
                             Padding="8,6"
-                            ToolTipService.ToolTip="Delete Roadmap"
                             Style="{ThemeResource SubtleButtonStyle}">
                             <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                         </Button>
@@ -171,10 +171,11 @@
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ManageRoadmaps')}"
                             Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE81C;" />
+                                <FontIcon Glyph="&#xE81C;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                 <TextBlock
                                     MaxWidth="180"
                                     TextTrimming="CharacterEllipsis"
+                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                     Text="{x:Bind ViewModel.ActiveRoadmap.Title, Mode=OneWay, FallbackValue=''}" />
                             </StackPanel>
                         </Button>
@@ -187,8 +188,8 @@
                             Padding="12,6"
                             Style="{ThemeResource DefaultButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE72C;" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_SyncProgress')}" />
+                                <FontIcon Glyph="&#xE72C;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_SyncProgress')}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                             </StackPanel>
                         </Button>
 
@@ -201,8 +202,8 @@
                             Padding="12,6"
                             Style="{ThemeResource DefaultButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE777;" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ResetProgress')}" />
+                                <FontIcon Glyph="&#xE777;" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ResetProgress')}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                             </StackPanel>
                         </Button>
 
@@ -211,10 +212,11 @@
                             Click="OpenCreateRoadmapDialog_Click"
                             CornerRadius="8"
                             Padding="14,6"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CreateGoal')}"
                             Style="{ThemeResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE710;" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" />
+                                <FontIcon Glyph="&#xE710;" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -418,8 +420,8 @@
                             CommandParameter="{x:Bind ViewModel.NextActiveNode, Mode=OneWay}"
                             Style="{ThemeResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE768;" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" />
+                                <FontIcon Glyph="&#xE768;" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -573,7 +575,10 @@
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
                                         CommandParameter="TOEIC_750"
                                         Style="{ThemeResource AccentButtonStyle}">
-                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                        </StackPanel>
                                     </Button>
                                 </StackPanel>
                             </Border>
@@ -616,7 +621,10 @@
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
                                         CommandParameter="IELTS_65"
                                         Style="{ThemeResource AccentButtonStyle}">
-                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                        </StackPanel>
                                     </Button>
                                 </StackPanel>
                             </Border>
@@ -659,7 +667,10 @@
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
                                         CommandParameter="VSTEP_B2"
                                         Style="{ThemeResource AccentButtonStyle}">
-                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                        </StackPanel>
                                     </Button>
                                 </StackPanel>
                             </Border>
@@ -673,8 +684,8 @@
                             Click="OpenCreateRoadmapDialog_Click"
                             Style="{ThemeResource DefaultButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE710;" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" />
+                                <FontIcon Glyph="&#xE710;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -825,9 +836,9 @@
                                         CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
                                         IsEnabled="{x:Bind ViewModel.CanAdvanceProgress, Mode=OneWay}"
                                         Style="{ThemeResource AccentButtonStyle}">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE768;" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE768;" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ActionLearn')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
                                         </StackPanel>
                                     </Button>
 
@@ -840,9 +851,9 @@
                                         CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
                                         IsEnabled="{x:Bind ViewModel.CanAdvanceProgress, Mode=OneWay}"
                                         Style="{ThemeResource DefaultButtonStyle}">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE73E;" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_MarkMastered')}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE73E;" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_MarkMastered')}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" FontWeight="SemiBold" />
                                         </StackPanel>
                                     </Button>
 
@@ -854,10 +865,10 @@
                                         Command="{x:Bind ViewModel.AdvanceNodeProgressCommand}"
                                         CommandParameter="{x:Bind ViewModel.SelectedNode, Mode=OneWay}"
                                         IsEnabled="{x:Bind ViewModel.CanAdvanceProgress, Mode=OneWay}"
-                                        Style="{ThemeResource SubtleButtonStyle}">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE72A;" />
-                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_AdvanceProgress')}" />
+                                        Style="{ThemeResource DefaultButtonStyle}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE72A;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_AdvanceProgress')}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" FontWeight="SemiBold" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
@@ -927,8 +938,8 @@
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ClearInactiveTooltip')}"
                                     Style="{ThemeResource DefaultButtonStyle}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE75C;" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ClearInactive')}" />
+                                        <FontIcon Glyph="&#xE75C;" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ClearInactive')}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                     </StackPanel>
                                 </Button>
                                 <Button
@@ -936,10 +947,10 @@
                                     CornerRadius="8"
                                     Padding="12,6"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ClearAll')}"
-                                    Style="{ThemeResource SubtleButtonStyle}">
+                                    Style="{ThemeResource DefaultButtonStyle}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE74D;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ClearAll')}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ClearAll')}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                     </StackPanel>
                                 </Button>
                                 <Button
@@ -949,8 +960,8 @@
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CreateGoal')}"
                                     Style="{ThemeResource AccentButtonStyle}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE710;" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" />
+                                        <FontIcon Glyph="&#xE710;" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Roadmap_CreateGoal')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>

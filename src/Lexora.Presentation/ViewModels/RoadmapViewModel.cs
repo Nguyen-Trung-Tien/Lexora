@@ -153,6 +153,18 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
         await _actionLock.WaitAsync(cancellationToken);
         try
         {
+            await LoadActiveRoadmapCoreAsync(cancellationToken);
+        }
+        finally
+        {
+            _actionLock.Release();
+        }
+    }
+
+    private async Task LoadActiveRoadmapCoreAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
             // Only show full loading spinner if we don't have an active roadmap yet
             if (ActiveRoadmap == null)
             {
@@ -221,12 +233,11 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             StatusMessage = ex.Message;
-            System.Diagnostics.Debug.WriteLine($"[RoadmapViewModel] LoadActiveRoadmapAsync error: {ex}");
+            System.Diagnostics.Debug.WriteLine($"[RoadmapViewModel] LoadActiveRoadmapCoreAsync error: {ex}");
         }
         finally
         {
             IsLoading = false;
-            _actionLock.Release();
         }
     }
 
@@ -354,6 +365,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             IsLoading = true;
             StatusMessage = string.Empty;
             await _roadmapService.SetActiveRoadmapAsync(roadmapId);
+            await LoadActiveRoadmapCoreAsync();
         }
         catch (Exception ex)
         {
@@ -364,7 +376,6 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             IsLoading = false;
             _actionLock.Release();
         }
-        await LoadActiveRoadmapAsync();
     }
 
     [RelayCommand]
@@ -376,6 +387,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             IsLoading = true;
             StatusMessage = string.Empty;
             await _roadmapService.DeleteRoadmapAsync(roadmapId);
+            await LoadActiveRoadmapCoreAsync();
         }
         catch (Exception ex)
         {
@@ -386,7 +398,6 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             IsLoading = false;
             _actionLock.Release();
         }
-        await LoadActiveRoadmapAsync();
     }
 
     [RelayCommand]
@@ -610,7 +621,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             IsSubmittingAction = true;
             int batch = Math.Max(1, (int)Math.Ceiling(target.TargetItemCount * 0.25));
             await _roadmapService.UpdateNodeProgressAsync(target.Id, batch, 2.6);
-            await LoadActiveRoadmapAsync();
+            await LoadActiveRoadmapCoreAsync();
 
             if (SelectedNode != null)
             {
@@ -640,7 +651,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             IsSubmittingAction = true;
             int remaining = Math.Max(1, target.TargetItemCount - target.CompletedItemCount);
             await _roadmapService.UpdateNodeProgressAsync(target.Id, remaining, 2.8);
-            await LoadActiveRoadmapAsync();
+            await LoadActiveRoadmapCoreAsync();
 
             if (SelectedNode != null)
             {

@@ -198,6 +198,47 @@ public class RoadmapPersistenceIntegrationTests : IDisposable
         all.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task AdvanceNodeProgress_ShouldIncrementProgressAndUnlockAdjacentNodeWhenMastered()
+    {
+        // 1. Generate active roadmap
+        var req = new GenerateRoadmapRequestDto("Toeic Test", ExamTarget.Toeic, 450, 750, 12);
+        var roadmap = await _roadmapService.GenerateAdaptiveRoadmapAsync(req);
+
+        var firstNode = roadmap.Milestones.First().Nodes.First();
+        firstNode.Status.Should().Be(NodeStatus.Available);
+        firstNode.CompletedItemCount.Should().Be(0);
+
+        // 2. Advance by 25% batch
+        int batch = Math.Max(1, (int)Math.Ceiling(firstNode.TargetItemCount * 0.25));
+        bool success = await _roadmapService.UpdateNodeProgressAsync(firstNode.Id, batch, 2.6);
+        success.Should().BeTrue();
+
+        var updatedRoadmap = await _roadmapService.GetActiveRoadmapAsync();
+        updatedRoadmap.Should().NotBeNull();
+        var updatedNode = updatedRoadmap!.Milestones.First().Nodes.First(n => n.Id == firstNode.Id);
+        updatedNode.CompletedItemCount.Should().Be(batch);
+        updatedNode.ProgressPercentage.Should().BeGreaterThan(0);
+
+        // 3. Complete all remaining items to master
+        int remaining = updatedNode.TargetItemCount - updatedNode.CompletedItemCount;
+        bool masterSuccess = await _roadmapService.UpdateNodeProgressAsync(firstNode.Id, remaining, 2.8);
+        masterSuccess.Should().BeTrue();
+
+        var masteredRoadmap = await _roadmapService.GetActiveRoadmapAsync();
+        masteredRoadmap.Should().NotBeNull();
+        var masteredNode = masteredRoadmap!.Milestones.First().Nodes.First(n => n.Id == firstNode.Id);
+        masteredNode.Status.Should().Be(NodeStatus.Mastered);
+        masteredNode.ProgressPercentage.Should().Be(100);
+
+        // Downstream node should now be unlocked (Available)
+        var nextNode = masteredRoadmap.Milestones.First().Nodes.ElementAtOrDefault(1);
+        if (nextNode != null)
+        {
+            nextNode.Status.Should().Be(NodeStatus.Available);
+        }
+    }
+
     public void Dispose()
     {
         _context.Dispose();

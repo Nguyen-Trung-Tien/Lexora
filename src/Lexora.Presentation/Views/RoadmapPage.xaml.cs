@@ -608,6 +608,34 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         }
     }
 
+    private void BtnSwitchRoadmap_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn)
+        {
+            ToolTipService.SetToolTip(btn, Loc.GetString("Roadmap_SelectGoal"));
+            if (btn.Content is StackPanel sp && sp.Children.OfType<TextBlock>().FirstOrDefault() is TextBlock tb)
+            {
+                tb.Text = Loc.GetString("Roadmap_BtnSelect");
+            }
+        }
+    }
+
+    private void BtnResetRoadmap_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn)
+        {
+            ToolTipService.SetToolTip(btn, Loc.GetString("Roadmap_ResetProgress"));
+        }
+    }
+
+    private void BtnDeleteRoadmap_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn)
+        {
+            ToolTipService.SetToolTip(btn, Loc.GetString("Action_Delete"));
+        }
+    }
+
     private async void SwitchRoadmapItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button btn && btn.Tag is StudyRoadmapDto roadmap)
