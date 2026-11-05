@@ -130,49 +130,184 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
 
     private void UpdateResponsiveLayout(double width)
     {
-        if (width <= 0 || OverviewCardsGrid == null || RoadmapWorkspaceGrid == null) return;
+        if (width <= 0) return;
 
-        bool isCompact = width < 1050;
-
-        // 1. Overview Cards: 4-columns on wide screens, 2x2 grid on compact screens
-        OverviewCardsGrid.ColumnDefinitions[2].Width = isCompact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
-        OverviewCardsGrid.ColumnDefinitions[3].Width = isCompact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
-
-        Grid.SetRow(OverviewCard1, 0);
-        Grid.SetColumn(OverviewCard1, 0);
-
-        Grid.SetRow(OverviewCard2, 0);
-        Grid.SetColumn(OverviewCard2, 1);
-
-        Grid.SetRow(OverviewCard3, isCompact ? 1 : 0);
-        Grid.SetColumn(OverviewCard3, isCompact ? 0 : 2);
-
-        Grid.SetRow(OverviewCard4, isCompact ? 1 : 0);
-        Grid.SetColumn(OverviewCard4, isCompact ? 1 : 3);
-
-        // 2. Track List + Inspector Workspace: Side-by-side on wide screens, stacked vertically on compact screens
-        var leftContainer = (FrameworkElement?)TrackWorkspaceLeftPanel ?? TrackListContainer;
-        if (isCompact)
+        // 1. Header Responsive Layout
+        if (PageHeaderGrid != null && HeaderTitleArea != null && HeaderActionsScroller != null)
         {
-            RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(0);
-            Grid.SetRow(leftContainer, 0);
-            Grid.SetColumn(leftContainer, 0);
-            leftContainer.Margin = new Thickness(0);
+            bool isHeaderCompact = width < 1180;
+            if (isHeaderCompact)
+            {
+                PageHeaderGrid.ColumnDefinitions[1].Width = new GridLength(0);
+                Grid.SetRow(HeaderTitleArea, 0);
+                Grid.SetColumn(HeaderTitleArea, 0);
+                Grid.SetColumnSpan(HeaderTitleArea, 2);
 
-            Grid.SetRow(InspectorHostBorder, 1);
-            Grid.SetColumn(InspectorHostBorder, 0);
-            InspectorHostBorder.Margin = new Thickness(0, 16, 0, 0);
+                Grid.SetRow(HeaderActionsScroller, 1);
+                Grid.SetColumn(HeaderActionsScroller, 0);
+                Grid.SetColumnSpan(HeaderActionsScroller, 2);
+                HeaderActionsScroller.HorizontalAlignment = HorizontalAlignment.Left;
+                HeaderActionsScroller.Margin = new Thickness(0, 12, 0, 0);
+            }
+            else
+            {
+                PageHeaderGrid.ColumnDefinitions[1].Width = GridLength.Auto;
+                Grid.SetRow(HeaderTitleArea, 0);
+                Grid.SetColumn(HeaderTitleArea, 0);
+                Grid.SetColumnSpan(HeaderTitleArea, 1);
+
+                Grid.SetRow(HeaderActionsScroller, 0);
+                Grid.SetColumn(HeaderActionsScroller, 1);
+                Grid.SetColumnSpan(HeaderActionsScroller, 1);
+                HeaderActionsScroller.HorizontalAlignment = HorizontalAlignment.Right;
+                HeaderActionsScroller.Margin = new Thickness(0);
+            }
         }
-        else
-        {
-            RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(380);
-            Grid.SetRow(leftContainer, 0);
-            Grid.SetColumn(leftContainer, 0);
-            leftContainer.Margin = new Thickness(0, 0, 16, 0);
 
-            Grid.SetRow(InspectorHostBorder, 0);
-            Grid.SetColumn(InspectorHostBorder, 1);
-            InspectorHostBorder.Margin = new Thickness(0);
+        // 2. Manage Roadmaps Header Responsive Layout
+        if (ManageHeaderGrid != null && ManageTitleArea != null && ManageActionsScroller != null)
+        {
+            bool isManageCompact = width < 1180;
+            if (isManageCompact)
+            {
+                ManageHeaderGrid.ColumnDefinitions[1].Width = new GridLength(0);
+                Grid.SetRow(ManageTitleArea, 0);
+                Grid.SetColumn(ManageTitleArea, 0);
+                Grid.SetColumnSpan(ManageTitleArea, 2);
+
+                Grid.SetRow(ManageActionsScroller, 1);
+                Grid.SetColumn(ManageActionsScroller, 0);
+                Grid.SetColumnSpan(ManageActionsScroller, 2);
+                ManageActionsScroller.HorizontalAlignment = HorizontalAlignment.Left;
+                ManageActionsScroller.Margin = new Thickness(0, 10, 0, 0);
+            }
+            else
+            {
+                ManageHeaderGrid.ColumnDefinitions[1].Width = GridLength.Auto;
+                Grid.SetRow(ManageTitleArea, 0);
+                Grid.SetColumn(ManageTitleArea, 0);
+                Grid.SetColumnSpan(ManageTitleArea, 1);
+
+                Grid.SetRow(ManageActionsScroller, 0);
+                Grid.SetColumn(ManageActionsScroller, 1);
+                Grid.SetColumnSpan(ManageActionsScroller, 1);
+                ManageActionsScroller.HorizontalAlignment = HorizontalAlignment.Right;
+                ManageActionsScroller.Margin = new Thickness(0);
+            }
+        }
+
+        // 3. Empty State Presets Responsive Layout
+        if (PresetsGrid != null && PresetCard1 != null && PresetCard2 != null && PresetCard3 != null)
+        {
+            if (width < 960)
+            {
+                // 1-Column Layout
+                PresetsGrid.ColumnDefinitions[1].Width = new GridLength(0);
+                PresetsGrid.ColumnDefinitions[2].Width = new GridLength(0);
+
+                Grid.SetRow(PresetCard1, 0);
+                Grid.SetColumn(PresetCard1, 0);
+                Grid.SetColumnSpan(PresetCard1, 1);
+
+                Grid.SetRow(PresetCard2, 1);
+                Grid.SetColumn(PresetCard2, 0);
+                Grid.SetColumnSpan(PresetCard2, 1);
+
+                Grid.SetRow(PresetCard3, 2);
+                Grid.SetColumn(PresetCard3, 0);
+                Grid.SetColumnSpan(PresetCard3, 1);
+            }
+            else if (width < 1200)
+            {
+                // 2-Column Layout
+                PresetsGrid.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);
+                PresetsGrid.ColumnDefinitions[2].Width = new GridLength(0);
+
+                Grid.SetRow(PresetCard1, 0);
+                Grid.SetColumn(PresetCard1, 0);
+                Grid.SetColumnSpan(PresetCard1, 1);
+
+                Grid.SetRow(PresetCard2, 0);
+                Grid.SetColumn(PresetCard2, 1);
+                Grid.SetColumnSpan(PresetCard2, 1);
+
+                Grid.SetRow(PresetCard3, 1);
+                Grid.SetColumn(PresetCard3, 0);
+                Grid.SetColumnSpan(PresetCard3, 2);
+            }
+            else
+            {
+                // 3-Column Layout
+                PresetsGrid.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);
+                PresetsGrid.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star);
+
+                Grid.SetRow(PresetCard1, 0);
+                Grid.SetColumn(PresetCard1, 0);
+                Grid.SetColumnSpan(PresetCard1, 1);
+
+                Grid.SetRow(PresetCard2, 0);
+                Grid.SetColumn(PresetCard2, 1);
+                Grid.SetColumnSpan(PresetCard2, 1);
+
+                Grid.SetRow(PresetCard3, 0);
+                Grid.SetColumn(PresetCard3, 2);
+                Grid.SetColumnSpan(PresetCard3, 1);
+            }
+        }
+
+        // 4. Overview Cards: 4-columns on wide screens, 2x2 grid on compact screens
+        if (OverviewCardsGrid != null && OverviewCard1 != null && OverviewCard2 != null && OverviewCard3 != null && OverviewCard4 != null)
+        {
+            bool isCompact = width < 1050;
+            OverviewCardsGrid.ColumnDefinitions[2].Width = isCompact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+            OverviewCardsGrid.ColumnDefinitions[3].Width = isCompact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+
+            Grid.SetRow(OverviewCard1, 0);
+            Grid.SetColumn(OverviewCard1, 0);
+
+            Grid.SetRow(OverviewCard2, 0);
+            Grid.SetColumn(OverviewCard2, 1);
+
+            Grid.SetRow(OverviewCard3, isCompact ? 1 : 0);
+            Grid.SetColumn(OverviewCard3, isCompact ? 0 : 2);
+
+            Grid.SetRow(OverviewCard4, isCompact ? 1 : 0);
+            Grid.SetColumn(OverviewCard4, isCompact ? 1 : 3);
+        }
+
+        // 5. Track List + Inspector Workspace: Side-by-side on wide screens, stacked vertically on compact screens
+        if (RoadmapWorkspaceGrid != null && InspectorHostBorder != null)
+        {
+            bool isCompact = width < 1050;
+            var leftContainer = (FrameworkElement?)TrackWorkspaceLeftPanel ?? TrackListContainer;
+            if (isCompact)
+            {
+                RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(0);
+                if (leftContainer != null)
+                {
+                    Grid.SetRow(leftContainer, 0);
+                    Grid.SetColumn(leftContainer, 0);
+                    leftContainer.Margin = new Thickness(0);
+                }
+
+                Grid.SetRow(InspectorHostBorder, 1);
+                Grid.SetColumn(InspectorHostBorder, 0);
+                InspectorHostBorder.Margin = new Thickness(0, 16, 0, 0);
+            }
+            else
+            {
+                RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(380);
+                if (leftContainer != null)
+                {
+                    Grid.SetRow(leftContainer, 0);
+                    Grid.SetColumn(leftContainer, 0);
+                    leftContainer.Margin = new Thickness(0, 0, 16, 0);
+                }
+
+                Grid.SetRow(InspectorHostBorder, 0);
+                Grid.SetColumn(InspectorHostBorder, 1);
+                InspectorHostBorder.Margin = new Thickness(0);
+            }
         }
     }
 
@@ -609,15 +744,15 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             return;
         }
 
-        const double nodeWidth = 176.0;
-        const double nodeHeight = 68.0;
+        const double nodeWidth = 220.0;
+        const double nodeHeight = 72.0;
         const double halfWidth = nodeWidth / 2.0;
         const double halfHeight = nodeHeight / 2.0;
 
         double maxY = nodes.Max(n => n.CanvasY) + nodeHeight + 60.0;
         double maxX = nodes.Max(n => n.CanvasX) + nodeWidth + 60.0;
-        RoadmapCanvas.Width = Math.Max(760.0, maxX);
-        RoadmapCanvas.Height = Math.Max(360.0, maxY);
+        RoadmapCanvas.Width = Math.Max(780.0, maxX);
+        RoadmapCanvas.Height = Math.Max(380.0, maxY);
 
         var trackGeometry = new PathGeometry();
         var activeGeometry = new PathGeometry();
@@ -676,7 +811,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             {
                 Width = nodeWidth,
                 Height = nodeHeight,
-                Padding = new Thickness(10, 8, 10, 8),
+                Padding = new Thickness(10, 6, 10, 6),
                 CornerRadius = new CornerRadius(12),
                 Tag = node,
                 Background = isSelected
@@ -720,7 +855,8 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                 FontSize = 12,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                 TextTrimming = TextTrimming.CharacterEllipsis,
-                MaxLines = 1
+                TextWrapping = TextWrapping.Wrap,
+                MaxLines = 2
             });
             textStack.Children.Add(new TextBlock
             {
@@ -734,6 +870,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             contentGrid.Children.Add(textStack);
 
             markerBtn.Content = contentGrid;
+            ToolTipService.SetToolTip(markerBtn, $"{node.Title}\n{node.Description}\n{node.TypeDisplay} • {node.ProgressPercentageDisplay}");
             markerBtn.Click += NodeCard_Click;
 
             Canvas.SetLeft(markerBtn, node.CanvasX);
