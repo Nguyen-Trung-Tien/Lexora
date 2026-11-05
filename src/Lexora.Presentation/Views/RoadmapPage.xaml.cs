@@ -110,11 +110,20 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
     {
         try
         {
-            UpdateResponsiveLayout(ActualWidth);
+            double w = ActualWidth > 0 ? ActualWidth : (XamlRoot?.Size.Width ?? 1200);
+            UpdateResponsiveLayout(w);
             Bindings.Update();
             UpdateTabButtonsState();
             RenderMilestoneTrack();
             RenderTimelineView();
+
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (ActualWidth > 0)
+                {
+                    UpdateResponsiveLayout(ActualWidth);
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -135,7 +144,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         // 1. Header Responsive Layout
         if (PageHeaderGrid != null && HeaderTitleArea != null && HeaderActionsScroller != null)
         {
-            bool isHeaderCompact = width < 1180;
+            bool isHeaderCompact = width < 1240;
             if (isHeaderCompact)
             {
                 PageHeaderGrid.ColumnDefinitions[1].Width = new GridLength(0);
@@ -167,7 +176,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         // 2. Manage Roadmaps Header Responsive Layout
         if (ManageHeaderGrid != null && ManageTitleArea != null && ManageActionsScroller != null)
         {
-            bool isManageCompact = width < 1180;
+            bool isManageCompact = width < 1240;
             if (isManageCompact)
             {
                 ManageHeaderGrid.ColumnDefinitions[1].Width = new GridLength(0);
@@ -217,7 +226,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                 Grid.SetColumn(PresetCard3, 0);
                 Grid.SetColumnSpan(PresetCard3, 1);
             }
-            else if (width < 1200)
+            else if (width < 1240)
             {
                 // 2-Column Layout
                 PresetsGrid.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);

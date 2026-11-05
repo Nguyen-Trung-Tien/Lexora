@@ -1,4 +1,4 @@
-﻿using Lexora.Presentation.Services;
+using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -98,6 +98,9 @@ public sealed partial class ShellPage : Page
                     }
                 };
 
+                NavView.PaneOpened += (s, args) => HandlePaneStateChanged();
+                NavView.PaneClosed += (s, args) => HandlePaneStateChanged();
+
                 ContentFrame.Navigated += (s, args) =>
                 {
                     NavView.IsBackEnabled = _navigationService.CanGoBack;
@@ -152,6 +155,15 @@ public sealed partial class ShellPage : Page
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[ShellPage] NavView_Loaded error: {ex.Message}");
+        }
+    }
+
+    private void HandlePaneStateChanged()
+    {
+        if (ContentFrame.Content is FrameworkElement fe)
+        {
+            fe.InvalidateMeasure();
+            fe.InvalidateArrange();
         }
     }
 
