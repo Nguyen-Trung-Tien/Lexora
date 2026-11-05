@@ -88,6 +88,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial string AvailableUpdatePublishDateText { get; set; } = string.Empty;
 
+    public event EventHandler<UpdateInfo>? UpdateFound;
+
     [ObservableProperty]
     public partial double DownloadProgressPercentage { get; set; }
 
@@ -642,6 +644,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                     var template = _locService.GetString("Update_Notification_Body");
                     var msg = string.Format(template, updateInfo.NewVersion);
                     _toastService.ShowInfo(msg, _locService.GetString("Settings_UpdateAvailable"), durationMs: 6000);
+
+                    UpdateFound?.Invoke(this, updateInfo);
                 }
                 else if (updateInfo != null)
                 {

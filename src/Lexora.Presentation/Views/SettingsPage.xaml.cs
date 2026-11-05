@@ -47,6 +47,15 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
                     }
                 });
             }
+            else if (e.PropertyName == nameof(ViewModel.AvailableUpdate))
+            {
+                DispatcherQueue.TryEnqueue(UpdateInlineReleaseNotes);
+            }
+        };
+
+        ViewModel.UpdateFound += async (s, updateInfo) =>
+        {
+            await ShowUpdateDetailsDialogAsync(updateInfo);
         };
     }
 
@@ -58,6 +67,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateThemeButtons();
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
+            UpdateInlineReleaseNotes();
             ViewModel.UpdateLanguageState();
             Bindings.Update();
         }
@@ -80,6 +90,8 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateThemeButtons();
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
+            UpdateInlineReleaseNotes();
+            UpdateInlineReleaseNotes();
             Bindings.Update();
         }
 
@@ -113,6 +125,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateThemeButtons();
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
+            UpdateInlineReleaseNotes();
 
             SpeechRateCombo.SelectedIndex = ViewModel.SpeechRate switch
             {
@@ -1024,5 +1037,50 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
         SettingsHelpTeachingTip.IsOpen = false;
         var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "BackupAndSettings";
         _navigationService.Navigate(typeof(HelpPage), tag);
+    }
+
+    private void UpdateInlineReleaseNotes()
+    {
+        if (InlineReleaseNotesPanel == null) return;
+        var notes = ViewModel.AvailableUpdate?.ReleaseNotes;
+        if (!string.IsNullOrWhiteSpace(notes))
+        {
+            Helpers.ReleaseNotesRenderer.RenderMarkdown(notes, InlineReleaseNotesPanel, this);
+        }
+    }
+
+    private async void OpenUpdateDetailsPopup_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.AvailableUpdate is { } update)
+        {
+            await ShowUpdateDetailsDialogAsync(update);
+        }
+    }
+
+    private async Task ShowUpdateDetailsDialogAsync(UpdateInfo? updateInfo)
+    {
+        if (updateInfo == null) return;
+        if (this.XamlRoot == null && App.Current?.MainWindow?.Content?.XamlRoot == null) return;
+
+        var dialog = new UpdateDetailsDialog(
+            updateInfo,
+            Loc,
+            onDownloadRequested: () =>
+            {
+                if (ViewModel.DownloadUpdateCommand.CanExecute(null))
+                {
+                    ViewModel.DownloadUpdateCommand.Execute(null);
+                }
+            },
+            onInstallRequested: () =>
+            {
+                if (ViewModel.InstallUpdateCommand.CanExecute(null))
+                {
+                    ViewModel.InstallUpdateCommand.Execute(null);
+                }
+            },
+            isReadyToInstall: ViewModel.UpdateReadyToInstall);
+
+        await dialog.ShowAsyncSafe(App.Current?.MainWindow?.Content?.XamlRoot ?? this.XamlRoot);
     }
 }

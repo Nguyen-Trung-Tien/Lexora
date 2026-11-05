@@ -829,7 +829,16 @@
                                 </StackPanel>
 
                                 <!-- Action Buttons -->
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <!-- View Details in Popup Button -->
+                                    <Button Click="OpenUpdateDetailsPopup_Click"
+                                            Style="{ThemeResource DefaultButtonStyle}"
+                                            CornerRadius="8" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE78B;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Settings_ViewUpdateDetails')}" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                    </Button>
                                     <!-- Download Button (Visible when not downloaded and not ready to install) -->
                                     <Button Command="{x:Bind ViewModel.DownloadUpdateCommand}"
                                             Visibility="{x:Bind ViewModel.UpdateReadyToInstall, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
@@ -868,16 +877,27 @@
                                 <StackPanel Spacing="6">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Text="{x:Bind Loc.GetString('Settings_ReleaseNotes')}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                                        <Button Grid.Column="1" Command="{x:Bind ViewModel.ToggleExpandUpdateNotesCommand}"
-                                                Style="{ThemeResource SubtleButtonStyle}" Padding="6,2" CornerRadius="4">
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <FontIcon Glyph="{x:Bind ViewModel.ExpandUpdateNotesGlyph, Mode=OneWay}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                <TextBlock Text="{x:Bind ViewModel.ExpandUpdateNotesText, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                            </StackPanel>
-                                        </Button>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                            <Button Command="{x:Bind ViewModel.ToggleExpandUpdateNotesCommand}"
+                                                    Style="{ThemeResource SubtleButtonStyle}" Padding="6,2" CornerRadius="4">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <FontIcon Glyph="{x:Bind ViewModel.ExpandUpdateNotesGlyph, Mode=OneWay}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{x:Bind ViewModel.ExpandUpdateNotesText, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Click="OpenUpdateDetailsPopup_Click"
+                                                    Style="{ThemeResource SubtleButtonStyle}" Padding="6,2" CornerRadius="4">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <FontIcon Glyph="&#xE78B;" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{x:Bind Loc.GetString('Settings_ViewUpdateDetails')}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
                                     </Grid>
                                     <ScrollViewer MaxHeight="{x:Bind ViewModel.ReleaseNotesMaxHeight, Mode=OneWay}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                        <TextBlock Text="{x:Bind ViewModel.AvailableUpdate.ReleaseNotes, Mode=OneWay, FallbackValue=''}" FontSize="12.5" LineHeight="22" LineStackingStrategy="MaxHeight" IsTextSelectionEnabled="True" TextWrapping="Wrap" />
+                                        <StackPanel x:Name="InlineReleaseNotesPanel" Spacing="4">
+                                            <TextBlock Text="{x:Bind ViewModel.AvailableUpdate.ReleaseNotes, Mode=OneWay, FallbackValue=''}" FontSize="12.5" LineHeight="22" LineStackingStrategy="MaxHeight" IsTextSelectionEnabled="True" TextWrapping="Wrap" />
+                                        </StackPanel>
                                     </ScrollViewer>
                                 </StackPanel>
                             </Border>
