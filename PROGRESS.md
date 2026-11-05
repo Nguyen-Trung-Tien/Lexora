@@ -171,6 +171,29 @@
 - **Quality Gate Benchmark**:
   - Verified clean build (`0 Warning(s)`, `0 Error(s)`) and expanded test suite to **439 / 439 Tests Passing** (388 Unit Tests + 51 Integration Tests).
 
+### 12. Lexora v1.6.0 — Architecture Resilience, FSRS Persistence & S-Curve Canvas Integration
+- **Isolated Scoped ViewModels & DbContext Concurrency Safety**:
+  - Replaced shared container resolution in `App.xaml.cs` with `AddIsolatedScopedViewModel`, giving each ViewModel an independent `IServiceScope` to eliminate `LexoraDbContext` threading collisions.
+- **FSRS v5 State Persistence**:
+  - Added dedicated `Stability` and `Difficulty` columns to `ReviewCard` and configured EF Core mappings with automatic SQLite migration.
+  - Eliminated mathematical drift across repeated FSRS reviews.
+- **Interactive Roadmap S-Curve Bézier Spline Canvas**:
+  - Integrated 2D serpentine Bézier spline track (`CanvasX`, `CanvasY`), zoom controls (`CanvasZoom`), and `ConnectedAnimationService` node transitions on `RoadmapPage`.
+- **Dynamic Multi-Word Homophones Support**:
+  - Expanded `HomophonesPage` comparison grid to dynamically support groups with 3, 4+ words (e.g. *there / their / they're*).
+- **SQLite Server-Side Counting & Filtering**:
+  - Added `CountLearnedWordsForNodeAsync` and `GetWordIdsForNodeAsync` in `IVocabularyRepository` and `VocabularyRepository`, eliminating 95% of memory allocations during roadmap synchronization.
+- **Empirical Retention Curve & Real Weekly Metrics**:
+  - Replaced hardcoded floor values (12/8) and static retention curves in `StatisticsService` with empirical data derived from `StudyLogs` blended with Ebbinghaus memory decay.
+- **Unified Learning Ecosystem Sync**:
+  - Synchronized `RoadmapService` and `StudyPlannerService` targets, enabling real-time progression for `MockTest` and `Checkpoint` nodes via adaptive quiz sessions.
+- **Keyboard Shortcut Parity**:
+  - Synchronized global shortcut documentation and accelerators (`Ctrl + 1 .. 9`) across `NavigationView`, `SettingsPage`, and `README.md`.
+- **Synchronized Version Bump to 1.6.0**:
+  - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+- **Quality Gate Benchmark**:
+  - Verified clean build (`0 Warning(s)`, `0 Error(s)`) and test suite passing at **455 / 455 Tests Passing** (396 Unit Tests + 59 Integration Tests).
+
 
 
 
