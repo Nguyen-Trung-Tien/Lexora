@@ -429,7 +429,8 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
             if (_roadmapService != null)
             {
-                ActiveRoadmap = await _roadmapService.GetActiveRoadmapAsync();
+                ActiveRoadmap = await _roadmapService.SyncRoadmapProgressAsync()
+                    ?? await _roadmapService.GetActiveRoadmapAsync();
             }
         }
         catch (Exception ex)
@@ -447,6 +448,60 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     public void NavigateToRoadmap()
     {
         _navService.Navigate(typeof(RoadmapPage));
+    }
+
+    [RelayCommand]
+    public async Task ContinueRoadmapAsync()
+    {
+        if (ActiveRoadmap?.NextActiveNode == null || _roadmapService == null)
+        {
+            _navService.Navigate(typeof(RoadmapPage));
+            return;
+        }
+
+        var targetNode = ActiveRoadmap.NextActiveNode;
+        try
+        {
+            var context = await _roadmapService.GetNodeActionContextAsync(targetNode.Id);
+
+            switch (targetNode.Type)
+            {
+                case RoadmapNodeType.VocabularySet:
+                    if (context?.TopicId != null && !string.IsNullOrWhiteSpace(context.TopicName))
+                    {
+                        var topicDto = new TopicDto(context.TopicId.Value, context.TopicName, null, null, null);
+                        _navService.Navigate(typeof(ReviewPage), topicDto);
+                    }
+                    else if (context != null && context.LinkedWordIds.Count > 0)
+                    {
+                        _navService.Navigate(typeof(ReviewPage), context.LinkedWordIds);
+                    }
+                    else
+                    {
+                        _navService.Navigate(typeof(ReviewPage));
+                    }
+                    break;
+
+                case RoadmapNodeType.GrammarPoint:
+                    string grammarQuery = context?.GrammarQuery ?? targetNode.ReferenceName ?? targetNode.Title;
+                    _navService.Navigate(typeof(GrammarPage), grammarQuery);
+                    break;
+
+                case RoadmapNodeType.MockTest:
+                case RoadmapNodeType.Checkpoint:
+                    _navService.Navigate(typeof(TestPage));
+                    break;
+
+                default:
+                    _navService.Navigate(typeof(RoadmapPage));
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] ContinueRoadmapAsync error: {ex.Message}");
+            _navService.Navigate(typeof(RoadmapPage));
+        }
     }
 
     [RelayCommand]

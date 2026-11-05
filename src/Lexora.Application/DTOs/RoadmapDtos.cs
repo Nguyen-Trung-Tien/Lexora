@@ -108,6 +108,7 @@ public record StudyRoadmapDto(
     public int DaysRemaining => Math.Max(0, (TargetDate.Date - DateTime.UtcNow.Date).Days);
     public int TotalNodes => Milestones.Sum(m => m.TotalNodesCount);
     public int MasteredNodes => Milestones.Sum(m => m.CompletedNodesCount);
+    public string NodesMasteredDisplay => $"{MasteredNodes}/{TotalNodes}";
     public string ExamBadgeText => Target switch
     {
         ExamTarget.Toeic => "TOEIC",

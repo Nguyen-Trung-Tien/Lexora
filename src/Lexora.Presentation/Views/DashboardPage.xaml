@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:services="using:Lexora.Presentation.Services"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
@@ -147,6 +148,9 @@
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="14" Padding="20,16"
+                    Tapped="RoadmapWidget_Tapped"
+                    helpers:CursorHelper.Cursor="Hand"
+                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}"
                     Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
@@ -180,18 +184,33 @@
                                          Value="{x:Bind ViewModel.ActiveRoadmap.OverallProgress, Mode=OneWay, FallbackValue=0}" />
                             <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.OverallProgressDisplay, Mode=OneWay, FallbackValue='0%'}"
                                        FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.NodesMasteredDisplay, Mode=OneWay, FallbackValue=''}"
+                                       FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
 
-                    <Button Grid.Column="2" VerticalAlignment="Center"
-                            Command="{x:Bind ViewModel.NavigateToRoadmapCommand}"
-                            Style="{ThemeResource AccentButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE768;" FontSize="12" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ContinueRoadmap')}" FontSize="12" />
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Command="{x:Bind ViewModel.NavigateToRoadmapCommand}"
+                                Style="{ThemeResource SubtleButtonStyle}"
+                                CornerRadius="8" Padding="10,7"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE81C;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Nav_Roadmap')}" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{x:Bind ViewModel.ContinueRoadmapCommand}"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                CornerRadius="8" Padding="14,7"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ContinueRoadmap')}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE768;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ContinueRoadmap')}" FontWeight="SemiBold" FontSize="12.5" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </Grid>
             </Border>
 

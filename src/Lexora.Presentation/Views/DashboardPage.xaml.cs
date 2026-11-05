@@ -266,4 +266,16 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
         var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "GettingStarted";
         _navigationService.Navigate(typeof(HelpPage), tag);
     }
+
+    private void RoadmapWidget_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        var cur = e.OriginalSource as DependencyObject;
+        var target = sender as DependencyObject;
+        while (cur != null && cur != target)
+        {
+            if (cur is Button) return;
+            cur = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(cur);
+        }
+        ViewModel.NavigateToRoadmap();
+    }
 }

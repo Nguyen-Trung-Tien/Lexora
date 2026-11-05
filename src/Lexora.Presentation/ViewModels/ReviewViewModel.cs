@@ -18,6 +18,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     private readonly ILocalizationService _localizationService;
     private readonly ISoundFeedbackService? _soundFeedback;
     private readonly IToastNotificationService? _toastService;
+    private readonly IRoadmapService? _roadmapService;
     private readonly Stopwatch _cardTimer = new();
     private readonly SemaphoreSlim _ratingLock = new(1, 1);
 
@@ -218,7 +219,8 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         IVocabularyService vocabService,
         ILocalizationService localizationService,
         ISoundFeedbackService? soundFeedback = null,
-        IToastNotificationService? toastService = null)
+        IToastNotificationService? toastService = null,
+        IRoadmapService? roadmapService = null)
     {
         _reviewService = reviewService;
         _audioPlayer = audioPlayer;
@@ -227,6 +229,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         _localizationService = localizationService;
         _soundFeedback = soundFeedback;
         _toastService = toastService;
+        _roadmapService = roadmapService;
 
         UpdateActiveSessionTitle();
 
@@ -510,6 +513,18 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
 
                 await RefreshDueCountAsync();
                 await LoadHistoryAsync();
+
+                if (_roadmapService != null)
+                {
+                    try
+                    {
+                        await _roadmapService.SyncRoadmapProgressAsync();
+                    }
+                    catch
+                    {
+                        // Background sync failure ignored safely
+                    }
+                }
             }
         }
         catch (Exception ex)
