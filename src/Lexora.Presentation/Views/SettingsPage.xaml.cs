@@ -1045,7 +1045,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
         var notes = ViewModel.AvailableUpdate?.ReleaseNotes;
         if (!string.IsNullOrWhiteSpace(notes))
         {
-            Helpers.ReleaseNotesRenderer.RenderMarkdown(notes, InlineReleaseNotesPanel, this);
+            Helpers.ReleaseNotesRenderer.RenderMarkdown(notes, InlineReleaseNotesPanel, this, Loc);
         }
     }
 

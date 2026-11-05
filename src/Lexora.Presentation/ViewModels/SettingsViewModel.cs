@@ -276,6 +276,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         }
 
         UpdateCurrentVersionNotes();
+        RefreshUpdateTexts();
         OnPropertyChanged(nameof(CurrentVersionDetailsTitle));
         OnPropertyChanged(nameof(ExpandUpdateNotesText));
     }
@@ -286,6 +287,45 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         CurrentVersionNotes = isVi
             ? "• Lộ trình học tập tương tác (Interactive Roadmap Canvas): Hệ thống chặng học trực quan với đồ thị Bézier thông minh cho TOEIC, IELTS và VSTEP.\n• Thuật toán Spaced Repetition kép: Tích hợp SM-2 kinh điển và FSRS tiên tiến, tự động hiệu chuẩn Ease Factor.\n• Phòng Luyện Nghe & Phát Âm (Pronunciation Lab): Hỗ trợ giọng đọc chuẩn UK/US cùng hai tầng âm thanh (Cached Human Audio & Windows TTS).\n• Kiểm tra thích ứng (Adaptive Test Mode): Tự động cá nhân hóa bài thi và phân loại câu hỏi theo độ khó CEFR.\n• Tối ưu hóa giao diện Fluent 2: Hỗ trợ hoàn hảo chế độ Sáng (Light) và Tối (Dark), con trỏ chuột tương tác mượt mà."
             : "• Interactive Learning Roadmap: Dynamic visual skill tree with smooth Bézier splines for TOEIC, IELTS, and VSTEP preparation.\n• Dual Spaced Repetition Engines: Classic SM-2 and next-generation FSRS with dynamic Ease Factor calibration.\n• Pronunciation & Listening Lab: High-fidelity UK/US audio playback with cached human pronunciation and speech synthesis fallback.\n• Adaptive Testing & Quizzes: Tailored difficulty calibration matching real CEFR proficiencies.\n• Fluent 2 Visual Enhancements: Flawless Light & Dark mode rendering, high-contrast clarity, and unified interactive cursor pointers.";
+    }
+
+    public void RefreshUpdateTexts()
+    {
+        if (AvailableUpdate != null)
+        {
+            if (AvailableUpdate.FileSizeBytes > 0)
+            {
+                var sizeMb = (double)AvailableUpdate.FileSizeBytes / (1024 * 1024);
+                AvailableUpdateFileSizeText = string.Format(_locService.GetString("Settings_SizeFormat"), sizeMb);
+            }
+            else
+            {
+                AvailableUpdateFileSizeText = string.Empty;
+            }
+
+            AvailableUpdatePublishDateText = $"{_locService.GetString("Settings_ReleaseDate")} {AvailableUpdate.PublishedAt.LocalDateTime:dd/MM/yyyy}";
+        }
+
+        if (UpdateAvailable)
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
+        }
+        else if (UpdateReadyToInstall)
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_UpdateDownloaded");
+        }
+        else if (IsCheckingUpdate)
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_CheckingForUpdates");
+        }
+        else if (IsDownloadingUpdate)
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_DownloadingUpdate");
+        }
+        else if (!string.IsNullOrEmpty(UpdateStatusMessage))
+        {
+            UpdateStatusMessage = _locService.GetString("Settings_UpdateUpToDate");
+        }
     }
 
     [RelayCommand]
@@ -627,19 +667,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                     UpdateAvailable = true;
                     IsShowingCurrentVersionNotes = false;
                     IsExpandedUpdateNotes = false;
-                    UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
-
-                    if (updateInfo.FileSizeBytes > 0)
-                    {
-                        var sizeMb = (double)updateInfo.FileSizeBytes / (1024 * 1024);
-                        AvailableUpdateFileSizeText = string.Format(_locService.GetString("Settings_SizeFormat"), sizeMb);
-                    }
-                    else
-                    {
-                        AvailableUpdateFileSizeText = string.Empty;
-                    }
-
-                    AvailableUpdatePublishDateText = $"{_locService.GetString("Settings_ReleaseDate")} {updateInfo.PublishedAt.LocalDateTime:dd/MM/yyyy}";
+                    RefreshUpdateTexts();
 
                     var template = _locService.GetString("Update_Notification_Body");
                     var msg = string.Format(template, updateInfo.NewVersion);

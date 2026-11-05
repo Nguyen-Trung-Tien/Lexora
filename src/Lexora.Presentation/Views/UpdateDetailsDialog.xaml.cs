@@ -7,7 +7,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Lexora.Presentation.Views;
 
-public sealed partial class UpdateDetailsDialog : ContentDialog
+public sealed partial class UpdateDetailsDialog : ContentDialog, ILocalizableView, IThemeAwareView
 {
     private readonly UpdateInfo _updateInfo;
     private readonly ILocalizationService _loc;
@@ -43,7 +43,40 @@ public sealed partial class UpdateDetailsDialog : ContentDialog
             RequestedTheme = rootElem.ActualTheme;
         }
 
+        PopulateUI();
+
+        _loc.LanguageChanged += OnLanguageChangedHandler;
+        ActualThemeChanged += (s, e) => OnThemeChanged();
+        PrimaryButtonClick += UpdateDetailsDialog_PrimaryButtonClick;
+        Unloaded += (s, e) => _loc.LanguageChanged -= OnLanguageChangedHandler;
+    }
+
+    private void OnLanguageChangedHandler(object? sender = null, EventArgs? e = null)
+    {
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            PopulateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(PopulateUI);
+        }
+    }
+
+    public void OnLanguageChanged()
+    {
+        OnLanguageChangedHandler();
+    }
+
+    public void OnThemeChanged()
+    {
+        RenderNotes();
+    }
+
+    private void PopulateUI()
+    {
         Title = _loc.GetString("Settings_UpdateDialogTitle");
+        DialogSubtitleText.Text = _loc.GetString("Settings_UpdateDialogSubtitle");
         CloseButtonText = _loc.GetString("Settings_RemindLater");
 
         if (_isReadyToInstall)
@@ -55,14 +88,6 @@ public sealed partial class UpdateDetailsDialog : ContentDialog
             PrimaryButtonText = _loc.GetString("Settings_DownloadUpdate");
         }
 
-        PopulateUI();
-
-        ActualThemeChanged += (s, e) => RenderNotes();
-        PrimaryButtonClick += UpdateDetailsDialog_PrimaryButtonClick;
-    }
-
-    private void PopulateUI()
-    {
         VersionBadgeText.Text = $"v{_updateInfo.NewVersion}";
         ReleaseTitleText.Text = string.IsNullOrWhiteSpace(_updateInfo.ReleaseTitle)
             ? $"Lexora v{_updateInfo.NewVersion}"
@@ -75,11 +100,25 @@ public sealed partial class UpdateDetailsDialog : ContentDialog
         {
             var sizeMb = (double)_updateInfo.FileSizeBytes / (1024 * 1024);
             DownloadSizeText.Text = string.Format(_loc.GetString("Settings_SizeFormat"), sizeMb);
-            DownloadSizeText.Visibility = Visibility.Visible;
+            DownloadSizeBorder.Visibility = Visibility.Visible;
+
+            // Ensure 3 equal columns for perfect symmetrical balance
+            BadgesGrid.ColumnDefinitions.Clear();
+            BadgesGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            BadgesGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            BadgesGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            Grid.SetColumn(DownloadSizeBorder, 1);
+            Grid.SetColumn(PublishDateBorder, 2);
         }
         else
         {
-            DownloadSizeText.Visibility = Visibility.Collapsed;
+            DownloadSizeBorder.Visibility = Visibility.Collapsed;
+
+            // Balance into 2 equal columns symmetrically
+            BadgesGrid.ColumnDefinitions.Clear();
+            BadgesGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            BadgesGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            Grid.SetColumn(PublishDateBorder, 1);
         }
 
         PublishDateText.Text = $"{_loc.GetString("Settings_ReleaseDate")} {_updateInfo.PublishedAt.LocalDateTime:dd/MM/yyyy}";
@@ -91,7 +130,7 @@ public sealed partial class UpdateDetailsDialog : ContentDialog
 
     private void RenderNotes()
     {
-        ReleaseNotesRenderer.RenderMarkdown(_updateInfo.ReleaseNotes, NotesContainer, this);
+        ReleaseNotesRenderer.RenderMarkdown(_updateInfo.ReleaseNotes, NotesContainer, this, _loc);
     }
 
     private void UpdateDetailsDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)

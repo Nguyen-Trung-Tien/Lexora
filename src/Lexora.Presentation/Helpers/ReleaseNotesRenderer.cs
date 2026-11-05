@@ -13,16 +13,17 @@ namespace Lexora.Presentation.Helpers;
 /// </summary>
 public static class ReleaseNotesRenderer
 {
-    public static void RenderMarkdown(string? rawText, StackPanel targetContainer, FrameworkElement scope)
+    public static void RenderMarkdown(string? rawText, StackPanel targetContainer, FrameworkElement scope, ILocalizationService? loc = null)
     {
         ArgumentNullException.ThrowIfNull(targetContainer);
         targetContainer.Children.Clear();
 
         if (string.IsNullOrWhiteSpace(rawText))
         {
+            var emptyText = loc?.GetString("Settings_NoReleaseNotes") ?? "Không có ghi chú chi tiết cho bản phát hành này.";
             var emptyBlock = new TextBlock
             {
-                Text = "Không có ghi chú chi tiết cho bản phát hành này.",
+                Text = emptyText,
                 FontSize = 12.5,
                 FontStyle = Windows.UI.Text.FontStyle.Italic,
                 Foreground = ThemeResourceHelper.GetThemeBrush(scope, "TextFillColorTertiaryBrush"),
@@ -211,3 +212,4 @@ public static class ReleaseNotesRenderer
         }
     }
 }
+

@@ -820,7 +820,7 @@
                                                        FontWeight="Bold" FontSize="12" />
                                         </Border>
                                         <TextBlock Text="{x:Bind ViewModel.AvailableUpdate.ReleaseTitle, Mode=OneWay, FallbackValue=''}"
-                                                   FontWeight="Bold" FontSize="14" VerticalAlignment="Center" />
+                                                   FontWeight="Bold" FontSize="14" TextWrapping="Wrap" VerticalAlignment="Center" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="12">
                                         <TextBlock Text="{x:Bind ViewModel.AvailableUpdatePublishDateText, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
