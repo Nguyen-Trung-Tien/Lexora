@@ -421,6 +421,18 @@
         <Setter Property="BorderThickness" Value="1" />
     </Style>
 
+    <Style x:Key="LexoraDangerButtonStyle" TargetType="Button">
+        <Setter Property="helpers:CursorHelper.Cursor" Value="Hand" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSmall}" />
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Background" Value="{ThemeResource SystemFillColorCriticalBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource SystemFillColorCriticalBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
     <Style x:Key="LexoraSubtleButtonStyle" TargetType="Button">
         <Setter Property="helpers:CursorHelper.Cursor" Value="Hand" />
         <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />

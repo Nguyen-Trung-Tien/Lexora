@@ -68,10 +68,8 @@
                     <!-- Scroll Left Chevron Button -->
                     <Button x:Name="ScrollPillsLeftBtn" Grid.Column="0"
                             Click="ScrollPillsLeft_Click"
+                            Style="{ThemeResource SubtleButtonStyle}"
                             Width="32" Height="36" Padding="0" CornerRadius="8"
-                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
                             VerticalAlignment="Center"
                             Visibility="Collapsed"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ScrollLeft')}">
@@ -133,10 +131,8 @@
                     <!-- Scroll Right Chevron Button -->
                     <Button x:Name="ScrollPillsRightBtn" Grid.Column="2"
                             Click="ScrollPillsRight_Click"
+                            Style="{ThemeResource SubtleButtonStyle}"
                             Width="32" Height="36" Padding="0" CornerRadius="8"
-                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
                             VerticalAlignment="Center"
                             Visibility="Collapsed"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ScrollRight')}">

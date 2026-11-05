@@ -65,7 +65,8 @@
 
                         <!-- Contextual Quick Help Button -->
                         <Button Grid.Column="1" x:Name="DashboardHelpButton" Click="DashboardHelpButton_Click"
-                                Background="Transparent" BorderThickness="0" CornerRadius="8" Padding="6"
+                                Style="{ThemeResource SubtleButtonStyle}"
+                                CornerRadius="8" Padding="6"
                                 VerticalAlignment="Top"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Dashboard_Help_Title')}">
                             <FontIcon Glyph="&#xE9CE;" FontSize="15" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -111,9 +112,7 @@
                             </Button>
 
                             <Button Grid.Column="1" Click="StartPracticeButton_Click"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
+                                    Style="{ThemeResource DefaultButtonStyle}"
                                     FontWeight="SemiBold" Padding="16,9" CornerRadius="8">
                                 <StackPanel Orientation="Horizontal" Spacing="7">
                                     <FontIcon Glyph="&#xE765;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -122,9 +121,7 @@
                             </Button>
 
                             <Button Grid.Row="1" Click="OpenStudyPlanner_Click"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
+                                    Style="{ThemeResource DefaultButtonStyle}"
                                     FontWeight="SemiBold" Padding="16,9" CornerRadius="8"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('StudyPlanner_Title')}">
                                 <StackPanel Orientation="Horizontal" Spacing="7">
@@ -134,9 +131,7 @@
                             </Button>
 
                             <Button Grid.Row="1" Grid.Column="1" Click="OpenListeningLab_Click"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
+                                    Style="{ThemeResource DefaultButtonStyle}"
                                     FontWeight="SemiBold" Padding="16,9" CornerRadius="8"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Title')}">
                                 <StackPanel Orientation="Horizontal" Spacing="7">

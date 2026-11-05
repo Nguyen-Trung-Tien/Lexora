@@ -378,20 +378,19 @@
 
                                     <!-- Audio & Skip Buttons -->
                                     <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                                        <Button Padding="10,6" Click="PlayUkAudio_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6">
+                                        <Button Style="{ThemeResource SubtleButtonStyle}" Padding="10,6" Click="PlayUkAudio_Click" CornerRadius="6">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
                                                 <TextBlock Text="{x:Bind Loc.GetString('Review_AudioUk')}" FontSize="12" />
                                             </StackPanel>
                                         </Button>
-                                        <Button Padding="10,6" Click="PlayUsAudio_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6">
+                                        <Button Style="{ThemeResource SubtleButtonStyle}" Padding="10,6" Click="PlayUsAudio_Click" CornerRadius="6">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                                 <TextBlock Text="{x:Bind Loc.GetString('Review_AudioUs')}" FontSize="12" />
                                             </StackPanel>
                                         </Button>
-                                        <Button Background="Transparent"
-                                                BorderThickness="0"
+                                        <Button Style="{ThemeResource SubtleButtonStyle}"
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                 FontSize="12"
                                                 Click="SkipTypingButton_Click">
@@ -433,8 +432,8 @@
 
                                     <!-- Pronunciation Audio Buttons -->
                                     <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                                        <Button Padding="14,6" Click="PlayUkAudio_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="20">
+                                        <Button Style="{ThemeResource SubtleButtonStyle}"
+                                                Padding="14,6" Click="PlayUkAudio_Click" CornerRadius="20">
                                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                 <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
                                                 <TextBlock Text="UK" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -442,8 +441,8 @@
                                             </StackPanel>
                                         </Button>
 
-                                        <Button Padding="14,6" Click="PlayUsAudio_Click" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="20">
+                                        <Button Style="{ThemeResource SubtleButtonStyle}"
+                                                Padding="14,6" Click="PlayUsAudio_Click" CornerRadius="20">
                                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                 <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                                 <TextBlock Text="US" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
@@ -535,10 +534,9 @@
                                     </Grid.ChildrenTransitions>
 
                                     <!-- 1: Again -->
-                                    <Button HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="AgainButton_Click"
-                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}"
-                                            BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1.5"
-                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <Button Style="{ThemeResource RatingAgainButton}"
+                                            HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="AgainButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}">
                                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                                             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">
@@ -552,10 +550,9 @@
                                     </Button>
 
                                     <!-- 2: Hard -->
-                                    <Button Grid.Column="1" HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="HardButton_Click"
-                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}"
-                                            BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1.5"
-                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <Button Grid.Column="1" Style="{ThemeResource RatingHardButton}"
+                                            HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="HardButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}">
                                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                                             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">
@@ -569,10 +566,9 @@
                                     </Button>
 
                                     <!-- 3: Good -->
-                                    <Button Grid.Column="2" HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="GoodButton_Click"
-                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}"
-                                            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}" BorderThickness="1.5"
-                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <Button Grid.Column="2" Style="{ThemeResource RatingGoodButton}"
+                                            HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="GoodButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}">
                                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                                             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">
@@ -586,10 +582,9 @@
                                     </Button>
 
                                     <!-- 4: Easy -->
-                                    <Button Grid.Column="3" HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="EasyButton_Click"
-                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}"
-                                            BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1.5"
-                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <Button Grid.Column="3" Style="{ThemeResource RatingEasyButton}"
+                                            HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="EasyButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}">
                                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                                             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">

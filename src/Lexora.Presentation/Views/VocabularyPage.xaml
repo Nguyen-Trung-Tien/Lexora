@@ -447,9 +447,8 @@
                             <Button Grid.Row="1" Grid.Column="1" x:Name="BtnDeleteSelectedWords"
                                     Click="DeleteSelectedWords_Click"
                                     IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
-                                    Background="{ThemeResource SystemFillColorCriticalBrush}"
-                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Stretch" CornerRadius="6" Padding="6,5" FontSize="11" FontWeight="Bold">
+                                    Style="{ThemeResource LexoraDangerButtonStyle}"
+                                    HorizontalAlignment="Stretch" CornerRadius="6" Padding="6,5" FontSize="11">
                                 <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE74D;" FontSize="11" />
                                     <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
@@ -675,10 +674,9 @@
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <!-- UK Audio Button -->
                                 <Button x:Name="BtnPlayUk"
+                                        Style="{ThemeResource SubtleButtonStyle}"
                                         Padding="10,6" Click="PlayUkAudio_Click"
-                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="8"
+                                        CornerRadius="8"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PlayUkPronunciation')}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon x:Name="IconPlayUk" Glyph="&#xE768;" FontSize="13"
@@ -692,10 +690,9 @@
 
                                 <!-- US Audio Button -->
                                 <Button x:Name="BtnPlayUs"
+                                        Style="{ThemeResource SubtleButtonStyle}"
                                         Padding="10,6" Click="PlayUsAudio_Click"
-                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="8"
+                                        CornerRadius="8"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PlayUsPronunciation')}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon x:Name="IconPlayUs" Glyph="&#xE768;" FontSize="13"
@@ -826,10 +823,9 @@
 
                             <!-- Related Homophones Linking Badge -->
                             <Button Click="ViewRelatedHomophones_Click"
+                                    Style="{ThemeResource DefaultButtonStyle}"
                                     Visibility="{x:Bind ViewModel.HasRelatedHomophoneGroup, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="8" Padding="12,6" HorizontalAlignment="Left" Margin="0,4,0,0">
+                                    CornerRadius="8" Padding="12,6" HorizontalAlignment="Left" Margin="0,4,0,0">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     <TextBlock Text="{x:Bind Loc.GetString('Vocab_ViewRelatedHomophones')}" FontSize="12" FontWeight="SemiBold" />
@@ -1103,9 +1099,8 @@
                             <Button Grid.Column="3" x:Name="BtnDeleteSelectedUnits"
                                     Click="DeleteSelectedUnits_Click"
                                     IsEnabled="{x:Bind ViewModel.HasContextUnitSelection, Mode=OneWay}"
-                                    Background="{ThemeResource SystemFillColorCriticalBrush}"
-                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                    CornerRadius="6" Padding="12,5" FontSize="12" FontWeight="Bold">
+                                    Style="{ThemeResource LexoraDangerButtonStyle}"
+                                    CornerRadius="6" Padding="12,5">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE74D;" FontSize="11" />
                                     <TextBlock x:Name="TextDeleteSelectedUnits" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" />
@@ -1176,8 +1171,8 @@
                                                 <!-- Context Unit More Options (Edit / Delete Topic) -->
                                                 <Button Tag="{x:Bind}"
                                                         Click="TopicMoreButton_Click"
+                                                        Style="{ThemeResource SubtleButtonStyle}"
                                                         Padding="6,3" CornerRadius="6"
-                                                        Background="Transparent" BorderThickness="0"
                                                         ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Action_Filter')}">
                                                     <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </Button>

@@ -56,8 +56,9 @@
                             </Border>
 
                             <!-- Contextual Help Button -->
-                            <Button x:Name="SettingsHelpButton" Click="SettingsHelpButton_Click" CornerRadius="8" Width="34" Height="34" Padding="0"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            <Button x:Name="SettingsHelpButton" Click="SettingsHelpButton_Click"
+                                    Style="{ThemeResource SubtleButtonStyle}"
+                                    CornerRadius="8" Width="34" Height="34" Padding="0"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_Help_Title')}">
                                 <FontIcon Glyph="&#xE9CE;" FontSize="13.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </Button>
@@ -106,13 +107,11 @@
                             <!-- 1. System Theme Card -->
                             <Button x:Name="ThemeSystemButton"
                                     Click="ThemeSystemButton_Click"
+                                    Style="{ThemeResource DefaultButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
                                     Padding="0"
-                                    CornerRadius="12"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    BorderThickness="1"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                    CornerRadius="12">
                                 <Grid Padding="14">
                                     <StackPanel Spacing="10">
                                         <!-- Mini Window Mockup System (Dual split Light/Dark) -->
@@ -181,13 +180,11 @@
                             <Button x:Name="ThemeLightButton"
                                     Grid.Column="1"
                                     Click="ThemeLightButton_Click"
+                                    Style="{ThemeResource DefaultButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
                                     Padding="0"
-                                    CornerRadius="12"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    BorderThickness="1"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                    CornerRadius="12">
                                 <Grid Padding="14">
                                     <StackPanel Spacing="10">
                                         <!-- Mini Window Mockup Light -->
@@ -230,13 +227,11 @@
                             <Button x:Name="ThemeDarkButton"
                                     Grid.Column="2"
                                     Click="ThemeDarkButton_Click"
+                                    Style="{ThemeResource DefaultButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
                                     Padding="0"
-                                    CornerRadius="12"
-                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    BorderThickness="1"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                    CornerRadius="12">
                                 <Grid Padding="14">
                                     <StackPanel Spacing="10">
                                         <!-- Mini Window Mockup Dark -->
@@ -389,7 +384,7 @@
                                     <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     <TextBlock Text="{x:Bind Loc.GetString('Settings_VoiceDiagnostic_Title')}" FontWeight="SemiBold" FontSize="13" />
                                 </StackPanel>
-                                <Button Grid.Column="1" Click="OpenSpeechSettings_Click" Padding="10,4" CornerRadius="6" Background="Transparent" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                <Button Grid.Column="1" Click="OpenSpeechSettings_Click" Style="{ThemeResource SubtleButtonStyle}" Padding="10,4" CornerRadius="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE8A7;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="{x:Bind Loc.GetString('Settings_Voice_InstallHelp')}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -403,7 +398,7 @@
                                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
                                         <TextBlock Text="🇬🇧 British English (UK)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UkVoiceStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                        <Button Grid.Row="2" Click="TestVoiceUk_Click" HorizontalAlignment="Left" Padding="10,4" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                        <Button Grid.Row="2" Click="TestVoiceUk_Click" Style="{ThemeResource SubtleButtonStyle}" HorizontalAlignment="Left" Padding="10,4" CornerRadius="6">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon Glyph="&#xE768;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                 <TextBlock Text="{x:Bind Loc.GetString('Settings_TestVoice_UK')}" FontSize="11" FontWeight="SemiBold" />
@@ -417,7 +412,7 @@
                                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
                                         <TextBlock Text="🇺🇸 American English (US)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UsVoiceStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                        <Button Grid.Row="2" Click="TestVoiceUs_Click" HorizontalAlignment="Left" Padding="10,4" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                        <Button Grid.Row="2" Click="TestVoiceUs_Click" Style="{ThemeResource SubtleButtonStyle}" HorizontalAlignment="Left" Padding="10,4" CornerRadius="6">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon Glyph="&#xE768;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                                 <TextBlock Text="{x:Bind Loc.GetString('Settings_TestVoice_US')}" FontSize="11" FontWeight="SemiBold" />
@@ -482,13 +477,11 @@
                         <!-- Card 1: SM-2 -->
                         <Button x:Name="AlgorithmSm2Button"
                                 Click="AlgorithmSm2Button_Click"
+                                Style="{ThemeResource DefaultButtonStyle}"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
                                 Padding="16,14"
-                                CornerRadius="10"
-                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                BorderThickness="1"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                CornerRadius="10">
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE735;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -507,13 +500,11 @@
                         <Button x:Name="AlgorithmFsrsButton"
                                 Grid.Column="1"
                                 Click="AlgorithmFsrsButton_Click"
+                                Style="{ThemeResource DefaultButtonStyle}"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
                                 Padding="16,14"
-                                CornerRadius="10"
-                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                BorderThickness="1"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                CornerRadius="10">
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE958;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -804,7 +795,7 @@
                                     <TextBlock Text="{x:Bind ViewModel.CurrentVersionDetailsTitle, Mode=OneWay}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
                                 </StackPanel>
                                 <Button Grid.Column="1" Command="{x:Bind ViewModel.ToggleCurrentVersionNotesCommand}"
-                                        Background="Transparent" BorderThickness="0" Padding="6,2" CornerRadius="4">
+                                        Style="{ThemeResource SubtleButtonStyle}" Padding="6,2" CornerRadius="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('Settings_HideReleaseNotes')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                 </Button>
                             </Grid>

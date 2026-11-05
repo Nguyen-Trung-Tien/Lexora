@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Lexora.Presentation.Views.GrammarPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -273,8 +273,8 @@
                             <Button Grid.Column="3" x:Name="BtnDeleteSelectedRules"
                                     Click="DeleteSelectedRules_Click"
                                     IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
-                                    Background="{ThemeResource SystemFillColorCriticalBrush}"
-                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                    Style="{ThemeResource LexoraDangerButtonStyle}"
+
                                     CornerRadius="6" Padding="10,4" FontSize="12" FontWeight="Bold">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE74D;" FontSize="11" />
@@ -708,7 +708,8 @@
                                 <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentPracticeOptions}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vm:TestOptionItem">
-                                            <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            <Button Style="{ThemeResource DefaultButtonStyle}"
+                                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                                                     MinHeight="54"
                                                     Margin="0,0,0,10" Padding="16,12" CornerRadius="10"
                                                     BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"

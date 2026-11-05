@@ -541,7 +541,8 @@
                         <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentOptions}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TestOptionItem">
-                                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                    <Button Style="{ThemeResource DefaultButtonStyle}"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                             Margin="0,0,0,8" Padding="14,10" CornerRadius="8"
                                             BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
                                             BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"

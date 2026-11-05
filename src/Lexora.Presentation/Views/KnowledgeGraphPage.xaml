@@ -96,8 +96,9 @@
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate x:DataType="dto:KnowledgeGraphRecommendationDto">
                                                         <Button Click="RecommendItem_Click" Tag="{x:Bind Id}"
+                                                                Style="{ThemeResource SubtleButtonStyle}"
                                                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                                                Background="Transparent" BorderThickness="0" CornerRadius="6" Padding="8,6" Margin="0,2">
+                                                                CornerRadius="6" Padding="8,6" Margin="0,2">
                                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
                                                                     <TextBlock Text="{x:Bind Level}" FontSize="10" FontWeight="Bold" />
@@ -243,8 +244,9 @@
 
                                         <!-- Connections count badge & Open Button -->
                                         <Button Grid.Column="2" Click="ConceptItem_Click" Tag="{x:Bind Id}"
+                                                Style="{ThemeResource SubtleButtonStyle}"
                                                 ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('KnowledgeGraph_CoreConcept')}"
-                                                CornerRadius="6" Padding="8,4" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                                CornerRadius="6" Padding="8,4">
                                             <StackPanel Orientation="Horizontal" Spacing="4">
                                                 <FontIcon Glyph="&#xE81E;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                 <TextBlock Text="{x:Bind TotalConnections}" FontSize="11" FontWeight="Bold" />

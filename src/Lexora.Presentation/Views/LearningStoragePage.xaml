@@ -58,11 +58,9 @@
                             </StackPanel>
                         </Button>
 
-                        <Button CornerRadius="8" Padding="12,6"
-                                Click="TestBtn_Click"
-                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1">
+                        <Button Style="{ThemeResource SubtleButtonStyle}"
+                                CornerRadius="8" Padding="12,6"
+                                Click="TestBtn_Click">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE765;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                 <TextBlock Text="{x:Bind Loc.GetString('Storage_BtnTest')}" FontWeight="SemiBold" FontSize="12.5" />
@@ -318,9 +316,8 @@
                         <Button Grid.Column="3" x:Name="BtnDeleteSelectedItems"
                                 Click="DeleteSelectedItems_Click"
                                 IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
-                                Background="{ThemeResource SystemFillColorCriticalBrush}"
-                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                CornerRadius="6" Padding="12,5" FontSize="12" FontWeight="Bold">
+                                Style="{ThemeResource LexoraDangerButtonStyle}"
+                                Padding="12,5">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE74D;" FontSize="11" />
                                 <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" />
@@ -599,7 +596,8 @@
                                 <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentOptions, Mode=OneWay}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vm:TestOptionItem">
-                                            <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            <Button Style="{ThemeResource DefaultButtonStyle}"
+                                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                                                     Margin="0,0,0,8" Padding="14,12" CornerRadius="10"
                                                     BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
                                                     BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"

@@ -154,12 +154,11 @@
                 <Button Grid.Column="2"
                         x:Name="CloseButton"
                         Click="CloseButton_Click"
+                        Style="{ThemeResource SubtleButtonStyle}"
                         Width="24" Height="24"
                         Padding="0"
                         CornerRadius="4"
                         VerticalAlignment="Top"
-                        Background="Transparent"
-                        BorderThickness="0"
                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Toast_Close')}">
                     <FontIcon Glyph="&#xE711;" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                 </Button>

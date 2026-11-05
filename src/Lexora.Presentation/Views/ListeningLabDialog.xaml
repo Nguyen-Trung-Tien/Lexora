@@ -152,7 +152,12 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <Button HorizontalAlignment="Right" Content="{x:Bind Loc.GetString('ListeningLab_NextWord')}" Click="NextDictation_Click" />
+                                    <Button HorizontalAlignment="Right"
+                                            Style="{ThemeResource AccentButtonStyle}"
+                                            CornerRadius="8"
+                                            Padding="16,6"
+                                            Content="{x:Bind Loc.GetString('ListeningLab_NextWord')}"
+                                            Click="NextDictation_Click" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -237,7 +242,12 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <Button HorizontalAlignment="Right" Content="{x:Bind Loc.GetString('ListeningLab_NextPair')}" Click="NextPair_Click" />
+                                    <Button HorizontalAlignment="Right"
+                                            Style="{ThemeResource AccentButtonStyle}"
+                                            CornerRadius="8"
+                                            Padding="16,6"
+                                            Content="{x:Bind Loc.GetString('ListeningLab_NextPair')}"
+                                            Click="NextPair_Click" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
