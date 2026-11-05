@@ -45,7 +45,7 @@ if ($Consolidate) {
     }
 
     foreach ($frag in $fragments) {
-        $content = Get-Content $frag.FullName
+        $content = Get-Content $frag.FullName -Encoding UTF8
         $currentCat = ""
         foreach ($line in $content) {
             if ($line -match '^###\s+(Added|Changed|Deprecated|Removed|Fixed|Security)') {
@@ -72,7 +72,7 @@ if ($Consolidate) {
 
     # Insert into CHANGELOG.md
     if (Test-Path $changelogFile) {
-        $chLines = Get-Content $changelogFile -Raw
+        $chLines = Get-Content $changelogFile -Raw -Encoding UTF8
         if ($chLines -match '(##\s+\[Unreleased\][\r\n]+)') {
             $chLines = $chLines -replace '(##\s+\[Unreleased\][\r\n]+)', "`$1$block`n"
             Set-Content -Path $changelogFile -Value $chLines.Trim() -Encoding UTF8

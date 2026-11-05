@@ -578,8 +578,8 @@
                             <Button Grid.Column="1" Command="{x:Bind ViewModel.NextQuestionCommand}"
                                     Style="{ThemeResource AccentButtonStyle}" Padding="26,10" CornerRadius="8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{x:Bind Loc.GetString('Test_NextQuestion')}" FontWeight="Bold" />
-                                    <FontIcon Glyph="&#xE76C;" FontSize="13" />
+                                    <TextBlock Text="{x:Bind ViewModel.NextButtonText, Mode=OneWay}" FontWeight="Bold" />
+                                    <FontIcon Glyph="{x:Bind ViewModel.NextButtonGlyph, Mode=OneWay}" FontSize="13" />
                                 </StackPanel>
                             </Button>
                         </Grid>

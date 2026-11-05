@@ -145,6 +145,17 @@ public partial class TestViewModel : ObservableObject, IDisposable
     public partial string ExplanationText { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NextButtonText))]
+    [NotifyPropertyChangedFor(nameof(NextButtonGlyph))]
+    public partial bool IsLastQuestion { get; set; } = false;
+
+    public string NextButtonText => IsLastQuestion
+        ? _localizationService.GetString("Test_FinishTest")
+        : _localizationService.GetString("Test_NextQuestion");
+
+    public string NextButtonGlyph => IsLastQuestion ? "\uE73E" : "\uE76C";
+
+    [ObservableProperty]
     public partial bool HasAudio { get; set; } = false;
 
     public ObservableCollection<TestOptionItem> CurrentOptions { get; } = new();
@@ -505,6 +516,7 @@ public partial class TestViewModel : ObservableObject, IDisposable
 
         CurrentQuestionIndex = index;
         CurrentQuestion = _allQuestions[index];
+        IsLastQuestion = index + 1 >= TotalQuestions;
         ProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), index + 1, TotalQuestions);
         ProgressPercent = (double)(index + 1) / TotalQuestions * 100.0;
 
@@ -544,23 +556,25 @@ public partial class TestViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    public void SubmitAnswer()
+    public void SubmitAnswer() => SubmitAnswerInternal(allowEmpty: false);
+
+    public void SubmitAnswerInternal(bool allowEmpty)
     {
         if (IsAnswerSubmitted || CurrentQuestion == null) return;
 
         _questionTimer.Stop();
         int responseTime = (int)_questionTimer.ElapsedMilliseconds;
 
-        string answer = SelectedOption ?? UserTextInput.Trim();
-        if (string.IsNullOrEmpty(answer)) return;
+        string answer = SelectedOption ?? UserTextInput?.Trim() ?? string.Empty;
+        if (!allowEmpty && string.IsNullOrEmpty(answer)) return;
 
         IsAnswerSubmitted = true;
-        IsAnswerCorrect = string.Equals(answer.Trim(), CurrentQuestion.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
+        IsAnswerCorrect = !string.IsNullOrEmpty(answer) && string.Equals(answer.Trim(), CurrentQuestion.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
         ExplanationText = CurrentQuestion.Explanation;
 
         foreach (var optItem in CurrentOptions)
         {
-            bool isThisSelected = string.Equals(optItem.Text.Trim(), answer.Trim(), StringComparison.OrdinalIgnoreCase);
+            bool isThisSelected = !string.IsNullOrEmpty(answer) && string.Equals(optItem.Text.Trim(), answer.Trim(), StringComparison.OrdinalIgnoreCase);
             bool isThisCorrect = string.Equals(optItem.Text.Trim(), CurrentQuestion.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
 
             if (isThisSelected)
@@ -597,10 +611,10 @@ public partial class TestViewModel : ObservableObject, IDisposable
 
         if (IsAdaptiveMode && _adaptiveQuizService != null)
         {
-            int selectedOptIndex = 0;
+            int selectedOptIndex = -1;
             for (int i = 0; i < CurrentOptions.Count; i++)
             {
-                if (string.Equals(CurrentOptions[i].Text.Trim(), answer.Trim(), StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(answer) && string.Equals(CurrentOptions[i].Text.Trim(), answer.Trim(), StringComparison.OrdinalIgnoreCase))
                 {
                     selectedOptIndex = i;
                     break;
@@ -641,7 +655,7 @@ public partial class TestViewModel : ObservableObject, IDisposable
             if (!IsAnswerSubmitted)
             {
                 // Auto submit empty/current answer if user clicks next directly
-                SubmitAnswer();
+                SubmitAnswerInternal(allowEmpty: true);
             }
 
             if (CurrentQuestionIndex + 1 < _allQuestions.Count)
@@ -727,7 +741,7 @@ public partial class TestViewModel : ObservableObject, IDisposable
 
     private void LoadAdaptiveQuestion(AdaptiveQuestionDto adaptiveQ)
     {
-        CurrentQuestionIndex = adaptiveQ.QuestionIndex;
+        CurrentQuestionIndex = Math.Max(0, adaptiveQ.QuestionIndex - 1);
         var dummyWord = new WordDto(
             Id: adaptiveQ.WordId,
             Term: adaptiveQ.PromptTerm,
@@ -762,6 +776,7 @@ public partial class TestViewModel : ObservableObject, IDisposable
         CurrentQuestion = testQ;
         CalibratedLevel = adaptiveQ.DifficultyLevel;
         CalibratedLevelDisplay = adaptiveQ.DifficultyLevel.ToString();
+        IsLastQuestion = adaptiveQ.QuestionIndex >= TotalQuestions;
 
         ProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), adaptiveQ.QuestionIndex, TotalQuestions);
         ProgressPercent = (double)adaptiveQ.QuestionIndex / TotalQuestions * 100.0;
@@ -967,6 +982,7 @@ public partial class TestViewModel : ObservableObject, IDisposable
 
     public void UpdateLanguageState()
     {
+        OnPropertyChanged(nameof(NextButtonText));
         if (IsTestingMode && TotalQuestions > 0)
         {
             ProgressText = string.Format(_localizationService.GetString("Quiz_ProgressFormat"), CurrentQuestionIndex + 1, TotalQuestions);

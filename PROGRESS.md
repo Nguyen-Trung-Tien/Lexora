@@ -1,7 +1,7 @@
 # 🚀 Lexora Development & Optimization Progress
 
 ## 📊 Quality Gates Benchmark
-- **Application Version**: `v1.6.0` (Comprehensive Architecture & Fluent 2 S-Curve Roadmap Upgrade)
+- **Application Version**: `v1.6.1` (Production Audit, Adaptive CAT Quiz Bugfixes & Dynamic Action Buttons)
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
 - **Automated Tests**: **455 / 455 Tests Passing** (396 Unit Tests + 59 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
@@ -193,6 +193,19 @@
   - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
 - **Quality Gate Benchmark**:
   - Verified clean build (`0 Warning(s)`, `0 Error(s)`) and test suite passing at **455 / 455 Tests Passing** (396 Unit Tests + 59 Integration Tests).
+
+### 13. Lexora v1.6.1 — Production Audit, Adaptive CAT Quiz Fixes & UI Flow Optimization
+- **Adaptive CAT Quiz Option Matching Hardening**:
+  - Initialized `selectedOptIndex = -1` in `TestViewModel.cs`, eliminating scoring false-positives on typed or skipped answers when correct option index is 0.
+- **Skipped Question Scoring & Evaluation Counter Integrity**:
+  - Implemented `SubmitAnswerInternal(allowEmpty: true)` upon next question auto-submission, preventing skipped questions from being omitted from evaluation results.
+- **Adaptive Quiz Progress Alignment**:
+  - Normalized `CurrentQuestionIndex` to 0-based in `LoadAdaptiveQuestion`, synchronizing `Quiz_ProgressFormat` and progress percentage accurately from question 1.
+- **Dynamic Last Question Action Button**:
+  - Bound `NextButtonText` and `NextButtonGlyph` in `TestPage.xaml` to dynamically transition from "Next Question" to "Finish Test" (`Test_FinishTest`) with a checkmark icon `\uE73E` on the final exam question.
+- **Synchronized Version Bump to 1.6.1**:
+  - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+
 
 
 

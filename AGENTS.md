@@ -219,12 +219,12 @@ dotnet build Lexora.slnx
 dotnet test Lexora.slnx --no-build
 
 # 3. Packaging & Installer Verification (When modifying deployment scripts)
-powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.0"
+powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.1"
 ```
 
 ### Current Quality Gate Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)`.
-- **Test Suite**: **440 / 440 Tests Passing** (388 Unit Tests + 52 Integration Tests, 0 Failed, 0 Skipped).
+- **Test Suite**: **455 / 455 Tests Passing** (396 Unit Tests + 59 Integration Tests, 0 Failed, 0 Skipped).
 
 ---
 

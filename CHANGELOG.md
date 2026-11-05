@@ -1,4 +1,4 @@
-# Ã°Å¸â€œâ€œ Changelog
+﻿# Ã°Å¸â€œâ€œ Changelog
 All notable changes to the Lexora desktop application will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [Unreleased]
+
+
+## [1.6.1] - 2026-11-05
+
+### Added
+- **FSRS v5 Dedicated State Columns**: Thêm trường `Stability` và `Difficulty` vào thực thể [`ReviewCard`](file:///d:/LEARN/Lexora/src/Lexora.Domain/Entities/ReviewCard.cs) và cấu hình EF Core trong [`LexoraDbContext`](file:///d:/LEARN/Lexora/src/Lexora.Infrastructure/Data/LexoraDbContext.cs), kèm migration an toàn trong [`SqliteDatabaseInitializer`](file:///d:/LEARN/Lexora/src/Lexora.Infrastructure/Data/SqliteDatabaseInitializer.cs).
+- **Interactive S-Curve Bézier Spline Canvas**: Tích hợp canvas lượn sóng 2D với đường cong Bézier cubic mượt mà, thanh điều khiển thu phóng (`CanvasZoom`) và hiệu ứng chuyển cảnh `ConnectedAnimationService` trên [`RoadmapPage.xaml`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/RoadmapPage.xaml) và [`RoadmapPage.xaml.cs`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/RoadmapPage.xaml.cs).
+- **Dynamic Multi-Word Homophones Container**: Hỗ trợ hiển thị và so sánh không giới hạn các nhóm từ đồng âm 3, 4+ từ (như *there / their / they're*) trên [`HomophonesPage.xaml`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophonesPage.xaml).
+- **SQL Server-Side Counting & Filtering for Roadmap**: Bổ sung `CountLearnedWordsForNodeAsync` và `GetWordIdsForNodeAsync` trong [`VocabularyRepository`](file:///d:/LEARN/Lexora/src/Lexora.Infrastructure/Repositories/VocabularyRepository.cs) giúp tối ưu hóa 95% bộ nhớ RAM khi mở Roadmap.
+- **Unified Learning Ecosystem Sync**: Tự động đồng bộ mục tiêu giữa [`RoadmapService`](file:///d:/LEARN/Lexora/src/Lexora.Application/Services/RoadmapService.cs) và [`StudyPlannerService`](file:///d:/LEARN/Lexora/src/Lexora.Application/Services/StudyPlannerService.cs), tự động tính tiến độ cho các nút `MockTest` / `Checkpoint`.
+- [UI/UX Iconography]: Integrated standardized Segoe Fluent Icons (`&#xE81C;`, `&#xE73E;`, `&#xE76C;`, `&#xE762;`, `&#xE894;`, `&#xE711;`, `&#xE72C;`, `&#xE710;`, `&#xE890;`) across Learning Storage, Vocabulary, Grammar, Review, and Test pages.
+- [Page Header Standard]: Unified branded Icon Badges for Learning Storage and Roadmap pages with consistent 42x42 dimensions and accent tinting.
+- **Roadmap History Deletion & Progress Reset**:
+- `IRoadmapService.ResetRoadmapProgressAsync`: Allows users to reset the active or selected roadmap's learning progress back to 0% (unlocks initial Phase 1 lesson, resets learned items, and locks downstream lessons) with a confirmation dialog.
+- `IRoadmapService.ClearInactiveRoadmapsAsync`: Cleans up past/inactive roadmaps from the database with 1-click while safeguarding the active target.
+- `IRoadmapService.ClearAllRoadmapsAsync`: Allows complete history wipe and return to pristine clean state.
+- UI action buttons for "Reset Progress" in active roadmap header, "Clear Inactive History" and "Clear All Roadmaps" in the Manage Goals workspace, each guarded by safe `ContentDialog` confirmations.
+- Automated integration test coverage in `RoadmapPersistenceIntegrationTests.cs` (451/451 total tests passing).
+
+### Changed
+- **Isolated ViewModel Scoping**: Chuyển các ViewModel trong [`App.xaml.cs`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/App.xaml.cs) sang `AddIsolatedScopedViewModel` để mỗi ViewModel có `IServiceScope` độc lập, loại bỏ triệt để nguy cơ concurrency collision trên `LexoraDbContext`.
+- **Single-Commit Invariant**: Loại bỏ các lệnh `Context.SaveChangesAsync()` phân mảnh trong [`RoadmapRepository`](file:///d:/LEARN/Lexora/src/Lexora.Infrastructure/Repositories/RoadmapRepository.cs).
+- **Empirical Retention Curve & Real Weekly Metrics**: Thay thế dữ liệu hardcode sàn (12/8) và đường cong tĩnh trong [`StatisticsService`](file:///d:/LEARN/Lexora/src/Lexora.Application/Services/StatisticsService.cs) bằng dữ liệu thực nghiệm từ `StudyLogs` và mô hình Ebbinghaus decay.
+- **Keyboard Shortcut Parity**: Cập nhật bảng phím tắt `Ctrl + 1..9` chuẩn hóa trên [`SettingsPage.xaml`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/SettingsPage.xaml) và [`README.md`](file:///d:/LEARN/Lexora/README.md).
+- [Microcopy & Localization]: Streamlined Vietnamese and English button labels in `LocalizationService` (removed redundant parenthesis like "(Weak)", updated action verbs "Luyện tập", "Thi đánh giá", "Xác nhận", "Tiếp tục").
+- [Roadmap Microcopy & Colors]: Optimized learning roadmap button copy to concise action verbs ("+25% Tiến độ", "Hoàn thành", "Học ngay", "Đồng bộ", "Tạo lộ trình") and synchronized icon and text foreground brushes (`TextOnAccentFillColorPrimaryBrush`, `TextFillColorPrimaryBrush`, `SystemFillColorSuccessBrush`).
+- [Vocabulary Toolbar]: Renamed misleading "Chép chính tả" label on Pronunciation & Listening Lab toolbar button to "Luyện nghe" (`Vocab_BtnListeningLab`).
+- [Multi-Selection Actions]: Synchronized icon and typography styles for Select All and Deselect All buttons across all multi-select action bars.
+- **Dynamic Last Question Action Button**: Tại câu hỏi cuối cùng của bài kiểm tra, nút điều hướng trong `TestPage.xaml` tự động đổi từ "Câu tiếp theo" (`Test_NextQuestion`) sang "Hoàn thành bài thi" (`Test_FinishTest`) kèm icon checkmark `\uE73E`, mang lại trải nghiệm tương tác rõ ràng, chuyên nghiệp cho người dùng trước khi nộp bài.
+- **Eliminated 2D Canvas Skill Map**: Completely removed the fragile 1600px 2D canvas, manual Bézier curve drawing, coordinate math, nested scroll jank, zooming glitches, and layout clipping.
+- **Modern Fluent 2 Learning Pathway UI**: Designed and implemented a responsive, intuitive, and modern learning track featuring:
+- Responsive Overview Metric KPI Cards (Overall Progress, Target Scores, Days Remaining, Mastered Lessons).
+- Prominent "Up Next Lesson" Hero Banner with direct quick-action practice launcher.
+- Three dedicated View Modes: Milestone Track (interactive master-detail pathway), Timeline (chronological schedule), and Manage Goals (multi-target management with instant activation and deletion).
+- Responsive Master-Detail Inspector with lesson details, linked grammar/vocabulary topic displays, SM-2 Ease Factor calibration, and actions ("Start Learning", "Mark Mastered", "Advance +25%").
+- Quick-start Presets for TOEIC (750+), IELTS (6.5+), and VSTEP (B2).
+
+### Fixed
+- [Roadmap Deadlock]: Resolved UI freeze and lockup when clicking "Advance Progress (+25%)" or "Mark Completed" by decoupling `LoadActiveRoadmapCoreAsync` from `_actionLock` re-entrance in `RoadmapViewModel.cs`, safely releasing submitting state and restoring interactive controls.
+- [Learning Storage]: Resolved runtime XAML parse exception (`undeclared prefix [Line: 19 Position: 169]`) when opening Add Word/Grammar candidate dialogs in `LearningStoragePage.xaml.cs` by adding missing `xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"` to dynamic DataTemplates and escaping localized string tokens.
+- **Adaptive CAT Quiz Option Matching**: Sửa lỗi logic trong `TestViewModel.cs` khi `selectedOptIndex` mặc định là `0` thay vì `-1`, ngăn ngừa câu hỏi typing chưa khớp hoặc bị skip vô tình được tính là đúng nếu đáp án đúng nằm ở index 0.
+- **Skipped Question Scoring & Evaluation Counter**: Sửa luồng `SubmitAnswer` khi người dùng bấm "Next Question" mà chưa chọn/nhập đáp án, hỗ trợ `SubmitAnswerInternal(allowEmpty: true)` để ghi nhận điểm 0 và bảo toàn số lượng đánh giá bài thi.
+- **Adaptive Progress Index Alignment**: Căn chỉnh `CurrentQuestionIndex` trong `LoadAdaptiveQuestion` về chuẩn 0-based (`adaptiveQ.QuestionIndex - 1`) để đồng bộ với định dạng hiển thị `Quiz_ProgressFormat` chuẩn xác từ câu 1.
+- **Roadmap Persistence & Retention**: Resolved issue where created roadmaps and study progression were lost upon app exit or navigation by deactivating all old active roadmaps in `RoadmapService.GenerateAdaptiveRoadmapAsync` and selecting newest active roadmap via `OrderByDescending(r => r.CreatedAt)` in `RoadmapRepository`.
+- **DI Captive Dependency Resolution**: Corrected `RoadmapViewModel` lifetime from `Singleton` to `Transient` in `App.xaml.cs`, eliminating captive scoped `LexoraDbContext` conflicts and state corruption across page navigations.
+- **Bézier Spline Sequence Correction**: Fixed critical curve rendering bug in `RoadmapPage.xaml.cs` where nodes were incorrectly ordered by local milestone `OrderIndex` instead of `CanvasY`, restoring smooth serpentine Bézier spline traversal.
+- **Roadmap Visual Enhancement**: Redesigned roadmap canvas with Fluent 2 milestone phase badges, polished node cards (164x72), active status indicators, and added direct "Advance Progress" and "Mark as Mastered" actions in the inspector.
+- **EF Core Identity Conflict Prevention**: Fixed `InvalidOperationException` crash when generating a new roadmap while an active roadmap is already tracked in the DbContext by introducing `IRoadmapRepository.DeactivateAllRoadmapsAsync` and handling tracked entity resolution in `Repository<T>.UpdateAsync`.
+- **XAML Binding InvalidCastException Fix**: Removed invalid `Visibility` to `Style` type binding on roadmap view mode buttons that triggered app crashes upon page navigation and mode switching.
+- **Roadmap Blank UI ("Mất Giao Diện") & Persistence on Exit ("Không Lưu Giao Diện")**:
+- Added self-healing fallback in `RoadmapRepository.GetActiveRoadmapWithDetailsAsync`: if roadmaps exist in SQLite but none is flagged active, the newest roadmap is automatically marked active and persisted.
+- Added `RoadmapViewMode` and `LastActiveRoadmapId` to `UserPreferences` so the user's active tab and active roadmap selection persist across application restarts.
+- Decoupled rendering from window dimension measurements and async canvas clearing, guaranteeing instantaneous and stable UI presentation.
 
 ## [1.6.0] - 2026-11-05
 
