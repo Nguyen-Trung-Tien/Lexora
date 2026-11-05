@@ -1,4 +1,4 @@
-﻿# Ã°Å¸â€œâ€œ Changelog
+# Ã°Å¸â€œâ€œ Changelog
 All notable changes to the Lexora desktop application will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [Unreleased]
+
+### Added
+- **User-Facing Release Notes Log Architecture (`release-notes/`)**: Bổ sung thư mục chuyên biệt `release-notes/` chứa ghi chú phát hành dạng Markdown chuẩn (tiếng Anh súc tích, dễ hiểu) cho từng phiên bản (`vX.Y.Z.md`) cùng tệp mẫu `template.md` và tài liệu hướng dẫn `README.md`.
+- **In-App Release Notes Log Viewer**: Tích hợp hộp thoại Fluent 2 bản địa `ReleaseNotesLogDialog` cho phép người học xem toàn bộ lịch sử cập nhật và cải tiến qua các phiên bản, hiển thị trực quan thông qua `ReleaseNotesRenderer` với công nghệ render Markdown ngoại tuyến, tự động thích ứng với Light/Dark Theme và bộ lọc phiên bản thông minh.
+- **Offline Release Notes Service Contracts**: Xây dựng `IReleaseNotesService` trong `Lexora.Application` và `ReleaseNotesService` trong `Lexora.Infrastructure` để tự động nạp, phân tích cú pháp và sắp xếp Semantic Versioning giảm dần mà không phụ thuộc kết nối Internet.
+- **Entrypoints in Settings & Help Hub**: Bổ sung nút hành động "Nhật ký phát hành / Release Notes Log" (biểu tượng `\uE81C`) trên thẻ Cập nhật phần mềm trong `SettingsPage` và Hero Banner của `HelpPage`.
+- **Agent Rules & Release Invariant Protocol**: Bổ sung Rule 08 (`08-release-notes-and-versioning.md`) và cập nhật `AGENTS.md` bắt buộc AI Agent và lập trình viên luôn tạo tệp release notes markdown cho mỗi phiên bản mới phát hành.
+
+### Changed
+- **Enhanced Release Notes Markdown Renderer**: Mở rộng `ReleaseNotesRenderer` hỗ trợ code tokens (inline backticks), blockquotes trích dẫn, khử trùng lặp tiêu đề `skipTopLevelTitle` và đảm bảo chống tràn 100% trên màn hình độ phân giải thấp (1366x768).
 
 
 ## [1.6.1] - 2026-11-05

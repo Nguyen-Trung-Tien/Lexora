@@ -224,7 +224,31 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.1"
 
 ### Current Quality Gate Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)`.
-- **Test Suite**: **455 / 455 Tests Passing** (396 Unit Tests + 59 Integration Tests, 0 Failed, 0 Skipped).
+- **Test Suite**: **459 / 459 Tests Passing** (400 Unit Tests + 59 Integration Tests, 0 Failed, 0 Skipped).
+
+### 8.1 Release Notes Log & User-Facing Documentation Protocol (`release-notes/`)
+> [!IMPORTANT]
+> **Mandatory Invariant for Every New Release**: Whenever a new application version is created, tagged, or bumped, developers and AI agents **MUST** create a dedicated Markdown release notes file in `release-notes/vX.Y.Z.md` and verify its presentation in the desktop client.
+
+1. **Folder Architecture & File Naming**:
+   - Location: `release-notes/` at the repository root.
+   - Naming convention: `vX.Y.Z.md` (e.g. `v1.6.1.md`, `v1.6.0.md`).
+   - Template: Must follow [`release-notes/template.md`](file:///d:/LEARN/Lexora/release-notes/template.md).
+2. **Authoring Standard (User-Centric & Markdown)**:
+   - **Simple, Concise, Easy to Understand**: Focus strictly on learner benefits and visible capabilities. Avoid internal class names, repository interfaces, or git commit diffs.
+   - **Standard Markdown Structure**:
+     - `# Lexora vX.Y.Z — [Tiêu đề bản phát hành / Release Title]`
+     - `> Ngày phát hành: YYYY-MM-DD | Phiên bản: X.Y.Z`
+     - `## 🌟 Điểm nổi bật (Highlights)`: 1-2 sentence executive overview.
+     - `## 🚀 Tính năng mới (New Features)`: Bullet points highlighting value for English exam preparation (TOEIC, IELTS, VSTEP).
+     - `## ⚡ Cải tiến & Trải nghiệm (Improvements & UX)`: Performance, layout responsiveness, Fluent 2 visual clarity, shortcuts.
+     - `## 🛠️ Sửa lỗi & Độ ổn định (Bug Fixes & Stability)`: Resolved issues, crash prevention, data security.
+     - `## 🇬🇧 English Summary`: Bilingual parity for global and international users.
+3. **In-App Release Notes Viewer Integration**:
+   - The application bundles `release-notes/` via `Lexora.Presentation.csproj` Content copy (`CopyToOutputDirectory="PreserveNewest"`).
+   - Domain contract `IReleaseNotesService` and infrastructure implementation `ReleaseNotesService` read and parse markdown notes offline with descending semantic version sorting.
+   - Native WinUI 3 dialog `ReleaseNotesLogDialog` combines with `ReleaseNotesRenderer` to render markdown with Segoe Fluent Icons, version selection, and high-contrast adaptability.
+   - Accessible from both `SettingsPage` (under Software Updates: "Nhật ký phát hành") and `HelpPage` (Help Center hero action).
 
 ---
 
@@ -269,6 +293,10 @@ Lexora/
 ├── changelog/                                # Changelog fragment management
 │   ├── unreleased/                           # PR/feature changelog fragments
 │   └── archive/                              # Archived version changelogs
+├── release-notes/                            # User-facing Release Notes log (Markdown format per version)
+│   ├── README.md                             # Release notes guidelines & authoring rules
+│   ├── template.md                           # Standard release note markdown template
+│   └── vX.Y.Z.md                             # Version-specific release notes (v1.6.1.md, v1.6.0.md, ...)
 ├── docs/                                     # Architecture, specs & documentation hub
 │   ├── adr/                                  # Architecture Decision Records (ADRs)
 │   ├── architecture.md                       # System architecture & Clean Architecture layout
@@ -323,8 +351,9 @@ Before marking any task as complete, verify:
 - [ ] **SM-2 Engine Compliance**: Spaced repetition logic preserves $EF \ge 1.3$ and logs study records.
 - [ ] **Token Economy Enforced**: Only targeted file slices viewed (`grep_search` + `view_file`); in-place diff edits instead of full-file overwrites; no unpaged output dumps.
 - [ ] **Anti-Hallucination & Type Reusability**: Existing types and services verified before declaring new contracts; Clean Architecture cascade strictly followed.
+- [ ] **Release Notes Log Created**: User-friendly, concise markdown release note created in `release-notes/vX.Y.Z.md` following `template.md` and accessible in `ReleaseNotesLogDialog`.
 - [ ] **Clean Build**: `dotnet build Lexora.slnx` completes with **0 warnings and 0 errors**.
-- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 435 tests**.
+- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 459 tests**.
 
 ---
 

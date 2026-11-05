@@ -51,6 +51,10 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             {
                 DispatcherQueue.TryEnqueue(UpdateInlineReleaseNotes);
             }
+            else if (e.PropertyName == nameof(ViewModel.CurrentVersionNotes) || (e.PropertyName == nameof(ViewModel.IsShowingCurrentVersionNotes) && ViewModel.IsShowingCurrentVersionNotes))
+            {
+                DispatcherQueue.TryEnqueue(UpdateInlineCurrentVersionNotes);
+            }
         };
 
         ViewModel.UpdateFound += async (s, updateInfo) =>
@@ -68,6 +72,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
             UpdateInlineReleaseNotes();
+            UpdateInlineCurrentVersionNotes();
             ViewModel.UpdateLanguageState();
             Bindings.Update();
         }
@@ -91,7 +96,8 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
             UpdateInlineReleaseNotes();
-            UpdateInlineReleaseNotes();
+            UpdateInlineCurrentVersionNotes();
+            UpdateInlineCurrentVersionNotes();
             Bindings.Update();
         }
 
@@ -126,6 +132,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
             UpdateInlineReleaseNotes();
+            UpdateInlineCurrentVersionNotes();
 
             SpeechRateCombo.SelectedIndex = ViewModel.SpeechRate switch
             {
@@ -1047,6 +1054,31 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
         {
             Helpers.ReleaseNotesRenderer.RenderMarkdown(notes, InlineReleaseNotesPanel, this, Loc);
         }
+    }
+
+    private void UpdateInlineCurrentVersionNotes()
+    {
+        if (InlineCurrentVersionNotesPanel == null) return;
+        var notes = ViewModel.CurrentVersionNotes;
+        if (!string.IsNullOrWhiteSpace(notes))
+        {
+            Helpers.ReleaseNotesRenderer.RenderMarkdown(notes, InlineCurrentVersionNotesPanel, this, Loc);
+        }
+    }
+
+    private async void OpenReleaseNotesLog_Click(object sender, RoutedEventArgs e)
+    {
+        await ShowReleaseNotesLogDialogAsync();
+    }
+
+    private async Task ShowReleaseNotesLogDialogAsync(string? version = null)
+    {
+        var xamlRoot = this.XamlRoot ?? App.Current?.MainWindow?.Content?.XamlRoot;
+        if (xamlRoot == null) return;
+
+        var notes = await ViewModel.ReleaseNotesService.GetAllReleaseNotesAsync();
+        var dialog = new ReleaseNotesLogDialog(notes, Loc, version);
+        await dialog.ShowAsyncSafe(xamlRoot);
     }
 
     private async void OpenUpdateDetailsPopup_Click(object sender, RoutedEventArgs e)

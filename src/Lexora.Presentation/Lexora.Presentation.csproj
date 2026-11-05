@@ -33,6 +33,10 @@
     <Content Include="Assets\brand\lexora-app-icon-1024.png" />
     <Content Include="Assets\brand\lexora-icon-only.png" />
     <Content Include="Assets\brand\lexora-logo-splash.png" />
+    <Content Include="..\..\release-notes\**\*">
+      <Link>release-notes\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -92,11 +96,13 @@
       <_ViewFiles Include="$(TargetDir)Views\**\*" />
       <_ThemeFiles Include="$(TargetDir)Themes\**\*" />
       <_AssetFiles Include="$(TargetDir)Assets\**\*" />
+      <_ReleaseNotesFiles Include="$(TargetDir)release-notes\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(_PriFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_XbfFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_ViewFiles)" DestinationFolder="$(PublishDir)Views\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_ThemeFiles)" DestinationFolder="$(PublishDir)Themes\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_AssetFiles)" DestinationFolder="$(PublishDir)Assets\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_ReleaseNotesFiles)" DestinationFolder="$(PublishDir)release-notes\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

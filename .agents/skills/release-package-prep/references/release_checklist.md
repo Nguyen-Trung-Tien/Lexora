@@ -12,6 +12,7 @@ Before producing or deploying an official release package, ensure each of the fo
 
 ## 2. Changelog & Versioning
 - [ ] All PR fragments in `changelog/unreleased/` have been consolidated into `CHANGELOG.md` under `## [X.Y.Z] - YYYY-MM-DD`.
+- [ ] User-facing release note created in `release-notes/vX.Y.Z.md` following `template.md` (simple, concise, easy to understand markdown).
 - [ ] Version string is updated in `build-installer.ps1` (or passed via `-Version "X.Y.Z"`).
 - [ ] `README.md` and `PROGRESS.md` version badges match.
 

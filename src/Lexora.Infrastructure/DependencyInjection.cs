@@ -56,6 +56,9 @@ public static class DependencyInjection
         // Production Software Update Service
         services.AddSingleton<IUpdateService, UpdateService>();
 
+        // Release Notes Log Service
+        services.AddSingleton<IReleaseNotesService, ReleaseNotesService>();
+
         return services;
     }
 }

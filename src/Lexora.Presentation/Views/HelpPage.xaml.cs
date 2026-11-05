@@ -182,4 +182,15 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
                 : null;
         }
     }
+
+    private async void OpenReleaseNotesLog_Click(object sender, RoutedEventArgs e)
+    {
+        var xamlRoot = this.XamlRoot ?? App.Current?.MainWindow?.Content?.XamlRoot;
+        if (xamlRoot == null || App.Current?.Services == null) return;
+
+        var releaseNotesService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IReleaseNotesService>();
+        var notes = await releaseNotesService.GetAllReleaseNotesAsync();
+        var dialog = new ReleaseNotesLogDialog(notes, Loc);
+        await dialog.ShowAsyncSafe(xamlRoot);
+    }
 }

@@ -19,6 +19,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private readonly IUserPreferencesService _preferencesService;
     private readonly IUpdateService _updateService;
     private readonly IToastNotificationService _toastService;
+    private readonly IReleaseNotesService _releaseNotesService;
     private readonly DispatcherQueue? _dispatcherQueue;
     private readonly EventHandler? _languageChangedHandler;
 
@@ -168,7 +169,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         IAudioPlayerService audioService,
         IUserPreferencesService preferencesService,
         IUpdateService updateService,
-        IToastNotificationService toastService)
+        IToastNotificationService toastService,
+        IReleaseNotesService releaseNotesService)
     {
         _themeService = themeService;
         _locService = locService;
@@ -179,6 +181,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         _preferencesService = preferencesService;
         _updateService = updateService;
         _toastService = toastService;
+        _releaseNotesService = releaseNotesService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
             ?? App.Current?.UIDispatcherQueue
             ?? App.Current?.MainWindow?.DispatcherQueue;
@@ -281,12 +284,35 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(ExpandUpdateNotesText));
     }
 
+    public IReleaseNotesService ReleaseNotesService => _releaseNotesService;
+
     public void UpdateCurrentVersionNotes()
     {
+        _ = LoadCurrentVersionNotesAsync();
+    }
+
+    private async Task LoadCurrentVersionNotesAsync()
+    {
+        try
+        {
+            var note = await _releaseNotesService.GetCurrentVersionReleaseNoteAsync();
+            if (note != null && !string.IsNullOrWhiteSpace(note.MarkdownContent))
+            {
+                RunOnUI(() => CurrentVersionNotes = note.MarkdownContent);
+                return;
+            }
+        }
+        catch
+        {
+            // fallback
+        }
+
         var isVi = _locService.CurrentLanguage == "vi-VN";
-        CurrentVersionNotes = isVi
+        var fallback = isVi
             ? "• Lộ trình học tập tương tác (Interactive Roadmap Canvas): Hệ thống chặng học trực quan với đồ thị Bézier thông minh cho TOEIC, IELTS và VSTEP.\n• Thuật toán Spaced Repetition kép: Tích hợp SM-2 kinh điển và FSRS tiên tiến, tự động hiệu chuẩn Ease Factor.\n• Phòng Luyện Nghe & Phát Âm (Pronunciation Lab): Hỗ trợ giọng đọc chuẩn UK/US cùng hai tầng âm thanh (Cached Human Audio & Windows TTS).\n• Kiểm tra thích ứng (Adaptive Test Mode): Tự động cá nhân hóa bài thi và phân loại câu hỏi theo độ khó CEFR.\n• Tối ưu hóa giao diện Fluent 2: Hỗ trợ hoàn hảo chế độ Sáng (Light) và Tối (Dark), con trỏ chuột tương tác mượt mà."
             : "• Interactive Learning Roadmap: Dynamic visual skill tree with smooth Bézier splines for TOEIC, IELTS, and VSTEP preparation.\n• Dual Spaced Repetition Engines: Classic SM-2 and next-generation FSRS with dynamic Ease Factor calibration.\n• Pronunciation & Listening Lab: High-fidelity UK/US audio playback with cached human pronunciation and speech synthesis fallback.\n• Adaptive Testing & Quizzes: Tailored difficulty calibration matching real CEFR proficiencies.\n• Fluent 2 Visual Enhancements: Flawless Light & Dark mode rendering, high-contrast clarity, and unified interactive cursor pointers.";
+
+        RunOnUI(() => CurrentVersionNotes = fallback);
     }
 
     public void RefreshUpdateTexts()
