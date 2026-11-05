@@ -69,6 +69,20 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     public partial bool IsShowingCurrentVersionNotes { get; set; } = false;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ReleaseNotesMaxHeight))]
+    [NotifyPropertyChangedFor(nameof(ExpandUpdateNotesText))]
+    [NotifyPropertyChangedFor(nameof(ExpandUpdateNotesGlyph))]
+    public partial bool IsExpandedUpdateNotes { get; set; } = false;
+
+    public double ReleaseNotesMaxHeight => IsExpandedUpdateNotes ? double.PositiveInfinity : 360.0;
+
+    public string ExpandUpdateNotesText => IsExpandedUpdateNotes
+        ? _locService.GetString("Settings_CollapseNotes")
+        : _locService.GetString("Settings_ExpandFullNotes");
+
+    public string ExpandUpdateNotesGlyph => IsExpandedUpdateNotes ? "\uE70E" : "\uE70D";
+
+    [ObservableProperty]
     public partial string AvailableUpdateFileSizeText { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -261,6 +275,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
         UpdateCurrentVersionNotes();
         OnPropertyChanged(nameof(CurrentVersionDetailsTitle));
+        OnPropertyChanged(nameof(ExpandUpdateNotesText));
     }
 
     public void UpdateCurrentVersionNotes()
@@ -275,6 +290,12 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     public void ToggleCurrentVersionNotes()
     {
         IsShowingCurrentVersionNotes = !IsShowingCurrentVersionNotes;
+    }
+
+    [RelayCommand]
+    public void ToggleExpandUpdateNotes()
+    {
+        IsExpandedUpdateNotes = !IsExpandedUpdateNotes;
     }
 
     public void UpdateVoiceStatus()
@@ -603,6 +624,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                     AvailableUpdate = updateInfo;
                     UpdateAvailable = true;
                     IsShowingCurrentVersionNotes = false;
+                    IsExpandedUpdateNotes = false;
                     UpdateStatusMessage = _locService.GetString("Settings_UpdateAvailable");
 
                     if (updateInfo.FileSizeBytes > 0)

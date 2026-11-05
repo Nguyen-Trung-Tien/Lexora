@@ -799,8 +799,8 @@
                                     <TextBlock Text="{x:Bind Loc.GetString('Settings_HideReleaseNotes')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                 </Button>
                             </Grid>
-                            <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                <TextBlock Text="{x:Bind ViewModel.CurrentVersionNotes, Mode=OneWay}" FontSize="12.5" LineHeight="20" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
+                            <ScrollViewer MaxHeight="360" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <TextBlock Text="{x:Bind ViewModel.CurrentVersionNotes, Mode=OneWay}" FontSize="12.5" LineHeight="22" LineStackingStrategy="MaxHeight" IsTextSelectionEnabled="True" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
                             </ScrollViewer>
                         </StackPanel>
                     </Border>
@@ -866,9 +866,18 @@
                             <!-- Release Notes Preview -->
                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,10">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Text="{x:Bind Loc.GetString('Settings_ReleaseNotes')}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                        <TextBlock Text="{x:Bind ViewModel.AvailableUpdate.ReleaseNotes, Mode=OneWay, FallbackValue=''}" FontSize="12.5" LineHeight="18" TextWrapping="Wrap" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Settings_ReleaseNotes')}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Command="{x:Bind ViewModel.ToggleExpandUpdateNotesCommand}"
+                                                Style="{ThemeResource SubtleButtonStyle}" Padding="6,2" CornerRadius="4">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <FontIcon Glyph="{x:Bind ViewModel.ExpandUpdateNotesGlyph, Mode=OneWay}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.ExpandUpdateNotesText, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                    <ScrollViewer MaxHeight="{x:Bind ViewModel.ReleaseNotesMaxHeight, Mode=OneWay}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                        <TextBlock Text="{x:Bind ViewModel.AvailableUpdate.ReleaseNotes, Mode=OneWay, FallbackValue=''}" FontSize="12.5" LineHeight="22" LineStackingStrategy="MaxHeight" IsTextSelectionEnabled="True" TextWrapping="Wrap" />
                                     </ScrollViewer>
                                 </StackPanel>
                             </Border>
