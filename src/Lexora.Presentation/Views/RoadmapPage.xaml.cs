@@ -599,24 +599,25 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             var border = new Border
             {
                 Margin = new Thickness(0, 0, 0, 16),
-                Padding = new Thickness(18),
+                Padding = new Thickness(20),
                 Background = GetThemeBrush("CardBackgroundFillColorDefaultBrush"),
                 BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(12)
             };
 
-            var stack = new StackPanel { Spacing = 12 };
+            var stack = new StackPanel { Spacing = 14 };
 
-            var header = new Grid { ColumnSpacing = 8 };
+            // Milestone Header: Phase + Title on Left, Stats & Date on Right
+            var header = new Grid { ColumnSpacing = 16 };
             header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            var titleRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+            var titleRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10, VerticalAlignment = VerticalAlignment.Center };
             var phasePill = new Border
             {
-                Padding = new Thickness(6, 2, 6, 2),
-                CornerRadius = new CornerRadius(4),
+                Padding = new Thickness(8, 3, 8, 3),
+                CornerRadius = new CornerRadius(6),
                 Background = GetThemeBrush("AccentFillColorDefaultBrush")
             };
             phasePill.Child = new TextBlock
@@ -632,88 +633,283 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
             {
                 Text = milestone.Title,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-                Style = (Style)App.Current.Resources["BodyStrongTextBlockStyle"]
+                Style = (Style)App.Current.Resources["SubtitleTextBlockStyle"],
+                FontSize = 16
             });
             Grid.SetColumn(titleRow, 0);
             header.Children.Add(titleRow);
 
+            var rightSummary = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12, VerticalAlignment = VerticalAlignment.Center };
+
+            // Milestone Progress Summary Badge
+            var progressBadge = new Border
+            {
+                Padding = new Thickness(10, 4, 10, 4),
+                CornerRadius = new CornerRadius(6),
+                Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
+                BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
+                BorderThickness = new Thickness(1)
+            };
+            var pbStack = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, VerticalAlignment = VerticalAlignment.Center };
+            pbStack.Children.Add(new FontIcon
+            {
+                Glyph = "\uE73E",
+                FontSize = 12,
+                Foreground = milestone.IsCompleted 
+                    ? GetThemeBrush("SystemFillColorSuccessBrush") 
+                    : GetThemeBrush("AccentTextFillColorPrimaryBrush")
+            });
+            pbStack.Children.Add(new TextBlock
+            {
+                Text = $"{milestone.CompletedNodesCount}/{milestone.TotalNodesCount} Mastered ({milestone.ProgressPercentage:F0}%)",
+                FontSize = 11.5,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                Foreground = GetThemeBrush("TextFillColorPrimaryBrush")
+            });
+            progressBadge.Child = pbStack;
+            rightSummary.Children.Add(progressBadge);
+
             if (!string.IsNullOrWhiteSpace(milestone.TargetDateDisplay))
             {
-                var dateText = new TextBlock
+                var datePill = new Border
+                {
+                    Padding = new Thickness(10, 4, 10, 4),
+                    CornerRadius = new CornerRadius(6),
+                    Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
+                    BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
+                    BorderThickness = new Thickness(1)
+                };
+                var dateStack = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, VerticalAlignment = VerticalAlignment.Center };
+                dateStack.Children.Add(new FontIcon { Glyph = "\uE787", FontSize = 12, Foreground = GetThemeBrush("TextFillColorSecondaryBrush") });
+                dateStack.Children.Add(new TextBlock
                 {
                     Text = milestone.TargetDateDisplay,
-                    FontSize = 11,
-                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
-                    HorizontalAlignment = HorizontalAlignment.Right
-                };
-                Grid.SetColumn(dateText, 1);
-                header.Children.Add(dateText);
+                    FontSize = 11.5,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush")
+                });
+                datePill.Child = dateStack;
+                rightSummary.Children.Add(datePill);
             }
+
+            Grid.SetColumn(rightSummary, 1);
+            header.Children.Add(rightSummary);
             stack.Children.Add(header);
 
-            // Nodes timeline items
+            // Nodes timeline items (Full-width, rich horizontal distribution)
             foreach (var node in milestone.Nodes)
             {
                 var rowBorder = new Border
                 {
                     Margin = new Thickness(0, 3, 0, 3),
-                    Padding = new Thickness(12, 10, 12, 10),
+                    Padding = new Thickness(14, 12, 14, 12),
                     Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
                     BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
                     BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(8)
+                    CornerRadius = new CornerRadius(10)
                 };
 
-                var rowGrid = new Grid { ColumnSpacing = 12 };
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                var rowGrid = new Grid { ColumnSpacing = 16 };
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 0: Status Icon Badge
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // 1: Title + Reference + Type Badge
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 2: Target Items Count
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 3: Progress Bar & %
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 4: Status Pill
+                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 5: Action Button
 
-                var icon = new FontIcon
+                // 0: Status Icon Badge (34x34)
+                var iconBadge = new Border
                 {
-                    FontSize = 14,
-                    Foreground = node.Status == NodeStatus.Mastered 
+                    Width = 34,
+                    Height = 34,
+                    CornerRadius = new CornerRadius(17),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
+                    BorderBrush = node.Status == NodeStatus.Mastered 
                         ? GetThemeBrush("SystemFillColorSuccessBrush") 
-                        : GetThemeBrush("AccentTextFillColorPrimaryBrush"),
-                    Glyph = node.StatusGlyph
+                        : (node.Status is NodeStatus.InProgress or NodeStatus.Available 
+                            ? GetThemeBrush("AccentFillColorDefaultBrush") 
+                            : GetThemeBrush("CardStrokeColorDefaultBrush")),
+                    BorderThickness = new Thickness(1.5),
+                    Child = new FontIcon
+                    {
+                        FontSize = 13,
+                        Glyph = node.StatusGlyph,
+                        Foreground = node.Status == NodeStatus.Mastered 
+                            ? GetThemeBrush("SystemFillColorSuccessBrush") 
+                            : (node.Status is NodeStatus.InProgress or NodeStatus.Available 
+                                ? GetThemeBrush("AccentTextFillColorPrimaryBrush") 
+                                : GetThemeBrush("TextFillColorSecondaryBrush")),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
                 };
-                Grid.SetColumn(icon, 0);
-                rowGrid.Children.Add(icon);
+                Grid.SetColumn(iconBadge, 0);
+                rowGrid.Children.Add(iconBadge);
 
-                var titleStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Spacing = 2 };
-                titleStack.Children.Add(new TextBlock { Text = node.Title, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
-                titleStack.Children.Add(new TextBlock
+                // 1: Title + Reference + Type Badge + Ease Factor
+                var titleStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Spacing = 3 };
+                var titleRowNode = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, VerticalAlignment = VerticalAlignment.Center };
+                titleRowNode.Children.Add(new TextBlock
+                {
+                    Text = node.Title,
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    FontSize = 13.5,
+                    TextTrimming = TextTrimming.CharacterEllipsis
+                });
+
+                var typePill = new Border
+                {
+                    Padding = new Thickness(6, 1, 6, 1),
+                    CornerRadius = new CornerRadius(4),
+                    Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
+                    BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
+                    BorderThickness = new Thickness(1)
+                };
+                typePill.Child = new TextBlock
+                {
+                    Text = node.TypeDisplay,
+                    FontSize = 10,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush")
+                };
+                titleRowNode.Children.Add(typePill);
+                titleStack.Children.Add(titleRowNode);
+
+                var descRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+                descRow.Children.Add(new TextBlock
                 {
                     Text = node.ReferenceDisplay,
-                    FontSize = 11,
-                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush")
+                    FontSize = 11.5,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+                    TextTrimming = TextTrimming.CharacterEllipsis
                 });
+                descRow.Children.Add(new TextBlock
+                {
+                    Text = $"• {node.EaseFactorWeightDisplay}",
+                    FontSize = 11.5,
+                    Foreground = GetThemeBrush("TextFillColorTertiaryBrush")
+                });
+                titleStack.Children.Add(descRow);
+
                 Grid.SetColumn(titleStack, 1);
                 rowGrid.Children.Add(titleStack);
 
-                var progress = new ProgressBar
+                // 2: Target Items Count
+                var countBorder = new Border
                 {
-                    Width = 80,
-                    Maximum = 100,
-                    Value = node.ProgressPercentage,
+                    Padding = new Thickness(10, 4, 10, 4),
+                    CornerRadius = new CornerRadius(6),
+                    Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
+                    BorderBrush = GetThemeBrush("CardStrokeColorDefaultBrush"),
+                    BorderThickness = new Thickness(1),
                     VerticalAlignment = VerticalAlignment.Center
                 };
-                Grid.SetColumn(progress, 2);
-                rowGrid.Children.Add(progress);
-
-                var selectBtn = new Button
+                var countStack = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, VerticalAlignment = VerticalAlignment.Center };
+                countStack.Children.Add(new FontIcon { Glyph = "\uE8D2", FontSize = 11, Foreground = GetThemeBrush("TextFillColorSecondaryBrush") });
+                countStack.Children.Add(new TextBlock
                 {
-                    Padding = new Thickness(8, 6, 8, 6),
+                    Text = $"{node.ItemCountDisplay} items",
+                    FontSize = 11,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+                    FontWeight = Microsoft.UI.Text.FontWeights.Medium
+                });
+                countBorder.Child = countStack;
+                Grid.SetColumn(countBorder, 2);
+                rowGrid.Children.Add(countBorder);
+
+                // 3: Progress Bar & %
+                var progressStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Spacing = 3, Width = 130 };
+                var progressTextGrid = new Grid();
+                progressTextGrid.Children.Add(new TextBlock
+                {
+                    Text = Loc.GetString("Roadmap_MasteryProgress"),
+                    FontSize = 10,
+                    Foreground = GetThemeBrush("TextFillColorSecondaryBrush")
+                });
+                var pctText = new TextBlock
+                {
+                    Text = node.ProgressPercentageDisplay,
+                    FontSize = 11,
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Foreground = node.ProgressPercentage > 0 
+                        ? GetThemeBrush("AccentTextFillColorPrimaryBrush") 
+                        : GetThemeBrush("TextFillColorSecondaryBrush")
+                };
+                progressTextGrid.Children.Add(pctText);
+                progressStack.Children.Add(progressTextGrid);
+
+                var pb = new ProgressBar
+                {
+                    Height = 4,
+                    Maximum = 100,
+                    Value = node.ProgressPercentage,
+                    Foreground = node.Status == NodeStatus.Mastered 
+                        ? GetThemeBrush("SystemFillColorSuccessBrush") 
+                        : GetThemeBrush("AccentFillColorDefaultBrush")
+                };
+                progressStack.Children.Add(pb);
+                Grid.SetColumn(progressStack, 3);
+                rowGrid.Children.Add(progressStack);
+
+                // 4: Status Pill
+                var statusBorder = new Border
+                {
+                    Padding = new Thickness(8, 3, 8, 3),
+                    CornerRadius = new CornerRadius(6),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
+                    BorderBrush = node.Status == NodeStatus.Mastered 
+                        ? GetThemeBrush("SystemFillColorSuccessBrush") 
+                        : (node.Status is NodeStatus.InProgress 
+                            ? GetThemeBrush("AccentFillColorDefaultBrush") 
+                            : GetThemeBrush("CardStrokeColorDefaultBrush")),
+                    BorderThickness = new Thickness(1)
+                };
+                statusBorder.Child = new TextBlock
+                {
+                    Text = node.StatusDisplay,
+                    FontSize = 11,
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    Foreground = node.Status == NodeStatus.Mastered 
+                        ? GetThemeBrush("SystemFillColorSuccessBrush") 
+                        : (node.Status is NodeStatus.InProgress 
+                            ? GetThemeBrush("AccentTextFillColorPrimaryBrush") 
+                            : GetThemeBrush("TextFillColorSecondaryBrush"))
+                };
+                Grid.SetColumn(statusBorder, 4);
+                rowGrid.Children.Add(statusBorder);
+
+                // 5: Action Button
+                var actionBtn = new Button
+                {
+                    Padding = new Thickness(12, 6, 12, 6),
                     CornerRadius = new CornerRadius(8),
                     Tag = node,
-                    Style = (Style)App.Current.Resources["SubtleButtonStyle"]
+                    Style = node.Status is NodeStatus.InProgress or NodeStatus.Available 
+                        ? (Style)App.Current.Resources["AccentButtonStyle"] 
+                        : (Style)App.Current.Resources["DefaultButtonStyle"]
                 };
-                ToolTipService.SetToolTip(selectBtn, Loc.GetString("Roadmap_ActionLearn"));
-                selectBtn.Content = new FontIcon { Glyph = "\uE76C", FontSize = 12 };
-                selectBtn.Click += TimelineNodeSelect_Click;
-                Grid.SetColumn(selectBtn, 3);
-                rowGrid.Children.Add(selectBtn);
+                var actionStack = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
+                if (node.Status is NodeStatus.InProgress or NodeStatus.Available)
+                {
+                    actionStack.Children.Add(new FontIcon { Glyph = "\uE768", FontSize = 11, Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush") });
+                    actionStack.Children.Add(new TextBlock { Text = Loc.GetString("Roadmap_ActionLearn"), FontSize = 11.5, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold, Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush") });
+                }
+                else if (node.Status == NodeStatus.Mastered)
+                {
+                    actionStack.Children.Add(new FontIcon { Glyph = "\uE777", FontSize = 11, Foreground = GetThemeBrush("TextFillColorPrimaryBrush") });
+                    actionStack.Children.Add(new TextBlock { Text = "Review", FontSize = 11.5, Foreground = GetThemeBrush("TextFillColorPrimaryBrush") });
+                }
+                else
+                {
+                    actionStack.Children.Add(new FontIcon { Glyph = "\uE72E", FontSize = 11, Foreground = GetThemeBrush("TextFillColorSecondaryBrush") });
+                    actionStack.Children.Add(new TextBlock { Text = "Locked", FontSize = 11.5, Foreground = GetThemeBrush("TextFillColorSecondaryBrush") });
+                    actionBtn.IsEnabled = false;
+                }
+                actionBtn.Content = actionStack;
+                actionBtn.Click += TimelineNodeSelect_Click;
+                Grid.SetColumn(actionBtn, 5);
+                rowGrid.Children.Add(actionBtn);
 
                 rowBorder.Child = rowGrid;
                 stack.Children.Add(rowBorder);

@@ -123,7 +123,6 @@
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">
             <StackPanel
-                MaxWidth="1240"
                 Margin="32,24,32,48"
                 HorizontalAlignment="Stretch"
                 Spacing="24">
