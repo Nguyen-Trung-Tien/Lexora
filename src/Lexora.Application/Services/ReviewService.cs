@@ -207,6 +207,9 @@ public class ReviewService : IReviewService
             double mappedEaseFactor = Math.Clamp(1.3 + (10.0 - fsrsState.Difficulty) * 0.15, 1.3, 3.0);
             mappedEaseFactor = Math.Round(mappedEaseFactor, 2);
 
+            card.Stability = fsrsState.Stability;
+            card.Difficulty = fsrsState.Difficulty;
+
             result = new SpacedRepetitionResult(
                 NewEaseFactor: mappedEaseFactor,
                 NewIntervalDays: fsrsState.IntervalDays,
@@ -218,6 +221,12 @@ public class ReviewService : IReviewService
         }
         else
         {
+            if (_fsrsEngine != null)
+            {
+                var fsrsState = _fsrsEngine.CalculateFsrsNextReview(card, rating, DateTime.UtcNow, desiredRetention);
+                card.Stability = fsrsState.Stability;
+                card.Difficulty = fsrsState.Difficulty;
+            }
             result = _srEngine.CalculateNextReview(card, rating, DateTime.UtcNow);
         }
 

@@ -141,6 +141,11 @@ public class FsrsSpacedRepetitionEngine : IFsrsSpacedRepetitionEngine
 
     public double CalculateStability(ReviewCard card)
     {
+        if (card.Stability > 0.01)
+        {
+            return Math.Clamp(Math.Round(card.Stability, 2), MinStability, MaxStability);
+        }
+
         if (card.Status == LearningStatus.New || card.Repetitions == 0)
         {
             return W[2]; // Default initial Good stability
@@ -157,6 +162,11 @@ public class FsrsSpacedRepetitionEngine : IFsrsSpacedRepetitionEngine
 
     public double CalculateDifficulty(ReviewCard card)
     {
+        if (card.Stability > 0.01 && card.Difficulty >= MinDifficulty && card.Difficulty <= MaxDifficulty)
+        {
+            return Math.Clamp(Math.Round(card.Difficulty, 2), MinDifficulty, MaxDifficulty);
+        }
+
         if (card.EaseFactor <= 0) return 5.0;
         // Invert EaseFactor (1.3 to 2.5+) to Difficulty (1.0 to 10.0)
         // High EF (2.8) -> Low Difficulty (2.0)

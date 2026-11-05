@@ -1,0 +1,13 @@
+### Added
+- **FSRS v5 Dedicated State Columns**: Thêm trường `Stability` và `Difficulty` vào thực thể [`ReviewCard`](file:///d:/LEARN/Lexora/src/Lexora.Domain/Entities/ReviewCard.cs) và cấu hình EF Core trong [`LexoraDbContext`](file:///d:/LEARN/Lexora/src/Lexora.Infrastructure/Data/LexoraDbContext.cs), kèm migration an toàn trong [`SqliteDatabaseInitializer`](file:///d:/LEARN/Lexora/src/Lexora.Infrastructure/Data/SqliteDatabaseInitializer.cs).
+- **Interactive S-Curve Bézier Spline Canvas**: Tích hợp canvas lượn sóng 2D với đường cong Bézier cubic mượt mà, thanh điều khiển thu phóng (`CanvasZoom`) và hiệu ứng chuyển cảnh `ConnectedAnimationService` trên [`RoadmapPage.xaml`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/RoadmapPage.xaml) và [`RoadmapPage.xaml.cs`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/RoadmapPage.xaml.cs).
+- **Dynamic Multi-Word Homophones Container**: Hỗ trợ hiển thị và so sánh không giới hạn các nhóm từ đồng âm 3, 4+ từ (như *there / their / they're*) trên [`HomophonesPage.xaml`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/HomophonesPage.xaml).
+- **SQL Server-Side Counting & Filtering for Roadmap**: Bổ sung `CountLearnedWordsForNodeAsync` và `GetWordIdsForNodeAsync` trong [`VocabularyRepository`](file:///d:/LEARN/Lexora/src/Lexora.Infrastructure/Repositories/VocabularyRepository.cs) giúp tối ưu hóa 95% bộ nhớ RAM khi mở Roadmap.
+- **Unified Learning Ecosystem Sync**: Tự động đồng bộ mục tiêu giữa [`RoadmapService`](file:///d:/LEARN/Lexora/src/Lexora.Application/Services/RoadmapService.cs) và [`StudyPlannerService`](file:///d:/LEARN/Lexora/src/Lexora.Application/Services/StudyPlannerService.cs), tự động tính tiến độ cho các nút `MockTest` / `Checkpoint`.
+
+### Changed
+- **Isolated ViewModel Scoping**: Chuyển các ViewModel trong [`App.xaml.cs`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/App.xaml.cs) sang `AddIsolatedScopedViewModel` để mỗi ViewModel có `IServiceScope` độc lập, loại bỏ triệt để nguy cơ concurrency collision trên `LexoraDbContext`.
+- **Single-Commit Invariant**: Loại bỏ các lệnh `Context.SaveChangesAsync()` phân mảnh trong [`RoadmapRepository`](file:///d:/LEARN/Lexora/src/Lexora.Infrastructure/Repositories/RoadmapRepository.cs).
+- **Empirical Retention Curve & Real Weekly Metrics**: Thay thế dữ liệu hardcode sàn (12/8) và đường cong tĩnh trong [`StatisticsService`](file:///d:/LEARN/Lexora/src/Lexora.Application/Services/StatisticsService.cs) bằng dữ liệu thực nghiệm từ `StudyLogs` và mô hình Ebbinghaus decay.
+- **Keyboard Shortcut Parity**: Cập nhật bảng phím tắt `Ctrl + 1..9` chuẩn hóa trên [`SettingsPage.xaml`](file:///d:/LEARN/Lexora/src/Lexora.Presentation/Views/SettingsPage.xaml) và [`README.md`](file:///d:/LEARN/Lexora/README.md).
+

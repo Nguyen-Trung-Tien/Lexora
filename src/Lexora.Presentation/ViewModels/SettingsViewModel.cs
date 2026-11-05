@@ -42,7 +42,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentVersionDetailsTitle))]
-    public partial string CurrentAppVersion { get; set; } = "1.5.0";
+    public partial string CurrentAppVersion { get; set; } = "1.6.0";
 
     public string CurrentVersionDetailsTitle =>
         string.Format(_locService.GetString("Settings_CurrentVersionDetails"), CurrentAppVersion);

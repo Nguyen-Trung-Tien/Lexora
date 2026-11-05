@@ -12,6 +12,7 @@ public class StudyPlannerService : IStudyPlannerService
     private readonly IReviewRepository _reviewRepo;
     private readonly IVocabularyRepository _vocabRepo;
     private readonly IGrammarRepository _grammarRepo;
+    private readonly IRoadmapRepository? _roadmapRepo;
     private readonly string _storageFilePath;
 
     private static readonly SemaphoreSlim PlanLock = new(1, 1);
@@ -26,11 +27,13 @@ public class StudyPlannerService : IStudyPlannerService
         IReviewRepository reviewRepo,
         IVocabularyRepository vocabRepo,
         IGrammarRepository grammarRepo,
-        string? storagePath = null)
+        string? storagePath = null,
+        IRoadmapRepository? roadmapRepo = null)
     {
         _reviewRepo = reviewRepo;
         _vocabRepo = vocabRepo;
         _grammarRepo = grammarRepo;
+        _roadmapRepo = roadmapRepo;
 
         if (string.IsNullOrEmpty(storagePath))
         {
@@ -51,6 +54,35 @@ public class StudyPlannerService : IStudyPlannerService
         if (model.Goal != null)
         {
             return model.Goal;
+        }
+
+        if (_roadmapRepo != null)
+        {
+            var activeRoadmap = await _roadmapRepo.GetActiveRoadmapWithDetailsAsync(cancellationToken);
+            if (activeRoadmap != null)
+            {
+                var examType = activeRoadmap.Target switch
+                {
+                    ExamTarget.Toeic => ExamType.Toeic,
+                    ExamTarget.Ielts => ExamType.Ielts,
+                    ExamTarget.Vstep => ExamType.Vstep,
+                    _ => ExamType.General
+                };
+
+                string scoreStr = activeRoadmap.Target == ExamTarget.Ielts
+                    ? $"{activeRoadmap.TargetScore:F1}+"
+                    : $"{activeRoadmap.TargetScore:F0}+";
+
+                return new StudyGoalDto(
+                    TargetExam: examType,
+                    TargetScore: scoreStr,
+                    TargetDate: DateOnly.FromDateTime(activeRoadmap.TargetDate),
+                    DailyMinutesGoal: 30,
+                    DailyNewWordsGoal: 15,
+                    DailyReviewTarget: 25,
+                    IsConfigured: true
+                );
+            }
         }
 
         var defaultTargetDate = DateOnly.FromDateTime(DateTime.Today.AddMonths(3));

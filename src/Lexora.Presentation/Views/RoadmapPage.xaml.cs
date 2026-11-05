@@ -151,12 +151,13 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         Grid.SetColumn(OverviewCard4, isCompact ? 1 : 3);
 
         // 2. Track List + Inspector Workspace: Side-by-side on wide screens, stacked vertically on compact screens
+        var leftContainer = (FrameworkElement?)TrackWorkspaceLeftPanel ?? TrackListContainer;
         if (isCompact)
         {
             RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(0);
-            Grid.SetRow(TrackListContainer, 0);
-            Grid.SetColumn(TrackListContainer, 0);
-            TrackListContainer.Margin = new Thickness(0);
+            Grid.SetRow(leftContainer, 0);
+            Grid.SetColumn(leftContainer, 0);
+            leftContainer.Margin = new Thickness(0);
 
             Grid.SetRow(InspectorHostBorder, 1);
             Grid.SetColumn(InspectorHostBorder, 0);
@@ -165,9 +166,9 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         else
         {
             RoadmapWorkspaceGrid.ColumnDefinitions[1].Width = new GridLength(380);
-            Grid.SetRow(TrackListContainer, 0);
-            Grid.SetColumn(TrackListContainer, 0);
-            TrackListContainer.Margin = new Thickness(0, 0, 16, 0);
+            Grid.SetRow(leftContainer, 0);
+            Grid.SetColumn(leftContainer, 0);
+            leftContainer.Margin = new Thickness(0, 0, 16, 0);
 
             Grid.SetRow(InspectorHostBorder, 0);
             Grid.SetColumn(InspectorHostBorder, 1);
@@ -226,6 +227,8 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
 
     private void RenderMilestoneTrack()
     {
+        RenderSerpentineCanvas();
+
         if (TrackListContainer == null) return;
         TrackListContainer.Children.Clear();
 
@@ -586,12 +589,181 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         }
     }
 
+    private void RenderSerpentineCanvas()
+    {
+        if (RoadmapCanvas == null || TrackSplinePath == null || ActiveSplinePath == null) return;
+
+        var existingDynamicNodes = RoadmapCanvas.Children
+            .Where(c => c != TrackSplinePath && c != ActiveSplinePath)
+            .ToList();
+        foreach (var child in existingDynamicNodes)
+        {
+            RoadmapCanvas.Children.Remove(child);
+        }
+
+        var nodes = ViewModel.Milestones.SelectMany(m => m.Nodes).ToList();
+        if (ViewModel.ActiveRoadmap == null || nodes.Count == 0)
+        {
+            TrackSplinePath.Data = null;
+            ActiveSplinePath.Data = null;
+            return;
+        }
+
+        const double nodeWidth = 176.0;
+        const double nodeHeight = 68.0;
+        const double halfWidth = nodeWidth / 2.0;
+        const double halfHeight = nodeHeight / 2.0;
+
+        double maxY = nodes.Max(n => n.CanvasY) + nodeHeight + 60.0;
+        double maxX = nodes.Max(n => n.CanvasX) + nodeWidth + 60.0;
+        RoadmapCanvas.Width = Math.Max(760.0, maxX);
+        RoadmapCanvas.Height = Math.Max(360.0, maxY);
+
+        var trackGeometry = new PathGeometry();
+        var activeGeometry = new PathGeometry();
+
+        if (nodes.Count > 1)
+        {
+            var firstCenter = new Windows.Foundation.Point(nodes[0].CanvasX + halfWidth, nodes[0].CanvasY + halfHeight);
+            var trackFigure = new PathFigure { StartPoint = firstCenter, IsClosed = false };
+            var activeFigure = new PathFigure { StartPoint = firstCenter, IsClosed = false };
+            bool hasActiveSegments = false;
+
+            for (int i = 0; i < nodes.Count - 1; i++)
+            {
+                var nodeA = nodes[i];
+                var nodeB = nodes[i + 1];
+
+                var p0 = new Windows.Foundation.Point(nodeA.CanvasX + halfWidth, nodeA.CanvasY + halfHeight);
+                var p1 = new Windows.Foundation.Point(nodeB.CanvasX + halfWidth, nodeB.CanvasY + halfHeight);
+                double midY = (p0.Y + p1.Y) / 2.0;
+                var cp1 = new Windows.Foundation.Point(p0.X, midY);
+                var cp2 = new Windows.Foundation.Point(p1.X, midY);
+
+                trackFigure.Segments.Add(new BezierSegment
+                {
+                    Point1 = cp1,
+                    Point2 = cp2,
+                    Point3 = p1
+                });
+
+                if (nodeA.Status == NodeStatus.Mastered || nodeB.Status is NodeStatus.Mastered or NodeStatus.InProgress or NodeStatus.Available)
+                {
+                    activeFigure.Segments.Add(new BezierSegment
+                    {
+                        Point1 = cp1,
+                        Point2 = cp2,
+                        Point3 = p1
+                    });
+                    hasActiveSegments = true;
+                }
+            }
+
+            trackGeometry.Figures.Add(trackFigure);
+            if (hasActiveSegments)
+            {
+                activeGeometry.Figures.Add(activeFigure);
+            }
+        }
+
+        TrackSplinePath.Data = trackGeometry;
+        ActiveSplinePath.Data = activeGeometry;
+
+        foreach (var node in nodes)
+        {
+            bool isSelected = ViewModel.SelectedNode?.Id == node.Id;
+            var markerBtn = new Button
+            {
+                Width = nodeWidth,
+                Height = nodeHeight,
+                Padding = new Thickness(10, 8, 10, 8),
+                CornerRadius = new CornerRadius(12),
+                Tag = node,
+                Background = isSelected
+                    ? GetThemeBrush("SubtleFillColorSecondaryBrush")
+                    : GetThemeBrush("CardBackgroundFillColorDefaultBrush"),
+                BorderBrush = isSelected || node.Status is NodeStatus.Available or NodeStatus.InProgress
+                    ? GetThemeBrush("AccentFillColorDefaultBrush")
+                    : (node.Status == NodeStatus.Mastered
+                        ? GetThemeBrush("SystemFillColorSuccessBrush")
+                        : GetThemeBrush("CardStrokeColorDefaultBrush")),
+                BorderThickness = new Thickness(isSelected ? 2.0 : 1.25)
+            };
+
+            var contentGrid = new Grid { ColumnSpacing = 8 };
+            contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var badge = new Border
+            {
+                Width = 28,
+                Height = 28,
+                CornerRadius = new CornerRadius(14),
+                VerticalAlignment = VerticalAlignment.Center,
+                Background = GetThemeBrush("SubtleFillColorSecondaryBrush"),
+                Child = new FontIcon
+                {
+                    FontSize = 12,
+                    Glyph = node.StatusGlyph,
+                    Foreground = node.Status == NodeStatus.Mastered
+                        ? GetThemeBrush("SystemFillColorSuccessBrush")
+                        : GetThemeBrush("AccentTextFillColorPrimaryBrush")
+                }
+            };
+            Grid.SetColumn(badge, 0);
+            contentGrid.Children.Add(badge);
+
+            var textStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Spacing = 2 };
+            textStack.Children.Add(new TextBlock
+            {
+                Text = node.Title,
+                FontSize = 12,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                MaxLines = 1
+            });
+            textStack.Children.Add(new TextBlock
+            {
+                Text = $"{node.TypeDisplay} • {node.ProgressPercentageDisplay}",
+                FontSize = 10,
+                Foreground = GetThemeBrush("TextFillColorSecondaryBrush"),
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                MaxLines = 1
+            });
+            Grid.SetColumn(textStack, 1);
+            contentGrid.Children.Add(textStack);
+
+            markerBtn.Content = contentGrid;
+            markerBtn.Click += NodeCard_Click;
+
+            Canvas.SetLeft(markerBtn, node.CanvasX);
+            Canvas.SetTop(markerBtn, node.CanvasY);
+            RoadmapCanvas.Children.Add(markerBtn);
+        }
+    }
+
     private void NodeCard_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button btn && btn.Tag is RoadmapNodeDto node)
         {
-            ViewModel.SelectNode(node);
-            Bindings.Update();
+            try
+            {
+                var animService = Microsoft.UI.Xaml.Media.Animation.ConnectedAnimationService.GetForCurrentView();
+                animService.PrepareToAnimate("nodeTransition", btn);
+                ViewModel.SelectNode(node);
+                Bindings.Update();
+                var anim = animService.GetAnimation("nodeTransition");
+                if (anim != null && InspectorTitle != null)
+                {
+                    anim.TryStart(InspectorTitle);
+                }
+            }
+            catch
+            {
+                ViewModel.SelectNode(node);
+                Bindings.Update();
+            }
+
             RenderMilestoneTrack();
         }
     }

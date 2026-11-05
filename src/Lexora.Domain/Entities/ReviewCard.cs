@@ -10,6 +10,8 @@ public class ReviewCard : Entity
 
     public LearningStatus Status { get; set; } = LearningStatus.New;
     public double EaseFactor { get; set; } = 2.5;
+    public double Stability { get; set; } = 0.0;
+    public double Difficulty { get; set; } = 5.0;
     public int IntervalDays { get; set; } = 0;
     public int Repetitions { get; set; } = 0;
     public int Lapses { get; set; } = 0;

@@ -666,15 +666,15 @@
                     </Grid>
 
                     <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="16" RowSpacing="12">
-                        <!-- Ctrl + 1-5 -->
+                        <!-- Ctrl + 1-9 -->
                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
-                            <TextBlock Text="Ctrl + 1 / 2 / 3 / 4 / 5" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
+                            <TextBlock Text="Ctrl + 1 .. 9" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
                         <TextBlock Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Nav')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 
-                        <!-- Ctrl + F -->
+                        <!-- Ctrl + K / F -->
                         <Border Grid.Row="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left">
-                            <TextBlock Text="Ctrl + F" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
+                            <TextBlock Text="Ctrl + K / F" FontWeight="SemiBold" FontFamily="Consolas, Cascadia Code" FontSize="12" />
                         </Border>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Loc.GetString('Settings_Shortcut_Search')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
 

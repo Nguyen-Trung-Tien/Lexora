@@ -43,7 +43,7 @@
 
 [CmdletBinding()]
 param (
-    [string]$Version = "1.5.0",
+    [string]$Version = "1.6.0",
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
     [switch]$SkipTests,

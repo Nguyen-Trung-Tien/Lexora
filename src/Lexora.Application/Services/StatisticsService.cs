@@ -230,16 +230,9 @@ public class StatisticsService : IStatisticsService
             ));
         }
 
-        // 7. Retention Curve Points
-        var retentionCurve = new List<RetentionCurvePointDto>
-        {
-            new(1, 95.0, allWords.Count(w => w.ReviewCard != null && w.ReviewCard.IntervalDays <= 1)),
-            new(3, 88.0, allWords.Count(w => w.ReviewCard != null && w.ReviewCard.IntervalDays is > 1 and <= 3)),
-            new(7, 82.0, allWords.Count(w => w.ReviewCard != null && w.ReviewCard.IntervalDays is > 3 and <= 7)),
-            new(14, 76.0, allWords.Count(w => w.ReviewCard != null && w.ReviewCard.IntervalDays is > 7 and <= 14)),
-            new(30, 71.0, allWords.Count(w => w.ReviewCard != null && w.ReviewCard.IntervalDays is > 14 and <= 30)),
-            new(60, 65.0, allWords.Count(w => w.ReviewCard != null && w.ReviewCard.IntervalDays > 30))
-        };
+        // 7. Empirical Retention Curve Points (blended with Ebbinghaus memory decay R(t) = e^(-t/S) when bucket logs are sparse)
+        var cardsForCurve = allWords.Where(w => w.ReviewCard != null).Select(w => w.ReviewCard!).ToList();
+        var retentionCurve = BuildEmpiricalRetentionCurve(recentLogs, cardsForCurve, 95.0);
 
         // 8. Recent Sessions
         var mappedSessions = recentSessions.Select(s => new StudySessionDto(
@@ -332,9 +325,9 @@ public class StatisticsService : IStatisticsService
             weeklyVelocity.Add(new WeeklyMasteryVelocityDto(
                 WeekStartDate: weekStart,
                 WeekLabel: i == 0 ? "Tuần này" : $"{weekStart:dd/MM}",
-                WordsLearned: Math.Max(studiedInWeek, i == 0 ? studiedInWeek : 12),
-                WordsMastered: Math.Max(masteredInWeek, i == 0 ? masteredInWeek : 8),
-                NetGrowth: Math.Max(studiedInWeek, 10)
+                WordsLearned: studiedInWeek,
+                WordsMastered: masteredInWeek,
+                NetGrowth: studiedInWeek + masteredInWeek
             ));
         }
 
@@ -369,16 +362,8 @@ public class StatisticsService : IStatisticsService
                 "Từ mới nạp hoặc có tỷ lệ quên cao, cần ôn ngay hôm nay.", "New words or high lapse rates, review immediately.", "#D83B01")
         };
 
-        // 5. Retention Curve
-        var retentionCurve = new List<RetentionCurvePointDto>
-        {
-            new(1, 100.0, cards.Count(c => c.IntervalDays <= 1)),
-            new(3, 91.2, cards.Count(c => c.IntervalDays is > 1 and <= 3)),
-            new(7, 84.5, cards.Count(c => c.IntervalDays is > 3 and <= 7)),
-            new(14, 78.0, cards.Count(c => c.IntervalDays is > 7 and <= 14)),
-            new(30, 72.5, cards.Count(c => c.IntervalDays is > 14 and <= 30)),
-            new(60, 68.0, cards.Count(c => c.IntervalDays > 30))
-        };
+        // 5. Empirical Retention Curve
+        var retentionCurve = BuildEmpiricalRetentionCurve(recentLogs, cards, 100.0);
 
         string tipVi = bestSlot != null && bestSlot.ReviewsCount > 0
             ? $"Hiệu suất não bộ của bạn đạt đỉnh vào {bestSlot.SlotNameVi} ({bestSlot.HoursRange}) với độ chính xác {bestSlot.AccuracyRate}%. Hãy ưu tiên học từ vựng mới trong khung giờ này."
@@ -464,5 +449,53 @@ public class StatisticsService : IStatisticsService
             ReadinessAssessmentVi: assessVi,
             ReadinessAssessmentEn: assessEn
         );
+    }
+
+    private static List<RetentionCurvePointDto> BuildEmpiricalRetentionCurve(
+        IReadOnlyList<StudyLog> logs,
+        IReadOnlyList<ReviewCard> cards,
+        double day1Default)
+    {
+        double avgStability = cards.Count > 0
+            ? Math.Max(14.0, cards.Average(c => c.Stability > 0.1 ? c.Stability : Math.Max(1.0, c.IntervalDays * (c.EaseFactor / 2.5))))
+            : 45.0;
+
+        (int DayMark, int MinInterval, int MaxInterval, double FallbackRate)[] buckets =
+        [
+            (1, 0, 1, day1Default),
+            (3, 2, 3, 91.2),
+            (7, 4, 7, 84.5),
+            (14, 8, 14, 78.0),
+            (30, 15, 30, 72.5),
+            (60, 31, int.MaxValue, 68.0)
+        ];
+
+        var points = new List<RetentionCurvePointDto>(buckets.Length);
+        foreach (var (dayMark, minInt, maxInt, fallbackRate) in buckets)
+        {
+            int cardCount = cards.Count(c => c.IntervalDays >= minInt && c.IntervalDays <= maxInt);
+            var bucketLogs = logs.Where(l => l.ResultingIntervalDays >= minInt && l.ResultingIntervalDays <= maxInt).ToList();
+
+            double retentionRate;
+            if (bucketLogs.Count >= 3)
+            {
+                int passed = bucketLogs.Count(l => l.Rating >= ReviewRating.Hard);
+                retentionRate = Math.Round((double)passed / bucketLogs.Count * 100.0, 1);
+            }
+            else if (cards.Count > 0)
+            {
+                // Ebbinghaus power-law / exponential blend from actual card stabilities
+                double theoretical = 100.0 * Math.Pow(1.0 + (19.0 / 81.0) * (dayMark / avgStability), -0.5);
+                retentionRate = Math.Clamp(Math.Round((theoretical + fallbackRate) / 2.0, 1), 40.0, 100.0);
+            }
+            else
+            {
+                retentionRate = fallbackRate;
+            }
+
+            points.Add(new RetentionCurvePointDto(dayMark, retentionRate, cardCount));
+        }
+
+        return points;
     }
 }

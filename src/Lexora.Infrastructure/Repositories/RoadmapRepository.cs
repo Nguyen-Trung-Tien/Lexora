@@ -67,7 +67,6 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
             node.Status = status;
             node.CompletedItemCount = completedItems;
             node.UpdatedAt = DateTime.UtcNow;
-            await Context.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -77,10 +76,7 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
         foreach (var r in activeRoadmaps)
         {
             r.IsActive = false;
-        }
-        if (activeRoadmaps.Count > 0)
-        {
-            await Context.SaveChangesAsync(cancellationToken);
+            r.UpdatedAt = DateTime.UtcNow;
         }
     }
 
@@ -89,9 +85,13 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
         var all = await Context.StudyRoadmaps.ToListAsync(cancellationToken);
         foreach (var r in all)
         {
-            r.IsActive = (r.Id == roadmapId);
+            bool shouldBeActive = (r.Id == roadmapId);
+            if (r.IsActive != shouldBeActive)
+            {
+                r.IsActive = shouldBeActive;
+                r.UpdatedAt = DateTime.UtcNow;
+            }
         }
-        await Context.SaveChangesAsync(cancellationToken);
     }
 }
 

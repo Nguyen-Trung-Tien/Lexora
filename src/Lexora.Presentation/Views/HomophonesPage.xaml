@@ -459,6 +459,9 @@
                             </StackPanel>
                         </Border>
                     </Grid>
+
+                    <!-- Dynamic container for 3rd, 4th+ homophone items (e.g., there / their / they're) -->
+                    <StackPanel x:Name="AdditionalComparisonCardsPanel" Spacing="16" Visibility="Collapsed" />
                 </StackPanel>
             </ScrollViewer>
         </Grid>

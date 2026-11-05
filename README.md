@@ -142,10 +142,14 @@ $$Interval(n) = \begin{cases} 1 \text{ day}, & n = 1 \\ 6 \text{ days}, & n = 2 
 | :--- | :--- | :--- |
 | <kbd>Ctrl</kbd> + <kbd>1</kbd> | Navigate to **Dashboard** | Global |
 | <kbd>Ctrl</kbd> + <kbd>2</kbd> | Navigate to **Vocabulary** | Global |
-| <kbd>Ctrl</kbd> + <kbd>3</kbd> | Navigate to **Spaced Review** | Global |
-| <kbd>Ctrl</kbd> + <kbd>4</kbd> | Navigate to **Practice & Test** | Global |
+| <kbd>Ctrl</kbd> + <kbd>3</kbd> | Navigate to **Homophones** | Global |
+| <kbd>Ctrl</kbd> + <kbd>4</kbd> | Navigate to **Knowledge Graph** | Global |
 | <kbd>Ctrl</kbd> + <kbd>5</kbd> | Navigate to **Grammar** | Global |
-| <kbd>Ctrl</kbd> + <kbd>F</kbd> | Focus Global Search Box | Global |
+| <kbd>Ctrl</kbd> + <kbd>6</kbd> | Navigate to **Spaced Review** | Global |
+| <kbd>Ctrl</kbd> + <kbd>7</kbd> | Navigate to **Practice & Test** | Global |
+| <kbd>Ctrl</kbd> + <kbd>8</kbd> | Navigate to **Learning Storage** | Global |
+| <kbd>Ctrl</kbd> + <kbd>9</kbd> | Navigate to **Roadmap** | Global |
+| <kbd>Ctrl</kbd> + <kbd>K</kbd> / <kbd>Ctrl</kbd> + <kbd>F</kbd> | Focus Global Search Box | Global |
 | <kbd>Ctrl</kbd> + <kbd>N</kbd> | Add New Word / Grammar Rule | Vocabulary & Grammar Pages |
 | <kbd>Ctrl</kbd> + <kbd>E</kbd> | Edit Selected Word / Rule | Vocabulary & Grammar Pages |
 | <kbd>Delete</kbd> | Delete Selected Entry (with confirmation) | Vocabulary & Grammar Pages |

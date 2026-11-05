@@ -492,6 +492,38 @@ public class SqliteDatabaseInitializer
                         cancellationToken);
                 }
             }
+
+            // Ensure FSRS Stability and Difficulty columns exist on ReviewCards for existing databases
+            using (var checkRcCmd = connection.CreateCommand())
+            {
+                checkRcCmd.CommandText = "PRAGMA table_info(\"ReviewCards\");";
+                using var rcReader = await checkRcCmd.ExecuteReaderAsync(cancellationToken);
+                bool hasStability = false;
+                bool hasDifficulty = false;
+                while (await rcReader.ReadAsync(cancellationToken))
+                {
+                    var colName = rcReader.GetString(1);
+                    if (string.Equals(colName, "Stability", StringComparison.OrdinalIgnoreCase))
+                        hasStability = true;
+                    else if (string.Equals(colName, "Difficulty", StringComparison.OrdinalIgnoreCase))
+                        hasDifficulty = true;
+                }
+                rcReader.Close();
+
+                if (!hasStability)
+                {
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "ALTER TABLE \"ReviewCards\" ADD COLUMN \"Stability\" REAL NOT NULL DEFAULT 0.0;",
+                        cancellationToken);
+                }
+
+                if (!hasDifficulty)
+                {
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "ALTER TABLE \"ReviewCards\" ADD COLUMN \"Difficulty\" REAL NOT NULL DEFAULT 5.0;",
+                        cancellationToken);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -694,6 +726,48 @@ public class SqliteDatabaseInitializer
                         PhoneticSpecific = "/dɪˈzɜːt/",
                         ExampleSentence = "We had fresh fruit and ice cream for dessert.",
                         ExampleTranslation = "Chúng tôi đã thưởng thức trái cây tươi và kem cho món tráng miệng."
+                    }
+                }
+            },
+            new()
+            {
+                Title = "there / their / they're",
+                PhoneticIpa = "/ðeə(r)/",
+                Type = HomophoneType.ExactHomophone,
+                DifficultyLevel = CefrLevel.A2,
+                ExamTag = ExamType.Toeic,
+                DifferentiationTip = "Bộ 3 đồng âm kinh điển: 'There' chỉ nơi chốn (ở đó) hoặc sự tồn tại (there is/are); 'Their' là tính từ sở hữu (của họ); 'They're' là viết tắt của 'they are' (họ là/đang).",
+                Items =
+                {
+                    new HomophoneItem
+                    {
+                        Term = "there",
+                        NormalizedTerm = "there",
+                        PartOfSpeech = PartOfSpeech.Adverb,
+                        MeaningVi = "ở đó, tại nơi đó",
+                        MeaningEn = "in, at, or to that place or position",
+                        ExampleSentence = "Please put the conference documents over there.",
+                        ExampleTranslation = "Vui lòng đặt các tài liệu hội nghị ở đằng kia."
+                    },
+                    new HomophoneItem
+                    {
+                        Term = "their",
+                        NormalizedTerm = "their",
+                        PartOfSpeech = PartOfSpeech.Adjective,
+                        MeaningVi = "của họ, của chúng (tính từ sở hữu)",
+                        MeaningEn = "belonging to or associated with the people previously mentioned",
+                        ExampleSentence = "The engineers presented their innovative prototype to the board.",
+                        ExampleTranslation = "Các kỹ sư đã trình bày nguyên mẫu sáng tạo của họ trước hội đồng."
+                    },
+                    new HomophoneItem
+                    {
+                        Term = "they're",
+                        NormalizedTerm = "they're",
+                        PartOfSpeech = PartOfSpeech.Phrase,
+                        MeaningVi = "họ đang / họ là (viết tắt của they are)",
+                        MeaningEn = "contraction of they are",
+                        ExampleSentence = "They're preparing for the upcoming IELTS examination.",
+                        ExampleTranslation = "Họ đang chuẩn bị cho kỳ thi IELTS sắp tới."
                     }
                 }
             }

@@ -276,6 +276,201 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
             BtnViewWord2.Tag = w2.Term;
             BtnSaveWord2.Tag = w2.Term;
         }
+
+        RenderAdditionalComparisonCards(group);
+    }
+
+    private void RenderAdditionalComparisonCards(HomophoneGroupDto group)
+    {
+        if (AdditionalComparisonCardsPanel == null) return;
+        AdditionalComparisonCardsPanel.Children.Clear();
+
+        if (group.Items.Count <= 2)
+        {
+            AdditionalComparisonCardsPanel.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        AdditionalComparisonCardsPanel.Visibility = Visibility.Visible;
+        var extraItems = group.Items.Skip(2).ToList();
+
+        for (int i = 0; i < extraItems.Count; i += 2)
+        {
+            var rowGrid = new Grid { ColumnSpacing = 16 };
+            rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var leftCard = CreateComparisonCardElement(extraItems[i]);
+            Grid.SetColumn(leftCard, 0);
+            rowGrid.Children.Add(leftCard);
+
+            if (i + 1 < extraItems.Count)
+            {
+                var rightCard = CreateComparisonCardElement(extraItems[i + 1]);
+                Grid.SetColumn(rightCard, 1);
+                rowGrid.Children.Add(rightCard);
+            }
+
+            AdditionalComparisonCardsPanel.Children.Add(rowGrid);
+        }
+    }
+
+    private Border CreateComparisonCardElement(HomophoneItemDto item)
+    {
+        var cardBorder = new Border
+        {
+            Background = ThemeResourceHelper.GetThemeBrush(this, "CardBackgroundFillColorDefaultBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(20)
+        };
+
+        var rootStack = new StackPanel { Spacing = 14 };
+        var headerGrid = new Grid();
+        headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        var titleStack = new StackPanel { Spacing = 2 };
+        titleStack.Children.Add(new TextBlock
+        {
+            Text = item.Term,
+            FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+            FontSize = 24,
+            TextWrapping = TextWrapping.Wrap
+        });
+        titleStack.Children.Add(new TextBlock
+        {
+            Text = LocalizationHelper.FormatPartOfSpeech(item.PartOfSpeech),
+            FontSize = 12,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush")
+        });
+        Grid.SetColumn(titleStack, 0);
+        headerGrid.Children.Add(titleStack);
+
+        var actionsPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 6,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        var listenBtn = new Button
+        {
+            Width = 36,
+            Height = 36,
+            Padding = new Thickness(0),
+            CornerRadius = new CornerRadius(18),
+            Tag = item.Term,
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            Content = new FontIcon
+            {
+                Glyph = "\uE768",
+                FontSize = 13,
+                Foreground = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush")
+            }
+        };
+        ToolTipService.SetToolTip(listenBtn, Loc.GetString("Vocab_PlayUsPronunciation"));
+        listenBtn.Click += async (s, e) => await ViewModel.PlayAudioAsync(item.Term);
+
+        var viewBtn = new Button
+        {
+            Width = 36,
+            Height = 36,
+            Padding = new Thickness(0),
+            CornerRadius = new CornerRadius(18),
+            Tag = item.Term,
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            Content = new FontIcon { Glyph = "\uE82D", FontSize = 13 }
+        };
+        ToolTipService.SetToolTip(viewBtn, Loc.GetString("Homophones_ViewInVocabulary"));
+        viewBtn.Click += ViewInVocab_Click;
+
+        var saveBtn = new Button
+        {
+            Width = 36,
+            Height = 36,
+            Padding = new Thickness(0),
+            CornerRadius = new CornerRadius(18),
+            Tag = item.Term,
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+            BorderBrush = ThemeResourceHelper.GetThemeBrush(this, "CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            Content = new FontIcon
+            {
+                Glyph = "\uE8B7",
+                FontSize = 13,
+                Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush")
+            }
+        };
+        ToolTipService.SetToolTip(saveBtn, Loc.GetString("Homophones_SaveToStorage"));
+        saveBtn.Click += SaveToStorage_Click;
+
+        actionsPanel.Children.Add(listenBtn);
+        actionsPanel.Children.Add(viewBtn);
+        actionsPanel.Children.Add(saveBtn);
+        Grid.SetColumn(actionsPanel, 1);
+        headerGrid.Children.Add(actionsPanel);
+        rootStack.Children.Add(headerGrid);
+
+        var meaningStack = new StackPanel { Spacing = 4 };
+        meaningStack.Children.Add(new TextBlock
+        {
+            Text = Loc.GetString("Homophones_VietnameseMeaning"),
+            FontSize = 11,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorTertiaryBrush")
+        });
+        meaningStack.Children.Add(new TextBlock
+        {
+            Text = item.MeaningVi,
+            FontSize = 14,
+            FontWeight = Microsoft.UI.Text.FontWeights.Medium,
+            TextWrapping = TextWrapping.Wrap
+        });
+        rootStack.Children.Add(meaningStack);
+
+        var exampleStack = new StackPanel { Spacing = 4 };
+        exampleStack.Children.Add(new TextBlock
+        {
+            Text = Loc.GetString("Homophones_ContextualExample"),
+            FontSize = 11,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorTertiaryBrush")
+        });
+
+        var exampleInnerStack = new StackPanel { Spacing = 4 };
+        exampleInnerStack.Children.Add(new TextBlock
+        {
+            Text = !string.IsNullOrWhiteSpace(item.ExampleSentence) ? item.ExampleSentence : Loc.GetString("Homophones_NoExample"),
+            FontStyle = Windows.UI.Text.FontStyle.Italic,
+            FontSize = 13,
+            TextWrapping = TextWrapping.Wrap
+        });
+        exampleInnerStack.Children.Add(new TextBlock
+        {
+            Text = item.ExampleTranslation ?? string.Empty,
+            FontSize = 11,
+            Foreground = ThemeResourceHelper.GetThemeBrush(this, "TextFillColorSecondaryBrush"),
+            TextWrapping = TextWrapping.Wrap
+        });
+
+        var exampleBorder = new Border
+        {
+            Background = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush"),
+            CornerRadius = new CornerRadius(6),
+            Padding = new Thickness(12, 8, 12, 8),
+            Child = exampleInnerStack
+        };
+        exampleStack.Children.Add(exampleBorder);
+        rootStack.Children.Add(exampleStack);
+
+        cardBorder.Child = rootStack;
+        return cardBorder;
     }
 
     private async void BtnAddGroup_Click(object sender, RoutedEventArgs e)

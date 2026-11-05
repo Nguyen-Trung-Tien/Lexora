@@ -73,4 +73,6 @@ public interface IVocabularyRepository : IRepository<Word>
     Task<IReadOnlyDictionary<string, Word>> GetWordsByTermsWithDetailsAsync(IEnumerable<string> normalizedTerms, CancellationToken cancellationToken = default);
     Task<HashSet<Guid>> GetExistingWordTopicAssociationsAsync(Guid topicId, IEnumerable<Guid> wordIds, CancellationToken cancellationToken = default);
     Task RemoveWordTopicAssociationsAsync(Guid topicId, IEnumerable<Guid> wordIds, CancellationToken cancellationToken = default);
+    Task<int> CountLearnedWordsForNodeAsync(Guid? topicId, string? topicName, ExamType? examType, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Guid>> GetWordIdsForNodeAsync(Guid? topicId, string? topicName, ExamType? examType, int limit = 50, CancellationToken cancellationToken = default);
 }

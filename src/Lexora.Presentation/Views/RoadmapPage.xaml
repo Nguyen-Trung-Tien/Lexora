@@ -427,11 +427,16 @@
                     </Grid>
                 </Border>
 
-                <!-- 4. Modern View Mode Selector Pills (Pathway Track / Timeline / Management) -->
+                <!-- 4. Modern View Mode Selector Pills (Pathway Track / Timeline / Management) & Zoom Controls -->
                 <Grid
                     HorizontalAlignment="Stretch"
                     Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
                     <Border
+                        Grid.Column="0"
                         HorizontalAlignment="Left"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -476,6 +481,48 @@
                                     <FontIcon Glyph="&#xE713;" FontSize="14" />
                                     <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ViewManage')}" />
                                 </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- S-Curve Canvas Zoom Controls -->
+                    <Border
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="4,2"
+                        Visibility="{x:Bind ViewModel.IsTrackView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <Button
+                                Padding="8,4"
+                                CornerRadius="6"
+                                Command="{x:Bind ViewModel.ZoomOutCommand}"
+                                Style="{ThemeResource SubtleButtonStyle}"
+                                ToolTipService.ToolTip="Zoom Out">
+                                <FontIcon Glyph="&#xE71F;" FontSize="12" />
+                            </Button>
+                            <Button
+                                Padding="8,4"
+                                CornerRadius="6"
+                                Command="{x:Bind ViewModel.ResetZoomCommand}"
+                                Style="{ThemeResource SubtleButtonStyle}"
+                                ToolTipService.ToolTip="Reset Zoom">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="100%" />
+                            </Button>
+                            <Button
+                                Padding="8,4"
+                                CornerRadius="6"
+                                Command="{x:Bind ViewModel.ZoomInCommand}"
+                                Style="{ThemeResource SubtleButtonStyle}"
+                                ToolTipService.ToolTip="Zoom In">
+                                <FontIcon Glyph="&#xE8A3;" FontSize="12" />
                             </Button>
                         </StackPanel>
                     </Border>
@@ -705,13 +752,52 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <!-- Left: Milestones & Lessons List -->
+                    <!-- Left: Interactive S-Curve Bézier Pathway Canvas + Milestones & Lessons List -->
                     <StackPanel
-                        x:Name="TrackListContainer"
+                        x:Name="TrackWorkspaceLeftPanel"
                         Grid.Row="0"
                         Grid.Column="0"
                         Spacing="16"
-                        Margin="0,0,16,0" />
+                        Margin="0,0,16,0">
+                        <Border
+                            Padding="16"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12">
+                            <ScrollViewer
+                                x:Name="RoadmapCanvasScroller"
+                                MaxHeight="440"
+                                HorizontalScrollBarVisibility="Auto"
+                                VerticalScrollBarVisibility="Auto">
+                                <Canvas
+                                    x:Name="RoadmapCanvas"
+                                    MinWidth="760"
+                                    MinHeight="380"
+                                    HorizontalAlignment="Center">
+                                    <Canvas.RenderTransform>
+                                        <ScaleTransform
+                                            x:Name="RoadmapCanvasScale"
+                                            ScaleX="{x:Bind ViewModel.CanvasZoom, Mode=OneWay}"
+                                            ScaleY="{x:Bind ViewModel.CanvasZoom, Mode=OneWay}" />
+                                    </Canvas.RenderTransform>
+                                    <Path
+                                        x:Name="TrackSplinePath"
+                                        Stroke="{ThemeResource ControlStrongStrokeColorDisabledBrush}"
+                                        StrokeDashArray="3,2"
+                                        StrokeThickness="4" />
+                                    <Path
+                                        x:Name="ActiveSplinePath"
+                                        Stroke="{ThemeResource AccentFillColorDefaultBrush}"
+                                        StrokeThickness="4" />
+                                </Canvas>
+                            </ScrollViewer>
+                        </Border>
+
+                        <StackPanel
+                            x:Name="TrackListContainer"
+                            Spacing="16" />
+                    </StackPanel>
 
                     <!-- Right: Master-Detail Lesson Inspector -->
                     <Border
@@ -753,6 +839,7 @@
                                     </StackPanel>
 
                                     <TextBlock
+                                        x:Name="InspectorTitle"
                                         FontWeight="SemiBold"
                                         Style="{ThemeResource SubtitleTextBlockStyle}"
                                         Text="{x:Bind ViewModel.SelectedNode.Title, Mode=OneWay, FallbackValue=''}"

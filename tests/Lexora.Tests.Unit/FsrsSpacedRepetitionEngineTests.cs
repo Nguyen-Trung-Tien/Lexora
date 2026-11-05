@@ -163,4 +163,28 @@ public class FsrsSpacedRepetitionEngineTests
         result.Status.Should().Be(LearningStatus.Mastered);
         result.Repetitions.Should().Be(6);
     }
+
+    [Fact]
+    public void CalculateStabilityAndDifficulty_WhenPersistedOnReviewCard_ShouldUseExactPersistedValues()
+    {
+        // Arrange
+        var card = new ReviewCard
+        {
+            EaseFactor = 2.5,
+            Stability = 18.75,
+            Difficulty = 3.42,
+            IntervalDays = 19,
+            Repetitions = 3,
+            Lapses = 0,
+            Status = LearningStatus.Remembered
+        };
+
+        // Act
+        double s = _engine.CalculateStability(card);
+        double d = _engine.CalculateDifficulty(card);
+
+        // Assert
+        s.Should().Be(18.75);
+        d.Should().Be(3.42);
+    }
 }

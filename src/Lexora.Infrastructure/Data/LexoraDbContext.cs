@@ -114,6 +114,8 @@ public class LexoraDbContext : DbContext
         modelBuilder.Entity<ReviewCard>(b =>
         {
             b.HasKey(rc => rc.Id);
+            b.Property(rc => rc.Stability).HasDefaultValue(0.0);
+            b.Property(rc => rc.Difficulty).HasDefaultValue(5.0);
             b.HasIndex(rc => rc.NextReviewAt);
             b.HasIndex(rc => rc.Status);
             b.HasIndex(rc => new { rc.NextReviewAt, rc.Status });

@@ -12,18 +12,24 @@ public class RoadmapService : IRoadmapService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IVocabularyRepository? _vocabularyRepository;
     private readonly IGrammarRepository? _grammarRepository;
+    private readonly IReviewRepository? _reviewRepository;
+    private readonly IStudyPlannerService? _studyPlannerService;
     private readonly RoadmapEngine _roadmapEngine;
 
     public RoadmapService(
         IRoadmapRepository roadmapRepository,
         IUnitOfWork unitOfWork,
         IVocabularyRepository? vocabularyRepository = null,
-        IGrammarRepository? grammarRepository = null)
+        IGrammarRepository? grammarRepository = null,
+        IReviewRepository? reviewRepository = null,
+        IStudyPlannerService? studyPlannerService = null)
     {
         _roadmapRepository = roadmapRepository ?? throw new ArgumentNullException(nameof(roadmapRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _vocabularyRepository = vocabularyRepository;
         _grammarRepository = grammarRepository;
+        _reviewRepository = reviewRepository;
+        _studyPlannerService = studyPlannerService;
         _roadmapEngine = new RoadmapEngine();
     }
 
@@ -67,6 +73,8 @@ public class RoadmapService : IRoadmapService
 
         await _roadmapRepository.AddAsync(newRoadmap, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await SyncStudyPlannerWithRoadmapAsync(newRoadmap, cancellationToken);
 
         return MapToDto(newRoadmap);
     }
@@ -131,11 +139,22 @@ public class RoadmapService : IRoadmapService
         var activeRoadmap = await _roadmapRepository.GetActiveRoadmapWithDetailsAsync(cancellationToken);
         if (activeRoadmap == null) return null;
 
-        IReadOnlyList<Word>? words = null;
-        if (_vocabularyRepository != null)
+        var examType = activeRoadmap.Target switch
         {
-            words = await _vocabularyRepository.GetWordsForAnalyticsAsync(cancellationToken);
+            ExamTarget.Toeic => ExamType.Toeic,
+            ExamTarget.Ielts => ExamType.Ielts,
+            ExamTarget.Vstep => ExamType.Vstep,
+            _ => (ExamType?)null
+        };
+
+        IReadOnlyList<StudySession>? recentSessions = null;
+        if (_reviewRepository != null)
+        {
+            recentSessions = await _reviewRepository.GetRecentSessionsAsync(50, cancellationToken);
         }
+
+        IReadOnlyList<Word>? fallbackWords = null;
+        bool fallbackWordsLoaded = false;
 
         bool anyUpdated = false;
 
@@ -143,37 +162,42 @@ public class RoadmapService : IRoadmapService
         {
             foreach (var node in milestone.Nodes.OrderBy(n => n.OrderIndex))
             {
-                if (node.Type == RoadmapNodeType.VocabularySet && words != null)
+                if (node.Type == RoadmapNodeType.VocabularySet && _vocabularyRepository != null)
                 {
-                    int learnedCount = 0;
+                    int learnedCount = await _vocabularyRepository.CountLearnedWordsForNodeAsync(
+                        node.ReferenceId,
+                        node.ReferenceName,
+                        examType,
+                        cancellationToken);
 
-                    if (node.ReferenceId.HasValue)
+                    if (learnedCount == 0)
                     {
-                        learnedCount = words.Count(w =>
-                            w.WordTopics.Any(wt => wt.TopicId == node.ReferenceId.Value) &&
-                            w.ReviewCard != null && w.ReviewCard.Status != LearningStatus.New);
-                    }
-                    else if (!string.IsNullOrWhiteSpace(node.ReferenceName))
-                    {
-                        learnedCount = words.Count(w =>
-                            w.WordTopics.Any(wt => wt.Topic != null && wt.Topic.Name.Contains(node.ReferenceName, StringComparison.OrdinalIgnoreCase)) &&
-                            w.ReviewCard != null && w.ReviewCard.Status != LearningStatus.New);
-                    }
-                    else
-                    {
-                        var examType = activeRoadmap.Target switch
+                        if (!fallbackWordsLoaded)
                         {
-                            ExamTarget.Toeic => ExamType.Toeic,
-                            ExamTarget.Ielts => ExamType.Ielts,
-                            ExamTarget.Vstep => ExamType.Vstep,
-                            _ => (ExamType?)null
-                        };
+                            fallbackWords = await _vocabularyRepository.GetWordsForAnalyticsAsync(cancellationToken);
+                            fallbackWordsLoaded = true;
+                        }
 
-                        if (examType.HasValue)
+                        if (fallbackWords != null && fallbackWords.Count > 0)
                         {
-                            learnedCount = words.Count(w =>
-                                w.WordExamTags.Any(wet => wet.ExamTag != null && wet.ExamTag.Type == examType.Value) &&
-                                w.ReviewCard != null && w.ReviewCard.Status != LearningStatus.New);
+                            if (node.ReferenceId.HasValue)
+                            {
+                                learnedCount = fallbackWords.Count(w =>
+                                    w.WordTopics.Any(wt => wt.TopicId == node.ReferenceId.Value) &&
+                                    w.ReviewCard != null && w.ReviewCard.Status != LearningStatus.New);
+                            }
+                            else if (!string.IsNullOrWhiteSpace(node.ReferenceName))
+                            {
+                                learnedCount = fallbackWords.Count(w =>
+                                    w.WordTopics.Any(wt => wt.Topic != null && wt.Topic.Name.Contains(node.ReferenceName, StringComparison.OrdinalIgnoreCase)) &&
+                                    w.ReviewCard != null && w.ReviewCard.Status != LearningStatus.New);
+                            }
+                            else if (examType.HasValue)
+                            {
+                                learnedCount = fallbackWords.Count(w =>
+                                    w.WordExamTags.Any(wet => wet.ExamTag != null && wet.ExamTag.Type == examType.Value) &&
+                                    w.ReviewCard != null && w.ReviewCard.Status != LearningStatus.New);
+                            }
                         }
                     }
 
@@ -198,6 +222,39 @@ public class RoadmapService : IRoadmapService
                     {
                         node.Status = NodeStatus.InProgress;
                         anyUpdated = true;
+                    }
+                }
+                else if ((node.Type == RoadmapNodeType.MockTest || node.Type == RoadmapNodeType.Checkpoint) && recentSessions != null)
+                {
+                    // Auto-sync completed test sessions when the node is unlocked
+                    if (node.Status is NodeStatus.Available or NodeStatus.InProgress)
+                    {
+                        var qualifyingTests = recentSessions
+                            .Where(s => s.CompletedAt.HasValue &&
+                                        s.StartedAt >= activeRoadmap.CreatedAt &&
+                                        s.SessionType != null &&
+                                        s.SessionType.StartsWith("Test_", StringComparison.OrdinalIgnoreCase) &&
+                                        s.TotalCards > 0 &&
+                                        (double)s.CorrectCards / s.TotalCards >= 0.70)
+                            .ToList();
+
+                        if (qualifyingTests.Count > 0)
+                        {
+                            int target = Math.Max(1, node.TargetItemCount);
+                            int completedTestsItems = Math.Min(target, qualifyingTests.Sum(s => Math.Max(1, s.CorrectCards)));
+                            if (completedTestsItems > node.CompletedItemCount)
+                            {
+                                node.CompletedItemCount = completedTestsItems;
+                                anyUpdated = true;
+                            }
+
+                            if (node.CompletedItemCount >= target && node.Status != NodeStatus.Mastered)
+                            {
+                                node.Status = NodeStatus.Mastered;
+                                UnlockNextNode(activeRoadmap, node);
+                                anyUpdated = true;
+                            }
+                        }
                     }
                 }
             }
@@ -238,51 +295,65 @@ public class RoadmapService : IRoadmapService
         if (targetNode == null) return null;
 
         List<Guid> linkedWordIds = new();
-        Guid? topicId = null;
+        Guid? topicId = targetNode.ReferenceId;
         string? topicName = targetNode.ReferenceName;
 
         if (targetNode.Type == RoadmapNodeType.VocabularySet && _vocabularyRepository != null)
         {
-            var allWords = await _vocabularyRepository.GetWordsForAnalyticsAsync(cancellationToken);
-
-            if (targetNode.ReferenceId.HasValue)
+            var examType = activeRoadmap.Target switch
             {
-                topicId = targetNode.ReferenceId.Value;
-                linkedWordIds = allWords
-                    .Where(w => w.WordTopics.Any(wt => wt.TopicId == topicId.Value))
-                    .Select(w => w.Id)
-                    .Take(targetNode.TargetItemCount > 0 ? targetNode.TargetItemCount : 50)
-                    .ToList();
+                ExamTarget.Toeic => ExamType.Toeic,
+                ExamTarget.Ielts => ExamType.Ielts,
+                ExamTarget.Vstep => ExamType.Vstep,
+                _ => (ExamType?)null
+            };
+
+            int limit = targetNode.TargetItemCount > 0 ? targetNode.TargetItemCount : 50;
+            var serverIds = await _vocabularyRepository.GetWordIdsForNodeAsync(
+                targetNode.ReferenceId,
+                targetNode.ReferenceName,
+                examType,
+                limit,
+                cancellationToken);
+
+            if (serverIds != null && serverIds.Count > 0)
+            {
+                linkedWordIds = serverIds.ToList();
             }
-            else if (!string.IsNullOrWhiteSpace(targetNode.ReferenceName))
+            else
             {
-                var matchedWords = allWords
-                    .Where(w => w.WordTopics.Any(wt => wt.Topic != null && wt.Topic.Name.Contains(targetNode.ReferenceName, StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
-                if (matchedWords.Count > 0)
+                var allWords = await _vocabularyRepository.GetWordsForAnalyticsAsync(cancellationToken);
+                if (allWords != null && allWords.Count > 0)
                 {
-                    topicId = matchedWords.First().WordTopics.First(wt => wt.Topic != null && wt.Topic.Name.Contains(targetNode.ReferenceName, StringComparison.OrdinalIgnoreCase)).TopicId;
-                    linkedWordIds = matchedWords.Select(w => w.Id).Take(targetNode.TargetItemCount > 0 ? targetNode.TargetItemCount : 50).ToList();
-                }
-            }
+                    if (targetNode.ReferenceId.HasValue)
+                    {
+                        topicId = targetNode.ReferenceId.Value;
+                        linkedWordIds = allWords
+                            .Where(w => w.WordTopics.Any(wt => wt.TopicId == topicId.Value))
+                            .Select(w => w.Id)
+                            .Take(limit)
+                            .ToList();
+                    }
+                    else if (!string.IsNullOrWhiteSpace(targetNode.ReferenceName))
+                    {
+                        var matchedWords = allWords
+                            .Where(w => w.WordTopics.Any(wt => wt.Topic != null && wt.Topic.Name.Contains(targetNode.ReferenceName, StringComparison.OrdinalIgnoreCase)))
+                            .ToList();
+                        if (matchedWords.Count > 0)
+                        {
+                            topicId = matchedWords.First().WordTopics.First(wt => wt.Topic != null && wt.Topic.Name.Contains(targetNode.ReferenceName, StringComparison.OrdinalIgnoreCase)).TopicId;
+                            linkedWordIds = matchedWords.Select(w => w.Id).Take(limit).ToList();
+                        }
+                    }
 
-            if (linkedWordIds.Count == 0)
-            {
-                var examType = activeRoadmap.Target switch
-                {
-                    ExamTarget.Toeic => ExamType.Toeic,
-                    ExamTarget.Ielts => ExamType.Ielts,
-                    ExamTarget.Vstep => ExamType.Vstep,
-                    _ => (ExamType?)null
-                };
-
-                if (examType.HasValue)
-                {
-                    linkedWordIds = allWords
-                        .Where(w => w.WordExamTags.Any(wet => wet.ExamTag != null && wet.ExamTag.Type == examType.Value))
-                        .Select(w => w.Id)
-                        .Take(targetNode.TargetItemCount > 0 ? targetNode.TargetItemCount : 30)
-                        .ToList();
+                    if (linkedWordIds.Count == 0 && examType.HasValue)
+                    {
+                        linkedWordIds = allWords
+                            .Where(w => w.WordExamTags.Any(wet => wet.ExamTag != null && wet.ExamTag.Type == examType.Value))
+                            .Select(w => w.Id)
+                            .Take(targetNode.TargetItemCount > 0 ? targetNode.TargetItemCount : 30)
+                            .ToList();
+                    }
                 }
             }
         }
@@ -342,6 +413,47 @@ public class RoadmapService : IRoadmapService
     {
         await _roadmapRepository.SetActiveRoadmapAsync(roadmapId, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var active = await _roadmapRepository.GetRoadmapWithDetailsAsync(roadmapId, cancellationToken);
+        if (active != null)
+        {
+            await SyncStudyPlannerWithRoadmapAsync(active, cancellationToken);
+        }
+    }
+
+    private async Task SyncStudyPlannerWithRoadmapAsync(StudyRoadmap roadmap, CancellationToken cancellationToken)
+    {
+        if (_studyPlannerService == null) return;
+
+        try
+        {
+            var currentGoal = await _studyPlannerService.GetUserGoalAsync(cancellationToken);
+            var examType = roadmap.Target switch
+            {
+                ExamTarget.Toeic => ExamType.Toeic,
+                ExamTarget.Ielts => ExamType.Ielts,
+                ExamTarget.Vstep => ExamType.Vstep,
+                _ => ExamType.General
+            };
+
+            string scoreStr = roadmap.Target == ExamTarget.Ielts
+                ? $"{roadmap.TargetScore:F1}+"
+                : $"{roadmap.TargetScore:F0}+";
+
+            var updatedGoal = currentGoal with
+            {
+                TargetExam = examType,
+                TargetScore = scoreStr,
+                TargetDate = DateOnly.FromDateTime(roadmap.TargetDate),
+                IsConfigured = true
+            };
+
+            await _studyPlannerService.SaveUserGoalAsync(updatedGoal, cancellationToken);
+        }
+        catch
+        {
+            // Non-blocking synchronization with StudyPlanner
+        }
     }
 
     public async Task DeleteRoadmapAsync(Guid roadmapId, CancellationToken cancellationToken = default)

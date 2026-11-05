@@ -25,7 +25,12 @@ public static class DependencyInjection
         services.AddScoped<IVocabularySuggestionService, VocabularySuggestionService>();
         services.AddScoped<IGrammarSuggestionService, GrammarSuggestionService>();
         services.AddScoped<IStudyAdvisorService, StudyAdvisorService>();
-        services.AddScoped<IStudyPlannerService, StudyPlannerService>();
+        services.AddScoped<IStudyPlannerService>(sp => new StudyPlannerService(
+            sp.GetRequiredService<Lexora.Domain.Interfaces.IReviewRepository>(),
+            sp.GetRequiredService<Lexora.Domain.Interfaces.IVocabularyRepository>(),
+            sp.GetRequiredService<Lexora.Domain.Interfaces.IGrammarRepository>(),
+            null,
+            sp.GetService<Lexora.Domain.Interfaces.IRoadmapRepository>()));
         services.AddScoped<IVocabularyKnowledgeGraphService, VocabularyKnowledgeGraphService>();
         services.AddScoped<IAdaptiveQuizService, AdaptiveQuizService>();
         services.AddScoped<IPronunciationListeningLabService, PronunciationListeningLabService>();

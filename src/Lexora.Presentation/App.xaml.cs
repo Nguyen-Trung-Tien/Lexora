@@ -85,19 +85,19 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddSingleton<IStartupOrchestrator, StartupOrchestrator>();
                 services.AddSingleton<IShortcutManager, ShortcutManager>();
 
-                // ViewModels
-                services.AddTransient<ShellViewModel>();
-                services.AddTransient<DashboardViewModel>();
-                services.AddTransient<RoadmapViewModel>();
-                services.AddTransient<VocabularyViewModel>();
-                services.AddTransient<ReviewViewModel>();
-                services.AddTransient<TestViewModel>();
-                services.AddTransient<GrammarViewModel>();
-                services.AddTransient<HomophonesViewModel>();
-                services.AddTransient<KnowledgeGraphViewModel>();
-                services.AddTransient<LearningStorageViewModel>();
-                services.AddTransient<SettingsViewModel>();
-                services.AddTransient<HelpViewModel>();
+                // ViewModels (Isolated IServiceScope per ViewModel to prevent DbContext concurrency collisions across cached pages)
+                AddIsolatedScopedViewModel<ShellViewModel>(services);
+                AddIsolatedScopedViewModel<DashboardViewModel>(services);
+                AddIsolatedScopedViewModel<RoadmapViewModel>(services);
+                AddIsolatedScopedViewModel<VocabularyViewModel>(services);
+                AddIsolatedScopedViewModel<ReviewViewModel>(services);
+                AddIsolatedScopedViewModel<TestViewModel>(services);
+                AddIsolatedScopedViewModel<GrammarViewModel>(services);
+                AddIsolatedScopedViewModel<HomophonesViewModel>(services);
+                AddIsolatedScopedViewModel<KnowledgeGraphViewModel>(services);
+                AddIsolatedScopedViewModel<LearningStorageViewModel>(services);
+                AddIsolatedScopedViewModel<SettingsViewModel>(services);
+                AddIsolatedScopedViewModel<HelpViewModel>(services);
 
                 // Views
                 services.AddTransient<ShellPage>();
@@ -136,6 +136,16 @@ public partial class App : Microsoft.UI.Xaml.Application
         {
             _ = mainWindow.StartStartupSequenceAsync();
         }
+    }
+
+    private static void AddIsolatedScopedViewModel<TViewModel>(IServiceCollection services)
+        where TViewModel : class
+    {
+        services.AddTransient<TViewModel>(sp =>
+        {
+            var scope = sp.CreateScope();
+            return ActivatorUtilities.CreateInstance<TViewModel>(scope.ServiceProvider);
+        });
     }
 
     public static void LogCrash(string source, Exception? ex, string? extra = null)

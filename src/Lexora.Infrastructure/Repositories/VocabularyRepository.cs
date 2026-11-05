@@ -684,4 +684,91 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             Context.WordTopics.RemoveRange(toRemove);
         }
     }
+
+    public async Task<int> CountLearnedWordsForNodeAsync(
+        Guid? topicId,
+        string? topicName,
+        ExamType? examType,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.AsNoTracking()
+            .Where(w => w.ReviewCard != null && w.ReviewCard.Status != LearningStatus.New);
+
+        if (topicId.HasValue && topicId.Value != Guid.Empty)
+        {
+            return await query
+                .CountAsync(w => w.WordTopics.Any(wt => wt.TopicId == topicId.Value), cancellationToken);
+        }
+
+        if (!string.IsNullOrWhiteSpace(topicName))
+        {
+            var lowerName = topicName.Trim().ToLower();
+            return await query
+                .CountAsync(w => w.WordTopics.Any(wt => wt.Topic != null && wt.Topic.Name.ToLower().Contains(lowerName)), cancellationToken);
+        }
+
+        if (examType.HasValue)
+        {
+            return await query
+                .CountAsync(w => w.WordExamTags.Any(wet => wet.ExamTag != null && wet.ExamTag.Type == examType.Value), cancellationToken);
+        }
+
+        return 0;
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetWordIdsForNodeAsync(
+        Guid? topicId,
+        string? topicName,
+        ExamType? examType,
+        int limit = 50,
+        CancellationToken cancellationToken = default)
+    {
+        int takeLimit = limit > 0 ? limit : 50;
+
+        if (topicId.HasValue && topicId.Value != Guid.Empty)
+        {
+            var byTopicId = await DbSet.AsNoTracking()
+                .Where(w => w.WordTopics.Any(wt => wt.TopicId == topicId.Value))
+                .OrderBy(w => w.Level)
+                .Select(w => w.Id)
+                .Take(takeLimit)
+                .ToListAsync(cancellationToken);
+
+            if (byTopicId.Count > 0)
+                return byTopicId;
+        }
+
+        if (!string.IsNullOrWhiteSpace(topicName))
+        {
+            var lowerName = topicName.Trim().ToLower();
+            var byTopicName = await DbSet.AsNoTracking()
+                .Where(w => w.WordTopics.Any(wt => wt.Topic != null && wt.Topic.Name.ToLower().Contains(lowerName)))
+                .OrderBy(w => w.Level)
+                .Select(w => w.Id)
+                .Take(takeLimit)
+                .ToListAsync(cancellationToken);
+
+            if (byTopicName.Count > 0)
+                return byTopicName;
+        }
+
+        if (examType.HasValue)
+        {
+            var byExam = await DbSet.AsNoTracking()
+                .Where(w => w.WordExamTags.Any(wet => wet.ExamTag != null && wet.ExamTag.Type == examType.Value))
+                .OrderBy(w => w.Level)
+                .Select(w => w.Id)
+                .Take(takeLimit)
+                .ToListAsync(cancellationToken);
+
+            if (byExam.Count > 0)
+                return byExam;
+        }
+
+        return await DbSet.AsNoTracking()
+            .OrderBy(w => w.Level)
+            .Select(w => w.Id)
+            .Take(takeLimit)
+            .ToListAsync(cancellationToken);
+    }
 }

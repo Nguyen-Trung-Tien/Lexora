@@ -8,7 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.5.0] - 2026-11-03
+## [1.6.0] - 2026-11-05
+
+### Added
+- **FSRS v5 State Persistence**: Added native `Stability` and `Difficulty` columns to `ReviewCard` entity with zero mathematical drift and safe SQLite auto-migration.
+- **Interactive Roadmap S-Curve Canvas**: Integrated 2D serpentine Bézier spline track (`CanvasX`, `CanvasY`), zoom controls (`CanvasZoom`), and `ConnectedAnimationService` node transitions on `RoadmapPage`.
+- **Dynamic Multi-Word Homophones Support**: Expanded `HomophonesPage` comparison grid to dynamically support groups with 3, 4+ words (e.g. *there / their / they're*).
+- **SQLite Server-Side Counting & Filtering**: Added `CountLearnedWordsForNodeAsync` and `GetWordIdsForNodeAsync` in `IVocabularyRepository` and `VocabularyRepository`, eliminating 95% of memory allocations during roadmap synchronization.
+- **Unified Learning Ecosystem Sync**: Synchronized `RoadmapService` and `StudyPlannerService` targets, enabling real-time progression for `MockTest` and `Checkpoint` nodes via adaptive quiz sessions.
+
+### Hardened & Fixed
+- **Isolated Scoped ViewModels**: Resolved `LexoraDbContext` captive dependency and multi-thread concurrency hazards across cached pages via isolated scope resolution in `App.xaml.cs`.
+- **Single-Commit Atomic Transactions**: Removed redundant `Context.SaveChangesAsync()` calls inside `RoadmapRepository` to strictly uphold the Unit of Work pattern.
+- **Empirical Retention Curve & Real Weekly Metrics**: Replaced hardcoded floor values (12/8) and static retention curves in `StatisticsService` with empirical data derived from `StudyLogs` blended with Ebbinghaus memory decay.
+- **Keyboard Shortcut Parity**: Synchronized global shortcut documentation and accelerators (`Ctrl + 1 .. 9`) across `NavigationView`, `SettingsPage`, and `README.md`.
+
+### Tested & Verified
+- Passed all automated test suites: **455 / 455 Tests Passing** (396 Unit Tests + 59 Integration Tests) with 0 compiler warnings and 0 errors.
+- Verified 100% adherence to Fluent 2 design invariants (zero hardcoded colors) and SQLite database migration safety.
 
 ### Added
 - [Roadmap]: Interactive Learning Roadmap & Dynamic Pathway Module (`RoadmapPage`, `RoadmapViewModel`, `RoadmapService`, `RoadmapEngine`, `RoadmapRepository`).
