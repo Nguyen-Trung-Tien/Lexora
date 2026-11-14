@@ -151,6 +151,8 @@
             <!-- Modal Dialog & Floating Overlay tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraModalBackgroundBrush" Color="#282828" />
             <SolidColorBrush x:Key="LexoraModalBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
+            <!-- Modal Backdrop token for visual depth & focus -->
+            <SolidColorBrush x:Key="LexoraOverlayBackdropBrush" Color="#000000" Opacity="0.55" />
             <!-- Semantic state background fills -->
             <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#393D1B" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#442726" />
@@ -501,4 +503,6 @@
     <SolidColorBrush x:Key="LexoraMockupDarkBarBrush" Color="#6B7280" />
     <SolidColorBrush x:Key="LexoraMockupDarkAccentBrush" Color="#60CDFF" />
 
+    <!-- Universal Fallback Backdrop Token -->
+    <SolidColorBrush x:Key="LexoraOverlayBackdropBrush" Color="#000000" Opacity="0.45" />
 </ResourceDictionary>
