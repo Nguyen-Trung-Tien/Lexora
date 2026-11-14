@@ -2,7 +2,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Lexora.Application.Interfaces;
 using Lexora.Presentation.Services;
-using Lexora.Presentation.Views;
+using Lexora.Presentation.Views.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;

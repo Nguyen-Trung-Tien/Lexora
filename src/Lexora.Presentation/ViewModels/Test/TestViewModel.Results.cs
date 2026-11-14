@@ -127,11 +127,11 @@ public partial class TestViewModel
         var weakIds = WeakWordsList.Select(w => w.Id).ToList();
         if (weakIds.Count > 0)
         {
-            _navService.Navigate(typeof(Views.ReviewPage), weakIds);
+            _navService.Navigate(typeof(ReviewPage), weakIds);
         }
         else
         {
-            _navService.Navigate(typeof(Views.ReviewPage));
+            _navService.Navigate(typeof(ReviewPage));
         }
     }
 

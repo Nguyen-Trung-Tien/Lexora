@@ -1,0 +1,12 @@
+global using Lexora.Presentation.Views.Common;
+global using Lexora.Presentation.Views.Dashboard;
+global using Lexora.Presentation.Views.Grammar;
+global using Lexora.Presentation.Views.Help;
+global using Lexora.Presentation.Views.Homophones;
+global using Lexora.Presentation.Views.KnowledgeGraph;
+global using Lexora.Presentation.Views.LearningStorage;
+global using Lexora.Presentation.Views.Review;
+global using Lexora.Presentation.Views.Roadmap;
+global using Lexora.Presentation.Views.Settings;
+global using Lexora.Presentation.Views.Test;
+global using Lexora.Presentation.Views.Vocabulary;

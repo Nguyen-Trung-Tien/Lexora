@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Lexora.Presentation"
-    xmlns:views="using:Lexora.Presentation.Views"
+    xmlns:common="using:Lexora.Presentation.Views.Common"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Lexora - English Learning Manager"
     mc:Ignorable="d">
@@ -80,6 +80,6 @@
         </Grid>
 
         <!-- Splash Screen Startup Animation Overlay (Full Window Coverage) -->
-        <views:SplashScreenOverlay x:Name="SplashOverlay" Grid.Row="0" Grid.RowSpan="2" Canvas.ZIndex="100" />
+        <common:SplashScreenOverlay x:Name="SplashOverlay" Grid.Row="0" Grid.RowSpan="2" Canvas.ZIndex="100" />
     </Grid>
 </Window>

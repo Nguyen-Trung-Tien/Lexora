@@ -1,0 +1,878 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Lexora.Presentation.Views.Review.ReviewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dto="using:Lexora.Application.DTOs"
+    xmlns:services="using:Lexora.Presentation.Services"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    KeyboardAcceleratorPlacementMode="Hidden"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Padding="24" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- 1. MODE SELECTOR & SETTINGS BAR -->
+            <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled" Margin="0,0,0,16">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <Button x:Name="ModeDueButton" Click="ModeDueButton_Click" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE823;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_TodayDue')}" FontWeight="SemiBold" FontSize="12" />
+                                <Border Background="{ThemeResource SystemFillColorCriticalBrush}" CornerRadius="10" Padding="4,1" Margin="2,0,0,0"
+                                        Visibility="{x:Bind ViewModel.DueCardsCount, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                                    <TextBlock Text="{x:Bind ViewModel.DueCardsCount, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
+                                </Border>
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="ModeNewButton" Click="ModeNewButton_Click" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE710;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_LearnNew')}" FontWeight="SemiBold" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="ModeDifficultButton" Click="ModeDifficultButton_Click" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE7BA;" FontSize="12" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_Difficult')}" FontWeight="SemiBold" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Smart Review Presets Dropdown -->
+                        <DropDownButton x:Name="SmartPresetsDropDown" CornerRadius="8" Padding="10,6">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE946;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Name="SmartPresetsBtnText" Text="{x:Bind Loc.GetString('SmartReview_Presets')}" FontWeight="SemiBold" FontSize="12" />
+                            </StackPanel>
+                            <DropDownButton.Flyout>
+                                <Flyout x:Name="SmartPresetsFlyout" Placement="Bottom">
+                                    <Border Width="380" MaxHeight="450">
+                                        <StackPanel Spacing="10">
+                                            <!-- Flyout Header -->
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_PresetFlyoutTitle')}" FontWeight="Bold" FontSize="14" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_PresetFlyoutSubtitle')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <MenuFlyoutSeparator Margin="0,2" />
+                                            <!-- List of Presets -->
+                                            <ListView ItemsSource="{x:Bind ViewModel.SmartPresetsList, Mode=OneWay}"
+                                                      SelectionMode="None"
+                                                      IsItemClickEnabled="True"
+                                                      ItemClick="SmartPresetListView_ItemClick">
+                                                <ListView.ItemTemplate>
+                                                    <DataTemplate x:DataType="dto:SmartReviewPresetDisplayItem">
+                                                        <Border Padding="10,8" Margin="0,3" CornerRadius="8"
+                                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                BorderThickness="1">
+                                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                                <Border Width="34" Height="34" CornerRadius="17"
+                                                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                        VerticalAlignment="Center">
+                                                                    <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="14"
+                                                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Border>
+                                                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{x:Bind Title}" FontWeight="SemiBold" FontSize="13" />
+                                                                    <TextBlock Text="{x:Bind Description}" FontSize="11"
+                                                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                               TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                                                </StackPanel>
+                                                                <Border Grid.Column="2" Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                                        CornerRadius="10" Padding="8,3" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{x:Bind BadgeText}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                                               FontSize="11" FontWeight="Bold" />
+                                                                </Border>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ListView.ItemTemplate>
+                                            </ListView>
+                                        </StackPanel>
+                                    </Border>
+                                </Flyout>
+                            </DropDownButton.Flyout>
+                        </DropDownButton>
+
+                        <!-- Unit / Topic Dropdown -->
+                        <ComboBox x:Name="ReviewUnitCombo"
+                                  PlaceholderText="{x:Bind Loc.GetString('Vocab_TopicFilter')}"
+                                  SelectionChanged="ReviewUnitCombo_SelectionChanged"
+                                  ItemsSource="{x:Bind ViewModel.AvailableTopics, Mode=OneWay}"
+                                  MinWidth="110" MaxWidth="170" Height="32" CornerRadius="6" FontSize="11"
+                                  ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TopicFilter')}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="dto:TopicDto">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE8EC;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind Name}" FontSize="11" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- Top Right: Audio & Typing Controls (Streamlined) -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                        <!-- Undo Last Review Button -->
+                        <Button x:Name="UndoReviewButton"
+                                Command="{x:Bind ViewModel.UndoLastReviewCommand}"
+                                IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}"
+                                CornerRadius="6" Padding="8,5"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_UndoTooltip')}">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE7A7;" FontSize="11" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_Undo')}" FontWeight="SemiBold" FontSize="11" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Focus Mode Toggle (Zen / Distraction-free) -->
+                        <ToggleButton x:Name="FocusModeToggle"
+                                      IsChecked="{x:Bind ViewModel.IsFocusMode, Mode=TwoWay}"
+                                      Click="FocusModeToggle_Click"
+                                      CornerRadius="6" Padding="8,5"
+                                      ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_FocusModeTooltip')}">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE740;" FontSize="11" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_FocusMode')}" FontWeight="SemiBold" FontSize="11" />
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <!-- Typing Recall Mode Toggle -->
+                        <ToggleButton x:Name="TypingModeToggle"
+                                      IsChecked="{x:Bind ViewModel.IsTypingPracticeEnabled, Mode=OneWay}"
+                                      Click="TypingModeToggle_Click"
+                                      CornerRadius="6" Padding="8,5"
+                                      ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_SpellingDrill')}">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE765;" FontSize="11" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Review_TypingDrill')}" FontWeight="SemiBold" FontSize="11" />
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <!-- Speech Rate DropDown -->
+                        <DropDownButton ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_Speed')}" CornerRadius="6" Padding="8,5">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE767;" FontSize="11" />
+                                <TextBlock Text="{x:Bind ViewModel.SpeechRateLabel, Mode=OneWay}" FontWeight="SemiBold" FontSize="11" />
+                            </StackPanel>
+                            <DropDownButton.Flyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem x:Name="FlyoutSpeedSlow" Text="0.75x" Tag="0.75" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem x:Name="FlyoutSpeedNormal" Text="1.0x" Tag="1.0" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem x:Name="FlyoutSpeedFast" Text="1.25x" Tag="1.25" Click="SpeedItem_Click" />
+                                    <MenuFlyoutItem x:Name="FlyoutSpeedVeryFast" Text="1.5x" Tag="1.5" Click="SpeedItem_Click" />
+                                </MenuFlyout>
+                            </DropDownButton.Flyout>
+                        </DropDownButton>
+
+                        <!-- Contextual Help Button -->
+                        <Button x:Name="ReviewHelpButton" Click="ReviewHelpButton_Click" CornerRadius="6" Padding="8,5"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Review_Help_Title')}">
+                            <FontIcon Glyph="&#xE9CE;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <TeachingTip x:Name="ReviewHelpTeachingTip"
+                         Target="{x:Bind ReviewHelpButton}"
+                         Title="{x:Bind Loc.GetString('Review_Help_Title')}"
+                         Subtitle="{x:Bind Loc.GetString('Review_Help_Subtitle')}"
+                         IsOpen="False"
+                         IsLightDismissEnabled="True"
+                         PreferredPlacement="BottomRight">
+                <TeachingTip.Content>
+                    <StackPanel Spacing="10" MaxWidth="320">
+                        <TextBlock Text="{x:Bind Loc.GetString('Review_Help_Content')}" TextWrapping="Wrap" FontSize="13" />
+                        <Button Style="{ThemeResource AccentButtonStyle}"
+                                Click="OpenFullGuide_Click"
+                                Tag="SpacedRepetition"
+                                CornerRadius="8" Padding="12,6">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="{x:Bind Loc.GetString('Help_OpenFullGuide')}" FontWeight="SemiBold" FontSize="12" />
+                                <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </TeachingTip.Content>
+            </TeachingTip>
+
+            <!-- 2. PROGRESS BAR & SESSION INDICATOR -->
+            <Grid Grid.Row="1" Margin="0,0,0,16"
+                  Visibility="{x:Bind ViewModel.IsCompleted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <StackPanel Spacing="6">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind ViewModel.ActiveSessionTitle, Mode=OneWay}" FontWeight="Bold" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="·" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="Bold" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center">
+                                <Run Text="{x:Bind Loc.GetString('Review_Progress')}" />
+                                <Run Text="{x:Bind ViewModel.CompletedCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                <Run Text="/" />
+                                <Run Text="{x:Bind ViewModel.TotalQueueCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                <Run Text=" (" />
+                                <Run Text="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" />
+                                <Run Text="%)" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Loc.GetString('Review_Remaining')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,2">
+                                <TextBlock Text="{x:Bind ViewModel.RemainingCount, Mode=OneWay}" FontWeight="Bold" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontSize="12" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                    <ProgressBar Value="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" Maximum="100" Height="4" CornerRadius="2" />
+                </StackPanel>
+            </Grid>
+
+            <!-- 3. MAIN WORKSPACE -->
+            <Grid Grid.Row="2">
+
+                <!-- Empty Due Queue State -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="32" MinHeight="380"
+                        Visibility="{x:Bind ViewModel.IsEmptyQueue, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="64" Height="64" CornerRadius="16" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="8" HorizontalAlignment="Center">
+                            <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
+                        </Border>
+                        <TextBlock Text="{x:Bind Loc.GetString('Review_AllCaughtUp')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Review_AllCaughtUpDesc')}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="460" />
+                        <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,8,0,0">
+                            <Button Content="{x:Bind Loc.GetString('Review_LearnNew')}" Style="{ThemeResource AccentButtonStyle}" Padding="20,8" CornerRadius="4" Click="ModeNewButton_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- ACTIVE FLASHCARD WORKSPACE (Responsive 2-Column or Centered) -->
+                <Grid x:Name="FlashcardWorkspaceGrid"
+                      Visibility="{x:Bind ViewModel.IsCardActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                      ColumnDefinitions="*,340" ColumnSpacing="20" HorizontalAlignment="Stretch">
+
+                    <!-- Left: Main Study Flashcard with 3D PlaneProjection -->
+                    <Border x:Name="FlashcardMainBorder"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource LexoraFlashcardBorderBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="24" MinHeight="440"
+                            HorizontalAlignment="Stretch">
+                        <Border.Projection>
+                            <PlaneProjection x:Name="FlashcardProjection" CenterOfRotationX="0.5" CenterOfRotationY="0.5" />
+                        </Border.Projection>
+
+                        <Grid RowDefinitions="Auto,Auto,Auto">
+                            <!-- Front Card: Typing Drill OR Standard Display -->
+                            <Grid Grid.Row="0" Margin="0,4,0,16">
+                                <!-- Typing Drill Mode -->
+                                <StackPanel Spacing="14" HorizontalAlignment="Stretch"
+                                            Visibility="{x:Bind ViewModel.IsTypingRecallActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="8,2">
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.Level, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" />
+                                        </Border>
+                                        <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="8,2">
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.PrimaryPartOfSpeech, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Border>
+                                        <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="8,2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <FontIcon Glyph="&#xE765;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_SpellingDrill')}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="8,2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="🎯" FontSize="11" />
+                                                <TextBlock Text="{x:Bind ViewModel.CurrentCard.Confidence, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                                <TextBlock Text="%" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- Prompt Definition -->
+                                    <TextBlock Text="{x:Bind ViewModel.CurrentCard.PrimaryDefinitionVi, Mode=OneWay}"
+                                               FontSize="28" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                               HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+
+                                    <!-- Cloze Sentence Context -->
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,2,0,4"
+                                            HorizontalAlignment="Stretch"
+                                            Visibility="{x:Bind ViewModel.HasClozeSentence, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <StackPanel Spacing="4">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE82F;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_ExampleContext')}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </StackPanel>
+                                            <TextBlock Text="{x:Bind ViewModel.ClozeSentenceEn, Mode=OneWay}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                            <TextBlock Text="{x:Bind ViewModel.ClozeSentenceVi, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Letter Pattern Scaffold -->
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="8" Padding="16,8"
+                                            HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE943;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Review_PatternHint')}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind ViewModel.WordScaffold, Mode=OneWay}"
+                                                       FontSize="18" FontWeight="Bold"
+                                                       FontFamily="Consolas, Cascadia Code, Courier New"
+                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Input Box & Controls -->
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" HorizontalAlignment="Stretch">
+                                        <TextBox x:Name="TypingInputBox"
+                                                 Text="{x:Bind ViewModel.TypedWord, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText="{x:Bind Loc.GetString('Review_TypePlaceholder')}"
+                                                 KeyDown="TypingInputBox_KeyDown"
+                                                 FontSize="16"
+                                                 CornerRadius="8"
+                                                 Padding="14,10" />
+                                        <Button Grid.Column="1"
+                                                Content="{x:Bind Loc.GetString('Review_BtnCheck')}"
+                                                Style="{ThemeResource AccentButtonStyle}"
+                                                Padding="20,10"
+                                                CornerRadius="8"
+                                                Click="CheckTypedAnswerButton_Click" />
+                                        <Button Grid.Column="2"
+                                                Content="{x:Bind Loc.GetString('Review_BtnHint')}"
+                                                Padding="14,10"
+                                                CornerRadius="8"
+                                                Click="HintButton_Click" />
+                                    </Grid>
+
+                                    <!-- Hint Banner -->
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="6" Padding="12,6"
+                                            HorizontalAlignment="Center"
+                                            Visibility="{x:Bind ViewModel.IsHintVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{x:Bind Loc.GetString('Review_PatternHint')}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{x:Bind ViewModel.HintText, Mode=OneWay}" FontSize="15" FontWeight="Bold" FontFamily="Consolas, Cascadia Code, Courier New" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Audio & Skip Buttons -->
+                                    <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                                        <Button Style="{ThemeResource SubtleButtonStyle}" Padding="10,6" Click="PlayUkAudio_Click" CornerRadius="6">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_AudioUk')}" FontSize="12" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{ThemeResource SubtleButtonStyle}" Padding="10,6" Click="PlayUsAudio_Click" CornerRadius="6">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_AudioUs')}" FontSize="12" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{ThemeResource SubtleButtonStyle}"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                FontSize="12"
+                                                Click="SkipTypingButton_Click">
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <FontIcon Glyph="&#xE890;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_BtnShowAnswer')}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Standard Front Card -->
+                                <StackPanel Spacing="16" HorizontalAlignment="Center"
+                                            Visibility="{x:Bind ViewModel.IsStandardFrontActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                        <!-- Level Badge -->
+                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,2">
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.Level, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" />
+                                        </Border>
+
+                                        <!-- POS Badge -->
+                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,2">
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.PrimaryPartOfSpeech, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="Medium" />
+                                        </Border>
+
+                                        <!-- Confidence Badge -->
+                                        <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="🎯" FontSize="11" />
+                                                <TextBlock Text="{x:Bind ViewModel.CurrentCard.Confidence, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                                <TextBlock Text="%" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- Large Term -->
+                                    <TextBlock Text="{x:Bind ViewModel.CurrentCard.Term, Mode=OneWay}"
+                                               FontSize="42" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" />
+
+                                    <!-- Pronunciation Audio Buttons -->
+                                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                                        <Button Style="{ThemeResource SubtleButtonStyle}"
+                                                Padding="14,6" Click="PlayUkAudio_Click" CornerRadius="20">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                                <TextBlock Text="UK" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.CurrentCard.PhoneticUk, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button Style="{ThemeResource SubtleButtonStyle}"
+                                                Padding="14,6" Click="PlayUsAudio_Click" CornerRadius="20">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="US" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="{x:Bind ViewModel.CurrentCard.PhoneticUs, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+
+                                    <!-- Context Sentence Preview (Hidden once answer is revealed to prevent duplication) -->
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="8" Padding="16,10"
+                                            HorizontalAlignment="Center" MaxWidth="720"
+                                            Visibility="{x:Bind ViewModel.IsClozePromptVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind ViewModel.ClozeSentenceEn, Mode=OneWay}" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Back Card: Revealed Definitions & Examples -->
+                            <StackPanel Grid.Row="1" Spacing="14"
+                                        Visibility="{x:Bind ViewModel.IsAnswerVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Margin="0,8,0,16">
+                                <StackPanel.ChildrenTransitions>
+                                    <TransitionCollection>
+                                        <EntranceThemeTransition FromVerticalOffset="0" />
+                                    </TransitionCollection>
+                                </StackPanel.ChildrenTransitions>
+                                <MenuFlyoutSeparator />
+
+                                <!-- Meaning Section -->
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="8" Padding="16,12">
+                                    <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.CurrentCard.PrimaryDefinitionVi, Mode=OneWay}"
+                                                   FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"
+                                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextWrapping="Wrap" TextAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.CurrentCard.PrimaryDefinitionEn, Mode=OneWay}"
+                                                   FontSize="13.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
+                                                   FontStyle="Italic"
+                                                   Visibility="{x:Bind ViewModel.CurrentCard.PrimaryDefinitionEn, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Bilingual Contextual Examples -->
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.CurrentCard.Examples, Mode=OneWay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="dto:ExampleSentenceDto">
+                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,3">
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                    <FontIcon Glyph="&#xE82F;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Top" Margin="0,2,0,0" />
+                                                    <StackPanel Grid.Column="1" Spacing="3">
+                                                        <TextBlock Text="{x:Bind SentenceEn}" FontWeight="SemiBold" FontSize="13.5" TextWrapping="Wrap" />
+                                                        <TextBlock Text="{x:Bind SentenceVi}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12.5" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <!-- Rating & Action Area -->
+                            <Grid Grid.Row="2" Margin="0,12,0,0">
+                                <!-- Show Meaning Button (Space) -->
+                                <Button HorizontalAlignment="Center" Style="{ThemeResource AccentButtonStyle}"
+                                        Padding="28,8" CornerRadius="4" FontSize="14" FontWeight="SemiBold"
+                                        Visibility="{x:Bind ViewModel.IsShowMeaningButtonVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Click="ShowAnswerButton_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_ShowMeaning')}" VerticalAlignment="Center" />
+                                        <Border Background="{ThemeResource TextOnAccentFillColorPrimaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                            <TextBlock Text="Space" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                        </Border>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- 4 SM-2 Rating Buttons -->
+                                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8"
+                                      Visibility="{x:Bind ViewModel.IsAnswerVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Grid.ChildrenTransitions>
+                                        <TransitionCollection>
+                                            <EntranceThemeTransition FromVerticalOffset="0" />
+                                        </TransitionCollection>
+                                    </Grid.ChildrenTransitions>
+
+                                    <!-- 1: Again -->
+                                    <Button Style="{ThemeResource RatingAgainButton}"
+                                            HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="AgainButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}">
+                                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">
+                                                    <TextBlock Text="1" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </Border>
+                                                <FontIcon Glyph="&#xE711;" FontSize="11.5" Foreground="{ThemeResource SystemFillColorCriticalBrush}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingAgain')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <TextBlock Text="{x:Bind ViewModel.AgainIntervalText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 2: Hard -->
+                                    <Button Grid.Column="1" Style="{ThemeResource RatingHardButton}"
+                                            HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="HardButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}">
+                                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">
+                                                    <TextBlock Text="2" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </Border>
+                                                <FontIcon Glyph="&#xE7BA;" FontSize="11.5" Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingHard')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <TextBlock Text="{x:Bind ViewModel.HardIntervalText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 3: Good -->
+                                    <Button Grid.Column="2" Style="{ThemeResource RatingGoodButton}"
+                                            HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="GoodButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}">
+                                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">
+                                                    <TextBlock Text="3" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </Border>
+                                                <FontIcon Glyph="&#xE73E;" FontSize="11.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingGood')}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <TextBlock Text="{x:Bind ViewModel.GoodIntervalText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 4: Easy -->
+                                    <Button Grid.Column="3" Style="{ThemeResource RatingEasyButton}"
+                                            HorizontalAlignment="Stretch" Padding="4,6" MinHeight="50" CornerRadius="8" Click="EasyButton_Click"
+                                            IsEnabled="{x:Bind ViewModel.CanRate, Mode=OneWay}">
+                                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">
+                                                    <TextBlock Text="4" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </Border>
+                                                <FontIcon Glyph="&#xEC4A;" FontSize="11.5" Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_RatingEasy')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <TextBlock Text="{x:Bind ViewModel.EasyIntervalText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Right Sidebar: Session Progress & SM-2 Insights -->
+                    <StackPanel x:Name="FlashcardSidebarPanel" Grid.Column="1" Spacing="14">
+                        <!-- Session Live Progress Card -->
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1" CornerRadius="8" Padding="14,12">
+                            <StackPanel Spacing="12">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE9D5;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_SessionStats')}" FontWeight="Bold" FontSize="14" />
+                                </StackPanel>
+
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,8">
+                                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                            <TextBlock Text="{x:Bind Loc.GetString('Review_Done')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind ViewModel.CompletedCount, Mode=OneWay}" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,8">
+                                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                            <TextBlock Text="{x:Bind Loc.GetString('Review_Left')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{x:Bind ViewModel.RemainingCount, Mode=OneWay}" FontWeight="Bold" FontSize="16" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,8">
+                                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                            <TextBlock Text="{x:Bind Loc.GetString('Review_Accuracy')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <TextBlock Text="{x:Bind ViewModel.SessionAccuracyRate, Mode=OneWay}" FontWeight="Bold" FontSize="15" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="%" FontSize="10" Foreground="{ThemeResource SystemFillColorSuccessBrush}" Margin="1,2,0,0" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- SM-2 & FSRS Memory Insights Card -->
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1" CornerRadius="8" Padding="14,12">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <FontIcon Glyph="&#xE9D9;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_Sm2Insights')}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1"
+                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="4" Padding="6,2"
+                                            Visibility="{x:Bind ViewModel.CurrentCardMemoryStability, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind ViewModel.CurrentCardMemoryStability.HealthLevel, Mode=OneWay}"
+                                                   FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    </Border>
+                                </Grid>
+
+                                <StackPanel Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_StatusLabel')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentCard.StatusLabel, Mode=OneWay}" FontWeight="SemiBold" FontSize="11" />
+                                        </Border>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_RetentionLabel')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.ConfidenceText, Mode=OneWay}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto" Visibility="{x:Bind ViewModel.CurrentCardMemoryStability, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind Loc.GetString('SmartReview_Stability')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="3">
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentCardMemoryStability.StabilityDays, Mode=OneWay, FallbackValue='1'}" FontWeight="SemiBold" FontSize="12" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Day_Unit')}" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto" Visibility="{x:Bind ViewModel.CurrentCardMemoryStability, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind Loc.GetString('SmartReview_Retrievability')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
+                                            <TextBlock Text="{x:Bind ViewModel.CurrentCardMemoryStability.RetrievabilityPercent, Mode=OneWay, FallbackValue='90'}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" />
+                                            <TextBlock Text="%" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_IntervalLabel')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.IntervalLabel, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_EaseFactorLabel')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.EaseFactorText, Mode=OneWay}" FontWeight="SemiBold" FontSize="12" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_LapsesLabel')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CurrentCard.Lapses, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="12" />
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Shortcuts Guide Card -->
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1" CornerRadius="8" Padding="14,12">
+                            <StackPanel Spacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE765;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_HotkeysTitle')}" FontWeight="Bold" FontSize="13" />
+                                </StackPanel>
+
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" MinWidth="44">
+                                        <TextBlock Text="Space" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Grid.Column="1" Text="{x:Bind Loc.GetString('Review_HotkeyFlip')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" MinWidth="44">
+                                        <TextBlock Text="1 - 4" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Grid.Column="1" Text="{x:Bind Loc.GetString('Review_HotkeyRate')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Session Completed View -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="32"
+                        Visibility="{x:Bind ViewModel.IsSessionCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                    <StackPanel Spacing="20" HorizontalAlignment="Center">
+                        <Border Width="64" Height="64" CornerRadius="16" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="8" HorizontalAlignment="Center">
+                            <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
+                        </Border>
+                        <TextBlock Text="{x:Bind Loc.GetString('Review_SessionCompletedTitle')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Review_SessionCompletedDesc')}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+
+                        <!-- Session Stats Cards -->
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16" Margin="0,12" MaxWidth="500">
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="14" HorizontalAlignment="Stretch">
+                                <StackPanel HorizontalAlignment="Center" Spacing="4">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_TotalStudied')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind ViewModel.TotalQueueCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="8" Padding="14" HorizontalAlignment="Stretch">
+                                <StackPanel HorizontalAlignment="Center" Spacing="4">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_CorrectCount')}" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind ViewModel.SessionCorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14" HorizontalAlignment="Stretch">
+                                <StackPanel HorizontalAlignment="Center" Spacing="4">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_Accuracy')}" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.SessionAccuracyRate, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="%" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Margin="2,4,0,0" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,12,0,0">
+                            <Button Style="{ThemeResource AccentButtonStyle}" Padding="20,9" CornerRadius="8" Click="RestartReviewButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE72C;" FontSize="12.5" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_BtnMoreCards')}" FontWeight="Bold" />
+                                </StackPanel>
+                            </Button>
+                            <Button Padding="20,9" CornerRadius="8" Click="ModeNewButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE710;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_BtnLearnNew')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Button Padding="20,9" CornerRadius="8" Click="ReturnToRoadmapButton_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE81C;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Loading Indicator Overlay -->
+                <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                              Width="44" Height="44" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+
+            <!-- 4. RECENT STUDY HISTORY EXPANDER -->
+            <Expander Grid.Row="3"
+                      Margin="0,20,0,0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Stretch">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Padding="4,8">
+                        <FontIcon Glyph="&#xE81C;" FontSize="15"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Review_RecentActivityTitle')}"
+                                   FontWeight="SemiBold" FontSize="14"
+                                   VerticalAlignment="Center" />
+                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                CornerRadius="20" Padding="8,1" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind ViewModel.RecentLogs.Count, Mode=OneWay}"
+                                       Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                       FontSize="11" FontWeight="Bold" />
+                        </Border>
+                    </StackPanel>
+                </Expander.Header>
+
+                <ItemsControl ItemsSource="{x:Bind ViewModel.RecentLogs, Mode=OneWay}"
+                              Padding="4,8,4,12">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="dto:StudyLogDto">
+                            <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,5"
+                                  BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                  BorderThickness="0,0,0,1">
+
+                                <!-- Rating badge with icon + label -->
+                                <Border Grid.Column="0"
+                                        Background="{x:Bind Rating, Converter={StaticResource ReviewRatingToBrushConverter}}"
+                                        CornerRadius="6" Padding="8,4" Margin="0,0,14,0"
+                                        VerticalAlignment="Center" MinWidth="72">
+                                    <StackPanel Orientation="Horizontal" Spacing="5"
+                                                HorizontalAlignment="Center">
+                                        <FontIcon Glyph="{x:Bind RatingIcon}"
+                                                  FontSize="11"
+                                                  Foreground="{x:Bind Rating, Converter={StaticResource ReviewRatingToForegroundConverter}}" />
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatRating(Rating)}"
+                                                   Foreground="{x:Bind Rating, Converter={StaticResource ReviewRatingToForegroundConverter}}"
+                                                   FontSize="11" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Term + status row -->
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Term}"
+                                               FontWeight="SemiBold" FontSize="13"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatStatus(ResultingStatus)}"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   FontSize="11" />
+                                        <TextBlock Text="·"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   FontSize="11" />
+                                        <FontIcon Glyph="&#xE916;" FontSize="10"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatInterval(ResultingIntervalDays)}"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   FontSize="11" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Relative timestamp -->
+                                <TextBlock Grid.Column="2"
+                                           Text="{x:Bind services:LocalizationHelper.FormatRelativeTime(CreatedAt)}"
+                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                           FontSize="11" VerticalAlignment="Center"
+                                           HorizontalAlignment="Right" Margin="12,0,0,0" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Expander>
+        </Grid>
+    </ScrollViewer>
+</Page>

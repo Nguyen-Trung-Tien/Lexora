@@ -1,0 +1,281 @@
+using Lexora.Application.Interfaces;
+using Lexora.Presentation.Services;
+using Lexora.Presentation.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
+
+namespace Lexora.Presentation.Views.Dashboard;
+
+public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareView
+{
+    public DashboardViewModel ViewModel { get; }
+    public ILocalizationService Loc { get; }
+    private readonly ISoundFeedbackService _soundFeedback;
+    private readonly INavigationService _navigationService;
+
+    public DashboardPage()
+    {
+        NavigationCacheMode = NavigationCacheMode.Required;
+        ViewModel = App.Current.Services.GetRequiredService<DashboardViewModel>();
+        Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
+        _soundFeedback = App.Current.Services.GetRequiredService<ISoundFeedbackService>();
+        _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
+
+        InitializeComponent();
+
+        Loaded += (s, e) => UpdateResponsiveLayout(ActualWidth);
+        SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
+        ActualThemeChanged += (s, e) => OnThemeChanged();
+    }
+
+    private void UpdateResponsiveLayout(double width)
+    {
+
+        if (MetricsGrid != null && CardTotalWords != null && CardDueToday != null && CardMastered != null && CardStreak != null)
+        {
+            if (width >= 1050)
+            {
+                if (MetricsGrid.ColumnDefinitions.Count != 4)
+                {
+                    MetricsGrid.ColumnDefinitions.Clear();
+                    MetricsGrid.RowDefinitions.Clear();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        MetricsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    }
+                    MetricsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    Grid.SetRow(CardTotalWords, 0);
+                    Grid.SetColumn(CardTotalWords, 0);
+
+                    Grid.SetRow(CardDueToday, 0);
+                    Grid.SetColumn(CardDueToday, 1);
+
+                    Grid.SetRow(CardMastered, 0);
+                    Grid.SetColumn(CardMastered, 2);
+
+                    Grid.SetRow(CardStreak, 0);
+                    Grid.SetColumn(CardStreak, 3);
+                }
+            }
+            else
+            {
+                if (MetricsGrid.ColumnDefinitions.Count != 2)
+                {
+                    MetricsGrid.ColumnDefinitions.Clear();
+                    MetricsGrid.RowDefinitions.Clear();
+                    MetricsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    MetricsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    MetricsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    MetricsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    Grid.SetRow(CardTotalWords, 0);
+                    Grid.SetColumn(CardTotalWords, 0);
+
+                    Grid.SetRow(CardDueToday, 0);
+                    Grid.SetColumn(CardDueToday, 1);
+
+                    Grid.SetRow(CardMastered, 1);
+                    Grid.SetColumn(CardMastered, 0);
+
+                    Grid.SetRow(CardStreak, 1);
+                    Grid.SetColumn(CardStreak, 1);
+                }
+            }
+        }
+
+        if (BreakdownGrid != null && CefrBreakdownBorder != null && PosBreakdownBorder != null)
+        {
+            if (width < 850)
+            {
+                if (BreakdownGrid.ColumnDefinitions.Count > 1)
+                {
+                    BreakdownGrid.ColumnDefinitions.Clear();
+                    BreakdownGrid.RowDefinitions.Clear();
+                    BreakdownGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    BreakdownGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    BreakdownGrid.RowSpacing = 16;
+
+                    Grid.SetColumn(CefrBreakdownBorder, 0);
+                    Grid.SetRow(CefrBreakdownBorder, 0);
+
+                    Grid.SetColumn(PosBreakdownBorder, 0);
+                    Grid.SetRow(PosBreakdownBorder, 1);
+                }
+            }
+            else
+            {
+                if (BreakdownGrid.ColumnDefinitions.Count <= 1)
+                {
+                    BreakdownGrid.RowDefinitions.Clear();
+                    BreakdownGrid.ColumnDefinitions.Clear();
+                    BreakdownGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    BreakdownGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    BreakdownGrid.RowSpacing = 0;
+
+                    Grid.SetColumn(CefrBreakdownBorder, 0);
+                    Grid.SetRow(CefrBreakdownBorder, 0);
+
+                    Grid.SetColumn(PosBreakdownBorder, 1);
+                    Grid.SetRow(PosBreakdownBorder, 0);
+                }
+            }
+        }
+    }
+
+    public void OnLanguageChanged()
+    {
+        void UpdateUI()
+        {
+            ViewModel.UpdateLanguageState();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateUI);
+        }
+    }
+
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            ViewModel.RefreshVisuals();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
+    }
+
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        OnLanguageChanged();
+        OnThemeChanged();
+        try
+        {
+            if (ViewModel.TotalWords == 0)
+            {
+                await ViewModel.LoadDashboardAsync();
+            }
+            else
+            {
+                // Background refresh without freezing UI thread during tab switch
+                _ = ViewModel.LoadDashboardAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardPage] OnNavigatedTo error: {ex.Message}");
+        }
+    }
+
+    private void StartReviewButton_Click(object sender, RoutedEventArgs e)
+    {
+        _soundFeedback.PlaySoftTapSound();
+        ViewModel.StartReviewSession();
+    }
+
+    private void StartPracticeButton_Click(object sender, RoutedEventArgs e)
+    {
+        _soundFeedback.PlaySoftTapSound();
+        ViewModel.StartPracticeTest();
+    }
+
+    private void TotalWordsCard_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        _soundFeedback.PlaySoftTapSound();
+        ViewModel.OpenVocabulary();
+    }
+
+    private void DueTodayCard_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        _soundFeedback.PlaySoftTapSound();
+        ViewModel.StartReviewSession();
+    }
+
+    private void StreakCard_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        _soundFeedback.PlayStreakSound();
+    }
+
+    private async void OpenStudyPlanner_Click(object sender, RoutedEventArgs e)
+    {
+        _soundFeedback.PlaySoftTapSound();
+        try
+        {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
+            var plannerService = App.Current.Services.GetRequiredService<IStudyPlannerService>();
+            var navService = App.Current.Services.GetService<INavigationService>();
+            var dialog = new StudyPlannerDialog(plannerService, Loc, navService)
+            {
+                XamlRoot = xamlRoot
+            };
+            await dialog.ShowAsyncSafe(xamlRoot);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardPage] OpenStudyPlanner error: {ex.Message}");
+        }
+    }
+
+    private async void OpenListeningLab_Click(object sender, RoutedEventArgs e)
+    {
+        _soundFeedback.PlaySoftTapSound();
+        try
+        {
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+            var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
+            var labService = App.Current.Services.GetRequiredService<IPronunciationListeningLabService>();
+            var audioService = App.Current.Services.GetService<IAudioPlayerService>();
+            var dialog = new ListeningLabDialog(labService, Loc, audioService)
+            {
+                XamlRoot = xamlRoot
+            };
+            await dialog.ShowAsyncSafe(xamlRoot);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardPage] OpenListeningLab error: {ex.Message}");
+        }
+    }
+
+    private void DashboardHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        DashboardHelpTeachingTip.IsOpen = true;
+    }
+
+    private void OpenFullGuide_Click(object sender, RoutedEventArgs e)
+    {
+        DashboardHelpTeachingTip.IsOpen = false;
+        var tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "GettingStarted";
+        _navigationService.Navigate(typeof(HelpPage), tag);
+    }
+
+    private void RoadmapWidget_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        var cur = e.OriginalSource as DependencyObject;
+        var target = sender as DependencyObject;
+        while (cur != null && cur != target)
+        {
+            if (cur is Button) return;
+            cur = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(cur);
+        }
+        ViewModel.NavigateToRoadmap();
+    }
+}

@@ -4,7 +4,18 @@ using Lexora.Infrastructure;
 using Lexora.Infrastructure.Data;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
-using Lexora.Presentation.Views;
+using Lexora.Presentation.Views.Common;
+using Lexora.Presentation.Views.Dashboard;
+using Lexora.Presentation.Views.Grammar;
+using Lexora.Presentation.Views.Help;
+using Lexora.Presentation.Views.Homophones;
+using Lexora.Presentation.Views.KnowledgeGraph;
+using Lexora.Presentation.Views.LearningStorage;
+using Lexora.Presentation.Views.Review;
+using Lexora.Presentation.Views.Roadmap;
+using Lexora.Presentation.Views.Settings;
+using Lexora.Presentation.Views.Test;
+using Lexora.Presentation.Views.Vocabulary;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -119,7 +130,7 @@ public partial class App : Microsoft.UI.Xaml.Application
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         // 0. Pre-warm lightweight splash logo asset into memory
-        Lexora.Presentation.Views.SplashScreenOverlay.PreloadAsset();
+        SplashScreenOverlay.PreloadAsset();
 
         // 1. Setup Main Window (hosts the splash overlay and main shell)
         _window = new MainWindow();

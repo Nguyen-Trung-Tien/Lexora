@@ -104,8 +104,8 @@ public partial class ShellViewModel : ObservableObject, IDisposable
             DueCardsCount = count;
             HasDueReviews = count > 0;
             var template = _localizationService.GetString("Review_Reminder_Msg");
-            DueReviewMessage = count > 0 
-                ? (template.Contains("{0}") ? string.Format(template, count) : $"{template} {count}") 
+            DueReviewMessage = count > 0
+                ? (template.Contains("{0}") ? string.Format(template, count) : $"{template} {count}")
                 : string.Empty;
 
             if (count > 0 && !_hasShownDueReviewToast)
@@ -120,7 +120,7 @@ public partial class ShellViewModel : ObservableObject, IDisposable
                     actionText: actionText,
                     actionCallback: () =>
                     {
-                        _navigationService.Navigate(typeof(Views.ReviewPage));
+                        _navigationService.Navigate(typeof(ReviewPage));
                     });
             }
         }
@@ -158,7 +158,7 @@ public partial class ShellViewModel : ObservableObject, IDisposable
                     actionText: actionText,
                     actionCallback: () =>
                     {
-                        _navigationService.Navigate(typeof(Views.SettingsPage));
+                        _navigationService.Navigate(typeof(SettingsPage));
                     });
             }
         }

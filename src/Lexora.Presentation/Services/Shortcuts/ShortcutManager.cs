@@ -60,7 +60,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.DashboardPage));
+                _navigationService.Navigate(typeof(DashboardPage));
                 return Task.CompletedTask;
             }
         });
@@ -76,7 +76,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.VocabularyPage));
+                _navigationService.Navigate(typeof(VocabularyPage));
                 return Task.CompletedTask;
             }
         });
@@ -92,7 +92,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.HomophonesPage));
+                _navigationService.Navigate(typeof(HomophonesPage));
                 return Task.CompletedTask;
             }
         });
@@ -108,7 +108,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.KnowledgeGraphPage));
+                _navigationService.Navigate(typeof(KnowledgeGraphPage));
                 return Task.CompletedTask;
             }
         });
@@ -124,7 +124,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.GrammarPage));
+                _navigationService.Navigate(typeof(GrammarPage));
                 return Task.CompletedTask;
             }
         });
@@ -140,7 +140,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.ReviewPage));
+                _navigationService.Navigate(typeof(ReviewPage));
                 return Task.CompletedTask;
             }
         });
@@ -156,7 +156,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.TestPage));
+                _navigationService.Navigate(typeof(TestPage));
                 return Task.CompletedTask;
             }
         });
@@ -172,7 +172,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.LearningStoragePage));
+                _navigationService.Navigate(typeof(LearningStoragePage));
                 return Task.CompletedTask;
             }
         });
@@ -188,7 +188,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.RoadmapPage));
+                _navigationService.Navigate(typeof(RoadmapPage));
                 return Task.CompletedTask;
             }
         });
@@ -239,7 +239,7 @@ public sealed class ShortcutManager : IShortcutManager
             AllowWhenTextInputFocused = false,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Views.HelpPage));
+                _navigationService.Navigate(typeof(HelpPage));
                 return Task.CompletedTask;
             }
         });
