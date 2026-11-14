@@ -56,6 +56,7 @@ public class SmartImportPreviewItem : CommunityToolkit.Mvvm.ComponentModel.Obser
     public bool IsDuplicate { get; set; }
     public bool IsValid { get; set; }
     public string? ValidationMessage { get; set; }
+    public bool HasValidationMessage => !string.IsNullOrWhiteSpace(ValidationMessage);
 
     private string _statusText = string.Empty;
     public string StatusText
@@ -469,6 +470,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             PanelPaste.Visibility = Visibility.Collapsed;
             if (accentStyle != null) BtnModeFile.Style = accentStyle;
             if (defaultStyle != null) BtnModePaste.Style = defaultStyle;
+            ContentToImport = !string.IsNullOrEmpty(FileNameHint) ? ContentToImport : string.Empty;
         }
         else
         {
@@ -476,6 +478,8 @@ public sealed partial class SmartImportDialog : ContentDialog
             PanelPaste.Visibility = Visibility.Visible;
             if (defaultStyle != null) BtnModeFile.Style = defaultStyle;
             if (accentStyle != null) BtnModePaste.Style = accentStyle;
+            ContentToImport = InputTextBox?.Text ?? string.Empty;
+            UpdatePasteStats();
         }
         EvaluateContent();
     }
@@ -696,6 +700,9 @@ public sealed partial class SmartImportDialog : ContentDialog
                 if (!string.IsNullOrWhiteSpace(text))
                 {
                     InputTextBox.Text = text;
+                    ContentToImport = text;
+                    UpdatePasteStats();
+                    EvaluateContent();
                 }
             }
         }
@@ -734,6 +741,7 @@ public sealed partial class SmartImportDialog : ContentDialog
     private void BtnClearPaste_Click(object sender, RoutedEventArgs e)
     {
         InputTextBox.Text = string.Empty;
+        ContentToImport = string.Empty;
         UpdatePasteStats();
         EvaluateContent();
     }
@@ -750,6 +758,10 @@ public sealed partial class SmartImportDialog : ContentDialog
             DetectedFormat = SmartContentDetector.DetectFormat(raw, FileNameHint);
         }
         UpdateDetectionBadge();
+        if (BtnAnalyzeNext != null)
+        {
+            BtnAnalyzeNext.IsEnabled = !string.IsNullOrWhiteSpace(ContentToImport) && DetectedFormat != DataFormat.Unknown;
+        }
     }
 
     private void UpdateDetectionBadge()
@@ -821,7 +833,9 @@ public sealed partial class SmartImportDialog : ContentDialog
             var sample = _sampleProvider(format);
             UpdateMode(false);
             InputTextBox.Text = sample;
+            ContentToImport = sample;
             UpdatePasteStats();
+            EvaluateContent();
         }
     }
 
@@ -1089,6 +1103,12 @@ public sealed partial class SmartImportDialog : ContentDialog
             }
             _analysisResult = await Task.Run(async () => await _exportImportService.AnalyzeSmartImportAsync(content, fileHint));
             await DispatcherQueue.EnsureOnUIThreadAsync();
+
+            if (_analysisResult == null || _analysisResult.TotalParsed == 0)
+            {
+                ShowInfoBar(InfoBarSeverity.Warning, _loc.GetString("SmartImport_NoContent"));
+                return;
+            }
 
             // Populate Step 2 Metrics
             TextMetricTotal.Text = _analysisResult.TotalParsed.ToString();

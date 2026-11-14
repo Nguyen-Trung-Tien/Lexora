@@ -448,25 +448,33 @@ public class ExportImportService : IExportImportService
                                 AudioPath: null
                             )).Where(e => !string.IsNullOrWhiteSpace(e.SentenceEn)).ToList();
 
+                            var effectiveDefVi = !string.IsNullOrWhiteSpace(m.ResolvedDefinitionVi)
+                                ? m.ResolvedDefinitionVi
+                                : (!string.IsNullOrWhiteSpace(m.ResolvedDefinitionEn) ? m.ResolvedDefinitionEn : string.Empty);
+
                             richMeanings.Add(new WordMeaningCreateDto(
                                 PartOfSpeech: mPos,
-                                DefinitionVi: m.ResolvedDefinitionVi,
+                                DefinitionVi: effectiveDefVi,
                                 DefinitionEn: m.ResolvedDefinitionEn,
                                 Explanation: m.Explanation,
                                 Examples: exList
                             ));
                         }
                     }
-                    else if (!string.IsNullOrWhiteSpace(jw.ResolvedDefinitionVi))
+                    else if (!string.IsNullOrWhiteSpace(jw.ResolvedDefinitionVi) || !string.IsNullOrWhiteSpace(jw.ResolvedDefinitionEn))
                     {
                         var mPos = jw.PrimaryPartOfSpeech != 0
                             ? jw.PrimaryPartOfSpeech
                             : (!string.IsNullOrWhiteSpace(jw.Pos) ? ParsePartOfSpeech(jw.Pos) : PartOfSpeech.Noun);
                         if (!allPosList.Contains(mPos)) allPosList.Add(mPos);
 
+                        var effectiveDefVi = !string.IsNullOrWhiteSpace(jw.ResolvedDefinitionVi)
+                            ? jw.ResolvedDefinitionVi
+                            : (jw.ResolvedDefinitionEn ?? string.Empty);
+
                         richMeanings.Add(new WordMeaningCreateDto(
                             PartOfSpeech: mPos,
-                            DefinitionVi: jw.ResolvedDefinitionVi,
+                            DefinitionVi: effectiveDefVi,
                             DefinitionEn: jw.ResolvedDefinitionEn,
                             Explanation: null,
                             Examples: new List<ExampleSentenceCreateDto>()
@@ -485,8 +493,13 @@ public class ExportImportService : IExportImportService
                     }
 
                     var firstMeaning = richMeanings.FirstOrDefault();
-                    string defVi = firstMeaning?.DefinitionVi ?? jw.ResolvedDefinitionVi;
+                    string defVi = firstMeaning?.DefinitionVi ?? (!string.IsNullOrWhiteSpace(jw.ResolvedDefinitionVi) ? jw.ResolvedDefinitionVi : (jw.ResolvedDefinitionEn ?? string.Empty));
                     string? defEn = firstMeaning?.DefinitionEn ?? jw.ResolvedDefinitionEn;
+
+                    if (string.IsNullOrWhiteSpace(defVi) && !string.IsNullOrWhiteSpace(defEn))
+                    {
+                        defVi = defEn;
+                    }
 
                     var allExamples = richMeanings
                         .SelectMany(m => m.Examples)
@@ -499,9 +512,12 @@ public class ExportImportService : IExportImportService
                     var resolvedExamTags = jw.ResolvedExamTags;
                     string? examsText = resolvedExamTags.Count > 0 ? string.Join("; ", resolvedExamTags) : null;
 
+                    bool hasDefinition = !string.IsNullOrWhiteSpace(defVi) || !string.IsNullOrWhiteSpace(defEn);
                     string? validationMsg = null;
                     if (!isTermValid) validationMsg = "Thuật ngữ không được để trống / Term is required.";
-                    else if (string.IsNullOrWhiteSpace(defVi)) validationMsg = "Chưa có định nghĩa tiếng Việt / Missing Vietnamese definition.";
+                    else if (!hasDefinition) validationMsg = "Thiếu định nghĩa / Missing definition.";
+
+                    bool isValid = isTermValid && hasDefinition;
 
                     if (isTermValid)
                     {
@@ -522,9 +538,9 @@ public class ExportImportService : IExportImportService
                         ExamTags: examsText,
                         Notes: jw.Notes,
                         IsDuplicate: isDuplicate,
-                        IsValid: isTermValid && !string.IsNullOrWhiteSpace(defVi),
+                        IsValid: isValid,
                         ValidationMessage: validationMsg,
-                        IsSelected: isTermValid && !string.IsNullOrWhiteSpace(defVi) && !isDuplicate,
+                        IsSelected: isValid && !isDuplicate,
                         RichMeanings: richMeanings,
                         AllPartsOfSpeech: allPosList.Distinct().ToList()
                     ));

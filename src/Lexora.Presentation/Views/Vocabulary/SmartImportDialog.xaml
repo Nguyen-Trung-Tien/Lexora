@@ -419,6 +419,11 @@
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                        TextWrapping="Wrap"
                                                        MaxLines="2" />
+                                            <TextBlock Text="{Binding ValidationMessage}"
+                                                       FontSize="11"
+                                                       Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                       Visibility="{Binding HasValidationMessage, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                       TextWrapping="Wrap" />
                                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
                                                         Visibility="{Binding HasMetadataRow, Converter={StaticResource BoolToVisibilityConverter}}">
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
@@ -455,6 +460,7 @@
                                                 BorderThickness="1"
                                                 CornerRadius="6"
                                                 Padding="8,3"
+                                                ToolTipService.ToolTip="{Binding ValidationMessage}"
                                                 VerticalAlignment="Center">
                                             <TextBlock Text="{Binding StatusText}"
                                                        FontSize="11"

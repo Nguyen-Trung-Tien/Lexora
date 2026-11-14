@@ -908,4 +908,41 @@ public class SmartImportWorkflowTests
         wordsFromWrapped[0].ResolvedTerm.Should().Be("perseverance");
         wordsFromWrapped[0].ResolvedDefinitionVi.Should().Be("kiên trì");
     }
+
+    [Fact]
+    public async Task AnalyzeSmartImportAsync_JsonWithEnglishOnlyDefinition_ShouldBeValidAndFallback()
+    {
+        // Arrange: JSON with only definitionEn, no definitionVi
+        var json = """
+        [
+          {
+            "term": "ubiquitous",
+            "pos": "adjective",
+            "level": "C1",
+            "definitionEn": "present, appearing, or found everywhere",
+            "phoneticUk": "/juːˈbɪk.wɪ.təs/"
+          }
+        ]
+        """;
+
+        _mockVocabRepo.Setup(r => r.GetAllNormalizedTermsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new HashSet<string>());
+
+        // Act
+        var result = await _service.AnalyzeSmartImportAsync(json, "words.json");
+
+        // Assert
+        result.Should().NotBeNull();
+        result.TotalParsed.Should().Be(1);
+        result.ValidCount.Should().Be(1);
+        result.InvalidCount.Should().Be(0);
+
+        var item = result.PreviewItems[0];
+        item.Term.Should().Be("ubiquitous");
+        item.IsValid.Should().BeTrue();
+        item.IsSelected.Should().BeTrue();
+        item.DefinitionVi.Should().Be("present, appearing, or found everywhere");
+        item.DefinitionEn.Should().Be("present, appearing, or found everywhere");
+        item.ValidationMessage.Should().BeNull();
+    }
 }
