@@ -124,7 +124,6 @@
             VerticalScrollBarVisibility="Auto">
             <StackPanel
                 Padding="24"
-                MaxWidth="1240"
                 HorizontalAlignment="Stretch"
                 Spacing="24">
 

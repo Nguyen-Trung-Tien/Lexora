@@ -128,7 +128,7 @@ The Interactive Learning Roadmap module models personalized, adaptive preparatio
     $cp_1 = (x_0, \frac{y_0 + y_1}{2}), \quad cp_2 = (x_1, \frac{y_0 + y_1}{2})$.
 - **Viewport Layout Budgeting**:
   - All large custom canvases (`RoadmapCanvas`, `KnowledgeGraphCanvas`) must be hosted inside a scroll-isolated `ScrollViewer` (`HorizontalScrollBarVisibility="Auto"`, `VerticalScrollBarVisibility="Auto"`), dynamically adjusting canvas dimensions based on $\max(Y) + 200$.
-  - Cards and overview banners must stretch responsively with `MaxWidth="1240"` and `HorizontalAlignment="Stretch"` to prevent layout clipping on lower display resolutions (1366x768).
+  - Page root containers and primary workspaces must stretch responsively with `HorizontalAlignment="Stretch"` and consistent margins/padding (e.g. `Padding="24"`) without arbitrary top-level `MaxWidth` constraints that cause dead whitespace or asymmetrical left-heavy clipping on 1080p+ widescreen monitors.
 
 ---
 
