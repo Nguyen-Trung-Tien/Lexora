@@ -83,7 +83,7 @@ public class SmartImportPreviewItem : CommunityToolkit.Mvvm.ComponentModel.Obser
 
 public sealed partial class SmartImportDialog : ContentDialog
 {
-    private readonly IServiceScope? _scope;
+    private IServiceScope? _scope;
     private readonly Func<string, string>? _sampleProvider;
     private readonly bool _isGrammarMode;
     private readonly bool _isHomophoneMode;
@@ -145,9 +145,21 @@ public sealed partial class SmartImportDialog : ContentDialog
 
         Unloaded += (s, e) =>
         {
-            _importCts?.Cancel();
-            _importCts?.Dispose();
-            _scope?.Dispose();
+            try
+            {
+                if (_importCts != null)
+                {
+                    _importCts.Cancel();
+                    _importCts.Dispose();
+                    _importCts = null;
+                }
+                _scope?.Dispose();
+                _scope = null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SmartImportDialog] Unloaded cleanup: {ex.Message}");
+            }
         };
 
         // Sync theme from the main window so the dialog renders correctly in both Light and Dark mode.
@@ -1234,7 +1246,8 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     private void BtnDone_Click(object sender, RoutedEventArgs e)
     {
-        Hide();
+        BtnDone.IsEnabled = false;
+        this.HideSafe();
     }
 }
 

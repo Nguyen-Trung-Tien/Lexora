@@ -1600,11 +1600,21 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
             var res = await dialog.ShowAsyncSafe(xamlRoot);
             if (dialog.WasCommitted)
             {
-                await ViewModel.LoadWordsAsync();
-                await ViewModel.LoadFiltersAsync();
-                await ViewModel.LoadContextUnitsAsync();
-                PopulateTopicFilterCombo();
-                Bindings.Update();
+                await Task.Delay(50);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+
+                try
+                {
+                    await ViewModel.LoadWordsAsync();
+                    await ViewModel.LoadFiltersAsync();
+                    await ViewModel.LoadContextUnitsAsync();
+                    PopulateTopicFilterCombo();
+                }
+                catch (Exception reloadEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[VocabularyPage] Error reloading after import: {reloadEx.Message}");
+                }
+
                 ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
             }
             else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
@@ -1722,11 +1732,21 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
             var res = await dialog.ShowAsyncSafe(xamlRoot);
             if (dialog.WasCommitted)
             {
-                await ViewModel.LoadWordsAsync();
-                await ViewModel.LoadFiltersAsync();
-                await ViewModel.LoadContextUnitsAsync();
-                PopulateTopicFilterCombo();
-                Bindings.Update();
+                await Task.Delay(50);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+
+                try
+                {
+                    await ViewModel.LoadWordsAsync();
+                    await ViewModel.LoadFiltersAsync();
+                    await ViewModel.LoadContextUnitsAsync();
+                    PopulateTopicFilterCombo();
+                }
+                catch (Exception reloadEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[VocabularyPage] Error reloading after import: {reloadEx.Message}");
+                }
+
                 ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
             }
             else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
@@ -1768,7 +1788,6 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
             await ViewModel.LoadFiltersAsync();
             await ViewModel.LoadContextUnitsAsync();
             PopulateTopicFilterCombo();
-            Bindings.Update();
 
             string summary;
             if (importResult.TotalUpdated > 0)

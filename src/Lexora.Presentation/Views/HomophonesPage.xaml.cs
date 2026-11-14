@@ -564,8 +564,19 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         var result = await dialog.ShowAsyncSafe();
         if (dialog.WasCommitted)
         {
-            await ViewModel.LoadGroupsAsync();
-            UpdateDetailView();
+            await Task.Delay(50);
+            await DispatcherQueue.EnsureOnUIThreadAsync();
+
+            try
+            {
+                await ViewModel.LoadGroupsAsync();
+                UpdateDetailView();
+            }
+            catch (Exception reloadEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"[HomophonesPage] Error reloading after import: {reloadEx.Message}");
+            }
+
             var count = (dialog.CommitResult?.TotalImported ?? 0) + (dialog.CommitResult?.TotalUpdated ?? 0);
             _toastService?.ShowSuccess(string.Format(Loc.GetString("SmartImport_Toast_Success"), count));
         }

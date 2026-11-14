@@ -835,8 +835,19 @@ public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareVie
             var res = await dialog.ShowAsyncSafe(xamlRoot);
             if (dialog.WasCommitted)
             {
-                await ViewModel.LoadRulesAsync();
-                await ViewModel.LoadTopicsAsync();
+                await Task.Delay(50);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+
+                try
+                {
+                    await ViewModel.LoadRulesAsync();
+                    await ViewModel.LoadTopicsAsync();
+                }
+                catch (Exception reloadEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[GrammarPage] Error reloading after import: {reloadEx.Message}");
+                }
+
                 ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
             }
             else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
@@ -946,9 +957,19 @@ public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareVie
             var res = await dialog.ShowAsyncSafe(xamlRoot);
             if (dialog.WasCommitted)
             {
-                await ViewModel.LoadRulesAsync();
-                await ViewModel.LoadTopicsAsync();
-                Bindings.Update();
+                await Task.Delay(50);
+                await DispatcherQueue.EnsureOnUIThreadAsync();
+
+                try
+                {
+                    await ViewModel.LoadRulesAsync();
+                    await ViewModel.LoadTopicsAsync();
+                }
+                catch (Exception reloadEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[GrammarPage] Error reloading after drag-drop import: {reloadEx.Message}");
+                }
+
                 ShowNotification(InfoBarSeverity.Success, Loc.GetString("Progress_CompletedTitle"), Loc.GetString("SmartImport_CommitSuccess"));
             }
             else if (res == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(dialog.ContentToImport))
