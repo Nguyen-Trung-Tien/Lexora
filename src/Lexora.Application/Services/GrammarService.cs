@@ -1,3 +1,4 @@
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Entities;
@@ -457,20 +458,5 @@ public class GrammarService : IGrammarService
             closestSuggestions);
     }
 
-    private static GrammarRuleDto MapToDto(GrammarRule r)
-    {
-        var examples = r.Examples.Select(e => new GrammarExampleDto(e.Id, e.SentenceEn, e.SentenceVi, e.Note)).ToList();
-        return new GrammarRuleDto(
-            r.Id,
-            r.Title,
-            r.Structure,
-            r.ExplanationVi,
-            r.ExplanationEn,
-            r.CommonMistakes,
-            r.Level,
-            r.ExamTarget,
-            r.Topic,
-            examples
-        );
-    }
+    private static GrammarRuleDto MapToDto(GrammarRule r) => r.ToDto();
 }

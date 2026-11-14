@@ -184,7 +184,7 @@
 
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="8" Padding="16" Width="400">
+                        BorderThickness="1" CornerRadius="8" Padding="16" MaxWidth="400" HorizontalAlignment="Stretch">
                     <StackPanel Spacing="8">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Import_ResRelations')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

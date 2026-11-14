@@ -1,3 +1,4 @@
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Entities;
@@ -540,46 +541,5 @@ public class RoadmapService : IRoadmapService
         return true;
     }
 
-    private static StudyRoadmapDto MapToDto(StudyRoadmap entity)
-    {
-        var milestonesDto = entity.Milestones
-            .OrderBy(m => m.OrderIndex)
-            .Select(m => new MilestoneDto(
-                m.Id,
-                m.RoadmapId,
-                m.Title,
-                m.Description,
-                m.OrderIndex,
-                m.TargetCompletionDate,
-                m.IsCompleted,
-                m.Nodes
-                    .OrderBy(n => n.OrderIndex)
-                    .Select(n => new RoadmapNodeDto(
-                        n.Id,
-                        n.MilestoneId,
-                        n.Title,
-                        n.Description,
-                        n.Type,
-                        n.Status,
-                        n.OrderIndex,
-                        n.CanvasX,
-                        n.CanvasY,
-                        n.TargetItemCount,
-                        n.CompletedItemCount,
-                        n.EaseFactorWeight,
-                        n.ReferenceId,
-                        n.ReferenceName))
-                    .ToList()))
-            .ToList();
-
-        return new StudyRoadmapDto(
-            entity.Id,
-            entity.Title,
-            entity.Target,
-            entity.StartingScore,
-            entity.TargetScore,
-            entity.TargetDate,
-            entity.IsActive,
-            milestonesDto);
-    }
+    private static StudyRoadmapDto MapToDto(StudyRoadmap entity) => entity.ToDto();
 }

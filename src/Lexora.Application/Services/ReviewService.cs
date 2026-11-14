@@ -1,3 +1,4 @@
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Application.SpacedRepetition;
@@ -677,43 +678,5 @@ public class ReviewService : IReviewService
         );
     }
 
-    private ReviewCardDto MapToDto(ReviewCard c)
-    {
-        var word = c.Word;
-        var primaryMeaning = word?.Meanings?.OrderBy(m => m.OrderIndex).FirstOrDefault();
-        var examples = (primaryMeaning?.Examples ?? Enumerable.Empty<ExampleSentence>())
-            .Select(e => new ExampleSentenceDto(e.Id, e.SentenceEn, e.SentenceVi, e.AudioPath))
-            .ToList();
-
-        double confidence = c.Confidence > 0.0
-            ? c.Confidence
-            : (c.TotalReviews > 0
-                ? Math.Round((double)c.CorrectReviews / c.TotalReviews * 100, 1)
-                : GetActiveEngine().engine.CalculateRetentionProbability(c));
-
-        return new ReviewCardDto(
-            c.Id,
-            c.WordId,
-            word?.Term ?? string.Empty,
-            word?.PhoneticUk,
-            word?.PhoneticUs,
-            word?.AudioUkPath,
-            word?.AudioUsPath,
-            word?.PrimaryPartOfSpeech ?? PartOfSpeech.Noun,
-            word?.Level ?? CefrLevel.None,
-            primaryMeaning?.DefinitionVi ?? string.Empty,
-            primaryMeaning?.DefinitionEn,
-            examples,
-            c.Status,
-            c.EaseFactor,
-            c.IntervalDays,
-            c.Repetitions,
-            c.Lapses,
-            c.LastReviewedAt,
-            c.NextReviewAt,
-            c.TotalReviews,
-            c.CorrectReviews,
-            confidence
-        );
-    }
+    private ReviewCardDto MapToDto(ReviewCard c) => c.ToDto(GetActiveEngine().engine);
 }

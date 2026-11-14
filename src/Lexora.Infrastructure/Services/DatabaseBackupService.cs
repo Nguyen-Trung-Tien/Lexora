@@ -1,3 +1,4 @@
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -27,13 +28,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
         var backupFileName = $"lexora_backup_{timestamp}.db";
         var targetPath = Path.Combine(fullDestDir, backupFileName);
-
-        var fullTargetPath = Path.GetFullPath(targetPath);
-        var safeBaseDir = fullDestDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        if (!fullTargetPath.StartsWith(safeBaseDir, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new System.Security.SecurityException("Potential path traversal attempt detected in backup destination.");
-        }
+        var fullTargetPath = SafePathHelper.ValidatePathWithinDirectory(targetPath, fullDestDir);
 
         return await CreateBackupToFileAsync(fullTargetPath, cancellationToken);
     }

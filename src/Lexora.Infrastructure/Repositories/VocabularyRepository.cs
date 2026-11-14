@@ -12,18 +12,27 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
     {
     }
 
-    public async Task<Word?> GetWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    private IQueryable<Word> QueryWithDetails(bool asNoTracking = false, bool includeStudyLogs = true)
     {
-        return await DbSet
+        IQueryable<Word> baseQuery = DbSet
             .AsSplitQuery()
             .Include(w => w.Meanings)
                 .ThenInclude(m => m.Examples)
             .Include(w => w.WordTopics)
                 .ThenInclude(wt => wt.Topic)
             .Include(w => w.WordExamTags)
-                .ThenInclude(wet => wet.ExamTag)
-            .Include(w => w.ReviewCard)
-                .ThenInclude(rc => rc!.StudyLogs)
+                .ThenInclude(wet => wet.ExamTag);
+
+        IQueryable<Word> query = includeStudyLogs
+            ? baseQuery.Include(w => w.ReviewCard).ThenInclude(rc => rc!.StudyLogs)
+            : baseQuery.Include(w => w.ReviewCard);
+
+        return asNoTracking ? query.AsNoTracking() : query;
+    }
+
+    public async Task<Word?> GetWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await QueryWithDetails()
             .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
     }
 
@@ -34,16 +43,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
 
         if (idList.Count <= 500)
         {
-            return await DbSet
-                .AsSplitQuery()
-                .Include(w => w.Meanings)
-                    .ThenInclude(m => m.Examples)
-                .Include(w => w.WordTopics)
-                    .ThenInclude(wt => wt.Topic)
-                .Include(w => w.WordExamTags)
-                    .ThenInclude(wet => wet.ExamTag)
-                .Include(w => w.ReviewCard)
-                    .ThenInclude(rc => rc!.StudyLogs)
+            return await QueryWithDetails()
                 .Where(w => idList.Contains(w.Id))
                 .ToListAsync(cancellationToken);
         }
@@ -52,16 +52,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         foreach (var chunk in idList.Chunk(500))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var batch = await DbSet
-                .AsSplitQuery()
-                .Include(w => w.Meanings)
-                    .ThenInclude(m => m.Examples)
-                .Include(w => w.WordTopics)
-                    .ThenInclude(wt => wt.Topic)
-                .Include(w => w.WordExamTags)
-                    .ThenInclude(wet => wet.ExamTag)
-                .Include(w => w.ReviewCard)
-                    .ThenInclude(rc => rc!.StudyLogs)
+            var batch = await QueryWithDetails()
                 .Where(w => chunk.Contains(w.Id))
                 .ToListAsync(cancellationToken);
             results.AddRange(batch);
@@ -72,15 +63,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
     public async Task<Word?> GetByTermAsync(string term, CancellationToken cancellationToken = default)
     {
         var normalized = term.Trim().ToLowerInvariant();
-        return await DbSet
-            .AsSplitQuery()
-            .Include(w => w.Meanings)
-                .ThenInclude(m => m.Examples)
-            .Include(w => w.WordTopics)
-                .ThenInclude(wt => wt.Topic)
-            .Include(w => w.WordExamTags)
-                .ThenInclude(wet => wet.ExamTag)
-            .Include(w => w.ReviewCard)
+        return await QueryWithDetails(includeStudyLogs: false)
             .FirstOrDefaultAsync(w => w.NormalizedTerm == normalized, cancellationToken);
     }
 
@@ -115,17 +98,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         bool? isWeak,
         CancellationToken cancellationToken = default)
     {
-        var query = DbSet
-            .AsSplitQuery()
-            .Include(w => w.Meanings)
-                .ThenInclude(m => m.Examples)
-            .Include(w => w.WordTopics)
-                .ThenInclude(wt => wt.Topic)
-            .Include(w => w.WordExamTags)
-                .ThenInclude(wet => wet.ExamTag)
-            .Include(w => w.ReviewCard)
-            .AsNoTracking()
-            .AsQueryable();
+        var query = QueryWithDetails(asNoTracking: true, includeStudyLogs: false);
 
         query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
 

@@ -1,4 +1,6 @@
+using System.Security;
 using System.Text.RegularExpressions;
+using Lexora.Application.Common;
 using Lexora.Application.Interfaces;
 
 namespace Lexora.Infrastructure.Services;
@@ -82,15 +84,13 @@ public class LocalAudioStorageService : IAudioStorageService
 
         var ext = extension.StartsWith('.') ? extension : "." + extension;
         var fileName = $"{safeTerm}_{safeAccent}{ext}";
-        var fullPath = Path.GetFullPath(Path.Combine(_cacheDirectory, fileName));
-
-        // Ensure path remains strictly within cache directory with trailing separator
-        var safeBaseDir = _cacheDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        if (!fullPath.StartsWith(safeBaseDir, StringComparison.OrdinalIgnoreCase))
+        try
+        {
+            return SafePathHelper.ValidatePathWithinDirectory(Path.Combine(_cacheDirectory, fileName), _cacheDirectory);
+        }
+        catch (SecurityException)
         {
             return null;
         }
-
-        return fullPath;
     }
 }

@@ -1,3 +1,4 @@
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Entities;
@@ -163,34 +164,5 @@ public class HomophoneService : IHomophoneService
         return await _homophoneRepo.CountAsync(cancellationToken: cancellationToken);
     }
 
-    private static HomophoneGroupDto MapToDto(HomophoneGroup group)
-    {
-        return new HomophoneGroupDto
-        {
-            Id = group.Id,
-            Title = group.Title,
-            PhoneticIpa = group.PhoneticIpa,
-            Type = group.Type,
-            DifficultyLevel = group.DifficultyLevel,
-            ExamTag = group.ExamTag,
-            DifferentiationTip = group.DifferentiationTip,
-            Notes = group.Notes,
-            CreatedAt = group.CreatedAt,
-            UpdatedAt = group.UpdatedAt,
-            Items = group.Items.Select(i => new HomophoneItemDto
-            {
-                Id = i.Id,
-                HomophoneGroupId = i.HomophoneGroupId,
-                Term = i.Term,
-                NormalizedTerm = i.NormalizedTerm,
-                PartOfSpeech = i.PartOfSpeech,
-                MeaningVi = i.MeaningVi,
-                MeaningEn = i.MeaningEn,
-                PhoneticSpecific = i.PhoneticSpecific,
-                ExampleSentence = i.ExampleSentence,
-                ExampleTranslation = i.ExampleTranslation,
-                AudioPath = i.AudioPath
-            }).ToList()
-        };
-    }
+    private static HomophoneGroupDto MapToDto(HomophoneGroup group) => group.ToDto();
 }

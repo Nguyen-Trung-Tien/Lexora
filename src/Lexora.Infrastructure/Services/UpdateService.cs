@@ -4,6 +4,7 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Microsoft.Data.Sqlite;
@@ -258,12 +259,7 @@ public class UpdateService : IUpdateService
         var targetFilePath = Path.Combine(baseTempDir, fileName);
 
         // Verify canonical path to enforce Path Traversal Defense (AGENTS.md 6.1)
-        var fullPath = Path.GetFullPath(targetFilePath);
-        var safeBaseDir = Path.GetFullPath(baseTempDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        if (!fullPath.StartsWith(safeBaseDir, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new SecurityException("Potential path traversal attempt detected in download target path.");
-        }
+        var fullPath = SafePathHelper.ValidatePathWithinDirectory(targetFilePath, baseTempDir);
 
         _logger.LogInformation("Downloading software update {Version} to {Path} from {Url}", update.NewVersion, fullPath, update.DownloadUrl);
 

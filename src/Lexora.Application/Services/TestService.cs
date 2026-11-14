@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Entities;
@@ -644,41 +645,7 @@ public class TestService : ITestService
         );
     }
 
-    private static WordDto MapToDto(Word w)
-    {
-        var meanings = w.Meanings
-            .OrderBy(m => m.OrderIndex)
-            .Select(m => new WordMeaningDto(
-                m.Id,
-                m.PartOfSpeech,
-                m.DefinitionVi,
-                m.DefinitionEn,
-                m.Explanation,
-                m.OrderIndex,
-                m.Examples.Select(e => new ExampleSentenceDto(e.Id, e.SentenceEn, e.SentenceVi, e.AudioPath)).ToList()
-            )).ToList();
-
-        var topics = w.WordTopics.Select(wt => wt.Topic?.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToList();
-        var examTags = w.WordExamTags.Select(et => et.ExamTag?.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToList();
-
-        return new WordDto(
-            w.Id,
-            w.Term,
-            w.PhoneticUk,
-            w.PhoneticUs,
-            w.AudioUkPath,
-            w.AudioUsPath,
-            w.Level,
-            w.PrimaryPartOfSpeech,
-            w.Notes,
-            meanings,
-            topics,
-            examTags,
-            w.ReviewCard?.Status,
-            w.ReviewCard?.NextReviewAt,
-            w.ReviewCard?.Confidence ?? 0.0
-        );
-    }
+    private static WordDto MapToDto(Word w) => w.ToDto();
 
     public Task<TestSessionDto?> GetActiveTestSessionAsync(CancellationToken cancellationToken = default)
     {

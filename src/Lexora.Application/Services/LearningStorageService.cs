@@ -1,3 +1,4 @@
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Application.SpacedRepetition;
@@ -960,91 +961,9 @@ public class LearningStorageService : ILearningStorageService
         throw new InvalidOperationException("No suitable words found in Storage for test generation.");
     }
 
-    private LearningStorageItemDto MapToDto(LearningStorageItem item)
-    {
-        var wordDto = item.Word != null ? MapWordToDto(item.Word) : null;
-        var grammarDto = item.GrammarRule != null ? MapGrammarToDto(item.GrammarRule) : null;
+    private LearningStorageItemDto MapToDto(LearningStorageItem item) => item.ToDto(_srEngine);
 
-        return new LearningStorageItemDto(
-            item.Id,
-            item.ItemType,
-            item.WordId,
-            wordDto,
-            item.GrammarRuleId,
-            grammarDto,
-            item.Status,
-            item.ReasonAdded,
-            item.Note,
-            item.IncorrectCount,
-            item.CorrectCount,
-            item.EaseFactor,
-            item.IntervalDays,
-            item.Repetitions,
-            item.Lapses,
-            item.RetentionProbability,
-            item.LastReviewedAt,
-            item.NextReviewAt,
-            item.CreatedAt
-        );
-    }
+    private WordDto MapWordToDto(Word w) => w.ToDto(_srEngine);
 
-    private WordDto MapWordToDto(Word w)
-    {
-        var meanings = w.Meanings
-            .OrderBy(m => m.OrderIndex)
-            .Select(m => new WordMeaningDto(
-                m.Id,
-                m.PartOfSpeech,
-                m.DefinitionVi,
-                m.DefinitionEn,
-                m.Explanation,
-                m.OrderIndex,
-                m.Examples.Select(e => new ExampleSentenceDto(e.Id, e.SentenceEn, e.SentenceVi, e.AudioPath)).ToList()
-            )).ToList();
-
-        var topics = w.WordTopics.Select(wt => wt.Topic?.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToList();
-        var examTags = w.WordExamTags.Select(et => et.ExamTag?.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToList();
-        var rc = w.ReviewCard;
-
-        return new WordDto(
-            w.Id,
-            w.Term,
-            w.PhoneticUk,
-            w.PhoneticUs,
-            w.AudioUkPath,
-            w.AudioUsPath,
-            w.Level,
-            w.PrimaryPartOfSpeech,
-            w.Notes,
-            meanings,
-            topics,
-            examTags,
-            rc?.Status,
-            rc?.NextReviewAt,
-            rc?.Confidence ?? 0.0,
-            rc?.IntervalDays ?? 0,
-            rc?.EaseFactor ?? 2.5,
-            rc?.Lapses ?? 0,
-            rc?.Repetitions ?? 0,
-            rc?.TotalReviews ?? 0,
-            rc != null ? _srEngine.CalculateRetentionProbability(rc) : 0.0
-        );
-    }
-
-    private static GrammarRuleDto MapGrammarToDto(GrammarRule r)
-    {
-        var examples = r.Examples.Select(e => new GrammarExampleDto(e.Id, e.SentenceEn, e.SentenceVi, e.Note)).ToList();
-        return new GrammarRuleDto(
-            r.Id,
-            r.Title,
-            r.Structure,
-            r.ExplanationVi,
-            r.ExplanationEn,
-            r.CommonMistakes,
-            r.Level,
-            r.ExamTarget,
-            r.Topic,
-            examples
-        );
-    }
+    private static GrammarRuleDto MapGrammarToDto(GrammarRule r) => r.ToDto();
 }

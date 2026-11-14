@@ -1,3 +1,4 @@
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Application.SpacedRepetition;
@@ -126,6 +127,7 @@ public class VocabularyService : IVocabularyService
 
     public async Task<WordDto> CreateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(dto);
         var trimmedTerm = dto.Term?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(trimmedTerm))
         {
@@ -213,6 +215,7 @@ public class VocabularyService : IVocabularyService
 
     public async Task<WordDto> UpdateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(dto);
         if (dto.Id == null)
             throw new ArgumentException("Word Id must not be null for update", nameof(dto));
 
@@ -744,48 +747,5 @@ public class VocabularyService : IVocabularyService
         return _smartSearch.FindClosestWordSuggestions(query, dtos, maxSuggestions);
     }
 
-    private WordDto MapToDto(Word w)
-    {
-        var meanings = w.Meanings
-            .OrderBy(m => m.OrderIndex)
-            .Select(m => new WordMeaningDto(
-                m.Id,
-                m.PartOfSpeech,
-                m.DefinitionVi,
-                m.DefinitionEn,
-                m.Explanation,
-                m.OrderIndex,
-                m.Examples.Select(e => new ExampleSentenceDto(e.Id, e.SentenceEn, e.SentenceVi, e.AudioPath)).ToList()
-            )).ToList();
-
-        var topics = w.WordTopics.Select(wt => wt.Topic?.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToList();
-        var examTags = w.WordExamTags.Select(et => et.ExamTag?.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToList();
-
-        var rc = w.ReviewCard;
-        double retention = rc != null ? _srEngine.CalculateRetentionProbability(rc) : 0.0;
-
-        return new WordDto(
-            w.Id,
-            w.Term,
-            w.PhoneticUk,
-            w.PhoneticUs,
-            w.AudioUkPath,
-            w.AudioUsPath,
-            w.Level,
-            w.PrimaryPartOfSpeech,
-            w.Notes,
-            meanings,
-            topics,
-            examTags,
-            rc?.Status,
-            rc?.NextReviewAt,
-            rc?.Confidence ?? 0.0,
-            rc?.IntervalDays ?? 0,
-            rc?.EaseFactor ?? 2.5,
-            rc?.Lapses ?? 0,
-            rc?.Repetitions ?? 0,
-            rc?.TotalReviews ?? 0,
-            retention
-        );
-    }
+    private WordDto MapToDto(Word w) => w.ToDto(_srEngine);
 }

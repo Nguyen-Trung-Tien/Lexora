@@ -34,6 +34,7 @@
     <Grid MaxWidth="820" HorizontalAlignment="Stretch">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="500" Padding="0,4,8,8">
             <StackPanel Spacing="16" Margin="0,4,0,0">
+                <InfoBar x:Name="DialogInfoBar" IsOpen="False" IsClosable="True" HorizontalAlignment="Stretch" Margin="0,0,0,4" />
 
                 <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Subtitle')}"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
