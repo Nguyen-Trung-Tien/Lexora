@@ -906,16 +906,12 @@ public class ExportImportService : IExportImportService
             existingWordsMap = new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
         }
 
-        // 3. Pre-fetch topics & exam tags
+        // 3. Pre-fetch topics & exam tags (resilient lookup against duplicate DB records)
         var rawTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
-        var allTopics = rawTopics != null 
-            ? rawTopics.ToDictionary(t => t.Name.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase) 
-            : new Dictionary<string, Topic>(StringComparer.OrdinalIgnoreCase);
+        var allTopics = BuildTopicLookup(rawTopics);
 
         var rawTags = await _vocabRepo.GetAllExamTagsAsync(cancellationToken);
-        var allExamTags = rawTags != null 
-            ? rawTags.ToDictionary(et => et.Name.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase) 
-            : new Dictionary<string, ExamTag>(StringComparer.OrdinalIgnoreCase);
+        var allExamTags = BuildExamTagLookup(rawTags);
 
         // 4. Begin single atomic transaction
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -1177,10 +1173,10 @@ public class ExportImportService : IExportImportService
             throttler.Report(10, 0, total, $"Đã tìm thấy {total} từ vựng. Đang chuẩn bị cơ sở dữ liệu...", "Querying metadata...", force: true);
 
             var rawTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
-            var allTopics = rawTopics != null ? rawTopics.ToDictionary(t => t.Name.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase) : new Dictionary<string, Topic>(StringComparer.OrdinalIgnoreCase);
+            var allTopics = BuildTopicLookup(rawTopics);
 
             var rawTags = await _vocabRepo.GetAllExamTagsAsync(cancellationToken);
-            var allExamTags = rawTags != null ? rawTags.ToDictionary(et => et.Name.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase) : new Dictionary<string, ExamTag>(StringComparer.OrdinalIgnoreCase);
+            var allExamTags = BuildExamTagLookup(rawTags);
 
             var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -1536,10 +1532,10 @@ public class ExportImportService : IExportImportService
             throttler.Report(10, 0, total, $"Đã tìm thấy {total} dòng từ vựng...", "Querying metadata...", force: true);
 
             var rawTopics = await _vocabRepo.GetAllTopicsAsync(cancellationToken);
-            var allTopics = rawTopics != null ? rawTopics.ToDictionary(t => t.Name.ToLowerInvariant()) : new Dictionary<string, Topic>();
+            var allTopics = BuildTopicLookup(rawTopics);
 
             var rawTags = await _vocabRepo.GetAllExamTagsAsync(cancellationToken);
-            var allExamTags = rawTags != null ? rawTags.ToDictionary(et => et.Name.ToLowerInvariant()) : new Dictionary<string, ExamTag>();
+            var allExamTags = BuildExamTagLookup(rawTags);
 
             var seenTerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var dataRows = records.Skip(1).ToList();
@@ -2286,6 +2282,40 @@ public class ExportImportService : IExportImportService
         }
 
         return result;
+    }
+
+    private static Dictionary<string, Topic> BuildTopicLookup(IEnumerable<Topic>? topics)
+    {
+        var dict = new Dictionary<string, Topic>(StringComparer.OrdinalIgnoreCase);
+        if (topics != null)
+        {
+            foreach (var t in topics)
+            {
+                var key = t.Name.Trim().ToLowerInvariant();
+                if (!string.IsNullOrEmpty(key) && !dict.ContainsKey(key))
+                {
+                    dict[key] = t;
+                }
+            }
+        }
+        return dict;
+    }
+
+    private static Dictionary<string, ExamTag> BuildExamTagLookup(IEnumerable<ExamTag>? examTags)
+    {
+        var dict = new Dictionary<string, ExamTag>(StringComparer.OrdinalIgnoreCase);
+        if (examTags != null)
+        {
+            foreach (var et in examTags)
+            {
+                var key = et.Name.Trim().ToLowerInvariant();
+                if (!string.IsNullOrEmpty(key) && !dict.ContainsKey(key))
+                {
+                    dict[key] = et;
+                }
+            }
+        }
+        return dict;
     }
 
     public static bool TryParsePartOfSpeech(string? input, out PartOfSpeech pos)

@@ -68,37 +68,69 @@ public class SqliteDatabaseInitializer
 
     private async Task SeedInitialDataAsync(CancellationToken ct)
     {
-        // 1. Topics
-        var businessTopic = new Topic
+        // 1. Topics (reuse existing if present)
+        var existingTopics = await _context.Topics.ToListAsync(ct);
+        var businessTopic = existingTopics.FirstOrDefault(t => t.Name.Equals("Business & Career", StringComparison.OrdinalIgnoreCase));
+        if (businessTopic == null)
         {
-            Name = "Business & Career",
-            Description = "Vocabularies for office, meetings, and business communication",
-            IconGlyph = "\uE825",
-            ColorHex = "#2B579A"
-        };
-        var techTopic = new Topic
+            businessTopic = new Topic
+            {
+                Name = "Business & Career",
+                Description = "Vocabularies for office, meetings, and business communication",
+                IconGlyph = "\uE825",
+                ColorHex = "#2B579A"
+            };
+            await _context.Topics.AddAsync(businessTopic, ct);
+        }
+
+        var techTopic = existingTopics.FirstOrDefault(t => t.Name.Equals("Technology", StringComparison.OrdinalIgnoreCase));
+        if (techTopic == null)
         {
-            Name = "Technology",
-            Description = "Software, computers, digital innovation",
-            IconGlyph = "\uE770",
-            ColorHex = "#0078D4"
-        };
-        var dailyTopic = new Topic
+            techTopic = new Topic
+            {
+                Name = "Technology",
+                Description = "Software, computers, digital innovation",
+                IconGlyph = "\uE770",
+                ColorHex = "#0078D4"
+            };
+            await _context.Topics.AddAsync(techTopic, ct);
+        }
+
+        var dailyTopic = existingTopics.FirstOrDefault(t => t.Name.Equals("Daily Life", StringComparison.OrdinalIgnoreCase));
+        if (dailyTopic == null)
         {
-            Name = "Daily Life",
-            Description = "Everyday conversation, routines, hobbies",
-            IconGlyph = "\uE80F",
-            ColorHex = "#107C41"
-        };
+            dailyTopic = new Topic
+            {
+                Name = "Daily Life",
+                Description = "Everyday conversation, routines, hobbies",
+                IconGlyph = "\uE80F",
+                ColorHex = "#107C41"
+            };
+            await _context.Topics.AddAsync(dailyTopic, ct);
+        }
 
-        await _context.Topics.AddRangeAsync(new[] { businessTopic, techTopic, dailyTopic }, ct);
+        // 2. Exam Tags (reuse existing if present)
+        var existingTags = await _context.ExamTags.ToListAsync(ct);
+        var toeicTag = existingTags.FirstOrDefault(et => et.Name.Equals("TOEIC 650+", StringComparison.OrdinalIgnoreCase));
+        if (toeicTag == null)
+        {
+            toeicTag = new ExamTag { Name = "TOEIC 650+", Type = ExamType.Toeic, TargetScore = "650" };
+            await _context.ExamTags.AddAsync(toeicTag, ct);
+        }
 
-        // 2. Exam Tags
-        var toeicTag = new ExamTag { Name = "TOEIC 650+", Type = ExamType.Toeic, TargetScore = "650" };
-        var vstepTag = new ExamTag { Name = "VSTEP B2", Type = ExamType.Vstep, TargetScore = "B2" };
-        var ieltsTag = new ExamTag { Name = "IELTS 6.5", Type = ExamType.Ielts, TargetScore = "6.5" };
+        var vstepTag = existingTags.FirstOrDefault(et => et.Name.Equals("VSTEP B2", StringComparison.OrdinalIgnoreCase));
+        if (vstepTag == null)
+        {
+            vstepTag = new ExamTag { Name = "VSTEP B2", Type = ExamType.Vstep, TargetScore = "B2" };
+            await _context.ExamTags.AddAsync(vstepTag, ct);
+        }
 
-        await _context.ExamTags.AddRangeAsync(new[] { toeicTag, vstepTag, ieltsTag }, ct);
+        var ieltsTag = existingTags.FirstOrDefault(et => et.Name.Equals("IELTS 6.5", StringComparison.OrdinalIgnoreCase));
+        if (ieltsTag == null)
+        {
+            ieltsTag = new ExamTag { Name = "IELTS 6.5", Type = ExamType.Ielts, TargetScore = "6.5" };
+            await _context.ExamTags.AddAsync(ieltsTag, ct);
+        }
 
         // 3. Words Starter Pack
         var sampleWords = new List<Word>
@@ -540,6 +572,92 @@ public class SqliteDatabaseInitializer
                         "ALTER TABLE \"ReviewCards\" ADD COLUMN \"Difficulty\" REAL NOT NULL DEFAULT 5.0;",
                         cancellationToken);
                 }
+            }
+
+            // Deduplicate duplicate ExamTags and Topics if any exist in the database
+            try
+            {
+                var allTags = await _context.ExamTags.ToListAsync(cancellationToken);
+                var dupTagGroups = allTags
+                    .GroupBy(t => t.Name.Trim().ToLowerInvariant())
+                    .Where(g => g.Count() > 1)
+                    .ToList();
+
+                if (dupTagGroups.Count > 0)
+                {
+                    _logger.LogInformation("Deduplicating {Count} duplicate ExamTag groups in database...", dupTagGroups.Count);
+                    foreach (var group in dupTagGroups)
+                    {
+                        var primary = group.First();
+                        var duplicates = group.Skip(1).ToList();
+                        var dupIds = duplicates.Select(d => d.Id).ToList();
+
+                        var wordExamTags = await _context.WordExamTags
+                            .Where(wet => dupIds.Contains(wet.ExamTagId))
+                            .ToListAsync(cancellationToken);
+
+                        foreach (var wet in wordExamTags)
+                        {
+                            bool alreadyLinked = await _context.WordExamTags
+                                .AnyAsync(w => w.WordId == wet.WordId && w.ExamTagId == primary.Id, cancellationToken);
+
+                            if (alreadyLinked)
+                            {
+                                _context.WordExamTags.Remove(wet);
+                            }
+                            else
+                            {
+                                wet.ExamTagId = primary.Id;
+                            }
+                        }
+
+                        _context.ExamTags.RemoveRange(duplicates);
+                    }
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
+                var allTopicsList = await _context.Topics.ToListAsync(cancellationToken);
+                var dupTopicGroups = allTopicsList
+                    .GroupBy(t => t.Name.Trim().ToLowerInvariant())
+                    .Where(g => g.Count() > 1)
+                    .ToList();
+
+                if (dupTopicGroups.Count > 0)
+                {
+                    _logger.LogInformation("Deduplicating {Count} duplicate Topic groups in database...", dupTopicGroups.Count);
+                    foreach (var group in dupTopicGroups)
+                    {
+                        var primary = group.First();
+                        var duplicates = group.Skip(1).ToList();
+                        var dupIds = duplicates.Select(d => d.Id).ToList();
+
+                        var wordTopics = await _context.WordTopics
+                            .Where(wt => dupIds.Contains(wt.TopicId))
+                            .ToListAsync(cancellationToken);
+
+                        foreach (var wt in wordTopics)
+                        {
+                            bool alreadyLinked = await _context.WordTopics
+                                .AnyAsync(w => w.WordId == wt.WordId && w.TopicId == primary.Id, cancellationToken);
+
+                            if (alreadyLinked)
+                            {
+                                _context.WordTopics.Remove(wt);
+                            }
+                            else
+                            {
+                                wt.TopicId = primary.Id;
+                            }
+                        }
+
+                        _context.Topics.RemoveRange(duplicates);
+                    }
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Tag/Topic deduplication encountered an issue.");
             }
         }
         catch (Exception ex)

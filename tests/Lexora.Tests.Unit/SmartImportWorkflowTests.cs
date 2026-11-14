@@ -568,4 +568,58 @@ public class SmartImportWorkflowTests
         mergedWord.NormalizedTerm.Should().Be("yield");
         mergedWord.Meanings.Count.Should().Be(2); // Both meanings merged!
     }
+
+    [Fact]
+    public async Task CommitSmartImportAsync_WhenDatabaseHasDuplicateExamTags_ShouldNotThrowArgumentException()
+    {
+        // Arrange: Database contains duplicate ExamTags with same lower-cased name (e.g. 'IELTS 6.5' and 'ielts 6.5')
+        var duplicateTags = new List<ExamTag>
+        {
+            new() { Id = Guid.NewGuid(), Name = "IELTS 6.5", Type = ExamType.Ielts },
+            new() { Id = Guid.NewGuid(), Name = "ielts 6.5", Type = ExamType.Ielts },
+            new() { Id = Guid.NewGuid(), Name = "TOEIC 650+", Type = ExamType.Toeic },
+            new() { Id = Guid.NewGuid(), Name = "toeic 650+", Type = ExamType.Toeic }
+        };
+
+        _mockVocabRepo.Setup(r => r.GetAllExamTagsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(duplicateTags);
+
+        var item = new SmartImportItemDto(
+            RowIndex: 1,
+            Term: "Authentic",
+            Level: CefrLevel.B2,
+            PartOfSpeech: PartOfSpeech.Adjective,
+            DefinitionVi: "Đích thực, xác thực",
+            DefinitionEn: null,
+            PhoneticUk: "/ɔːˈθen.tɪk/",
+            PhoneticUs: null,
+            Examples: null,
+            Topics: null,
+            ExamTags: "IELTS 6.5",
+            Notes: null,
+            IsDuplicate: false,
+            IsValid: true,
+            ValidationMessage: null,
+            IsSelected: true
+        );
+
+        _mockVocabRepo.Setup(r => r.GetByTermAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word?)null);
+        _mockVocabRepo.Setup(r => r.AddAsync(It.IsAny<Word>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word w, CancellationToken _) => w);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var request = new SmartImportCommitRequestDto(
+            Items: new List<SmartImportItemDto> { item },
+            ConflictResolution: ImportConflictResolution.Skip
+        );
+
+        // Act & Assert: Must NOT throw ArgumentException "An item with the same key has already been added. Key: ielts 6.5"
+        var result = await _service.CommitSmartImportAsync(request);
+
+        result.Should().NotBeNull();
+        result.TotalErrors.Should().Be(0);
+        result.TotalImported.Should().Be(1);
+    }
 }
