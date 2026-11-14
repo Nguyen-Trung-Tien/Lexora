@@ -8,7 +8,7 @@
     xmlns:local="using:Lexora.Presentation.Views"
     DefaultButton="Primary"
     mc:Ignorable="d"
-    CornerRadius="16">
+    CornerRadius="8">
 
 
     <ContentDialog.Resources>

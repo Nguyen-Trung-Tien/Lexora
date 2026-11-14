@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dto="using:Lexora.Application.DTOs"
     mc:Ignorable="d"
-    CornerRadius="16">
+    CornerRadius="8">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">880</x:Double>
@@ -38,7 +38,7 @@
         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="10"
+                CornerRadius="8"
                 Padding="12,8">
             <Grid ColumnDefinitions="*,Auto,*,Auto,*">
                 <StackPanel x:Name="Step1Badge" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">

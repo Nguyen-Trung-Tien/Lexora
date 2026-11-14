@@ -294,7 +294,13 @@ public sealed partial class SmartImportDialog : ContentDialog
         MenuItemSampleTxt.Text = _loc.GetString("SmartImport_SampleTxt");
         TextDone.Text = _loc.GetString("SmartImport_DoneBtn");
         TextReportBack.Text = _loc.GetString("SmartImport_ReportBack");
-        BtnClearPaste.Content = _loc.GetString("SmartImport_ClearPaste");
+        TextInsertSampleQuick.Text = _loc.GetString("SmartImport_InsertSample");
+        TextClearPasteBtn.Text = _loc.GetString("SmartImport_ClearQuick");
+        MenuSampleJsonQuick.Text = _loc.GetString("SmartImport_SampleJson");
+        MenuSampleCsvQuick.Text = _loc.GetString("SmartImport_SampleCsv");
+        MenuSampleTxtQuick.Text = _loc.GetString("SmartImport_SampleTxt");
+        ToolTipService.SetToolTip(BtnClearPaste, _loc.GetString("SmartImport_ClearPaste"));
+        ToolTipService.SetToolTip(BtnInsertSampleQuick, _loc.GetString("SmartImport_InsertSample"));
         TextDropHint.Text = _loc.GetString("SmartImport_DragDropHint");
         TextModePasteHeader.Text = _loc.GetString("SmartImport_InputDataLabel");
         TextCancelImport.Text = _loc.GetString("Action_Cancel");
@@ -606,14 +612,14 @@ public sealed partial class SmartImportDialog : ContentDialog
     private void UpdatePasteStats()
     {
         var text = InputTextBox.Text ?? string.Empty;
-        if (string.IsNullOrEmpty(text))
+        bool hasText = !string.IsNullOrEmpty(text);
+        BtnClearPaste.IsEnabled = hasText;
+        if (!hasText)
         {
             TextPasteStats.Text = string.Empty;
-            BtnClearPaste.Visibility = Visibility.Collapsed;
             return;
         }
 
-        BtnClearPaste.Visibility = Visibility.Visible;
         int lineCount = text.Split('\n').Length;
         int charCount = text.Length;
         TextPasteStats.Text = string.Format(_loc.GetString("SmartImport_LineCount"), lineCount, charCount);
@@ -1210,6 +1216,9 @@ public sealed partial class SmartImportDialog : ContentDialog
         _isImporting = true;
         BtnCommitImport.IsEnabled = false;
         BtnBackToStep1.IsEnabled = false;
+        CommitButtonProgressRing.IsActive = true;
+        CommitButtonProgressRing.Visibility = Visibility.Visible;
+        IconCommitImport.Visibility = Visibility.Collapsed;
         BtnReportBack.Visibility = Visibility.Collapsed;
         HideInfoBar();
 
@@ -1290,9 +1299,35 @@ public sealed partial class SmartImportDialog : ContentDialog
         finally
         {
             _isImporting = false;
+            CommitButtonProgressRing.IsActive = false;
+            CommitButtonProgressRing.Visibility = Visibility.Collapsed;
+            IconCommitImport.Visibility = Visibility.Visible;
             BtnCommitImport.IsEnabled = true;
             BtnBackToStep1.IsEnabled = true;
             CloseButtonText = _loc.GetString("Action_Cancel");
+        }
+    }
+
+    private void BtnDeletePreviewItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.DataContext is SmartImportPreviewItem item)
+        {
+            _previewItems.Remove(item);
+            if (_analysisResult != null)
+            {
+                int total = _previewItems.Count;
+                int valid = _previewItems.Count(x => x.IsValid);
+                int duplicates = _previewItems.Count(x => x.IsValid && x.IsDuplicate);
+                int errors = _previewItems.Count(x => !x.IsValid);
+
+                TextMetricTotal.Text = total.ToString();
+                TextMetricValid.Text = valid.ToString();
+                TextMetricDuplicates.Text = duplicates.ToString();
+                TextMetricErrors.Text = errors.ToString();
+            }
+
+            RefreshPreviewPage();
+            UpdateSelectionCount();
         }
     }
 

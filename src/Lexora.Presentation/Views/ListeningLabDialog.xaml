@@ -13,7 +13,7 @@
     DefaultButton="Primary"
     HorizontalAlignment="Center"
     VerticalAlignment="Center"
-    CornerRadius="16">
+    CornerRadius="8">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">840</x:Double>
@@ -40,7 +40,7 @@
                            FontSize="13" TextWrapping="Wrap" />
 
                 <!-- Fluent 2 Modern Segmented Tab Bar -->
-                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4" HorizontalAlignment="Center">
+                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="4" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <Button x:Name="BtnTabDictation" Click="TabDictation_Click" CornerRadius="8" Padding="16,8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -70,7 +70,7 @@
                     <!-- Prompt Audio Card -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="12" Padding="20">
+                            BorderThickness="1" CornerRadius="8" Padding="20">
                         <StackPanel Spacing="16">
                             <Grid ColumnDefinitions="*,Auto">
                                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -98,14 +98,14 @@
 
                             <!-- Big Audio Play Buttons -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                <Button x:Name="BtnPlayUkAudio" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="10" Click="PlayUkAudio_Click">
+                                <Button x:Name="BtnPlayUkAudio" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="6" Click="PlayUkAudio_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_PlayUk')}" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Button>
 
-                                <Button x:Name="BtnPlayUsAudio" Grid.Column="1" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="10" Click="PlayUsAudio_Click">
+                                <Button x:Name="BtnPlayUsAudio" Grid.Column="1" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="6" Click="PlayUsAudio_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_PlayUs')}" FontWeight="SemiBold" />
@@ -129,7 +129,7 @@
                             <Border x:Name="DictationResultPanel"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="10" Padding="16"
+                                    BorderThickness="1" CornerRadius="8" Padding="16"
                                     Visibility="Collapsed">
                                 <StackPanel Spacing="10">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
@@ -171,7 +171,7 @@
                     <!-- Challenge Header Card -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="12" Padding="20">
+                            BorderThickness="1" CornerRadius="8" Padding="20">
                         <StackPanel Spacing="16">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3">
@@ -188,7 +188,7 @@
                             <Button x:Name="BtnPlayPairPrompt"
                                     HorizontalAlignment="Stretch" Padding="20,16"
                                     Style="{ThemeResource AccentButtonStyle}"
-                                    CornerRadius="10" Click="PlayPairPrompt_Click">
+                                    CornerRadius="6" Click="PlayPairPrompt_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE767;" FontSize="18" />
                                     <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ListenPrompt')}" FontWeight="Bold" FontSize="14" />
@@ -200,7 +200,7 @@
                                 <!-- Option A Card -->
                                 <Button x:Name="BtnChoiceA"
                                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                        Padding="16,14" CornerRadius="10"
+                                        Padding="16,14" CornerRadius="6"
                                         Click="ChoiceA_Click">
                                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                                         <TextBlock Text="{x:Bind CurrentPair.WordA, Mode=OneWay}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
@@ -212,7 +212,7 @@
                                 <!-- Option B Card -->
                                 <Button x:Name="BtnChoiceB" Grid.Column="1"
                                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                        Padding="16,14" CornerRadius="10"
+                                        Padding="16,14" CornerRadius="6"
                                         Click="ChoiceB_Click">
                                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                                         <TextBlock Text="{x:Bind CurrentPair.WordB, Mode=OneWay}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
@@ -226,7 +226,7 @@
                             <Border x:Name="PairFeedbackPanel"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="10" Padding="16"
+                                    BorderThickness="1" CornerRadius="8" Padding="16"
                                     Visibility="Collapsed">
                                 <StackPanel Spacing="10">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -266,7 +266,7 @@
                             <DataTemplate x:DataType="dto:AccentComparisonItemDto">
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,4">
+                                        BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,4">
                                     <Grid ColumnDefinitions="140,*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
                                         <!-- Term & Meaning -->
                                         <StackPanel Spacing="2" VerticalAlignment="Center">

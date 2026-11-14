@@ -11,7 +11,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="28,20" HorizontalAlignment="Stretch">
+        <Grid Padding="24" MaxWidth="1240" HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -246,17 +246,17 @@
                 <!-- Empty Due Queue State -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="16" Padding="48" MinHeight="420"
+                        BorderThickness="1" CornerRadius="8" Padding="32" MinHeight="380"
                         Visibility="{x:Bind ViewModel.IsEmptyQueue, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Border Width="72" Height="72" CornerRadius="20" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="10" HorizontalAlignment="Center">
-                            <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="52" Height="52" />
+                        <Border Width="64" Height="64" CornerRadius="16" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="8" HorizontalAlignment="Center">
+                            <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
                         </Border>
                         <TextBlock Text="{x:Bind Loc.GetString('Review_AllCaughtUp')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
                         <TextBlock Text="{x:Bind Loc.GetString('Review_AllCaughtUpDesc')}"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="460" />
                         <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,8,0,0">
-                            <Button Content="{x:Bind Loc.GetString('Review_LearnNew')}" Style="{ThemeResource AccentButtonStyle}" Padding="22,10" CornerRadius="8" Click="ModeNewButton_Click" />
+                            <Button Content="{x:Bind Loc.GetString('Review_LearnNew')}" Style="{ThemeResource AccentButtonStyle}" Padding="20,8" CornerRadius="4" Click="ModeNewButton_Click" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -270,7 +270,7 @@
                     <Border x:Name="FlashcardMainBorder"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource LexoraFlashcardBorderBrush}"
-                            BorderThickness="1.5" CornerRadius="16" Padding="32" MinHeight="480"
+                            BorderThickness="1" CornerRadius="8" Padding="24" MinHeight="440"
                             HorizontalAlignment="Stretch">
                         <Border.Projection>
                             <PlaneProjection x:Name="FlashcardProjection" CenterOfRotationX="0.5" CenterOfRotationY="0.5" />
@@ -313,7 +313,7 @@
                                     <!-- Cloze Sentence Context -->
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1" CornerRadius="10" Padding="16,12" Margin="0,2,0,4"
+                                            BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,2,0,4"
                                             HorizontalAlignment="Stretch"
                                             Visibility="{x:Bind ViewModel.HasClozeSentence, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <StackPanel Spacing="4">
@@ -476,7 +476,7 @@
                                 <!-- Meaning Section -->
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="10" Padding="18,14">
+                                        BorderThickness="1" CornerRadius="8" Padding="16,12">
                                     <StackPanel Spacing="6" HorizontalAlignment="Center">
                                         <TextBlock Text="{x:Bind ViewModel.CurrentCard.PrimaryDefinitionVi, Mode=OneWay}"
                                                    FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"
@@ -495,7 +495,7 @@
                                         <DataTemplate x:DataType="dto:ExampleSentenceDto">
                                             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                    BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,3">
+                                                    BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,3">
                                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                                                     <FontIcon Glyph="&#xE82F;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Top" Margin="0,2,0,0" />
                                                     <StackPanel Grid.Column="1" Spacing="3">
@@ -513,7 +513,7 @@
                             <Grid Grid.Row="2" Margin="0,12,0,0">
                                 <!-- Show Meaning Button (Space) -->
                                 <Button HorizontalAlignment="Center" Style="{ThemeResource AccentButtonStyle}"
-                                        Padding="32,10" CornerRadius="10" FontSize="15" FontWeight="SemiBold"
+                                        Padding="28,8" CornerRadius="4" FontSize="14" FontWeight="SemiBold"
                                         Visibility="{x:Bind ViewModel.IsShowMeaningButtonVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                                         Click="ShowAnswerButton_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -606,7 +606,7 @@
                         <!-- Session Live Progress Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="12" Padding="16,14">
+                                BorderThickness="1" CornerRadius="8" Padding="14,12">
                             <StackPanel Spacing="12">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE9D5;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -614,19 +614,19 @@
                                 </StackPanel>
 
                                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
-                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="6,8">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,8">
                                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                                             <TextBlock Text="{x:Bind Loc.GetString('Review_Done')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                             <TextBlock Text="{x:Bind ViewModel.CompletedCount, Mode=OneWay}" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </Border>
-                                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="6,8">
+                                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,8">
                                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                                             <TextBlock Text="{x:Bind Loc.GetString('Review_Left')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                             <TextBlock Text="{x:Bind ViewModel.RemainingCount, Mode=OneWay}" FontWeight="Bold" FontSize="16" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </Border>
-                                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="6,8">
+                                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,8">
                                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                                             <TextBlock Text="{x:Bind Loc.GetString('Review_Accuracy')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -642,7 +642,7 @@
                         <!-- SM-2 & FSRS Memory Insights Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="12" Padding="16,14">
+                                BorderThickness="1" CornerRadius="8" Padding="14,12">
                             <StackPanel Spacing="10">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -652,7 +652,7 @@
                                     <Border Grid.Column="1"
                                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1" CornerRadius="6" Padding="6,2"
+                                            BorderThickness="1" CornerRadius="4" Padding="6,2"
                                             Visibility="{x:Bind ViewModel.CurrentCardMemoryStability, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                                         <TextBlock Text="{x:Bind ViewModel.CurrentCardMemoryStability.HealthLevel, Mode=OneWay}"
                                                    FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -703,7 +703,7 @@
                         <!-- Shortcuts Guide Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="12" Padding="16,14">
+                                BorderThickness="1" CornerRadius="8" Padding="14,12">
                             <StackPanel Spacing="8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE765;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -730,12 +730,12 @@
                 <!-- Session Completed View -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="16" Padding="40"
+                        BorderThickness="1" CornerRadius="8" Padding="32"
                         Visibility="{x:Bind ViewModel.IsSessionCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
 
                     <StackPanel Spacing="20" HorizontalAlignment="Center">
-                        <Border Width="72" Height="72" CornerRadius="18" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="10" HorizontalAlignment="Center">
-                            <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="52" Height="52" />
+                        <Border Width="64" Height="64" CornerRadius="16" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="8" HorizontalAlignment="Center">
+                            <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
                         </Border>
                         <TextBlock Text="{x:Bind Loc.GetString('Review_SessionCompletedTitle')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
                         <TextBlock Text="{x:Bind Loc.GetString('Review_SessionCompletedDesc')}"
@@ -743,21 +743,21 @@
 
                         <!-- Session Stats Cards -->
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16" Margin="0,12" MaxWidth="500">
-                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="12" Padding="16" HorizontalAlignment="Stretch">
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="14" HorizontalAlignment="Stretch">
                                 <StackPanel HorizontalAlignment="Center" Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('Review_TotalStudied')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                                     <TextBlock Text="{x:Bind ViewModel.TotalQueueCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="12" Padding="16" HorizontalAlignment="Stretch">
+                            <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="8" Padding="14" HorizontalAlignment="Stretch">
                                 <StackPanel HorizontalAlignment="Center" Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('Review_CorrectCount')}" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                                     <TextBlock Text="{x:Bind ViewModel.SessionCorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="2" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="16" HorizontalAlignment="Stretch">
+                            <Border Grid.Column="2" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14" HorizontalAlignment="Stretch">
                                 <StackPanel HorizontalAlignment="Center" Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('Review_Accuracy')}" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

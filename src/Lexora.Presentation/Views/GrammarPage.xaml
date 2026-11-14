@@ -11,7 +11,7 @@
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,*" Padding="28,20" RowSpacing="14">
+    <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
         
         <!-- Loading Ring Overlay -->
         <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
@@ -241,7 +241,7 @@
             <!-- Left: Rules List -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="12">
+                    BorderThickness="1" CornerRadius="8">
                 <Grid RowDefinitions="Auto,Auto,*,Auto">
                     <Grid Padding="16,14" ColumnDefinitions="*,Auto" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                         <TextBlock Text="{x:Bind Loc.GetString('Grammar_Structures')}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" />
@@ -414,7 +414,7 @@
             <!-- Right: Rule Detail (Modern, Non-Overlapping Layout) -->
             <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="28">
+                    BorderThickness="1" CornerRadius="8" Padding="20">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <Grid>
                         <!-- Detail Empty State -->
@@ -675,7 +675,7 @@
                         <!-- Main Question Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="16" Padding="28,24">
+                                BorderThickness="1" CornerRadius="8" Padding="20">
                             <StackPanel Spacing="20">
                                 
                                 <!-- Question Meta & Context Clue (Fully Wrapping, Zero Clipping) -->
@@ -785,7 +785,7 @@
                         <!-- Hero Score Banner -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="16" Padding="28,24">
+                                BorderThickness="1" CornerRadius="8" Padding="20">
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
                                 <!-- Score Circle -->
                                 <Border Width="96" Height="96" CornerRadius="48"
@@ -825,7 +825,7 @@
 
                         <!-- 3 Metric Cards Grid -->
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
-                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE9D9;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -837,7 +837,7 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
+                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
@@ -846,7 +846,7 @@
                                     <TextBlock Text="{x:Bind ViewModel.PracticeResult.CorrectCount, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
+                            <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
@@ -865,7 +865,7 @@
                                 <DataTemplate x:DataType="dto:GrammarQuizQuestionDto">
                                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,0,0,12">
+                                            BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
                                         <StackPanel Spacing="10">
                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">

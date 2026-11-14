@@ -8,7 +8,7 @@
     xmlns:dto="using:Lexora.Application.DTOs"
     DefaultButton="Primary"
     mc:Ignorable="d"
-    CornerRadius="16">
+    CornerRadius="8">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">480</x:Double>

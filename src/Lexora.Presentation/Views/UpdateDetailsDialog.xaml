@@ -8,7 +8,7 @@
     xmlns:dto="using:Lexora.Application.DTOs"
     DefaultButton="Primary"
     mc:Ignorable="d"
-    CornerRadius="16">
+    CornerRadius="8">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">680</x:Double>
@@ -41,7 +41,7 @@
         <Border Grid.Row="1"
                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1" CornerRadius="10" Padding="14,12"
+                BorderThickness="1" CornerRadius="8" Padding="14,12"
                 HorizontalAlignment="Stretch">
             <StackPanel Spacing="10">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Top">
@@ -104,7 +104,7 @@
         <Border Grid.Row="2"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1" CornerRadius="10" Padding="14,12"
+                BorderThickness="1" CornerRadius="8" Padding="14,12"
                 HorizontalAlignment="Stretch">
             <StackPanel Spacing="8">
                 <Grid ColumnDefinitions="*,Auto">

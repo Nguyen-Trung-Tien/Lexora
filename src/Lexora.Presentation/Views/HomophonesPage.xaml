@@ -15,7 +15,7 @@
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="0,0,0,1"
-                Padding="24,14,24,14">
+                Padding="24,16">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <!-- Page Title -->
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
@@ -344,8 +344,8 @@
                                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="20">
+                                CornerRadius="8"
+                                Padding="16">
                             <StackPanel Spacing="14">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <StackPanel Spacing="2">
@@ -395,8 +395,8 @@
                                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="20">
+                                CornerRadius="8"
+                                Padding="16">
                             <StackPanel Spacing="14">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <StackPanel Spacing="2">

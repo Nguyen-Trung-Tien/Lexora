@@ -117,7 +117,7 @@ public static class SafeDialogExtensions
                     // Apply compact, balanced proportions (320px - 420px wide instead of bloated default)
                     dialog.Resources["ContentDialogMinWidth"] = 320.0;
                     dialog.Resources["ContentDialogMaxWidth"] = 420.0;
-                    dialog.CornerRadius = new CornerRadius(14);
+                    dialog.CornerRadius = new CornerRadius(8);
 
                     // Enhance raw string message into an elegant Fluent 2 card layout with contextual state icon
                     if (dialog.Content is string textContent && !string.IsNullOrWhiteSpace(textContent))
@@ -292,7 +292,7 @@ public static class SafeDialogExtensions
         {
             Width = 36,
             Height = 36,
-            CornerRadius = new CornerRadius(10),
+            CornerRadius = new CornerRadius(8),
             VerticalAlignment = VerticalAlignment.Top,
             Margin = new Thickness(0, 1, 0, 0)
         };

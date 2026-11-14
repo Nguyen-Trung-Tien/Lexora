@@ -11,7 +11,7 @@
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,Auto,*" Padding="28,20" RowSpacing="14">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="24" RowSpacing="16">
         <Grid.Resources>
             <!-- Connected Morph Pre-Launch Storyboard -->
             <Storyboard x:Name="CardMorphStoryboard">
@@ -401,7 +401,7 @@
             <!-- Left: Word List -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="12">
+                    BorderThickness="1" CornerRadius="8">
                 <Grid RowDefinitions="Auto,Auto,*,Auto">
                     <Grid Padding="16,14" ColumnDefinitions="*,Auto" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                         <TextBlock Text="{x:Bind Loc.GetString('Vocab_Title')}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" />
@@ -613,7 +613,7 @@
             <!-- Right: Word Detail (Oxford / Cambridge Dictionary Style) -->
             <Border x:Name="WordDetailPaneBorder" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="28"
+                    BorderThickness="1" CornerRadius="8" Padding="20"
                     RenderTransformOrigin="0.5,0.3">
                 <Border.RenderTransform>
                     <ScaleTransform x:Name="WordDetailScaleTransform" ScaleX="1.0" ScaleY="1.0" />
@@ -840,7 +840,7 @@
                             <!-- Ebbinghaus Memory Retention Gauge Card -->
                             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="12" Padding="16,14"
+                                    BorderThickness="1" CornerRadius="8" Padding="16,12"
                                     Visibility="{x:Bind ViewModel.SelectedWord, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                                 <StackPanel Spacing="10">
                                     <Grid ColumnDefinitions="Auto,*,Auto">
@@ -1128,7 +1128,7 @@
                             <DataTemplate x:DataType="dto:ContextUnitDto">
                                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="12" Padding="20">
+                                        BorderThickness="1" CornerRadius="8" Padding="16">
                                     <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
                                         <!-- Header: CheckBox, Icon, Name, Word Count Badge -->
                                         <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10">

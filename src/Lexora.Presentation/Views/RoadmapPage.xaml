@@ -16,11 +16,11 @@
         <DataTemplate x:Key="RoadmapCardTemplate" x:DataType="dto:StudyRoadmapDto">
             <Border
                 Margin="0,0,0,12"
-                Padding="18"
+                Padding="16"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="12">
+                CornerRadius="8">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -123,7 +123,8 @@
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">
             <StackPanel
-                Margin="32,24,32,48"
+                Padding="24"
+                MaxWidth="1240"
                 HorizontalAlignment="Stretch"
                 Spacing="24">
 
@@ -143,7 +144,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="42" Height="42" CornerRadius="12"
+                        <Border Width="42" Height="42" CornerRadius="8"
                                 Margin="0,0,14,0"
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -260,11 +261,11 @@
                     <Border
                         x:Name="OverviewCard1"
                         Grid.Column="0"
-                        Padding="18,16"
+                        Padding="16"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="10">
+                        CornerRadius="8">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -289,11 +290,11 @@
                     <Border
                         x:Name="OverviewCard2"
                         Grid.Column="1"
-                        Padding="18,16"
+                        Padding="16"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="10">
+                        CornerRadius="8">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -321,11 +322,11 @@
                     <Border
                         x:Name="OverviewCard3"
                         Grid.Column="2"
-                        Padding="18,16"
+                        Padding="16"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="10">
+                        CornerRadius="8">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -351,11 +352,11 @@
                     <Border
                         x:Name="OverviewCard4"
                         Grid.Column="3"
-                        Padding="18,16"
+                        Padding="16"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="10">
+                        CornerRadius="8">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -389,7 +390,7 @@
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
                     BorderThickness="1.5"
-                    CornerRadius="12"
+                    CornerRadius="8"
                     Visibility="{x:Bind ViewModel.HasNextActiveNode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
@@ -551,7 +552,7 @@
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
-                    CornerRadius="12"
+                    CornerRadius="8"
                     Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" Spacing="16">
                         <ProgressRing IsActive="True" Width="48" Height="48" />
@@ -570,7 +571,7 @@
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
-                    CornerRadius="12"
+                    CornerRadius="8"
                     Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <StackPanel MaxWidth="880" HorizontalAlignment="Center" Spacing="24">
                         <StackPanel Spacing="8" HorizontalAlignment="Center">
@@ -614,7 +615,7 @@
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="10">
+                                CornerRadius="8">
                                 <StackPanel Spacing="12">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Border
@@ -662,7 +663,7 @@
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="10">
+                                CornerRadius="8">
                                 <StackPanel Spacing="12">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Border
@@ -710,7 +711,7 @@
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="10">
+                                CornerRadius="8">
                                 <StackPanel Spacing="12">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Border
@@ -791,7 +792,7 @@
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            CornerRadius="12">
+                            CornerRadius="8">
                             <ScrollViewer
                                 x:Name="RoadmapCanvasScroller"
                                 MaxHeight="440"
@@ -836,7 +837,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="12">
+                        CornerRadius="8">
                         <ScrollViewer
                             MaxHeight="460"
                             HorizontalScrollBarVisibility="Disabled"

@@ -24,13 +24,13 @@
         <!-- Main Content Area -->
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
-                      Padding="28,20">
-            <StackPanel Spacing="16" MaxWidth="1560" HorizontalAlignment="Stretch">
+                      Padding="24">
+            <StackPanel Spacing="16" MaxWidth="1240" HorizontalAlignment="Stretch">
 
                 <!-- 1. Top Header -->
                 <Grid x:Name="TopHeaderGrid" ColumnDefinitions="*,Auto" ColumnSpacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-                        <Border Width="42" Height="42" CornerRadius="12"
+                        <Border Width="42" Height="42" CornerRadius="8"
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1">
@@ -112,7 +112,7 @@
                         <!-- Weak (Needs Focus) Card -->
                         <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="10" Padding="12,10">
+                                CornerRadius="8" Padding="12,10">
                             <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatWeak')}"
@@ -134,7 +134,7 @@
                         <!-- In Progress (Learning) Card -->
                         <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="10" Padding="12,10">
+                                CornerRadius="8" Padding="12,10">
                             <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatLearning')}"
@@ -156,7 +156,7 @@
                         <!-- Mastered Card -->
                         <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="10" Padding="12,10">
+                                CornerRadius="8" Padding="12,10">
                             <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatMastered')}"
@@ -178,7 +178,7 @@
                         <!-- Due for Review Card -->
                         <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="10" Padding="12,10">
+                                CornerRadius="8" Padding="12,10">
                             <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatDueToday')}"
@@ -200,7 +200,7 @@
                         <!-- Average Retention Card -->
                         <Border Grid.Column="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="10" Padding="12,10">
+                                CornerRadius="8" Padding="12,10">
                             <StackPanel Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="{x:Bind Loc.GetString('Storage_StatAvgRetention')}"
@@ -224,7 +224,7 @@
                 <!-- 3. Unified Streamlined Toolbar (Segmented Tabs, Search, Filter, Action) -->
                 <Grid x:Name="StorageToolbarGrid" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                     <!-- Segmented View Mode Switcher -->
-                    <Border x:Name="TabSwitcherBorder" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4">
+                    <Border x:Name="TabSwitcherBorder" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="4">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <Button x:Name="BtnVocabTab" Click="TabVocab_Click" CornerRadius="8" Padding="14,6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
@@ -252,7 +252,7 @@
                              PlaceholderText="{x:Bind Loc.GetString('Storage_Search_Placeholder')}"
                              Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}"
                              TextChanged="SearchBox_TextChanged"
-                             CornerRadius="10" Padding="14,8" />
+                             CornerRadius="8" Padding="14,8" />
 
                     <!-- Actions & Filters (Streamlined) -->
                     <ScrollViewer x:Name="StorageActionsScrollViewer" Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
@@ -299,7 +299,7 @@
                         Visibility="{x:Bind ViewModel.IsSelectionMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="10" Padding="12,8">
+                        BorderThickness="1" CornerRadius="8" Padding="12,8">
                     <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
                         <Button Click="SelectAllItems_Click" CornerRadius="6" Padding="10,5" FontSize="12">
                             <StackPanel Orientation="Horizontal" Spacing="5">
@@ -329,7 +329,7 @@
                 <!-- 4. Empty State -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                        CornerRadius="14" Padding="48,40"
+                        CornerRadius="8" Padding="48,40"
                         Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Border Width="64" Height="64" CornerRadius="32"
@@ -368,7 +368,7 @@
                         <DataTemplate x:DataType="dto:LearningStorageItemDto">
                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                    CornerRadius="12" Padding="18,14" Margin="0,0,0,10" HorizontalAlignment="Stretch">
+                                    CornerRadius="8" Padding="18,14" Margin="0,0,0,10" HorizontalAlignment="Stretch">
                                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
 
                                     <!-- Top Row: Badges and Title -->
@@ -537,7 +537,7 @@
               Canvas.ZIndex="30" Padding="20">
             <Border Background="{ThemeResource LexoraModalBackgroundBrush}"
                     BorderBrush="{ThemeResource LexoraModalBorderBrush}" BorderThickness="1"
-                    CornerRadius="16" MaxWidth="680" MaxHeight="660"
+                    CornerRadius="8" MaxWidth="640" MaxHeight="660"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Padding="28,24"
                     Translation="0,0,32">
@@ -598,7 +598,7 @@
                                         <DataTemplate x:DataType="vm:TestOptionItem">
                                             <Button Style="{ThemeResource DefaultButtonStyle}"
                                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                                    Margin="0,0,0,8" Padding="14,12" CornerRadius="10"
+                                                    Margin="0,0,0,8" Padding="14,12" CornerRadius="6"
                                                     BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
                                                     BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"
                                                     Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBackground}"

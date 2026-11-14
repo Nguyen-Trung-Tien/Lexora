@@ -8,7 +8,7 @@
     xmlns:services="using:Lexora.Presentation.Services"
     mc:Ignorable="d"
     DefaultButton="None"
-    CornerRadius="16">
+    CornerRadius="8">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">520</x:Double>
@@ -48,7 +48,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="0,0,0,4">
-                <Border Width="36" Height="36" CornerRadius="10"
+                <Border Width="36" Height="36" CornerRadius="8"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"

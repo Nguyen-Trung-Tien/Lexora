@@ -13,7 +13,7 @@
     DefaultButton="Primary"
     HorizontalAlignment="Center"
     VerticalAlignment="Center"
-    CornerRadius="16">
+    CornerRadius="8">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">840</x:Double>
@@ -58,7 +58,7 @@
             <!-- Center Word Hero Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="14" Padding="20">
+                    BorderThickness="1" CornerRadius="8" Padding="20">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="8">
@@ -109,7 +109,7 @@
                     <DataTemplate x:DataType="dto:GraphNodeDto">
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="10" Padding="14,10">
+                                BorderThickness="1" CornerRadius="8" Padding="14,10">
                             <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12" VerticalAlignment="Center">
                                 <!-- Relationship Tag -->
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">

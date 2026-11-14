@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:Lexora.Presentation.Converters"
     mc:Ignorable="d"
-    CornerRadius="16">
+    CornerRadius="8">
 
     <ContentDialog.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -47,7 +47,7 @@
                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="10"
+                CornerRadius="8"
                 Padding="12,8">
             <Grid ColumnDefinitions="*,Auto,*,Auto,*">
                 <!-- Step 1 Indicator -->
@@ -120,11 +120,11 @@
                     <!-- Mode 1: File Selection -->
                     <StackPanel x:Name="PanelFile" Spacing="10">
                         <Border x:Name="DropZoneBorder"
-                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="10"
-                                Padding="16"
+                                CornerRadius="8"
+                                Padding="20,18"
                                 AllowDrop="True"
                                 DragOver="DropZone_DragOver"
                                 DragLeave="DropZone_DragLeave"
@@ -146,6 +146,23 @@
                                            TextAlignment="Center"
                                            FontSize="11"
                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                        <TextBlock Text="JSON" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    </Border>
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                        <TextBlock Text="CSV" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    </Border>
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                        <TextBlock Text="TXT / TSV" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    </Border>
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon Glyph="&#xE72E;" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="≤ 20 MB" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
                                 <TextBlock x:Name="TextSelectedFile"
                                            TextAlignment="Center"
                                            TextWrapping="Wrap"
@@ -163,16 +180,41 @@
                                        FontWeight="SemiBold"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        VerticalAlignment="Center" />
-                            <Button Grid.Column="1"
-                                    x:Name="BtnPasteClipboard"
-                                    Padding="8,4"
-                                    CornerRadius="6"
-                                    Click="BtnPasteClipboard_Click">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE77F;" FontSize="12" />
-                                    <TextBlock x:Name="TextPasteClipboard" FontSize="11" />
-                                </StackPanel>
-                            </Button>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                <DropDownButton x:Name="BtnInsertSampleQuick"
+                                                Padding="8,4"
+                                                CornerRadius="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE8B7;" FontSize="12" />
+                                        <TextBlock x:Name="TextInsertSampleQuick" FontSize="11" />
+                                    </StackPanel>
+                                    <DropDownButton.Flyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem x:Name="MenuSampleJsonQuick" Click="MenuItemSampleJson_Click" />
+                                            <MenuFlyoutItem x:Name="MenuSampleCsvQuick" Click="MenuItemSampleCsv_Click" />
+                                            <MenuFlyoutItem x:Name="MenuSampleTxtQuick" Click="MenuItemSampleTxt_Click" />
+                                        </MenuFlyout>
+                                    </DropDownButton.Flyout>
+                                </DropDownButton>
+                                <Button x:Name="BtnPasteClipboard"
+                                        Padding="8,4"
+                                        CornerRadius="6"
+                                        Click="BtnPasteClipboard_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE77F;" FontSize="12" />
+                                        <TextBlock x:Name="TextPasteClipboard" FontSize="11" />
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="BtnClearPaste"
+                                        Padding="8,4"
+                                        CornerRadius="6"
+                                        Click="BtnClearPaste_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                        <TextBlock x:Name="TextClearPasteBtn" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                         </Grid>
                         <TextBox x:Name="InputTextBox"
                                  MinHeight="200"
@@ -188,13 +230,6 @@
                                        FontSize="11"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        VerticalAlignment="Center" />
-                            <Button Grid.Column="1"
-                                    x:Name="BtnClearPaste"
-                                    Padding="6,2"
-                                    FontSize="11"
-                                    CornerRadius="4"
-                                    Click="BtnClearPaste_Click"
-                                    Visibility="Collapsed" />
                         </Grid>
                     </StackPanel>
                 </Grid>
@@ -335,7 +370,7 @@
                 <!-- Scrollable Item Cards Preview -->
                 <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="10"
+                        CornerRadius="8"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <ListView x:Name="ItemsPreviewListView"
                               Height="260"
@@ -345,7 +380,7 @@
                                 <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="0,0,0,1"
                                         Padding="10,8">
-                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
                                         <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                                   MinWidth="24"
                                                   VerticalAlignment="Center" />
@@ -431,6 +466,15 @@
                                                        FontWeight="SemiBold"
                                                        Foreground="{Binding StatusForegroundBrush}" />
                                         </Border>
+                                        <!-- Quick Delete Button -->
+                                        <Button Grid.Column="4"
+                                                Click="BtnDeletePreviewItem_Click"
+                                                Style="{ThemeResource SubtleButtonStyle}"
+                                                Padding="6,4"
+                                                CornerRadius="4"
+                                                VerticalAlignment="Center">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                        </Button>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -481,7 +525,11 @@
                             Padding="18,8"
                             Click="BtnCommitImport_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE896;" FontSize="14" />
+                            <ProgressRing x:Name="CommitButtonProgressRing"
+                                          Width="14" Height="14"
+                                          IsActive="False"
+                                          Visibility="Collapsed" />
+                            <FontIcon x:Name="IconCommitImport" Glyph="&#xE896;" FontSize="14" />
                             <TextBlock x:Name="TextCommitImport" Text="Tiến hành nhập" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
@@ -530,7 +578,7 @@
                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            CornerRadius="10"
+                            CornerRadius="8"
                             Padding="16">
                         <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" RowSpacing="12" ColumnSpacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">

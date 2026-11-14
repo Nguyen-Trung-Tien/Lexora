@@ -13,7 +13,7 @@
     DefaultButton="Primary"
     HorizontalAlignment="Center"
     VerticalAlignment="Center"
-    CornerRadius="16">
+    CornerRadius="8">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">800</x:Double>
@@ -51,7 +51,7 @@
                             <!-- Daily Milestone & Progress Card -->
                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="12" Padding="20">
+                                    BorderThickness="1" CornerRadius="8" Padding="20">
                                 <Grid ColumnDefinitions="*,Auto" RowSpacing="12">
                                     <StackPanel Spacing="8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
@@ -71,7 +71,7 @@
 
                                     <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                            CornerRadius="10" Padding="16,8" VerticalAlignment="Center">
+                                            CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
                                         <StackPanel Spacing="2" HorizontalAlignment="Center">
                                             <TextBlock Text="{x:Bind OverallProgressText, Mode=OneWay}" FontSize="24" FontWeight="Bold"
                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
@@ -90,7 +90,7 @@
                                     <DataTemplate x:DataType="dto:CurriculumTaskDto">
                                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="1" CornerRadius="10" Padding="16,12" Margin="0,4">
+                                                BorderThickness="1" CornerRadius="8" Padding="16,12" Margin="0,4">
                                             <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12" VerticalAlignment="Center">
                                                 <!-- Status Icon -->
                                                 <FontIcon Glyph="{x:Bind StatusGlyph}"

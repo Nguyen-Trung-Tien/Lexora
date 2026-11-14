@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     DefaultButton="Primary"
-    CornerRadius="16"
+    CornerRadius="8"
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
@@ -31,7 +31,7 @@
             <!-- Card 1: Group Metadata Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="10" Padding="16">
+                    BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel Spacing="14">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE768;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
@@ -92,7 +92,7 @@
                 <Border Grid.Column="0"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="10" Padding="16">
+                        BorderThickness="1" CornerRadius="8" Padding="16">
                     <StackPanel Spacing="12">
                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
                             <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorWord1Badge')}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -129,7 +129,7 @@
                 <Border Grid.Column="1"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="10" Padding="16">
+                        BorderThickness="1" CornerRadius="8" Padding="16">
                     <StackPanel Spacing="12">
                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
                             <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorWord2Badge')}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />

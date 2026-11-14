@@ -12,7 +12,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="28,20" HorizontalAlignment="Stretch">
+        <Grid Padding="24" MaxWidth="1240" HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -78,9 +78,9 @@
                 <!-- Page Title Banner -->
                 <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="14" Padding="24,18">
+                        BorderThickness="1" CornerRadius="8" Padding="20,16">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
-                        <Border Width="48" Height="48" CornerRadius="12" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Padding="8" VerticalAlignment="Center">
+                        <Border Width="44" Height="44" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Padding="8" VerticalAlignment="Center">
                             <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="32" Height="32" />
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
@@ -141,7 +141,7 @@
                     <!-- Left Column: Choose Test Format -->
                     <Border x:Name="TestFormatBorder" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="14" Padding="22"
+                            BorderThickness="1" CornerRadius="8" Padding="20"
                             VerticalAlignment="Stretch">
                         <StackPanel Spacing="16">
                             <StackPanel Spacing="2">
@@ -151,10 +151,10 @@
                             
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                                 <!-- Mixed Test -->
-                                <Button x:Name="BtnTypeMixed" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="10"
+                                <Button x:Name="BtnTypeMixed" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="6"
                                         Click="TestTypeButton_Click" Tag="Mixed">
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <Border Width="34" Height="34" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
                                             <FontIcon x:Name="IconTypeMixed" Glyph="&#xE765;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
@@ -169,10 +169,10 @@
                                 </Button>
 
                                 <!-- Word -> Meaning -->
-                                <Button x:Name="BtnTypeWordToMeaning" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="10"
+                                <Button x:Name="BtnTypeWordToMeaning" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="6"
                                         Click="TestTypeButton_Click" Tag="WordToMeaning">
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <Border Width="34" Height="34" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
                                             <FontIcon x:Name="IconTypeWordToMeaning" Glyph="&#xE82D;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
@@ -187,10 +187,10 @@
                                 </Button>
 
                                 <!-- Meaning -> Word -->
-                                <Button x:Name="BtnTypeMeaningToWord" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="10"
+                                <Button x:Name="BtnTypeMeaningToWord" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="6"
                                         Click="TestTypeButton_Click" Tag="MeaningToWord">
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <Border Width="34" Height="34" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
                                             <FontIcon x:Name="IconTypeMeaningToWord" Glyph="&#xE895;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
@@ -205,10 +205,10 @@
                                 </Button>
 
                                 <!-- Fill in the blank -->
-                                <Button x:Name="BtnTypeFillInTheBlank" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="10"
+                                <Button x:Name="BtnTypeFillInTheBlank" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="6"
                                         Click="TestTypeButton_Click" Tag="FillInTheBlank">
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <Border Width="34" Height="34" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
                                             <FontIcon x:Name="IconTypeFillInTheBlank" Glyph="&#xE70F;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
@@ -223,10 +223,10 @@
                                 </Button>
 
                                 <!-- Part of Speech -->
-                                <Button x:Name="BtnTypePartOfSpeech" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="10"
+                                <Button x:Name="BtnTypePartOfSpeech" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="6"
                                         Click="TestTypeButton_Click" Tag="PartOfSpeech">
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <Border Width="34" Height="34" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
                                             <FontIcon x:Name="IconTypePartOfSpeech" Glyph="&#xE8D2;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
@@ -241,10 +241,10 @@
                                 </Button>
 
                                 <!-- Listening / Audio Quiz -->
-                                <Button x:Name="BtnTypeListeningQuiz" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="10"
+                                <Button x:Name="BtnTypeListeningQuiz" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,12" CornerRadius="6"
                                         Click="TestTypeButton_Click" Tag="ListeningQuiz">
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <Border Width="34" Height="34" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
                                             <FontIcon x:Name="IconTypeListeningQuiz" Glyph="&#xE767;" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
@@ -262,7 +262,7 @@
                             <!-- Adaptive CAT Mode Toggle Card -->
                             <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="12" Padding="16,12" Margin="0,6,0,0">
+                                    BorderThickness="1" CornerRadius="8" Padding="16,12" Margin="0,6,0,0">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <Border Width="36" Height="36" CornerRadius="18" Background="{ThemeResource AccentFillColorDefaultBrush}">
                                         <FontIcon Glyph="&#xE734;" FontSize="16" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -285,7 +285,7 @@
                     <!-- Right Column: Settings, Question Count & Filters -->
                     <Border x:Name="TestSettingsBorder" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="14" Padding="22"
+                            BorderThickness="1" CornerRadius="8" Padding="20"
                             VerticalAlignment="Stretch">
                         <StackPanel Spacing="16">
                             <StackPanel Spacing="2">
@@ -444,9 +444,9 @@
                 <!-- Full-Width Master Start Action Footer -->
                 <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="14" Padding="24,18">
+                        BorderThickness="1" CornerRadius="8" Padding="20,16">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16" VerticalAlignment="Center">
-                        <Border Width="44" Height="44" CornerRadius="12"
+                        <Border Width="44" Height="44" CornerRadius="8"
                                 Background="{ThemeResource AccentFillColorDefaultBrush}"
                                 HorizontalAlignment="Center" VerticalAlignment="Center">
                             <FontIcon Glyph="&#xE768;" FontSize="18" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -473,7 +473,7 @@
             <!-- ========================================== -->
             <StackPanel Grid.Row="1" Spacing="18"
                         Visibility="{x:Bind ViewModel.IsTestingMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                        MaxWidth="1360" HorizontalAlignment="Stretch">
+                        MaxWidth="1240" HorizontalAlignment="Stretch">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
                         <EntranceThemeTransition FromVerticalOffset="0" />
@@ -496,16 +496,16 @@
                 <!-- Question Main Card -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="16" Padding="32">
+                        BorderThickness="1" CornerRadius="8" Padding="24">
                     <StackPanel Spacing="22">
                         
                         <!-- Question Type Badge, Adaptive Calibration Badge & Audio Button -->
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
-                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="10" Padding="10,4">
+                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="10,4">
                                     <TextBlock Text="{x:Bind ViewModel.CurrentQuestion.QuestionType, Mode=OneWay}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="12" FontWeight="SemiBold" />
                                 </Border>
-                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10,4"
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="10,4"
                                         Visibility="{x:Bind ViewModel.IsAdaptiveMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                         <FontIcon Glyph="&#xE734;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -543,14 +543,14 @@
                                 <DataTemplate x:DataType="vm:TestOptionItem">
                                     <Button Style="{ThemeResource DefaultButtonStyle}"
                                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                                            Margin="0,0,0,8" Padding="14,10" CornerRadius="8"
+                                            Margin="0,0,0,8" Padding="14,10" CornerRadius="6"
                                             BorderBrush="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBorder}"
                                             BorderThickness="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToThicknessConverter}}"
                                             Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=CardBackground}"
                                             Click="OptionButton_Click" Tag="{x:Bind Text}">
                                         <Grid ColumnDefinitions="Auto,*">
                                             <Border Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Background}"
-                                                    CornerRadius="6" Width="26" Height="26" Margin="0,0,12,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    CornerRadius="4" Width="26" Height="26" Margin="0,0,12,0" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <FontIcon Glyph="{x:Bind Glyph, Mode=OneWay}" FontSize="11.5"
                                                           Foreground="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Foreground}" />
                                             </Border>
@@ -593,7 +593,7 @@
             <!-- ========================================== -->
             <StackPanel Grid.Row="1" Spacing="22"
                         Visibility="{x:Bind ViewModel.IsResultMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                        MaxWidth="1360" HorizontalAlignment="Stretch">
+                        MaxWidth="1240" HorizontalAlignment="Stretch">
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
                         <EntranceThemeTransition FromVerticalOffset="0" />
@@ -603,7 +603,7 @@
                 <!-- Score Summary Banner -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="16" Padding="28,24">
+                        BorderThickness="1" CornerRadius="8" Padding="24,20">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="24">
                         <!-- Score Circle -->
                         <Border Width="96" Height="96" CornerRadius="48"
@@ -675,20 +675,20 @@
                 <!-- ADAPTIVE CAT EXAM PROJECTION & SUMMARY -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="14" Padding="22,18"
+                        BorderThickness="1" CornerRadius="8" Padding="20,16"
                         Visibility="{x:Bind ViewModel.IsAdaptiveMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="16">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,2">
+                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="8,2">
                                         <TextBlock Text="{x:Bind Loc.GetString('AdaptiveQuiz_CatCalibration')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
                                     </Border>
                                     <TextBlock Text="{x:Bind Loc.GetString('AdaptiveQuiz_ReportTitle')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
                                 </StackPanel>
                                 <TextBlock Text="{x:Bind Loc.GetString('AdaptiveQuiz_ReportDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                             </StackPanel>
-                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
+                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <TextBlock Text="{x:Bind Loc.GetString('AdaptiveQuiz_FinalCefr')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind ViewModel.CalibratedLevelDisplay, Mode=OneWay}" FontSize="13" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -700,7 +700,7 @@
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                    BorderThickness="1" CornerRadius="8" Padding="14,12">
                                 <StackPanel Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('AdaptiveQuiz_ToeicEstimated')}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind ViewModel.EstimatedToeicDisplay, Mode=OneWay}" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -709,7 +709,7 @@
 
                             <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                    BorderThickness="1" CornerRadius="8" Padding="14,12">
                                 <StackPanel Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('AdaptiveQuiz_IeltsEstimated')}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind ViewModel.EstimatedIeltsDisplay, Mode=OneWay}" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -718,7 +718,7 @@
 
                             <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                    BorderThickness="1" CornerRadius="8" Padding="14,12">
                                 <StackPanel Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('AdaptiveQuiz_VstepEstimated')}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind ViewModel.EstimatedVstepDisplay, Mode=OneWay}" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />

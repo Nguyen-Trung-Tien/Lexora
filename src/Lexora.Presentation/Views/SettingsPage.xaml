@@ -10,15 +10,15 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="28,20" HorizontalAlignment="Stretch">
-            <StackPanel Spacing="22" MaxWidth="1100" HorizontalAlignment="Stretch">
+        <Grid Padding="24" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="20" MaxWidth="1240" HorizontalAlignment="Stretch">
                 <!-- Page Title -->
                 <TextBlock Text="{x:Bind Loc.GetString('Settings_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" TextTrimming="CharacterEllipsis" />
 
                 <!-- Top Profile & System Status Hero Card -->
                 <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
-                        BorderThickness="1" CornerRadius="16" Padding="24,20">
+                        BorderThickness="1" CornerRadius="8" Padding="20,16">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
                         <Border Width="52" Height="52" CornerRadius="26"
                                 Background="{ThemeResource AccentFillColorDefaultBrush}"
@@ -90,7 +90,7 @@
                 </TeachingTip>
 
                 <!-- Appearance Theme Card -->
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                     <StackPanel Spacing="16">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                             <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
@@ -111,7 +111,7 @@
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
                                     Padding="0"
-                                    CornerRadius="12">
+                                    CornerRadius="8">
                                 <Grid Padding="14">
                                     <StackPanel Spacing="10">
                                         <!-- Mini Window Mockup System (Dual split Light/Dark) -->
@@ -184,7 +184,7 @@
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
                                     Padding="0"
-                                    CornerRadius="12">
+                                    CornerRadius="8">
                                 <Grid Padding="14">
                                     <StackPanel Spacing="10">
                                         <!-- Mini Window Mockup Light -->
@@ -231,7 +231,7 @@
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
                                     Padding="0"
-                                    CornerRadius="12">
+                                    CornerRadius="8">
                                 <Grid Padding="14">
                                     <StackPanel Spacing="10">
                                         <!-- Mini Window Mockup Dark -->
@@ -274,7 +274,7 @@
             </Border>
 
             <!-- Language Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                         <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
@@ -286,7 +286,7 @@
                         </StackPanel>
                     </Grid>
 
-                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4" HorizontalAlignment="Left">
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="4" HorizontalAlignment="Left">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <Button x:Name="LangViButton" Click="LangViButton_Click" CornerRadius="8" Padding="16,8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -306,7 +306,7 @@
             </Border>
 
             <!-- Study Experience & Notifications Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                         <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
@@ -358,7 +358,7 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_PronunciationPreference')}" FontWeight="SemiBold" FontSize="14" />
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_PronunciationSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
-                        <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="4" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="4" VerticalAlignment="Center" HorizontalAlignment="Right">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <Button x:Name="AccentUkButton" Click="AccentUkButton_Click" CornerRadius="8" Padding="14,6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -377,7 +377,7 @@
                     </Grid>
 
                     <!-- Voice Engine Diagnostic & Test Panel -->
-                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="14,12" Margin="0,2">
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,2">
                         <StackPanel Spacing="10">
                             <Grid ColumnDefinitions="*,Auto">
                                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -460,7 +460,7 @@
             </Border>
 
             <!-- 4. Spaced Repetition Algorithm & Target Retention Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                         <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
@@ -481,7 +481,7 @@
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
                                 Padding="16,14"
-                                CornerRadius="10">
+                                CornerRadius="8">
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE735;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -504,7 +504,7 @@
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
                                 Padding="16,14"
-                                CornerRadius="10">
+                                CornerRadius="8">
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE958;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -540,7 +540,7 @@
             </Border>
 
             <!-- Database & Backup Management Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                         <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
@@ -554,7 +554,7 @@
                     </Grid>
 
                     <!-- Database Stats Grid -->
-                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="18,14">
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="18,14">
                         <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="140,*,Auto" RowSpacing="10" ColumnSpacing="12">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_DbLocation')}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.DatabasePath, Mode=OneWay}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" VerticalAlignment="Center" />
@@ -613,7 +613,7 @@
             </Border>
 
             <!-- Voice & Pronunciation Test Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                         <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
@@ -644,7 +644,7 @@
             </Border>
 
             <!-- Keyboard Shortcuts Reference Guide -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                         <Border Width="34" Height="34" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
@@ -715,7 +715,7 @@
             </Border>
 
             <!-- Software Updates Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                 <StackPanel Spacing="16">
                     <!-- Header -->
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
@@ -756,7 +756,7 @@
                     </Grid>
 
                     <!-- Version Status Bar -->
-                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10" Padding="14,10">
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <TextBlock Text="{x:Bind Loc.GetString('Settings_CurrentVersion')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" />
@@ -800,7 +800,7 @@
                     <Border Visibility="{x:Bind ViewModel.IsShowingCurrentVersionNotes, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="12" Padding="16,14">
+                            BorderThickness="1" CornerRadius="8" Padding="16,14">
                         <StackPanel Spacing="10">
                             <Grid ColumnDefinitions="*,Auto">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -824,7 +824,7 @@
                     <Border Visibility="{x:Bind ViewModel.UpdateAvailable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
-                            BorderThickness="1.5" CornerRadius="12" Padding="16,14">
+                            BorderThickness="1.5" CornerRadius="8" Padding="16,14">
                         <StackPanel Spacing="12">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                 <StackPanel Spacing="6">
@@ -928,7 +928,7 @@
             </Border>
 
             <!-- About Card -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14" Padding="24,20">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20,16">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
                     <Border Width="56" Height="56" CornerRadius="14" VerticalAlignment="Center">
                         <Image Source="ms-appx:///Assets/brand/lexora-app-icon-1024.png" Width="56" Height="56" />

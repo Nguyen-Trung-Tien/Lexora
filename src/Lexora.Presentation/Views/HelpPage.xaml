@@ -11,13 +11,13 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="28,20" HorizontalAlignment="Stretch">
-            <StackPanel Spacing="22" MaxWidth="1100" HorizontalAlignment="Stretch">
+        <Grid Padding="24" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="20" MaxWidth="1240" HorizontalAlignment="Stretch">
 
                 <!-- 1. HERO BANNER: Elegant Fluent Card with Hub Overview -->
                 <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
-                        BorderThickness="1" CornerRadius="16" Padding="28,24">
+                        BorderThickness="1" CornerRadius="8" Padding="20,16">
                     <Grid RowDefinitions="Auto,Auto" RowSpacing="18">
                         <StackPanel Spacing="8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -154,11 +154,11 @@
                         <DataTemplate x:DataType="vm:HelpGuideDisplayItem">
                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="12" Padding="20,18" Margin="0,0,0,14">
+                                    BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,14">
                                 <StackPanel Spacing="14">
                                     <!-- Card Header -->
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
-                                        <Border Width="44" Height="44" CornerRadius="10"
+                                        <Border Width="44" Height="44" CornerRadius="8"
                                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                 VerticalAlignment="Center">
                                             <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="18"
@@ -249,7 +249,7 @@
                 </ItemsControl>
 
                 <!-- 4. FOOTER NOTE -->
-                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="12" Padding="20,16">
+                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="20,16">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
                         <FontIcon Glyph="&#xE946;" FontSize="20" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                         <StackPanel Grid.Column="1" Spacing="2">
