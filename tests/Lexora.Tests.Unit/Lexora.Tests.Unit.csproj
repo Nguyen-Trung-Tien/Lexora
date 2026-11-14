@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\src\Lexora.Presentation\Services\Localization\ILocalizationService.cs" Link="Services\Localization\ILocalizationService.cs" />
-    <Compile Include="..\..\src\Lexora.Presentation\Services\Localization\LocalizationService.cs" Link="Services\Localization\LocalizationService.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\Localization\LocalizationService*.cs" Link="Services\Localization\%(Filename)%(Extension)" />
     <Compile Include="..\..\src\Lexora.Presentation\Services\Shortcuts\ShortcutResolver.cs" Link="Services\Shortcuts\ShortcutResolver.cs" />
     <Compile Include="..\..\src\Lexora.Presentation\Services\Notifications\IToastNotificationService.cs" Link="Services\Notifications\IToastNotificationService.cs" />
     <Compile Include="..\..\src\Lexora.Presentation\Services\Notifications\ToastNotificationService.cs" Link="Services\Notifications\ToastNotificationService.cs" />

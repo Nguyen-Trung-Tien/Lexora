@@ -5,43 +5,59 @@ param (
 )
 
 $ErrorActionPreference = "Stop"
-$locServiceFile = "src/Lexora.Presentation/Services/Localization/LocalizationService.cs"
-if (-not (Test-Path $locServiceFile)) {
-    $locServiceFile = "src/Lexora.Presentation/Services/LocalizationService.cs"
+$locDir = "src/Lexora.Presentation/Services/Localization"
+$locFiles = @()
+if (Test-Path $locDir) {
+    $locFiles = @(Get-ChildItem -Path $locDir -Filter "LocalizationService*.cs" -File)
+}
+if ($locFiles.Count -eq 0) {
+    $legacyFile = "src/Lexora.Presentation/Services/LocalizationService.cs"
+    if (Test-Path $legacyFile) {
+        $locFiles = @(Get-Item $legacyFile)
+    }
 }
 
-if (-not (Test-Path $locServiceFile)) {
-    Write-Error "LocalizationService.cs not found at '$locServiceFile'"
+if ($locFiles.Count -eq 0) {
+    Write-Error "No LocalizationService files found in '$locDir'."
     exit 1
 }
-
-$lines = Get-Content $locServiceFile
 
 $viKeys = [System.Collections.Generic.HashSet[string]]::new()
 $enKeys = [System.Collections.Generic.HashSet[string]]::new()
 
-$currentLang = ""
+foreach ($file in $locFiles) {
+    $lines = Get-Content $file.FullName
+    $currentLang = ""
+    foreach ($line in $lines) {
+        if ($line -match '^\s*vi\["([a-zA-Z0-9_]+)"\]\s*=') {
+            [void]$viKeys.Add($matches[1])
+            continue
+        }
+        if ($line -match '^\s*en\["([a-zA-Z0-9_]+)"\]\s*=') {
+            [void]$enKeys.Add($matches[1])
+            continue
+        }
 
-foreach ($line in $lines) {
-    if ($line -match '^\s*\["vi-VN"\]\s*=') {
-        $currentLang = "vi"
-        continue
-    }
-    if ($line -match '^\s*\["en-US"\]\s*=') {
-        $currentLang = "en"
-        continue
-    }
-    if ($line -match '^\s*\},') {
-        $currentLang = ""
-        continue
-    }
+        if ($line -match '^\s*\["vi-VN"\]\s*=') {
+            $currentLang = "vi"
+            continue
+        }
+        if ($line -match '^\s*\["en-US"\]\s*=') {
+            $currentLang = "en"
+            continue
+        }
+        if ($line -match '^\s*\},') {
+            $currentLang = ""
+            continue
+        }
 
-    if ($line -match '^\s*\["([a-zA-Z0-9_]+)"\]\s*=') {
-        $key = $matches[1]
-        if ($currentLang -eq "vi") {
-            [void]$viKeys.Add($key)
-        } elseif ($currentLang -eq "en") {
-            [void]$enKeys.Add($key)
+        if ($line -match '^\s*\["([a-zA-Z0-9_]+)"\]\s*=') {
+            $key = $matches[1]
+            if ($currentLang -eq "vi") {
+                [void]$viKeys.Add($key)
+            } elseif ($currentLang -eq "en") {
+                [void]$enKeys.Add($key)
+            }
         }
     }
 }

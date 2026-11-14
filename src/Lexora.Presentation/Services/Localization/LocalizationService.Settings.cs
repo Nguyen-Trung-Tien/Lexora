@@ -1,0 +1,353 @@
+namespace Lexora.Presentation.Services;
+
+public partial class LocalizationService
+{
+    private static void RegisterSettings(Dictionary<string, string> vi, Dictionary<string, string> en)
+    {
+        // ==========================================
+        // Settings — vi-VN (Tiếng Việt)
+        // ==========================================
+        // Settings
+        vi["Settings_Title"] = "Cài Đặt Ứng Dụng";
+        vi["Settings_Theme"] = "Giao diện hiển thị";
+        vi["Settings_ThemeSubtitle"] = "Tùy chỉnh chế độ sáng, tối hoặc theo cài đặt hệ điều hành Windows.";
+        vi["Settings_Theme_System"] = "Theo hệ thống Windows";
+        vi["Settings_Theme_SystemDesc"] = "Tự động đồng bộ theo giao diện Windows";
+        vi["Settings_Theme_Light"] = "Chế độ Sáng (Light)";
+        vi["Settings_Theme_LightDesc"] = "Giao diện thanh lịch, tương phản tươi sáng";
+        vi["Settings_Theme_Dark"] = "Chế độ Tối (Dark)";
+        vi["Settings_Theme_DarkDesc"] = "Dịu mắt, tối ưu tập trung khi học ban đêm";
+        vi["Settings_Language"] = "Ngôn ngữ ứng dụng";
+        vi["Settings_LanguageSubtitle"] = "Lựa chọn ngôn ngữ giao diện hiển thị cho toàn bộ ứng dụng Lexora.";
+        vi["Settings_Audio"] = "Giọng đọc & Phát âm";
+        vi["Settings_AudioSubtitle"] = "Cấu hình âm thanh phát âm từ vựng chuẩn Windows Media TTS.";
+        vi["Settings_Accent"] = "Chất giọng mặc định";
+        vi["Settings_Speed"] = "Tốc độ đọc";
+        vi["Settings_Data"] = "Dữ liệu & Sao lưu";
+        vi["Settings_DataSubtitle"] = "Quản lý cơ sở dữ liệu SQLite, tạo bản sao lưu an toàn hoặc khôi phục dữ liệu.";
+        vi["Settings_BackupNow"] = "Sao lưu CSDL ngay";
+        vi["Settings_RestoreBackup"] = "Khôi phục từ bản sao lưu...";
+        vi["Settings_Shortcuts"] = "Bảng phím tắt nhanh";
+        // Settings - Study Experience & Notifications
+        vi["Settings_StudyExperience"] = "Trải nghiệm học tập & Thông báo";
+        vi["Settings_StudyExperienceSubtitle"] = "Tùy biến hành vi học tập, tự động phát âm thanh và nhắc nhở ôn tập hàng ngày.";
+        vi["Settings_AutoPlayAudio"] = "Tự động phát âm thanh từ vựng";
+        vi["Settings_AutoPlayAudio_On"] = "Tự động phát âm khi lật mở thẻ flashcard (theo giọng ưu tiên)";
+        vi["Settings_AutoPlayAudio_Off"] = "Tắt";
+        vi["Settings_PronunciationPreference"] = "Giọng phát âm mặc định";
+        vi["Settings_PronunciationSubtitle"] = "Chọn giọng đọc UK (Anh - Anh) hoặc US (Anh - Mỹ) ưu tiên khi học, ôn tập và làm bài kiểm tra.";
+        vi["Settings_Accent_UK"] = "🇬🇧 Tiếng Anh - Anh (UK)";
+        vi["Settings_Accent_US"] = "🇺🇸 Tiếng Anh - Mỹ (US)";
+        vi["Settings_VoiceDiagnostic_Title"] = "Trạng thái Giọng đọc TTS hệ thống";
+        vi["Settings_Voice_Installed"] = "Đã nhận diện: {0}";
+        vi["Settings_Voice_FallbackWarning"] = "Chưa có giọng native UK trên Windows. Đang tạm dùng: {0}";
+        vi["Settings_Voice_InstallHelp"] = "Cài đặt thêm giọng UK trong Windows";
+        vi["Settings_TestVoice_UK"] = "Nghe thử UK";
+        vi["Settings_TestVoice_US"] = "Nghe thử US";
+        vi["Settings_DueReminder"] = "Thông báo từ vựng đến hạn ôn";
+        vi["Settings_DueReminder_On"] = "Hiển thị thanh nhắc nhở khi có từ vựng đến hạn ôn tập";
+        vi["Settings_DueReminder_Off"] = "Tắt";
+        vi["Settings_SpeechRate"] = "Tốc độ phát âm (TTS)";
+        vi["Settings_SpeechRateSubtitle"] = "Điều chỉnh tốc độ giọng đọc audio để luyện nghe và phát âm.";
+        vi["Settings_Speed_Slow"] = "0.75x (Chậm)";
+        vi["Settings_Speed_Normal"] = "1.0x (Chuẩn)";
+        vi["Settings_Speed_Fast"] = "1.25x (Nhanh)";
+        vi["Settings_Speed_VeryFast"] = "1.5x (Rất nhanh)";
+        vi["Settings_TypingPractice"] = "Chế độ gõ từ (Active Recall Drill)";
+        vi["Settings_TypingPractice_On"] = "Bật (Yêu cầu gõ chính xác từ vựng để rèn trí nhớ chủ động)";
+        vi["Settings_TypingPractice_Off"] = "Tắt (Lật thẻ ôn tập tiêu chuẩn)";
+        vi["Settings_Toggle_On"] = "Bật";
+        vi["Settings_Toggle_Off"] = "Tắt";
+        // Settings - Database & Backup Management
+        vi["Settings_DatabaseManagement"] = "Quản lý Cơ sở Dữ liệu & Sao lưu";
+        vi["Settings_DatabaseManagementSubtitle"] = "Lexora lưu trữ dữ liệu offline bằng SQLite. Bạn có thể theo dõi dung lượng, sao lưu tức thì hoặc khôi phục dữ liệu.";
+        vi["Settings_RefreshStats"] = "Làm mới số liệu";
+        vi["Settings_DbLocation"] = "Vị trí cơ sở dữ liệu:";
+        vi["Settings_DbSize"] = "Dung lượng tệp CSDL:";
+        vi["Settings_DbTotalData"] = "Tổng dữ liệu lưu trữ:";
+        vi["Settings_DbWordsUnit"] = "Từ vựng •";
+        vi["Settings_DbGrammarUnit"] = "Quy tắc ngữ pháp";
+        vi["Settings_CreateBackupBtn"] = "Tạo bản sao lưu (.db)";
+        vi["Settings_RestoreBackupBtn"] = "Khôi phục từ bản sao lưu (.db)...";
+        // Settings - Voice & Pronunciation Test
+        vi["Settings_TtsTitle"] = "Thử nghiệm Giọng đọc & Phát âm (TTS)";
+        vi["Settings_TtsSubtitle"] = "Kiểm tra giọng đọc tiếng Anh Text-to-Speech. Lexora ưu tiên phát âm thanh người thật bản xứ và tự động chuyển sang Windows TTS khi cần.";
+        vi["Settings_TtsPlaceholder"] = "Nhập từ hoặc câu mẫu để nghe thử...";
+        vi["Settings_TestUkVoice"] = "🔊 Nghe giọng UK (Anh)";
+        vi["Settings_TestUsVoice"] = "🔊 Nghe giọng US (Mỹ)";
+        // Settings - Keyboard Shortcuts
+        vi["Settings_ShortcutsTitle"] = "Bảng Tra cứu Phím tắt Nhanh";
+        vi["Settings_ShortcutsSubtitle"] = "Thao tác nhanh và học tập hiệu quả mà không cần chạm chuột.";
+        vi["Settings_Shortcut_Nav"] = "Chuyển nhanh đến: Tổng quan, Từ vựng, Ôn tập, Thi, Ngữ pháp";
+        vi["Settings_Shortcut_Search"] = "Trỏ nhanh con trỏ vào ô tìm kiếm toàn cục từ bất kỳ đâu";
+        vi["Settings_Shortcut_AddWord"] = "Thêm từ vựng mới (trên trang Kho Từ Vựng)";
+        vi["Settings_Shortcut_EditWord"] = "Chỉnh sửa từ vựng đang chọn (trên trang Kho Từ Vựng)";
+        vi["Settings_Shortcut_DeleteWord"] = "Xóa từ vựng đang chọn (trên trang Kho Từ Vựng)";
+        vi["Settings_Shortcut_Flip"] = "Lật thẻ flashcard (Ôn tập) / Phát lại âm thanh (Luyện tập)";
+        vi["Settings_Shortcut_Rate"] = "Đánh giá mức nhớ: Quên, Khó, Nhớ, Dễ (Ôn tập) / Chọn đáp án (Thi)";
+        vi["Settings_Shortcut_Audio"] = "Phát âm thanh chuẩn UK / US (trên trang Ôn tập)";
+        vi["Settings_Shortcut_Enter"] = "Nộp câu trả lời / Chuyển câu hỏi tiếp theo (Luyện tập & Thi)";
+        // Settings - About
+        vi["Settings_AboutSubtitle"] = "Hệ thống Quản lý Học Từ vựng & Ngữ pháp Thông minh cho TOEIC / VSTEP / IELTS";
+        vi["Settings_AboutTech"] = "Phát triển bằng C# / .NET 10 • Windows App SDK / WinUI 3 • EF Core 10 SQLite • Clean Architecture.";
+        // Settings - Software Updates
+        vi["Settings_UpdateTitle"] = "Cập nhật Phần mềm";
+        vi["Settings_UpdateSubtitle"] = "Kiểm tra phiên bản mới, xem danh sách tính năng và cập nhật tự động an toàn.";
+        vi["Settings_CurrentVersion"] = "Phiên bản hiện tại:";
+        vi["Settings_LatestVersion"] = "Bản phát hành mới nhất:";
+        vi["Settings_CheckForUpdates"] = "Kiểm tra cập nhật";
+        vi["Settings_CheckingForUpdates"] = "Đang kiểm tra...";
+        vi["Settings_UpdateUpToDate"] = "Bạn đang sử dụng phiên bản mới nhất.";
+        vi["Settings_UpdateAvailable"] = "Đã có bản cập nhật mới!";
+        vi["Settings_DownloadUpdate"] = "Tải xuống bản cập nhật";
+        vi["Settings_DownloadingUpdate"] = "Đang tải xuống bản cập nhật...";
+        vi["Settings_InstallUpdate"] = "Cài đặt & Khởi động lại";
+        vi["Settings_UpdateDownloaded"] = "Đã tải xong bản cập nhật. Sẵn sàng cài đặt.";
+        vi["Settings_UpdateFailed"] = "Không thể kiểm tra hoặc tải bản cập nhật.";
+        vi["Settings_ReleaseNotes"] = "Ghi chú phát hành:";
+        vi["Settings_ToggleReleaseNotes"] = "Xem ghi chú phiên bản";
+        vi["Settings_CurrentVersionDetails"] = "Tính năng mới nổi bật trong phiên bản v{0}:";
+        vi["Settings_HideReleaseNotes"] = "Thu gọn ghi chú";
+        vi["Settings_ExpandFullNotes"] = "Xem toàn bộ nội dung";
+        vi["Settings_CollapseNotes"] = "Thu gọn";
+        vi["Settings_ViewUpdateDetails"] = "Xem chi tiết (Popup)";
+        vi["Settings_UpdateDialogTitle"] = "Thông Tin Bản Cập Nhật";
+        vi["Settings_UpdateDialogSubtitle"] = "Phiên bản mới sẵn sàng nâng cấp trải nghiệm học tập của bạn.";
+        vi["Settings_NoReleaseNotes"] = "Không có ghi chú chi tiết cho bản phát hành này.";
+        vi["Settings_CurrentVsNewVersion"] = "Hiện tại: v{0}  ➔  Mới nhất: v{1}";
+        vi["Settings_RemindLater"] = "Để sau";
+        vi["Settings_SizeFormat"] = "Dung lượng tải: {0:F1} MB";
+        vi["Settings_ReleaseDate"] = "Ngày phát hành:";
+        vi["Settings_BtnViewReleaseNotesLog"] = "Nhật ký phát hành";
+        vi["Settings_ViewReleaseNotesLogTooltip"] = "Xem toàn bộ nhật ký tính năng và cải tiến qua các phiên bản";
+        vi["Settings_AutoBackupNote"] = "Lexora sẽ tự động sao lưu dữ liệu học tập trước khi áp dụng bản cập nhật.";
+        vi["Settings_AutoCheckUpdates"] = "Tự động kiểm tra bản cập nhật";
+        vi["Settings_AutoCheckUpdatesDesc"] = "Tự động kiểm tra phiên bản mới khi khởi động ứng dụng và thông báo cho bạn.";
+        vi["Update_Notification_Title"] = "Đã có bản cập nhật mới!";
+        vi["Update_Notification_Body"] = "Phiên bản {0} đã sẵn sàng. Cập nhật ngay để trải nghiệm các tính năng mới nhất.";
+        vi["Update_Notification_Action"] = "Xem cập nhật";
+        // Settings - Restore Dialogs
+        vi["Settings_DlgRestorePathTitle"] = "Nhập Đường Dẫn Tệp Sao Lưu";
+        vi["Settings_DlgRestorePathSelect"] = "Chọn tệp";
+        vi["Settings_DlgRestoreConfirmTitle"] = "Xác Nhận Khôi Phục Cơ Sở Dữ Liệu";
+        vi["Settings_DlgRestoreConfirmMsg"] = "Bạn có chắc chắn muốn khôi phục cơ sở dữ liệu từ:\n{0}\n\nCẢNH BÁO: Toàn bộ dữ liệu hiện tại trên máy sẽ bị thay thế bằng bản sao lưu này!";
+        vi["Settings_DlgRestoreConfirmBtn"] = "Khôi phục ngay";
+        vi["Settings_DlgRestoreSuccessTitle"] = "Khôi Phục Thành Công";
+        vi["Settings_DlgRestoreSuccessMsg"] = "Cơ sở dữ liệu đã được khôi phục thành công. Dữ liệu mới đã được làm mới tức thì trên toàn ứng dụng.";
+        vi["Settings_DlgRestorePreviewInfo"] = "Thông tin chi tiết bản sao lưu:";
+        vi["Settings_DlgRestoreFileInfo"] = "Tệp: {0} ({1})";
+        vi["Settings_DlgRestoreStatsFormat"] = "Nội dung: {0} từ vựng • {1} cấu trúc ngữ pháp • {2} nhật ký ôn tập";
+        vi["Settings_DlgRestoreCompareTitle"] = "So sánh dữ liệu:";
+        vi["Settings_DlgRestoreCurrentStats"] = "Hiện tại: {0} từ vựng, {1} ngữ pháp";
+        vi["Settings_DlgRestoreBackupStats"] = "Bản sao lưu: {0} từ vựng, {1} ngữ pháp";
+        vi["Settings_DlgRestoreWarningNote"] = "Lưu ý: Ứng dụng sẽ tự động tạo bản sao an toàn trước khi ghi đè để có thể hoàn tác nếu xảy ra sự cố.";
+        vi["Settings_DlgRestoreInvalidFile"] = "Tệp sao lưu không hợp lệ hoặc bị lỗi cấu trúc: {0}";
+        // Settings Messages
+        vi["Settings_DbNotCreatedYet"] = "Chưa khởi tạo";
+        vi["Settings_BackupSuccess"] = "Đã tạo bản sao lưu thành công tại: {0}";
+        vi["Settings_BackupFailed"] = "Sao lưu thất bại: {0}";
+        vi["Settings_RestoreSuccessStatus"] = "Khôi phục cơ sở dữ liệu thành công từ: {0}";
+        vi["Settings_RestoreFailedStatus"] = "Khôi phục thất bại: {0}";
+        vi["Settings_BackupFailedTitle"] = "Sao lưu thất bại";
+        vi["Settings_BackupSuccessTitle"] = "Sao lưu thành công";
+        vi["Settings_RestoreFailedTitle"] = "Khôi phục thất bại";
+        vi["Settings_RestoreSuccessTitle"] = "Khôi phục thành công";
+        // Newly Added Settings
+        vi["Settings_AutoPlayAudioSubtitle"] = "Tự động phát âm chuẩn khi lật mở nghĩa của thẻ";
+        vi["Settings_DueReminderSubtitle"] = "Nhận thông báo khi có flashcard đến hạn lặp lại ngắt quãng SM-2";
+        vi["Settings_TypingPracticeSubtitle"] = "Yêu cầu gõ chính tả từ vựng trước khi lật thẻ ghi nhớ";
+        vi["Settings_FailedLoadStatsFormat"] = "Không thể tải số liệu sao lưu: {0}";
+        // Spaced Repetition Algorithm Settings
+        vi["Settings_Algorithm"] = "Thuật toán Ghi nhớ & Ôn tập (Spaced Repetition)";
+        vi["Settings_AlgorithmSubtitle"] = "Tùy chọn mô hình giãn cách thời gian và tỷ lệ ghi nhớ mục tiêu";
+        vi["Settings_Algorithm_SM2"] = "SM-2 (Cổ điển & Ổn định)";
+        vi["Settings_Algorithm_SM2Desc"] = "Mô hình SuperMemo chuẩn mực dựa trên Hệ số Dễ (Ease Factor). Khoảng cách ôn tập tiến triển ổn định theo ngày.";
+        vi["Settings_Algorithm_FSRS"] = "FSRS v5 (Mô hình Trí nhớ 3 Chiều)";
+        vi["Settings_Algorithm_FSRSDesc"] = "Mô hình khoa học thần kinh hiện đại, tính toán dựa trên Độ ổn định (Stability), Độ khó (Difficulty) và Khả năng truy xuất (Retrievability).";
+        vi["Settings_TargetRetention"] = "Tỷ lệ ghi nhớ mục tiêu (Target Retention)";
+        vi["Settings_TargetRetentionSubtitle"] = "Tỷ lệ phần trăm từ vựng bạn muốn duy trì trong trí nhớ tại thời điểm đến hạn ôn";
+        vi["Settings_Retention_85"] = "85% - Tiết kiệm thời gian (Khoảng cách ôn dài hơn)";
+        vi["Settings_Retention_90"] = "90% - Cân bằng chuẩn (Khuyên dùng)";
+        vi["Settings_Retention_95"] = "95% - Ghi nhớ tối đa (Ôn tập thường xuyên hơn)";
+        vi["Backup_SuccessMsg"] = "Đã tạo bản sao lưu thành công tại: {0}";
+        vi["Backup_FailedMsg"] = "Tạo bản sao lưu thất bại: {0}";
+        vi["Restore_SuccessMsg"] = "Đã khôi phục cơ sở dữ liệu thành công từ: {0}";
+        vi["Restore_FailedMsg"] = "Khôi phục cơ sở dữ liệu thất bại: {0}";
+        vi["Settings_Help_Title"] = "Trợ giúp: Cài đặt & Sao lưu";
+        vi["Settings_Help_Subtitle"] = "Bảo vệ dữ liệu và cá nhân hóa";
+        vi["Settings_Help_Content"] = "Tạo bản sao lưu cơ sở dữ liệu (.db), kích hoạt sao lưu tự động và chuyển đổi thuật toán học (SM-2 hoặc FSRS) phù hợp với mục tiêu của bạn.";
+
+        // ==========================================
+        // Settings — en-US (English)
+        // ==========================================
+        // Settings
+        en["Settings_Title"] = "Application Settings";
+        en["Settings_Theme"] = "Appearance Theme";
+        en["Settings_ThemeSubtitle"] = "Choose light, dark or follow your Windows operating system setting.";
+        en["Settings_Theme_System"] = "Use system setting";
+        en["Settings_Theme_SystemDesc"] = "Automatically matches your Windows mode";
+        en["Settings_Theme_Light"] = "Light Mode";
+        en["Settings_Theme_LightDesc"] = "Clean, crisp & high contrast appearance";
+        en["Settings_Theme_Dark"] = "Dark Mode";
+        en["Settings_Theme_DarkDesc"] = "Gentle on the eyes, night-study optimized";
+        en["Settings_Language"] = "App Language";
+        en["Settings_LanguageSubtitle"] = "Select the interface display language for Lexora application.";
+        en["Settings_Audio"] = "Audio & Speech";
+        en["Settings_AudioSubtitle"] = "Configure pronunciation voice output using Windows Media TTS.";
+        en["Settings_Accent"] = "Default Voice Accent";
+        en["Settings_Speed"] = "Speech Speed";
+        en["Settings_Data"] = "Data & Backup";
+        en["Settings_DataSubtitle"] = "Manage SQLite database, create secure backups or restore existing data.";
+        en["Settings_BackupNow"] = "Backup Database Now";
+        en["Settings_RestoreBackup"] = "Restore Backup...";
+        en["Settings_Shortcuts"] = "Keyboard Shortcuts Guide";
+        // Settings - Study Experience & Notifications
+        en["Settings_StudyExperience"] = "Study Experience & Notifications";
+        en["Settings_StudyExperienceSubtitle"] = "Customize study behavior, audio automation, and daily practice reminders.";
+        en["Settings_AutoPlayAudio"] = "Auto-play Audio Pronunciation";
+        en["Settings_AutoPlayAudio_On"] = "Automatically play pronunciation when revealing flashcards (using preferred accent)";
+        en["Settings_AutoPlayAudio_Off"] = "Disabled";
+        en["Settings_PronunciationPreference"] = "Default Pronunciation Accent";
+        en["Settings_PronunciationSubtitle"] = "Choose British English (UK) or American English (US) as your preferred accent across study and test sessions.";
+        en["Settings_Accent_UK"] = "🇬🇧 British English (UK)";
+        en["Settings_Accent_US"] = "🇺🇸 American English (US)";
+        en["Settings_VoiceDiagnostic_Title"] = "System TTS Voice Status";
+        en["Settings_Voice_Installed"] = "Detected: {0}";
+        en["Settings_Voice_FallbackWarning"] = "No native UK voice found on Windows. Falling back to: {0}";
+        en["Settings_Voice_InstallHelp"] = "Install British English voice in Windows Settings";
+        en["Settings_TestVoice_UK"] = "Test UK";
+        en["Settings_TestVoice_US"] = "Test US";
+        en["Settings_DueReminder"] = "Due Review Reminders";
+        en["Settings_DueReminder_On"] = "Show notification banner when words are due for review";
+        en["Settings_DueReminder_Off"] = "Disabled";
+        en["Settings_SpeechRate"] = "Pronunciation Speech Rate";
+        en["Settings_SpeechRateSubtitle"] = "Adjust audio playback speed for learning pronunciation.";
+        en["Settings_Speed_Slow"] = "0.75x (Slow)";
+        en["Settings_Speed_Normal"] = "1.0x (Normal)";
+        en["Settings_Speed_Fast"] = "1.25x (Fast)";
+        en["Settings_Speed_VeryFast"] = "1.5x (Very Fast)";
+        en["Settings_TypingPractice"] = "Typing Practice (Active Recall Drill)";
+        en["Settings_TypingPractice_On"] = "On (Type word to drill active spelling recall)";
+        en["Settings_TypingPractice_Off"] = "Off (Standard card flip)";
+        en["Settings_Toggle_On"] = "On";
+        en["Settings_Toggle_Off"] = "Off";
+        // Settings - Database & Backup Management
+        en["Settings_DatabaseManagement"] = "Database & Backup Management";
+        en["Settings_DatabaseManagementSubtitle"] = "Lexora uses an offline-first SQLite database. You can inspect database metrics, create instant backups, or restore from a backup file.";
+        en["Settings_RefreshStats"] = "Refresh Stats";
+        en["Settings_DbLocation"] = "Database Location:";
+        en["Settings_DbSize"] = "Database File Size:";
+        en["Settings_DbTotalData"] = "Total Stored Data:";
+        en["Settings_DbWordsUnit"] = "Words •";
+        en["Settings_DbGrammarUnit"] = "Grammar Rules";
+        en["Settings_CreateBackupBtn"] = "Create Backup (.db)";
+        en["Settings_RestoreBackupBtn"] = "Restore from Backup (.db)...";
+        // Settings - Voice & Pronunciation Test
+        en["Settings_TtsTitle"] = "Voice & Pronunciation (TTS)";
+        en["Settings_TtsSubtitle"] = "Test English Text-to-Speech audio output. Lexora caches native human pronunciations and falls back to Windows Speech Synthesis.";
+        en["Settings_TtsPlaceholder"] = "Enter sample word or phrase...";
+        en["Settings_TestUkVoice"] = "🔊 Test UK Voice";
+        en["Settings_TestUsVoice"] = "🔊 Test US Voice";
+        // Settings - Keyboard Shortcuts
+        en["Settings_ShortcutsTitle"] = "Keyboard Shortcuts Reference Guide";
+        en["Settings_ShortcutsSubtitle"] = "Navigate and study rapidly without reaching for the mouse.";
+        en["Settings_Shortcut_Nav"] = "Navigate to Dashboard, Vocabulary, Review, Test, Grammar";
+        en["Settings_Shortcut_Search"] = "Focus global search box from anywhere";
+        en["Settings_Shortcut_AddWord"] = "Add a new vocabulary word (Vocabulary Page)";
+        en["Settings_Shortcut_EditWord"] = "Edit selected vocabulary word (Vocabulary Page)";
+        en["Settings_Shortcut_DeleteWord"] = "Delete selected vocabulary word (Vocabulary Page)";
+        en["Settings_Shortcut_Flip"] = "Flip flashcard (Review Page) / Replay audio (Practice Test)";
+        en["Settings_Shortcut_Rate"] = "Grade card: Again, Hard, Good, Easy (Review) / Choose option (Test)";
+        en["Settings_Shortcut_Audio"] = "Play UK / US pronunciation audio (Review Page)";
+        en["Settings_Shortcut_Enter"] = "Submit answer / Next question (Practice Test)";
+        // Settings - About
+        en["Settings_AboutSubtitle"] = "Intelligent Vocabulary & Grammar Manager for TOEIC / VSTEP / IELTS";
+        en["Settings_AboutTech"] = "Built with C# / .NET 10 • Windows App SDK / WinUI 3 • EF Core 10 SQLite • Clean Architecture.";
+        // Settings - Software Updates
+        en["Settings_UpdateTitle"] = "Software Updates";
+        en["Settings_UpdateSubtitle"] = "Check for new releases, view changelog notes, and apply seamless updates.";
+        en["Settings_CurrentVersion"] = "Current Version:";
+        en["Settings_LatestVersion"] = "Latest Release:";
+        en["Settings_CheckForUpdates"] = "Check for Updates";
+        en["Settings_CheckingForUpdates"] = "Checking for updates...";
+        en["Settings_UpdateUpToDate"] = "You are running the latest version.";
+        en["Settings_UpdateAvailable"] = "A new update is available!";
+        en["Settings_DownloadUpdate"] = "Download Update";
+        en["Settings_DownloadingUpdate"] = "Downloading update...";
+        en["Settings_InstallUpdate"] = "Install & Restart";
+        en["Settings_UpdateDownloaded"] = "Update downloaded successfully. Ready to install.";
+        en["Settings_UpdateFailed"] = "Failed to check or download update.";
+        en["Settings_ReleaseNotes"] = "Release Notes:";
+        en["Settings_ToggleReleaseNotes"] = "View Release Notes";
+        en["Settings_CurrentVersionDetails"] = "What's new in version v{0}:";
+        en["Settings_HideReleaseNotes"] = "Hide Release Notes";
+        en["Settings_ExpandFullNotes"] = "View Full Notes";
+        en["Settings_CollapseNotes"] = "Show Less";
+        en["Settings_ViewUpdateDetails"] = "View Details (Popup)";
+        en["Settings_UpdateDialogTitle"] = "Update Details";
+        en["Settings_UpdateDialogSubtitle"] = "A new version is ready to upgrade your learning experience.";
+        en["Settings_NoReleaseNotes"] = "No detailed notes available for this release.";
+        en["Settings_CurrentVsNewVersion"] = "Current: v{0}  ➔  Latest: v{1}";
+        en["Settings_RemindLater"] = "Later";
+        en["Settings_SizeFormat"] = "Download size: {0:F1} MB";
+        en["Settings_ReleaseDate"] = "Release date:";
+        en["Settings_BtnViewReleaseNotesLog"] = "Release Notes Log";
+        en["Settings_ViewReleaseNotesLogTooltip"] = "View complete release history and feature logs across versions";
+        en["Settings_AutoBackupNote"] = "Lexora will automatically snapshot your study database before updating.";
+        en["Settings_AutoCheckUpdates"] = "Automatically check for updates";
+        en["Settings_AutoCheckUpdatesDesc"] = "Automatically check for newer releases when the app starts and notify you.";
+        en["Update_Notification_Title"] = "A new update is available!";
+        en["Update_Notification_Body"] = "Version {0} is available. Update now to get the latest features and fixes.";
+        en["Update_Notification_Action"] = "View Update";
+        // Settings - Restore Dialogs
+        en["Settings_DlgRestorePathTitle"] = "Specify Backup File Path";
+        en["Settings_DlgRestorePathSelect"] = "Select";
+        en["Settings_DlgRestoreConfirmTitle"] = "Restore Database Confirmation";
+        en["Settings_DlgRestoreConfirmMsg"] = "Are you sure you want to restore database from:\n{0}\n\nWARNING: All current local data will be replaced by the backup copy!";
+        en["Settings_DlgRestoreConfirmBtn"] = "Restore Now";
+        en["Settings_DlgRestoreSuccessTitle"] = "Restore Completed";
+        en["Settings_DlgRestoreSuccessMsg"] = "Database has been restored successfully. Fresh data has been immediately reloaded across the application.";
+        en["Settings_DlgRestorePreviewInfo"] = "Backup File Inspection Details:";
+        en["Settings_DlgRestoreFileInfo"] = "File: {0} ({1})";
+        en["Settings_DlgRestoreStatsFormat"] = "Content: {0} words • {1} grammar rules • {2} study logs";
+        en["Settings_DlgRestoreCompareTitle"] = "Data Comparison:";
+        en["Settings_DlgRestoreCurrentStats"] = "Current: {0} words, {1} grammar rules";
+        en["Settings_DlgRestoreBackupStats"] = "Backup: {0} words, {1} grammar rules";
+        en["Settings_DlgRestoreWarningNote"] = "Note: A safety snapshot is automatically created before overwriting to ensure complete rollback if anything goes wrong.";
+        en["Settings_DlgRestoreInvalidFile"] = "The backup file is invalid or corrupted: {0}";
+        // Settings Messages
+        en["Settings_DbNotCreatedYet"] = "Not created yet";
+        en["Settings_BackupSuccess"] = "Backup created successfully at: {0}";
+        en["Settings_BackupFailed"] = "Backup failed: {0}";
+        en["Settings_RestoreSuccessStatus"] = "Database restored successfully from: {0}";
+        en["Settings_RestoreFailedStatus"] = "Restore failed: {0}";
+        en["Settings_BackupFailedTitle"] = "Backup Failed";
+        en["Settings_BackupSuccessTitle"] = "Backup Successful";
+        en["Settings_RestoreFailedTitle"] = "Restore Failed";
+        en["Settings_RestoreSuccessTitle"] = "Restore Successful";
+        // Newly Added Settings
+        en["Settings_AutoPlayAudioSubtitle"] = "Play native pronunciation automatically when card meaning is revealed";
+        en["Settings_DueReminderSubtitle"] = "Receive notifications when flashcards are due for SM-2 repetition";
+        en["Settings_TypingPracticeSubtitle"] = "Require typing spelling recall before flipping flashcards";
+        en["Settings_FailedLoadStatsFormat"] = "Failed to load backup stats: {0}";
+        // Spaced Repetition Algorithm Settings
+        en["Settings_Algorithm"] = "Spaced Repetition Scheduling Engine";
+        en["Settings_AlgorithmSubtitle"] = "Choose spaced repetition model and configure target memory retention rate";
+        en["Settings_Algorithm_SM2"] = "SM-2 (Classic & Stable)";
+        en["Settings_Algorithm_SM2Desc"] = "Standard SuperMemo model based on Ease Factor. Review intervals scale reliably over days and weeks.";
+        en["Settings_Algorithm_FSRS"] = "FSRS v5 (Modern 3D Memory Model)";
+        en["Settings_Algorithm_FSRSDesc"] = "Modern neurocognitive 3-variable model factoring Stability, Difficulty, and Retrievability for higher recall efficiency.";
+        en["Settings_TargetRetention"] = "Target Retention Rate";
+        en["Settings_TargetRetentionSubtitle"] = "Desired recall probability when cards become due for review";
+        en["Settings_Retention_85"] = "85% - Time Efficient (Longer intervals)";
+        en["Settings_Retention_90"] = "90% - Balanced Standard (Recommended)";
+        en["Settings_Retention_95"] = "95% - High Retention (More frequent reviews)";
+        en["Backup_SuccessMsg"] = "Database backup created successfully at: {0}";
+        en["Backup_FailedMsg"] = "Database backup failed: {0}";
+        en["Restore_SuccessMsg"] = "Database restored successfully from: {0}";
+        en["Restore_FailedMsg"] = "Database restore failed: {0}";
+        en["Settings_Help_Title"] = "Quick Help: Settings & Backup";
+        en["Settings_Help_Subtitle"] = "Data integrity and preferences";
+        en["Settings_Help_Content"] = "Create snapshot database backups (.db), toggle automatic backup schedules, and select your preferred memory engine (SM-2 or FSRS).";
+    }
+}

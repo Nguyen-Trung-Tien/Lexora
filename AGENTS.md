@@ -1,6 +1,6 @@
 # 🏛️ AGENTS.md — Developer & AI Agent Guidelines for Lexora
 
-> **Lexora** is a high-performance, offline-first English learning and vocabulary management desktop application designed for TOEIC, IELTS, and VSTEP exam preparation. Built with **.NET 10**, **WinUI 3 / Windows App SDK**, and **Entity Framework Core 10 (SQLite)** following strict **Clean Architecture** patterns.
+> **Lexora** is a high-performance, offline-first English learning and vocabulary management desktop application designed for TOEIC, IELTS, and VSTEP exam preparation. Built with **.NET 10**, **WinUI 3 / Windows App SDK (v1.6+)**, and **Entity Framework Core 10 (SQLite)** following strict **Clean Architecture** patterns. Current Version: **v1.6.2**.
 
 Any developer or AI agent contributing to this repository **MUST** strictly adhere to the architectural, design, code quality, and verification invariants outlined below.
 
@@ -26,26 +26,39 @@ graph TD
     Application --> Domain
 ```
 
-- **`Lexora.Domain`**: Pure .NET library. **CANNOT** reference any other project, ORM (EF Core), or UI framework. Contains core entities (`Word`, `ExampleSentence`, `ContextUnit`, `GrammarRule`, `StudyLog`), domain enums (`CefrLevel`, `ExamType`, `LearningStatus`), value objects, and domain exceptions.
-- **`Lexora.Application`**: Contains application logic, service interfaces, DTOs, and mappings. References **ONLY** `Lexora.Domain`.
-- **`Lexora.Infrastructure`**: Implements repositories, EF Core DbContext, SQLite configurations, TTS audio playback, file storage, and database backup routines. References `Lexora.Application` and `Lexora.Domain`.
-- **`Lexora.Presentation`**: WinUI 3 desktop client containing Views, ViewModels, Converters, Custom Controls, and Presentation-specific services. References `Lexora.Application`, `Lexora.Infrastructure`, and `Lexora.Domain`.
+- **`Lexora.Domain`**: Pure .NET library. **CANNOT** reference any other project, ORM (EF Core), or UI framework. Contains core entities partitioned by domain (`Vocabulary`, `Grammar`, `Homophones`, `LearningStorage`, `Review`, `Roadmap`), domain enums (`CefrLevel`, `ExamType`, `ExamTarget`, `LearningStatus`, `RoadmapNodeType`, `NodeStatus`, `PartOfSpeech`), value objects, domain exceptions, repository contracts, and `IUnitOfWork`.
+- **`Lexora.Application`**: Contains application use cases, service contracts, symmetrical DTOs, mapping extensions, and algorithm engines (SM-2, FSRS, RoadmapEngine, CAT Adaptive Quizzes). References **ONLY** `Lexora.Domain`.
+- **`Lexora.Infrastructure`**: Implements repositories, EF Core DbContext, SQLite configurations, human audio caching, database backup and restoration routines, and notification providers. References `Lexora.Application` and `Lexora.Domain`.
+- **`Lexora.Presentation`**: WinUI 3 desktop client containing Views, ViewModels, Converters, Custom Controls, and Presentation-specific services (Theming, Navigation, Audio playback, Shortcuts, Localization). References `Lexora.Application`, `Lexora.Infrastructure`, and `Lexora.Domain`.
 
 ### 1.2 The Absolute Presentation Layer Boundary Rule
 > [!CAUTION]
-> **No EF Core in Views or ViewModels**: The Presentation layer **MUST NEVER** reference `LexoraDbContext`, execute direct LINQ-to-Entities queries, or manage raw EF transactions. All data retrieval, mutations, and business rules **MUST** be orchestrated through Application services or repository contracts (`IVocabularyService`, `IGrammarService`, `IReviewService`, `ITestService`, `IDatabaseBackupService`).
+> **No EF Core in Views or ViewModels**: The Presentation layer **MUST NEVER** reference `LexoraDbContext`, execute direct LINQ-to-Entities queries, or manage raw EF transactions. All data retrieval, mutations, and business rules **MUST** be orchestrated through Application services or repository contracts (`IVocabularyService`, `IGrammarService`, `IReviewService`, `IRoadmapService`, `ITestService`, `IDatabaseBackupService`).
 
 ### 1.3 Database Transactions & Schema Evolution
 - **Default Database Location**: `%LocalAppData%/Lexora/data/lexora.db` (with WAL mode enabled).
-- **Entity Configurations**: Fluent configurations reside exclusively in `LexoraDbContext.OnModelCreating`. Do **NOT** scatter table or column attributes across Domain entities.
+- **Entity Configurations**: Fluent configurations reside exclusively in `LexoraDbContext.OnModelCreating` and dedicated configuration classes in `Lexora.Infrastructure/Data/Configurations/`. Do **NOT** scatter table or column attributes across Domain entities.
 - **Single-Commit Atomic Operations**: Multi-entity mutations must be executed in a single atomic transaction (`await _unitOfWork.SaveChangesAsync(cancellationToken)`). Never perform intermediate commits that risk leaving the database in an inconsistent state.
 
 ### 1.4 Learning Roadmap & Dynamic Pathway Domain Specifications
 The Interactive Learning Roadmap module models personalized, adaptive preparation tracks for TOEIC, IELTS, and VSTEP:
-- **Domain Layer Purity**: Entities (`StudyRoadmap`, `RoadmapMilestone`, `RoadmapNode`) and Enums (`ExamTarget`, `RoadmapNodeType`, `NodeStatus`) are pure POCOs in `Lexora.Domain`. They contain zero references to EF Core, SQLite, or WinUI 3 markup.
-- **Adaptive Engine Boundary**: Roadmap calculation and graph synthesis are isolated inside `Lexora.Application.Services.RoadmapEngine`. Score gap calibrations dynamically adjust initial SM-2 Ease Factors (EF $\in [2.0, 2.5]$) and generate serpentine 2D coordinates (`CanvasX`, `CanvasY`) for smooth visual presentation.
+- **Domain Layer Purity**: Entities (`StudyRoadmap`, `RoadmapMilestone`, `RoadmapNode`) and Enums (`ExamTarget`, `RoadmapNodeType`, `NodeStatus`) are pure POCOs in `Lexora.Domain.Entities.Roadmap`. They contain zero references to EF Core, SQLite, or WinUI 3 markup.
+- **Adaptive Engine Boundary**: Roadmap calculation and graph synthesis are isolated inside `Lexora.Application.Services.Roadmap.RoadmapEngine`. Score gap calibrations dynamically adjust initial SM-2 Ease Factors (EF $\in [2.0, 2.5]$) and generate serpentine 2D coordinates (`CanvasX`, `CanvasY`) for smooth visual presentation.
 - **Progressive Node Unlocking**: Mastery of a node ($q \ge 3$ or $100\%$ target items learned) unlocks adjacent downstream nodes atomically in `RoadmapService.UpdateNodeProgressAsync`, adhering to the single-commit UnitOfWork invariant.
 - **Repository Isolation**: Persistence is mediated strictly through `IRoadmapRepository` and EF Core Fluent configurations in `LexoraDbContext.OnModelCreating`, guaranteeing database indexing and cascade deletion integrity across Roadmap $\rightarrow$ Milestones $\rightarrow$ Nodes.
+
+### 1.5 Domain-Driven Modular Layout Across All Layers
+To prevent monolithic source file explosion, all 4 layers mirror a consistent domain taxonomy:
+1. **Vocabulary & Knowledge Graph**: Terms, meanings, example sentences, contextual units, synonym/antonym graphs, and smart CSV/JSON imports.
+2. **Grammar & Patterns**: Structural rules, syntactic categories, and rule suggestions.
+3. **Homophones & Phonetics**: Sound-alike clusters, phonetic transcriptions, and distinction quizzes.
+4. **Learning Storage**: User-curated notebooks, flashcard sets, and practice storage.
+5. **Review & Spaced Repetition**: SM-2 and FSRS scheduling engines, study logs, workload forecasts, and streak calculations.
+6. **Roadmap & Study Pathways**: Goal tracking, milestone progression, and dynamic graph layouts.
+7. **Pronunciation & Listening Lab**: Native audio caching, Windows speech synthesis, and speed controls.
+8. **Practice Tests & Adaptive Quizzes**: Computerized Adaptive Testing (CAT) and simulated exam sections.
+9. **Data Health & Backup**: Automated SQLite integrity validation, backups, and safe recovery.
+10. **Updates & Release Notes**: In-app user-facing markdown release logs with SemVer sorting.
 
 ---
 
@@ -55,7 +68,7 @@ The Interactive Learning Roadmap module models personalized, adaptive preparatio
   - Class Libraries (`Domain`, `Application`, `Infrastructure`, `Tests`): `net10.0`
   - Presentation Client (`Lexora.Presentation`): `net10.0-windows10.0.26100.0`
 - **Modern C# 13/14 Syntax**:
-  - **File-Scoped Namespaces**: All C# files must use file-scoped namespaces (e.g. `namespace Lexora.Application.Services;`).
+  - **File-Scoped Namespaces**: All C# files must use file-scoped namespaces (e.g. `namespace Lexora.Application.Services.Vocabulary;`).
   - **Primary Constructors**: Use primary constructors for dependency injection in classes and ViewModels where applicable.
   - **Nullable Reference Types**: Enable `#nullable enable` across all projects. Do not suppress nullability warnings with blanket `!` operators; use defensive validation or explicit guard clauses (`ArgumentNullException.ThrowIfNull(...)`).
   - **Asynchronous Operations**: All I/O-bound and database methods must be asynchronous, return `Task` or `Task<T>`, accept an optional `CancellationToken cancellationToken = default`, and handle task cancellations cleanly.
@@ -69,6 +82,16 @@ The Interactive Learning Roadmap module models personalized, adaptive preparatio
   ```
 - Use `[RelayCommand]` on ViewModel methods for clean command bindings.
 - ViewModels must be registered in the Microsoft Dependency Injection container with appropriate lifetimes (usually `Transient` for transient pages or `Singleton` for shared app state).
+
+### 2.2 Partial Class Pattern for ViewModels & Complex Services
+> [!TIP]
+> When ViewModels or Services exceed ~250 lines or encompass multiple distinct operational aspects (e.g. Filtering, Batch Actions, Import/Export, Quiz Logic), **ALWAYS** partition them into feature-specific partial classes within their respective feature subfolders:
+- **`VocabularyViewModel.cs`**: Core state, collections, selection tracking, primary lifecycle.
+- **`VocabularyViewModel.Filter.cs`**: CEFR, topic, search query, and status filtering logic.
+- **`VocabularyViewModel.Batch.cs`**: Multi-select bulk deletion, status mutation, and topic assignments.
+- **`VocabularyViewModel.ImportExport.cs`**: CSV/JSON/Text export and smart import workflows.
+- **`LocalizationService.cs`**: Core localization engine, culture switching, and indexers.
+- **`LocalizationService.*.cs`**: 16 dedicated partial dictionaries divided cleanly by domain feature.
 
 ---
 
@@ -134,13 +157,37 @@ The Interactive Learning Roadmap module models personalized, adaptive preparatio
 
 ## 4. Real-Time Multi-Language Localization (i18n)
 
-### 4.1 Architecture of `ILocalizationService`
-Lexora includes an offline, dual-dictionary localization system supporting **Tiếng Việt (`vi-VN`)** and **English (`en-US`)**:
+### 4.1 Modular Architecture of `ILocalizationService`
+Lexora includes a high-performance, offline, dual-dictionary localization system supporting **Tiếng Việt (`vi-VN`)** and **English (`en-US`)**:
 - Service interface: `ILocalizationService`
 - Implementation: `LocalizationService` registered as a `Singleton` in DI.
 - Key naming convention: `Category_Descriptor` (e.g. `Nav_Dashboard`, `Vocab_AddWord`, `Review_RatingGood`, `Settings_Theme`).
 
-### 4.2 Dynamic Real-Time Switching Without App Restart
+### 4.2 Partial Class Dictionary Partitioning
+To guarantee zero dictionary merge conflicts, optimal code maintainability, and clean domain boundaries, `LocalizationService` is partitioned into **16 modular partial classes** in `src/Lexora.Presentation/Services/Localization/`:
+1. `LocalizationService.cs`: Core dictionary engine, active culture state, `SetLanguage`, and string indexer/resolver.
+2. `LocalizationService.Common.cs`: Global actions (Save, Cancel, Delete, Confirm, Loading, Success, Error).
+3. `LocalizationService.Dashboard.cs`: Dashboard metrics, streak banners, daily goals, and exam countdowns.
+4. `LocalizationService.Dialogs.cs`: Modal dialog headers, confirmation prompts, and progress messages.
+5. `LocalizationService.Grammar.cs`: Grammar points, CEFR grammar levels, structural formulas, and notes.
+6. `LocalizationService.Help.cs`: Help center, FAQs, keyboard shortcuts reference, and feedback.
+7. `LocalizationService.Homophones.cs`: Sound-alike pairs, IPA comparisons, and distinction notes.
+8. `LocalizationService.KnowledgeGraph.cs`: Graph nodes, semantic links, clustering, and visual filters.
+9. `LocalizationService.ListeningLab.cs`: Voice accents (US/UK), audio speeds, and dictation controls.
+10. `LocalizationService.Navigation.cs`: Shell navigation menu items, sidebar titles, and header breadcrumbs.
+11. `LocalizationService.Review.cs`: Spaced repetition ratings (Again, Hard, Good, Easy), cards, and session summaries.
+12. `LocalizationService.Roadmap.cs`: Milestones, target exam scores (TOEIC/IELTS/VSTEP), and adaptive nodes.
+13. `LocalizationService.Settings.cs`: Appearance themes, audio voice selection, database backup/restore, and updates.
+14. `LocalizationService.SmartImport.cs`: Intelligent CSV/JSON/Text parser labels, column mapping, and import preview.
+15. `LocalizationService.Storage.cs`: Learning notebooks, personalized tags, and custom memory categories.
+16. `LocalizationService.Test.cs`: Mock test modes, adaptive quiz questions, countdown timers, and score reports.
+17. `LocalizationService.Vocabulary.cs`: Word definitions, phonetic transcriptions, CEFR levels, and word filters.
+
+> [!IMPORTANT]
+> Whenever adding or altering user-facing text, developers and agents **MUST** add both `vi-VN` and `en-US` entries to the relevant partial file and verify parity using the script:
+> `powershell -ExecutionPolicy Bypass -File .agents/skills/i18n-localization-sync/scripts/sync_localization.ps1`
+
+### 4.3 Dynamic Real-Time Switching Without App Restart
 When the user toggles the application language in `SettingsPage`:
 1. `ILocalizationService.SetLanguage(langCode)` updates `CultureInfo.CurrentCulture` and `CultureInfo.CurrentUICulture`, then raises the `LanguageChanged` event.
 2. `MainWindow.xaml.cs` handles `LanguageChanged` to update the native window title and custom Fluent titlebar.
@@ -149,10 +196,10 @@ When the user toggles the application language in `SettingsPage`:
 
 ---
 
-## 5. Spaced Repetition (SM-2) Integrity
+## 5. Spaced Repetition (SM-2 & FSRS) Integrity
 
 ### 5.1 The SM-2 Mathematical Specification
-All spaced repetition calculations must be routed through `ISpacedRepetitionEngine` (`Sm2SpacedRepetitionEngine`):
+All spaced repetition calculations must be routed through `ISpacedRepetitionEngine` (`Sm2SpacedRepetitionEngine` or `FsrsSpacedRepetitionEngine`):
 - **Rating Scale**:
   - `0` or `1`: Again (Complete blackout or incorrect recall)
   - `2`: Hard (Correct response with significant hesitation)
@@ -178,13 +225,9 @@ All spaced repetition calculations must be routed through `ISpacedRepetitionEngi
 
 ### 6.1 Path Traversal Defense
 > [!WARNING]
-> Any service handling file exports, database backups, or cached audio files **MUST** sanitize filenames using an alphanumeric whitelist and verify canonical paths:
+> Any service handling file exports, database backups, or cached audio files **MUST** sanitize filenames using an alphanumeric whitelist and verify canonical paths via `SafePathHelper`:
 > ```csharp
-> var fullPath = Path.GetFullPath(targetPath);
-> if (!fullPath.StartsWith(allowedBaseDirectory, StringComparison.OrdinalIgnoreCase))
-> {
->     throw new SecurityException("Potential path traversal attempt detected.");
-> }
+> var fullPath = SafePathHelper.EnsureSafePath(baseDirectory, userFilename);
 > ```
 
 ### 6.2 SQLite Backup & Restoration Integrity
@@ -213,9 +256,9 @@ Before completing any task, committing code, or declaring an issue resolved, dev
 
 ```powershell
 # 1. Build the entire solution (Must finish with 0 warnings and 0 errors)
-dotnet build Lexora.slnx
+dotnet build Lexora.slnx -v q /clp:ErrorsOnly
 
-# 2. Run all unit and integration test suites (All 390 tests MUST pass)
+# 2. Run all unit and integration test suites (All 524 tests MUST pass)
 dotnet test Lexora.slnx --no-build
 
 # 3. Packaging & Installer Verification (When modifying deployment scripts)
@@ -224,7 +267,8 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.2"
 
 ### Current Quality Gate Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)`.
-- **Test Suite**: **477 / 477 Tests Passing** (415 Unit Tests + 62 Integration Tests, 0 Failed, 0 Skipped).
+- **Test Suite**: **524 / 524 Tests Passing** (462 Unit Tests + 62 Integration Tests, 0 Failed, 0 Skipped).
+- **Architecture Integrity**: Clean Architecture invariants strictly satisfied with 0 boundary violations.
 
 ### 8.1 Release Notes Log & User-Facing Documentation Protocol (`release-notes/`)
 > [!IMPORTANT]
@@ -257,6 +301,7 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.2"
 ```
 Lexora/
 ├── Lexora.slnx                               # Solution file (.NET 10 slnx format)
+├── Directory.Build.props                     # Global solution assembly versioning (v1.6.2)
 ├── AGENTS.md                                 # Developer & AI Agent master guidelines
 ├── CHANGELOG.md                              # High-level version history (Semantic Versioning 2.0.0)
 ├── PROGRESS.md                               # Project progress tracking and milestones
@@ -279,6 +324,7 @@ Lexora/
 │   │   ├── 05-spaced-repetition-sm2.md       # SM-2 formula, intervals, and streak engine
 │   │   ├── 06-testing-and-verification.md    # Test suite requirements & CI verification
 │   │   ├── 07-agent-token-efficiency-and-accuracy.md # AI Agent token economy & precision protocol
+│   │   ├── 08-release-notes-and-versioning.md# User-facing markdown release notes in release-notes/
 │   │   └── README.md                         # Rules index & guide
 │   └── skills/                               # Standardized, executable agent skills
 │       ├── clean-architecture-lint/          # Architecture boundaries static analysis
@@ -296,7 +342,7 @@ Lexora/
 ├── release-notes/                            # User-facing Release Notes log (Markdown format per version)
 │   ├── README.md                             # Release notes guidelines & authoring rules
 │   ├── template.md                           # Standard release note markdown template
-│   └── vX.Y.Z.md                             # Version-specific release notes (v1.6.2.md, v1.6.1.md, ...)
+│   └── v1.6.2.md                             # Current release notes log (v1.6.2, v1.6.1, v1.6.0, ...)
 ├── docs/                                     # Architecture, specs & documentation hub
 │   ├── adr/                                  # Architecture Decision Records (ADRs)
 │   ├── architecture.md                       # System architecture & Clean Architecture layout
@@ -308,28 +354,121 @@ Lexora/
 │   ├── milestones.md                         # Milestone definitions, releases & exit criteria
 │   └── backlog.md                            # Categorized backlog & acceptance criteria
 ├── src/
-│   ├── Lexora.Domain/                        # Pure domain layer (Entities, Enums, Exceptions)
-│   │   ├── Entities/                         # Word, WordMeaning, GrammarRule, LearningStorageItem, StudyLog, StudyRoadmap, RoadmapMilestone, RoadmapNode
-│   │   ├── Enums/                            # CefrLevel, ExamType, ExamTarget, RoadmapNodeType, NodeStatus, LearningStatus, PartOfSpeech
-│   │   ├── Interfaces/                       # IVocabularyRepository, IReviewRepository, IRoadmapRepository, IUnitOfWork
-│   │   └── Exceptions/                       # Domain-specific validation exceptions
-│   ├── Lexora.Application/                   # Application layer (Services, DTOs, Interfaces)
-│   │   ├── DTOs/                             # WordDto, GrammarRuleDto, StudySessionDto, RoadmapNodeDto, MilestoneDto, StudyRoadmapDto
-│   │   ├── Interfaces/                       # IVocabularyService, IReviewService, IRoadmapService, IPronunciationListeningLabService, etc.
-│   │   └── Services/                         # Domain-structured services (Vocabulary, Grammar, Homophones, KnowledgeGraph, LearningStorage, Pronunciation, Review, Roadmap, Search, Statistics, Test, Common)
-│   ├── Lexora.Infrastructure/                # Infrastructure layer (EF Core, Audio, SQLite, Updates)
-│   │   ├── Data/                             # LexoraDbContext, SqliteDatabaseInitializer, UnitOfWork
-│   │   ├── Repositories/                     # VocabularyRepository, ReviewRepository, RoadmapRepository, LearningStorageRepository
-│   │   └── Services/                         # Modular infrastructure services (Audio, Backup, Notifications, Preferences, Updates)
-│   └── Lexora.Presentation/                  # WinUI 3 client application
+│   ├── Lexora.Domain/                        # Pure domain layer (Entities, Enums, Exceptions, Repositories)
+│   │   ├── Common/                           # BaseEntity, ValueObject base contracts
+│   │   ├── Entities/                         # Domain-grouped POCO entities
+│   │   │   ├── Grammar/                      # GrammarRule, GrammarCategory
+│   │   │   ├── Homophones/                   # HomophoneGroup, HomophoneItem
+│   │   │   ├── LearningStorage/              # LearningStorageItem, StorageCategory
+│   │   │   ├── Review/                       # StudyLog
+│   │   │   ├── Roadmap/                      # StudyRoadmap, RoadmapMilestone, RoadmapNode
+│   │   │   └── Vocabulary/                   # Word, WordMeaning, ExampleSentence, ContextUnit, Topic, KnowledgeNode, KnowledgeEdge
+│   │   ├── Enums/                            # CefrLevel, ExamType, ExamTarget, RoadmapNodeType, NodeStatus, LearningStatus, PartOfSpeech, etc.
+│   │   ├── Exceptions/                       # DomainValidationException, EntityNotFoundException, SecurityException
+│   │   └── Interfaces/                       # Domain repository contracts (IVocabularyRepository, IReviewRepository, IRoadmapRepository, etc.) & IUnitOfWork
+│   ├── Lexora.Application/                   # Application layer (Services, DTOs, Use Cases, Interfaces)
+│   │   ├── Common/                           # MappingExtensions, JsonConverters, SafePathHelper, ProgressThrottler
+│   │   ├── DTOs/                             # Domain-symmetrical DTO models
+│   │   │   ├── Audio/                        # ListeningLabDtos, VoiceDescriptor
+│   │   │   ├── Backup/                       # BackupMetadata, DataHealthDtos
+│   │   │   ├── Dashboard/                    # DashboardSummaryDto, WorkloadForecastDto
+│   │   │   ├── Grammar/                      # GrammarRuleDto
+│   │   │   ├── Homophones/                   # HomophoneGroupDto, HomophoneItemDto, HomophoneSmartImportDtos
+│   │   │   ├── KnowledgeGraph/               # KnowledgeGraphDtos
+│   │   │   ├── LearningStorage/              # LearningStorageDtos
+│   │   │   ├── Preferences/                  # UserPreferences
+│   │   │   ├── Review/                       # ReviewCardDto, LearningIntelligenceDtos, SmartReviewDtos, StudyAdviceDto, StudyPlannerDtos
+│   │   │   ├── Roadmap/                      # RoadmapDtos, MilestoneDto, StudyRoadmapDto
+│   │   │   ├── Search/                       # SmartSearchDtos
+│   │   │   ├── Statistics/                   # AnalyticsDTOs, ProgressReport
+│   │   │   ├── Test/                         # TestDTOs, AdaptiveQuizDtos
+│   │   │   ├── Updates/                      # UpdateDtos
+│   │   │   └── Vocabulary/                   # WordDto, ExportModels, SmartImportDtos
+│   │   ├── Interfaces/                       # Domain-symmetrical service interfaces
+│   │   │   ├── Audio/                        # IAudioPlayerService, IAudioStorageService, IPronunciationListeningLabService, IVoiceProvider
+│   │   │   ├── Backup/                       # IDatabaseBackupService, IDataHealthService
+│   │   │   ├── Grammar/                      # IGrammarService, IGrammarExportImportService, IGrammarSuggestionService
+│   │   │   ├── Homophones/                   # IHomophoneService, IHomophoneExportImportService
+│   │   │   ├── KnowledgeGraph/               # IVocabularyKnowledgeGraphService, IKnowledgeGraphExportImportService
+│   │   │   ├── LearningStorage/              # ILearningStorageService
+│   │   │   ├── Preferences/                  # IUserPreferencesService
+│   │   │   ├── Review/                       # IReviewService, IReviewReminderService, IStudyAdvisorService, IStudyPlannerService
+│   │   │   ├── Roadmap/                      # IRoadmapService
+│   │   │   ├── Search/                       # IFuzzySearchService, ISmartSearchService, ISmartSearchCacheService
+│   │   │   ├── Statistics/                   # IStatisticsService
+│   │   │   ├── Test/                         # ITestService, IAdaptiveQuizService
+│   │   │   ├── Updates/                      # IUpdateService, IReleaseNotesService
+│   │   │   └── Vocabulary/                   # IVocabularyService, IExportImportService, IVocabularySuggestionService
+│   │   ├── Services/                         # Domain-symmetrical service implementations
+│   │   │   ├── Common/                       # ProgressThrottler
+│   │   │   ├── Grammar/                      # GrammarService, GrammarExportImportService, GrammarSuggestionService
+│   │   │   ├── Homophones/                   # HomophoneService, HomophoneExportImportService
+│   │   │   ├── KnowledgeGraph/               # VocabularyKnowledgeGraphService, KnowledgeGraphExportImportService
+│   │   │   ├── LearningStorage/              # LearningStorageService
+│   │   │   ├── Pronunciation/                # PronunciationListeningLabService, PronunciationVoiceResolver
+│   │   │   ├── Review/                       # ReviewService, StudyAdvisorService, StudyPlannerService
+│   │   │   ├── Roadmap/                      # RoadmapService, RoadmapEngine
+│   │   │   ├── Search/                       # FuzzySearchService, SmartSearchService, SmartSearchCacheService
+│   │   │   ├── Statistics/                   # StatisticsService
+│   │   │   ├── Test/                         # TestService, AdaptiveQuizService
+│   │   │   ├── Updates/                      # UpdateService, ReleaseNotesService
+│   │   │   └── Vocabulary/                   # VocabularyService, ExportImportService, VocabularySuggestionService
+│   │   └── SpacedRepetition/                 # ISpacedRepetitionEngine, Sm2SpacedRepetitionEngine, FsrsSpacedRepetitionEngine, SpacedRepetitionEngineFactory
+│   ├── Lexora.Infrastructure/                # Infrastructure layer (EF Core, Audio, SQLite, Notifications)
+│   │   ├── Data/                             # LexoraDbContext, SqliteDatabaseInitializer, UnitOfWork, Configurations/
+│   │   ├── Repositories/                     # VocabularyRepository, ReviewRepository, RoadmapRepository, LearningStorageRepository, GrammarRepository, HomophoneRepository, KnowledgeGraphRepository
+│   │   └── Services/                         # Modular infrastructure services
+│   │       ├── Audio/                        # AudioStorageService (SHA256 human audio cache)
+│   │       ├── Backup/                       # DatabaseBackupService (SQLite integrity & restore)
+│   │       ├── Notifications/                # ReviewReminderService (Windows toast reminders)
+│   │       ├── Preferences/                  # UserPreferencesService (Local JSON storage)
+│   │       └── Updates/                      # ReleaseNotesService, UpdateService
+│   └── Lexora.Presentation/                  # WinUI 3 desktop client (Windows App SDK)
 │       ├── Assets/                           # App icons, splash screens, brand assets
-│       ├── Converters/                       # BoolToVisibility, HeatmapLevelToBrush, etc.
-│       ├── Services/                         # Presentation services & contracts (Audio, Localization, Navigation, Theming, Shortcuts, Notifications, Orchestration, Extensions)
-│       ├── ViewModels/                       # DashboardViewModel, RoadmapViewModel, VocabularyViewModel, LearningStorageViewModel, etc.
-│       └── Views/                            # ShellPage, DashboardPage, RoadmapPage, VocabularyPage, ListeningLabDialog, etc.
+│       ├── Converters/                       # BoolToVisibility, HeatmapLevelToBrush, EnumToDisplayName, etc.
+│       ├── Helpers/                          # ReleaseNotesRenderer, UI helper routines
+│       ├── Services/                         # Presentation services & contracts
+│       │   ├── Audio/                        # AudioPlayerService, WindowsVoiceProvider
+│       │   ├── Extensions/                   # ResourceExtensions
+│       │   ├── Localization/                 # LocalizationService (Core engine) + 16 domain partial classes:
+│       │   │                                 # (.Common, .Dashboard, .Dialogs, .Grammar, .Help, .Homophones, .KnowledgeGraph,
+│       │   │                                 #  .ListeningLab, .Navigation, .Review, .Roadmap, .Settings, .SmartImport, .Storage, .Test, .Vocabulary)
+│       │   ├── Navigation/                   # NavigationService, PageService
+│       │   ├── Notifications/                # InAppNotificationService (Toast overlays)
+│       │   ├── Orchestration/                # PresentationOrchestrationService
+│       │   ├── Shortcuts/                    # KeyboardShortcutService
+│       │   └── Theming/                      # ThemeSelectorService (Mica backdrop, Dark/Light modes)
+│       ├── Strings/                          # Localization resource assets
+│       ├── Themes/                           # Fluent 2 XAML styles, brushes & ThemeResources
+│       ├── ViewModels/                       # Feature-partitioned MVVM ViewModels (Partial Class pattern)
+│       │   ├── Common/                       # BaseViewModel, NavigationItemViewModel
+│       │   ├── Dashboard/                    # DashboardViewModel
+│       │   ├── Grammar/                      # GrammarViewModel (.Editor, .Filter)
+│       │   ├── Help/                         # HelpViewModel
+│       │   ├── Homophones/                   # HomophonesViewModel (.Editor, .ImportExport)
+│       │   ├── KnowledgeGraph/               # KnowledgeGraphViewModel (.Interaction)
+│       │   ├── LearningStorage/              # LearningStorageViewModel (.Operations, .Practice)
+│       │   ├── Review/                       # ReviewViewModel (.Rating, .Typing)
+│       │   ├── Roadmap/                      # RoadmapViewModel (.Generation)
+│       │   ├── Settings/                     # SettingsViewModel (.Backup, .Updates)
+│       │   ├── Test/                         # TestViewModel (.Quiz, .Results, TestOptionItem)
+│       │   └── Vocabulary/                   # VocabularyViewModel (.Batch, .Filter, .ImportExport, SelectableWordItem)
+│       └── Views/                            # Feature-grouped XAML Views & Dialogs
+│           ├── Common/                       # ShellPage, SplashScreenOverlay, ToastOverlayControl, OperationProgressDialog
+│           ├── Dashboard/                    # DashboardPage, DataHealthCenterDialog, StudyPlannerDialog
+│           ├── Grammar/                      # GrammarPage, GrammarEditorDialog
+│           ├── Help/                         # HelpPage, ReleaseNotesLogDialog
+│           ├── Homophones/                   # HomophonesPage, HomophoneEditorDialog
+│           ├── KnowledgeGraph/               # KnowledgeGraphPage, KnowledgeGraphDialog, KnowledgeGraphImportDialog
+│           ├── LearningStorage/              # LearningStoragePage
+│           ├── Review/                       # ReviewPage, ListeningLabDialog
+│           ├── Roadmap/                      # RoadmapPage
+│           ├── Settings/                     # SettingsPage, UpdateDetailsDialog
+│           ├── Test/                         # TestPage
+│           └── Vocabulary/                   # VocabularyPage, WordEditorDialog, TopicEditorDialog, AssignTopicDialog, SmartImportDialog
 ├── tests/
-│   ├── Lexora.Tests.Unit/                    # 384 xUnit Unit Tests (Roadmap, SM-2, FSRS, Listening Lab, CAT, DTOs, Services)
-│   └── Lexora.Tests.Integration/             # 51 xUnit Integration Tests (SQLite in-memory, Repositories)
+│   ├── Lexora.Tests.Unit/                    # 462 xUnit Unit Tests (Roadmap, SM-2, FSRS, Listening Lab, CAT, DTOs, Services)
+│   └── Lexora.Tests.Integration/             # 62 xUnit Integration Tests (SQLite in-memory, Repositories, Workflows)
 └── .github/
     └── workflows/
         ├── agent-quality-gate.yml            # CI build & automated test quality gate
@@ -345,15 +484,16 @@ Before marking any task as complete, verify:
 - [ ] **Clean Architecture Preserved**: No direct EF Core references or DbContext calls in `Lexora.Presentation`.
 - [ ] **Zero Hardcoded Colors**: All UI elements strictly use Fluent `{ThemeResource ...}` brushes.
 - [ ] **Responsive & Non-Clipping**: All grids, cards, and dialogs adapt cleanly to small viewports without horizontal clipping.
-- [ ] **Bilingual Localization**: All newly added user-facing strings are added to both `vi-VN` and `en-US` dictionaries in `LocalizationService.cs`.
+- [ ] **Bilingual Localization**: All newly added user-facing strings are added to both `vi-VN` and `en-US` dictionaries in the corresponding `LocalizationService.<Domain>.cs` partial file.
+- [ ] **Partial Class Architecture Adhered**: Large ViewModels and services adhere to the partial class convention without monolithic growth.
 - [ ] **Dialog Safety**: All `ContentDialog` calls set `XamlRoot` and precede sequential dialogs with `await Task.Yield()`.
-- [ ] **Data Security**: File paths are validated against directory traversal; database operations commit atomically.
-- [ ] **SM-2 Engine Compliance**: Spaced repetition logic preserves $EF \ge 1.3$ and logs study records.
-- [ ] **Token Economy Enforced**: Only targeted file slices viewed (`grep_search` + `view_file`); in-place diff edits instead of full-file overwrites; no unpaged output dumps.
+- [ ] **Data Security**: File paths are validated against directory traversal via `SafePathHelper`; database operations commit atomically through `IUnitOfWork`.
+- [ ] **SM-2 / FSRS Engine Compliance**: Spaced repetition logic preserves $EF \ge 1.3$ and logs study records.
+- [ ] **Token Economy Enforced**: Only targeted file slices viewed (`read_file` with ranges); in-place diff edits (`edit_file`) instead of full-file overwrites; quiet build flags (`-v q /clp:ErrorsOnly`).
 - [ ] **Anti-Hallucination & Type Reusability**: Existing types and services verified before declaring new contracts; Clean Architecture cascade strictly followed.
-- [ ] **Release Notes Log Created**: User-friendly, concise markdown release note created in `release-notes/vX.Y.Z.md` following `template.md` and accessible in `ReleaseNotesLogDialog`.
-- [ ] **Clean Build**: `dotnet build Lexora.slnx` completes with **0 warnings and 0 errors**.
-- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 459 tests**.
+- [ ] **Release Notes Log Created**: User-friendly, concise markdown release note created in `release-notes/vX.Y.Z.md` following `template.md` and verified in `ReleaseNotesLogDialog`.
+- [ ] **Clean Build**: `dotnet build Lexora.slnx -v q /clp:ErrorsOnly` completes with **0 warnings and 0 errors**.
+- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 524 tests** (462 Unit + 62 Integration).
 
 ---
 
@@ -363,11 +503,11 @@ Before marking any task as complete, verify:
 > To maximize inference efficiency, preserve the context window, and guarantee zero-defect code generation, AI agents (e.g. Gemini 2.5 / 3.x Flash & Pro in Antigravity) **MUST** strictly adhere to the following operational protocols:
 
 ### 11.1 Token Conservation & Context Window Economy
-1. **Targeted Inspection (`view_file` & `grep_search`)**:
-   - **NEVER** dump entire files (>150 lines). Always combine `grep_search` (with `Includes` filters like `["*.cs"]`) to pinpoint symbols/lines, then read only the relevant 30–60 line block using `StartLine` and `EndLine`.
+1. **Targeted Inspection (`read_file`)**:
+   - **NEVER** dump entire files (>150 lines). Pinpoint symbols and line numbers first, then read only the relevant 30–60 line block using `StartLine` and `EndLine`.
    - Never re-read files that were already retrieved earlier in the current conversation context.
-2. **Precision Diffs (`replace_file_content` / `multi_replace_file_content`)**:
-   - **NEVER** call `write_to_file` on existing files to apply modifications. Use atomic replacement chunks with minimal anchor lines (1–2 lines) to minimize completion tokens and prevent accidental truncation of imports or comments.
+2. **Precision Diffs (`edit_file`)**:
+   - **NEVER** overwrite entire existing files just to apply modifications. Use atomic replacement chunks with minimal anchor lines (1–2 lines) to minimize completion tokens and prevent accidental truncation of imports or comments.
    - Never replace entire classes or large blocks just to modify a single line or variable.
 3. **Quiet & Paged Terminal Commands (`run_command`)**:
    - Keep build logs silent on success: `dotnet build Lexora.slnx -v q /clp:ErrorsOnly` (0 tokens returned on clean build).
@@ -379,7 +519,7 @@ Before marking any task as complete, verify:
 
 ### 11.2 Precision Feature Implementation & Zero Hallucination
 1. **5-Step Execution Cycle**:
-   - `Locate (grep_search)` $\rightarrow$ `Inspect (view_file slice)` $\rightarrow$ `Minimal Diff (replace_file)` $\rightarrow$ `Build Check (dotnet build -v q /clp:ErrorsOnly)` $\rightarrow$ `Targeted Test (dotnet test --filter)`.
+   - `Locate` $\rightarrow$ `Inspect slice` $\rightarrow$ `Minimal Diff` $\rightarrow$ `Build Check (dotnet build -v q /clp:ErrorsOnly)` $\rightarrow$ `Targeted Test (dotnet test --filter)`.
 2. **Verify Before Declaring Abstractions**:
    - Always search `Lexora.Domain` and `Lexora.Application` first before writing any new entity, DTO, interface, or converter. Reuse existing types to keep domain contracts clean.
 3. **Strict Cascade of Changes**:
@@ -392,7 +532,7 @@ Before marking any task as complete, verify:
    - Use defensive null checks (`ArgumentNullException.ThrowIfNull(...)`) rather than blanket `!` suppression.
 5. **WinUI 3 & Fluent 2 Framework Specifics**:
    - Never use raw hex colors (`#FFFFFF`, `#000000`). Use `{ThemeResource ...}` brushes exclusively.
-   - Synchronize all UI strings into both `vi-VN` and `en-US` in `LocalizationService.cs`.
+   - Synchronize all UI strings into both `vi-VN` and `en-US` in the matching `LocalizationService.<Domain>.cs` partial file.
    - Always set `XamlRoot` and handle dialog chaining with `await Task.Yield()`.
    - Dispatch background UI mutations through `DispatcherQueue.TryEnqueue`.
    - Avoid `{x:Bind}` out of scope in `DataTemplate` or `MenuFlyout` (prevents compiler `WMC9999`).
@@ -427,4 +567,3 @@ When encountering complex, recurring engineering challenges (e.g. WinUI 3 markup
      - `dotnet build Lexora.slnx -v q /clp:ErrorsOnly` completes with **0 warnings and 0 errors**.
      - Relevant unit/integration test suites execute and pass.
    - Never generate theoretical, unverified, or pseudo-code instructions.
-
