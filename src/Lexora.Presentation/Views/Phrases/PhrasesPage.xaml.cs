@@ -3,6 +3,7 @@ using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -18,22 +19,40 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
     public PhrasesViewModel ViewModel => _viewModel;
     public ILocalizationService Loc => _loc;
 
+    public PhrasesPage() : this(
+        App.Current.Services.GetRequiredService<PhrasesViewModel>(),
+        App.Current.Services.GetRequiredService<ILocalizationService>(),
+        App.Current.Services.GetRequiredService<IConversationPhraseService>())
+    {
+    }
+
     public PhrasesPage(
         PhrasesViewModel viewModel,
         ILocalizationService loc,
         IConversationPhraseService phraseService)
     {
+        NavigationCacheMode = NavigationCacheMode.Required;
         _viewModel = viewModel;
         _loc = loc;
         _phraseService = phraseService;
 
         InitializeComponent();
+
+        Loaded += OnPageLoaded;
+    }
+
+    private async void OnPageLoaded(object sender, RoutedEventArgs e)
+    {
+        await _viewModel.LoadDataAsync();
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
-        await _viewModel.LoadDataAsync();
+        if (IsLoaded)
+        {
+            await _viewModel.LoadDataAsync();
+        }
     }
 
     public void OnLanguageChanged()
