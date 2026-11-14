@@ -235,7 +235,7 @@
         <!-- ========================================== -->
         <!-- 1. MASTER-DETAIL VIEW (Main Mode)          -->
         <!-- ========================================== -->
-        <Grid x:Name="GrammarMasterDetailGrid" Grid.Row="1" ColumnDefinitions="340,*" ColumnSpacing="16"
+        <Grid x:Name="GrammarMasterDetailGrid" Grid.Row="1" ColumnDefinitions="360,*" ColumnSpacing="16"
               Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             
             <!-- Left: Rules List -->
@@ -251,34 +251,37 @@
                         </Border>
                     </Grid>
 
-                    <!-- Multi-Selection Action Bar -->
+                    <!-- Multi-Selection Action Bar (Streamlined Non-Clipping 2-Row Layout) -->
                     <Border Grid.Row="1" x:Name="SelectionActionBar"
                             Visibility="{x:Bind ViewModel.IsSelectionMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="0,0,0,1" Padding="12,8">
-                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
-                            <Button Click="SelectAllRules_Click" CornerRadius="6" Padding="8,4" FontSize="12">
-                                <StackPanel Orientation="Horizontal" Spacing="5">
+                            BorderThickness="0,0,0,1" Padding="8,8">
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="6" RowSpacing="6">
+                            <!-- Row 0: Select All & Deselect All -->
+                            <Button Grid.Row="0" Grid.Column="0" Click="SelectAllRules_Click" HorizontalAlignment="Stretch" CornerRadius="6" Padding="6,5" FontSize="11.5">
+                                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE762;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Action_SelectAll')}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Action_SelectAll')}" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Button>
-                            <Button Grid.Column="1" Click="DeselectAllRules_Click" CornerRadius="6" Padding="8,4" FontSize="12">
-                                <StackPanel Orientation="Horizontal" Spacing="5">
+                            <Button Grid.Row="0" Grid.Column="1" Click="DeselectAllRules_Click" HorizontalAlignment="Stretch" CornerRadius="6" Padding="6,5" FontSize="11.5">
+                                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE894;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Action_DeselectAll')}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Action_DeselectAll')}" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Button>
-                            <Button Grid.Column="3" x:Name="BtnDeleteSelectedRules"
+
+                            <!-- Row 1: Delete Selected (Full Width Across Both Columns) -->
+                            <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="BtnDeleteSelectedRules"
                                     Click="DeleteSelectedRules_Click"
                                     IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
                                     Style="{ThemeResource LexoraDangerButtonStyle}"
-
-                                    CornerRadius="6" Padding="10,4" FontSize="12" FontWeight="Bold">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    HorizontalAlignment="Stretch"
+                                    CornerRadius="6" Padding="10,5" FontSize="11.5" FontWeight="Bold">
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE74D;" FontSize="11" />
-                                    <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" />
+                                    <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Button>
                         </Grid>

@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:Lexora.Presentation.Converters"
     mc:Ignorable="d"
-    CornerRadius="8">
+    CornerRadius="12">
 
     <ContentDialog.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -31,18 +31,15 @@
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
-    <ScrollViewer MaxHeight="500" HorizontalAlignment="Stretch"
-                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                  Padding="0,4,12,8">
-        <Grid MaxWidth="840" HorizontalAlignment="Stretch" RowDefinitions="Auto,Auto,*" RowSpacing="14">
-        <!-- Global InfoBar at the top of the dialog -->
+    <Grid MaxWidth="840" HorizontalAlignment="Stretch" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10" Margin="0,2,0,0">
+        <!-- Row 0: Global InfoBar at the top of the dialog -->
         <InfoBar x:Name="DialogInfoBar"
                  IsOpen="False"
                  IsClosable="True"
                  HorizontalAlignment="Stretch"
                  Margin="0,0,0,2" />
 
-        <!-- Step Breadcrumbs Header -->
+        <!-- Row 1: Step Breadcrumbs Header -->
         <Border Grid.Row="1"
                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -80,14 +77,14 @@
             </Grid>
         </Border>
 
-        <!-- Dynamic Content Body -->
+        <!-- Row 2: Dynamic Content Body -->
         <Grid Grid.Row="2">
             <!-- ================= STEP 1: SOURCE SELECTION ================= -->
-            <StackPanel x:Name="PanelStep1" Spacing="14" Visibility="Visible">
+            <StackPanel x:Name="PanelStep1" Spacing="12" Visibility="Visible">
                 <!-- Subtitle / Info note -->
                 <TextBlock x:Name="SubtitleText"
                            TextWrapping="Wrap"
-                           FontSize="13"
+                           FontSize="12.5"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                 <!-- Input Method Selector (Segmented look) -->
@@ -217,8 +214,8 @@
                             </StackPanel>
                         </Grid>
                         <TextBox x:Name="InputTextBox"
-                                 MinHeight="200"
-                                 Height="220"
+                                 MinHeight="180"
+                                 Height="200"
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
                                  TextChanged="InputTextBox_TextChanged"
@@ -274,62 +271,50 @@
                         </DropDownButton.Flyout>
                     </DropDownButton>
                 </Grid>
-
-                <!-- Action Button to Step 2 -->
-                <Button x:Name="BtnAnalyzeNext"
-                        Style="{ThemeResource AccentButtonStyle}"
-                        HorizontalAlignment="Stretch"
-                        CornerRadius="8"
-                        Padding="12,10"
-                        Click="BtnAnalyzeNext_Click">
-                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                        <FontIcon Glyph="&#xE721;" FontSize="14" />
-                        <TextBlock x:Name="TextAnalyzeNext" Text="Phân tích &amp; Xem trước" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Button>
             </StackPanel>
 
             <!-- ================= STEP 2: PREVIEW & VALIDATION ================= -->
-            <StackPanel x:Name="PanelStep2" Spacing="12" Visibility="Collapsed">
-                <!-- Metrics Bar -->
-                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="6">
+            <Grid x:Name="PanelStep2" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10" Visibility="Collapsed">
+                <!-- Row 0: Metrics Summary Bar -->
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
                     <!-- Total -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="8,6">
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                             <TextBlock x:Name="TextMetricTotalLabel" Text="Tổng số" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
-                            <TextBlock x:Name="TextMetricTotal" Text="0" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TextMetricTotal" Text="0" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Valid -->
-                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="8" Padding="8,6">
+                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                             <TextBlock x:Name="TextMetricValidLabel" Text="Hợp lệ" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
-                            <TextBlock x:Name="TextMetricValid" Text="0" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TextMetricValid" Text="0" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Duplicates -->
-                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="8,6">
+                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                             <TextBlock x:Name="TextMetricDuplicatesLabel" Text="Trùng lặp" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" />
-                            <TextBlock x:Name="TextMetricDuplicates" Text="0" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TextMetricDuplicates" Text="0" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Errors -->
-                    <Border Grid.Column="3" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1" CornerRadius="8" Padding="8,6">
+                    <Border Grid.Column="3" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                             <TextBlock x:Name="TextMetricErrorsLabel" Text="Lỗi/Thiếu" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" />
-                            <TextBlock x:Name="TextMetricErrors" Text="0" FontSize="15" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TextMetricErrors" Text="0" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <!-- Conflict Strategy -->
-                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                <!-- Row 1: Conflict Strategy Strip -->
+                <Border Grid.Row="1"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
-                        Padding="12,8">
-                    <StackPanel Spacing="6">
+                        Padding="12,6">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                             <FontIcon Glyph="&#xE8B7;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                             <TextBlock x:Name="TextConflictTitle"
@@ -338,42 +323,52 @@
                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                        VerticalAlignment="Center" />
                         </StackPanel>
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
                             <RadioButton x:Name="RadioConflictSkip"
                                          IsChecked="True"
                                          FontSize="12"
                                          GroupName="ConflictResolution"
                                          Checked="RadioConflict_Checked" />
-                            <RadioButton Grid.Column="1"
-                                         x:Name="RadioConflictOverwrite"
+                            <RadioButton x:Name="RadioConflictOverwrite"
                                          FontSize="12"
                                          GroupName="ConflictResolution"
                                          Checked="RadioConflict_Checked" />
-                        </Grid>
-                    </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </Border>
 
-                <!-- Selection Controls -->
-                <Grid ColumnDefinitions="Auto,*,Auto">
+                <!-- Row 2: Selection Controls Strip -->
+                <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
                     <CheckBox x:Name="ChkSelectAll"
                               IsChecked="True"
                               Content="Chọn tất cả"
                               FontSize="12"
                               Click="ChkSelectAll_Click" />
-                    <TextBlock x:Name="TextSelectedCounter"
-                               Grid.Column="2"
-                               FontSize="12"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               VerticalAlignment="Center" />
+                    <Border Grid.Column="2"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="8,3">
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock x:Name="TextSelectedCounter"
+                                       FontSize="11.5"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
                 </Grid>
 
-                <!-- Scrollable Item Cards Preview -->
-                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                <!-- Row 3: Scrollable Item Cards Preview -->
+                <Border Grid.Row="3"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <ListView x:Name="ItemsPreviewListView"
-                              Height="260"
+                              Height="285"
                               SelectionMode="None">
                         <ListView.ItemTemplate>
                             <DataTemplate>
@@ -431,7 +426,7 @@
                                                         Padding="5,1"
                                                         Visibility="{Binding HasExamType, Converter={StaticResource BoolToVisibilityConverter}}">
                                                     <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <FontIcon Glyph="&#xE734;" FontSize="9" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                                        <FontIcon Glyph="&#xE734;" FontSize="9" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                         <TextBlock Text="{Binding ExamType}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                     </StackPanel>
                                                 </Border>
@@ -440,7 +435,7 @@
                                                         Padding="5,1"
                                                         Visibility="{Binding HasTopic, Converter={StaticResource BoolToVisibilityConverter}}">
                                                     <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <FontIcon Glyph="&#xE8EC;" FontSize="9" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                                        <FontIcon Glyph="&#xE8EC;" FontSize="9" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                         <TextBlock Text="{Binding TopicName}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                     </StackPanel>
                                                 </Border>
@@ -481,74 +476,21 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </Border>
-
-                <!-- Preview Pagination Controls -->
-                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2,0,0" VerticalAlignment="Center">
-                    <TextBlock x:Name="TextPreviewPagingInfo"
-                               FontSize="11"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               VerticalAlignment="Center" />
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                        <Button x:Name="BtnPreviewFirstPage" Padding="6,4" CornerRadius="4" Click="BtnPreviewFirstPage_Click">
-                            <FontIcon Glyph="&#xE892;" FontSize="10" />
-                        </Button>
-                        <Button x:Name="BtnPreviewPrevPage" Padding="6,4" CornerRadius="4" Click="BtnPreviewPrevPage_Click">
-                            <FontIcon Glyph="&#xE76B;" FontSize="10" />
-                        </Button>
-                        <TextBlock x:Name="TextPreviewCurrentPage" Text="1 / 1" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0" />
-                        <Button x:Name="BtnPreviewNextPage" Padding="6,4" CornerRadius="4" Click="BtnPreviewNextPage_Click">
-                            <FontIcon Glyph="&#xE76C;" FontSize="10" />
-                        </Button>
-                        <Button x:Name="BtnPreviewLastPage" Padding="6,4" CornerRadius="4" Click="BtnPreviewLastPage_Click">
-                            <FontIcon Glyph="&#xE893;" FontSize="10" />
-                        </Button>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Navigation Action Buttons -->
-                <Grid ColumnDefinitions="*,*">
-                    <Button x:Name="BtnBackToStep1"
-                            HorizontalAlignment="Left"
-                            CornerRadius="8"
-                            Padding="14,8"
-                            Click="BtnBackToStep1_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE72B;" FontSize="13" />
-                            <TextBlock x:Name="TextBackToStep1" Text="Quay lại" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="BtnCommitImport"
-                            Grid.Column="1"
-                            Style="{ThemeResource AccentButtonStyle}"
-                            HorizontalAlignment="Right"
-                            CornerRadius="8"
-                            Padding="18,8"
-                            Click="BtnCommitImport_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <ProgressRing x:Name="CommitButtonProgressRing"
-                                          Width="14" Height="14"
-                                          IsActive="False"
-                                          Visibility="Collapsed" />
-                            <FontIcon x:Name="IconCommitImport" Glyph="&#xE896;" FontSize="14" />
-                            <TextBlock x:Name="TextCommitImport" Text="Tiến hành nhập" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
-            </StackPanel>
+            </Grid>
 
             <!-- ================= STEP 3: SUMMARY & REPORT ================= -->
             <StackPanel x:Name="PanelStep3" Spacing="16" Visibility="Collapsed">
                 <!-- Loading State -->
-                <StackPanel x:Name="PanelImportProgress" Spacing="12" HorizontalAlignment="Center" Margin="0,20">
+                <StackPanel x:Name="PanelImportProgress" Spacing="14" HorizontalAlignment="Center" Margin="0,30" MaxWidth="440">
                     <ProgressRing Width="48" Height="48" IsActive="True" HorizontalAlignment="Center" />
-                    <ProgressBar x:Name="BarImportProgress" MaxWidth="320" HorizontalAlignment="Stretch" />
+                    <ProgressBar x:Name="BarImportProgress" HorizontalAlignment="Stretch" Margin="0,4" />
                     <TextBlock x:Name="TextImportProgressMessage"
                                Text="Đang xử lý và lưu vào cơ sở dữ liệu..."
                                FontSize="13"
                                HorizontalAlignment="Center"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <Button x:Name="BtnCancelImport"
-                            Margin="0,6,0,0"
+                            Margin="0,4,0,0"
                             HorizontalAlignment="Center"
                             CornerRadius="8"
                             Padding="16,6"
@@ -561,7 +503,7 @@
                 </StackPanel>
 
                 <!-- Final Report Card -->
-                <StackPanel x:Name="PanelImportReport" Spacing="16" Visibility="Collapsed">
+                <StackPanel x:Name="PanelImportReport" Spacing="16" Visibility="Collapsed" Margin="0,10,0,0">
                     <StackPanel Spacing="6" HorizontalAlignment="Center">
                         <FontIcon x:Name="IconReportStatus" Glyph="&#xE73E;" FontSize="42" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                         <TextBlock x:Name="TextReportTitle"
@@ -599,32 +541,129 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
-                    <Grid Margin="0,4,0,0" RowDefinitions="Auto,Auto" RowSpacing="8">
-                        <Button x:Name="BtnReportBack"
-                                HorizontalAlignment="Stretch"
-                                CornerRadius="8"
-                                Padding="12,10"
-                                Visibility="Collapsed"
-                                Click="BtnReportBack_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                                <FontIcon Glyph="&#xE72B;" FontSize="14" />
-                                <TextBlock x:Name="TextReportBack" Text="Quay lại kiểm tra" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
-                        <Button x:Name="BtnDone"
-                                Grid.Row="1"
-                                Style="{ThemeResource AccentButtonStyle}"
-                                HorizontalAlignment="Stretch"
-                                CornerRadius="8"
-                                Padding="12,10"
-                                Click="BtnDone_Click">
-                            <TextBlock x:Name="TextDone" Text="Hoàn tất" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                        </Button>
-                    </Grid>
                 </StackPanel>
             </StackPanel>
         </Grid>
+
+        <!-- ================= UNIFIED DIALOG FOOTER BAR ================= -->
+        <Border Grid.Row="3"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,12,0,2"
+                Margin="0,4,0,0">
+            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                <!-- Left: Contextual Indicators & Pagination -->
+                <Grid VerticalAlignment="Center">
+                    <!-- Step 1 Left: Data Format Detection Badge -->
+                    <StackPanel x:Name="FooterStep1Left" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8,4">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <FontIcon x:Name="FooterFormatIcon" Glyph="&#xE946;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Name="FooterFormatText" FontSize="11.5" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Step 2 Left: Pagination Navigation Strip -->
+                    <StackPanel x:Name="FooterStep2Left" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Visibility="Collapsed">
+                        <Button x:Name="BtnPreviewFirstPage" Padding="6,5" CornerRadius="6" Click="BtnPreviewFirstPage_Click">
+                            <FontIcon Glyph="&#xE892;" FontSize="11" />
+                        </Button>
+                        <Button x:Name="BtnPreviewPrevPage" Padding="6,5" CornerRadius="6" Click="BtnPreviewPrevPage_Click">
+                            <FontIcon Glyph="&#xE76B;" FontSize="11" />
+                        </Button>
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="10,4"
+                                Margin="4,0">
+                            <TextBlock x:Name="TextPreviewPagingInfo" Text="1 - 10 / 10 mục (Trang 1/1)" FontSize="11.5" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        </Border>
+                        <Button x:Name="BtnPreviewNextPage" Padding="6,5" CornerRadius="6" Click="BtnPreviewNextPage_Click">
+                            <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                        </Button>
+                        <Button x:Name="BtnPreviewLastPage" Padding="6,5" CornerRadius="6" Click="BtnPreviewLastPage_Click">
+                            <FontIcon Glyph="&#xE893;" FontSize="11" />
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Step 3 Left: Status Summary -->
+                    <StackPanel x:Name="FooterStep3Left" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Visibility="Collapsed">
+                        <TextBlock x:Name="FooterStep3StatusText" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Right: Unified Action Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <!-- Back Button: Used in Step 2 to return to Step 1, or in Step 3 to review errors -->
+                    <Button x:Name="BtnFooterBack"
+                            CornerRadius="8"
+                            Padding="14,8"
+                            Visibility="Collapsed"
+                            Click="BtnFooterBack_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE72B;" FontSize="12" />
+                            <TextBlock x:Name="TextFooterBack" Text="Quay lại" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Cancel Button: Always accessible across steps -->
+                    <Button x:Name="BtnFooterCancel"
+                            CornerRadius="8"
+                            Padding="14,8"
+                            Click="BtnFooterCancel_Click">
+                        <TextBlock x:Name="TextFooterCancel" Text="Hủy" />
+                    </Button>
+
+                    <!-- Step 1 Primary Action: Phân tích & Xem trước -->
+                    <Button x:Name="BtnAnalyzeNext"
+                            Style="{ThemeResource AccentButtonStyle}"
+                            CornerRadius="8"
+                            Padding="18,8"
+                            Click="BtnAnalyzeNext_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE721;" FontSize="13" />
+                            <TextBlock x:Name="TextAnalyzeNext" Text="Phân tích &amp; Xem trước" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Step 2 Primary Action: Tiến hành nhập / Import Selected (HERO ACTION) -->
+                    <Button x:Name="BtnCommitImport"
+                            Style="{ThemeResource AccentButtonStyle}"
+                            CornerRadius="8"
+                            Padding="18,8"
+                            Visibility="Collapsed"
+                            Click="BtnCommitImport_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ProgressRing x:Name="CommitButtonProgressRing"
+                                          Width="14" Height="14"
+                                          IsActive="False"
+                                          Visibility="Collapsed" />
+                            <FontIcon x:Name="IconCommitImport" Glyph="&#xE896;" FontSize="14" />
+                            <TextBlock x:Name="TextCommitImport" Text="Tiến hành nhập (0 mục)" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Step 3 Primary Action: Hoàn tất -->
+                    <Button x:Name="BtnDone"
+                            Style="{ThemeResource AccentButtonStyle}"
+                            CornerRadius="8"
+                            Padding="20,8"
+                            Visibility="Collapsed"
+                            Click="BtnDone_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE73E;" FontSize="13" />
+                            <TextBlock x:Name="TextDone" Text="Hoàn tất" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
-    </ScrollViewer>
 </ContentDialog>

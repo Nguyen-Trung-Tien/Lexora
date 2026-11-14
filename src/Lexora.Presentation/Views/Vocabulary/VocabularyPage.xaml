@@ -1130,7 +1130,7 @@
                     <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredContextUnits, Mode=OneWay}"
                                    Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                         <ItemsRepeater.Layout>
-                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="290" MinColumnSpacing="14" MinRowSpacing="14" ItemsStretch="Fill" />
+                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="310" MinColumnSpacing="14" MinRowSpacing="14" ItemsStretch="Fill" />
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate x:DataType="dto:ContextUnitDto">
@@ -1138,52 +1138,61 @@
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1" CornerRadius="8" Padding="16">
                                     <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
-                                        <!-- Header: CheckBox, Icon, Name, Word Count Badge -->
-                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10">
-                                            <!-- Multi-Select CheckBox -->
-                                            <CheckBox x:Name="UnitSelectionCheckBox"
-                                                      Tag="{x:Bind}"
-                                                      Loaded="UnitSelectionCheckBox_Loaded"
-                                                      Unloaded="UnitSelectionCheckBox_Unloaded"
-                                                      Click="UnitSelectionCheckBox_Click"
-                                                      MinWidth="32" MinHeight="32" Padding="0"
-                                                      VerticalAlignment="Center"
-                                                      Visibility="Collapsed" />
+                                        <!-- Header: Action/Meta Strip + Full-Width Title & Description -->
+                                        <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                                            <!-- Row 0: CheckBox, Icon, Word Count Badge, More Options Button -->
+                                            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                                                <!-- Multi-Select CheckBox -->
+                                                <CheckBox x:Name="UnitSelectionCheckBox"
+                                                          Tag="{x:Bind}"
+                                                          Loaded="UnitSelectionCheckBox_Loaded"
+                                                          Unloaded="UnitSelectionCheckBox_Unloaded"
+                                                          Click="UnitSelectionCheckBox_Click"
+                                                          MinWidth="28" MinHeight="28" Padding="0"
+                                                          VerticalAlignment="Center"
+                                                          Visibility="Collapsed" />
 
-                                            <Border Grid.Column="1" Width="42" Height="42" CornerRadius="10"
-                                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                    BorderThickness="1">
-                                                <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="18"
-                                                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
-                                                <TextBlock Text="{x:Bind Name}" FontWeight="Bold" FontSize="16" TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Text="{x:Bind Description}" FontSize="12"
-                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                           TextWrapping="Wrap" MaxLines="2" />
-                                            </StackPanel>
-
-                                            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
-                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                <Border Grid.Column="1" Width="38" Height="38" CornerRadius="8"
+                                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                        BorderThickness="1" CornerRadius="6" Padding="8,3">
-                                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="12" />
-                                                        <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Vocab_WordsSuffix')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                    </StackPanel>
+                                                        BorderThickness="1">
+                                                    <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="16"
+                                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                 </Border>
 
-                                                <!-- Context Unit More Options (Edit / Delete Topic) -->
-                                                <Button Tag="{x:Bind}"
-                                                        Click="TopicMoreButton_Click"
-                                                        Style="{ThemeResource SubtleButtonStyle}"
-                                                        Padding="6,3" CornerRadius="6"
-                                                        ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Action_Filter')}">
-                                                    <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Button>
+                                                <!-- Word Count Badge & More Options Button (Aligned Right) -->
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                            BorderThickness="1" CornerRadius="6" Padding="8,3">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <TextBlock Text="{x:Bind TotalWords}" FontWeight="Bold" FontSize="11.5" />
+                                                            <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Vocab_WordsSuffix')}" FontSize="11.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                        </StackPanel>
+                                                    </Border>
+
+                                                    <!-- Context Unit More Options (Edit / Delete Topic) -->
+                                                    <Button Tag="{x:Bind}"
+                                                            Click="TopicMoreButton_Click"
+                                                            Style="{ThemeResource SubtleButtonStyle}"
+                                                            Padding="6,4" CornerRadius="6"
+                                                            ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Action_Filter')}">
+                                                        <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <!-- Row 1: Full-Width Title & Optional Description (Never Truncates Prematurely!) -->
+                                            <StackPanel Grid.Row="1" Spacing="3">
+                                                <TextBlock Text="{x:Bind Name}"
+                                                           FontWeight="Bold" FontSize="15"
+                                                           TextWrapping="Wrap" MaxLines="2"
+                                                           ToolTipService.ToolTip="{x:Bind Name}" />
+                                                <TextBlock Text="{x:Bind Description}" FontSize="12"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           TextWrapping="Wrap" MaxLines="2"
+                                                           Visibility="{x:Bind Description, Converter={StaticResource NullToVisibilityConverter}}" />
                                             </StackPanel>
                                         </Grid>
 

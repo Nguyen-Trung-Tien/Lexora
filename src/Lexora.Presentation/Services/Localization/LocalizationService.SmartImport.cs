@@ -34,6 +34,7 @@ public partial class LocalizationService
         vi["SmartImport_DoneBtn"] = "Hoàn tất";
         vi["SmartImport_CommitSuccess"] = "Nhập dữ liệu thành công!";
         vi["SmartImport_LineCount"] = "{0} dòng, {1} ký tự";
+        vi["SmartImport_PagingFormat"] = "{0} - {1} / {2} (Trang {3}/{4})";
         vi["SmartImport_FormatDetected"] = "Định dạng nhận diện: {0}";
         vi["SmartImport_FormatUnknown"] = "Chưa nhận diện được định dạng";
         vi["SmartImport_NoContent"] = "Vui lòng chọn tệp hoặc dán nội dung để nhập.";
@@ -136,6 +137,7 @@ public partial class LocalizationService
         en["SmartImport_DoneBtn"] = "Done";
         en["SmartImport_CommitSuccess"] = "Import completed successfully!";
         en["SmartImport_LineCount"] = "{0} lines, {1} characters";
+        en["SmartImport_PagingFormat"] = "{0} - {1} / {2} (Page {3}/{4})";
         en["SmartImport_FormatDetected"] = "Detected Format: {0}";
         en["SmartImport_FormatUnknown"] = "Format not recognized yet";
         en["SmartImport_NoContent"] = "Please select a file or paste content to import.";
