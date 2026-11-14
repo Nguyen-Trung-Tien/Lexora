@@ -294,9 +294,9 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         _searchCts?.Cancel();
-        _searchCts?.Dispose();
-        _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
+        var cts = new CancellationTokenSource();
+        _searchCts = cts;
+        var token = cts.Token;
 
         _ = Task.Run(async () =>
         {
@@ -313,7 +313,7 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
                     }
                 });
             }
-            catch (OperationCanceledException) { }
+            catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException) { }
         }, token);
     }
 

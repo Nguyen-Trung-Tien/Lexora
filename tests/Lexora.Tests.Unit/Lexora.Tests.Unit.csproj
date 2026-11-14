@@ -27,12 +27,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\src\Lexora.Presentation\Services\LocalizationService.cs" Link="Services\LocalizationService.cs" />
-    <Compile Include="..\..\src\Lexora.Presentation\Services\ShortcutResolver.cs" Link="Services\ShortcutResolver.cs" />
-    <Compile Include="..\..\src\Lexora.Presentation\Services\IToastNotificationService.cs" Link="Services\IToastNotificationService.cs" />
-    <Compile Include="..\..\src\Lexora.Presentation\Services\ToastNotificationService.cs" Link="Services\ToastNotificationService.cs" />
-    <Compile Include="..\..\src\Lexora.Presentation\Services\IStartupOrchestrator.cs" Link="Services\IStartupOrchestrator.cs" />
-    <Compile Include="..\..\src\Lexora.Presentation\Services\StartupOrchestrator.cs" Link="Services\StartupOrchestrator.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\Localization\ILocalizationService.cs" Link="Services\Localization\ILocalizationService.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\Localization\LocalizationService.cs" Link="Services\Localization\LocalizationService.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\Shortcuts\ShortcutResolver.cs" Link="Services\Shortcuts\ShortcutResolver.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\Notifications\IToastNotificationService.cs" Link="Services\Notifications\IToastNotificationService.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\Notifications\ToastNotificationService.cs" Link="Services\Notifications\ToastNotificationService.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\Orchestration\IStartupOrchestrator.cs" Link="Services\Orchestration\IStartupOrchestrator.cs" />
+    <Compile Include="..\..\src\Lexora.Presentation\Services\Orchestration\StartupOrchestrator.cs" Link="Services\Orchestration\StartupOrchestrator.cs" />
   </ItemGroup>
 
 </Project>

@@ -22,7 +22,10 @@ if (Test-Path $initializerFile) {
 }
 
 # 2. Verify 16-byte SQLite Magic Header Verification in Backup Service
-$backupServiceFile = "src/Lexora.Infrastructure/Services/DatabaseBackupService.cs"
+$backupServiceFile = "src/Lexora.Infrastructure/Services/Backup/DatabaseBackupService.cs"
+if (-not (Test-Path $backupServiceFile)) {
+    $backupServiceFile = "src/Lexora.Infrastructure/Services/DatabaseBackupService.cs"
+}
 if (Test-Path $backupServiceFile) {
     $backupContent = Get-Content $backupServiceFile -Raw
     if ($backupContent -notmatch 'SQLite format 3' -and $backupContent -notmatch '0x53') {

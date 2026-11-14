@@ -806,9 +806,9 @@
                         <TextBlock Text="{x:Bind Loc.GetString('Dashboard_NoRecentSessions')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="440" TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <ListView ItemsSource="{x:Bind ViewModel.RecentSessionsList}" SelectionMode="None"
-                              Visibility="{x:Bind ViewModel.HasRecentSessions, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <ListView.ItemTemplate>
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.RecentSessionsList}"
+                                  Visibility="{x:Bind ViewModel.HasRecentSessions, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="dto:StudySessionDto">
                                 <Grid ColumnDefinitions="160,*,Auto,Auto" Padding="8,10" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                     <StackPanel VerticalAlignment="Center">
@@ -830,8 +830,8 @@
                                     <TextBlock Grid.Column="3" Text="{x:Bind DurationText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                 </Grid>
                             </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
             </Border>
 

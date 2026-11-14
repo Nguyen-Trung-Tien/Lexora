@@ -348,9 +348,9 @@ public sealed partial class ShellPage : Page
             return;
 
         _searchCts?.Cancel();
-        _searchCts?.Dispose();
-        _searchCts = new CancellationTokenSource();
-        var ct = _searchCts.Token;
+        var cts = new CancellationTokenSource();
+        _searchCts = cts;
+        var ct = cts.Token;
 
         var query = sender.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(query))
@@ -364,7 +364,7 @@ public sealed partial class ShellPage : Page
             // Debounce delay to prevent flooding SQLite/EF Core on every keystroke
             await Task.Delay(250, ct);
         }
-        catch (OperationCanceledException)
+        catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException)
         {
             return;
         }

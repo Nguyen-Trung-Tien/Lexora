@@ -316,15 +316,15 @@ Lexora/
 │   ├── Lexora.Application/                   # Application layer (Services, DTOs, Interfaces)
 │   │   ├── DTOs/                             # WordDto, GrammarRuleDto, StudySessionDto, RoadmapNodeDto, MilestoneDto, StudyRoadmapDto
 │   │   ├── Interfaces/                       # IVocabularyService, IReviewService, IRoadmapService, IPronunciationListeningLabService, etc.
-│   │   └── Services/                         # VocabularyService, RoadmapEngine, RoadmapService, Sm2SpacedRepetitionEngine, FsrsSpacedRepetitionEngine
+│   │   └── Services/                         # Domain-structured services (Vocabulary, Grammar, Homophones, KnowledgeGraph, LearningStorage, Pronunciation, Review, Roadmap, Search, Statistics, Test, Common)
 │   ├── Lexora.Infrastructure/                # Infrastructure layer (EF Core, Audio, SQLite, Updates)
 │   │   ├── Data/                             # LexoraDbContext, SqliteDatabaseInitializer, UnitOfWork
 │   │   ├── Repositories/                     # VocabularyRepository, ReviewRepository, RoadmapRepository, LearningStorageRepository
-│   │   └── Services/                         # AudioPlayerService, DatabaseBackupService, UpdateService
+│   │   └── Services/                         # Modular infrastructure services (Audio, Backup, Notifications, Preferences, Updates)
 │   └── Lexora.Presentation/                  # WinUI 3 client application
 │       ├── Assets/                           # App icons, splash screens, brand assets
 │       ├── Converters/                       # BoolToVisibility, HeatmapLevelToBrush, etc.
-│       ├── Services/                         # LocalizationService, ThemeService
+│       ├── Services/                         # Presentation services & contracts (Audio, Localization, Navigation, Theming, Shortcuts, Notifications, Orchestration, Extensions)
 │       ├── ViewModels/                       # DashboardViewModel, RoadmapViewModel, VocabularyViewModel, LearningStorageViewModel, etc.
 │       └── Views/                            # ShellPage, DashboardPage, RoadmapPage, VocabularyPage, ListeningLabDialog, etc.
 ├── tests/

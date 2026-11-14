@@ -5,7 +5,10 @@ param (
 )
 
 $ErrorActionPreference = "Stop"
-$locServiceFile = "src/Lexora.Presentation/Services/LocalizationService.cs"
+$locServiceFile = "src/Lexora.Presentation/Services/Localization/LocalizationService.cs"
+if (-not (Test-Path $locServiceFile)) {
+    $locServiceFile = "src/Lexora.Presentation/Services/LocalizationService.cs"
+}
 
 if (-not (Test-Path $locServiceFile)) {
     Write-Error "LocalizationService.cs not found at '$locServiceFile'"

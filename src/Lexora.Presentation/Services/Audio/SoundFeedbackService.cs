@@ -4,16 +4,6 @@ using Windows.Storage.Streams;
 
 namespace Lexora.Presentation.Services;
 
-public interface ISoundFeedbackService
-{
-    void PlayCardFlipSound();
-    void PlaySoftTapSound();
-    void PlayReviewCompleteSound();
-    void PlayStreakSound();
-    void PlaySuccessSound();
-    void PlayErrorSound();
-}
-
 /// <summary>
 /// High-performance, offline sound feedback service for Fluent UI desktop interactions.
 /// Synthesizes pleasant harmonic sine chimes in memory and plays via native WinRT MediaPlayer.

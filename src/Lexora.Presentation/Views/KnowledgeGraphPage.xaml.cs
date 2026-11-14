@@ -548,7 +548,6 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
         {
             _headerSearchCts?.Cancel();
-            _headerSearchCts?.Dispose();
             var cts = new CancellationTokenSource();
             _headerSearchCts = cts;
 
@@ -563,7 +562,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
                     sender.ItemsSource = ViewModel.SearchSuggestions;
                 }
             }
-            catch (OperationCanceledException)
+            catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException)
             {
                 // Ignore cancelled keystroke debounce
             }
