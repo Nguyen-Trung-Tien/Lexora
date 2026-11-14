@@ -622,4 +622,261 @@ public class SmartImportWorkflowTests
         result.TotalErrors.Should().Be(0);
         result.TotalImported.Should().Be(1);
     }
+
+    [Fact]
+    public async Task AnalyzeSmartImportAsync_UserTenWordsJson_ShouldParseAllWordsWithPhrasalVerbAndNestedStructures()
+    {
+        // Arrange
+        var json = """
+        [
+          {
+            "term": "maternity leave",
+            "phoneticUk": "/məˈtɜː.nə.ti ˌliːv/",
+            "phoneticUs": "/məˈtɝː.nə.t̬i ˌliːv/",
+            "level": "B2",
+            "primaryPartOfSpeech": "Noun",
+            "notes": "Từ mở rộng: 'paternity leave'.",
+            "meanings": [
+              {
+                "partOfSpeech": "Noun",
+                "definitionVi": "chế độ nghỉ thai sản",
+                "definitionEn": "a period of absence from work granted to a mother",
+                "examples": [
+                  {
+                    "sentenceEn": "She is currently on maternity leave and will return in September.",
+                    "sentenceVi": "Cô ấy hiện đang nghỉ thai sản và sẽ quay trở lại vào tháng Chín."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "promotion",
+            "phoneticUk": "/prəˈməʊ.ʃən/",
+            "phoneticUs": "/prəˈmoʊ.ʃən/",
+            "level": "B1",
+            "primaryPartOfSpeech": "Noun",
+            "meanings": [
+              {
+                "partOfSpeech": "Noun",
+                "definitionVi": "sự thăng chức, sự đề bạt",
+                "definitionEn": "advancement in rank or position",
+                "examples": [
+                  {
+                    "sentenceEn": "David finally earned a promotion to senior analyst.",
+                    "sentenceVi": "David cuối cùng đã được thăng chức lên chuyên viên phân tích cấp cao."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "career",
+            "phoneticUk": "/kəˈrɪər/",
+            "phoneticUs": "/kəˈrɪr/",
+            "level": "A2",
+            "primaryPartOfSpeech": "Noun",
+            "meanings": [
+              {
+                "partOfSpeech": "Noun",
+                "definitionVi": "sự nghiệp, nghề nghiệp lâu dài",
+                "definitionEn": "an occupation undertaken for a significant period of a person's life",
+                "examples": [
+                  {
+                    "sentenceEn": "This corporation offers excellent opportunities for long-term career growth.",
+                    "sentenceVi": "Tập đoàn này mang lại những cơ hội tuyệt vời để phát triển sự nghiệp lâu dài."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "retire",
+            "phoneticUk": "/rɪˈtaɪər/",
+            "phoneticUs": "/rɪˈtaɪr/",
+            "level": "B1",
+            "primaryPartOfSpeech": "Verb",
+            "meanings": [
+              {
+                "partOfSpeech": "Verb",
+                "definitionVi": "nghỉ hưu, về hưu",
+                "definitionEn": "leave one's job and cease to work",
+                "examples": [
+                  {
+                    "sentenceEn": "Our vice president plans to retire at the end of this year.",
+                    "sentenceVi": "Phó chủ tịch của chúng tôi dự định nghỉ hưu vào cuối năm nay."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "lay off",
+            "phoneticUk": "/ˌleɪ ˈɒf/",
+            "phoneticUs": "/ˌleɪ ˈɑːf/",
+            "level": "B2",
+            "primaryPartOfSpeech": "Phrasal Verb",
+            "meanings": [
+              {
+                "partOfSpeech": "Phrasal Verb",
+                "definitionVi": "cho thôi việc, cắt giảm nhân sự",
+                "definitionEn": "discharge a worker temporarily or permanently",
+                "examples": [
+                  {
+                    "sentenceEn": "The manufacturer was forced to lay off fifty factory workers.",
+                    "sentenceVi": "Nhà sản xuất buộc phải cho năm mươi công nhân nhà máy thôi việc."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "terminate",
+            "phoneticUk": "/ˈtɜː.mɪ.neɪt/",
+            "phoneticUs": "/ˈtɝː.mə.neɪt/",
+            "level": "C1",
+            "primaryPartOfSpeech": "Verb",
+            "meanings": [
+              {
+                "partOfSpeech": "Verb",
+                "definitionVi": "chấm dứt hợp đồng, sa thải",
+                "definitionEn": "bring to an end",
+                "examples": [
+                  {
+                    "sentenceEn": "The company decided to terminate his contract immediately.",
+                    "sentenceVi": "Công ty đã quyết định chấm dứt hợp đồng của anh ấy ngay lập tức."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "probation",
+            "phoneticUk": "/prəˈbeɪ.ʃən/",
+            "phoneticUs": "/proʊˈbeɪ.ʃən/",
+            "level": "B2",
+            "primaryPartOfSpeech": "Noun",
+            "meanings": [
+              {
+                "partOfSpeech": "Noun",
+                "definitionVi": "thời gian thử việc",
+                "definitionEn": "a period of trial to test ability or qualifications",
+                "examples": [
+                  {
+                    "sentenceEn": "All newly hired developers must undergo a two-month probation.",
+                    "sentenceVi": "Tất cả các lập trình viên mới được tuyển dụng đều phải trải qua hai tháng thử việc."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "pension",
+            "phoneticUk": "/ˈpen.ʃən/",
+            "phoneticUs": "/ˈpen.ʃən/",
+            "level": "B2",
+            "primaryPartOfSpeech": "Noun",
+            "meanings": [
+              {
+                "partOfSpeech": "Noun",
+                "definitionVi": "tiền lương hưu",
+                "definitionEn": "a regular payment made during a person's retirement",
+                "examples": [
+                  {
+                    "sentenceEn": "Employees contribute a fixed percentage of salary to their retirement pension.",
+                    "sentenceVi": "Nhân viên đóng góp một tỷ lệ lương cố định vào quỹ lương hưu."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "overtime",
+            "phoneticUk": "/ˈəʊ.və.taɪm/",
+            "phoneticUs": "/ˈoʊ.vɚ.taɪm/",
+            "level": "B1",
+            "primaryPartOfSpeech": "Noun",
+            "meanings": [
+              {
+                "partOfSpeech": "Noun",
+                "definitionVi": "giờ làm thêm, tiền làm ngoài giờ",
+                "definitionEn": "time worked beyond regular hours",
+                "examples": [
+                  {
+                    "sentenceEn": "Engineers worked overtime to meet the release deadline.",
+                    "sentenceVi": "Các kỹ sư đã làm việc thêm giờ để kịp hạn chót phát hành."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          },
+          {
+            "term": "resignation",
+            "phoneticUk": "/ˌrez.ɪɡˈneɪ.ʃən/",
+            "phoneticUs": "/ˌrez.ɪɡˈneɪ.ʃən/",
+            "level": "B2",
+            "primaryPartOfSpeech": "Noun",
+            "meanings": [
+              {
+                "partOfSpeech": "Noun",
+                "definitionVi": "đơn từ chức, sự từ chức",
+                "definitionEn": "an act of giving up a position or office",
+                "examples": [
+                  {
+                    "sentenceEn": "She tendered her formal resignation to the CEO yesterday.",
+                    "sentenceVi": "Cô ấy đã nộp đơn từ chức chính thức lên Tổng giám đốc vào ngày hôm qua."
+                  }
+                ]
+              }
+            ],
+            "topics": ["Recruitment & HR"],
+            "examTags": ["TOEIC", "IELTS"]
+          }
+        ]
+        """;
+
+        _mockVocabRepo.Setup(r => r.GetByTermAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word?)null);
+
+        // Act
+        var result = await _service.AnalyzeSmartImportAsync(json, "words.json");
+
+        // Assert
+        result.Should().NotBeNull();
+        result.DetectedFormat.Should().Be(DataFormat.Json);
+        result.TotalParsed.Should().Be(10);
+        result.ValidCount.Should().Be(10);
+        result.DuplicateCount.Should().Be(0);
+
+        // Verify "lay off" has PhrasalVerb
+        var layOff = result.PreviewItems.First(x => x.Term == "lay off");
+        layOff.PartOfSpeech.Should().Be(PartOfSpeech.PhrasalVerb);
+        layOff.Level.Should().Be(CefrLevel.B2);
+        layOff.PhoneticUk.Should().Be("/ˌleɪ ˈɒf/");
+        layOff.DefinitionVi.Should().Be("cho thôi việc, cắt giảm nhân sự");
+        layOff.Topics.Should().Contain("Recruitment & HR");
+        layOff.ExamTags.Should().Contain("TOEIC");
+        layOff.ExamTags.Should().Contain("IELTS");
+        layOff.RichMeanings.Should().HaveCount(1);
+        layOff.RichMeanings[0].Examples.Should().HaveCount(1);
+        layOff.RichMeanings[0].Examples[0].SentenceEn.Should().Contain("lay off fifty factory workers");
+    }
 }

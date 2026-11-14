@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Entities;
@@ -26,14 +27,90 @@ public class ExportImportService : IExportImportService
     private readonly IVocabularyRepository _vocabRepo;
     private readonly IUnitOfWork _unitOfWork;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    public static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        Converters = { new JsonStringEnumConverter() }
+        Converters =
+        {
+            new FlexiblePartOfSpeechJsonConverter(),
+            new FlexibleCefrLevelJsonConverter(),
+            new FlexibleStringListJsonConverter(),
+            new FlexibleExampleListJsonConverter(),
+            new JsonStringEnumConverter()
+        }
     };
+
+    public static string StripMarkdownCodeFence(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+        var trimmed = input.TrimStart('\uFEFF', ' ', '\t', '\r', '\n');
+        if (trimmed.StartsWith("```", StringComparison.Ordinal))
+        {
+            int firstNl = trimmed.IndexOf('\n');
+            if (firstNl >= 0)
+            {
+                trimmed = trimmed.Substring(firstNl + 1);
+            }
+            int lastFence = trimmed.LastIndexOf("```", StringComparison.Ordinal);
+            if (lastFence >= 0)
+            {
+                trimmed = trimmed.Substring(0, lastFence);
+            }
+            trimmed = trimmed.Trim();
+        }
+        return trimmed;
+    }
+
+    public static List<WordExportModel> DeserializeWordsJson(string rawContent)
+    {
+        var cleanJson = StripMarkdownCodeFence(rawContent);
+        if (string.IsNullOrWhiteSpace(cleanJson)) return new List<WordExportModel>();
+
+        // Fast path: direct array
+        if (cleanJson.StartsWith('['))
+        {
+            return JsonSerializer.Deserialize<List<WordExportModel>>(cleanJson, JsonOptions) ?? new List<WordExportModel>();
+        }
+
+        // Object path: inspect with JsonDocument
+        if (cleanJson.StartsWith('{'))
+        {
+            using var doc = JsonDocument.Parse(cleanJson);
+            var root = doc.RootElement;
+
+            // Check common array properties
+            string[] candidates = ["words", "data", "items", "vocabulary", "vocab", "list", "content", "records"];
+            foreach (var propName in candidates)
+            {
+                if (root.TryGetProperty(propName, out var arrayEl) && arrayEl.ValueKind == JsonValueKind.Array)
+                {
+                    return JsonSerializer.Deserialize<List<WordExportModel>>(arrayEl.GetRawText(), JsonOptions) ?? new List<WordExportModel>();
+                }
+            }
+
+            // Check if any property in root is an Array
+            foreach (var prop in root.EnumerateObject())
+            {
+                if (prop.Value.ValueKind == JsonValueKind.Array)
+                {
+                    return JsonSerializer.Deserialize<List<WordExportModel>>(prop.Value.GetRawText(), JsonOptions) ?? new List<WordExportModel>();
+                }
+            }
+
+            // Single word object check
+            if (root.TryGetProperty("term", out _) || root.TryGetProperty("word", out _))
+            {
+                var single = JsonSerializer.Deserialize<WordExportModel>(cleanJson, JsonOptions);
+                return single != null ? [single] : new List<WordExportModel>();
+            }
+        }
+
+        // Fallback
+        return JsonSerializer.Deserialize<List<WordExportModel>>(cleanJson, JsonOptions) ?? new List<WordExportModel>();
+    }
 
     public ExportImportService(IVocabularyRepository vocabRepo, IUnitOfWork unitOfWork)
     {
@@ -413,7 +490,7 @@ public class ExportImportService : IExportImportService
 
             try
             {
-                var jsonWords = JsonSerializer.Deserialize<List<WordExportModel>>(content, JsonOptions) ?? new();
+                var jsonWords = DeserializeWordsJson(content);
                 int rowIdx = 0;
                 foreach (var jw in jsonWords)
                 {
@@ -507,8 +584,10 @@ public class ExportImportService : IExportImportService
                         .Where(s => !string.IsNullOrWhiteSpace(s))
                         .ToList();
                     string? exText = allExamples.Count > 0 ? string.Join(" | ", allExamples) : (!string.IsNullOrWhiteSpace(jw.Examples) ? jw.Examples : null);
-                    string? topicsText = jw.Topics != null && jw.Topics.Count > 0 ? string.Join("; ", jw.Topics) : null;
-                    string? examsText = jw.ExamTags != null && jw.ExamTags.Count > 0 ? string.Join("; ", jw.ExamTags) : null;
+                    var resolvedTopics = jw.ResolvedTopics;
+                    string? topicsText = resolvedTopics.Count > 0 ? string.Join("; ", resolvedTopics) : null;
+                    var resolvedExamTags = jw.ResolvedExamTags;
+                    string? examsText = resolvedExamTags.Count > 0 ? string.Join("; ", resolvedExamTags) : null;
 
                     string? validationMsg = null;
                     if (!isTermValid) validationMsg = "Thuật ngữ không được để trống / Term is required.";
@@ -526,8 +605,8 @@ public class ExportImportService : IExportImportService
                         PartOfSpeech: primaryPos,
                         DefinitionVi: defVi,
                         DefinitionEn: defEn,
-                        PhoneticUk: jw.PhoneticUk,
-                        PhoneticUs: jw.PhoneticUs,
+                        PhoneticUk: jw.ResolvedPhoneticUk,
+                        PhoneticUs: jw.ResolvedPhoneticUs,
                         Examples: exText,
                         Topics: topicsText,
                         ExamTags: examsText,
@@ -541,9 +620,36 @@ public class ExportImportService : IExportImportService
                     ));
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                format = DataFormat.Txt;
+                var trimmed = StripMarkdownCodeFence(content).TrimStart();
+                if (!trimmed.StartsWith('{') && !trimmed.StartsWith('['))
+                {
+                    format = DataFormat.Txt;
+                }
+                else
+                {
+                    previewItems.Add(new SmartImportItemDto(
+                        RowIndex: 1,
+                        Term: "Lỗi định dạng JSON / Invalid JSON",
+                        Level: CefrLevel.None,
+                        PartOfSpeech: PartOfSpeech.Noun,
+                        DefinitionVi: string.Empty,
+                        DefinitionEn: null,
+                        PhoneticUk: null,
+                        PhoneticUs: null,
+                        Examples: null,
+                        Topics: null,
+                        ExamTags: null,
+                        Notes: ex.Message,
+                        IsDuplicate: false,
+                        IsValid: false,
+                        ValidationMessage: $"Cấu trúc JSON không hợp lệ: {ex.Message}",
+                        IsSelected: false,
+                        RichMeanings: [],
+                        AllPartsOfSpeech: []
+                    ));
+                }
             }
         }
 
@@ -1163,7 +1269,7 @@ public class ExportImportService : IExportImportService
 
         try
         {
-            var list = JsonSerializer.Deserialize<List<WordExportModel>>(trimmedJson, JsonOptions);
+            var list = DeserializeWordsJson(trimmedJson);
             if (list == null || list.Count == 0)
             {
                 return new ImportResult(0, 0, new List<string> { "JSON data is empty or invalid" }, 0);
@@ -1237,8 +1343,8 @@ public class ExportImportService : IExportImportService
                             if (conflictResolution == ImportConflictResolution.Overwrite)
                             {
                                 if (item.Level != CefrLevel.None) existing.Level = item.Level;
-                                if (!string.IsNullOrWhiteSpace(item.PhoneticUk)) existing.PhoneticUk = item.PhoneticUk;
-                                if (!string.IsNullOrWhiteSpace(item.PhoneticUs)) existing.PhoneticUs = item.PhoneticUs;
+                                if (!string.IsNullOrWhiteSpace(item.ResolvedPhoneticUk)) existing.PhoneticUk = item.ResolvedPhoneticUk;
+                                if (!string.IsNullOrWhiteSpace(item.ResolvedPhoneticUs)) existing.PhoneticUs = item.ResolvedPhoneticUs;
                                 if (!string.IsNullOrWhiteSpace(item.Notes)) existing.Notes = item.Notes;
                                 if (item.PrimaryPartOfSpeech != 0) existing.PrimaryPartOfSpeech = item.PrimaryPartOfSpeech;
                                 existing.UpdatedAt = DateTime.UtcNow;
@@ -1297,9 +1403,9 @@ public class ExportImportService : IExportImportService
 
                                 // Link topics
                                 var newTopics = new List<WordTopic>();
-                                foreach (var tname in item.Topics)
+                                foreach (var tname in item.ResolvedTopics)
                                 {
-                                    var lower = tname.ToLowerInvariant();
+                                    var lower = tname.Trim().ToLowerInvariant();
                                     if (!allTopics.TryGetValue(lower, out var topic))
                                     {
                                         topic = new Topic { Name = tname.Trim() };
@@ -1320,9 +1426,9 @@ public class ExportImportService : IExportImportService
 
                                 // Link exam tags
                                 var newTags = new List<WordExamTag>();
-                                foreach (var etname in item.ExamTags)
+                                foreach (var etname in item.ResolvedExamTags)
                                 {
-                                    var lower = etname.ToLowerInvariant();
+                                    var lower = etname.Trim().ToLowerInvariant();
                                     if (!allExamTags.TryGetValue(lower, out var examTag))
                                     {
                                         var examType = ExamType.General;
@@ -1364,8 +1470,8 @@ public class ExportImportService : IExportImportService
                         {
                             Term = term,
                             NormalizedTerm = normalized,
-                            PhoneticUk = item.PhoneticUk,
-                            PhoneticUs = item.PhoneticUs,
+                            PhoneticUk = item.ResolvedPhoneticUk,
+                            PhoneticUs = item.ResolvedPhoneticUs,
                             Level = item.Level,
                             PrimaryPartOfSpeech = primaryPos,
                             Notes = item.Notes
@@ -1424,9 +1530,9 @@ public class ExportImportService : IExportImportService
                         }
 
                         // Link topics
-                        foreach (var tname in item.Topics)
+                        foreach (var tname in item.ResolvedTopics)
                         {
-                            var lower = tname.ToLowerInvariant();
+                            var lower = tname.Trim().ToLowerInvariant();
                             if (!allTopics.TryGetValue(lower, out var topic))
                             {
                                 topic = new Topic { Name = tname.Trim() };
@@ -1437,9 +1543,9 @@ public class ExportImportService : IExportImportService
                         }
 
                         // Link exam tags
-                        foreach (var etname in item.ExamTags)
+                        foreach (var etname in item.ResolvedExamTags)
                         {
-                            var lower = etname.ToLowerInvariant();
+                            var lower = etname.Trim().ToLowerInvariant();
                             if (!allExamTags.TryGetValue(lower, out var examTag))
                             {
                                 var examType = ExamType.General;
