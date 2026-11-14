@@ -11,6 +11,7 @@ using Lexora.Presentation.Views.Help;
 using Lexora.Presentation.Views.Homophones;
 using Lexora.Presentation.Views.KnowledgeGraph;
 using Lexora.Presentation.Views.LearningStorage;
+using Lexora.Presentation.Views.Phrases;
 using Lexora.Presentation.Views.Review;
 using Lexora.Presentation.Views.Roadmap;
 using Lexora.Presentation.Views.Settings;
@@ -105,6 +106,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 AddIsolatedScopedViewModel<TestViewModel>(services);
                 AddIsolatedScopedViewModel<GrammarViewModel>(services);
                 AddIsolatedScopedViewModel<HomophonesViewModel>(services);
+                AddIsolatedScopedViewModel<PhrasesViewModel>(services);
                 AddIsolatedScopedViewModel<KnowledgeGraphViewModel>(services);
                 AddIsolatedScopedViewModel<LearningStorageViewModel>(services);
                 AddIsolatedScopedViewModel<SettingsViewModel>(services);
@@ -116,6 +118,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddTransient<RoadmapPage>();
                 services.AddTransient<VocabularyPage>();
                 services.AddTransient<HomophonesPage>();
+                services.AddTransient<PhrasesPage>();
                 services.AddTransient<KnowledgeGraphPage>();
                 services.AddTransient<ReviewPage>();
                 services.AddTransient<TestPage>();

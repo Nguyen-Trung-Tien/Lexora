@@ -1,5 +1,6 @@
 using Lexora.Application.Interfaces;
 using Lexora.Application.Services;
+using Lexora.Application.Services.Phrases;
 using Lexora.Application.SpacedRepetition;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -39,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<IHomophoneExportImportService, HomophoneExportImportService>();
         services.AddScoped<IKnowledgeGraphExportImportService, KnowledgeGraphExportImportService>();
         services.AddScoped<IRoadmapService, RoadmapService>();
+        services.AddScoped<IConversationPhraseService, ConversationPhraseService>();
 
         return services;
     }

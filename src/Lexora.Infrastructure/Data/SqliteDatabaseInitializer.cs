@@ -1,4 +1,5 @@
 using Lexora.Domain.Entities;
+using Lexora.Domain.Entities.Phrases;
 using Lexora.Domain.Enums;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,12 @@ public class SqliteDatabaseInitializer
                 {
                     _logger.LogInformation("Seeding starter homophones and phonetic confusions...");
                     await SeedHomophoneStarterDataAsync(cancellationToken);
+                }
+
+                if (!await _context.ConversationPhrases.AnyAsync(cancellationToken))
+                {
+                    _logger.LogInformation("Seeding starter conversation phrases and common scenarios...");
+                    await SeedPhraseStarterDataAsync(cancellationToken);
                 }
 
                 _logger.LogInformation("SQLite database initialized successfully.");
@@ -518,6 +525,31 @@ public class SqliteDatabaseInitializer
                 """;
             await _context.Database.ExecuteSqlRawAsync(createRoadmapsTablesSql, cancellationToken);
 
+            const string createPhrasesTableSql = """
+                CREATE TABLE IF NOT EXISTS "ConversationPhrases" (
+                    "Id" TEXT NOT NULL CONSTRAINT "PK_ConversationPhrases" PRIMARY KEY,
+                    "Category" TEXT NOT NULL,
+                    "ContextTag" TEXT NOT NULL DEFAULT '',
+                    "PromptSentence" TEXT NOT NULL,
+                    "PromptTranslation" TEXT NOT NULL,
+                    "SampleResponse" TEXT NOT NULL,
+                    "ResponseTranslation" TEXT NOT NULL,
+                    "AdditionalSuggestions" TEXT NOT NULL DEFAULT '',
+                    "CefrLevel" INTEGER NOT NULL DEFAULT 3,
+                    "IsFavorite" INTEGER NOT NULL DEFAULT 0,
+                    "NormalizedPrompt" TEXT NOT NULL DEFAULT '',
+                    "NormalizedResponse" TEXT NOT NULL DEFAULT '',
+                    "CreatedAt" TEXT NOT NULL,
+                    "UpdatedAt" TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_Category" ON "ConversationPhrases" ("Category");
+                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_CefrLevel" ON "ConversationPhrases" ("CefrLevel");
+                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_IsFavorite" ON "ConversationPhrases" ("IsFavorite");
+                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_CreatedAt" ON "ConversationPhrases" ("CreatedAt");
+                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_NormalizedPrompt" ON "ConversationPhrases" ("NormalizedPrompt");
+                """;
+            await _context.Database.ExecuteSqlRawAsync(createPhrasesTableSql, cancellationToken);
+
             // Ensure ReferenceName column exists on RoadmapNodes for existing databases
             using (var checkCmd = connection.CreateCommand())
             {
@@ -911,5 +943,205 @@ public class SqliteDatabaseInitializer
         await _context.HomophoneGroups.AddRangeAsync(groups, ct);
         await _context.SaveChangesAsync(ct);
         _logger.LogInformation("Successfully seeded {Count} starter homophone groups.", groups.Count);
+    }
+
+    private async Task SeedPhraseStarterDataAsync(CancellationToken ct)
+    {
+        var phrases = new List<ConversationPhrase>
+        {
+            // Category 1: Greetings & Introductions
+            new()
+            {
+                Category = "Greetings & Introductions",
+                ContextTag = "Daily Greeting",
+                PromptSentence = "Good morning! How are you doing today?",
+                PromptTranslation = "Chào buổi sáng! Hôm nay bạn thế nào?",
+                SampleResponse = "Good morning! I'm doing really well, thank you. How about yourself?",
+                ResponseTranslation = "Chào buổi sáng! Tôi rất khỏe, cảm ơn bạn. Còn bạn thì sao?",
+                AdditionalSuggestions = "• Formal: \"Good morning, Mr./Ms. [Name]. I trust you had a restful weekend?\"\n• Casual: \"Morning! How's everything going?\"\n• Pro Tip: Luôn đối đáp lại bằng \"How about yourself?\" hoặc \"And you?\" để giữ phép lịch sự tự nhiên.",
+                CefrLevel = CefrLevel.A2,
+                IsFavorite = true
+            },
+            new()
+            {
+                Category = "Greetings & Introductions",
+                ContextTag = "First Meeting",
+                PromptSentence = "It's a great pleasure to finally meet you in person.",
+                PromptTranslation = "Rất hân hạnh khi cuối cùng cũng được gặp trực tiếp bạn.",
+                SampleResponse = "Likewise! I've been really looking forward to our collaboration.",
+                ResponseTranslation = "Tôi cũng vậy! Tôi đã rất mong chờ sự hợp tác giữa chúng ta.",
+                AdditionalSuggestions = "• Business Formal: \"The pleasure is all mine. Thank you for taking the time to meet today.\"\n• Vocabulary: \"Likewise\" là từ đối đáp lịch thiệp thay cho \"Me too\".",
+                CefrLevel = CefrLevel.B1,
+                IsFavorite = true
+            },
+            new()
+            {
+                Category = "Greetings & Introductions",
+                ContextTag = "New Member",
+                PromptSentence = "I'd like to introduce myself. My name is Alex, and I just joined the product team.",
+                PromptTranslation = "Tôi xin phép được giới thiệu bản thân. Tên tôi là Alex và tôi vừa gia nhập đội ngũ phát triển sản phẩm.",
+                SampleResponse = "Welcome aboard, Alex! It's fantastic to have you on the team. Let me know if you need any help settling in.",
+                ResponseTranslation = "Chào mừng bạn gia nhập công ty, Alex! Rất tuyệt khi có bạn trong đội ngũ. Hãy cho tôi biết nếu bạn cần giúp đỡ gì để hòa nhập nhé.",
+                AdditionalSuggestions = "• Idioms: \"Welcome aboard\" (chào mừng gia nhập), \"settle in\" (làm quen, ổn định môi trường mới).\n• Casual: \"Hey Alex, great to meet you! Excited to collaborate!\"",
+                CefrLevel = CefrLevel.B1
+            },
+
+            // Category 2: Workplace & Office
+            new()
+            {
+                Category = "Workplace & Office",
+                ContextTag = "Project Status",
+                PromptSentence = "Could you please give me a quick status update on the quarterly report?",
+                PromptTranslation = "Bạn có thể cập nhật nhanh cho tôi tình hình báo cáo quý được không?",
+                SampleResponse = "Certainly! We have finalized the financial summary and are currently reviewing the executive metrics. It will be ready by 3 PM.",
+                ResponseTranslation = "Chắc chắn rồi! Chúng tôi đã chốt xong bản tóm tắt tài chính và hiện đang rà soát các chỉ số điều hành. Báo cáo sẽ sẵn sàng trước 3 giờ chiều.",
+                AdditionalSuggestions = "• Collocations: \"ahead of schedule\" (vượt tiến độ), \"on track\" (đúng tiến độ), \"finalized the draft\" (chốt bản thảo).\n• Follow-up: \"Would you like a preliminary walkthrough before the final submission?\"",
+                CefrLevel = CefrLevel.B2,
+                IsFavorite = true
+            },
+            new()
+            {
+                Category = "Workplace & Office",
+                ContextTag = "Scheduling",
+                PromptSentence = "Would you mind if we rescheduled our sync meeting to tomorrow morning?",
+                PromptTranslation = "Bạn có phiền nếu chúng ta dời cuộc họp trao đổi sang sáng mai không?",
+                SampleResponse = "Not at all! Tomorrow morning works perfectly for me. Does 9:30 AM suit your calendar?",
+                ResponseTranslation = "Không sao cả! Sáng mai hoàn toàn phù hợp với tôi. Lúc 9:30 sáng có tiện lịch của bạn không?",
+                AdditionalSuggestions = "• Grammar Note: Khi được hỏi \"Would you mind...?\", câu trả lời \"Not at all\" hoặc \"No problem\" biểu thị sự đồng ý (không thấy phiền).",
+                CefrLevel = CefrLevel.B2
+            },
+            new()
+            {
+                Category = "Workplace & Office",
+                ContextTag = "Proposal",
+                PromptSentence = "I'd like to propose a minor adjustment to our delivery timeline.",
+                PromptTranslation = "Tôi muốn đề xuất một điều chỉnh nhỏ đối với mốc thời gian bàn giao của chúng ta.",
+                SampleResponse = "I understand. Could you please share the rationale behind the adjustment and how it mitigates potential risks?",
+                ResponseTranslation = "Tôi hiểu rồi. Bạn có thể chia sẻ lý do đằng sau đề xuất điều chỉnh này và cách nó giảm thiểu các rủi ro tiềm ẩn không?",
+                AdditionalSuggestions = "• Advanced vocab: \"mitigate risks\" (giảm thiểu rủi ro), \"rationale behind\" (lý do căn bản), \"delivery timeline\" (tiến độ bàn giao).",
+                CefrLevel = CefrLevel.C1
+            },
+
+            // Category 3: Job Interviews
+            new()
+            {
+                Category = "Job Interviews",
+                ContextTag = "Candidate Strengths",
+                PromptSentence = "Why do you believe you are the strongest candidate for this position?",
+                PromptTranslation = "Tại sao bạn tin rằng mình là ứng viên sáng giá nhất cho vị trí này?",
+                SampleResponse = "With over five years of dedicated experience in full-stack architecture and a solid track record of optimizing system throughput, I can immediately streamline your team's development lifecycle.",
+                ResponseTranslation = "Với hơn 5 năm kinh nghiệm chuyên sâu về kiến trúc full-stack và thành tích vững chắc trong việc tối ưu hóa hiệu năng hệ thống, tôi có thể ngay lập tức tinh gọn vòng đời phát triển của nhóm bạn.",
+                AdditionalSuggestions = "• Interview Structure: Nền tảng chuyên môn + Minh chứng kết quả (track record) + Đóng góp tức thời (streamline lifecycle).\n• Alternative: \"My proactive mindset aligns seamlessly with your engineering standards.\"",
+                CefrLevel = CefrLevel.B2,
+                IsFavorite = true
+            },
+            new()
+            {
+                Category = "Job Interviews",
+                ContextTag = "Pressure Management",
+                PromptSentence = "How do you handle tight deadlines and high-pressure situations?",
+                PromptTranslation = "Bạn xử lý các hạn chót gấp gáp và tình huống áp lực cao như thế nào?",
+                SampleResponse = "I prioritize tasks based on impact and urgency, break complex challenges into manageable milestones, and keep stakeholders transparently informed.",
+                ResponseTranslation = "Tôi sắp xếp công việc theo mức độ ảnh hưởng và tính cấp thiết, chia nhỏ thách thức phức tạp thành các cột mốc dễ quản lý và luôn thông báo minh bạch cho các bên liên quan.",
+                AdditionalSuggestions = "• STAR Method: Chuẩn bị một ví dụ ngắn có kết quả định lượng cụ thể khi người phỏng vấn hỏi đào sâu (drill-down).",
+                CefrLevel = CefrLevel.B2
+            },
+
+            // Category 4: Travel & Directions
+            new()
+            {
+                Category = "Travel & Directions",
+                ContextTag = "Asking Directions",
+                PromptSentence = "Excuse me, could you point me toward the nearest underground station?",
+                PromptTranslation = "Xin lỗi, bạn có thể chỉ giúp tôi đường đến ga tàu điện ngầm gần nhất không?",
+                SampleResponse = "Sure thing! Walk straight down this avenue for two blocks, then take the first right. You can't miss the entrance next to the pharmacy.",
+                ResponseTranslation = "Được chứ! Đi thẳng đại lộ này qua hai dãy nhà, rồi rẽ phải ở ngã rẽ đầu tiên. Lối vào ngay cạnh hiệu thuốc rất dễ thấy.",
+                AdditionalSuggestions = "• Native Phrasing: \"You can't miss it\" (rất dễ nhận thấy).\n• Directions: \"within walking distance\" (ở cự ly đi bộ được), \"hang a left/right\" (rẽ trái/phải).",
+                CefrLevel = CefrLevel.A2
+            },
+            new()
+            {
+                Category = "Travel & Directions",
+                ContextTag = "Hotel Check-in",
+                PromptSentence = "Hello, I have a hotel reservation under the name Tran for three nights.",
+                PromptTranslation = "Xin chào, tôi có đặt phòng khách sạn trước dưới tên Trần trong ba đêm.",
+                SampleResponse = "Welcome, Mr. Tran! I have found your booking right here. May I please see your passport and a credit card for the incidental deposit?",
+                ResponseTranslation = "Chào mừng quý khách Trần! Tôi đã tìm thấy thông tin đặt phòng của quý khách ở đây. Tôi có thể xin phép xem hộ chiếu và thẻ tín dụng để đặt cọc chi phí phát sinh không ạ?",
+                AdditionalSuggestions = "• Travel Vocab: \"incidental deposit\" (tiền cọc chi phí phát sinh), \"complimentary breakfast\" (bữa sáng miễn phí đi kèm).",
+                CefrLevel = CefrLevel.B1
+            },
+
+            // Category 5: Dining & Shopping
+            new()
+            {
+                Category = "Dining & Shopping",
+                ContextTag = "Paying the Bill",
+                PromptSentence = "Could we please get the check? And do you split bills among guests?",
+                PromptTranslation = "Làm ơn cho chúng tôi xin hóa đơn được không? Quán có hỗ trợ chia tiền hóa đơn không ạ?",
+                SampleResponse = "Certainly! Here is your bill. Yes, we can easily split the total evenly or charge individual items as you prefer.",
+                ResponseTranslation = "Chắc chắn rồi! Đây là hóa đơn của quý khách. Vâng, chúng tôi có thể dễ dàng chia đều tổng số tiền hoặc thanh toán riêng từng món tùy ý quý khách.",
+                AdditionalSuggestions = "• Usage Note: Người Mỹ dùng \"the check\", người Anh dùng \"the bill\". \"Go Dutch\" hoặc \"split the bill\" nghĩa là chia tiền.",
+                CefrLevel = CefrLevel.A2
+            },
+            new()
+            {
+                Category = "Dining & Shopping",
+                ContextTag = "Recommendations",
+                PromptSentence = "What do you recommend for someone who loves seafood but prefers less spicy food?",
+                PromptTranslation = "Bạn gợi ý món gì cho người thích hải sản nhưng thích ăn ít cay?",
+                SampleResponse = "I would highly recommend our pan-seared sea bass with white wine sauce. It is exceptionally fresh, flavorful, and completely mild.",
+                ResponseTranslation = "Tôi rất khuyến khích quý khách thử món cá chẽm áp chảo với sốt vang trắng. Món này cực kỳ tươi ngon, đậm vị và hoàn toàn không cay.",
+                AdditionalSuggestions = "• Culinary Terms: \"pan-seared\" (áp chảo), \"exceptionally fresh\" (cực kỳ tươi ngon), \"mild\" (thanh dịu, không cay).",
+                CefrLevel = CefrLevel.B1
+            },
+
+            // Category 6: TOEIC & VSTEP Speaking
+            new()
+            {
+                Category = "TOEIC & VSTEP Speaking",
+                ContextTag = "Opinion Expression",
+                PromptSentence = "In your opinion, what is the primary benefit of continuous online learning?",
+                PromptTranslation = "Theo quan điểm của bạn, lợi ích hàng đầu của việc học tập trực tuyến liên tục là gì?",
+                SampleResponse = "From my perspective, the primary benefit is autonomy. Learners can tailor their pace according to personal needs, which dramatically optimizes knowledge retention while balancing professional obligations.",
+                ResponseTranslation = "Từ góc nhìn của tôi, lợi ích hàng đầu là tính tự chủ. Người học có thể điều chỉnh tốc độ theo nhu cầu cá nhân, điều này tối ưu hóa đáng kể khả năng ghi nhớ kiến thức trong khi vẫn cân bằng được các nghĩa vụ công việc.",
+                AdditionalSuggestions = "• Academic Connectors: \"From my perspective\", \"Consequently\", \"Furthermore\".\n• Collocations: \"tailor their pace\", \"knowledge retention\", \"balance professional obligations\".",
+                CefrLevel = CefrLevel.B2,
+                IsFavorite = true
+            },
+            new()
+            {
+                Category = "TOEIC & VSTEP Speaking",
+                ContextTag = "Debate & Comparison",
+                PromptSentence = "Do you think artificial intelligence will replace human educators in the near future?",
+                PromptTranslation = "Bạn có nghĩ trí tuệ nhân tạo sẽ thay thế các nhà giáo dục trong tương lai gần không?",
+                SampleResponse = "While AI can personalize curriculum and automate grading efficiently, it cannot replicate empathy, moral mentorship, and emotional encouragement that human educators provide.",
+                ResponseTranslation = "Mặc dù AI có thể cá nhân hóa chương trình học và tự động chấm điểm hiệu quả, nó không thể tái tạo được sự thấu cảm, sự dìu dắt đạo đức và sự động viên cảm xúc mà các nhà giáo dục mang lại.",
+                AdditionalSuggestions = "• Balanced View: \"While [advantage of AI], it cannot replicate [human essence]\".\n• C1 Vocab: \"replicate empathy\", \"moral mentorship\".",
+                CefrLevel = CefrLevel.C1
+            },
+
+            // Category 7: Daily Conversation & Socializing
+            new()
+            {
+                Category = "Daily Conversation & Socializing",
+                ContextTag = "Catching Up",
+                PromptSentence = "It's been ages since we last caught up! How have you been holding up?",
+                PromptTranslation = "Đã lâu lắm rồi chúng ta mới gặp lại nhau! Dạo này bạn thế nào rồi?",
+                SampleResponse = "I know, right? Time flies! I've been quite busy with my new project, but overall everything is going great. How about you?",
+                ResponseTranslation = "Chuẩn luôn! Thời gian trôi nhanh thật! Dạo này mình khá bận rộn với dự án mới, nhưng nhìn chung mọi thứ đều tuyệt. Còn cậu thì sao?",
+                AdditionalSuggestions = "• Idioms: \"It's been ages\" (lâu lắm rồi), \"Time flies\" (thời gian trôi nhanh), \"catch up\" (hàn huyên tâm sự).\n• Casual response: \"Can't complain! Hanging in there.\"",
+                CefrLevel = CefrLevel.B1,
+                IsFavorite = true
+            }
+        };
+
+        foreach (var phrase in phrases)
+        {
+            phrase.UpdateNormalizedFields();
+        }
+
+        await _context.ConversationPhrases.AddRangeAsync(phrases, ct);
+        await _context.SaveChangesAsync(ct);
+        _logger.LogInformation("Successfully seeded {Count} starter conversation phrases.", phrases.Count);
     }
 }

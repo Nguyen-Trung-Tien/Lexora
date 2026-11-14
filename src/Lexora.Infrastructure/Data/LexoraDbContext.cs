@@ -1,4 +1,5 @@
 using Lexora.Domain.Entities;
+using Lexora.Domain.Entities.Phrases;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lexora.Infrastructure.Data;
@@ -28,6 +29,7 @@ public class LexoraDbContext : DbContext
     public DbSet<StudyRoadmap> StudyRoadmaps => Set<StudyRoadmap>();
     public DbSet<RoadmapMilestone> RoadmapMilestones => Set<RoadmapMilestone>();
     public DbSet<RoadmapNode> RoadmapNodes => Set<RoadmapNode>();
+    public DbSet<ConversationPhrase> ConversationPhrases => Set<ConversationPhrase>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -300,6 +302,27 @@ public class LexoraDbContext : DbContext
             b.HasIndex(n => n.Status);
             b.HasIndex(n => n.Type);
             b.HasIndex(n => n.OrderIndex);
+        });
+
+        // ConversationPhrase configuration
+        modelBuilder.Entity<ConversationPhrase>(b =>
+        {
+            b.HasKey(p => p.Id);
+            b.Property(p => p.Category).IsRequired().HasMaxLength(100);
+            b.Property(p => p.ContextTag).HasMaxLength(100);
+            b.Property(p => p.PromptSentence).IsRequired().HasMaxLength(2000);
+            b.Property(p => p.PromptTranslation).IsRequired().HasMaxLength(2000);
+            b.Property(p => p.SampleResponse).IsRequired().HasMaxLength(3000);
+            b.Property(p => p.ResponseTranslation).IsRequired().HasMaxLength(3000);
+            b.Property(p => p.AdditionalSuggestions).HasMaxLength(4000);
+            b.Property(p => p.NormalizedPrompt).HasMaxLength(2000);
+            b.Property(p => p.NormalizedResponse).HasMaxLength(3000);
+
+            b.HasIndex(p => p.Category);
+            b.HasIndex(p => p.CefrLevel);
+            b.HasIndex(p => p.IsFavorite);
+            b.HasIndex(p => p.CreatedAt);
+            b.HasIndex(p => p.NormalizedPrompt);
         });
     }
 }

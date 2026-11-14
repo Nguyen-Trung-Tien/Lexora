@@ -34,6 +34,7 @@
             <converters:OptionStateToBrushConverter x:Key="OptionStateToBrushConverter" />
             <converters:OptionStateToThicknessConverter x:Key="OptionStateToThicknessConverter" />
             <converters:EnumToLocalizedTextConverter x:Key="EnumToLocalizedTextConverter" />
+            <converters:BoolToStarGlyphConverter x:Key="BoolToStarGlyphConverter" />
 
             <!-- Fallback Button Style -->
             <Style x:Key="DefaultButtonStyle" TargetType="Button" />

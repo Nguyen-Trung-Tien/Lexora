@@ -1,5 +1,6 @@
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
+using Lexora.Presentation.Views.Phrases;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -141,6 +142,7 @@ public sealed partial class ShellPage : Page
                         ReviewPage => NavItemReview,
                         TestPage => NavItemTest,
                         GrammarPage => NavItemGrammar,
+                        PhrasesPage => NavItemPhrases,
                         LearningStoragePage => NavItemLearningStorage,
                         SettingsPage => NavItemSettings,
                         HelpPage => NavItemHelp,
@@ -234,6 +236,7 @@ public sealed partial class ShellPage : Page
             "Review" => typeof(ReviewPage),
             "Test" => typeof(TestPage),
             "Grammar" => typeof(GrammarPage),
+            "Phrases" => typeof(PhrasesPage),
             "LearningStorage" => typeof(LearningStoragePage),
             "Settings" => typeof(SettingsPage),
             "Help" => typeof(HelpPage),
@@ -265,6 +268,7 @@ public sealed partial class ShellPage : Page
         NavItemReview.Content = _localizationService.GetString("Nav_Review");
         NavItemTest.Content = _localizationService.GetString("Nav_Test");
         NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
+        NavItemPhrases.Content = _localizationService.GetString("Nav_Phrases");
         NavItemLearningStorage.Content = _localizationService.GetString("Nav_LearningStorage");
         NavItemHelp.Content = _localizationService.GetString("Nav_Help");
         NavItemSettings.Content = _localizationService.GetString("Nav_Settings");
@@ -276,6 +280,7 @@ public sealed partial class ShellPage : Page
         ToolTipService.SetToolTip(NavItemHomophones, _localizationService.GetString("Shell_TooltipHomophones"));
         ToolTipService.SetToolTip(NavItemKnowledgeGraph, $"{_localizationService.GetString("Nav_KnowledgeGraph")} (Ctrl+4)");
         ToolTipService.SetToolTip(NavItemGrammar, _localizationService.GetString("Shell_TooltipGrammar"));
+        ToolTipService.SetToolTip(NavItemPhrases, _localizationService.GetString("Shell_TooltipPhrases"));
         ToolTipService.SetToolTip(NavItemReview, _localizationService.GetString("Shell_TooltipReview"));
         ToolTipService.SetToolTip(NavItemTest, _localizationService.GetString("Shell_TooltipTest"));
         ToolTipService.SetToolTip(NavItemLearningStorage, _localizationService.GetString("Shell_TooltipLearningStorage"));

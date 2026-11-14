@@ -50,6 +50,7 @@ public partial class LocalizationService : ILocalizationService
         RegisterStorage(vi, en);
         RegisterTest(vi, en);
         RegisterVocabulary(vi, en);
+        RegisterPhrases(vi, en);
 
         return new Dictionary<string, Dictionary<string, string>>
         {

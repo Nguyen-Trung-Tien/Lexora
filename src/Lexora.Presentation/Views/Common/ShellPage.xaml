@@ -58,6 +58,11 @@
                         <FontIcon Glyph="&#xE8D2;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemPhrases" Content="Conversation Phrases" Tag="Phrases" ToolTipService.ToolTip="Conversation Phrases (Ctrl+Shift+P)">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8BD;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
 
                 <!-- 3. Practice & Assessment Group -->
                 <NavigationViewItemHeader x:Name="NavHeaderPractice" Content="LUYỆN TẬP &amp; ĐÁNH GIÁ" />

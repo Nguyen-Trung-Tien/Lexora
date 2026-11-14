@@ -1,6 +1,7 @@
 using Lexora.Application.DTOs;
 using Lexora.Application.SpacedRepetition;
 using Lexora.Domain.Entities;
+using Lexora.Domain.Entities.Phrases;
 using Lexora.Domain.Enums;
 
 namespace Lexora.Application.Common;
@@ -254,5 +255,29 @@ public static class MappingExtensions
             item.NextReviewAt,
             item.CreatedAt
         );
+    }
+
+    /// <summary>
+    /// Maps a ConversationPhrase entity to ConversationPhraseDto.
+    /// </summary>
+    public static ConversationPhraseDto ToDto(this ConversationPhrase phrase)
+    {
+        ArgumentNullException.ThrowIfNull(phrase);
+
+        return new ConversationPhraseDto
+        {
+            Id = phrase.Id,
+            Category = phrase.Category,
+            ContextTag = phrase.ContextTag,
+            PromptSentence = phrase.PromptSentence,
+            PromptTranslation = phrase.PromptTranslation,
+            SampleResponse = phrase.SampleResponse,
+            ResponseTranslation = phrase.ResponseTranslation,
+            AdditionalSuggestions = phrase.AdditionalSuggestions,
+            CefrLevel = phrase.CefrLevel,
+            IsFavorite = phrase.IsFavorite,
+            CreatedAt = phrase.CreatedAt,
+            UpdatedAt = phrase.UpdatedAt
+        };
     }
 }

@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<ILearningStorageRepository, LearningStorageRepository>();
         services.AddScoped<IHomophoneRepository, HomophoneRepository>();
         services.AddScoped<IRoadmapRepository, RoadmapRepository>();
+        services.AddScoped<IConversationPhraseRepository, ConversationPhraseRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Initializer

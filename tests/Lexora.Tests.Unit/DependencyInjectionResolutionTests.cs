@@ -23,6 +23,7 @@ public class DependencyInjectionResolutionTests
         services.AddScoped(_ => new Mock<ILearningStorageRepository>().Object);
         services.AddScoped(_ => new Mock<IHomophoneRepository>().Object);
         services.AddScoped(_ => new Mock<IRoadmapRepository>().Object);
+        services.AddScoped(_ => new Mock<IConversationPhraseRepository>().Object);
         services.AddScoped(_ => new Mock<IUnitOfWork>().Object);
         services.AddSingleton(_ => new Mock<IVoiceProvider>().Object);
 
@@ -73,5 +74,8 @@ public class DependencyInjectionResolutionTests
 
         var roadmapService = scope.ServiceProvider.GetRequiredService<IRoadmapService>();
         roadmapService.Should().NotBeNull();
+
+        var phraseService = scope.ServiceProvider.GetRequiredService<IConversationPhraseService>();
+        phraseService.Should().NotBeNull();
     }
 }
