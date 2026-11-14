@@ -18,6 +18,8 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
+    private const int MaxImportPayloadLength = 20_000_000; // 20 MB ceiling per AGENTS.md rule 6.3
+
     private readonly IVocabularyKnowledgeGraphService _graphService;
     private readonly IVocabularyRepository _vocabRepo;
     private readonly IUnitOfWork _unitOfWork;
@@ -247,6 +249,12 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
             return new KnowledgeGraphImportAnalysisResultDto(items, 0, 0, 0, 0, warnings);
         }
 
+        if (content.Length > MaxImportPayloadLength)
+        {
+            warnings.Add($"Dung lượng dữ liệu vượt quá giới hạn an toàn 20MB ({content.Length:N0} bytes).");
+            return new KnowledgeGraphImportAnalysisResultDto(items, 0, 0, 0, 0, warnings);
+        }
+
         var trimmed = content.Trim();
         bool isJson = format.Equals("json", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("{") || trimmed.StartsWith("[");
 
@@ -471,17 +479,20 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
             }
 
             var wordsToProcess = validItems
-                .SelectMany(i => new[] { i.SourceTerm, i.TargetTerm })
+                .SelectMany(i => new[] { i.SourceTerm?.Trim(), i.TargetTerm?.Trim() })
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t!)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             var wordsMap = new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
             foreach (var term in wordsToProcess)
             {
-                var w = await _vocabRepo.GetByTermAsync(term, cancellationToken);
+                var cleanTerm = term.Trim();
+                var w = await _vocabRepo.GetByTermAsync(cleanTerm, cancellationToken);
                 if (w != null)
                 {
-                    wordsMap[term] = w;
+                    wordsMap[cleanTerm] = w;
                 }
                 else if (autoCreateMissingWords)
                 {
@@ -489,8 +500,8 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
                     var newWord = new Word
                     {
                         Id = Guid.NewGuid(),
-                        Term = term,
-                        NormalizedTerm = term.Trim().ToLowerInvariant(),
+                        Term = cleanTerm,
+                        NormalizedTerm = cleanTerm.ToLowerInvariant(),
                         Level = CefrLevel.B1,
                         PrimaryPartOfSpeech = PartOfSpeech.Noun,
                         Notes = string.Empty,

@@ -22,12 +22,20 @@ public class DatabaseBackupService : IDatabaseBackupService
         if (string.IsNullOrWhiteSpace(destinationDirectory))
             throw new ArgumentException("Destination directory cannot be empty.", nameof(destinationDirectory));
 
-        Directory.CreateDirectory(destinationDirectory);
+        var fullDestDir = Path.GetFullPath(destinationDirectory);
+        Directory.CreateDirectory(fullDestDir);
         var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
         var backupFileName = $"lexora_backup_{timestamp}.db";
-        var targetPath = Path.Combine(destinationDirectory, backupFileName);
+        var targetPath = Path.Combine(fullDestDir, backupFileName);
 
-        return await CreateBackupToFileAsync(targetPath, cancellationToken);
+        var fullTargetPath = Path.GetFullPath(targetPath);
+        var safeBaseDir = fullDestDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        if (!fullTargetPath.StartsWith(safeBaseDir, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new System.Security.SecurityException("Potential path traversal attempt detected in backup destination.");
+        }
+
+        return await CreateBackupToFileAsync(fullTargetPath, cancellationToken);
     }
 
     public async Task<string> CreateBackupToFileAsync(string targetFilePath, CancellationToken cancellationToken = default)
@@ -35,7 +43,8 @@ public class DatabaseBackupService : IDatabaseBackupService
         if (string.IsNullOrWhiteSpace(targetFilePath))
             throw new ArgumentException("Target file path cannot be empty.", nameof(targetFilePath));
 
-        var ext = Path.GetExtension(targetFilePath);
+        var fullTarget = Path.GetFullPath(targetFilePath);
+        var ext = Path.GetExtension(fullTarget);
         if (!string.Equals(ext, ".db", StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(ext, ".bak", StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(ext, ".sqlite", StringComparison.OrdinalIgnoreCase) &&
@@ -47,13 +56,13 @@ public class DatabaseBackupService : IDatabaseBackupService
         if (!File.Exists(_dbFilePath))
             throw new FileNotFoundException("Database file not found.", _dbFilePath);
 
-        var targetDir = Path.GetDirectoryName(targetFilePath);
+        var targetDir = Path.GetDirectoryName(fullTarget);
         if (!string.IsNullOrEmpty(targetDir))
         {
             Directory.CreateDirectory(targetDir);
         }
 
-        _logger.LogInformation("Creating backup from {Source} to {Target}", _dbFilePath, targetFilePath);
+        _logger.LogInformation("Creating backup from {Source} to {Target}", _dbFilePath, fullTarget);
 
         // 1. Flush SQLite WAL to ensure all committed pages are written before backup snapshot
         try
@@ -72,13 +81,13 @@ public class DatabaseBackupService : IDatabaseBackupService
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
         // 2. Clean up target placeholder if 0 bytes (e.g. created by FileSavePicker) or stale WAL/SHM
-        var targetWal = targetFilePath + "-wal";
-        var targetShm = targetFilePath + "-shm";
+        var targetWal = fullTarget + "-wal";
+        var targetShm = fullTarget + "-shm";
         if (File.Exists(targetWal)) try { File.Delete(targetWal); } catch { }
         if (File.Exists(targetShm)) try { File.Delete(targetShm); } catch { }
-        if (File.Exists(targetFilePath) && new FileInfo(targetFilePath).Length == 0)
+        if (File.Exists(fullTarget) && new FileInfo(fullTarget).Length == 0)
         {
-            try { File.Delete(targetFilePath); } catch { }
+            try { File.Delete(fullTarget); } catch { }
         }
 
         bool backupSucceeded = false;
@@ -87,7 +96,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         try
         {
             using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadOnly;Pooling=False"))
-            using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={targetFilePath};Mode=ReadWriteCreate;Pooling=False"))
+            using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={fullTarget};Mode=ReadWriteCreate;Pooling=False"))
             {
                 await sourceConn.OpenAsync(cancellationToken);
                 await destConn.OpenAsync(cancellationToken);
@@ -112,7 +121,7 @@ public class DatabaseBackupService : IDatabaseBackupService
                 try
                 {
                     using (var sourceStream = new FileStream(_dbFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                    using (var destStream = new FileStream(targetFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (var destStream = new FileStream(fullTarget, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         await sourceStream.CopyToAsync(destStream, cancellationToken);
                     }
@@ -130,7 +139,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         // 4. Consolidate backup into a standalone single .db file (switch journal_mode from WAL to DELETE)
         try
         {
-            using (var convertConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={targetFilePath};Mode=ReadWrite;Pooling=False"))
+            using (var convertConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={fullTarget};Mode=ReadWrite;Pooling=False"))
             {
                 await convertConn.OpenAsync(cancellationToken);
                 using var modeCmd = convertConn.CreateCommand();
@@ -150,20 +159,20 @@ public class DatabaseBackupService : IDatabaseBackupService
         if (File.Exists(targetShm)) try { File.Delete(targetShm); } catch { }
 
         // 6. Post-backup integrity verification to guarantee 100% healthy backup
-        var fileInfo = new FileInfo(targetFilePath);
+        var fileInfo = new FileInfo(fullTarget);
         if (!fileInfo.Exists || fileInfo.Length < 16)
         {
-            if (File.Exists(targetFilePath)) try { File.Delete(targetFilePath); } catch { }
+            if (File.Exists(fullTarget)) try { File.Delete(fullTarget); } catch { }
             throw new InvalidOperationException("Backup creation failed: output file is missing or corrupted.");
         }
 
         byte[] header = new byte[16];
-        using (var fs = new FileStream(targetFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        using (var fs = new FileStream(fullTarget, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
             int read = await fs.ReadAsync(header.AsMemory(0, 16), cancellationToken);
             if (read < 16)
             {
-                if (File.Exists(targetFilePath)) try { File.Delete(targetFilePath); } catch { }
+                if (File.Exists(fullTarget)) try { File.Delete(fullTarget); } catch { }
                 throw new InvalidOperationException("Backup creation failed: cannot read SQLite header.");
             }
         }
@@ -171,7 +180,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         var headerString = System.Text.Encoding.ASCII.GetString(header, 0, 15);
         if (!string.Equals(headerString, "SQLite format 3", StringComparison.Ordinal) || header[15] != 0)
         {
-            if (File.Exists(targetFilePath)) try { File.Delete(targetFilePath); } catch { }
+            if (File.Exists(fullTarget)) try { File.Delete(fullTarget); } catch { }
             throw new InvalidOperationException("Backup creation failed: generated file is not a valid SQLite database.");
         }
 
@@ -179,26 +188,26 @@ public class DatabaseBackupService : IDatabaseBackupService
         {
             try
             {
-                using var verifyConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={targetFilePath};Mode=ReadOnly;Pooling=False");
+                using var verifyConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={fullTarget};Mode=ReadOnly;Pooling=False");
                 await verifyConn.OpenAsync(cancellationToken);
                 using var verifyCmd = verifyConn.CreateCommand();
                 verifyCmd.CommandText = "PRAGMA quick_check(1);";
                 var checkResult = await verifyCmd.ExecuteScalarAsync(cancellationToken);
                 if (checkResult != null && !string.Equals(checkResult.ToString(), "ok", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (File.Exists(targetFilePath)) try { File.Delete(targetFilePath); } catch { }
+                    if (File.Exists(fullTarget)) try { File.Delete(fullTarget); } catch { }
                     throw new InvalidOperationException($"Backup creation failed integrity check: {checkResult}");
                 }
             }
             catch (Exception ex)
             {
-                if (File.Exists(targetFilePath)) try { File.Delete(targetFilePath); } catch { }
+                if (File.Exists(fullTarget)) try { File.Delete(fullTarget); } catch { }
                 throw new InvalidOperationException($"Backup creation verification failed: {ex.Message}", ex);
             }
         }
 
-        _logger.LogInformation("Backup created and verified successfully at {Target}", targetFilePath);
-        return targetFilePath;
+        _logger.LogInformation("Backup created and verified successfully at {Target}", fullTarget);
+        return fullTarget;
     }
 
     public async Task<BackupMetadata> GetBackupMetadataAsync(string backupFilePath, CancellationToken cancellationToken = default)
@@ -426,23 +435,42 @@ public class DatabaseBackupService : IDatabaseBackupService
         IProgress<(int Percent, string StepMessage, string? Detail)>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        if (!File.Exists(backupFilePath))
-            throw new FileNotFoundException("Backup file not found.", backupFilePath);
+        if (string.IsNullOrWhiteSpace(backupFilePath))
+            throw new ArgumentException("Backup file path cannot be empty.", nameof(backupFilePath));
 
-        var backupFileName = Path.GetFileName(backupFilePath);
+        var fullBackupPath = Path.GetFullPath(backupFilePath);
+        if (!File.Exists(fullBackupPath))
+            throw new FileNotFoundException("Backup file not found.", fullBackupPath);
+
+        // Step 0: Mandatory 16-byte SQLite Magic Header check per AGENTS.md rule 6.2
+        byte[] magicHeader = new byte[16];
+        using (var fs = new FileStream(fullBackupPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        {
+            int read = await fs.ReadAsync(magicHeader.AsMemory(0, 16), cancellationToken);
+            if (read < 16)
+            {
+                throw new InvalidOperationException("The specified backup file is too small to be a valid SQLite database.");
+            }
+            if (!System.Text.Encoding.ASCII.GetString(magicHeader, 0, 15).Equals("SQLite format 3", StringComparison.Ordinal) || magicHeader[15] != 0)
+            {
+                throw new InvalidOperationException("The specified file is not a valid SQLite database (invalid SQLite format 3\\0 magic header).");
+            }
+        }
+
+        var backupFileName = Path.GetFileName(fullBackupPath);
 
         // Step 1: Validate SQLite header & integrity
         progress?.Report((15, "Đang xác thực cấu trúc tệp sao lưu...", backupFileName));
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
-        var metadata = await GetBackupMetadataAsync(backupFilePath, cancellationToken);
+        var metadata = await GetBackupMetadataAsync(fullBackupPath, cancellationToken);
         if (!metadata.IsValid)
         {
             throw new InvalidOperationException(metadata.ErrorMessage ?? "Tệp sao lưu không hợp lệ.");
         }
 
         _logger.LogWarning("Restoring database from {Backup} to {Target}. Backup contains {Words} words, {Rules} grammar rules.",
-            backupFilePath, _dbFilePath, metadata.WordCount, metadata.GrammarRuleCount);
+            fullBackupPath, _dbFilePath, metadata.WordCount, metadata.GrammarRuleCount);
 
         var targetDir = Path.GetDirectoryName(_dbFilePath);
         if (!string.IsNullOrEmpty(targetDir))
@@ -515,7 +543,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             // Primary Method: SQLite Online Backup API (Atomic, page-level transfer handled safely by SQLite C engine)
             try
             {
-                using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={backupFilePath};Mode=ReadOnly;Pooling=False"))
+                using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={fullBackupPath};Mode=ReadOnly;Pooling=False"))
                 using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadWriteCreate;Pooling=False"))
                 {
                     await sourceConn.OpenAsync(cancellationToken);
@@ -545,7 +573,7 @@ public class DatabaseBackupService : IDatabaseBackupService
                     attempts++;
                     try
                     {
-                        using (var sourceStream = new FileStream(backupFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        using (var sourceStream = new FileStream(fullBackupPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         using (var destStream = new FileStream(_dbFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             await sourceStream.CopyToAsync(destStream, cancellationToken);
@@ -605,7 +633,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             }
 
             Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
-            _logger.LogInformation("Database restored and verified successfully from {Backup}", backupFilePath);
+            _logger.LogInformation("Database restored and verified successfully from {Backup}", fullBackupPath);
         }
         catch (Exception ex)
         {

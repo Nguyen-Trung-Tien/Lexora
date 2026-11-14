@@ -36,7 +36,6 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
         if (latest != null)
         {
             latest.IsActive = true;
-            await Context.SaveChangesAsync(cancellationToken);
             return latest;
         }
 

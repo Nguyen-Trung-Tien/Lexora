@@ -573,11 +573,15 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private bool _isCreatingBackup = false;
     private bool _isRestoringBackup = false;
 
+    [ObservableProperty]
+    public partial bool IsSubmitting { get; set; } = false;
+
     [RelayCommand]
     public async Task<string?> CreateBackupAsync(string? targetFilePath = null)
     {
-        if (_isCreatingBackup) return null;
+        if (_isCreatingBackup || IsSubmitting) return null;
         _isCreatingBackup = true;
+        IsSubmitting = true;
         try
         {
             string backupPath;
@@ -613,6 +617,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         finally
         {
             _isCreatingBackup = false;
+            IsSubmitting = false;
         }
     }
 
@@ -626,8 +631,9 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         IProgress<(int Percent, string StepMessage, string? Detail)>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        if (_isRestoringBackup) return false;
+        if (_isRestoringBackup || IsSubmitting) return false;
         _isRestoringBackup = true;
+        IsSubmitting = true;
         try
         {
             await _backupService.RestoreBackupAsync(backupFilePath, progress, cancellationToken);
@@ -657,6 +663,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         finally
         {
             _isRestoringBackup = false;
+            IsSubmitting = false;
         }
     }
 

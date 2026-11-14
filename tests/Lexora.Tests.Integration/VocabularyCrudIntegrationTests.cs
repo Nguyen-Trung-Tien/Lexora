@@ -957,6 +957,93 @@ public class VocabularyCrudIntegrationTests : IDisposable
         txt.Should().Contain("ubiquitous\tcó mặt ở khắp nơi, phổ biến");
     }
 
+    [Fact]
+    public async Task SmartImport_EndToEndIntegration_RealSqliteDatabase_ShouldSucceedWithoutConstraintViolations()
+    {
+        // 1. Arrange: Pre-populate database with an existing word
+        var existingWord = await _vocabService.CreateWordAsync(new WordCreateOrUpdateDto(
+            Id: null,
+            Term: "abundant",
+            PhoneticUk: "/əˈbʌn.dənt/",
+            PhoneticUs: "/əˈbʌn.dənt/",
+            AudioUkPath: null,
+            AudioUsPath: null,
+            Level: CefrLevel.B2,
+            PrimaryPartOfSpeech: PartOfSpeech.Adjective,
+            Notes: "Existing note",
+            Meanings: new List<WordMeaningCreateDto>
+            {
+                new(
+                    PartOfSpeech: PartOfSpeech.Adjective,
+                    DefinitionVi: "dồi dào, nhiều",
+                    DefinitionEn: "existing or available in large quantities",
+                    Explanation: null,
+                    Examples: new List<ExampleSentenceCreateDto>()
+                )
+            },
+            TopicIds: new List<Guid>(),
+            ExamTagIds: new List<Guid>()
+        ));
+
+        existingWord.Should().NotBeNull();
+
+        var exportImportService = new ExportImportService(_vocabRepo, _unitOfWork);
+
+        // 2. Prepare raw input data with:
+        //    - Row 1: Existing term 'abundant' (with additional meaning)
+        //    - Row 2: In-batch duplicate 'lucid' (meaning 1)
+        //    - Row 3: In-batch duplicate 'lucid' (meaning 2)
+        //    - Row 4: New markdown row 'resilience'
+        var rawInput =
+            "abundant\t(adj)\tphong phú, dồi dào, thừa thãi\tWe have abundant evidence.\n" +
+            "lucid\t(adj)\trõ ràng, minh bạch\n" +
+            "lucid\t(adj)\tsáng suốt, dễ hiểu\tA lucid explanation.\n" +
+            "| resilience | (n) | khả năng phục hồi | /rɪˈzɪl.jəns/ | C1 | Mental resilience is key. |\n";
+
+        // 3. Act: Analyze
+        var analysis = await exportImportService.AnalyzeSmartImportAsync(rawInput);
+        analysis.Should().NotBeNull();
+        analysis.TotalParsed.Should().Be(4);
+        analysis.DuplicateCount.Should().Be(2); // 'abundant' in SQLite + 'lucid' in-batch duplicate
+
+        var abundantPreview = analysis.PreviewItems.First(p => p.Term == "abundant");
+        abundantPreview.IsDuplicate.Should().BeTrue();
+
+        // 4. Act: Commit with Overwrite mode
+        var request = new SmartImportCommitRequestDto(
+            Items: analysis.PreviewItems.Where(p => p.IsValid).Select(p => p with { IsSelected = true }).ToList(),
+            ConflictResolution: ImportConflictResolution.Overwrite
+        );
+
+        var commitResult = await exportImportService.CommitSmartImportAsync(request);
+
+        // 5. Assert commit result
+        var errorDetails = string.Join("; ", commitResult.Errors);
+        commitResult.TotalErrors.Should().Be(0, because: $"Errors occurred: {errorDetails}");
+        commitResult.TotalImported.Should().Be(2, because: $"Imported={commitResult.TotalImported}, Updated={commitResult.TotalUpdated}, Skipped={commitResult.TotalSkipped}, Errors={errorDetails}");
+        commitResult.TotalUpdated.Should().Be(2);  // 'abundant' (updated) + 'lucid' 2nd row (merged)
+
+        // 6. Verify directly against SQLite Database
+        var totalWordsInDb = await _context.Words.CountAsync();
+        totalWordsInDb.Should().Be(3); // abundant, lucid, resilience
+
+        var dbAbundant = await _vocabRepo.GetByTermAsync("abundant");
+        dbAbundant.Should().NotBeNull();
+        dbAbundant!.Meanings.Should().NotBeEmpty();
+
+        var dbLucid = await _vocabRepo.GetByTermAsync("lucid");
+        dbLucid.Should().NotBeNull();
+        dbLucid!.Meanings.Count.Should().Be(2); // Merged both meanings!
+        dbLucid.Meanings.Select(m => m.DefinitionVi).Should().Contain("rõ ràng, minh bạch");
+        dbLucid.Meanings.Select(m => m.DefinitionVi).Should().Contain("sáng suốt, dễ hiểu");
+
+        var dbResilience = await _vocabRepo.GetByTermAsync("resilience");
+        dbResilience.Should().NotBeNull();
+        dbResilience!.PrimaryPartOfSpeech.Should().Be(PartOfSpeech.Noun);
+        dbResilience.Level.Should().Be(CefrLevel.C1);
+        dbResilience.PhoneticUk.Should().Be("/rɪˈzɪl.jəns/");
+    }
+
     public void Dispose()
     {
         _context.Dispose();

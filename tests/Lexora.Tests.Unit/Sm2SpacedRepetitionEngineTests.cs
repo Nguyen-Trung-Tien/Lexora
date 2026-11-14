@@ -196,4 +196,74 @@ public class Sm2SpacedRepetitionEngineTests
         probability.Should().BeLessThan(90.0);
         probability.Should().BeGreaterThan(50.0);
     }
+
+    [Theory]
+    [InlineData(0.5)]
+    [InlineData(1.0)]
+    [InlineData(1.15)]
+    [InlineData(1.29)]
+    public void CalculateNextReview_WhenCardEaseFactorIsBelowMinimum_ShouldNeverProduceResultBelow1Point3(double invalidEf)
+    {
+        // Arrange
+        var card = new ReviewCard
+        {
+            EaseFactor = invalidEf,
+            IntervalDays = 2,
+            Repetitions = 1,
+            Status = LearningStatus.Learning
+        };
+
+        // Act & Assert across all possible ratings
+        foreach (var rating in Enum.GetValues<ReviewRating>())
+        {
+            var result = _engine.CalculateNextReview(card, rating);
+            result.NewEaseFactor.Should().BeGreaterThanOrEqualTo(1.3, $"Rating {rating} with input EF {invalidEf} must never violate EF >= 1.3 invariant");
+        }
+    }
+
+    [Fact]
+    public void CalculateNextReview_MultipleAgainRatings_ShouldStrictlyEnforceFloorOf1Point3()
+    {
+        // Arrange
+        var card = new ReviewCard
+        {
+            EaseFactor = 2.5,
+            IntervalDays = 1,
+            Repetitions = 0,
+            Status = LearningStatus.Learning
+        };
+
+        // Act
+        for (int i = 0; i < 25; i++)
+        {
+            var result = _engine.CalculateNextReview(card, ReviewRating.Again);
+            card.EaseFactor = result.NewEaseFactor;
+            card.IntervalDays = result.NewIntervalDays;
+            card.Repetitions = result.NewRepetitions;
+            card.Lapses = result.NewLapses;
+            card.Status = result.NewStatus;
+        }
+
+        // Assert
+        card.EaseFactor.Should().Be(1.3);
+    }
+
+    [Fact]
+    public void CalculateNextReview_HardRatingWhenNearFloor_ShouldClampAt1Point3()
+    {
+        // Arrange
+        var card = new ReviewCard
+        {
+            EaseFactor = 1.35,
+            IntervalDays = 3,
+            Repetitions = 2,
+            Status = LearningStatus.Learning
+        };
+
+        // Act
+        var result = _engine.CalculateNextReview(card, ReviewRating.Hard);
+
+        // Assert
+        result.NewEaseFactor.Should().Be(1.3);
+    }
 }

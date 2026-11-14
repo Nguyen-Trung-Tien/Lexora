@@ -481,7 +481,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
 
     private async void BackupButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_isBackupOrRestoreInProgress) return;
+        if (_isBackupOrRestoreInProgress || ViewModel.IsSubmitting) return;
         _isBackupOrRestoreInProgress = true;
         var clickedButton = sender as Button;
         if (clickedButton != null) clickedButton.IsEnabled = false;
@@ -603,7 +603,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
 
     private async void RestoreButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_isBackupOrRestoreInProgress) return;
+        if (_isBackupOrRestoreInProgress || ViewModel.IsSubmitting) return;
         _isBackupOrRestoreInProgress = true;
         var clickedButton = sender as Button;
         if (clickedButton != null) clickedButton.IsEnabled = false;

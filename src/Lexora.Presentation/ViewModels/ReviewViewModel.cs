@@ -432,12 +432,17 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(CanRate))]
     public partial bool IsRatingInProgress { get; set; } = false;
 
-    public bool CanRate => !IsRatingInProgress && IsAnswerVisible && CurrentCard != null;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRate))]
+    public partial bool IsSubmitting { get; set; } = false;
+
+    public bool CanRate => !IsSubmitting && !IsRatingInProgress && IsAnswerVisible && CurrentCard != null;
 
     [RelayCommand]
     public async Task RateCardAsync(ReviewRating rating)
     {
-        if (CurrentCard == null || !_ratingLock.Wait(0)) return;
+        if (CurrentCard == null || IsSubmitting || !_ratingLock.Wait(0)) return;
+        IsSubmitting = true;
         IsRatingInProgress = true;
 
         try
@@ -535,6 +540,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         }
         finally
         {
+            IsSubmitting = false;
             IsRatingInProgress = false;
             try { _ratingLock.Release(); } catch (ObjectDisposedException) { }
         }
@@ -584,6 +590,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         }
         finally
         {
+            IsSubmitting = false;
             IsRatingInProgress = false;
             try { _ratingLock.Release(); } catch (ObjectDisposedException) { }
         }

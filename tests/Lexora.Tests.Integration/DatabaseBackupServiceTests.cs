@@ -332,6 +332,35 @@ public class DatabaseBackupServiceTests : IDisposable
         reports.Last().Percent.Should().Be(100);
     }
 
+    [Fact]
+    public async Task RestoreBackupAsync_WhenFileHasInvalidMagicHeader_ShouldThrowInvalidOperationException()
+    {
+        // Arrange - Create a dummy file with non-SQLite header
+        var corruptFilePath = Path.Combine(_tempDirectory, "corrupt_fake.db");
+        await File.WriteAllBytesAsync(corruptFilePath, new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12 });
+
+        // Act
+        var act = () => _backupService.RestoreBackupAsync(corruptFilePath);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*SQLite*");
+    }
+
+    [Fact]
+    public async Task RestoreBackupAsync_WhenFileIsEmpty_ShouldThrowInvalidOperationException()
+    {
+        // Arrange - Create a 0-byte file
+        var emptyFilePath = Path.Combine(_tempDirectory, "empty.db");
+        await File.WriteAllBytesAsync(emptyFilePath, Array.Empty<byte>());
+
+        // Act
+        var act = () => _backupService.RestoreBackupAsync(emptyFilePath);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>();
+    }
+
     public void Dispose()
     {
         try

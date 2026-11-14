@@ -34,9 +34,17 @@
     <ScrollViewer MaxHeight="500" HorizontalAlignment="Stretch"
                   VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   Padding="0,4,12,8">
-        <Grid MaxWidth="840" HorizontalAlignment="Stretch" RowDefinitions="Auto,*" RowSpacing="14">
+        <Grid MaxWidth="840" HorizontalAlignment="Stretch" RowDefinitions="Auto,Auto,*" RowSpacing="14">
+        <!-- Global InfoBar at the top of the dialog -->
+        <InfoBar x:Name="DialogInfoBar"
+                 IsOpen="False"
+                 IsClosable="True"
+                 HorizontalAlignment="Stretch"
+                 Margin="0,0,0,2" />
+
         <!-- Step Breadcrumbs Header -->
-        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+        <Border Grid.Row="1"
+                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="10"
@@ -73,7 +81,7 @@
         </Border>
 
         <!-- Dynamic Content Body -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <!-- ================= STEP 1: SOURCE SELECTION ================= -->
             <StackPanel x:Name="PanelStep1" Spacing="14" Visibility="Visible">
                 <!-- Subtitle / Info note -->
@@ -493,14 +501,28 @@
                         </Grid>
                     </Border>
 
-                    <Button x:Name="BtnDone"
-                            Style="{ThemeResource AccentButtonStyle}"
-                            HorizontalAlignment="Stretch"
-                            CornerRadius="8"
-                            Padding="12,10"
-                            Click="BtnDone_Click">
-                        <TextBlock x:Name="TextDone" Text="Hoàn tất" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                    </Button>
+                    <Grid Margin="0,4,0,0" RowDefinitions="Auto,Auto" RowSpacing="8">
+                        <Button x:Name="BtnReportBack"
+                                HorizontalAlignment="Stretch"
+                                CornerRadius="8"
+                                Padding="12,10"
+                                Visibility="Collapsed"
+                                Click="BtnReportBack_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <FontIcon Glyph="&#xE72B;" FontSize="14" />
+                                <TextBlock x:Name="TextReportBack" Text="Quay lại kiểm tra" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BtnDone"
+                                Grid.Row="1"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                CornerRadius="8"
+                                Padding="12,10"
+                                Click="BtnDone_Click">
+                            <TextBlock x:Name="TextDone" Text="Hoàn tất" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        </Button>
+                    </Grid>
                 </StackPanel>
             </StackPanel>
         </Grid>

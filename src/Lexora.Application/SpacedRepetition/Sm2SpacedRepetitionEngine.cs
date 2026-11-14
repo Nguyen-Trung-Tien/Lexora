@@ -11,7 +11,7 @@ public class Sm2SpacedRepetitionEngine : ISpacedRepetitionEngine
     public SpacedRepetitionResult CalculateNextReview(ReviewCard card, ReviewRating rating, DateTime? reviewTimeUtc = null)
     {
         var now = reviewTimeUtc ?? DateTime.UtcNow;
-        double ef = card.EaseFactor <= 0 ? DefaultEaseFactor : card.EaseFactor;
+        double ef = card.EaseFactor < MinEaseFactor ? DefaultEaseFactor : card.EaseFactor;
         int reps = card.Repetitions;
         int lapses = card.Lapses;
         int interval;
@@ -72,7 +72,7 @@ public class Sm2SpacedRepetitionEngine : ISpacedRepetitionEngine
                 break;
         }
 
-        ef = Math.Round(ef, 2);
+        ef = Math.Max(MinEaseFactor, Math.Round(ef, 2));
         var nextReviewAt = now.Date.AddDays(interval);
 
         return new SpacedRepetitionResult(

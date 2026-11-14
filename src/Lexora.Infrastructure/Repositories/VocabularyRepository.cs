@@ -578,6 +578,10 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         if (meanings.Count > 0)
         {
             Context.WordMeanings.RemoveRange(meanings);
+            foreach (var m in meanings)
+            {
+                m.Examples.Clear();
+            }
             word.Meanings.Clear();
         }
         var topics = word.WordTopics.ToList();

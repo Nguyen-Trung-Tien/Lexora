@@ -376,4 +376,196 @@ public class SmartImportWorkflowTests
         savedWord.WordExamTags.Count.Should().Be(1);
         savedWord.WordExamTags.First().ExamTagId.Should().NotBeEmpty();
     }
+
+    [Theory]
+    [InlineData("| resilient | (adj) | kiên cường, bền bỉ | /rɪˈzɪl.jənt/ | B2 | She is very resilient. |", "resilient", "kiên cường, bền bỉ", PartOfSpeech.Adjective, CefrLevel.B2, "/rɪˈzɪl.jənt/")]
+    [InlineData("1. ephemeral /ɪˈfem.ər.əl/ (adj) - phù du, chóng tàn", "ephemeral", "phù du, chóng tàn", PartOfSpeech.Adjective, CefrLevel.A1, "/ɪˈfem.ər.əl/")]
+    [InlineData("- serendipity : sự tình cờ may mắn", "serendipity", "sự tình cờ may mắn", PartOfSpeech.Noun, CefrLevel.A1, null)]
+    [InlineData("ubiquitous = có mặt ở khắp mọi nơi", "ubiquitous", "có mặt ở khắp mọi nơi", PartOfSpeech.Noun, CefrLevel.A1, null)]
+    [InlineData("benevolent :: nhân từ, rộng lượng", "benevolent", "nhân từ, rộng lượng", PartOfSpeech.Noun, CefrLevel.A1, null)]
+    public void ParseSmartTxtLine_VariousFormats_ShouldParseAccurately(
+        string line,
+        string expectedTerm,
+        string expectedMeaning,
+        PartOfSpeech expectedPos,
+        CefrLevel expectedLevel,
+        string? expectedPhonetic)
+    {
+        var parsed = ExportImportService.ParseSmartTxtLine(line);
+
+        parsed.Should().NotBeNull();
+        parsed!.Term.Should().Be(expectedTerm);
+        parsed.DefinitionVi.Should().Be(expectedMeaning);
+        parsed.PartOfSpeech.Should().Be(expectedPos);
+        if (expectedLevel != CefrLevel.A1)
+        {
+            parsed.Level.Should().Be(expectedLevel);
+        }
+        if (expectedPhonetic != null)
+        {
+            (parsed.PhoneticUk ?? parsed.PhoneticUs).Should().Be(expectedPhonetic);
+        }
+    }
+
+    [Fact]
+    public async Task CommitSmartImportAsync_WithInternalBatchDuplicates_SkipMode_ShouldPersistOnlyFirstOccurrence()
+    {
+        // Arrange: 2 duplicate terms in the same batch + 1 distinct word
+        var item1 = new SmartImportItemDto(
+            RowIndex: 1,
+            Term: "Concur",
+            Level: CefrLevel.B2,
+            PartOfSpeech: PartOfSpeech.Verb,
+            DefinitionVi: "Đồng ý, đồng tình",
+            DefinitionEn: null,
+            PhoneticUk: null,
+            PhoneticUs: null,
+            Examples: null,
+            Topics: null,
+            ExamTags: null,
+            Notes: null,
+            IsDuplicate: false,
+            IsValid: true,
+            ValidationMessage: null,
+            IsSelected: true
+        );
+
+        var item2 = new SmartImportItemDto(
+            RowIndex: 2,
+            Term: "concur", // same term, different casing
+            Level: CefrLevel.B2,
+            PartOfSpeech: PartOfSpeech.Verb,
+            DefinitionVi: "Xảy ra đồng thời",
+            DefinitionEn: null,
+            PhoneticUk: null,
+            PhoneticUs: null,
+            Examples: null,
+            Topics: null,
+            ExamTags: null,
+            Notes: null,
+            IsDuplicate: false,
+            IsValid: true,
+            ValidationMessage: null,
+            IsSelected: true
+        );
+
+        var item3 = new SmartImportItemDto(
+            RowIndex: 3,
+            Term: "Distinctive",
+            Level: CefrLevel.B2,
+            PartOfSpeech: PartOfSpeech.Adjective,
+            DefinitionVi: "Đặc biệt, dễ phân biệt",
+            DefinitionEn: null,
+            PhoneticUk: null,
+            PhoneticUs: null,
+            Examples: null,
+            Topics: null,
+            ExamTags: null,
+            Notes: null,
+            IsDuplicate: false,
+            IsValid: true,
+            ValidationMessage: null,
+            IsSelected: true
+        );
+
+        var addedWords = new List<Word>();
+        _mockVocabRepo.Setup(r => r.GetByTermAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word?)null);
+
+        _mockVocabRepo.Setup(r => r.AddAsync(It.IsAny<Word>(), It.IsAny<CancellationToken>()))
+            .Callback<Word, CancellationToken>((w, _) => addedWords.Add(w))
+            .ReturnsAsync((Word w, CancellationToken _) => w);
+
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var request = new SmartImportCommitRequestDto(
+            Items: new List<SmartImportItemDto> { item1, item2, item3 },
+            ConflictResolution: ImportConflictResolution.Skip
+        );
+
+        // Act
+        var result = await _service.CommitSmartImportAsync(request);
+
+        // Assert
+        result.TotalImported.Should().Be(2);
+        result.TotalSkipped.Should().Be(1);
+        result.TotalErrors.Should().Be(0);
+
+        addedWords.Count.Should().Be(2);
+        addedWords.Select(w => w.NormalizedTerm).Should().Contain("concur");
+        addedWords.Select(w => w.NormalizedTerm).Should().Contain("distinctive");
+    }
+
+    [Fact]
+    public async Task CommitSmartImportAsync_WithInternalBatchDuplicates_OverwriteMode_ShouldMergeMeaningsIntoOneWord()
+    {
+        // Arrange: 2 duplicate terms in the same batch in Overwrite mode
+        var item1 = new SmartImportItemDto(
+            RowIndex: 1,
+            Term: "Yield",
+            Level: CefrLevel.B2,
+            PartOfSpeech: PartOfSpeech.Verb,
+            DefinitionVi: "Sinh ra, mang lại lợi nhuận",
+            DefinitionEn: null,
+            PhoneticUk: "/jiːld/",
+            PhoneticUs: null,
+            Examples: "The investment yielded high returns.",
+            Topics: "Finance",
+            ExamTags: null,
+            Notes: null,
+            IsDuplicate: false,
+            IsValid: true,
+            ValidationMessage: null,
+            IsSelected: true
+        );
+
+        var item2 = new SmartImportItemDto(
+            RowIndex: 2,
+            Term: "yield",
+            Level: CefrLevel.B2,
+            PartOfSpeech: PartOfSpeech.Noun,
+            DefinitionVi: "Sản lượng, lợi nhuận",
+            DefinitionEn: null,
+            PhoneticUk: "/jiːld/",
+            PhoneticUs: null,
+            Examples: "Crop yields have increased.",
+            Topics: "Agriculture",
+            ExamTags: null,
+            Notes: null,
+            IsDuplicate: false,
+            IsValid: true,
+            ValidationMessage: null,
+            IsSelected: true
+        );
+
+        var addedWords = new List<Word>();
+        _mockVocabRepo.Setup(r => r.GetByTermAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Word?)null);
+
+        _mockVocabRepo.Setup(r => r.AddAsync(It.IsAny<Word>(), It.IsAny<CancellationToken>()))
+            .Callback<Word, CancellationToken>((w, _) => addedWords.Add(w))
+            .ReturnsAsync((Word w, CancellationToken _) => w);
+
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var request = new SmartImportCommitRequestDto(
+            Items: new List<SmartImportItemDto> { item1, item2 },
+            ConflictResolution: ImportConflictResolution.Overwrite
+        );
+
+        // Act
+        var result = await _service.CommitSmartImportAsync(request);
+
+        // Assert
+        result.TotalImported.Should().Be(1);
+        result.TotalUpdated.Should().Be(1); // 2nd row merged into the 1st
+        result.TotalErrors.Should().Be(0);
+
+        addedWords.Count.Should().Be(1);
+        var mergedWord = addedWords[0];
+        mergedWord.NormalizedTerm.Should().Be("yield");
+        mergedWord.Meanings.Count.Should().Be(2); // Both meanings merged!
+    }
 }

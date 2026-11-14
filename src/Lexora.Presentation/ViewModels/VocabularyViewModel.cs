@@ -569,11 +569,15 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
 
     private bool _isSavingWord = false;
 
+    [ObservableProperty]
+    public partial bool IsSubmitting { get; set; } = false;
+
     [RelayCommand]
     public async Task SaveWordAsync(WordCreateOrUpdateDto dto)
     {
-        if (_isSavingWord) return;
+        if (_isSavingWord || IsSubmitting) return;
         _isSavingWord = true;
+        IsSubmitting = true;
         try
         {
             WordDto saved;
@@ -617,6 +621,7 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
         finally
         {
             _isSavingWord = false;
+            IsSubmitting = false;
         }
     }
 

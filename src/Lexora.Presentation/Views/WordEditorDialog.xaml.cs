@@ -140,6 +140,7 @@ public sealed partial class WordEditorDialog : ContentDialog
     private readonly List<TopicDto> _allTopics;
     private readonly List<ExamTagDto> _allExamTags;
     private bool _isHandlingPosSelectionChange;
+    private bool _isSubmitting = false;
 
     public WordEditorDialog(
         WordDto? existingWord,
@@ -567,11 +568,15 @@ public sealed partial class WordEditorDialog : ContentDialog
 
     private bool TrySaveInternal()
     {
+        if (_isSubmitting) return false;
+        _isSubmitting = true;
+
         DialogInfoBar.IsOpen = false;
 
         var term = TermTextBox.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(term))
         {
+            _isSubmitting = false;
             DialogInfoBar.Message = Loc.GetString("WordEditor_ErrTermRequired");
             DialogInfoBar.IsOpen = true;
             TermTextBox.Focus(FocusState.Programmatic);
@@ -580,6 +585,7 @@ public sealed partial class WordEditorDialog : ContentDialog
 
         if (PosGroups.Count == 0)
         {
+            _isSubmitting = false;
             DialogInfoBar.Message = Loc.GetString("WordEditor_ErrMeaningRequired");
             DialogInfoBar.IsOpen = true;
             return false;
@@ -595,6 +601,7 @@ public sealed partial class WordEditorDialog : ContentDialog
 
             if (validMeaningsForGroup.Count == 0)
             {
+                _isSubmitting = false;
                 DialogInfoBar.Message = string.Format(Loc.GetString("WordEditor_ErrPosNeedsMeaning"), group.DisplayName);
                 DialogInfoBar.IsOpen = true;
                 return false;

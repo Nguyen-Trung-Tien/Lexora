@@ -99,6 +99,7 @@ public sealed partial class SmartImportDialog : ContentDialog
     private int PreviewTotalPages => Math.Max(1, (int)Math.Ceiling((double)_previewItems.Count / PreviewPageSize));
     private CancellationTokenSource? _importCts;
     private SmartImportAnalysisResultDto? _analysisResult;
+    private bool _isImporting;
 
     public string? ContentToImport { get; private set; }
     public string? FileNameHint { get; private set; }
@@ -134,6 +135,14 @@ public sealed partial class SmartImportDialog : ContentDialog
 
         InitializeComponent();
 
+        Closing += (s, args) =>
+        {
+            if (_isImporting)
+            {
+                args.Cancel = true;
+            }
+        };
+
         Unloaded += (s, e) =>
         {
             _importCts?.Cancel();
@@ -154,6 +163,19 @@ public sealed partial class SmartImportDialog : ContentDialog
         // ThemeResourceHelper can resolve ActualTheme from the live visual tree
         // and named elements are guaranteed to exist.
         Loaded += OnDialogLoaded;
+    }
+
+    private void ShowInfoBar(InfoBarSeverity severity, string message, string? title = null)
+    {
+        DialogInfoBar.Severity = severity;
+        DialogInfoBar.Title = title ?? string.Empty;
+        DialogInfoBar.Message = message;
+        DialogInfoBar.IsOpen = true;
+    }
+
+    private void HideInfoBar()
+    {
+        DialogInfoBar.IsOpen = false;
     }
 
     public void LoadInitialContent(string content, string fileName)
@@ -251,6 +273,7 @@ public sealed partial class SmartImportDialog : ContentDialog
         MenuItemSampleCsv.Text = _loc.GetString("SmartImport_SampleCsv");
         MenuItemSampleTxt.Text = _loc.GetString("SmartImport_SampleTxt");
         TextDone.Text = _loc.GetString("SmartImport_DoneBtn");
+        TextReportBack.Text = _loc.GetString("SmartImport_ReportBack");
         BtnClearPaste.Content = _loc.GetString("SmartImport_ClearPaste");
         TextDropHint.Text = _loc.GetString("SmartImport_DragDropHint");
         TextModePasteHeader.Text = _loc.GetString("SmartImport_InputDataLabel");
@@ -270,6 +293,8 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     private void GoToStep(int step)
     {
+        HideInfoBar();
+
         var accentBrush = ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush");
         var layerBrush = ThemeResourceHelper.GetThemeBrush(this, "LayerFillColorDefaultBrush");
         var accentText = ThemeResourceHelper.GetThemeBrush(this, "AccentTextFillColorPrimaryBrush");
@@ -293,6 +318,12 @@ public sealed partial class SmartImportDialog : ContentDialog
         Step3NumberBorder.Background = step == 3 ? accentBrush : layerBrush;
         Step3NumberText.Foreground = step == 3 ? onAccentText : subtleText;
         Step3Text.Foreground = step == 3 ? accentText : subtleText;
+    }
+
+    private void BtnReportBack_Click(object sender, RoutedEventArgs e)
+    {
+        HideInfoBar();
+        GoToStep(2);
     }
 
     private void UpdateMode(bool isFileMode)
@@ -630,6 +661,8 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     private async void BtnAnalyzeNext_Click(object sender, RoutedEventArgs e)
     {
+        HideInfoBar();
+
         if (PanelPaste.Visibility == Visibility.Visible)
         {
             ContentToImport = InputTextBox.Text;
@@ -640,6 +673,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             TextFormatBadge.Text = _loc.GetString("SmartImport_NoContent");
             IconFormatBadge.Glyph = "\uEA39";
             IconFormatBadge.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+            ShowInfoBar(InfoBarSeverity.Warning, _loc.GetString("SmartImport_NoContent"));
             return;
         }
 
@@ -648,6 +682,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             TextFormatBadge.Text = _loc.GetString("SmartImport_FormatUnknown");
             IconFormatBadge.Glyph = "\uEA39";
             IconFormatBadge.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+            ShowInfoBar(InfoBarSeverity.Warning, _loc.GetString("SmartImport_FormatUnknown"));
             return;
         }
 
@@ -656,9 +691,12 @@ public sealed partial class SmartImportDialog : ContentDialog
             if (_homophoneExportImportService == null)
             {
                 TextFormatBadge.Text = _loc.GetString("Homophones_ServiceNotAvailable");
+                ShowInfoBar(InfoBarSeverity.Error, _loc.GetString("Homophones_ServiceNotAvailable"));
                 return;
             }
 
+            if (_isImporting) return;
+            _isImporting = true;
             BtnAnalyzeNext.IsEnabled = false;
             GoToStep(3);
             PanelImportProgress.Visibility = Visibility.Visible;
@@ -698,6 +736,7 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), importResult.TotalUpdated);
                 TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), importResult.TotalSkipped);
                 TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), importResult.Errors.Count);
+                BtnReportBack.Visibility = importResult.Errors.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
             catch (OperationCanceledException)
             {
@@ -711,6 +750,7 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
                 TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
                 TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 0);
+                BtnReportBack.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
@@ -725,9 +765,12 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
                 TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
                 TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 1);
+                ShowInfoBar(InfoBarSeverity.Error, errorMsg, _loc.GetString("Common_Error"));
+                BtnReportBack.Visibility = Visibility.Visible;
             }
             finally
             {
+                _isImporting = false;
                 CloseButtonText = _loc.GetString("Action_Cancel");
                 BtnAnalyzeNext.IsEnabled = true;
             }
@@ -739,9 +782,12 @@ public sealed partial class SmartImportDialog : ContentDialog
             if (_grammarExportImportService == null)
             {
                 TextFormatBadge.Text = _loc.GetString("Grammar_ServiceNotAvailable");
+                ShowInfoBar(InfoBarSeverity.Error, _loc.GetString("Grammar_ServiceNotAvailable"));
                 return;
             }
 
+            if (_isImporting) return;
+            _isImporting = true;
             BtnAnalyzeNext.IsEnabled = false;
             GoToStep(3);
             PanelImportProgress.Visibility = Visibility.Visible;
@@ -789,6 +835,7 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), importResult.TotalUpdated);
                 TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), importResult.TotalSkipped);
                 TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), importResult.Errors.Count);
+                BtnReportBack.Visibility = importResult.Errors.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
             catch (OperationCanceledException)
             {
@@ -802,6 +849,7 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
                 TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
                 TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 0);
+                BtnReportBack.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
@@ -816,9 +864,12 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
                 TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
                 TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 1);
+                ShowInfoBar(InfoBarSeverity.Error, errorMsg, _loc.GetString("Common_Error"));
+                BtnReportBack.Visibility = Visibility.Visible;
             }
             finally
             {
+                _isImporting = false;
                 CloseButtonText = _loc.GetString("Action_Cancel");
                 BtnAnalyzeNext.IsEnabled = true;
             }
@@ -894,7 +945,7 @@ public sealed partial class SmartImportDialog : ContentDialog
                     IsDuplicate = item.IsDuplicate,
                     IsValid = item.IsValid,
                     ValidationMessage = item.ValidationMessage,
-                    IsSelected = item.IsValid,
+                    IsSelected = item.IsValid && (isOverwrite || !item.IsDuplicate),
                     OriginalDto = item,
                     StatusBackgroundBrush = successBg
                 };
@@ -947,9 +998,11 @@ public sealed partial class SmartImportDialog : ContentDialog
         catch (Exception ex)
         {
             await DispatcherQueue.EnsureOnUIThreadAsync();
-            TextFormatBadge.Text = string.Format(_loc.GetString("Common_ParseError"), ex.Message);
+            var parseErrorMsg = string.Format(_loc.GetString("Common_ParseError"), ex.Message);
+            TextFormatBadge.Text = parseErrorMsg;
             IconFormatBadge.Glyph = "\uEA39";
             IconFormatBadge.Foreground = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+            ShowInfoBar(InfoBarSeverity.Error, parseErrorMsg);
         }
         finally
         {
@@ -1042,15 +1095,18 @@ public sealed partial class SmartImportDialog : ContentDialog
                     preview.StatusText = _loc.GetString("SmartImport_StatusOverwrite");
                     preview.StatusBorderBrush = accentBorder;
                     preview.StatusForegroundBrush = accentFg;
+                    preview.IsSelected = true;
                 }
                 else
                 {
                     preview.StatusText = _loc.GetString("SmartImport_StatusDuplicate");
                     preview.StatusBorderBrush = cautionBorder;
                     preview.StatusForegroundBrush = cautionFg;
+                    preview.IsSelected = false;
                 }
             }
         }
+        UpdateSelectionCount();
     }
 
     private void UpdateSelectionCount()
@@ -1078,8 +1134,20 @@ public sealed partial class SmartImportDialog : ContentDialog
 
     private async void BtnCommitImport_Click(object sender, RoutedEventArgs e)
     {
+        if (_isImporting) return;
+
         var selectedItems = _previewItems.Where(x => x.IsSelected).Select(x => x.OriginalDto).ToList();
-        if (selectedItems.Count == 0) return;
+        if (selectedItems.Count == 0)
+        {
+            ShowInfoBar(InfoBarSeverity.Warning, _loc.GetString("SmartImport_NoSelectedItems"));
+            return;
+        }
+
+        _isImporting = true;
+        BtnCommitImport.IsEnabled = false;
+        BtnBackToStep1.IsEnabled = false;
+        BtnReportBack.Visibility = Visibility.Collapsed;
+        HideInfoBar();
 
         GoToStep(3);
         PanelImportProgress.Visibility = Visibility.Visible;
@@ -1123,6 +1191,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), CommitResult.TotalUpdated);
             TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), CommitResult.TotalSkipped);
             TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), CommitResult.TotalErrors);
+            BtnReportBack.Visibility = CommitResult.TotalErrors > 0 ? Visibility.Visible : Visibility.Collapsed;
         }
         catch (OperationCanceledException)
         {
@@ -1136,6 +1205,7 @@ public sealed partial class SmartImportDialog : ContentDialog
             TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), CommitResult?.TotalUpdated ?? 0);
             TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), CommitResult?.TotalSkipped ?? 0);
             TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), 0);
+            BtnReportBack.Visibility = Visibility.Visible;
         }
         catch (Exception ex)
         {
@@ -1150,9 +1220,14 @@ public sealed partial class SmartImportDialog : ContentDialog
             TextReportUpdated.Text = string.Format(_loc.GetString("SmartImport_UpdatedCount"), 0);
             TextReportSkipped.Text = string.Format(_loc.GetString("SmartImport_SkippedCount"), 0);
             TextReportErrors.Text = string.Format(_loc.GetString("SmartImport_ErrorCount"), selectedItems.Count);
+            ShowInfoBar(InfoBarSeverity.Error, errorMsg, _loc.GetString("Common_Error"));
+            BtnReportBack.Visibility = Visibility.Visible;
         }
         finally
         {
+            _isImporting = false;
+            BtnCommitImport.IsEnabled = true;
+            BtnBackToStep1.IsEnabled = true;
             CloseButtonText = _loc.GetString("Action_Cancel");
         }
     }

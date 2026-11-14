@@ -210,4 +210,19 @@ abandon,maintain,Antonym,0.95,B2,Từ bỏ vs. Duy trì";
 
         mockCache.Verify(c => c.InvalidateVocabulary(), Times.Once);
     }
+
+    [Fact]
+    public async Task AnalyzeImportAsync_WhenPayloadExceeds20MB_ShouldReturnWarningAndZeroItems()
+    {
+        // Arrange - Create a string representation exceeding 20MB
+        var largeContent = new string('A', 20_000_001);
+
+        // Act
+        var result = await _service.AnalyzeImportAsync(largeContent, "json");
+
+        // Assert
+        result.TotalCount.Should().Be(0);
+        result.Items.Should().BeEmpty();
+        result.GlobalWarnings.Should().Contain(w => w.Contains("20MB"));
+    }
 }

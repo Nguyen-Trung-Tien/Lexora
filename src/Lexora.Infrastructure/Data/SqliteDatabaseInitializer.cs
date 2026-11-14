@@ -1,5 +1,6 @@
 using Lexora.Domain.Entities;
 using Lexora.Domain.Enums;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -18,34 +19,50 @@ public class SqliteDatabaseInitializer
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        try
+        const int maxRetries = 3;
+        int attempt = 0;
+
+        while (true)
         {
-            _logger.LogInformation("Ensuring SQLite database is created...");
-            await _context.Database.EnsureCreatedAsync(cancellationToken);
-
-            // Configure optimal client SQLite PRAGMAs for high performance and lock resilience
-            await _context.Database.ExecuteSqlRawAsync(
-                "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 15000; PRAGMA cache_size = -8000; PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 30000000;",
-                cancellationToken);
-
-            await EnsureSchemaCompatibilityAsync(cancellationToken);
-
-            if (!await _context.Words.AnyAsync(cancellationToken))
+            attempt++;
+            try
             {
-                _logger.LogInformation("Seeding initial starter pack data...");
-                await SeedInitialDataAsync(cancellationToken);
-            }
+                _logger.LogInformation("Ensuring SQLite database is created (attempt {Attempt}/{MaxRetries})...", attempt, maxRetries);
+                await _context.Database.EnsureCreatedAsync(cancellationToken);
 
-            if (!await _context.HomophoneGroups.AnyAsync(cancellationToken))
-            {
-                _logger.LogInformation("Seeding starter homophones and phonetic confusions...");
-                await SeedHomophoneStarterDataAsync(cancellationToken);
+                // Configure optimal client SQLite PRAGMAs for high performance and lock resilience
+                await _context.Database.ExecuteSqlRawAsync(
+                    "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 15000; PRAGMA cache_size = -8000; PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 30000000;",
+                    cancellationToken);
+
+                await EnsureSchemaCompatibilityAsync(cancellationToken);
+
+                if (!await _context.Words.AnyAsync(cancellationToken))
+                {
+                    _logger.LogInformation("Seeding initial starter pack data...");
+                    await SeedInitialDataAsync(cancellationToken);
+                }
+
+                if (!await _context.HomophoneGroups.AnyAsync(cancellationToken))
+                {
+                    _logger.LogInformation("Seeding starter homophones and phonetic confusions...");
+                    await SeedHomophoneStarterDataAsync(cancellationToken);
+                }
+
+                _logger.LogInformation("SQLite database initialized successfully.");
+                break;
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred while initializing the SQLite database.");
-            throw;
+            catch (SqliteException ex) when (attempt < maxRetries && (ex.SqliteErrorCode == 5 || ex.Message.Contains("busy", StringComparison.OrdinalIgnoreCase) || ex.Message.Contains("locked", StringComparison.OrdinalIgnoreCase)))
+            {
+                _logger.LogWarning(ex, "SQLite database busy/locked on initialization attempt {Attempt}/{MaxRetries}. Retrying after backoff...", attempt, maxRetries);
+                SqliteConnection.ClearAllPools();
+                await Task.Delay(250 * attempt, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while initializing the SQLite database on attempt {Attempt}.", attempt);
+                throw;
+            }
         }
     }
 

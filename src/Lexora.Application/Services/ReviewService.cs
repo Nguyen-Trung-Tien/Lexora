@@ -230,8 +230,8 @@ public class ReviewService : IReviewService
             result = _srEngine.CalculateNextReview(card, rating, DateTime.UtcNow);
         }
 
-        // Apply algorithm results
-        card.EaseFactor = result.NewEaseFactor;
+        // Apply algorithm results (enforcing EF >= 1.3 invariant)
+        card.EaseFactor = Math.Max(1.3, result.NewEaseFactor);
         card.IntervalDays = result.NewIntervalDays;
         card.Repetitions = result.NewRepetitions;
         card.Lapses = result.NewLapses;
@@ -244,6 +244,12 @@ public class ReviewService : IReviewService
             card.CorrectReviews++;
         }
         card.UpdatedAt = DateTime.UtcNow;
+
+        // Synchronize parent word timestamp
+        if (card.Word != null)
+        {
+            card.Word.UpdatedAt = DateTime.UtcNow;
+        }
 
         // Log the review action
         var log = new StudyLog

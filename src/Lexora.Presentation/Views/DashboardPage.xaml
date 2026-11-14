@@ -317,7 +317,7 @@
                         </StackPanel>
 
                         <TextBlock Text="{x:Bind ViewModel.AdviceTitle, Mode=OneWay}" FontSize="18" FontWeight="Bold" />
-                        <TextBlock Text="{x:Bind ViewModel.AdviceDescription, Mode=OneWay}" Style="{StaticResource LexoraBodyStyle}" MaxWidth="680" />
+                        <TextBlock Text="{x:Bind ViewModel.AdviceDescription, Mode=OneWay}" Style="{StaticResource LexoraBodyStyle}" TextWrapping="Wrap" MaxWidth="680" />
                     </StackPanel>
 
                     <Button Grid.Column="1"

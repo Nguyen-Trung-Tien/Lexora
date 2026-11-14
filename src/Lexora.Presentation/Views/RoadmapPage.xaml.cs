@@ -954,7 +954,7 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
         const double halfWidth = nodeWidth / 2.0;
         const double halfHeight = nodeHeight / 2.0;
 
-        double maxY = nodes.Max(n => n.CanvasY) + nodeHeight + 60.0;
+        double maxY = nodes.Max(n => n.CanvasY) + nodeHeight + 200.0;
         double maxX = nodes.Max(n => n.CanvasX) + nodeWidth + 60.0;
         RoadmapCanvas.Width = Math.Max(780.0, maxX);
         RoadmapCanvas.Height = Math.Max(380.0, maxY);
