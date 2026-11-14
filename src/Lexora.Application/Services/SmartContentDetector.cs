@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Lexora.Application.Services;
 
 public enum DataFormat
@@ -55,6 +57,24 @@ public static class SmartContentDetector
         }
 
         // 2. Check for markdown code fences or direct JSON structure
+        var unFenced = ExportImportService.StripMarkdownCodeFence(trimmed).TrimStart();
+        if (unFenced.StartsWith('[') || unFenced.StartsWith('{'))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(unFenced);
+                return DataFormat.Json;
+            }
+            catch
+            {
+                // Even if trailing comma or slightly malformed, if it structurally starts with [ or {
+                if (unFenced.StartsWith('[') || (unFenced.StartsWith('{') && unFenced.Contains(':')))
+                {
+                    return DataFormat.Json;
+                }
+            }
+        }
+
         if (trimmed.StartsWith("```json", StringComparison.OrdinalIgnoreCase))
         {
             return DataFormat.Json;
@@ -63,11 +83,6 @@ public static class SmartContentDetector
         if (trimmed.StartsWith("```csv", StringComparison.OrdinalIgnoreCase))
         {
             return DataFormat.Csv;
-        }
-
-        if (trimmed.StartsWith('[') || (trimmed.StartsWith('{') && (trimmed.Contains("\"term\"") || trimmed.Contains("\"title\"") || trimmed.Contains("\"meanings\""))))
-        {
-            return DataFormat.Json;
         }
 
         // 3. Inspect first few non-empty lines

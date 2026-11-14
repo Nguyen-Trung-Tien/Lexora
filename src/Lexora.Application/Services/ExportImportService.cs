@@ -106,6 +106,36 @@ public class ExportImportService : IExportImportService
                 var single = JsonSerializer.Deserialize<WordExportModel>(cleanJson, JsonOptions);
                 return single != null ? [single] : new List<WordExportModel>();
             }
+
+            // Dictionary format check: { "apple": "quả táo" } or { "apple": { ... } }
+            var dictWords = new List<WordExportModel>();
+            foreach (var prop in root.EnumerateObject())
+            {
+                if (prop.Value.ValueKind == JsonValueKind.String)
+                {
+                    dictWords.Add(new WordExportModel
+                    {
+                        Term = prop.Name,
+                        DefinitionVi = prop.Value.GetString() ?? string.Empty
+                    });
+                }
+                else if (prop.Value.ValueKind == JsonValueKind.Object)
+                {
+                    var item = JsonSerializer.Deserialize<WordExportModel>(prop.Value.GetRawText(), JsonOptions);
+                    if (item != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(item.Term) && string.IsNullOrWhiteSpace(item.Word))
+                        {
+                            item.Term = prop.Name;
+                        }
+                        dictWords.Add(item);
+                    }
+                }
+            }
+            if (dictWords.Count > 0)
+            {
+                return dictWords;
+            }
         }
 
         // Fallback

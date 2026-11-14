@@ -879,4 +879,33 @@ public class SmartImportWorkflowTests
         layOff.RichMeanings[0].Examples.Should().HaveCount(1);
         layOff.RichMeanings[0].Examples[0].SentenceEn.Should().Contain("lay off fifty factory workers");
     }
+
+    [Theory]
+    [InlineData("```\n[\n  {\"term\": \"resilient\", \"definitionVi\": \"kiên cường\"}\n]\n```")]
+    [InlineData("{\n  \"vocabulary\": [\n    {\"word\": \"perseverance\", \"meaning\": \"kiên trì\"}\n  ]\n}")]
+    [InlineData("{\n  \"apple\": \"quả táo\",\n  \"banana\": \"quả chuối\"\n}")]
+    [InlineData("[\n  {\"term\": \"abandon\", \"pos\": \"verb\", \"definitionVi\": \"từ bỏ\"}\n]")]
+    public void DetectFormat_VariousJsonShapes_ShouldAlwaysDetectAsJson(string content)
+    {
+        var format = SmartContentDetector.DetectFormat(content);
+        format.Should().Be(DataFormat.Json);
+    }
+
+    [Fact]
+    public void DeserializeWordsJson_DictionaryAndWrappedFormats_ShouldParseCorrectly()
+    {
+        // 1. Key-value string dictionary
+        var dictJson = "{\n  \"apple\": \"quả táo\",\n  \"banana\": \"quả chuối\"\n}";
+        var wordsFromDict = ExportImportService.DeserializeWordsJson(dictJson);
+        wordsFromDict.Should().HaveCount(2);
+        wordsFromDict[0].Term.Should().Be("apple");
+        wordsFromDict[0].DefinitionVi.Should().Be("quả táo");
+
+        // 2. Wrapped in "vocabulary" property
+        var wrappedJson = "{\n  \"vocabulary\": [\n    {\"word\": \"perseverance\", \"meaning\": \"kiên trì\"}\n  ]\n}";
+        var wordsFromWrapped = ExportImportService.DeserializeWordsJson(wrappedJson);
+        wordsFromWrapped.Should().HaveCount(1);
+        wordsFromWrapped[0].ResolvedTerm.Should().Be("perseverance");
+        wordsFromWrapped[0].ResolvedDefinitionVi.Should().Be("kiên trì");
+    }
 }

@@ -11,6 +11,7 @@ using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Application.Services;
 using Lexora.Presentation.Services;
+using Lexora.Domain.Enums;
 
 namespace Lexora.Presentation.Views;
 
@@ -40,11 +41,17 @@ public class SmartImportPreviewItem : CommunityToolkit.Mvvm.ComponentModel.Obser
     public bool HasPartOfSpeech => !string.IsNullOrWhiteSpace(PartOfSpeech);
     public string Meaning { get; set; } = string.Empty;
     public string? Pronunciation { get; set; }
+    public bool HasPronunciation => !string.IsNullOrWhiteSpace(Pronunciation);
     public string? ExampleSentence { get; set; }
+    public bool HasExample => !string.IsNullOrWhiteSpace(ExampleSentence);
     public string? ExampleTranslation { get; set; }
     public string? TopicName { get; set; }
+    public bool HasTopic => !string.IsNullOrWhiteSpace(TopicName);
     public string? CefrLevel { get; set; }
+    public bool HasCefrLevel => !string.IsNullOrWhiteSpace(CefrLevel) && CefrLevel != "None" && CefrLevel != "0";
     public string? ExamType { get; set; }
+    public bool HasExamType => !string.IsNullOrWhiteSpace(ExamType);
+    public bool HasMetadataRow => HasTopic || HasExamType || HasExample;
 
     public bool IsDuplicate { get; set; }
     public bool IsValid { get; set; }
@@ -100,6 +107,7 @@ public sealed partial class SmartImportDialog : ContentDialog
     private CancellationTokenSource? _importCts;
     private SmartImportAnalysisResultDto? _analysisResult;
     private bool _isImporting;
+    private DataFormat? _manualFormatOverride;
 
     public string? ContentToImport { get; private set; }
     public string? FileNameHint { get; private set; }
@@ -621,7 +629,14 @@ public sealed partial class SmartImportDialog : ContentDialog
     private void EvaluateContent()
     {
         var raw = ContentToImport;
-        DetectedFormat = SmartContentDetector.DetectFormat(raw, FileNameHint);
+        if (_manualFormatOverride.HasValue)
+        {
+            DetectedFormat = _manualFormatOverride.Value;
+        }
+        else
+        {
+            DetectedFormat = SmartContentDetector.DetectFormat(raw, FileNameHint);
+        }
         UpdateDetectionBadge();
     }
 
@@ -631,22 +646,24 @@ public sealed partial class SmartImportDialog : ContentDialog
         var successBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
         var cautionBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush");
 
+        string overrideSuffix = _manualFormatOverride.HasValue ? " (Thủ công)" : "";
+
         switch (DetectedFormat)
         {
             case DataFormat.Json:
                 IconFormatBadge.Glyph = "\uE73E";
                 IconFormatBadge.Foreground = successBrush;
-                TextFormatBadge.Text = string.Format(_loc.GetString("SmartImport_FormatDetected"), "JSON");
+                TextFormatBadge.Text = string.Format(_loc.GetString("SmartImport_FormatDetected"), $"JSON{overrideSuffix}");
                 break;
             case DataFormat.Csv:
                 IconFormatBadge.Glyph = "\uE73E";
                 IconFormatBadge.Foreground = successBrush;
-                TextFormatBadge.Text = string.Format(_loc.GetString("SmartImport_FormatDetected"), "CSV");
+                TextFormatBadge.Text = string.Format(_loc.GetString("SmartImport_FormatDetected"), $"CSV{overrideSuffix}");
                 break;
             case DataFormat.Txt:
                 IconFormatBadge.Glyph = "\uE73E";
                 IconFormatBadge.Foreground = accentBrush;
-                TextFormatBadge.Text = string.Format(_loc.GetString("SmartImport_FormatDetected"), "TXT / TSV / Anki / Quizlet");
+                TextFormatBadge.Text = string.Format(_loc.GetString("SmartImport_FormatDetected"), $"TXT / TSV / Anki{overrideSuffix}");
                 break;
             default:
                 IconFormatBadge.Glyph = "\uE946";
@@ -654,6 +671,30 @@ public sealed partial class SmartImportDialog : ContentDialog
                 TextFormatBadge.Text = _loc.GetString("SmartImport_FormatUnknown");
                 break;
         }
+    }
+
+    private void MenuFormatAuto_Click(object sender, RoutedEventArgs e)
+    {
+        _manualFormatOverride = null;
+        EvaluateContent();
+    }
+
+    private void MenuFormatJson_Click(object sender, RoutedEventArgs e)
+    {
+        _manualFormatOverride = DataFormat.Json;
+        EvaluateContent();
+    }
+
+    private void MenuFormatCsv_Click(object sender, RoutedEventArgs e)
+    {
+        _manualFormatOverride = DataFormat.Csv;
+        EvaluateContent();
+    }
+
+    private void MenuFormatTxt_Click(object sender, RoutedEventArgs e)
+    {
+        _manualFormatOverride = DataFormat.Txt;
+        EvaluateContent();
     }
 
     private void MenuItemSampleJson_Click(object sender, RoutedEventArgs e) => LoadSample("json");
@@ -893,6 +934,16 @@ public sealed partial class SmartImportDialog : ContentDialog
         {
             var content = ContentToImport;
             var fileHint = FileNameHint;
+            if (_manualFormatOverride.HasValue)
+            {
+                fileHint = _manualFormatOverride.Value switch
+                {
+                    DataFormat.Json => "forced.json",
+                    DataFormat.Csv => "forced.csv",
+                    DataFormat.Txt => "forced.txt",
+                    _ => fileHint
+                };
+            }
             _analysisResult = await Task.Run(async () => await _exportImportService.AnalyzeSmartImportAsync(content, fileHint));
             await DispatcherQueue.EnsureOnUIThreadAsync();
 
@@ -953,7 +1004,8 @@ public sealed partial class SmartImportDialog : ContentDialog
                     Pronunciation = item.PhoneticUk ?? item.PhoneticUs,
                     ExampleSentence = item.Examples,
                     TopicName = item.Topics,
-                    CefrLevel = item.Level.ToString(),
+                    ExamType = item.ExamTags,
+                    CefrLevel = item.Level != CefrLevel.None ? item.Level.ToString() : null,
                     IsDuplicate = item.IsDuplicate,
                     IsValid = item.IsValid,
                     ValidationMessage = item.ValidationMessage,
