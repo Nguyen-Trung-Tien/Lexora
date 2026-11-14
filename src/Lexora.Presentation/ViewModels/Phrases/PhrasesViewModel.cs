@@ -190,14 +190,30 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
 
     private void RefreshCurrentPageSlice()
     {
-        Phrases.Clear();
         var slice = _allFilteredPhrases
             .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize);
+            .Take(PageSize)
+            .ToList();
 
-        foreach (var item in slice)
+        // Stable in-place collection update to prevent layout collapse and flickering
+        while (Phrases.Count > slice.Count)
         {
-            Phrases.Add(item);
+            Phrases.RemoveAt(Phrases.Count - 1);
+        }
+
+        for (int i = 0; i < slice.Count; i++)
+        {
+            if (i < Phrases.Count)
+            {
+                if (Phrases[i].Id != slice[i].Id)
+                {
+                    Phrases[i] = slice[i];
+                }
+            }
+            else
+            {
+                Phrases.Add(slice[i]);
+            }
         }
 
         OnPropertyChanged(nameof(TotalPages));
@@ -260,12 +276,9 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
             else
             {
                 var match = _allFilteredPhrases.FirstOrDefault(p => p.Id == phrase.Id);
-                if (match != null) match.IsFavorite = newStatus;
-
-                var index = Phrases.IndexOf(phrase);
-                if (index >= 0)
+                if (match != null && match != phrase)
                 {
-                    Phrases[index] = phrase;
+                    match.IsFavorite = newStatus;
                 }
             }
         }
@@ -383,13 +396,16 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
             var existing = _allFilteredPhrases.FirstOrDefault(p => p.Id == savedPhrase.Id);
             if (existing != null)
             {
-                var idx = _allFilteredPhrases.IndexOf(existing);
-                _allFilteredPhrases[idx] = savedPhrase;
-            }
-            var pageIdx = Phrases.IndexOf(existing ?? savedPhrase);
-            if (pageIdx >= 0)
-            {
-                Phrases[pageIdx] = savedPhrase;
+                existing.Category = savedPhrase.Category;
+                existing.ContextTag = savedPhrase.ContextTag;
+                existing.PromptSentence = savedPhrase.PromptSentence;
+                existing.PromptTranslation = savedPhrase.PromptTranslation;
+                existing.SampleResponse = savedPhrase.SampleResponse;
+                existing.ResponseTranslation = savedPhrase.ResponseTranslation;
+                existing.AdditionalSuggestions = savedPhrase.AdditionalSuggestions;
+                existing.CefrLevel = savedPhrase.CefrLevel;
+                existing.IsFavorite = savedPhrase.IsFavorite;
+                existing.UpdatedAt = savedPhrase.UpdatedAt;
             }
         }
     }

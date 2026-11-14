@@ -15,6 +15,7 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
     private readonly PhrasesViewModel _viewModel;
     private readonly ILocalizationService _loc;
     private readonly IConversationPhraseService _phraseService;
+    private bool _isInitializing = true;
 
     public PhrasesViewModel ViewModel => _viewModel;
     public ILocalizationService Loc => _loc;
@@ -35,6 +36,7 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
         _viewModel = viewModel;
         _loc = loc;
         _phraseService = phraseService;
+        _isInitializing = true;
 
         InitializeComponent();
 
@@ -43,7 +45,15 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
     {
-        await _viewModel.LoadDataAsync();
+        _isInitializing = true;
+        try
+        {
+            await _viewModel.LoadDataAsync();
+        }
+        finally
+        {
+            _isInitializing = false;
+        }
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -51,7 +61,15 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
         base.OnNavigatedTo(e);
         if (IsLoaded)
         {
-            await _viewModel.LoadDataAsync();
+            _isInitializing = true;
+            try
+            {
+                await _viewModel.LoadDataAsync();
+            }
+            finally
+            {
+                _isInitializing = false;
+            }
         }
     }
 
@@ -176,11 +194,13 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
 
     private async void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
+        if (_isInitializing) return;
         await _viewModel.RefreshPhrasesAsync();
     }
 
     private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
+        if (_isInitializing) return;
         if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput && string.IsNullOrEmpty(sender.Text))
         {
             await _viewModel.RefreshPhrasesAsync();
@@ -189,11 +209,13 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
 
     private async void CategoryFilterBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isInitializing) return;
         await _viewModel.RefreshPhrasesAsync();
     }
 
     private async void LevelFilterBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isInitializing) return;
         if (LevelFilterBox.SelectedItem is ComboBoxItem item)
         {
             var tag = item.Tag?.ToString();
@@ -211,24 +233,35 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
 
     private async void FavoritesToggle_Checked(object sender, RoutedEventArgs e)
     {
+        if (_isInitializing) return;
         await _viewModel.RefreshPhrasesAsync();
     }
 
     private async void FavoritesToggle_Unchecked(object sender, RoutedEventArgs e)
     {
+        if (_isInitializing) return;
         await _viewModel.RefreshPhrasesAsync();
     }
 
     private async void BtnClearFilters_Click(object sender, RoutedEventArgs e)
     {
-        LevelFilterBox.SelectedIndex = 0;
-        FavoritesToggle.IsChecked = false;
+        _isInitializing = true;
+        try
+        {
+            LevelFilterBox.SelectedIndex = 0;
+            FavoritesToggle.IsChecked = false;
+            CategoryFilterBox.SelectedIndex = 0;
+        }
+        finally
+        {
+            _isInitializing = false;
+        }
         await _viewModel.ClearFiltersAsync();
     }
 
     private void PageSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_viewModel == null) return;
+        if (_isInitializing || _viewModel == null) return;
         if (sender is ComboBox cb && cb.SelectedItem is ComboBoxItem item && int.TryParse(item.Content?.ToString(), out int size))
         {
             _viewModel.ChangePageSize(size);

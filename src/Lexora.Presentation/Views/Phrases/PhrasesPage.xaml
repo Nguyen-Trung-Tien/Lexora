@@ -150,21 +150,18 @@
                 </Button>
             </StackPanel>
 
-            <!-- Phrases Cards List -->
-            <ListView x:Name="PhrasesListView"
-                      ItemsSource="{x:Bind ViewModel.Phrases, Mode=OneWay}"
-                      SelectionMode="None"
-                      Padding="0,0,0,16"
-                      HorizontalAlignment="Stretch">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Padding" Value="0,0,0,12" />
-                        <Setter Property="Margin" Value="0" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="dtos:ConversationPhraseDto">
+            <!-- Phrases Cards Container -->
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="0,0,0,8"
+                          Visibility="{x:Bind ViewModel.IsEmptyState, Converter={StaticResource InverseBoolToVisibilityConverter}, Mode=OneWay}">
+                <ItemsRepeater x:Name="PhrasesRepeater"
+                               ItemsSource="{x:Bind ViewModel.Phrases, Mode=OneWay}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Vertical" Spacing="12" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="dtos:ConversationPhraseDto">
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
@@ -318,9 +315,10 @@
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </ScrollViewer>
+    </Grid>
 
         <!-- ROW 4: Pagination Controls Bar -->
         <Border Grid.Row="4"
