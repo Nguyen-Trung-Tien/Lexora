@@ -8,12 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-11-14
+
 ### Added
 - **User-Facing Release Notes Log Architecture (`release-notes/`)**: Bổ sung thư mục chuyên biệt `release-notes/` chứa ghi chú phát hành dạng Markdown chuẩn (tiếng Anh súc tích, dễ hiểu) cho từng phiên bản (`vX.Y.Z.md`) cùng tệp mẫu `template.md` và tài liệu hướng dẫn `README.md`.
 - **In-App Release Notes Log Viewer**: Tích hợp hộp thoại Fluent 2 bản địa `ReleaseNotesLogDialog` cho phép người học xem toàn bộ lịch sử cập nhật và cải tiến qua các phiên bản, hiển thị trực quan thông qua `ReleaseNotesRenderer` với công nghệ render Markdown ngoại tuyến, tự động thích ứng với Light/Dark Theme và bộ lọc phiên bản thông minh.
 - **Offline Release Notes Service Contracts**: Xây dựng `IReleaseNotesService` trong `Lexora.Application` và `ReleaseNotesService` trong `Lexora.Infrastructure` để tự động nạp, phân tích cú pháp và sắp xếp Semantic Versioning giảm dần mà không phụ thuộc kết nối Internet.
 - **Entrypoints in Settings & Help Hub**: Bổ sung nút hành động "Nhật ký phát hành / Release Notes Log" (biểu tượng `\uE81C`) trên thẻ Cập nhật phần mềm trong `SettingsPage` và Hero Banner của `HelpPage`.
 - **Agent Rules & Release Invariant Protocol**: Bổ sung Rule 08 (`08-release-notes-and-versioning.md`) và cập nhật `AGENTS.md` bắt buộc AI Agent và lập trình viên luôn tạo tệp release notes markdown cho mỗi phiên bản mới phát hành.
+- **Smart Import Resilient Multi-Format Parser**: Tự động nhận diện định dạng TSV, CSV, Colon/Hyphen separated, và danh sách do AI sinh với khả năng tự điền giá trị mặc định cho cột thiếu.
+- **Atomic Batch Upsert & Tag Deduplication**: Tự động lọc trùng lặp nội bộ trong cùng batch nhập và auto-healing các bản ghi duplicate `ExamTags` và `Topics` trong SQLite.
+
+### Fixed
+- **WinUI 3 Post-Import Access Violation (0xc0000005)**: Khắc phục triệt để lỗi crash native trong `Microsoft.UI.Xaml.dll` do gọi `Bindings.Update()` trong khi visual tree của ContentDialog đang đóng hoặc tái chế item.
+- **Safe Dialog Chaining & Visual Tree Detachment**: Bổ sung độ trễ an toàn 80ms trong `SafeDialogExtensions.ShowAsyncSafe` đảm bảo popup dialog tách rời hoàn toàn trước khi nhả semaphore hoặc nạp lại dữ liệu UI.
+- **Double-Click Protection on Import Actions**: Khóa nút "Hoàn tất" (Done) tức thì khi nhấn để chống crash do gọi `Hide()` nhiều lần trên `ContentDialog`.
+- **SQLite Tag Collision Fix**: Xử lý triệt để ngoại lệ `ArgumentException: An item with the same key has already been added` bằng lookup dictionary an toàn cho Exam Tags và Topics.
 
 ### Changed
 - **Enhanced Release Notes Markdown Renderer**: Mở rộng `ReleaseNotesRenderer` hỗ trợ code tokens (inline backticks), blockquotes trích dẫn, khử trùng lặp tiêu đề `skipTopLevelTitle` và đảm bảo chống tràn 100% trên màn hình độ phân giải thấp (1366x768).

@@ -1,9 +1,9 @@
 # 🚀 Lexora Development & Optimization Progress
 
 ## 📊 Quality Gates Benchmark
-- **Application Version**: `v1.6.1` (Production Audit, Adaptive CAT Quiz Bugfixes & Dynamic Action Buttons)
+- **Application Version**: `v1.6.2` (Smart Import Resilience, Crash Fixes & SQLite Deduplication)
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
-- **Automated Tests**: **455 / 455 Tests Passing** (396 Unit Tests + 59 Integration Tests, 0 Failed, 0 Skipped).
+- **Automated Tests**: **477 / 477 Tests Passing** (415 Unit Tests + 62 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
 - **Fluent UI Audit**: `0 Violations` (`audit_fluent_ui.ps1` scanned 102 files).
 - **Localization (i18n)**: `100% Parity` across all keys (`sync_localization.ps1 -CheckXaml`).
@@ -205,6 +205,19 @@
   - Bound `NextButtonText` and `NextButtonGlyph` in `TestPage.xaml` to dynamically transition from "Next Question" to "Finish Test" (`Test_FinishTest`) with a checkmark icon `\uE73E` on the final exam question.
 - **Synchronized Version Bump to 1.6.1**:
   - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+
+### 14. Lexora v1.6.2 — Smart Import Resilience, UI Stability & Tag Auto-Healing
+- **WinUI 3 Post-Import Access Violation Elimination**:
+  - Removed hazardous manual `Bindings.Update()` calls during ContentDialog dismissal and large collection refreshing in `VocabularyPage.xaml.cs` and `GrammarPage.xaml.cs`.
+  - Added safe dialog detachment delays (80ms in `SafeDialogExtensions.ShowAsyncSafe`, 50ms in Page callers) to ensure ContentDialog visual tree detachment completes before UI reloads.
+- **Double-Click Protection & Safe Lifecycle**:
+  - Protected "Done" buttons against rapid double-clicks (`BtnDone.IsEnabled = false` + `HideSafe()`).
+  - Hardened `SmartImportDialog.Unloaded` lifecycle event with exception safety and null-guards.
+- **SQLite Tag Collision Auto-Healing**:
+  - Replaced throwing `ToDictionary` with safe `BuildExamTagLookup` and `BuildTopicLookup` to handle pre-existing duplicate or case-variant tags in SQLite.
+- **Synchronized Version Bump to 1.6.2**:
+  - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `ReleaseNotesService.cs`, `build-installer.ps1`, `release-notes/v1.6.2.md`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+
 
 
 

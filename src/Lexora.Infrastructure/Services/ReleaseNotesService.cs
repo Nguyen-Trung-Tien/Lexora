@@ -161,7 +161,7 @@ public sealed class ReleaseNotesService : IReleaseNotesService
             // Fallback
         }
 
-        return "1.6.1";
+        return "1.6.2";
     }
 
     private static string ResolveReleaseNotesDirectory()
@@ -219,6 +219,14 @@ public sealed class ReleaseNotesService : IReleaseNotesService
     {
         return new List<ReleaseNoteItem>
         {
+            new(
+                Version: "1.6.2",
+                Title: "Lexora v1.6.2 — Smart Import Resilience & UI Stability Patch",
+                ReleaseDate: "2026-11-14",
+                Summary: "Lexora v1.6.2 delivers a major stability and resilience patch for Smart Data Import, resolving native teardown crashes and automating SQLite tag deduplication.",
+                MarkdownContent: "# Lexora v1.6.2 — Smart Import Resilience & UI Stability Patch\n> Release Date: 2026-11-14 | Version: 1.6.2\n\n## 🌟 Highlights\nLexora v1.6.2 delivers a major stability and resilience patch for **Smart Data Import**, resolving native application teardown crashes upon import completion, automating SQLite tag deduplication, and streamlining post-import library refreshes.\n\n## 🚀 New Features\n- **Resilient Multi-Format Smart Parser**: Automatically recognizes TSV, CSV, Colon-separated, Hyphen-separated, and AI-generated vocabulary and grammar lists.\n- **Atomic Batch Upsert & Tag Auto-Healing**: Safely handles duplicate entries within batch payloads and auto-heals pre-existing duplicate exam/topic tags in SQLite.\n\n## ⚡ Improvements & UX\n- **Seamless Dialog Teardown & Chaining**: Hardened SafeDialogExtensions with guaranteed visual tree popup detachment delays.\n- **Double-Click Protection on Import Actions**: Guard against re-entrant clicks with instantaneous state locking.\n\n## 🛠️ Bug Fixes & Stability\n- **Resolved Post-Import Native Crash (0xc0000005)**: Fixed an Access Violation in Microsoft.UI.Xaml.dll triggered when dismissing SmartImportDialog.\n- **Fixed Exam Tag Dictionary Key Collision**: Eliminated duplicate tag key collisions during batch imports.",
+                IsCurrent: NormalizeVersion("1.6.2") == NormalizeVersion(currentVersion)),
+
             new(
                 Version: "1.6.1",
                 Title: "Lexora v1.6.1 — Interactive Fluent 2 Roadmap & System Polish",

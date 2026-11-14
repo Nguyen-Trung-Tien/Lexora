@@ -219,12 +219,12 @@ dotnet build Lexora.slnx
 dotnet test Lexora.slnx --no-build
 
 # 3. Packaging & Installer Verification (When modifying deployment scripts)
-powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.1"
+powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.2"
 ```
 
 ### Current Quality Gate Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)`.
-- **Test Suite**: **459 / 459 Tests Passing** (400 Unit Tests + 59 Integration Tests, 0 Failed, 0 Skipped).
+- **Test Suite**: **477 / 477 Tests Passing** (415 Unit Tests + 62 Integration Tests, 0 Failed, 0 Skipped).
 
 ### 8.1 Release Notes Log & User-Facing Documentation Protocol (`release-notes/`)
 > [!IMPORTANT]
@@ -232,7 +232,7 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.1"
 
 1. **Folder Architecture & File Naming**:
    - Location: `release-notes/` at the repository root.
-   - Naming convention: `vX.Y.Z.md` (e.g. `v1.6.1.md`, `v1.6.0.md`).
+   - Naming convention: `vX.Y.Z.md` (e.g. `v1.6.2.md`, `v1.6.1.md`, `v1.6.0.md`).
    - Template: Must follow [`release-notes/template.md`](file:///d:/LEARN/Lexora/release-notes/template.md).
 2. **Authoring Standard (User-Centric & Markdown)**:
    - **Simple, Concise, Easy to Understand**: Focus strictly on learner benefits and visible capabilities. Avoid internal class names, repository interfaces, or git commit diffs.
@@ -296,7 +296,7 @@ Lexora/
 ├── release-notes/                            # User-facing Release Notes log (Markdown format per version)
 │   ├── README.md                             # Release notes guidelines & authoring rules
 │   ├── template.md                           # Standard release note markdown template
-│   └── vX.Y.Z.md                             # Version-specific release notes (v1.6.1.md, v1.6.0.md, ...)
+│   └── vX.Y.Z.md                             # Version-specific release notes (v1.6.2.md, v1.6.1.md, ...)
 ├── docs/                                     # Architecture, specs & documentation hub
 │   ├── adr/                                  # Architecture Decision Records (ADRs)
 │   ├── architecture.md                       # System architecture & Clean Architecture layout

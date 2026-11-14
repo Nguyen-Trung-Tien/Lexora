@@ -22,7 +22,8 @@ Unlike `CHANGELOG.md` (which focuses on low-level developer commits, internal cl
 release-notes/
 ├── README.md               # This specification and guideline document
 ├── template.md             # Standard template for authoring new release notes
-├── v1.6.1.md               # Version 1.6.1 (Current)
+├── v1.6.2.md               # Version 1.6.2 (Current)
+├── v1.6.1.md               # Version 1.6.1
 ├── v1.6.0.md               # Version 1.6.0
 ├── v1.5.0.md               # Version 1.5.0
 ├── v1.4.1.md               # Version 1.4.1

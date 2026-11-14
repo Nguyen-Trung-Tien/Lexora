@@ -73,7 +73,7 @@ public class ReleaseNotesServiceTests : IDisposable
     public async Task GetCurrentVersionReleaseNoteAsync_WhenCurrentVersionMatches_ReturnsIsCurrentTrue()
     {
         // Arrange
-        await File.WriteAllTextAsync(Path.Combine(_tempDir, "v1.6.1.md"), "# Lexora v1.6.1\n> Release Date: 2026-11-05\n\n## 🌟 Highlights\nCurrent active version.");
+        await File.WriteAllTextAsync(Path.Combine(_tempDir, "v1.6.2.md"), "# Lexora v1.6.2\n> Release Date: 2026-11-14\n\n## 🌟 Highlights\nCurrent active version.");
         await File.WriteAllTextAsync(Path.Combine(_tempDir, "v1.5.0.md"), "# Lexora v1.5.0\n> Release Date: 2026-11-03\n\n## 🌟 Highlights\nPast version.");
 
         var service = new ReleaseNotesService(_tempDir);
@@ -84,7 +84,7 @@ public class ReleaseNotesServiceTests : IDisposable
         // Assert
         Assert.NotNull(currentNote);
         Assert.True(currentNote.IsCurrent);
-        Assert.Equal("1.6.1", currentNote.Version);
+        Assert.Equal("1.6.2", currentNote.Version);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class ReleaseNotesServiceTests : IDisposable
         // Assert
         Assert.NotNull(result);
         Assert.NotEmpty(result);
-        Assert.Contains(result, n => n.Version == "1.6.1");
+        Assert.Contains(result, n => n.Version == "1.6.2");
     }
 }
 

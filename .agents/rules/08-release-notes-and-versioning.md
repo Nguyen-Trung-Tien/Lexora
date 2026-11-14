@@ -17,7 +17,8 @@ In contrast, the `release-notes/` folder houses **user-facing, easily understand
 release-notes/
 ├── README.md               # Folder conventions and usage guide
 ├── template.md             # Canonical template for new version release notes
-├── v1.6.1.md               # Current release notes log
+├── v1.6.2.md               # Current release notes log
+├── v1.6.1.md
 ├── v1.6.0.md
 └── ...
 ```
