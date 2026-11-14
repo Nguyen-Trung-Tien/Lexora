@@ -17,6 +17,8 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
     private readonly IAudioPlayerService? _audioPlayerService;
     private readonly DispatcherQueue? _dispatcherQueue;
 
+    private readonly List<ConversationPhraseDto> _allFilteredPhrases = [];
+
     public ObservableCollection<ConversationPhraseDto> Phrases { get; } = [];
     public ObservableCollection<string> Categories { get; } = [];
 
@@ -24,7 +26,7 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(IsEmptyState))]
     public partial bool IsLoading { get; set; } = true;
 
-    public bool IsEmptyState => !IsLoading && Phrases.Count == 0;
+    public bool IsEmptyState => !IsLoading && _allFilteredPhrases.Count == 0;
 
     [ObservableProperty]
     public partial bool IsSubmitting { get; set; }
@@ -48,8 +50,54 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
     public bool HasSelectedPhrase => SelectedPhrase != null;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalPages))]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
     [NotifyPropertyChangedFor(nameof(CountDisplayInfo))]
     public partial int TotalCount { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalPages))]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalPages))]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
+    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
+    public partial int PageSize { get; set; } = 5;
+
+    public int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalCount / Math.Max(1, PageSize)));
+
+    public bool HasPreviousPage => CurrentPage > 1;
+
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    public string PageDisplayInfo => $"{CurrentPage} / {TotalPages}";
+
+    public string ItemsRangeDisplay
+    {
+        get
+        {
+            if (TotalCount == 0) return string.Empty;
+            int start = ((CurrentPage - 1) * PageSize) + 1;
+            int end = Math.Min(CurrentPage * PageSize, TotalCount);
+            return string.Format(_localizationService.GetString("Phrases_PageSummary"), start, end, TotalCount);
+        }
+    }
+
+    partial void OnPageSizeChanged(int value)
+    {
+        CurrentPage = 1;
+        RefreshCurrentPageSlice();
+    }
 
     public string CountDisplayInfo => string.Format(_localizationService.GetString("Phrases_TotalCount"), TotalCount);
 
@@ -123,13 +171,12 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
 
             var list = await _phraseService.GetPhrasesAsync(filter);
 
-            Phrases.Clear();
-            foreach (var item in list)
-            {
-                Phrases.Add(item);
-            }
+            _allFilteredPhrases.Clear();
+            _allFilteredPhrases.AddRange(list);
 
-            TotalCount = Phrases.Count;
+            TotalCount = _allFilteredPhrases.Count;
+            CurrentPage = 1;
+            RefreshCurrentPageSlice();
         }
         catch (Exception ex)
         {
@@ -139,6 +186,53 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
         {
             IsLoading = false;
         }
+    }
+
+    private void RefreshCurrentPageSlice()
+    {
+        Phrases.Clear();
+        var slice = _allFilteredPhrases
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize);
+
+        foreach (var item in slice)
+        {
+            Phrases.Add(item);
+        }
+
+        OnPropertyChanged(nameof(TotalPages));
+        OnPropertyChanged(nameof(HasPreviousPage));
+        OnPropertyChanged(nameof(HasNextPage));
+        OnPropertyChanged(nameof(PageDisplayInfo));
+        OnPropertyChanged(nameof(ItemsRangeDisplay));
+        OnPropertyChanged(nameof(IsEmptyState));
+    }
+
+    [RelayCommand]
+    public void FirstPage() => GoToPage(1);
+
+    [RelayCommand]
+    public void PreviousPage() => GoToPage(CurrentPage - 1);
+
+    [RelayCommand]
+    public void NextPage() => GoToPage(CurrentPage + 1);
+
+    [RelayCommand]
+    public void LastPage() => GoToPage(TotalPages);
+
+    public void GoToPage(int page)
+    {
+        int target = Math.Clamp(page, 1, TotalPages);
+        if (target == CurrentPage && Phrases.Count > 0) return;
+        CurrentPage = target;
+        RefreshCurrentPageSlice();
+    }
+
+    [RelayCommand]
+    public void ChangePageSize(int newSize)
+    {
+        if (newSize <= 0 || newSize == PageSize) return;
+        PageSize = newSize;
     }
 
     [RelayCommand]
@@ -155,12 +249,19 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
             // If filtering only favorites and user unfavorited, remove from list
             if (OnlyFavorites && !newStatus)
             {
-                Phrases.Remove(phrase);
-                TotalCount = Phrases.Count;
+                _allFilteredPhrases.Remove(phrase);
+                TotalCount = _allFilteredPhrases.Count;
+                if (CurrentPage > TotalPages)
+                {
+                    CurrentPage = Math.Max(1, TotalPages);
+                }
+                RefreshCurrentPageSlice();
             }
             else
             {
-                // Refresh list item bindings
+                var match = _allFilteredPhrases.FirstOrDefault(p => p.Id == phrase.Id);
+                if (match != null) match.IsFavorite = newStatus;
+
                 var index = Phrases.IndexOf(phrase);
                 if (index >= 0)
                 {
@@ -187,8 +288,13 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
         try
         {
             await _phraseService.DeleteAsync(phrase.Id);
-            Phrases.Remove(phrase);
-            TotalCount = Phrases.Count;
+            _allFilteredPhrases.Remove(phrase);
+            TotalCount = _allFilteredPhrases.Count;
+            if (CurrentPage > TotalPages)
+            {
+                CurrentPage = Math.Max(1, TotalPages);
+            }
+            RefreshCurrentPageSlice();
         }
         catch (Exception ex)
         {
@@ -263,8 +369,10 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
     {
         if (isNew)
         {
-            Phrases.Insert(0, savedPhrase);
-            TotalCount = Phrases.Count;
+            _allFilteredPhrases.Insert(0, savedPhrase);
+            TotalCount = _allFilteredPhrases.Count;
+            CurrentPage = 1;
+            RefreshCurrentPageSlice();
             if (!string.IsNullOrEmpty(savedPhrase.Category) && !Categories.Contains(savedPhrase.Category))
             {
                 Categories.Add(savedPhrase.Category);
@@ -272,17 +380,23 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
         }
         else
         {
-            var existing = Phrases.FirstOrDefault(p => p.Id == savedPhrase.Id);
+            var existing = _allFilteredPhrases.FirstOrDefault(p => p.Id == savedPhrase.Id);
             if (existing != null)
             {
-                var idx = Phrases.IndexOf(existing);
-                Phrases[idx] = savedPhrase;
+                var idx = _allFilteredPhrases.IndexOf(existing);
+                _allFilteredPhrases[idx] = savedPhrase;
+            }
+            var pageIdx = Phrases.IndexOf(existing ?? savedPhrase);
+            if (pageIdx >= 0)
+            {
+                Phrases[pageIdx] = savedPhrase;
             }
         }
     }
 
     public void Dispose()
     {
+        _allFilteredPhrases.Clear();
         Phrases.Clear();
         Categories.Clear();
     }

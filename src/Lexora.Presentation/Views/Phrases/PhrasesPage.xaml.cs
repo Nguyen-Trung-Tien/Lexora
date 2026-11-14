@@ -225,4 +225,13 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
         FavoritesToggle.IsChecked = false;
         await _viewModel.ClearFiltersAsync();
     }
+
+    private void PageSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_viewModel == null) return;
+        if (sender is ComboBox cb && cb.SelectedItem is ComboBoxItem item && int.TryParse(item.Content?.ToString(), out int size))
+        {
+            _viewModel.ChangePageSize(size);
+        }
+    }
 }

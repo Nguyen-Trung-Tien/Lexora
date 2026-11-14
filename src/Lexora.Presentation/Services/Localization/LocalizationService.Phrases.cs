@@ -62,6 +62,7 @@ public partial class LocalizationService
         vi["Phrases_ActionEdit"] = "Chỉnh sửa";
         vi["Phrases_ActionDelete"] = "Xóa";
         vi["Phrases_CategoryAll"] = "Tất cả danh mục";
+        vi["Phrases_PageSummary"] = "Hiển thị {0} - {1} trong {2} mẫu câu";
 
         // ==========================================
         // Phrases — en-US (English)
@@ -121,5 +122,6 @@ public partial class LocalizationService
         en["Phrases_ActionEdit"] = "Edit";
         en["Phrases_ActionDelete"] = "Delete";
         en["Phrases_CategoryAll"] = "All Categories";
+        en["Phrases_PageSummary"] = "Showing {0} - {1} of {2} phrases";
     }
 }
