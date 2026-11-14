@@ -58,6 +58,7 @@ public class VocabularyService : IVocabularyService
         bool isAscending = true,
         bool? isDueToday = null,
         bool? isWeak = null,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default)
     {
         int skip = Math.Max(0, (page - 1) * pageSize);
@@ -69,7 +70,7 @@ public class VocabularyService : IVocabularyService
         {
             int poolSize = Math.Max(300, page * pageSize * 3);
             IReadOnlyList<Word> rawWords;
-            if (isDueToday == null && isWeak == null)
+            if (isDueToday == null && isWeak == null && isLeech == null)
             {
                 rawWords = await _vocabRepo.SearchAsync(
                     search, level, pos, topicId, examType, status,
@@ -79,7 +80,7 @@ public class VocabularyService : IVocabularyService
             {
                 rawWords = await _vocabRepo.SearchAsync(
                     search, level, pos, topicId, examType, status,
-                    0, poolSize, null, true, isDueToday, isWeak, cancellationToken);
+                    0, poolSize, null, true, isDueToday, isWeak, isLeech, cancellationToken);
             }
 
             var dtoList = rawWords.Select(MapToDto).ToList();
@@ -88,7 +89,7 @@ public class VocabularyService : IVocabularyService
         }
 
         IReadOnlyList<Word> words;
-        if (isDueToday == null && isWeak == null)
+        if (isDueToday == null && isWeak == null && isLeech == null)
         {
             words = await _vocabRepo.SearchAsync(
                 search, level, pos, topicId, examType, status,
@@ -98,7 +99,7 @@ public class VocabularyService : IVocabularyService
         {
             words = await _vocabRepo.SearchAsync(
                 search, level, pos, topicId, examType, status,
-                skip, pageSize, sortBy, isAscending, isDueToday, isWeak, cancellationToken);
+                skip, pageSize, sortBy, isAscending, isDueToday, isWeak, isLeech, cancellationToken);
         }
 
         return words.Select(MapToDto).ToList();
@@ -113,15 +114,16 @@ public class VocabularyService : IVocabularyService
         LearningStatus? status = null,
         bool? isDueToday = null,
         bool? isWeak = null,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default)
     {
-        if (isDueToday == null && isWeak == null)
+        if (isDueToday == null && isWeak == null && isLeech == null)
         {
             return await _vocabRepo.CountFilteredAsync(search, level, pos, topicId, examType, status, cancellationToken);
         }
         else
         {
-            return await _vocabRepo.CountFilteredAsync(search, level, pos, topicId, examType, status, isDueToday, isWeak, cancellationToken);
+            return await _vocabRepo.CountFilteredAsync(search, level, pos, topicId, examType, status, isDueToday, isWeak, isLeech, cancellationToken);
         }
     }
 
@@ -695,10 +697,11 @@ public class VocabularyService : IVocabularyService
         bool isAscending = true,
         bool? isDueToday = null,
         bool? isWeak = null,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default)
     {
-        int totalCount = await CountWordsAsync(search, level, pos, topicId, examType, status, isDueToday, isWeak, cancellationToken);
-        var words = await SearchWordsAsync(search, level, pos, topicId, examType, status, page, pageSize, sortBy, isAscending, isDueToday, isWeak, cancellationToken);
+        int totalCount = await CountWordsAsync(search, level, pos, topicId, examType, status, isDueToday, isWeak, isLeech, cancellationToken);
+        var words = await SearchWordsAsync(search, level, pos, topicId, examType, status, page, pageSize, sortBy, isAscending, isDueToday, isWeak, isLeech, cancellationToken);
 
         var matchResults = new List<SmartSearchMatchResult<WordDto>>();
         if (!string.IsNullOrWhiteSpace(search) && _smartSearch != null)
@@ -745,6 +748,12 @@ public class VocabularyService : IVocabularyService
         var candidateWords = await _vocabRepo.SearchAsync(take: 200, cancellationToken: cancellationToken);
         var dtos = candidateWords.Select(MapToDto).ToList();
         return _smartSearch.FindClosestWordSuggestions(query, dtos, maxSuggestions);
+    }
+
+    public async Task<IReadOnlyList<WordDto>> GetLeechWordsAsync(int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var rawWords = await _vocabRepo.GetLeechWordsAsync(limit, cancellationToken);
+        return rawWords.Select(MapToDto).ToList();
     }
 
     private WordDto MapToDto(Word w) => w.ToDto(_srEngine);

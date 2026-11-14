@@ -46,6 +46,7 @@ public partial class VocabularyViewModel
                 case "All":
                 case "DueToday":
                 case "Weak":
+                case "Leech":
                     SelectedStatus = null;
                     break;
                 case "Learning":
@@ -83,6 +84,7 @@ public partial class VocabularyViewModel
 
             bool isDueToday = SelectedQuickFilter == "DueToday";
             bool isWeak = SelectedQuickFilter == "Weak";
+            bool isLeech = SelectedQuickFilter == "Leech";
 
             var total = await _vocabService.CountWordsAsync(
                 search: string.IsNullOrWhiteSpace(SearchTerm) ? null : SearchTerm,
@@ -93,6 +95,7 @@ public partial class VocabularyViewModel
                 status: SelectedStatus,
                 isDueToday: isDueToday ? true : null,
                 isWeak: isWeak ? true : null,
+                isLeech: isLeech ? true : null,
                 cancellationToken: ct);
 
             if (ct.IsCancellationRequested) return;
@@ -114,6 +117,7 @@ public partial class VocabularyViewModel
                 isAscending: isDueToday || IsAscending,
                 isDueToday: isDueToday ? true : null,
                 isWeak: isWeak ? true : null,
+                isLeech: isLeech ? true : null,
                 page: CurrentPage,
                 pageSize: PageSize,
                 cancellationToken: ct);

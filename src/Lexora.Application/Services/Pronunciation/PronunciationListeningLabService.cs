@@ -79,6 +79,7 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
 
         if (string.Equals(cleanInput, cleanExpected, StringComparison.OrdinalIgnoreCase))
         {
+            var matchTokens = safeExpected.Select(c => new DictationDiffTokenDto(c.ToString(), DictationDiffType.Correct)).ToList();
             return new DictationEvaluationResultDto(
                 IsExactMatch: true,
                 LevenshteinDistance: 0,
@@ -86,7 +87,8 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
                 ExpectedTerm: safeExpected,
                 UserInput: userInput ?? string.Empty,
                 FeedbackMessage: "Chính xác tuyệt đối! Tai nghe và chính tả rất xuất sắc.",
-                Phonetic: phonetic
+                Phonetic: phonetic,
+                DiffTokens: matchTokens
             );
         }
 
@@ -104,6 +106,8 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
             feedback = $"Chưa chính xác. Từ phát âm là '{safeExpected}'. Hãy nghe lại phát âm và ghi nhớ nhé.";
         }
 
+        var diffTokens = ComputeDiffTokens(cleanInput, cleanExpected);
+
         return new DictationEvaluationResultDto(
             IsExactMatch: false,
             LevenshteinDistance: distance,
@@ -111,8 +115,79 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
             ExpectedTerm: safeExpected,
             UserInput: userInput ?? string.Empty,
             FeedbackMessage: feedback,
-            Phonetic: phonetic
+            Phonetic: phonetic,
+            DiffTokens: diffTokens
         );
+    }
+
+    public static IReadOnlyList<DictationDiffTokenDto> ComputeDiffTokens(string input, string expected)
+    {
+        var s1 = input ?? string.Empty;
+        var s2 = expected ?? string.Empty;
+
+        int m = s1.Length;
+        int n = s2.Length;
+
+        if (m == 0 && n == 0) return Array.Empty<DictationDiffTokenDto>();
+
+        // Levenshtein DP matrix
+        int[,] dp = new int[m + 1, n + 1];
+
+        for (int i = 0; i <= m; i++) dp[i, 0] = i;
+        for (int j = 0; j <= n; j++) dp[0, j] = j;
+
+        for (int i = 1; i <= m; i++)
+        {
+            for (int j = 1; j <= n; j++)
+            {
+                bool match = char.ToLowerInvariant(s1[i - 1]) == char.ToLowerInvariant(s2[j - 1]);
+                if (match)
+                {
+                    dp[i, j] = dp[i - 1, j - 1];
+                }
+                else
+                {
+                    int sub = dp[i - 1, j - 1] + 1;
+                    int del = dp[i - 1, j] + 1;
+                    int ins = dp[i, j - 1] + 1;
+                    dp[i, j] = Math.Min(sub, Math.Min(del, ins));
+                }
+            }
+        }
+
+        // Backtrack
+        var tokens = new List<DictationDiffTokenDto>();
+        int curI = m;
+        int curJ = n;
+
+        while (curI > 0 || curJ > 0)
+        {
+            if (curI > 0 && curJ > 0 && char.ToLowerInvariant(s1[curI - 1]) == char.ToLowerInvariant(s2[curJ - 1]))
+            {
+                tokens.Add(new DictationDiffTokenDto(s1[curI - 1].ToString(), DictationDiffType.Correct));
+                curI--;
+                curJ--;
+            }
+            else if (curI > 0 && curJ > 0 && dp[curI, curJ] == dp[curI - 1, curJ - 1] + 1)
+            {
+                tokens.Add(new DictationDiffTokenDto(s1[curI - 1].ToString(), DictationDiffType.Incorrect, s2[curJ - 1].ToString()));
+                curI--;
+                curJ--;
+            }
+            else if (curJ > 0 && (curI == 0 || dp[curI, curJ] == dp[curI, curJ - 1] + 1))
+            {
+                tokens.Add(new DictationDiffTokenDto(s2[curJ - 1].ToString(), DictationDiffType.Missing, s2[curJ - 1].ToString()));
+                curJ--;
+            }
+            else if (curI > 0 && (curJ == 0 || dp[curI, curJ] == dp[curI - 1, curJ] + 1))
+            {
+                tokens.Add(new DictationDiffTokenDto(s1[curI - 1].ToString(), DictationDiffType.Extra));
+                curI--;
+            }
+        }
+
+        tokens.Reverse();
+        return tokens;
     }
 
     public Task<IReadOnlyList<MinimalPairChallengeDto>> GetMinimalPairChallengesAsync(

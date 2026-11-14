@@ -413,4 +413,86 @@ public class ShortcutResolverTests
         resolved.ExecuteAsync();
         executed.Should().BeTrue();
     }
+
+    [Fact]
+    public void ShortcutResolver_Resolve_ReviewKeyboardShortcuts_ShouldResolveSpace1234AndR()
+    {
+        var resolver = new ShortcutResolver();
+
+        resolver.Register(new ShortcutDefinition
+        {
+            Id = "Review.ShowAnswer",
+            Gesture = new ShortcutGesture(ShortcutKey.Space, ShortcutModifiers.None),
+            Scope = ShortcutScope.Page,
+            TargetPageType = typeof(DummyReviewPage),
+            DescriptionKey = "desc",
+            Priority = ShortcutPriority.Page,
+            ExecuteAsync = () => Task.CompletedTask
+        });
+
+        resolver.Register(new ShortcutDefinition
+        {
+            Id = "Review.RateAgain",
+            Gesture = new ShortcutGesture(ShortcutKey.Number1, ShortcutModifiers.None),
+            Scope = ShortcutScope.Page,
+            TargetPageType = typeof(DummyReviewPage),
+            DescriptionKey = "desc",
+            Priority = ShortcutPriority.Page,
+            ExecuteAsync = () => Task.CompletedTask
+        });
+
+        resolver.Register(new ShortcutDefinition
+        {
+            Id = "Review.ReplayAudio",
+            Gesture = new ShortcutGesture(ShortcutKey.R, ShortcutModifiers.None),
+            Scope = ShortcutScope.Page,
+            TargetPageType = typeof(DummyReviewPage),
+            DescriptionKey = "desc",
+            Priority = ShortcutPriority.Page,
+            ExecuteAsync = () => Task.CompletedTask
+        });
+
+        // Space resolves on Review Page
+        var space = resolver.Resolve(ShortcutKey.Space, ShortcutModifiers.None, false, false, typeof(DummyReviewPage));
+        space.Should().NotBeNull();
+        space!.Id.Should().Be("Review.ShowAnswer");
+
+        // Number1 resolves on Review Page
+        var num1 = resolver.Resolve(ShortcutKey.Number1, ShortcutModifiers.None, false, false, typeof(DummyReviewPage));
+        num1.Should().NotBeNull();
+        num1!.Id.Should().Be("Review.RateAgain");
+
+        // R resolves on Review Page
+        var rKey = resolver.Resolve(ShortcutKey.R, ShortcutModifiers.None, false, false, typeof(DummyReviewPage));
+        rKey.Should().NotBeNull();
+        rKey!.Id.Should().Be("Review.ReplayAudio");
+    }
+
+    [Fact]
+    public void ShortcutResolver_Resolve_CommandPaletteCtrlK_ShouldResolveGlobally()
+    {
+        var resolver = new ShortcutResolver();
+        bool paletteInvoked = false;
+
+        resolver.Register(new ShortcutDefinition
+        {
+            Id = "Global.CommandPalette",
+            Gesture = new ShortcutGesture(ShortcutKey.K, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "desc",
+            Priority = ShortcutPriority.Global,
+            AllowWhenTextInputFocused = true,
+            ExecuteAsync = () =>
+            {
+                paletteInvoked = true;
+                return Task.CompletedTask;
+            }
+        });
+
+        var match = resolver.Resolve(ShortcutKey.K, ShortcutModifiers.Control, isTextInputFocused: true, isDialogOpen: false, typeof(DummyDashboardPage));
+        match.Should().NotBeNull();
+        match!.Id.Should().Be("Global.CommandPalette");
+        match.ExecuteAsync();
+        paletteInvoked.Should().BeTrue();
+    }
 }

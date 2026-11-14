@@ -974,6 +974,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         SetChipStyle(ChipFilterAll, activeFilter == "All");
         SetChipStyle(ChipFilterDueToday, activeFilter == "DueToday");
         SetChipStyle(ChipFilterWeak, activeFilter == "Weak");
+        SetChipStyle(ChipFilterLeech, activeFilter == "Leech");
         SetChipStyle(ChipFilterLearning, activeFilter == "Learning");
         SetChipStyle(ChipFilterMastered, activeFilter == "Mastered");
         SetChipStyle(ChipFilterNew, activeFilter == "New");

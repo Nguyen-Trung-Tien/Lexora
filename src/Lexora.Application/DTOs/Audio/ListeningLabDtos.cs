@@ -12,6 +12,20 @@ public record ListeningDictationChallengeDto(
     string? ExampleSentenceVi
 );
 
+public enum DictationDiffType
+{
+    Correct,
+    Incorrect,
+    Missing,
+    Extra
+}
+
+public record DictationDiffTokenDto(
+    string Text,
+    DictationDiffType Type,
+    string? Expected = null
+);
+
 public record DictationEvaluationResultDto(
     bool IsExactMatch,
     int LevenshteinDistance,
@@ -19,7 +33,8 @@ public record DictationEvaluationResultDto(
     string ExpectedTerm,
     string UserInput,
     string FeedbackMessage,
-    string? Phonetic
+    string? Phonetic,
+    IReadOnlyList<DictationDiffTokenDto>? DiffTokens = null
 );
 
 public record MinimalPairChallengeDto(

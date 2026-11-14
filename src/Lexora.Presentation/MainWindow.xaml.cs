@@ -353,6 +353,26 @@ public sealed partial class MainWindow : Window
         _startupCts?.Dispose();
         _startupCts = null;
 
+        // Auto-Backup on Exit: Ensure SQLite database is backed up with integrity check and rotated (5 backups)
+        try
+        {
+            var backupService = App.Current.Services.GetService<IDatabaseBackupService>();
+            if (backupService != null)
+            {
+                Task.Run(async () =>
+                {
+                    await backupService.EnsureAutoBackupAsync(
+                        maxRetainedBackups: 5,
+                        force: true,
+                        cancellationToken: CancellationToken.None);
+                }).GetAwaiter().GetResult();
+            }
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("MainWindow.OnWindowClosed.AutoBackup", ex);
+        }
+
         // Persist window placement for next launch
         SaveWindowPlacement();
 

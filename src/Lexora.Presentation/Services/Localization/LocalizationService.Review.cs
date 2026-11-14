@@ -58,6 +58,7 @@ public partial class LocalizationService
         vi["Review_BtnShowAnswer"] = "Hiện đáp án";
         vi["Review_AudioUk"] = "Phát âm (UK)";
         vi["Review_AudioUs"] = "Phát âm (US)";
+        vi["Review_ReplayAudio"] = "Nghe lại phát âm (R)";
         vi["Review_DefinitionSection"] = "Định nghĩa & Ý nghĩa";
         vi["Review_Accuracy"] = "Độ chính xác";
         vi["Review_Sm2Insights"] = "Thông số ghi nhớ SM-2";
@@ -159,6 +160,7 @@ public partial class LocalizationService
         en["Review_BtnShowAnswer"] = "Show Answer";
         en["Review_AudioUk"] = "Audio (UK)";
         en["Review_AudioUs"] = "Audio (US)";
+        en["Review_ReplayAudio"] = "Replay Pronunciation (R)";
         en["Review_DefinitionSection"] = "Definition & Meaning";
         en["Review_Accuracy"] = "Accuracy";
         en["Review_Sm2Insights"] = "SM-2 Memory Insights";

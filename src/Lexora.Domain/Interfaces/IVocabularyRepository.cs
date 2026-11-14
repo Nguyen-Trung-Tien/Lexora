@@ -34,6 +34,7 @@ public interface IVocabularyRepository : IRepository<Word>
         bool isAscending,
         bool? isDueToday,
         bool? isWeak,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default);
 
     Task<int> CountFilteredAsync(
@@ -54,7 +55,10 @@ public interface IVocabularyRepository : IRepository<Word>
         LearningStatus? status,
         bool? isDueToday,
         bool? isWeak,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Word>> GetLeechWordsAsync(int limit = 50, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Word>> GetRandomWordsAsync(int count, Guid? excludeWordId = null, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Word>> GetWordsForAnalyticsAsync(CancellationToken cancellationToken = default);

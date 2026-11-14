@@ -1,3 +1,4 @@
+using Lexora.Application.Interfaces;
 using Lexora.Infrastructure.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -59,6 +60,28 @@ public class StartupOrchestrator : IStartupOrchestrator
                 var dbInitializer = scope.ServiceProvider.GetRequiredService<SqliteDatabaseInitializer>();
                 await dbInitializer.InitializeAsync(cancellationToken);
             }
+
+            // Step 2.1: Automated 24h Backup Rotation Check (Non-blocking background check)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var backupScope = _serviceProvider.CreateScope();
+                    var backupService = backupScope.ServiceProvider.GetService<IDatabaseBackupService>();
+                    if (backupService != null)
+                    {
+                        await backupService.EnsureAutoBackupAsync(
+                            maxRetainedBackups: 5,
+                            minInterval: TimeSpan.FromHours(24),
+                            force: false,
+                            cancellationToken: CancellationToken.None);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Background 24h auto-backup check encountered non-critical issue: {Message}", ex.Message);
+                }
+            }, CancellationToken.None);
 
             await Task.Delay(250, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();

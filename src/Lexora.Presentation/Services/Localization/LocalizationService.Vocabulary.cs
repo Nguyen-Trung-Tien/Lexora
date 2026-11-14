@@ -129,7 +129,8 @@ public partial class LocalizationService
         // Quick Filter Chips
         vi["Vocab_FilterAll"] = "Tất cả";
         vi["Vocab_FilterDueToday"] = "Cần ôn hôm nay";
-        vi["Vocab_FilterWeak"] = "Từ hay quên";
+        vi["Vocab_FilterWeak"] = "Từ yếu / Chưa nhớ";
+        vi["Vocab_FilterLeech"] = "Từ khó nhớ (Leech)";
         vi["Vocab_FilterLearning"] = "Đang học";
         vi["Vocab_FilterMastered"] = "Đã thành thạo";
         vi["Vocab_FilterNew"] = "Từ mới";
@@ -369,7 +370,8 @@ public partial class LocalizationService
         // Quick Filter Chips
         en["Vocab_FilterAll"] = "All";
         en["Vocab_FilterDueToday"] = "Due Today";
-        en["Vocab_FilterWeak"] = "Weak Words";
+        en["Vocab_FilterWeak"] = "Weak / Lapsed";
+        en["Vocab_FilterLeech"] = "Leech Words";
         en["Vocab_FilterLearning"] = "Learning";
         en["Vocab_FilterMastered"] = "Mastered";
         en["Vocab_FilterNew"] = "New";

@@ -80,7 +80,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         bool isAscending = true,
         CancellationToken cancellationToken = default)
     {
-        return SearchAsync(searchTerm, level, partOfSpeech, topicId, examType, status, skip, take, sortBy, isAscending, null, null, cancellationToken);
+        return SearchAsync(searchTerm, level, partOfSpeech, topicId, examType, status, skip, take, sortBy, isAscending, null, null, null, cancellationToken);
     }
 
     public async Task<IReadOnlyList<Word>> SearchAsync(
@@ -96,11 +96,12 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         bool isAscending,
         bool? isDueToday,
         bool? isWeak,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default)
     {
         var query = QueryWithDetails(asNoTracking: true, includeStudyLogs: false);
 
-        query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
+        query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak, isLeech);
 
         query = sortBy?.ToLowerInvariant() switch
         {
@@ -140,7 +141,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         LearningStatus? status = null,
         CancellationToken cancellationToken = default)
     {
-        return CountFilteredAsync(searchTerm, level, partOfSpeech, topicId, examType, status, null, null, cancellationToken);
+        return CountFilteredAsync(searchTerm, level, partOfSpeech, topicId, examType, status, null, null, null, cancellationToken);
     }
 
     public async Task<int> CountFilteredAsync(
@@ -152,10 +153,11 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         LearningStatus? status,
         bool? isDueToday,
         bool? isWeak,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();
-        query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
+        query = ApplyFilters(query, searchTerm, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak, isLeech);
         var count = await query.CountAsync(cancellationToken);
         if (count > 0 || string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -436,7 +438,8 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         ExamType? examType,
         LearningStatus? status,
         bool? isDueToday = null,
-        bool? isWeak = null)
+        bool? isWeak = null,
+        bool? isLeech = null)
     {
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -496,7 +499,22 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
             query = query.Where(w => w.ReviewCard != null && (w.ReviewCard.Lapses > 0 || w.ReviewCard.Status == LearningStatus.NotRemembered));
         }
 
+        if (isLeech == true)
+        {
+            query = query.Where(w => w.ReviewCard != null && (w.ReviewCard.EaseFactor <= 1.4 || w.ReviewCard.Lapses >= 3));
+        }
+
         return query;
+    }
+
+    public async Task<IReadOnlyList<Word>> GetLeechWordsAsync(int limit = 50, CancellationToken cancellationToken = default)
+    {
+        return await QueryWithDetails(asNoTracking: true, includeStudyLogs: false)
+            .Where(w => w.ReviewCard != null && (w.ReviewCard.EaseFactor <= 1.4 || w.ReviewCard.Lapses >= 3))
+            .OrderBy(w => w.ReviewCard!.EaseFactor)
+            .ThenByDescending(w => w.ReviewCard!.Lapses)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<Topic>> GetAllTopicsAsync(CancellationToken cancellationToken = default)

@@ -263,6 +263,14 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_FilterWeak')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                     </Button>
+                    <!-- Leech / Từ khó nhớ -->
+                    <Button x:Name="ChipFilterLeech" Click="QuickFilter_Click" Tag="Leech"
+                            CornerRadius="12" Padding="10,4">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <FontIcon Glyph="&#xE7BA;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_FilterLeech')}" FontWeight="SemiBold" FontSize="12" />
+                        </StackPanel>
+                    </Button>
                     <!-- Learning -->
                     <Button x:Name="ChipFilterLearning" Click="QuickFilter_Click" Tag="Learning"
                             CornerRadius="12" Padding="10,4">

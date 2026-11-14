@@ -143,5 +143,10 @@
                                    Margin="0,16,0,0"
                                    IsHitTestVisible="False"
                                    Canvas.ZIndex="1000" />
+
+        <!-- Modern Command Palette Modal Overlay (Ctrl + K) -->
+        <common:CommandPaletteOverlayControl x:Name="CommandPaletteOverlay"
+                                             Canvas.ZIndex="2000"
+                                             Visibility="Collapsed" />
     </Grid>
 </Page>

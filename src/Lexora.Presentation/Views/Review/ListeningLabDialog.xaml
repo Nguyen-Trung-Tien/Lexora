@@ -114,6 +114,24 @@
                                 </Button>
                             </Grid>
 
+                            <!-- Dictation Target Mode (Word vs Sentence) -->
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button x:Name="BtnDictateWord" Style="{ThemeResource AccentButtonStyle}"
+                                        CornerRadius="6" Padding="12,4" Click="DictateWordMode_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE8D2;" FontSize="11" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ModeWord')}" FontSize="12" />
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="BtnDictateSentence" Style="{ThemeResource DefaultButtonStyle}"
+                                        CornerRadius="6" Padding="12,4" Click="DictateSentenceMode_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE8BD;" FontSize="11" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ModeSentence')}" FontSize="12" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
                             <!-- User Input and Check -->
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                 <TextBox x:Name="DictationInputBox"
@@ -140,6 +158,14 @@
                                         <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Accuracy')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                         <TextBlock x:Name="DictationAccuracyText" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                                     </StackPanel>
+
+                                    <!-- Character Diff Comparison -->
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="12,10">
+                                        <StackPanel Spacing="6">
+                                            <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_DiffTitle')}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <RichTextBlock x:Name="DictationDiffViewer" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
 
                                     <!-- Revealed Term & Context -->
                                     <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="12,10">

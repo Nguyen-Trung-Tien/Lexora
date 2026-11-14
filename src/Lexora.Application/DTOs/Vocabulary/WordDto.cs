@@ -28,6 +28,7 @@ public record WordDto(
 {
     public string PrimaryDefinition => Meanings.FirstOrDefault()?.DefinitionVi ?? string.Empty;
     public bool IsDueNow => NextReviewAt.HasValue && NextReviewAt.Value <= DateTime.UtcNow;
+    public bool IsLeech => (EaseFactor <= 1.4 && TotalReviews > 0) || Lapses >= 3;
 
     public IReadOnlyList<PartOfSpeech> AllPartsOfSpeech
     {

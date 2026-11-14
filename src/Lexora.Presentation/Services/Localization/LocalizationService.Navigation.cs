@@ -57,6 +57,14 @@ public partial class LocalizationService
         // Vocabulary Knowledge Graph
         vi["Nav_KnowledgeGraph"] = "Mạng lưới Ngữ nghĩa";
         vi["Nav_ListeningLab"] = "Luyện phát âm & Nghe";
+        // Command Palette
+        vi["Palette_Placeholder"] = "Tìm từ vựng hoặc điều hướng nhanh... (Ctrl+K)";
+        vi["Palette_FooterHint"] = "↑↓ Duyệt  •  Enter Chọn  •  Esc Đóng";
+        vi["Palette_SectionActions"] = "Lệnh & Chức năng";
+        vi["Palette_SectionVocabulary"] = "Từ vựng";
+        vi["Palette_SectionGrammar"] = "Ngữ pháp";
+        vi["Palette_DictationLab"] = "Luyện nghe chép chính tả (Dictation Lab)";
+        vi["Palette_NoResults"] = "Không tìm thấy kết quả phù hợp";
 
         // ==========================================
         // Navigation — en-US (English)
@@ -111,5 +119,13 @@ public partial class LocalizationService
         // Vocabulary Knowledge Graph
         en["Nav_KnowledgeGraph"] = "Knowledge Graph";
         en["Nav_ListeningLab"] = "Listening Lab";
+        // Command Palette
+        en["Palette_Placeholder"] = "Search vocabulary or quick navigate... (Ctrl+K)";
+        en["Palette_FooterHint"] = "↑↓ Navigate  •  Enter Select  •  Esc Close";
+        en["Palette_SectionActions"] = "Commands & Actions";
+        en["Palette_SectionVocabulary"] = "Vocabulary";
+        en["Palette_SectionGrammar"] = "Grammar";
+        en["Palette_DictationLab"] = "Audio Dictation Lab";
+        en["Palette_NoResults"] = "No matching commands or words found";
     }
 }

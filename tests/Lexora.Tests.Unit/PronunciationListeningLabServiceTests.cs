@@ -71,6 +71,47 @@ public class PronunciationListeningLabServiceTests
     }
 
     [Fact]
+    public void ComputeDiffTokens_ExactMatch_AllTokensCorrect()
+    {
+        // Act
+        var tokens = PronunciationListeningLabService.ComputeDiffTokens("apple", "apple");
+
+        // Assert
+        tokens.Should().HaveCount(5);
+        tokens.Should().OnlyContain(t => t.Type == Lexora.Application.DTOs.DictationDiffType.Correct);
+    }
+
+    [Fact]
+    public void ComputeDiffTokens_Substitution_DetectsIncorrectAndExpected()
+    {
+        // Act: 'apxle' vs 'apple'
+        var tokens = PronunciationListeningLabService.ComputeDiffTokens("apxle", "apple");
+
+        // Assert
+        tokens.Should().Contain(t => t.Type == Lexora.Application.DTOs.DictationDiffType.Incorrect && t.Text == "x" && t.Expected == "p");
+    }
+
+    [Fact]
+    public void ComputeDiffTokens_MissingCharacter_DetectsMissing()
+    {
+        // Act: 'appl' vs 'apple'
+        var tokens = PronunciationListeningLabService.ComputeDiffTokens("appl", "apple");
+
+        // Assert
+        tokens.Should().Contain(t => t.Type == Lexora.Application.DTOs.DictationDiffType.Missing && t.Text == "e");
+    }
+
+    [Fact]
+    public void ComputeDiffTokens_ExtraCharacter_DetectsExtra()
+    {
+        // Act: 'applee' vs 'apple'
+        var tokens = PronunciationListeningLabService.ComputeDiffTokens("applee", "apple");
+
+        // Assert
+        tokens.Should().Contain(t => t.Type == Lexora.Application.DTOs.DictationDiffType.Extra && t.Text == "e");
+    }
+
+    [Fact]
     public async Task GetMinimalPairChallengesAsync_ReturnsExpectedCountAndValidPairs()
     {
         // Act

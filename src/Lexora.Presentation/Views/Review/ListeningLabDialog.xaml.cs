@@ -133,27 +133,60 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
     // TAB 1: Dictation Lab
     // ─────────────────────────────────────────────────────────────────────────
 
+    private bool _isSentenceMode = false;
+
+    private void DictateWordMode_Click(object sender, RoutedEventArgs e)
+    {
+        _isSentenceMode = false;
+        BtnDictateWord.Style = (Style)App.Current.Resources["AccentButtonStyle"];
+        BtnDictateSentence.Style = (Style)App.Current.Resources["DefaultButtonStyle"];
+        DictationInputBox.PlaceholderText = Loc.GetString("ListeningLab_TypeHeardWord");
+        DictationDiffViewer?.Blocks.Clear();
+        DictationResultPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private void DictateSentenceMode_Click(object sender, RoutedEventArgs e)
+    {
+        _isSentenceMode = true;
+        BtnDictateWord.Style = (Style)App.Current.Resources["DefaultButtonStyle"];
+        BtnDictateSentence.Style = (Style)App.Current.Resources["AccentButtonStyle"];
+        DictationInputBox.PlaceholderText = Loc.GetString("ListeningLab_TypeHeardSentence");
+        DictationDiffViewer?.Blocks.Clear();
+        DictationResultPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private string GetCurrentAudioTarget()
+    {
+        if (CurrentDictation == null) return string.Empty;
+        if (_isSentenceMode && !string.IsNullOrWhiteSpace(CurrentDictation.ExampleSentenceEn))
+        {
+            return CurrentDictation.ExampleSentenceEn;
+        }
+        return CurrentDictation.Term;
+    }
+
     private async Task LoadNextDictationAsync()
     {
         DictationInputBox.Text = string.Empty;
+        DictationDiffViewer?.Blocks.Clear();
         DictationResultPanel.Visibility = Visibility.Collapsed;
         CurrentDictation = await _labService.GetNextDictationChallengeAsync();
         if (CurrentDictation != null && _audioService != null)
         {
-            await _audioService.PlayPronunciationAsync(CurrentDictation.Term, "uk", _playbackRate);
+            await _audioService.PlayPronunciationAsync(GetCurrentAudioTarget(), "uk", _playbackRate);
         }
     }
 
     private async void PlayUkAudio_Click(object sender, RoutedEventArgs e)
     {
         if (CurrentDictation == null || _audioService == null) return;
-        await _audioService.PlayPronunciationAsync(CurrentDictation.Term, "uk", _playbackRate);
+        await _audioService.PlayPronunciationAsync(GetCurrentAudioTarget(), "uk", _playbackRate);
     }
 
     private async void PlayUsAudio_Click(object sender, RoutedEventArgs e)
     {
         if (CurrentDictation == null || _audioService == null) return;
-        await _audioService.PlayPronunciationAsync(CurrentDictation.Term, "us", _playbackRate);
+        await _audioService.PlayPronunciationAsync(GetCurrentAudioTarget(), "us", _playbackRate);
     }
 
     private void SpeedComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -182,9 +215,11 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
     {
         if (CurrentDictation == null) return;
 
+        var expectedTarget = GetCurrentAudioTarget();
+
         var result = _labService.EvaluateDictation(
             DictationInputBox.Text,
-            CurrentDictation.Term,
+            expectedTarget,
             CurrentDictation.PhoneticUk ?? CurrentDictation.PhoneticUs);
 
         DictationFeedbackText.Text = result.FeedbackMessage;
@@ -211,7 +246,76 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
         DictationRevealedMeaning.Text = CurrentDictation.DefinitionVi;
         DictationRevealedExample.Text = CurrentDictation.ExampleSentenceEn ?? string.Empty;
 
+        RenderDiff(result.DiffTokens);
+
         DictationResultPanel.Visibility = Visibility.Visible;
+    }
+
+    private void RenderDiff(IReadOnlyList<DictationDiffTokenDto>? tokens)
+    {
+        if (DictationDiffViewer == null) return;
+        DictationDiffViewer.Blocks.Clear();
+
+        if (tokens == null || tokens.Count == 0) return;
+
+        var paragraph = new Microsoft.UI.Xaml.Documents.Paragraph();
+
+        var successBrush = (Brush)App.Current.Resources["SystemFillColorSuccessBrush"];
+        var criticalBrush = (Brush)App.Current.Resources["SystemFillColorCriticalBrush"];
+        var cautionBrush = (Brush)App.Current.Resources["SystemFillColorCautionBrush"];
+
+        foreach (var token in tokens)
+        {
+            switch (token.Type)
+            {
+                case DictationDiffType.Correct:
+                    paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                    {
+                        Text = token.Text,
+                        Foreground = successBrush,
+                        FontWeight = Microsoft.UI.Text.FontWeights.Bold
+                    });
+                    break;
+
+                case DictationDiffType.Incorrect:
+                    paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                    {
+                        Text = token.Text,
+                        Foreground = criticalBrush,
+                        TextDecorations = Windows.UI.Text.TextDecorations.Strikethrough
+                    });
+                    if (!string.IsNullOrEmpty(token.Expected))
+                    {
+                        paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                        {
+                            Text = $"({token.Expected})",
+                            Foreground = successBrush,
+                            FontSize = 13
+                        });
+                    }
+                    break;
+
+                case DictationDiffType.Missing:
+                    paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                    {
+                        Text = $"[{token.Text}]",
+                        Foreground = cautionBrush,
+                        FontStyle = Windows.UI.Text.FontStyle.Italic
+                    });
+                    break;
+
+                case DictationDiffType.Extra:
+                    paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                    {
+                        Text = token.Text,
+                        Foreground = criticalBrush,
+                        TextDecorations = Windows.UI.Text.TextDecorations.Strikethrough
+                    });
+                    break;
+            }
+        }
+
+        DictationDiffViewer.Blocks.Add(paragraph);
     }
 
     private async void NextDictation_Click(object sender, RoutedEventArgs e)

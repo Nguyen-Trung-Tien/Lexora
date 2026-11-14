@@ -663,4 +663,127 @@ public class DatabaseBackupService : IDatabaseBackupService
             throw;
         }
     }
+
+    public async Task<bool> ValidateDatabaseIntegrityAsync(string? filePath = null, CancellationToken cancellationToken = default)
+    {
+        var target = filePath ?? _dbFilePath;
+        if (!File.Exists(target)) return false;
+
+        try
+        {
+            using var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={target};Mode=ReadOnly;Pooling=False");
+            await conn.OpenAsync(cancellationToken);
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "PRAGMA quick_check(1);";
+            var result = await cmd.ExecuteScalarAsync(cancellationToken);
+            return result != null && string.Equals(result.ToString(), "ok", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Integrity check failed for {Target}: {Message}", target, ex.Message);
+            return false;
+        }
+    }
+
+    public async Task<string?> EnsureAutoBackupAsync(
+        int maxRetainedBackups = 5,
+        TimeSpan? minInterval = null,
+        bool force = false,
+        CancellationToken cancellationToken = default)
+    {
+        if (!File.Exists(_dbFilePath))
+        {
+            _logger.LogWarning("Cannot perform auto-backup: database file does not exist at {Path}", _dbFilePath);
+            return null;
+        }
+
+        var dbDir = Path.GetDirectoryName(_dbFilePath) ?? AppContext.BaseDirectory;
+        var autoDir = Path.Combine(dbDir, "backups", "auto");
+        Directory.CreateDirectory(autoDir);
+
+        // Check if latest backup is within minInterval
+        if (!force && minInterval.HasValue)
+        {
+            var dirInfo = new DirectoryInfo(autoDir);
+            var latestBackup = dirInfo.GetFiles("lexora_autobackup_*.db")
+                .OrderByDescending(f => f.LastWriteTimeUtc)
+                .FirstOrDefault();
+
+            if (latestBackup != null)
+            {
+                var age = DateTime.UtcNow - latestBackup.LastWriteTimeUtc;
+                if (age < minInterval.Value)
+                {
+                    _logger.LogInformation("Skipping auto-backup: latest backup is {Minutes:F1} minutes old (interval: {Interval})",
+                        age.TotalMinutes, minInterval.Value);
+                    return null;
+                }
+            }
+        }
+
+        // Validate integrity of source database before backing up
+        bool isHealthy = await ValidateDatabaseIntegrityAsync(_dbFilePath, cancellationToken);
+        if (!isHealthy)
+        {
+            _logger.LogError("Auto-backup aborted: source database at {Path} failed integrity check", _dbFilePath);
+            throw new InvalidOperationException("Source database failed integrity check; auto-backup aborted to protect archive integrity.");
+        }
+
+        var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+        var targetFile = Path.Combine(autoDir, $"lexora_autobackup_{timestamp}.db");
+
+        _logger.LogInformation("Creating auto-backup at {TargetFile}", targetFile);
+        var createdPath = await CreateBackupToFileAsync(targetFile, cancellationToken);
+
+        // Rotate to keep at most maxRetainedBackups
+        await RotateBackupsAsync(autoDir, maxRetainedBackups, "lexora_autobackup_*.db", cancellationToken);
+
+        return createdPath;
+    }
+
+    public Task<IReadOnlyList<string>> RotateBackupsAsync(
+        string directory,
+        int maxRetainedBackups = 5,
+        string pattern = "lexora_autobackup_*.db",
+        CancellationToken cancellationToken = default)
+    {
+        if (!Directory.Exists(directory))
+            return Task.FromResult<IReadOnlyList<string>>([]);
+
+        var dirInfo = new DirectoryInfo(directory);
+        var files = dirInfo.GetFiles(pattern)
+            .OrderByDescending(f => f.LastWriteTimeUtc)
+            .ToList();
+
+        var deletedFiles = new List<string>();
+
+        if (files.Count > maxRetainedBackups)
+        {
+            var toPrune = files.Skip(maxRetainedBackups);
+            foreach (var file in toPrune)
+            {
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var fullPath = file.FullName;
+                    file.Delete();
+                    deletedFiles.Add(fullPath);
+
+                    // Delete sidecar WAL / SHM files if present
+                    var wal = fullPath + "-wal";
+                    var shm = fullPath + "-shm";
+                    if (File.Exists(wal)) try { File.Delete(wal); } catch { }
+                    if (File.Exists(shm)) try { File.Delete(shm); } catch { }
+
+                    _logger.LogInformation("Pruned old auto-backup: {File}", fullPath);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    _logger.LogWarning(ex, "Failed to prune old backup {File}: {Message}", file.FullName, ex.Message);
+                }
+            }
+        }
+
+        return Task.FromResult<IReadOnlyList<string>>(deletedFiles);
+    }
 }

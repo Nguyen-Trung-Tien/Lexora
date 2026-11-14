@@ -52,7 +52,21 @@ public sealed partial class ShellPage : Page
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            GlobalSearchBox.Focus(FocusState.Programmatic);
+            if (CommandPaletteOverlay != null)
+            {
+                if (CommandPaletteOverlay.IsOpen)
+                {
+                    CommandPaletteOverlay.Hide();
+                }
+                else
+                {
+                    CommandPaletteOverlay.Show();
+                }
+            }
+            else
+            {
+                GlobalSearchBox.Focus(FocusState.Programmatic);
+            }
         });
     }
 
@@ -62,6 +76,7 @@ public sealed partial class ShellPage : Page
         {
             UpdateNavigationLabels();
             ViewModel.UpdateLocalizedTexts();
+            CommandPaletteOverlay?.UpdateLocalizedTexts();
             Bindings.Update();
             if (ContentFrame.Content is ILocalizableView localizableView)
             {
@@ -103,6 +118,7 @@ public sealed partial class ShellPage : Page
 
                 ContentFrame.Navigated += (s, args) =>
                 {
+                    CommandPaletteOverlay?.Hide();
                     NavView.IsBackEnabled = _navigationService.CanGoBack;
 
                     if (ContentFrame.Content is IThemeAwareView navThemeAwareView)

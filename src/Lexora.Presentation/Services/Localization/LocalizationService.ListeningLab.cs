@@ -25,6 +25,10 @@ public partial class LocalizationService
         vi["ListeningLab_ArticulatoryTip"] = "Mẹo phát âm & Khẩu hình";
         vi["ListeningLab_Speed"] = "Tốc độ";
         vi["ListeningLab_Accuracy"] = "Độ chính xác";
+        vi["ListeningLab_DiffTitle"] = "So sánh chính tả (Đúng / Sai):";
+        vi["ListeningLab_ModeWord"] = "Chép từ vựng";
+        vi["ListeningLab_ModeSentence"] = "Chép câu ví dụ";
+        vi["ListeningLab_TypeHeardSentence"] = "Nhập toàn bộ câu bạn nghe được...";
 
         // ==========================================
         // ListeningLab — en-US (English)
@@ -47,5 +51,9 @@ public partial class LocalizationService
         en["ListeningLab_ArticulatoryTip"] = "Articulation & Mouth Shape Guide";
         en["ListeningLab_Speed"] = "Speed";
         en["ListeningLab_Accuracy"] = "Accuracy";
+        en["ListeningLab_DiffTitle"] = "Character Diff Comparison (Correct / Incorrect):";
+        en["ListeningLab_ModeWord"] = "Dictate Word";
+        en["ListeningLab_ModeSentence"] = "Dictate Sentence";
+        en["ListeningLab_TypeHeardSentence"] = "Type the sentence you hear...";
     }
 }

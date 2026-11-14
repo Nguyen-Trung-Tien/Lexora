@@ -20,6 +20,7 @@ public interface IVocabularyService
         bool isAscending = true,
         bool? isDueToday = null,
         bool? isWeak = null,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default);
 
     Task<int> CountWordsAsync(
@@ -31,6 +32,7 @@ public interface IVocabularyService
         LearningStatus? status = null,
         bool? isDueToday = null,
         bool? isWeak = null,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default);
 
     Task<WordDto> CreateWordAsync(WordCreateOrUpdateDto dto, CancellationToken cancellationToken = default);
@@ -60,7 +62,9 @@ public interface IVocabularyService
         bool isAscending = true,
         bool? isDueToday = null,
         bool? isWeak = null,
+        bool? isLeech = null,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<string>> GetClosestSuggestionsAsync(string query, int maxSuggestions = 5, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<WordDto>> GetLeechWordsAsync(int limit = 50, CancellationToken cancellationToken = default);
 }
