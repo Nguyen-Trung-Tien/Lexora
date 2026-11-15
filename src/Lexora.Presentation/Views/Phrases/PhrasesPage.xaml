@@ -215,19 +215,12 @@
                                 Style="{StaticResource AccentButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon FontSize="12" Glyph="&#xE8D2;" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Phrases_FilterAll')}" FontWeight="SemiBold" FontSize="12" />
-                                    <Border
-                                        x:Name="BadgeFilterAllBorder"
-                                        Padding="6,2"
-                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                        CornerRadius="{ThemeResource OverlayCornerRadius}">
-                                        <TextBlock
-                                            x:Name="BadgeFilterAllText"
-                                            FontSize="11"
-                                            FontWeight="Bold"
-                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                            Text="{x:Bind ViewModel.TotalPhraseCount, Mode=OneWay}" />
-                                    </Border>
+                                    <TextBlock FontWeight="SemiBold" FontSize="12">
+                                        <Run Text="{x:Bind Loc.GetString('Phrases_FilterAll')}" />
+                                        <Run Text=" (" />
+                                        <Run Text="{x:Bind ViewModel.TotalPhraseCount, Mode=OneWay}" />
+                                        <Run Text=")" />
+                                    </TextBlock>
                                 </StackPanel>
                             </Button>
 
@@ -239,19 +232,12 @@
                                 Padding="12,5">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon FontSize="12" Foreground="{ThemeResource SystemFillColorCautionBrush}" Glyph="&#xE734;" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Phrases_FilterFavorites')}" FontWeight="SemiBold" FontSize="12" />
-                                    <Border
-                                        x:Name="BadgeFilterFavoritesBorder"
-                                        Padding="6,2"
-                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                        CornerRadius="{ThemeResource OverlayCornerRadius}">
-                                        <TextBlock
-                                            x:Name="BadgeFilterFavoritesText"
-                                            FontSize="11"
-                                            FontWeight="Bold"
-                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{x:Bind ViewModel.FavoritePhraseCount, Mode=OneWay}" />
-                                    </Border>
+                                    <TextBlock FontWeight="SemiBold" FontSize="12">
+                                        <Run Text="{x:Bind Loc.GetString('Phrases_FilterFavorites')}" />
+                                        <Run Text=" (" />
+                                        <Run Text="{x:Bind ViewModel.FavoritePhraseCount, Mode=OneWay}" />
+                                        <Run Text=")" />
+                                    </TextBlock>
                                 </StackPanel>
                             </Button>
 
@@ -263,19 +249,12 @@
                                 Padding="12,5">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon FontSize="12" Foreground="{ThemeResource SystemFillColorCautionBrush}" Glyph="&#xE823;" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Phrases_FilterDue')}" FontWeight="SemiBold" FontSize="12" />
-                                    <Border
-                                        x:Name="BadgeFilterDueBorder"
-                                        Padding="6,2"
-                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                                        CornerRadius="8">
-                                        <TextBlock
-                                            x:Name="BadgeFilterDueText"
-                                            FontSize="11"
-                                            FontWeight="Bold"
-                                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                                            Text="{x:Bind ViewModel.DuePhraseCount, Mode=OneWay}" />
-                                    </Border>
+                                    <TextBlock FontWeight="SemiBold" FontSize="12">
+                                        <Run Text="{x:Bind Loc.GetString('Phrases_FilterDue')}" />
+                                        <Run Text=" (" />
+                                        <Run Text="{x:Bind ViewModel.DuePhraseCount, Mode=OneWay}" />
+                                        <Run Text=")" />
+                                    </TextBlock>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -781,9 +760,10 @@
                                         BorderThickness="1"
                                         CornerRadius="{ThemeResource OverlayCornerRadius}">
                                         <StackPanel Spacing="8">
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Grid Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                                                     <Border
+                                                        Grid.Column="0"
                                                         Width="22"
                                                         Height="22"
                                                         CornerRadius="11"
@@ -797,14 +777,16 @@
                                                             Text="A" />
                                                     </Border>
                                                     <TextBlock
+                                                        Grid.Column="1"
                                                         VerticalAlignment="Center"
                                                         FontSize="12"
                                                         FontWeight="SemiBold"
                                                         Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                        Text="{x:Bind Loc.GetString('Phrases_SpeakerAPrompt')}" />
-                                                </StackPanel>
+                                                        Text="{x:Bind Loc.GetString('Phrases_SpeakerAPrompt')}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                </Grid>
 
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                     <Button Click="OnDetailPlayPromptClick" Padding="8,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                                             <FontIcon FontSize="12" Glyph="{x:Bind ViewModel.SelectedPhrase.PromptAudioGlyph, Mode=OneWay}" />
@@ -851,9 +833,10 @@
                                         BorderThickness="1"
                                         CornerRadius="{ThemeResource OverlayCornerRadius}">
                                         <StackPanel Spacing="8">
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Grid Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
                                                     <Border
+                                                        Grid.Column="0"
                                                         Width="22"
                                                         Height="22"
                                                         CornerRadius="11"
@@ -867,14 +850,16 @@
                                                             Text="B" />
                                                     </Border>
                                                     <TextBlock
+                                                        Grid.Column="1"
                                                         VerticalAlignment="Center"
                                                         FontSize="12"
                                                         FontWeight="SemiBold"
                                                         Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                                                        Text="{x:Bind Loc.GetString('Phrases_SpeakerBResponse')}" />
-                                                </StackPanel>
+                                                        Text="{x:Bind Loc.GetString('Phrases_SpeakerBResponse')}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                </Grid>
 
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                     <Button Click="OnDetailPlayResponseClick" Padding="8,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                                             <FontIcon FontSize="12" Glyph="{x:Bind ViewModel.SelectedPhrase.ResponseAudioGlyph, Mode=OneWay}" />
