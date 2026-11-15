@@ -92,6 +92,9 @@ public partial class LocalizationService
         vi["Roadmap_NotStarted"] = "Chưa bắt đầu";
         vi["Roadmap_CloseInspector"] = "Đóng chi tiết";
         vi["Roadmap_ActiveBadge"] = "Đang học";
+        vi["Roadmap_Help_Title"] = "Trợ giúp: Lộ trình học thích ứng";
+        vi["Roadmap_Help_Subtitle"] = "Chinh phục mục tiêu TOEIC, IELTS & VSTEP";
+        vi["Roadmap_Help_Content"] = "Lộ trình học trực quan hóa các mốc kiến thức (Milestones) dạng uốn lượn. Hoàn thành mục tiêu hoặc đạt điểm ôn tập q >= 3 sẽ tự động mở khóa các node tiếp theo. Nhấp vào node bất kỳ để bắt đầu thử thách.";
 
         // ==========================================
         // Roadmap — en-US (English)
@@ -181,5 +184,8 @@ public partial class LocalizationService
         en["Roadmap_NotStarted"] = "Not Started";
         en["Roadmap_CloseInspector"] = "Close Details";
         en["Roadmap_ActiveBadge"] = "Active";
+        en["Roadmap_Help_Title"] = "Quick Help: Adaptive Roadmap";
+        en["Roadmap_Help_Subtitle"] = "Conquer TOEIC, IELTS & VSTEP Goals";
+        en["Roadmap_Help_Content"] = "The Roadmap visualizes your milestone tree with smooth adaptive paths. Mastering items with rating q >= 3 automatically unlocks downstream nodes. Click any milestone node to inspect details and launch challenges.";
     }
 }

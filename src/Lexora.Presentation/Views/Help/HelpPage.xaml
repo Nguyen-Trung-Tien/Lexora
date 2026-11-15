@@ -115,6 +115,18 @@
                                     <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_SpacedRepetition')}" FontWeight="SemiBold" />
                                 </StackPanel>
                             </Button>
+                            <Button x:Name="FilterBtnRoadmap" Click="FilterButton_Click" Tag="Roadmap" CornerRadius="8" Padding="14,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE81D;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_Roadmap')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="FilterBtnKnowledgeGraph" Click="FilterButton_Click" Tag="KnowledgeGraph" CornerRadius="8" Padding="14,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE9CE;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_Cat_KnowledgeGraph')}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
                             <Button x:Name="FilterBtnListeningLab" Click="FilterButton_Click" Tag="ListeningLab" CornerRadius="8" Padding="14,6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE767;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />

@@ -71,6 +71,9 @@ public partial class LocalizationService
         vi["Homophones_SuggestionGroupBadge"] = "Nhóm đồng âm";
         vi["Homophones_DidYouMeanFormat"] = "Ý bạn là '{0}'?";
         vi["Homophones_SuggestionHintFormat"] = "Gợi ý: {0}";
+        vi["Homophones_Help_Title"] = "Trợ giúp: Từ đồng âm & Phòng luyện nghe";
+        vi["Homophones_Help_Subtitle"] = "Phân biệt cặp âm dễ nhầm và luyện tai nghe";
+        vi["Homophones_Help_Content"] = "Luyện nghe đối sánh giữa giọng UK và US, làm bài trắc nghiệm phản xạ 3 giây phân biệt các cặp từ đồng âm và nghe chép chính tả (Dictation) để nâng cao độ nhạy thính giác.";
 
         // ==========================================
         // Homophones — en-US (English)
@@ -139,5 +142,8 @@ public partial class LocalizationService
         en["Homophones_SuggestionGroupBadge"] = "Homophone Group";
         en["Homophones_DidYouMeanFormat"] = "Did you mean '{0}'?";
         en["Homophones_SuggestionHintFormat"] = "Suggestion: {0}";
+        en["Homophones_Help_Title"] = "Quick Help: Homophones & Listening Lab";
+        en["Homophones_Help_Subtitle"] = "Distinguish minimal pairs & sharpen ears";
+        en["Homophones_Help_Content"] = "Compare British (UK) vs American (US) audio pronunciations, challenge yourself with 3-second rapid minimal-pair drills, and practice typing dictation to boost acoustic precision.";
     }
 }

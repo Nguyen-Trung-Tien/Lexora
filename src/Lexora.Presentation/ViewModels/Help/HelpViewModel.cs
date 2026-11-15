@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lexora.Domain.Common;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.Views;
+using Lexora.Presentation.Views.Roadmap;
 
 namespace Lexora.Presentation.ViewModels;
 
@@ -37,7 +39,7 @@ internal sealed record HelpGuideDefinition(
     string? ActionLabelKey,
     string? BadgeKey,
     IReadOnlyList<string> TipsListKeys,
-    IReadOnlyList<string> ShortcutKeys);
+    IReadOnlyList<string> ShortcutKeysKeys);
 
 public partial class HelpViewModel : ObservableObject, IDisposable
 {
@@ -109,10 +111,15 @@ public partial class HelpViewModel : ObservableObject, IDisposable
                 "Help_Tip_GettingStarted_2",
                 "Help_Tip_GettingStarted_3"
             },
-            ShortcutKeys: new[] { "Ctrl+1: Dashboard", "Ctrl+K: Smart Search", "F1: Help Hub" }
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl1",
+                "Help_Shortcut_CtrlK",
+                "Help_Shortcut_F1"
+            }
         ));
 
-        // 2. Vocabulary & Grammar Management
+        // 2. Vocabulary & Topic Units
         _definitions.Add(new HelpGuideDefinition(
             Id: "vocabulary-management",
             Category: "Vocabulary",
@@ -132,10 +139,15 @@ public partial class HelpViewModel : ObservableObject, IDisposable
                 "Help_Tip_Vocab_3",
                 "Help_Tip_Vocab_4"
             },
-            ShortcutKeys: new[] { "Ctrl+2: Vocabulary Hub", "Ctrl+N: Add Word", "Ctrl+5: Grammar" }
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl2",
+                "Help_Shortcut_CtrlN",
+                "Help_Shortcut_Ctrl5"
+            }
         ));
 
-        // 3. Spaced Repetition (SM-2 & FSRS Engine)
+        // 3. Spaced Repetition (SM-2 & FSRS Deep-Dive)
         _definitions.Add(new HelpGuideDefinition(
             Id: "spaced-repetition",
             Category: "SpacedRepetition",
@@ -155,10 +167,122 @@ public partial class HelpViewModel : ObservableObject, IDisposable
                 "Help_Tip_SpacedRepetition_Good",
                 "Help_Tip_SpacedRepetition_Easy"
             },
-            ShortcutKeys: new[] { "Ctrl+6: Review", "1: Again", "2: Hard", "3: Good", "4: Easy", "Space: Flip Card", "Ctrl+Z: Undo" }
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl6",
+                "Help_Shortcut_SpaceFlip",
+                "Help_Shortcut_RatingAgain",
+                "Help_Shortcut_RatingHard",
+                "Help_Shortcut_RatingGood",
+                "Help_Shortcut_RatingEasy",
+                "Help_Shortcut_CtrlZ"
+            }
         ));
 
-        // 4. Homophones & Pronunciation Listening Lab
+        // 4. Learning Roadmap & Goal Tracking
+        _definitions.Add(new HelpGuideDefinition(
+            Id: "learning-roadmap",
+            Category: "Roadmap",
+            TitleKey: "Help_Guide_Roadmap_Title",
+            SubtitleKey: "Help_Guide_Roadmap_Subtitle",
+            IconGlyph: "\uE81D",
+            SummaryKey: "Help_Guide_Roadmap_Summary",
+            ContentKey: "Help_Guide_Roadmap_Content",
+            FormulaKey: "Help_Guide_Roadmap_Formula",
+            ActionTargetTag: "Roadmap",
+            ActionLabelKey: "Help_Action_GoRoadmap",
+            BadgeKey: "Help_Badge_Roadmap",
+            TipsListKeys: new[]
+            {
+                "Help_Tip_Roadmap_1",
+                "Help_Tip_Roadmap_2",
+                "Help_Tip_Roadmap_3"
+            },
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl9",
+                "Help_Shortcut_RoadmapInspect"
+            }
+        ));
+
+        // 5. Knowledge Graph & Semantic Associations
+        _definitions.Add(new HelpGuideDefinition(
+            Id: "knowledge-graph",
+            Category: "KnowledgeGraph",
+            TitleKey: "Help_Guide_KnowledgeGraph_Title",
+            SubtitleKey: "Help_Guide_KnowledgeGraph_Subtitle",
+            IconGlyph: "\uE9CE",
+            SummaryKey: "Help_Guide_KnowledgeGraph_Summary",
+            ContentKey: "Help_Guide_KnowledgeGraph_Content",
+            FormulaKey: null,
+            ActionTargetTag: "KnowledgeGraph",
+            ActionLabelKey: "Help_Action_GoKnowledgeGraph",
+            BadgeKey: "Help_Badge_Graph",
+            TipsListKeys: new[]
+            {
+                "Help_Tip_KnowledgeGraph_1",
+                "Help_Tip_KnowledgeGraph_2",
+                "Help_Tip_KnowledgeGraph_3"
+            },
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl4",
+                "Help_Shortcut_GraphInspect",
+                "Help_Shortcut_GraphPivot"
+            }
+        ));
+
+        // 6. Grammar & Pattern Suggester
+        _definitions.Add(new HelpGuideDefinition(
+            Id: "grammar-patterns",
+            Category: "Vocabulary",
+            TitleKey: "Help_Guide_Grammar_Title",
+            SubtitleKey: "Help_Guide_Grammar_Subtitle",
+            IconGlyph: "\uE8D3",
+            SummaryKey: "Help_Guide_Grammar_Summary",
+            ContentKey: "Help_Guide_Grammar_Content",
+            FormulaKey: null,
+            ActionTargetTag: "Grammar",
+            ActionLabelKey: "Help_Action_GoGrammar",
+            BadgeKey: "Help_Badge_Grammar",
+            TipsListKeys: new[]
+            {
+                "Help_Tip_Grammar_1",
+                "Help_Tip_Grammar_2",
+                "Help_Tip_Grammar_3"
+            },
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl5"
+            }
+        ));
+
+        // 7. Learning Storage & Personal Notebooks
+        _definitions.Add(new HelpGuideDefinition(
+            Id: "learning-storage",
+            Category: "KnowledgeGraph",
+            TitleKey: "Help_Guide_Storage_Title",
+            SubtitleKey: "Help_Guide_Storage_Subtitle",
+            IconGlyph: "\uE74E",
+            SummaryKey: "Help_Guide_Storage_Summary",
+            ContentKey: "Help_Guide_Storage_Content",
+            FormulaKey: null,
+            ActionTargetTag: "LearningStorage",
+            ActionLabelKey: "Help_Action_GoStorage",
+            BadgeKey: "Help_Badge_Storage",
+            TipsListKeys: new[]
+            {
+                "Help_Tip_Storage_1",
+                "Help_Tip_Storage_2",
+                "Help_Tip_Storage_3"
+            },
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl8"
+            }
+        ));
+
+        // 8. Homophones, Pronunciation & Listening Lab
         _definitions.Add(new HelpGuideDefinition(
             Id: "listening-lab-homophones",
             Category: "ListeningLab",
@@ -177,10 +301,15 @@ public partial class HelpViewModel : ObservableObject, IDisposable
                 "Help_Tip_ListeningLab_2",
                 "Help_Tip_ListeningLab_3"
             },
-            ShortcutKeys: new[] { "Ctrl+3: Homophones", "Alt+U: UK Accent", "Alt+A: US Accent" }
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl3",
+                "Help_Shortcut_AltU",
+                "Help_Shortcut_AltA"
+            }
         ));
 
-        // 5. Adaptive Testing & Practice Mode (CAT)
+        // 9. Adaptive Testing & Practice Mode (CAT)
         _definitions.Add(new HelpGuideDefinition(
             Id: "test-and-cat",
             Category: "TestMode",
@@ -199,10 +328,15 @@ public partial class HelpViewModel : ObservableObject, IDisposable
                 "Help_Tip_Test_2",
                 "Help_Tip_Test_3"
             },
-            ShortcutKeys: new[] { "Ctrl+7: Test Hub", "1-4: Select Answer", "Enter: Submit" }
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_Ctrl7",
+                "Help_Shortcut_TestKeys",
+                "Help_Shortcut_TestEnter"
+            }
         ));
 
-        // 6. Database Backup, Restore & Personalization
+        // 10. Database Backup, Restore & Personalization
         _definitions.Add(new HelpGuideDefinition(
             Id: "backup-and-settings",
             Category: "BackupAndSettings",
@@ -221,7 +355,11 @@ public partial class HelpViewModel : ObservableObject, IDisposable
                 "Help_Tip_Settings_2",
                 "Help_Tip_Settings_3"
             },
-            ShortcutKeys: new[] { "Ctrl+T: Toggle Theme", "F1: Open Help" }
+            ShortcutKeysKeys: new[]
+            {
+                "Help_Shortcut_CtrlT",
+                "Help_Shortcut_F1"
+            }
         ));
 
         TotalGuidesCount = _definitions.Count;
@@ -234,6 +372,7 @@ public partial class HelpViewModel : ObservableObject, IDisposable
         foreach (var def in _definitions)
         {
             var tips = def.TipsListKeys.Select(k => _localizationService.GetString(k)).ToList();
+            var shortcuts = def.ShortcutKeysKeys.Select(k => _localizationService.GetString(k)).ToList();
             var item = new HelpGuideDisplayItem(
                 Id: def.Id,
                 Category: def.Category,
@@ -247,7 +386,7 @@ public partial class HelpViewModel : ObservableObject, IDisposable
                 ActionLabel: def.ActionLabelKey != null ? _localizationService.GetString(def.ActionLabelKey) : null,
                 Badge: def.BadgeKey != null ? _localizationService.GetString(def.BadgeKey) : null,
                 TipsList: tips,
-                ShortcutKeys: def.ShortcutKeys,
+                ShortcutKeys: shortcuts,
                 FormulaHeader: _localizationService.GetString("Help_AlgorithmFormulaTitle"),
                 KeyPointsHeader: _localizationService.GetString("Help_KeyPointsTitle"),
                 ShortcutsHeader: _localizationService.GetString("Help_ShortcutsTitle")
@@ -289,6 +428,7 @@ public partial class HelpViewModel : ObservableObject, IDisposable
             "Vocabulary" => typeof(VocabularyPage),
             "Homophones" => typeof(HomophonesPage),
             "KnowledgeGraph" => typeof(KnowledgeGraphPage),
+            "Roadmap" => typeof(RoadmapPage),
             "Review" => typeof(ReviewPage),
             "Test" => typeof(TestPage),
             "Grammar" => typeof(GrammarPage),
@@ -305,7 +445,8 @@ public partial class HelpViewModel : ObservableObject, IDisposable
 
     public void ApplyFilter()
     {
-        var query = SearchQuery?.Trim() ?? string.Empty;
+        var rawQuery = SearchQuery?.Trim() ?? string.Empty;
+        var normQuery = SearchTextHelper.Normalize(rawQuery);
         var category = SelectedCategory;
 
         var results = _allDisplayItems.Where(g =>
@@ -317,14 +458,17 @@ public partial class HelpViewModel : ObservableObject, IDisposable
                 return false;
             }
 
-            // Search query check
-            if (!string.IsNullOrWhiteSpace(query))
+            // Search query check with diacritic-insensitive intelligence
+            if (!string.IsNullOrWhiteSpace(normQuery))
             {
-                var match = g.Id.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                            g.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                            g.Subtitle.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                            g.Summary.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                            g.Content.Contains(query, StringComparison.OrdinalIgnoreCase);
+                var match = SearchTextHelper.Normalize(g.Id).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                            SearchTextHelper.Normalize(g.Title).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                            SearchTextHelper.Normalize(g.Subtitle).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                            SearchTextHelper.Normalize(g.Summary).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                            SearchTextHelper.Normalize(g.Content).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
+                            (g.Formula != null && SearchTextHelper.Normalize(g.Formula).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+                            g.TipsList.Any(t => SearchTextHelper.Normalize(t).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
+                            g.ShortcutKeys.Any(s => SearchTextHelper.Normalize(s).Contains(normQuery, StringComparison.OrdinalIgnoreCase));
 
                 if (!match) return false;
             }

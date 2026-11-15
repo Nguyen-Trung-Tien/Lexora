@@ -186,6 +186,16 @@ public class LocalizationServiceTests
     [InlineData("Review_UndoSuccess", "Đã hoàn tác đánh giá thẻ ôn tập vừa rồi.", "Last card rating undone successfully.")]
     [InlineData("Action_Export", "Xuất tệp", "Export")]
     [InlineData("Action_Import", "Nhập tệp", "Import")]
+    [InlineData("Roadmap_Help_Title", "Trợ giúp: Lộ trình học thích ứng", "Quick Help: Adaptive Roadmap")]
+    [InlineData("Grammar_Help_Title", "Trợ giúp: Ngữ pháp & Cấu trúc câu", "Quick Help: Grammar Patterns")]
+    [InlineData("Homophones_Help_Title", "Trợ giúp: Từ đồng âm & Phòng luyện nghe", "Quick Help: Homophones & Listening Lab")]
+    [InlineData("KnowledgeGraph_Help_Title", "Trợ giúp: Đồ thị tri thức ngữ nghĩa", "Quick Help: Knowledge Graph")]
+    [InlineData("Help_Cat_Roadmap", "Lộ trình học (Roadmap)", "Adaptive Roadmap & Goals")]
+    [InlineData("Help_Cat_KnowledgeGraph", "Đồ thị từ & Lưu trữ", "Knowledge Graph & Storage")]
+    [InlineData("Help_Guide_Roadmap_Title", "Lộ trình học thích ứng & Mục tiêu thi cử (Roadmap Hub)", "Adaptive Learning Roadmap & Exam Pathways")]
+    [InlineData("Help_Guide_KnowledgeGraph_Title", "Đồ thị tri thức (Knowledge Graph) & Cụm ngữ nghĩa", "Knowledge Graph & Semantic Clusters")]
+    [InlineData("Help_Shortcut_Ctrl1", "Ctrl+1: Bảng tổng quan (Dashboard)", "Ctrl+1: Dashboard Mission Control")]
+    [InlineData("Help_Shortcut_Ctrl9", "Ctrl+9: Lộ trình học thích ứng (Roadmap)", "Ctrl+9: Adaptive Learning Roadmap")]
     public void NewlyAddedKeys_MustReturnAccurateTranslations(string key, string expectedVi, string expectedEn)
     {
         _loc.SetLanguage("vi-VN");

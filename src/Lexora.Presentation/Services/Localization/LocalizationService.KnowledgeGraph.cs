@@ -90,6 +90,9 @@ public partial class LocalizationService
         vi["KnowledgeGraph_Import_ErrEmpty"] = "Vui lòng nhập nội dung JSON/CSV hoặc chọn tệp để tiếp tục.";
         vi["KnowledgeGraph_Import_ErrNoValid"] = "Không phát hiện được quan hệ ngữ nghĩa nào hợp lệ trong dữ liệu nhập.";
         vi["KnowledgeGraph_SemanticGraph"] = "Mạng lưới ngữ nghĩa";
+        vi["KnowledgeGraph_Help_Title"] = "Trợ giúp: Đồ thị tri thức ngữ nghĩa";
+        vi["KnowledgeGraph_Help_Subtitle"] = "Mạng lưới liên tưởng từ vựng đa chiều";
+        vi["KnowledgeGraph_Help_Content"] = "Đồ thị kết nối các từ vựng theo mối quan hệ từ đồng nghĩa, trái nghĩa và cùng chủ đề. Kéo cuộn canvas để khám phá cụm từ, nhấp vào node để nghe phát âm và bấm 'Pivot' để lấy từ đó làm tâm điểm đồ thị.";
 
         // ==========================================
         // KnowledgeGraph — en-US (English)
@@ -177,5 +180,8 @@ public partial class LocalizationService
         en["KnowledgeGraph_Import_ErrEmpty"] = "Please provide JSON/CSV content or select a file to continue.";
         en["KnowledgeGraph_Import_ErrNoValid"] = "No valid semantic relationships found in the imported data.";
         en["KnowledgeGraph_SemanticGraph"] = "Semantic Knowledge Graph";
+        en["KnowledgeGraph_Help_Title"] = "Quick Help: Knowledge Graph";
+        en["KnowledgeGraph_Help_Subtitle"] = "Associative semantic vocabulary network";
+        en["KnowledgeGraph_Help_Content"] = "The graph connects words by synonyms, antonyms, and thematic clusters. Pan and zoom the canvas, click any node to play audio, and click 'Pivot' to re-center the entire semantic web around that term.";
     }
 }

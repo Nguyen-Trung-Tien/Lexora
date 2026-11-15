@@ -121,6 +121,7 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
     {
         ViewModel.RebuildDisplayItems();
         ViewModel.ApplyFilter();
+        Bindings.Update();
         UpdateFilterPillsState();
         DispatcherQueue.TryEnqueue(UpdateScrollButtonsVisibility);
     }
@@ -162,6 +163,8 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         SetPillState(FilterBtnGettingStarted, string.Equals(activeCategory, "GettingStarted", StringComparison.OrdinalIgnoreCase));
         SetPillState(FilterBtnVocabulary, string.Equals(activeCategory, "Vocabulary", StringComparison.OrdinalIgnoreCase));
         SetPillState(FilterBtnSpacedRepetition, string.Equals(activeCategory, "SpacedRepetition", StringComparison.OrdinalIgnoreCase));
+        SetPillState(FilterBtnRoadmap, string.Equals(activeCategory, "Roadmap", StringComparison.OrdinalIgnoreCase));
+        SetPillState(FilterBtnKnowledgeGraph, string.Equals(activeCategory, "KnowledgeGraph", StringComparison.OrdinalIgnoreCase));
         SetPillState(FilterBtnListeningLab, string.Equals(activeCategory, "ListeningLab", StringComparison.OrdinalIgnoreCase));
         SetPillState(FilterBtnTestMode, string.Equals(activeCategory, "TestMode", StringComparison.OrdinalIgnoreCase));
         SetPillState(FilterBtnBackupSettings, string.Equals(activeCategory, "BackupAndSettings", StringComparison.OrdinalIgnoreCase));

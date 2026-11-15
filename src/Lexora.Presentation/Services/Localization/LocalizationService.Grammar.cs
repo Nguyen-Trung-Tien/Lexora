@@ -93,6 +93,9 @@ public partial class LocalizationService
         vi["Grammar_SmartImport_Subtitle"] = "Dán trực tiếp hoặc tải tệp (JSON, CSV, TXT) chứa danh sách cấu trúc ngữ pháp, giải thích và ví dụ câu.";
         vi["Grammar_SmartImport_AnalyzeBtn"] = "Tiến hành nhập dữ liệu";
         vi["Grammar_ServiceNotAvailable"] = "Dịch vụ nhập/xuất ngữ pháp không khả dụng.";
+        vi["Grammar_Help_Title"] = "Trợ giúp: Ngữ pháp & Cấu trúc câu";
+        vi["Grammar_Help_Subtitle"] = "Làm chủ công thức và quy tắc ngữ pháp";
+        vi["Grammar_Help_Content"] = "Tra cứu các cấu trúc ngữ pháp then chốt theo cấp độ CEFR từ A1 đến C2. Xem công thức, ví dụ ngữ cảnh và làm bài tập củng cố để ghi nhớ quy tắc tự nhiên.";
 
         // ==========================================
         // Grammar — en-US (English)
@@ -183,5 +186,8 @@ public partial class LocalizationService
         en["Grammar_SmartImport_Subtitle"] = "Directly paste or load files (JSON, CSV, TXT) containing grammar rules, explanations, and example sentences.";
         en["Grammar_SmartImport_AnalyzeBtn"] = "Start Import";
         en["Grammar_ServiceNotAvailable"] = "Grammar export/import service not available.";
+        en["Grammar_Help_Title"] = "Quick Help: Grammar Patterns";
+        en["Grammar_Help_Subtitle"] = "Master syntax rules & formulas";
+        en["Grammar_Help_Content"] = "Look up key syntactic formulas across CEFR levels from A1 to C2. Review structural patterns, real-world examples, and practice drills to master grammar rules naturally.";
     }
 }
