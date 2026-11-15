@@ -6,6 +6,7 @@ using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.Storage;
@@ -40,6 +41,8 @@ public sealed partial class PhrasesPage : Page
         Loc = localizationService;
         InitializeComponent();
         DataContext = ViewModel;
+
+        UpdateFilterPillStyles();
 
         ViewModel.PropertyChanged += (s, e) =>
         {
@@ -199,6 +202,40 @@ public sealed partial class PhrasesPage : Page
         BtnFilterAll.Style = ViewModel.QuickFilterIndex == 0 ? accentStyle : defaultStyle;
         BtnFilterFavorites.Style = ViewModel.QuickFilterIndex == 1 ? accentStyle : defaultStyle;
         BtnFilterDue.Style = ViewModel.QuickFilterIndex == 2 ? accentStyle : defaultStyle;
+
+        var cardBg = (Brush)App.Current.Resources["CardBackgroundFillColorDefaultBrush"];
+        var subtleBg = (Brush)App.Current.Resources["SubtleFillColorSecondaryBrush"];
+        var cautionBg = (Brush)App.Current.Resources["SystemFillColorCautionBackgroundBrush"];
+
+        var accentText = (Brush)App.Current.Resources["AccentTextFillColorPrimaryBrush"];
+        var secondaryText = (Brush)App.Current.Resources["TextFillColorSecondaryBrush"];
+        var cautionText = (Brush)App.Current.Resources["SystemFillColorCautionBrush"];
+
+        if (BadgeFilterAllBorder is not null && BadgeFilterAllText is not null)
+        {
+            BadgeFilterAllBorder.Background = ViewModel.QuickFilterIndex == 0 ? cardBg : subtleBg;
+            BadgeFilterAllText.Foreground = ViewModel.QuickFilterIndex == 0 ? accentText : secondaryText;
+        }
+
+        if (BadgeFilterFavoritesBorder is not null && BadgeFilterFavoritesText is not null)
+        {
+            BadgeFilterFavoritesBorder.Background = ViewModel.QuickFilterIndex == 1 ? cardBg : subtleBg;
+            BadgeFilterFavoritesText.Foreground = ViewModel.QuickFilterIndex == 1 ? accentText : secondaryText;
+        }
+
+        if (BadgeFilterDueBorder is not null && BadgeFilterDueText is not null)
+        {
+            BadgeFilterDueBorder.Background = ViewModel.QuickFilterIndex == 2 ? cardBg : cautionBg;
+            BadgeFilterDueText.Foreground = ViewModel.QuickFilterIndex == 2 ? accentText : cautionText;
+        }
+    }
+
+    private void DetailScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (sender is ScrollViewer sv && sv.ActualWidth > 0 && DetailCardRoot is not null)
+        {
+            DetailCardRoot.MaxWidth = sv.ActualWidth;
+        }
     }
 
     private async void OnDetailPlayFullConversationClick(object sender, RoutedEventArgs e)

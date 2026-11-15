@@ -41,7 +41,7 @@ public partial class LocalizationService
         vi["Phrases_EmptySubtitle"] = "Thử thay đổi bộ lọc, tìm kiếm bằng từ khóa khác hoặc thêm cụm từ mới.";
         vi["Phrases_SelectPromptHint"] = "Chọn một mẫu câu bên trái để xem chi tiết hội thoại, biến thể và luyện phát âm.";
         vi["Phrases_AddToReviewQueue"] = "Đưa vào ôn tập";
-        vi["Phrases_PlayFullDialogue"] = "Nghe toàn bộ hội thoại";
+        vi["Phrases_PlayFullDialogue"] = "Nghe hội thoại";
         vi["Phrases_DialogueExchangeHeader"] = "Hội thoại mẫu (Dialogue Flow)";
         vi["Phrases_SpeakerAPrompt"] = "NGƯỜI NÓI A — CÂU HỎI / TÌNH HUỐNG";
         vi["Phrases_SpeakerBResponse"] = "NGƯỜI NÓI B — PHẢN HỒI MẪU";
@@ -156,7 +156,7 @@ public partial class LocalizationService
         en["Phrases_EmptySubtitle"] = "Adjust your scenario/register filters, try another keyword, or create a new phrase.";
         en["Phrases_SelectPromptHint"] = "Select a phrase from the left pane to inspect dialogue variations and listen.";
         en["Phrases_AddToReviewQueue"] = "Queue Review";
-        en["Phrases_PlayFullDialogue"] = "Play Full Dialogue";
+        en["Phrases_PlayFullDialogue"] = "Play Dialogue";
         en["Phrases_DialogueExchangeHeader"] = "Dialogue Exchange Flow";
         en["Phrases_SpeakerAPrompt"] = "SPEAKER A — PROMPT / SITUATION";
         en["Phrases_SpeakerBResponse"] = "SPEAKER B — MODEL RESPONSE";
