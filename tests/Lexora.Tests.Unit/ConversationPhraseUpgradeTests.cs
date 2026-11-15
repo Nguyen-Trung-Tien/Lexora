@@ -288,4 +288,35 @@ public class ConversationPhraseUpgradeTests
         dto.EaseFactor.Should().BeGreaterThanOrEqualTo(1.3);
         _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public void ConversationPhraseDto_KeyPhraseTokens_ShouldParseTokensCleanly()
+    {
+        // Arrange
+        var dto = new ConversationPhraseDto
+        {
+            KeyPhrases = "on the same page; touch base, circle back \n align on"
+        };
+
+        // Act & Assert
+        dto.HasKeyPhrases.Should().BeTrue();
+        dto.KeyPhraseTokens.Should().BeEquivalentTo(new[] { "on the same page", "touch base", "circle back", "align on" });
+    }
+
+    [Fact]
+    public void ConversationPhraseDto_Variations_ShouldReflectFlagsAccurately()
+    {
+        // Arrange & Act
+        var dto = new ConversationPhraseDto
+        {
+            FormalVariation = "Could you please elaborate?",
+            CasualVariation = "Can you explain more?"
+        };
+
+        // Assert
+        dto.HasFormalVariation.Should().BeTrue();
+        dto.HasCasualVariation.Should().BeTrue();
+        dto.HasVariations.Should().BeTrue();
+        dto.HasBothVariations.Should().BeTrue();
+    }
 }

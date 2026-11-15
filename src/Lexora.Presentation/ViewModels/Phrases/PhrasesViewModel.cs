@@ -49,6 +49,7 @@ public partial class PhrasesViewModel(
     public partial string StatusMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatusSeverity))]
     public partial bool IsErrorStatus { get; set; }
 
     [ObservableProperty]
@@ -89,6 +90,9 @@ public partial class PhrasesViewModel(
     public bool HasSelectedPhrase => SelectedPhrase is not null;
     public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
     public bool HasNoPhrases => Phrases.Count == 0 && !IsLoading;
+    public Microsoft.UI.Xaml.Controls.InfoBarSeverity StatusSeverity => IsErrorStatus
+        ? Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error
+        : Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational;
     public string SelectedAccentCode => SelectedAccentIndex == 1 ? "uk" : "us";
     public double SelectedPlaybackRate => SelectedRateIndex switch
     {
@@ -168,6 +172,63 @@ public partial class PhrasesViewModel(
         }
 
         await ToggleOrPlayAudioAsync(phrase, isPrompt: false, phrase.SampleResponse);
+    }
+
+    [RelayCommand]
+    public async Task PlayFullConversationAsync(ConversationPhraseDto? phrase)
+    {
+        if (phrase is null || string.IsNullOrWhiteSpace(phrase.PromptSentence) || string.IsNullOrWhiteSpace(phrase.SampleResponse))
+        {
+            return;
+        }
+
+        if (phrase.IsAnyAudioPlaying)
+        {
+            StopAudio();
+            return;
+        }
+
+        int token = Interlocked.Increment(ref _audioRequestToken);
+        CancelAudioIndicatorCts();
+        ClearAllPlayingIndicators();
+
+        var cts = new CancellationTokenSource();
+        _audioIndicatorCts = cts;
+
+        try
+        {
+            // 1. Play Speaker A Prompt
+            phrase.IsPlayingPrompt = true;
+            await audioService.PlayPronunciationAsync(phrase.PromptSentence, SelectedAccentCode, SelectedPlaybackRate);
+            int promptMs = Math.Clamp((int)(phrase.PromptSentence.Length * 62 / SelectedPlaybackRate) + 650, 1100, 15000);
+            await Task.Delay(promptMs, cts.Token);
+
+            phrase.IsPlayingPrompt = false;
+
+            // 2. Natural dialogue pause between speakers
+            await Task.Delay(600, cts.Token);
+
+            // 3. Play Speaker B Response
+            phrase.IsPlayingResponse = true;
+            await audioService.PlayPronunciationAsync(phrase.SampleResponse, SelectedAccentCode, SelectedPlaybackRate);
+            int responseMs = Math.Clamp((int)(phrase.SampleResponse.Length * 62 / SelectedPlaybackRate) + 650, 1100, 15000);
+            await Task.Delay(responseMs, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"{localizationService.GetString("Phrases_ErrorAudio")}: {ex.Message}", isError: true);
+        }
+        finally
+        {
+            if (token == Volatile.Read(ref _audioRequestToken))
+            {
+                phrase.IsPlayingPrompt = false;
+                phrase.IsPlayingResponse = false;
+            }
+        }
     }
 
     [RelayCommand]

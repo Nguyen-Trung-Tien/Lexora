@@ -40,6 +40,16 @@ public sealed partial class PhrasesPage : Page
         Loc = localizationService;
         InitializeComponent();
         DataContext = ViewModel;
+
+        ViewModel.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName is nameof(PhrasesViewModel.QuickFilterIndex)
+                or nameof(PhrasesViewModel.OnlyFavorites)
+                or nameof(PhrasesViewModel.OnlyDueForReview))
+            {
+                UpdateFilterPillStyles();
+            }
+        };
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -161,6 +171,55 @@ public sealed partial class PhrasesPage : Page
         {
             // Ignore when animation could not attach on initial transition
         }
+    }
+
+    private void OnFilterAllClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SelectFilterAll();
+        UpdateFilterPillStyles();
+    }
+
+    private void OnFilterFavoritesClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SelectFilterFavorites();
+        UpdateFilterPillStyles();
+    }
+
+    private void OnFilterDueClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SelectFilterDue();
+        UpdateFilterPillStyles();
+    }
+
+    private void UpdateFilterPillStyles()
+    {
+        var accentStyle = (Style)App.Current.Resources["AccentButtonStyle"];
+        var defaultStyle = (Style)App.Current.Resources["DefaultButtonStyle"];
+
+        BtnFilterAll.Style = ViewModel.QuickFilterIndex == 0 ? accentStyle : defaultStyle;
+        BtnFilterFavorites.Style = ViewModel.QuickFilterIndex == 1 ? accentStyle : defaultStyle;
+        BtnFilterDue.Style = ViewModel.QuickFilterIndex == 2 ? accentStyle : defaultStyle;
+    }
+
+    private async void OnDetailPlayFullConversationClick(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedPhrase is not null)
+        {
+            await ViewModel.PlayFullConversationCommand.ExecuteAsync(ViewModel.SelectedPhrase);
+        }
+    }
+
+    private async void OnDetailToggleFavoriteClick(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedPhrase is not null)
+        {
+            await ViewModel.ToggleFavoriteAsync(ViewModel.SelectedPhrase);
+        }
+    }
+
+    private void OnStopAudioClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.StopAudio();
     }
 
     private async void OnCardPlayPromptClick(object sender, RoutedEventArgs e)

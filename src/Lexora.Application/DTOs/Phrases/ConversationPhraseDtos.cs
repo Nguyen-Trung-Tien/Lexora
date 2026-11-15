@@ -97,6 +97,7 @@ public class ConversationPhraseDto : INotifyPropertyChanged
             if (SetField(ref _keyPhrases, value))
             {
                 OnPropertyChanged(nameof(HasKeyPhrases));
+                OnPropertyChanged(nameof(KeyPhraseTokens));
             }
         }
     }
@@ -228,9 +229,16 @@ public class ConversationPhraseDto : INotifyPropertyChanged
     public bool HasContextTag => !string.IsNullOrWhiteSpace(ContextTag);
     public bool HasAdditionalSuggestions => !string.IsNullOrWhiteSpace(AdditionalSuggestions);
     public bool HasKeyPhrases => !string.IsNullOrWhiteSpace(KeyPhrases);
+    public IReadOnlyList<string> KeyPhraseTokens => string.IsNullOrWhiteSpace(KeyPhrases)
+        ? []
+        : KeyPhrases.Split([';', ',', '\n', '\r'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     public bool HasFormalVariation => !string.IsNullOrWhiteSpace(FormalVariation);
     public bool HasCasualVariation => !string.IsNullOrWhiteSpace(CasualVariation);
     public bool HasVariations => HasFormalVariation || HasCasualVariation;
+    public bool HasBothVariations => HasFormalVariation && HasCasualVariation;
     public bool HasCommonMistakesVi => !string.IsNullOrWhiteSpace(CommonMistakesVi);
     public bool HasExamTarget => ExamTarget.HasValue;
     public string RegisterLabel => Register.ToString();

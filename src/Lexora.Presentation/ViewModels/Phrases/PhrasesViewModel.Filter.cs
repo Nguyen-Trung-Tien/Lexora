@@ -20,13 +20,33 @@ public partial class PhrasesViewModel
     public partial int SelectedExamTargetIndex { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     public partial bool OnlyFavorites { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     public partial bool OnlyDueForReview { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     public partial string SearchQuery { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFilterAllSelected))]
+    [NotifyPropertyChangedFor(nameof(IsFilterFavoritesSelected))]
+    [NotifyPropertyChangedFor(nameof(IsFilterDueSelected))]
+    public partial int QuickFilterIndex { get; set; } = 0;
+
+    public bool IsFilterAllSelected => !OnlyFavorites && !OnlyDueForReview;
+    public bool IsFilterFavoritesSelected => OnlyFavorites;
+    public bool IsFilterDueSelected => OnlyDueForReview;
+    public bool HasActiveFilters => !string.IsNullOrWhiteSpace(SearchQuery)
+        || !string.Equals(SelectedCategory, "All", StringComparison.OrdinalIgnoreCase)
+        || SelectedCefrIndex > 0
+        || SelectedRegisterIndex > 0
+        || SelectedExamTargetIndex > 0
+        || OnlyFavorites
+        || OnlyDueForReview;
 
     partial void OnSelectedCategoryChanged(string value)
     {
@@ -138,6 +158,63 @@ public partial class PhrasesViewModel
     }
 
     [RelayCommand]
+    public void SelectFilterAll()
+    {
+        if (!OnlyFavorites && !OnlyDueForReview && QuickFilterIndex == 0) return;
+        _suppressFilterReload = true;
+        try
+        {
+            OnlyFavorites = false;
+            OnlyDueForReview = false;
+            QuickFilterIndex = 0;
+        }
+        finally
+        {
+            _suppressFilterReload = false;
+        }
+        NotifyFilterPillProperties();
+        _ = RefreshPhrasesAsync(resetPage: true);
+    }
+
+    [RelayCommand]
+    public void SelectFilterFavorites()
+    {
+        if (OnlyFavorites && !OnlyDueForReview && QuickFilterIndex == 1) return;
+        _suppressFilterReload = true;
+        try
+        {
+            OnlyFavorites = true;
+            OnlyDueForReview = false;
+            QuickFilterIndex = 1;
+        }
+        finally
+        {
+            _suppressFilterReload = false;
+        }
+        NotifyFilterPillProperties();
+        _ = RefreshPhrasesAsync(resetPage: true);
+    }
+
+    [RelayCommand]
+    public void SelectFilterDue()
+    {
+        if (!OnlyFavorites && OnlyDueForReview && QuickFilterIndex == 2) return;
+        _suppressFilterReload = true;
+        try
+        {
+            OnlyFavorites = false;
+            OnlyDueForReview = true;
+            QuickFilterIndex = 2;
+        }
+        finally
+        {
+            _suppressFilterReload = false;
+        }
+        NotifyFilterPillProperties();
+        _ = RefreshPhrasesAsync(resetPage: true);
+    }
+
+    [RelayCommand]
     public async Task ResetFiltersAsync()
     {
         _suppressFilterReload = true;
@@ -149,6 +226,7 @@ public partial class PhrasesViewModel
             SelectedExamTargetIndex = 0;
             OnlyFavorites = false;
             OnlyDueForReview = false;
+            QuickFilterIndex = 0;
             SearchQuery = string.Empty;
         }
         finally
@@ -156,7 +234,16 @@ public partial class PhrasesViewModel
             _suppressFilterReload = false;
         }
 
+        NotifyFilterPillProperties();
         await RefreshPhrasesAsync(resetPage: true);
+    }
+
+    private void NotifyFilterPillProperties()
+    {
+        OnPropertyChanged(nameof(IsFilterAllSelected));
+        OnPropertyChanged(nameof(IsFilterFavoritesSelected));
+        OnPropertyChanged(nameof(IsFilterDueSelected));
+        OnPropertyChanged(nameof(HasActiveFilters));
     }
 
     private ConversationPhraseFilterDto BuildCurrentFilter()

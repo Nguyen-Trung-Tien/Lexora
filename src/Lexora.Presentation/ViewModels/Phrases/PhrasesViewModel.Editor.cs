@@ -105,6 +105,15 @@ public partial class PhrasesViewModel
     }
 
     [RelayCommand]
+    public async Task ToggleSelectedPhraseFavoriteAsync()
+    {
+        if (SelectedPhrase is not null)
+        {
+            await ToggleFavoriteAsync(SelectedPhrase);
+        }
+    }
+
+    [RelayCommand]
     public async Task DeletePhraseAsync(ConversationPhraseDto? phrase)
     {
         if (phrase is null || IsSubmitting) return;
