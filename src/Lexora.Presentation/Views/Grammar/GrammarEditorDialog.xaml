@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     DefaultButton="Primary"
-    CornerRadius="8"
+    UseLayoutRounding="True"
+    CornerRadius="{ThemeResource OverlayCornerRadius}"
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
@@ -17,7 +18,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
-                <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="24" Height="24" VerticalAlignment="Center" />
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE8D2;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
             </Grid>
         </DataTemplate>
@@ -26,10 +27,10 @@
     <ScrollViewer MaxHeight="500" HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,4,12,8">
         <StackPanel Spacing="16">
             <!-- Validation Error InfoBar -->
-            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" />
+            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" CornerRadius="{ThemeResource OverlayCornerRadius}" />
 
             <!-- Card 1: Title & Structure -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                 <StackPanel Spacing="14">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE943;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -40,12 +41,14 @@
                     <TextBox x:Name="TitleTextBox"
                              Header="{x:Bind Loc.GetString('GrammarEditor_HeaderTitle')}"
                              PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderTitle')}"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
                              FontWeight="SemiBold"
                              TextWrapping="Wrap" />
                     
                     <!-- Structure Formula (Full width for clear, uninterrupted Cascadia Code syntax display) -->
                     <TextBox x:Name="StructureTextBox"
                              PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderStructure')}"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
                              FontFamily="Cascadia Code, Consolas"
                              TextWrapping="Wrap"
                              MinHeight="44">
@@ -59,6 +62,7 @@
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                         <ComboBox x:Name="LevelComboBox"
                                   Header="{x:Bind Loc.GetString('GrammarEditor_HeaderLevel')}"
+                                  CornerRadius="{ThemeResource ControlCornerRadius}"
                                   HorizontalAlignment="Stretch">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -68,6 +72,7 @@
                         </ComboBox>
                         <ComboBox Grid.Column="1" x:Name="ExamComboBox"
                                   Header="{x:Bind Loc.GetString('GrammarEditor_HeaderExam')}"
+                                  CornerRadius="{ThemeResource ControlCornerRadius}"
                                   HorizontalAlignment="Stretch">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -77,13 +82,14 @@
                         </ComboBox>
                         <TextBox Grid.Column="2" x:Name="TopicTextBox"
                                  Header="{x:Bind Loc.GetString('GrammarEditor_HeaderTopic')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderTopic')}" />
                     </Grid>
                 </StackPanel>
             </Border>
 
             <!-- Card 2: Explanations -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                 <StackPanel Spacing="14">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE762;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -93,17 +99,19 @@
                     <TextBox x:Name="ExplanationViTextBox"
                              Header="{x:Bind Loc.GetString('GrammarEditor_HeaderExplanationVi')}"
                              PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderExplanationVi')}"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
                              AcceptsReturn="True" TextWrapping="Wrap" MinHeight="75" />
 
                     <TextBox x:Name="ExplanationEnTextBox"
                              Header="{x:Bind Loc.GetString('GrammarEditor_HeaderExplanationEn')}"
                              PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderExplanationEn')}"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
                              AcceptsReturn="True" TextWrapping="Wrap" MinHeight="55" />
                 </StackPanel>
             </Border>
 
             <!-- Card 3: Common Mistakes -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                 <StackPanel Spacing="10">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE7BA;" FontSize="15" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
@@ -112,6 +120,7 @@
                     <TextBox x:Name="CommonMistakesTextBox"
                              Header="{x:Bind Loc.GetString('GrammarEditor_HeaderMistakes')}"
                              PlaceholderText="{x:Bind Loc.GetString('GrammarEditor_PlaceholderMistakes')}"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
                              AcceptsReturn="True" TextWrapping="Wrap" MinHeight="65" />
                 </StackPanel>
             </Border>
@@ -126,7 +135,7 @@
                         </StackPanel>
                         <TextBlock Text="{x:Bind Loc.GetString('GrammarEditor_SectionExamplesDesc')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                     </StackPanel>
-                    <Button Grid.Column="1" Click="AddExampleButton_Click" Style="{ThemeResource AccentButtonStyle}" CornerRadius="6" VerticalAlignment="Center" Padding="14,6">
+                    <Button Grid.Column="1" Click="AddExampleButton_Click" Style="{ThemeResource AccentButtonStyle}" CornerRadius="{ThemeResource ControlCornerRadius}" VerticalAlignment="Center" Padding="14,6">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE710;" FontSize="12" />
                             <TextBlock Text="{x:Bind Loc.GetString('GrammarEditor_BtnAddExample')}" />
@@ -139,12 +148,12 @@
                         <DataTemplate>
                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14" Margin="0,0,0,10">
                                 <StackPanel Spacing="10">
                                     <!-- Example Header Bar with Badge and Remove button -->
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
-                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding ExampleBadge}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
+                                        <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ExampleBadge}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" FontSize="11" FontWeight="SemiBold" />
                                         </Border>
 
                                         <Border Grid.Column="1" />
@@ -154,7 +163,7 @@
                                                 ToolTipService.ToolTip="{Binding TooltipRemoveExample}"
                                                 Click="RemoveExampleButton_Click"
                                                 IsEnabled="{Binding CanRemove}"
-                                                Padding="8,6" CornerRadius="6">
+                                                Padding="8,6" CornerRadius="{ThemeResource ControlCornerRadius}">
                                             <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                         </Button>
                                     </Grid>
@@ -163,6 +172,7 @@
                                     <TextBox Header="{Binding HeaderSentenceEn}"
                                              Text="{Binding SentenceEn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              PlaceholderText="{Binding PlaceholderSentenceEn}"
+                                             CornerRadius="{ThemeResource ControlCornerRadius}"
                                              TextWrapping="Wrap"
                                              AcceptsReturn="True"
                                              MinHeight="40" />
@@ -171,6 +181,7 @@
                                     <TextBox Header="{Binding HeaderSentenceVi}"
                                              Text="{Binding SentenceVi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              PlaceholderText="{Binding PlaceholderSentenceVi}"
+                                             CornerRadius="{ThemeResource ControlCornerRadius}"
                                              TextWrapping="Wrap"
                                              AcceptsReturn="True"
                                              MinHeight="40" />
@@ -179,6 +190,7 @@
                                     <TextBox Header="{Binding HeaderNote}"
                                              Text="{Binding Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              PlaceholderText="{Binding PlaceholderNote}"
+                                             CornerRadius="{ThemeResource ControlCornerRadius}"
                                              TextWrapping="Wrap"
                                              AcceptsReturn="True"
                                              MinHeight="40" />

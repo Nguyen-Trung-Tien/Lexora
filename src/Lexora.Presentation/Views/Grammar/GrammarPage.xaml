@@ -9,7 +9,7 @@
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
-    mc:Ignorable="d">
+    mc:Ignorable="d" UseLayoutRounding="True">
 
     <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
         
@@ -45,7 +45,7 @@
                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <!-- Add Rule Primary Button -->
                         <Button Click="AddRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipAdd')}"
-                                Style="{ThemeResource AccentButtonStyle}" Padding="10,5" CornerRadius="8">
+                                Style="{ThemeResource AccentButtonStyle}" Padding="10,5" CornerRadius="{ThemeResource ControlCornerRadius}">
                             <StackPanel Orientation="Horizontal" Spacing="5">
                                 <FontIcon Glyph="&#xE710;" FontSize="12.5" />
                                 <TextBlock Text="{x:Bind Loc.GetString('Grammar_AddRule')}" FontWeight="Bold" FontSize="12" />
@@ -54,7 +54,7 @@
 
                         <!-- Practice Secondary Button -->
                         <Button Click="PracticeButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipPractice')}"
-                                Padding="10,5" CornerRadius="8">
+                                Padding="10,5" CornerRadius="{ThemeResource ControlCornerRadius}">
                             <StackPanel Orientation="Horizontal" Spacing="5">
                                 <FontIcon Glyph="&#xE768;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                 <TextBlock Text="{x:Bind Loc.GetString('Grammar_Practice')}" FontWeight="SemiBold" FontSize="12" />
@@ -64,7 +64,7 @@
                         <!-- Multi-Select Toggle Button -->
                         <Button x:Name="BtnSelectMode"
                                 Click="BtnSelectMode_Click"
-                                CornerRadius="8" Padding="9,5"
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
                             <StackPanel Orientation="Horizontal" Spacing="5">
                                 <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="12.5" />
@@ -73,7 +73,7 @@
                         </Button>
 
                         <!-- Import / Export Dropdown -->
-                        <DropDownButton Padding="9,5" CornerRadius="8"
+                        <DropDownButton Padding="9,5" CornerRadius="{ThemeResource ControlCornerRadius}"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_ImportExport')}">
                             <StackPanel Orientation="Horizontal" Spacing="5">
                                 <FontIcon Glyph="&#xE8B5;" FontSize="12.5" />
@@ -138,7 +138,7 @@
             <Border Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                     Background="{ThemeResource LayerFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="10,4">
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,4">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Disabled"
@@ -190,7 +190,7 @@
 
                             <!-- Reset Filters Button -->
                             <Button Click="ResetFiltersButton_Click"
-                                    Padding="8,4" CornerRadius="6" Height="32"
+                                    Padding="8,4" CornerRadius="{ThemeResource ControlCornerRadius}" Height="32"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_ResetFilters')}">
                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                     <FontIcon Glyph="&#xE894;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -219,7 +219,7 @@
         <Border Visibility="{x:Bind ViewModel.HasTypoSuggestion, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                 Background="{ThemeResource LayerFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
-                BorderThickness="1" CornerRadius="8" Padding="14,6">
+                BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14,6">
             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <FontIcon Glyph="&#xE946;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
                 <TextBlock Text="{x:Bind Loc.GetString('Vocab_DidYouMean')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
@@ -241,7 +241,7 @@
             <!-- Left: Rules List -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8">
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}">
                 <Grid RowDefinitions="Auto,Auto,*,Auto">
                     <Grid Padding="16,14" ColumnDefinitions="*,Auto" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                         <TextBlock Text="{x:Bind Loc.GetString('Grammar_Structures')}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" />
@@ -259,13 +259,13 @@
                             BorderThickness="0,0,0,1" Padding="8,8">
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="6" RowSpacing="6">
                             <!-- Row 0: Select All & Deselect All -->
-                            <Button Grid.Row="0" Grid.Column="0" Click="SelectAllRules_Click" HorizontalAlignment="Stretch" CornerRadius="6" Padding="6,5" FontSize="11.5">
+                            <Button Grid.Row="0" Grid.Column="0" Click="SelectAllRules_Click" HorizontalAlignment="Stretch" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="6,5" FontSize="11.5">
                                 <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE762;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     <TextBlock Text="{x:Bind Loc.GetString('Action_SelectAll')}" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Button>
-                            <Button Grid.Row="0" Grid.Column="1" Click="DeselectAllRules_Click" HorizontalAlignment="Stretch" CornerRadius="6" Padding="6,5" FontSize="11.5">
+                            <Button Grid.Row="0" Grid.Column="1" Click="DeselectAllRules_Click" HorizontalAlignment="Stretch" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="6,5" FontSize="11.5">
                                 <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE894;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind Loc.GetString('Action_DeselectAll')}" TextTrimming="CharacterEllipsis" />
@@ -278,7 +278,7 @@
                                     IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
                                     Style="{ThemeResource LexoraDangerButtonStyle}"
                                     HorizontalAlignment="Stretch"
-                                    CornerRadius="6" Padding="10,5" FontSize="11.5" FontWeight="Bold">
+                                    CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5" FontSize="11.5" FontWeight="Bold">
                                 <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE74D;" FontSize="11" />
                                     <TextBlock x:Name="TextDeleteSelected" Text="{x:Bind Loc.GetString('Action_Delete')}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
@@ -376,13 +376,13 @@
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">
                                 <Button Command="{x:Bind ViewModel.FirstPageCommand}"
                                         IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}"
-                                        Padding="0" Height="28" Width="28" CornerRadius="6"
+                                        Padding="0" Height="28" Width="28" CornerRadius="{ThemeResource ControlCornerRadius}"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_FirstPage')}">
                                     <FontIcon Glyph="&#xE892;" FontSize="11" />
                                 </Button>
                                 <Button Command="{x:Bind ViewModel.PreviousPageCommand}"
                                         IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}"
-                                        Padding="0" Height="28" Width="28" CornerRadius="6"
+                                        Padding="0" Height="28" Width="28" CornerRadius="{ThemeResource ControlCornerRadius}"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PrevPage')}">
                                     <FontIcon Glyph="&#xE76B;" FontSize="11" />
                                 </Button>
@@ -398,13 +398,13 @@
 
                                 <Button Command="{x:Bind ViewModel.NextPageCommand}"
                                         IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}"
-                                        Padding="0" Height="28" Width="28" CornerRadius="6"
+                                        Padding="0" Height="28" Width="28" CornerRadius="{ThemeResource ControlCornerRadius}"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_NextPage')}">
                                     <FontIcon Glyph="&#xE76C;" FontSize="11" />
                                 </Button>
                                 <Button Command="{x:Bind ViewModel.LastPageCommand}"
                                         IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}"
-                                        Padding="0" Height="28" Width="28" CornerRadius="6"
+                                        Padding="0" Height="28" Width="28" CornerRadius="{ThemeResource ControlCornerRadius}"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_LastPage')}">
                                     <FontIcon Glyph="&#xE893;" FontSize="11" />
                                 </Button>
@@ -417,14 +417,14 @@
             <!-- Right: Rule Detail (Modern, Non-Overlapping Layout) -->
             <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="20">
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <Grid>
                         <!-- Detail Empty State -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14" Padding="40"
                                     Visibility="{x:Bind ViewModel.SelectedRule, Mode=OneWay, Converter={StaticResource InverseNullToVisibilityConverter}}">
                             <Border Width="64" Height="64" CornerRadius="18" Background="{ThemeResource LayerFillColorDefaultBrush}" Padding="8" HorizontalAlignment="Center">
-                                <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
+                                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE8D2;" FontSize="32" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <TextBlock Text="{x:Bind Loc.GetString('Grammar_SelectPromptTitle')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />
                             <TextBlock Text="{x:Bind Loc.GetString('Grammar_SelectPromptSubtitle')}"
@@ -444,19 +444,19 @@
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
-                                    <Button Click="MoveToStorageButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_BtnMoveToStorage')}" Padding="10,6" CornerRadius="8">
+                                    <Button Click="MoveToStorageButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Storage_BtnMoveToStorage')}" Padding="10,6" CornerRadius="{ThemeResource ControlCornerRadius}">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE81C;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Nav_LearningStorage')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Click="EditRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipEdit')}" Padding="10,6" CornerRadius="8">
+                                    <Button Click="EditRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipEdit')}" Padding="10,6" CornerRadius="{ThemeResource ControlCornerRadius}">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE70F;" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Action_Edit')}" FontSize="12" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Click="DeleteRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipDelete')}" Margin="4,0,0,0" Padding="10,6" CornerRadius="8">
+                                    <Button Click="DeleteRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipDelete')}" Margin="4,0,0,0" Padding="10,6" CornerRadius="{ThemeResource ControlCornerRadius}">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE74D;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Action_Delete')}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="12" />
@@ -490,7 +490,7 @@
                                                    TextWrapping="Wrap" />
                                     </StackPanel>
                                     <Button x:Name="BtnCopyStructure" Grid.Column="1" Click="CopyStructureButton_Click" VerticalAlignment="Center"
-                                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Copy')}" CornerRadius="8" Padding="10,6">
+                                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Copy')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon x:Name="IconCopyStructure" Glyph="&#xE8C8;" FontSize="12" />
                                             <TextBlock x:Name="TextCopyStructure" Text="{x:Bind Loc.GetString('Action_Copy')}" FontSize="12" FontWeight="SemiBold" />
@@ -507,7 +507,7 @@
                             </StackPanel>
 
                             <!-- Common Mistakes / Exam Traps -->
-                            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1.5" CornerRadius="12" Padding="16"
+                            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="12" Padding="16"
                                     Visibility="{x:Bind ViewModel.SelectedRule.CommonMistakes, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -667,7 +667,7 @@
                             <ProgressBar Grid.Column="1" Value="{x:Bind ViewModel.PracticeProgressPercent, Mode=OneWay}" Maximum="100" Height="8" CornerRadius="4" VerticalAlignment="Center" Margin="16,0" />
 
                             <!-- Right Exit Button -->
-                            <Button Grid.Column="2" Click="ExitPracticeButton_Click" CornerRadius="8" Padding="14,8" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_ExitPractice')}">
+                            <Button Grid.Column="2" Click="ExitPracticeButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="14,8" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_ExitPractice')}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE711;" FontSize="12" />
                                     <TextBlock Text="{x:Bind Loc.GetString('Grammar_ExitPractice')}" FontWeight="SemiBold" FontSize="13" />
@@ -678,7 +678,7 @@
                         <!-- Main Question Card -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="8" Padding="20">
+                                BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                             <StackPanel Spacing="20">
                                 
                                 <!-- Question Meta & Context Clue (Fully Wrapping, Zero Clipping) -->
@@ -691,7 +691,7 @@
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="8" Padding="12,8"
+                                            CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8"
                                             HorizontalAlignment="Stretch"
                                             Visibility="{x:Bind ViewModel.CurrentPracticeQuestion.SubPrompt, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
@@ -788,7 +788,7 @@
                         <!-- Hero Score Banner -->
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="8" Padding="20">
+                                BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
                                 <!-- Score Circle -->
                                 <Border Width="96" Height="96" CornerRadius="48"
@@ -810,13 +810,13 @@
 
                                 <!-- Top Actions -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                    <Button Click="PracticeButton_Click" Padding="16,10" CornerRadius="8">
+                                    <Button Click="PracticeButton_Click" Padding="16,10" CornerRadius="{ThemeResource ControlCornerRadius}">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE72C;" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Grammar_PracticeAgain')}" FontWeight="SemiBold" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Style="{ThemeResource AccentButtonStyle}" Click="ExitPracticeButton_Click" Padding="18,10" CornerRadius="8">
+                                    <Button Style="{ThemeResource AccentButtonStyle}" Click="ExitPracticeButton_Click" Padding="18,10" CornerRadius="{ThemeResource ControlCornerRadius}">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE8D2;" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Grammar_BackToRules')}" FontWeight="Bold" />
@@ -828,7 +828,7 @@
 
                         <!-- 3 Metric Cards Grid -->
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
-                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE9D9;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -840,7 +840,7 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
@@ -849,7 +849,7 @@
                                     <TextBlock Text="{x:Bind ViewModel.PracticeResult.CorrectCount, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                            <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
@@ -868,7 +868,7 @@
                                 <DataTemplate x:DataType="dto:GrammarQuizQuestionDto">
                                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16" Margin="0,0,0,12">
                                         <StackPanel Spacing="10">
                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
@@ -883,13 +883,13 @@
                                             </Grid>
 
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="16" Margin="0,4,0,0">
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="12,8">
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
                                                     <StackPanel Spacing="2">
                                                         <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Grammar_YourAnswer')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                         <TextBlock Text="{x:Bind UserAnswer}" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="12,8">
+                                                <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
                                                     <StackPanel Spacing="2">
                                                         <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Grammar_CorrectAnswer')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                         <TextBlock Text="{x:Bind CorrectAnswer}" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
@@ -897,7 +897,7 @@
                                                 </Border>
                                             </Grid>
 
-                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12,8">
+                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
                                                 <TextBlock Text="{x:Bind Explanation}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                             </Border>
                                         </StackPanel>

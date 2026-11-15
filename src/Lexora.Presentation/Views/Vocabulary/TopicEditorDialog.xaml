@@ -8,7 +8,8 @@
     xmlns:local="using:Lexora.Presentation.Views.Vocabulary"
     DefaultButton="Primary"
     mc:Ignorable="d"
-    CornerRadius="8">
+    UseLayoutRounding="True"
+    CornerRadius="{ThemeResource OverlayCornerRadius}">
 
 
     <ContentDialog.Resources>
@@ -19,7 +20,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
-                <Border Width="32" Height="32" CornerRadius="8"
+                <Border Width="32" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1">
@@ -35,23 +36,25 @@
     <ScrollViewer MaxHeight="480" HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,4,12,8">
         <StackPanel Spacing="16">
             <!-- Validation Error InfoBar -->
-            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" />
+            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" CornerRadius="{ThemeResource OverlayCornerRadius}" />
 
             <!-- Topic Details Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16">
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                 <StackPanel Spacing="14">
                     <!-- Topic Name -->
                     <TextBox x:Name="NameTextBox"
                              Header="{x:Bind Loc.GetString('TopicEditor_HeaderName')}"
                              PlaceholderText="{x:Bind Loc.GetString('TopicEditor_PlaceholderName')}"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
                              FontWeight="SemiBold" />
 
                     <!-- Topic Description -->
                     <TextBox x:Name="DescriptionTextBox"
                              Header="{x:Bind Loc.GetString('TopicEditor_HeaderDesc')}"
                              PlaceholderText="{x:Bind Loc.GetString('TopicEditor_PlaceholderDesc')}"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
                              TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72" MaxHeight="140" />
 
                     <!-- Icon Selector -->
@@ -70,7 +73,7 @@
                             <GridView.ItemTemplate>
                                 <DataTemplate x:DataType="local:TopicIconOption">
                                     <Grid Width="46" Height="46" ToolTipService.ToolTip="{x:Bind Name}">
-                                        <Border CornerRadius="8"
+                                        <Border CornerRadius="{ThemeResource ControlCornerRadius}"
                                                 BorderThickness="{x:Bind BorderThickness, Mode=OneWay}"
                                                 BorderBrush="{x:Bind BorderBrush, Mode=OneWay}"
                                                 Background="{x:Bind BackgroundBrush, Mode=OneWay}">
@@ -83,7 +86,7 @@
                                                 Width="16" Height="16" CornerRadius="8"
                                                 Background="{ThemeResource AccentFillColorDefaultBrush}"
                                                 BorderBrush="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                                BorderThickness="1.5"
+                                                BorderThickness="1"
                                                 HorizontalAlignment="Right" VerticalAlignment="Top"
                                                 Margin="0,-2,-2,0">
                                             <FontIcon Glyph="&#xE73E;" FontSize="9"

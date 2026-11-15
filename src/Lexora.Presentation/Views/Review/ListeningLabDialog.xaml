@@ -13,7 +13,7 @@
     DefaultButton="Primary"
     HorizontalAlignment="Center"
     VerticalAlignment="Center"
-    CornerRadius="8">
+    UseLayoutRounding="True" CornerRadius="{ThemeResource OverlayCornerRadius}">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">840</x:Double>
@@ -23,7 +23,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Border Width="32" Height="32" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                <Border Width="32" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
                     <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="18" VerticalAlignment="Center" />
@@ -34,28 +34,28 @@
     <Grid MaxWidth="820" HorizontalAlignment="Stretch">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="500" Padding="0,4,8,8">
             <StackPanel Spacing="16" Margin="0,4,0,0">
-                <InfoBar x:Name="DialogInfoBar" IsOpen="False" IsClosable="True" HorizontalAlignment="Stretch" Margin="0,0,0,4" />
+                <InfoBar x:Name="DialogInfoBar" IsOpen="False" IsClosable="True" HorizontalAlignment="Stretch" Margin="0,0,0,4"  CornerRadius="{ThemeResource OverlayCornerRadius}"/>
 
                 <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Subtitle')}"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            FontSize="13" TextWrapping="Wrap" />
 
                 <!-- Fluent 2 Modern Segmented Tab Bar -->
-                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="4" HorizontalAlignment="Center">
+                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="4" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Button x:Name="BtnTabDictation" Click="TabDictation_Click" CornerRadius="8" Padding="16,8">
+                        <Button x:Name="BtnTabDictation" Click="TabDictation_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="16,8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE767;" FontSize="13" />
                                 <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_TabDictation')}" FontWeight="SemiBold" FontSize="13" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnTabMinimalPairs" Click="TabMinimalPairs_Click" CornerRadius="8" Padding="16,8">
+                        <Button x:Name="BtnTabMinimalPairs" Click="TabMinimalPairs_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="16,8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE895;" FontSize="13" />
                                 <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_TabMinimalPairs')}" FontWeight="SemiBold" FontSize="13" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnTabAccentCompare" Click="TabAccentCompare_Click" CornerRadius="8" Padding="16,8">
+                        <Button x:Name="BtnTabAccentCompare" Click="TabAccentCompare_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="16,8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE787;" FontSize="13" />
                                 <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_TabAccentCompare')}" FontWeight="SemiBold" FontSize="13" />
@@ -71,11 +71,11 @@
                     <!-- Prompt Audio Card -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8" Padding="20">
+                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                         <StackPanel Spacing="16">
                             <Grid ColumnDefinitions="*,Auto">
                                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3">
+                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="8,3">
                                         <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_TabDictation')}"
                                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                                                    FontSize="11" FontWeight="Bold" />
@@ -99,14 +99,14 @@
 
                             <!-- Big Audio Play Buttons -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                <Button x:Name="BtnPlayUkAudio" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="6" Click="PlayUkAudio_Click">
+                                <Button x:Name="BtnPlayUkAudio" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="{ThemeResource ControlCornerRadius}" Click="PlayUkAudio_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_PlayUk')}" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Button>
 
-                                <Button x:Name="BtnPlayUsAudio" Grid.Column="1" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="6" Click="PlayUsAudio_Click">
+                                <Button x:Name="BtnPlayUsAudio" Grid.Column="1" HorizontalAlignment="Stretch" Padding="14,12" CornerRadius="{ThemeResource ControlCornerRadius}" Click="PlayUsAudio_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE767;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_PlayUs')}" FontWeight="SemiBold" />
@@ -117,14 +117,14 @@
                             <!-- Dictation Target Mode (Word vs Sentence) -->
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Button x:Name="BtnDictateWord" Style="{ThemeResource AccentButtonStyle}"
-                                        CornerRadius="6" Padding="12,4" Click="DictateWordMode_Click">
+                                        CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,4" Click="DictateWordMode_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE8D2;" FontSize="11" />
                                         <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ModeWord')}" FontSize="12" />
                                     </StackPanel>
                                 </Button>
                                 <Button x:Name="BtnDictateSentence" Style="{ThemeResource DefaultButtonStyle}"
-                                        CornerRadius="6" Padding="12,4" Click="DictateSentenceMode_Click">
+                                        CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,4" Click="DictateSentenceMode_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE8BD;" FontSize="11" />
                                         <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ModeSentence')}" FontSize="12" />
@@ -148,7 +148,7 @@
                             <Border x:Name="DictationResultPanel"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="8" Padding="16"
+                                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16"
                                     Visibility="Collapsed">
                                 <StackPanel Spacing="10">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
@@ -160,7 +160,7 @@
                                     </StackPanel>
 
                                     <!-- Character Diff Comparison -->
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="12,10">
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
                                         <StackPanel Spacing="6">
                                             <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_DiffTitle')}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             <RichTextBlock x:Name="DictationDiffViewer" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -170,7 +170,7 @@
                                     <!-- Word-by-Word Diff Comparison -->
                                     <Border x:Name="DictationWordDiffContainer"
                                             Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                            CornerRadius="8" Padding="12,10"
+                                            CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10"
                                             Visibility="Collapsed">
                                         <StackPanel Spacing="6">
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
@@ -188,7 +188,7 @@
                                     </Border>
 
                                     <!-- Revealed Term & Context -->
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="12,10">
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
                                         <StackPanel Spacing="6">
                                             <StackPanel Orientation="Horizontal" Spacing="12">
                                                 <TextBlock x:Name="DictationRevealedTerm" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -201,7 +201,7 @@
 
                                     <Button HorizontalAlignment="Right"
                                             Style="{ThemeResource AccentButtonStyle}"
-                                            CornerRadius="8"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}"
                                             Padding="16,6"
                                             Content="{x:Bind Loc.GetString('ListeningLab_NextWord')}"
                                             Click="NextDictation_Click" />
@@ -218,10 +218,10 @@
                     <!-- Challenge Header Card -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8" Padding="20">
+                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                         <StackPanel Spacing="16">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3">
+                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="8,3">
                                     <TextBlock Text="{x:Bind CurrentPair.PhonemePairLabel, Mode=OneWay}"
                                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                                                FontSize="12" FontWeight="Bold" />
@@ -235,7 +235,7 @@
                             <Button x:Name="BtnPlayPairPrompt"
                                     HorizontalAlignment="Stretch" Padding="20,16"
                                     Style="{ThemeResource AccentButtonStyle}"
-                                    CornerRadius="6" Click="PlayPairPrompt_Click">
+                                    CornerRadius="{ThemeResource ControlCornerRadius}" Click="PlayPairPrompt_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE767;" FontSize="18" />
                                     <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ListenPrompt')}" FontWeight="Bold" FontSize="14" />
@@ -247,7 +247,7 @@
                                 <!-- Option A Card -->
                                 <Button x:Name="BtnChoiceA"
                                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                        Padding="16,14" CornerRadius="6"
+                                        Padding="16,14" CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Click="ChoiceA_Click">
                                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                                         <TextBlock Text="{x:Bind CurrentPair.WordA, Mode=OneWay}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
@@ -259,7 +259,7 @@
                                 <!-- Option B Card -->
                                 <Button x:Name="BtnChoiceB" Grid.Column="1"
                                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                        Padding="16,14" CornerRadius="6"
+                                        Padding="16,14" CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Click="ChoiceB_Click">
                                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                                         <TextBlock Text="{x:Bind CurrentPair.WordB, Mode=OneWay}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
@@ -273,7 +273,7 @@
                             <Border x:Name="PairFeedbackPanel"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="8" Padding="16"
+                                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16"
                                     Visibility="Collapsed">
                                 <StackPanel Spacing="10">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -282,7 +282,7 @@
                                     </StackPanel>
 
                                     <!-- Articulatory Tip -->
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="12,8">
+                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
                                         <StackPanel Spacing="4">
                                             <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ArticulatoryTip')}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             <TextBlock Text="{x:Bind CurrentPair.Tip, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
@@ -291,7 +291,7 @@
 
                                     <Button HorizontalAlignment="Right"
                                             Style="{ThemeResource AccentButtonStyle}"
-                                            CornerRadius="8"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}"
                                             Padding="16,6"
                                             Content="{x:Bind Loc.GetString('ListeningLab_NextPair')}"
                                             Click="NextPair_Click" />
@@ -313,7 +313,7 @@
                             <DataTemplate x:DataType="dto:AccentComparisonItemDto">
                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,4">
+                                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14,10" Margin="0,4">
                                     <Grid ColumnDefinitions="140,*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
                                         <!-- Term & Meaning -->
                                         <StackPanel Spacing="2" VerticalAlignment="Center">
@@ -333,13 +333,13 @@
 
                                         <!-- Audio Play Buttons -->
                                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                            <Button Padding="8,6" CornerRadius="6" ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Vocab_PlayUkPronunciation')}" Click="PlayUkItem_Click" Tag="{x:Bind Term}">
+                                            <Button Padding="8,6" CornerRadius="{ThemeResource ControlCornerRadius}" ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Vocab_PlayUkPronunciation')}" Click="PlayUkItem_Click" Tag="{x:Bind Term}">
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                                     <FontIcon Glyph="&#xE767;" FontSize="12" />
                                                     <TextBlock Text="UK" FontSize="11" FontWeight="Bold" />
                                                 </StackPanel>
                                             </Button>
-                                            <Button Padding="8,6" CornerRadius="6" ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Vocab_PlayUsPronunciation')}" Click="PlayUsItem_Click" Tag="{x:Bind Term}">
+                                            <Button Padding="8,6" CornerRadius="{ThemeResource ControlCornerRadius}" ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Vocab_PlayUsPronunciation')}" Click="PlayUsItem_Click" Tag="{x:Bind Term}">
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                                     <FontIcon Glyph="&#xE767;" FontSize="12" />
                                                     <TextBlock Text="US" FontSize="11" FontWeight="Bold" />

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    UseLayoutRounding="True"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -320,7 +321,7 @@
 
         <!-- 3. Energy Ripple Shockwave Ring -->
         <Border x:Name="RippleRing" Width="180" Height="180" CornerRadius="90"
-                BorderThickness="1.5" BorderBrush="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                BorderThickness="1" BorderBrush="{ThemeResource AccentTextFillColorPrimaryBrush}"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 Opacity="0" IsHitTestVisible="False">
             <Border.RenderTransform>
@@ -361,7 +362,7 @@
                     Width="140" Height="140" CornerRadius="34"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1.5"
+                    BorderThickness="1"
                     Opacity="0"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Border.Shadow>
@@ -456,11 +457,11 @@
                 <!-- Platform / Edition Pill Badge -->
                 <Border
                     Margin="0,4,0,0"
-                    CornerRadius="11"
-                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    CornerRadius="12"
+                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="1"
-                    Padding="12,3"
+                    Padding="8,3"
                     HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <Ellipse Width="7" Height="7" Fill="{ThemeResource SystemFillColorSuccessBrush}" />
@@ -470,7 +471,7 @@
                             FontSize="10.5"
                             FontWeight="SemiBold"
                             CharacterSpacing="50"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                             VerticalAlignment="Center" />
                     </StackPanel>
                 </Border>
@@ -564,10 +565,10 @@
                 Visibility="Collapsed"
                 MaxWidth="420"
                 Padding="22"
-                CornerRadius="14"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
-                BorderThickness="1.5">
+                BorderThickness="1">
                 <Border.Shadow>
                     <ThemeShadow />
                 </Border.Shadow>
@@ -589,7 +590,7 @@
                     </StackPanel>
 
                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                            CornerRadius="8" Padding="12,10">
+                            CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
                         <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <TextBlock
                                 x:Name="ErrorDetailsTextBlock"
@@ -606,13 +607,13 @@
                             x:Name="RetryButton"
                             Content="Thử lại"
                             Style="{StaticResource AccentButtonStyle}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="18,8"
                             Click="RetryButton_Click" />
                         <Button
                             x:Name="ExitButton"
                             Content="Đóng ứng dụng"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="18,8"
                             Click="ExitButton_Click" />
                     </StackPanel>

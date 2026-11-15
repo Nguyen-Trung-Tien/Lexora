@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:dtos="using:Lexora.Application.DTOs"
     Background="Transparent"
-    NavigationCacheMode="Required">
+    NavigationCacheMode="Required" UseLayoutRounding="True">
 
     <Grid
         Padding="24,16,24,20"
@@ -81,7 +81,7 @@
                 <!-- Roleplay Practice Button -->
                 <Button
                     Click="OnStartRoleplayClick"
-                    CornerRadius="8"
+                    CornerRadius="{ThemeResource ControlCornerRadius}"
                     Padding="12,6"
                     Style="{StaticResource AccentButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -91,7 +91,7 @@
                 </Button>
 
                 <!-- Add Phrase Button -->
-                <Button Click="OnAddPhraseClick" CornerRadius="8" Padding="12,6">
+                <Button Click="OnAddPhraseClick" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon FontSize="14" Glyph="&#xE710;" />
                         <TextBlock Text="{x:Bind Loc.GetString('Phrases_AddButton')}" />
@@ -99,7 +99,7 @@
                 </Button>
 
                 <!-- Import / Export DropDown -->
-                <DropDownButton Content="{x:Bind Loc.GetString('Phrases_ImportExportButton')}" CornerRadius="8" Padding="10,6">
+                <DropDownButton Content="{x:Bind Loc.GetString('Phrases_ImportExportButton')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                     <DropDownButton.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <MenuFlyoutItem Click="OnImportFileClick" Text="{x:Bind Loc.GetString('Phrases_ImportAction')}">
@@ -134,7 +134,7 @@
 
                 <!-- Audio Accent & Speed Settings Flyout -->
                 <DropDownButton
-                    CornerRadius="8"
+                    CornerRadius="{ThemeResource ControlCornerRadius}"
                     Padding="10,6"
                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_AudioSettings')}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -169,7 +169,7 @@
                                 <Button
                                     HorizontalAlignment="Stretch"
                                     Command="{x:Bind ViewModel.StopAudioCommand}"
-                                    CornerRadius="6">
+                                    CornerRadius="{ThemeResource ControlCornerRadius}">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
                                         <FontIcon FontSize="12" Glyph="&#xE71A;" />
                                         <TextBlock Text="{x:Bind Loc.GetString('Phrases_StopAudio')}" />
@@ -211,7 +211,7 @@
                                 <Border
                                     Padding="6,1.5"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    CornerRadius="8">
+                                    CornerRadius="{ThemeResource OverlayCornerRadius}">
                                     <TextBlock
                                         FontSize="11"
                                         FontWeight="Bold"
@@ -232,7 +232,7 @@
                                 <Border
                                     Padding="6,1.5"
                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                    CornerRadius="8">
+                                    CornerRadius="{ThemeResource OverlayCornerRadius}">
                                     <TextBlock
                                         FontSize="11"
                                         FontWeight="Bold"
@@ -303,7 +303,7 @@
                     <DropDownButton
                         Grid.Column="2"
                         VerticalAlignment="Bottom"
-                        CornerRadius="8"
+                        CornerRadius="{ThemeResource ControlCornerRadius}"
                         Padding="10,6">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon FontSize="12" Glyph="&#xE71C;" />
@@ -344,7 +344,7 @@
                         Grid.Column="4"
                         VerticalAlignment="Bottom"
                         Command="{x:Bind ViewModel.ResetFiltersCommand}"
-                        CornerRadius="8"
+                        CornerRadius="{ThemeResource ControlCornerRadius}"
                         Padding="10,6">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon FontSize="12" Glyph="&#xE72C;" />
@@ -390,7 +390,7 @@
                 Background="{ThemeResource LayerFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="8">
+                CornerRadius="{ThemeResource OverlayCornerRadius}">
                 <Grid RowDefinitions="Auto,*">
                     <ProgressBar
                         Grid.Row="0"
@@ -453,7 +453,7 @@
                                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="8">
+                                    CornerRadius="{ThemeResource OverlayCornerRadius}">
                                     <StackPanel Spacing="5">
                                         <!-- Card Top: CEFR + Category + Due Badge + Favorite Star -->
                                         <Grid ColumnDefinitions="*,Auto">
@@ -539,7 +539,7 @@
                 Background="{ThemeResource LayerFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="8">
+                CornerRadius="{ThemeResource OverlayCornerRadius}">
                 <Grid>
                     <!-- Empty Selection Hint -->
                     <StackPanel
@@ -647,7 +647,7 @@
                                     <Button
                                         Click="OnDetailPlayFullConversationClick"
                                         Style="{StaticResource AccentButtonStyle}"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="10,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_PlayFullDialogue')}">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -659,7 +659,7 @@
                                     <!-- Favorite Toggle Button -->
                                     <Button
                                         Click="OnDetailToggleFavoriteClick"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="8,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_StatFavorites')}">
                                         <FontIcon
@@ -671,7 +671,7 @@
                                     <!-- Add to Review Queue -->
                                     <Button
                                         Click="OnEnqueueSelectedReviewClick"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="8,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_AddToReviewQueue')}">
                                         <FontIcon FontSize="14" Glyph="&#xE823;" />
@@ -680,7 +680,7 @@
                                     <!-- Edit -->
                                     <Button
                                         Click="OnEditSelectedClick"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="8,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Edit')}">
                                         <FontIcon FontSize="14" Glyph="&#xE70F;" />
@@ -689,7 +689,7 @@
                                     <!-- Delete -->
                                     <Button
                                         Click="OnDeleteSelectedClick"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="8,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Delete')}">
                                         <FontIcon
@@ -723,7 +723,7 @@
                                         <Button
                                             Grid.Column="1"
                                             Click="OnStopAudioClick"
-                                            CornerRadius="6"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}"
                                             Padding="6,2"
                                             Visibility="{x:Bind ViewModel.SelectedPhrase.IsAnyAudioPlaying, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <StackPanel Orientation="Horizontal" Spacing="4">
@@ -739,7 +739,7 @@
                                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
-                                        CornerRadius="8">
+                                        CornerRadius="{ThemeResource OverlayCornerRadius}">
                                         <StackPanel Spacing="8">
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
@@ -765,7 +765,7 @@
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                                                    <Button Click="OnDetailPlayPromptClick" Padding="8,4" CornerRadius="6">
+                                                    <Button Click="OnDetailPlayPromptClick" Padding="8,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                                             <FontIcon FontSize="12" Glyph="{x:Bind ViewModel.SelectedPhrase.PromptAudioGlyph, Mode=OneWay}" />
                                                             <ProgressRing
@@ -776,7 +776,7 @@
                                                             <TextBlock FontSize="12" Text="{x:Bind Loc.GetString('Phrases_Listen')}" />
                                                         </StackPanel>
                                                     </Button>
-                                                    <Button Click="OnCopyPromptClick" Padding="8,4" CornerRadius="6" ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_CopyPrompt')}">
+                                                    <Button Click="OnCopyPromptClick" Padding="8,4" CornerRadius="{ThemeResource ControlCornerRadius}" ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_CopyPrompt')}">
                                                         <FontIcon FontSize="12" Glyph="&#xE8C8;" />
                                                     </Button>
                                                 </StackPanel>
@@ -810,7 +810,7 @@
                                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
-                                        CornerRadius="8">
+                                        CornerRadius="{ThemeResource OverlayCornerRadius}">
                                         <StackPanel Spacing="8">
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
@@ -836,7 +836,7 @@
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                                                    <Button Click="OnDetailPlayResponseClick" Padding="8,4" CornerRadius="6">
+                                                    <Button Click="OnDetailPlayResponseClick" Padding="8,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                                             <FontIcon FontSize="12" Glyph="{x:Bind ViewModel.SelectedPhrase.ResponseAudioGlyph, Mode=OneWay}" />
                                                             <ProgressRing
@@ -847,7 +847,7 @@
                                                             <TextBlock FontSize="12" Text="{x:Bind Loc.GetString('Phrases_Listen')}" />
                                                         </StackPanel>
                                                     </Button>
-                                                    <Button Click="OnCopyResponseClick" Padding="8,4" CornerRadius="6" ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_CopyResponse')}">
+                                                    <Button Click="OnCopyResponseClick" Padding="8,4" CornerRadius="{ThemeResource ControlCornerRadius}" ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_CopyResponse')}">
                                                         <FontIcon FontSize="12" Glyph="&#xE8C8;" />
                                                     </Button>
                                                 </StackPanel>
@@ -877,7 +877,7 @@
                                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8"
+                                CornerRadius="{ThemeResource OverlayCornerRadius}"
                                 Visibility="{x:Bind ViewModel.SelectedPhrase.HasKeyPhrases, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel Spacing="8">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -921,7 +921,7 @@
                                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8"
+                                CornerRadius="{ThemeResource OverlayCornerRadius}"
                                 Visibility="{x:Bind ViewModel.SelectedPhrase.HasVariations, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel Spacing="10">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -1009,7 +1009,7 @@
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8"
+                                CornerRadius="{ThemeResource OverlayCornerRadius}"
                                 Visibility="{x:Bind ViewModel.SelectedPhrase.HasAdditionalSuggestions, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -1056,7 +1056,7 @@
                         <Button
                             Grid.Column="0"
                             Command="{x:Bind ViewModel.ExitRoleplayCommand}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="10,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon FontSize="13" Glyph="&#xE72B;" />
@@ -1090,7 +1090,7 @@
                         <!-- Audio Accent / Speed Dropdown in Roleplay -->
                         <DropDownButton
                             Grid.Column="2"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="10,6"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Phrases_AudioSettings')}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -1142,7 +1142,7 @@
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            CornerRadius="8">
+                            CornerRadius="{ThemeResource OverlayCornerRadius}">
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock
@@ -1154,7 +1154,7 @@
                                     <Button
                                         Grid.Column="1"
                                         Command="{x:Bind ViewModel.PlayRoleplayPromptCommand}"
-                                        CornerRadius="6"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="10,4">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon FontSize="13" Glyph="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.PromptAudioGlyph, Mode=OneWay}" />
@@ -1193,7 +1193,7 @@
                         <Button
                             Command="{x:Bind ViewModel.RevealRoleplayAnswerCommand}"
                             Content="{x:Bind Loc.GetString('Phrases_RoleplayReveal')}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="16,8"
                             Style="{StaticResource AccentButtonStyle}"
                             Visibility="{x:Bind ViewModel.IsRoleplayAnswerRevealed, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
@@ -1219,7 +1219,7 @@
                                         <Button
                                             Grid.Column="1"
                                             Command="{x:Bind ViewModel.PlayRoleplayResponseCommand}"
-                                            CornerRadius="6"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}"
                                             Padding="10,4">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon FontSize="13" Glyph="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.ResponseAudioGlyph, Mode=OneWay}" />
@@ -1254,7 +1254,7 @@
                                 <Button
                                     Grid.Column="0"
                                     HorizontalAlignment="Stretch"
-                                    CornerRadius="8"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}"
                                     Padding="0,8"
                                     Command="{x:Bind ViewModel.RateRoleplayAgainCommand}">
                                     <StackPanel>
@@ -1273,7 +1273,7 @@
                                 <Button
                                     Grid.Column="1"
                                     HorizontalAlignment="Stretch"
-                                    CornerRadius="8"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}"
                                     Padding="0,8"
                                     Command="{x:Bind ViewModel.RateRoleplayHardCommand}">
                                     <StackPanel>
@@ -1292,7 +1292,7 @@
                                 <Button
                                     Grid.Column="2"
                                     HorizontalAlignment="Stretch"
-                                    CornerRadius="8"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}"
                                     Padding="0,8"
                                     Command="{x:Bind ViewModel.RateRoleplayGoodCommand}">
                                     <StackPanel>
@@ -1311,7 +1311,7 @@
                                 <Button
                                     Grid.Column="3"
                                     HorizontalAlignment="Stretch"
-                                    CornerRadius="8"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}"
                                     Padding="0,8"
                                     Command="{x:Bind ViewModel.RateRoleplayEasyCommand}">
                                     <StackPanel>
@@ -1350,7 +1350,7 @@
                             HorizontalAlignment="Center"
                             Command="{x:Bind ViewModel.ExitRoleplayCommand}"
                             Content="{x:Bind Loc.GetString('Phrases_ExitRoleplay')}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="16,8"
                             Style="{StaticResource AccentButtonStyle}" />
                     </StackPanel>
@@ -1370,7 +1370,7 @@
             <Button
                 Command="{x:Bind ViewModel.PreviousPageCommand}"
                 Content="{x:Bind Loc.GetString('Phrases_PrevPage')}"
-                CornerRadius="6"
+                CornerRadius="{ThemeResource ControlCornerRadius}"
                 IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}" />
             <TextBlock
                 VerticalAlignment="Center"
@@ -1379,7 +1379,7 @@
             <Button
                 Command="{x:Bind ViewModel.NextPageCommand}"
                 Content="{x:Bind Loc.GetString('Phrases_NextPage')}"
-                CornerRadius="6"
+                CornerRadius="{ThemeResource ControlCornerRadius}"
                 IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}" />
         </StackPanel>
     </Grid>

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    UseLayoutRounding="True"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -84,7 +85,7 @@
     </UserControl.Resources>
 
     <Border x:Name="ToastRoot"
-            CornerRadius="12"
+            CornerRadius="{ThemeResource OverlayCornerRadius}"
             Background="{ThemeResource LexoraToastBackgroundBrush}"
             BorderBrush="{ThemeResource LexoraToastBorderBrush}"
             BorderThickness="1"
@@ -114,7 +115,7 @@
                 <!-- Icon Badge -->
                 <Border x:Name="IconBadgeBorder"
                         Width="32" Height="32"
-                        CornerRadius="8"
+                        CornerRadius="{ThemeResource ControlCornerRadius}"
                         VerticalAlignment="Top"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}">
                     <FontIcon x:Name="TypeIcon"
@@ -141,7 +142,7 @@
                     <Button x:Name="ActionButton"
                             Margin="0,4,0,0"
                             Padding="12,5"
-                            CornerRadius="6"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             FontSize="12"
                             FontWeight="SemiBold"
                             Style="{ThemeResource AccentButtonStyle}"
@@ -157,7 +158,7 @@
                         Style="{ThemeResource SubtleButtonStyle}"
                         Width="24" Height="24"
                         Padding="0"
-                        CornerRadius="4"
+                        CornerRadius="{ThemeResource ControlCornerRadius}"
                         VerticalAlignment="Top"
                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Toast_Close')}">
                     <FontIcon Glyph="&#xE711;" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
@@ -166,14 +167,14 @@
 
             <!-- Remaining Time Indicator Bar Track -->
             <Border Grid.Row="1"
-                    Height="2.5"
-                    CornerRadius="1.25"
+                    Height="2"
+                    CornerRadius="1"
                     Margin="0,8,0,0"
                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                     HorizontalAlignment="Stretch">
                 <Border x:Name="TimeProgressBar"
-                        Height="2.5"
-                        CornerRadius="1.25"
+                        Height="2"
+                        CornerRadius="1"
                         Background="{ThemeResource AccentFillColorDefaultBrush}"
                         HorizontalAlignment="Stretch"
                         RenderTransformOrigin="0,0.5">

@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:Lexora.Presentation.Converters"
     mc:Ignorable="d"
-    CornerRadius="12">
+    UseLayoutRounding="True" CornerRadius="{ThemeResource OverlayCornerRadius}">
 
     <ContentDialog.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -18,7 +18,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
-                <Border Width="32" Height="32" CornerRadius="8"
+                <Border Width="32" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1">
@@ -44,7 +44,7 @@
                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="8"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
                 Padding="12,8">
             <Grid ColumnDefinitions="*,Auto,*,Auto,*">
                 <!-- Step 1 Indicator -->
@@ -91,7 +91,7 @@
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                     <Button x:Name="BtnModeFile"
                             HorizontalAlignment="Stretch"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="12,8"
                             Click="BtnModeFile_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
@@ -102,7 +102,7 @@
                     <Button x:Name="BtnModePaste"
                             Grid.Column="1"
                             HorizontalAlignment="Stretch"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="12,8"
                             Click="BtnModePaste_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
@@ -120,7 +120,7 @@
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8"
+                                CornerRadius="{ThemeResource OverlayCornerRadius}"
                                 Padding="20,18"
                                 AllowDrop="True"
                                 DragOver="DropZone_DragOver"
@@ -131,7 +131,7 @@
                                 <Button x:Name="BtnBrowseFile"
                                         HorizontalAlignment="Center"
                                         Style="{ThemeResource AccentButtonStyle}"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="16,8"
                                         Click="BtnBrowseFile_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -144,16 +144,16 @@
                                            FontSize="11"
                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                 <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
                                         <TextBlock Text="JSON" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </Border>
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
                                         <TextBlock Text="CSV" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </Border>
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
                                         <TextBlock Text="TXT / TSV" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </Border>
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE72E;" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             <TextBlock Text="≤ 20 MB" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -180,7 +180,7 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
                                 <DropDownButton x:Name="BtnInsertSampleQuick"
                                                 Padding="8,4"
-                                                CornerRadius="6">
+                                                CornerRadius="{ThemeResource ControlCornerRadius}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE8B7;" FontSize="12" />
                                         <TextBlock x:Name="TextInsertSampleQuick" FontSize="11" />
@@ -195,7 +195,7 @@
                                 </DropDownButton>
                                 <Button x:Name="BtnPasteClipboard"
                                         Padding="8,4"
-                                        CornerRadius="6"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Click="BtnPasteClipboard_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE77F;" FontSize="12" />
@@ -204,7 +204,7 @@
                                 </Button>
                                 <Button x:Name="BtnClearPaste"
                                         Padding="8,4"
-                                        CornerRadius="6"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Click="BtnClearPaste_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                         <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
@@ -238,7 +238,7 @@
                                     Background="{ThemeResource LayerFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="8"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}"
                                     Padding="10,6"
                                     HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -257,7 +257,7 @@
                     </DropDownButton>
 
                     <!-- Sample Template Button with Menu -->
-                    <DropDownButton Grid.Column="1" CornerRadius="8" Padding="10,6">
+                    <DropDownButton Grid.Column="1" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE8B7;" FontSize="13" />
                             <TextBlock x:Name="TextViewSample" FontSize="12" />
@@ -278,28 +278,28 @@
                 <!-- Row 0: Metrics Summary Bar -->
                 <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
                     <!-- Total -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                             <TextBlock x:Name="TextMetricTotalLabel" Text="Tổng số" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
                             <TextBlock x:Name="TextMetricTotal" Text="0" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Valid -->
-                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                             <TextBlock x:Name="TextMetricValidLabel" Text="Hợp lệ" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                             <TextBlock x:Name="TextMetricValid" Text="0" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Duplicates -->
-                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                             <TextBlock x:Name="TextMetricDuplicatesLabel" Text="Trùng lặp" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" />
                             <TextBlock x:Name="TextMetricDuplicates" Text="0" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <!-- Errors -->
-                    <Border Grid.Column="3" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                    <Border Grid.Column="3" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6">
                         <StackPanel HorizontalAlignment="Center" Spacing="2">
                             <TextBlock x:Name="TextMetricErrorsLabel" Text="Lỗi/Thiếu" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" />
                             <TextBlock x:Name="TextMetricErrors" Text="0" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" />
@@ -312,7 +312,7 @@
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
                         Padding="12,6">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
@@ -365,7 +365,7 @@
                 <Border Grid.Row="3"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <ListView x:Name="ItemsPreviewListView"
                               Height="285"
@@ -472,7 +472,7 @@
                                                 Click="BtnDeletePreviewItem_Click"
                                                 Style="{ThemeResource SubtleButtonStyle}"
                                                 Padding="6,4"
-                                                CornerRadius="4"
+                                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                                 VerticalAlignment="Center">
                                             <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                         </Button>
@@ -498,7 +498,7 @@
                     <Button x:Name="BtnCancelImport"
                             Margin="0,4,0,0"
                             HorizontalAlignment="Center"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="16,6"
                             Click="BtnCancelImport_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -526,7 +526,7 @@
                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource OverlayCornerRadius}"
                             Padding="16">
                         <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" RowSpacing="12" ColumnSpacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">
@@ -576,10 +576,10 @@
 
                     <!-- Step 2 Left: Pagination Navigation Strip -->
                     <StackPanel x:Name="FooterStep2Left" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Visibility="Collapsed">
-                        <Button x:Name="BtnPreviewFirstPage" Padding="6,5" CornerRadius="6" Click="BtnPreviewFirstPage_Click">
+                        <Button x:Name="BtnPreviewFirstPage" Padding="6,5" CornerRadius="{ThemeResource ControlCornerRadius}" Click="BtnPreviewFirstPage_Click">
                             <FontIcon Glyph="&#xE892;" FontSize="11" />
                         </Button>
-                        <Button x:Name="BtnPreviewPrevPage" Padding="6,5" CornerRadius="6" Click="BtnPreviewPrevPage_Click">
+                        <Button x:Name="BtnPreviewPrevPage" Padding="6,5" CornerRadius="{ThemeResource ControlCornerRadius}" Click="BtnPreviewPrevPage_Click">
                             <FontIcon Glyph="&#xE76B;" FontSize="11" />
                         </Button>
                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
@@ -591,10 +591,10 @@
                             <TextBlock x:Name="TextPreviewPagingInfo" Text="1 - 10 / 10 mục (Trang 1/1)" FontSize="11.5" FontWeight="SemiBold"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                         </Border>
-                        <Button x:Name="BtnPreviewNextPage" Padding="6,5" CornerRadius="6" Click="BtnPreviewNextPage_Click">
+                        <Button x:Name="BtnPreviewNextPage" Padding="6,5" CornerRadius="{ThemeResource ControlCornerRadius}" Click="BtnPreviewNextPage_Click">
                             <FontIcon Glyph="&#xE76C;" FontSize="11" />
                         </Button>
-                        <Button x:Name="BtnPreviewLastPage" Padding="6,5" CornerRadius="6" Click="BtnPreviewLastPage_Click">
+                        <Button x:Name="BtnPreviewLastPage" Padding="6,5" CornerRadius="{ThemeResource ControlCornerRadius}" Click="BtnPreviewLastPage_Click">
                             <FontIcon Glyph="&#xE893;" FontSize="11" />
                         </Button>
                     </StackPanel>
@@ -609,7 +609,7 @@
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <!-- Back Button: Used in Step 2 to return to Step 1, or in Step 3 to review errors -->
                     <Button x:Name="BtnFooterBack"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="14,8"
                             Visibility="Collapsed"
                             Click="BtnFooterBack_Click">
@@ -621,7 +621,7 @@
 
                     <!-- Cancel Button: Always accessible across steps -->
                     <Button x:Name="BtnFooterCancel"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="14,8"
                             Click="BtnFooterCancel_Click">
                         <TextBlock x:Name="TextFooterCancel" Text="Hủy" />
@@ -630,7 +630,7 @@
                     <!-- Step 1 Primary Action: Phân tích & Xem trước -->
                     <Button x:Name="BtnAnalyzeNext"
                             Style="{ThemeResource AccentButtonStyle}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="18,8"
                             Click="BtnAnalyzeNext_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
@@ -642,7 +642,7 @@
                     <!-- Step 2 Primary Action: Tiến hành nhập / Import Selected (HERO ACTION) -->
                     <Button x:Name="BtnCommitImport"
                             Style="{ThemeResource AccentButtonStyle}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="18,8"
                             Visibility="Collapsed"
                             Click="BtnCommitImport_Click">
@@ -659,7 +659,7 @@
                     <!-- Step 3 Primary Action: Hoàn tất -->
                     <Button x:Name="BtnDone"
                             Style="{ThemeResource AccentButtonStyle}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="20,8"
                             Visibility="Collapsed"
                             Click="BtnDone_Click">

@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     DefaultButton="Primary"
-    CornerRadius="8"
+    UseLayoutRounding="True"
+    CornerRadius="{ThemeResource OverlayCornerRadius}"
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
@@ -17,7 +18,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
-                <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="24" Height="24" VerticalAlignment="Center" />
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE767;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
             </Grid>
         </DataTemplate>
@@ -26,12 +27,12 @@
     <ScrollViewer MaxHeight="500" HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,4,12,8">
         <StackPanel Spacing="16">
             <!-- Validation Feedback InfoBar at Top -->
-            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" />
+            <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" CornerRadius="{ThemeResource OverlayCornerRadius}" />
 
             <!-- Card 1: Group Metadata Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16">
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                 <StackPanel Spacing="14">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE768;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
@@ -44,23 +45,25 @@
                         <TextBox x:Name="TitleTextBox"
                                  Header="{x:Bind Loc.GetString('Homophones_EditorTitleHeader')}"
                                  PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTitlePlaceholder')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  FontWeight="SemiBold"
                                  TextWrapping="Wrap" />
                         <TextBox x:Name="IpaTextBox" Grid.Column="1"
                                  Header="{x:Bind Loc.GetString('Homophones_EditorIpaHeader')}"
                                  PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorIpaPlaceholder')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  FontFamily="Consolas, Cascadia Code, Segoe UI" />
                     </Grid>
 
                     <!-- Type, Level, Exam Tag -->
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                        <ComboBox x:Name="TypeComboBox" Header="{x:Bind Loc.GetString('Homophones_EditorTypeHeader')}" HorizontalAlignment="Stretch">
+                        <ComboBox x:Name="TypeComboBox" Header="{x:Bind Loc.GetString('Homophones_EditorTypeHeader')}" HorizontalAlignment="Stretch" CornerRadius="{ThemeResource ControlCornerRadius}">
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypeExact')}" Tag="ExactHomophone" IsSelected="True" />
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypeNear')}" Tag="NearHomophone" />
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Homophones_TypePair')}" Tag="MinimalPair" />
                         </ComboBox>
 
-                        <ComboBox x:Name="LevelComboBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorLevelHeader')}" HorizontalAlignment="Stretch">
+                        <ComboBox x:Name="LevelComboBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorLevelHeader')}" HorizontalAlignment="Stretch" CornerRadius="{ThemeResource ControlCornerRadius}">
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Cefr_None')}" Tag="None" IsSelected="True" />
                             <ComboBoxItem Content="A1" Tag="A1" />
                             <ComboBoxItem Content="A2" Tag="A2" />
@@ -70,7 +73,7 @@
                             <ComboBoxItem Content="C2" Tag="C2" />
                         </ComboBox>
 
-                        <ComboBox x:Name="ExamComboBox" Grid.Column="2" Header="{x:Bind Loc.GetString('Homophones_EditorExamHeader')}" HorizontalAlignment="Stretch">
+                        <ComboBox x:Name="ExamComboBox" Grid.Column="2" Header="{x:Bind Loc.GetString('Homophones_EditorExamHeader')}" HorizontalAlignment="Stretch" CornerRadius="{ThemeResource ControlCornerRadius}">
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Exam_Name_General')}" Tag="General" IsSelected="True" />
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Exam_Name_Toeic')}" Tag="Toeic" />
                             <ComboBoxItem Content="{x:Bind Loc.GetString('Exam_Name_Ielts')}" Tag="Ielts" />
@@ -82,6 +85,7 @@
                     <TextBox x:Name="TipTextBox"
                              Header="{x:Bind Loc.GetString('Homophones_EditorTipHeader')}"
                              PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTipPlaceholder')}"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
                              TextWrapping="Wrap" AcceptsReturn="True" MinHeight="68" MaxHeight="140" />
                 </StackPanel>
             </Border>
@@ -92,15 +96,15 @@
                 <Border Grid.Column="0"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="8" Padding="16">
+                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                     <StackPanel Spacing="12">
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
-                            <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorWord1Badge')}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3" HorizontalAlignment="Left">
+                            <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorWord1Badge')}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                         </Border>
 
                         <Grid ColumnDefinitions="*,135" ColumnSpacing="10">
-                            <TextBox x:Name="Word1TermBox" Header="{x:Bind Loc.GetString('Homophones_EditorTermHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTerm1Placeholder')}" FontWeight="SemiBold" />
-                            <ComboBox x:Name="Word1PosBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorPosHeader')}" HorizontalAlignment="Stretch">
+                            <TextBox x:Name="Word1TermBox" Header="{x:Bind Loc.GetString('Homophones_EditorTermHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTerm1Placeholder')}" CornerRadius="{ThemeResource ControlCornerRadius}" FontWeight="SemiBold" />
+                            <ComboBox x:Name="Word1PosBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorPosHeader')}" CornerRadius="{ThemeResource ControlCornerRadius}" HorizontalAlignment="Stretch">
                                 <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosNoun')}" Tag="Noun" IsSelected="True" />
                                 <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosVerb')}" Tag="Verb" />
                                 <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosAdj')}" Tag="Adjective" />
@@ -113,14 +117,17 @@
                         <TextBox x:Name="Word1MeaningBox"
                                  Header="{x:Bind Loc.GetString('Homophones_EditorMeaningHeader')}"
                                  PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorMeaning1Placeholder')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  TextWrapping="Wrap" AcceptsReturn="True" MinHeight="56" />
                         <TextBox x:Name="Word1ExampleBox"
                                  Header="{x:Bind Loc.GetString('Homophones_EditorExampleHeader')}"
                                  PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorExamplePlaceholder')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  TextWrapping="Wrap" AcceptsReturn="True" MinHeight="64" />
                         <TextBox x:Name="Word1ExampleTransBox"
                                  Header="{x:Bind Loc.GetString('Homophones_EditorExampleTransHeader')}"
                                  PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorExampleTransPlaceholder')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  TextWrapping="Wrap" AcceptsReturn="True" MinHeight="56" />
                     </StackPanel>
                 </Border>
@@ -129,15 +136,15 @@
                 <Border Grid.Column="1"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="8" Padding="16">
+                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                     <StackPanel Spacing="12">
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
-                            <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorWord2Badge')}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3" HorizontalAlignment="Left">
+                            <TextBlock Text="{x:Bind Loc.GetString('Homophones_EditorWord2Badge')}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                         </Border>
 
                         <Grid ColumnDefinitions="*,135" ColumnSpacing="10">
-                            <TextBox x:Name="Word2TermBox" Header="{x:Bind Loc.GetString('Homophones_EditorTermHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTerm2Placeholder')}" FontWeight="SemiBold" />
-                            <ComboBox x:Name="Word2PosBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorPosHeader')}" HorizontalAlignment="Stretch">
+                            <TextBox x:Name="Word2TermBox" Header="{x:Bind Loc.GetString('Homophones_EditorTermHeader')}" PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorTerm2Placeholder')}" CornerRadius="{ThemeResource ControlCornerRadius}" FontWeight="SemiBold" />
+                            <ComboBox x:Name="Word2PosBox" Grid.Column="1" Header="{x:Bind Loc.GetString('Homophones_EditorPosHeader')}" CornerRadius="{ThemeResource ControlCornerRadius}" HorizontalAlignment="Stretch">
                                 <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosNoun')}" Tag="Noun" />
                                 <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosVerb')}" Tag="Verb" IsSelected="True" />
                                 <ComboBoxItem Content="{x:Bind Loc.GetString('WordEditor_PosAdj')}" Tag="Adjective" />
@@ -150,14 +157,17 @@
                         <TextBox x:Name="Word2MeaningBox"
                                  Header="{x:Bind Loc.GetString('Homophones_EditorMeaningHeader')}"
                                  PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorMeaning2Placeholder')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  TextWrapping="Wrap" AcceptsReturn="True" MinHeight="56" />
                         <TextBox x:Name="Word2ExampleBox"
                                  Header="{x:Bind Loc.GetString('Homophones_EditorExampleHeader')}"
                                  PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorExamplePlaceholder')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  TextWrapping="Wrap" AcceptsReturn="True" MinHeight="64" />
                         <TextBox x:Name="Word2ExampleTransBox"
                                  Header="{x:Bind Loc.GetString('Homophones_EditorExampleTransHeader')}"
                                  PlaceholderText="{x:Bind Loc.GetString('Homophones_EditorExampleTransPlaceholder')}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                  TextWrapping="Wrap" AcceptsReturn="True" MinHeight="56" />
                     </StackPanel>
                 </Border>

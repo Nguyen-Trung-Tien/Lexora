@@ -6,6 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     DefaultButton="Primary"
+    UseLayoutRounding="True"
+    CornerRadius="{ThemeResource OverlayCornerRadius}"
     PrimaryButtonClick="OnPrimaryButtonClick"
     mc:Ignorable="d">
 
@@ -21,6 +23,7 @@
             Grid.Row="0"
             IsClosable="True"
             IsOpen="False"
+            CornerRadius="{ThemeResource OverlayCornerRadius}"
             Severity="Error" />
 
         <!-- Scrollable Form Container -->
@@ -37,7 +40,7 @@
                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
-                    CornerRadius="8">
+                    CornerRadius="{ThemeResource OverlayCornerRadius}">
                     <StackPanel Spacing="8">
                         <TextBlock
                             FontSize="12"
@@ -49,10 +52,12 @@
                                 x:Name="TemplateComboBox"
                                 Grid.Column="0"
                                 HorizontalAlignment="Stretch"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 DisplayMemberPath="Title"
                                 PlaceholderText="{x:Bind Loc.GetString('MemoryTips_QuickTemplates')}" />
                             <Button
                                 Grid.Column="1"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Click="OnApplyTemplateClick"
                                 Content="{x:Bind Loc.GetString('MemoryTips_ApplyTemplate')}" />
                         </Grid>
@@ -62,6 +67,7 @@
                 <!-- Tip Title -->
                 <TextBox
                     x:Name="TitleBox"
+                    CornerRadius="{ThemeResource ControlCornerRadius}"
                     Header="{x:Bind Loc.GetString('MemoryTips_FieldTitle')}"
                     PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldTitlePlaceholder')}" />
 
@@ -71,12 +77,14 @@
                         x:Name="CategoryComboBox"
                         Grid.Column="0"
                         HorizontalAlignment="Stretch"
+                        CornerRadius="{ThemeResource ControlCornerRadius}"
                         Header="{x:Bind Loc.GetString('MemoryTips_FieldCategory')}" />
 
                     <ComboBox
                         x:Name="ExamTargetComboBox"
                         Grid.Column="1"
                         HorizontalAlignment="Stretch"
+                        CornerRadius="{ThemeResource ControlCornerRadius}"
                         Header="{x:Bind Loc.GetString('MemoryTips_FieldExamTarget')}" />
                 </Grid>
 
@@ -84,6 +92,7 @@
                 <ComboBox
                     x:Name="TechniqueComboBox"
                     HorizontalAlignment="Stretch"
+                    CornerRadius="{ThemeResource ControlCornerRadius}"
                     Header="{x:Bind Loc.GetString('MemoryTips_FieldTechnique')}" />
 
                 <!-- Mnemonic Hook / Quick Recall -->
@@ -92,6 +101,7 @@
                     MinHeight="72"
                     MaxHeight="180"
                     AcceptsReturn="True"
+                    CornerRadius="{ThemeResource ControlCornerRadius}"
                     Header="{x:Bind Loc.GetString('MemoryTips_FieldHook')}"
                     PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldHookPlaceholder')}"
                     TextWrapping="Wrap"
@@ -103,6 +113,7 @@
                     MinHeight="100"
                     MaxHeight="280"
                     AcceptsReturn="True"
+                    CornerRadius="{ThemeResource ControlCornerRadius}"
                     Header="{x:Bind Loc.GetString('MemoryTips_FieldExplanation')}"
                     PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldExplanationPlaceholder')}"
                     TextWrapping="Wrap"
@@ -114,6 +125,7 @@
                     MinHeight="72"
                     MaxHeight="180"
                     AcceptsReturn="True"
+                    CornerRadius="{ThemeResource ControlCornerRadius}"
                     Header="{x:Bind Loc.GetString('MemoryTips_FieldExample')}"
                     PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldExamplePlaceholder')}"
                     TextWrapping="Wrap"
@@ -125,6 +137,7 @@
                     MinHeight="72"
                     MaxHeight="180"
                     AcceptsReturn="True"
+                    CornerRadius="{ThemeResource ControlCornerRadius}"
                     Header="{x:Bind Loc.GetString('MemoryTips_FieldTrap')}"
                     PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldTrapPlaceholder')}"
                     TextWrapping="Wrap"
@@ -135,6 +148,7 @@
                     <TextBox
                         x:Name="TagsBox"
                         Grid.Column="0"
+                        CornerRadius="{ThemeResource ControlCornerRadius}"
                         Header="{x:Bind Loc.GetString('MemoryTips_FieldTags')}"
                         PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldTagsPlaceholder')}" />
 

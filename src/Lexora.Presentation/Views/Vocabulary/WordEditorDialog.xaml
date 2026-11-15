@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:Lexora.Presentation.Views.Vocabulary"
     DefaultButton="Primary"
-    CornerRadius="8"
+    UseLayoutRounding="True" CornerRadius="{ThemeResource OverlayCornerRadius}"
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
@@ -18,7 +18,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
-                <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="24" Height="24" VerticalAlignment="Center" />
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE82D;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Text="{Binding}" FontWeight="SemiBold" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap" />
             </Grid>
         </DataTemplate>
@@ -32,14 +32,14 @@
                       Padding="0,4,12,8">
             <StackPanel Spacing="16">
                 <!-- Top Validation Error InfoBar -->
-                <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4" />
+                <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" Margin="0,0,0,4"  CornerRadius="{ThemeResource OverlayCornerRadius}"/>
 
                 <!-- ======================================================== -->
                 <!-- CARD 1: BASIC INFORMATION (Term, Level, Phonetics, Notes) -->
                 <!-- ======================================================== -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="8" Padding="16">
+                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                     <StackPanel Spacing="14">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE82D;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -105,7 +105,7 @@
                         <!-- Add Part of Speech Button with MenuFlyout -->
                         <Button Grid.Column="1" x:Name="BtnAddPosGroup"
                                 Style="{ThemeResource AccentButtonStyle}"
-                                CornerRadius="6"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 VerticalAlignment="Center"
                                 Padding="14,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -124,12 +124,12 @@
                             <DataTemplate>
                                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,14">
+                                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16" Margin="0,0,0,14">
                                     <StackPanel Spacing="14">
                                         <!-- POS Group Header Bar -->
                                         <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
                                             <!-- POS Pill Badge -->
-                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="10,5" VerticalAlignment="Center">
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="10,5" VerticalAlignment="Center">
                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                     <FontIcon Glyph="&#xE8D2;" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
                                                     <TextBlock Text="{Binding HeaderTitle}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" FontSize="13" />
@@ -152,7 +152,7 @@
                                             <!-- Primary POS Indicator / Set Primary Button -->
                                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                 <Border Background="{ThemeResource SystemFillColorSuccessBrush}"
-                                                        CornerRadius="6" Padding="8,4"
+                                                        CornerRadius="12" Padding="8,4"
                                                         Visibility="{Binding PrimaryBadgeVisibility}">
                                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                                         <FontIcon Glyph="&#xE735;" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
@@ -163,7 +163,7 @@
                                                         Click="SetPrimaryPosButton_Click"
                                                         ToolTipService.ToolTip="{Binding TooltipSetAsPrimary}"
                                                         Style="{ThemeResource SubtleButtonStyle}"
-                                                        Padding="8,4" CornerRadius="6">
+                                                        Padding="8,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                                         <FontIcon Glyph="&#xE734;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                         <TextBlock Text="{Binding SetAsPrimaryText}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -179,7 +179,7 @@
                                                     Click="DeletePosGroupButton_Click"
                                                     IsEnabled="{Binding CanDelete}"
                                                     ToolTipService.ToolTip="{Binding TooltipDeletePos}"
-                                                    Padding="8,6" CornerRadius="6">
+                                                    Padding="8,6" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                 <FontIcon Glyph="&#xE74D;" FontSize="13" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                             </Button>
                                         </Grid>
@@ -193,13 +193,13 @@
                                                 <DataTemplate>
                                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                            BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14" Margin="0,0,0,10">
                                                         <StackPanel Spacing="10">
                                                             <!-- Meaning Header with badge & delete button -->
                                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
                                                                 <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                                                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                                        BorderThickness="1" CornerRadius="4" Padding="8,3">
+                                                                        BorderThickness="1" CornerRadius="12" Padding="8,3">
                                                                     <TextBlock Text="{Binding MeaningBadge}" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                                 </Border>
                                                                 <Border Grid.Column="1" />
@@ -207,7 +207,7 @@
                                                                         Click="DeleteMeaningButton_Click"
                                                                         IsEnabled="{Binding CanDelete}"
                                                                         ToolTipService.ToolTip="{Binding TooltipDeleteMeaning}"
-                                                                        Padding="6,4" CornerRadius="4">
+                                                                        Padding="6,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                                     <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                                                 </Button>
                                                             </Grid>
@@ -246,18 +246,18 @@
                                                                         <DataTemplate>
                                                                             <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                                                                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                                                    BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,2,0,8">
+                                                                                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12" Margin="0,2,0,8">
                                                                                 <StackPanel Spacing="8">
                                                                                     <!-- Example Header: Badge + Remove Button -->
                                                                                     <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
-                                                                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+                                                                                        <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="8,2" VerticalAlignment="Center">
                                                                                             <TextBlock Text="{Binding ExampleBadge}" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="Bold" />
                                                                                         </Border>
                                                                                         <Border Grid.Column="1" />
                                                                                         <Button Grid.Column="2"
                                                                                                 ToolTipService.ToolTip="{Binding TooltipDeleteExample}"
                                                                                                 Click="DeleteExampleButton_Click"
-                                                                                                Padding="6,4" CornerRadius="4">
+                                                                                                Padding="6,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                                                             <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                                                                         </Button>
                                                                                     </Grid>
@@ -283,7 +283,7 @@
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
 
-                                                                <Button HorizontalAlignment="Left" Click="AddExampleButton_Click" Padding="12,5" CornerRadius="6">
+                                                                <Button HorizontalAlignment="Left" Click="AddExampleButton_Click" Padding="12,5" CornerRadius="{ThemeResource ControlCornerRadius}">
                                                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                                                         <FontIcon Glyph="&#xE710;" FontSize="11" />
                                                                         <TextBlock Text="{Binding BtnAddExample}" FontSize="12" FontWeight="SemiBold" />
@@ -300,7 +300,7 @@
                                         <Button Click="AddMeaningToPosButton_Click"
                                                 HorizontalAlignment="Left"
                                                 Style="{ThemeResource SubtleButtonStyle}"
-                                                Padding="12,6" CornerRadius="6">
+                                                Padding="12,6" CornerRadius="{ThemeResource ControlCornerRadius}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon Glyph="&#xE710;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                 <TextBlock Text="{Binding BtnAddMeaningLabel}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -318,7 +318,7 @@
                 <!-- ======================================================== -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="8" Padding="16">
+                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
                     <StackPanel Spacing="14">
                         <StackPanel Spacing="2">
                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -361,7 +361,7 @@
                                         </Button.Flyout>
                                     </Button>
                                 </Grid>
-                                <Border BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6" MinHeight="100" MaxHeight="140" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                <Border BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" MinHeight="100" MaxHeight="140" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
                                     <Grid>
                                         <ListView x:Name="TopicsListView" SelectionMode="Multiple">
                                             <ListView.ItemTemplate>
@@ -383,7 +383,7 @@
                             <!-- Exam tags list -->
                             <StackPanel Grid.Column="1" Spacing="6">
                                 <TextBlock Text="{x:Bind Loc.GetString('WordEditor_HeaderExams')}" FontWeight="Medium" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                <Border BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="6" MinHeight="100" MaxHeight="140" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                <Border BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" MinHeight="100" MaxHeight="140" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
                                     <Grid>
                                         <ListView x:Name="ExamTagsListView" SelectionMode="Multiple">
                                             <ListView.ItemTemplate>

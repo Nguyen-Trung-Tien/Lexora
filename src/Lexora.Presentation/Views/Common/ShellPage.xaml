@@ -8,6 +8,7 @@
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     KeyboardAcceleratorPlacementMode="Hidden"
+    UseLayoutRounding="True"
     mc:Ignorable="d">
 
     <Grid KeyboardAcceleratorPlacementMode="Hidden">
@@ -120,6 +121,7 @@
 
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox x:Name="GlobalSearchBox"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 PlaceholderText="{x:Bind services:LocalizationHelper.GetString('Search_Placeholder')}"
                                 ToolTipService.ToolTip="{x:Bind services:LocalizationHelper.GetString('Shell_SearchTooltip')}"
                                 QueryIcon="Find"
@@ -129,7 +131,7 @@
                     <AutoSuggestBox.ItemTemplate>
                         <DataTemplate>
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="4,4">
-                                <Border Width="26" Height="26" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                <Border Width="26" Height="26" CornerRadius="{ThemeResource ControlCornerRadius}" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
                                     <FontIcon Glyph="{Binding Glyph}" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">

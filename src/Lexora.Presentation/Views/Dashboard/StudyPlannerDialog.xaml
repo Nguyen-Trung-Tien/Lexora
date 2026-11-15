@@ -13,7 +13,8 @@
     DefaultButton="Primary"
     HorizontalAlignment="Center"
     VerticalAlignment="Center"
-    CornerRadius="8">
+    UseLayoutRounding="True"
+    CornerRadius="{ThemeResource OverlayCornerRadius}">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">800</x:Double>
@@ -23,7 +24,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Border Width="32" Height="32" CornerRadius="8"
+                <Border Width="32" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1">
@@ -51,14 +52,14 @@
                             <!-- Daily Milestone & Progress Card -->
                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="8" Padding="20">
+                                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                                 <Grid ColumnDefinitions="*,Auto" RowSpacing="12">
                                     <StackPanel Spacing="8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="6" Padding="8,3">
+                                            <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
                                                 <TextBlock Text="{x:Bind PacingBadgeText, Mode=OneWay}"
-                                                           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                                           FontSize="11" FontWeight="Bold" />
+                                                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                           FontSize="11" FontWeight="SemiBold" />
                                             </Border>
                                             <TextBlock Text="{x:Bind DaysRemainingText, Mode=OneWay}"
                                                        FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -71,7 +72,7 @@
 
                                     <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                            CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
+                                            CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16,8" VerticalAlignment="Center">
                                         <StackPanel Spacing="2" HorizontalAlignment="Center">
                                             <TextBlock Text="{x:Bind OverallProgressText, Mode=OneWay}" FontSize="24" FontWeight="Bold"
                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
@@ -90,7 +91,7 @@
                                     <DataTemplate x:DataType="dto:CurriculumTaskDto">
                                         <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="1" CornerRadius="8" Padding="16,12" Margin="0,4">
+                                                BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16,12" Margin="0,4">
                                             <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12" VerticalAlignment="Center">
                                                 <!-- Status Icon -->
                                                 <FontIcon Glyph="{x:Bind StatusGlyph}"
@@ -109,7 +110,7 @@
                                                 </StackPanel>
 
                                                 <Button Grid.Column="3" Content="{x:Bind services:LocalizationHelper.GetString('StudyPlanner_OpenTask')}" Tag="{x:Bind NavigationTag}"
-                                                        Click="TaskNavigate_Click" CornerRadius="6" Padding="12,4" FontSize="12" />
+                                                        Click="TaskNavigate_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,4" FontSize="12" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -125,7 +126,7 @@
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
                                 <StackPanel Spacing="6">
                                     <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_ExamTarget')}" FontSize="12" FontWeight="SemiBold" />
-                                    <ComboBox x:Name="ExamTargetCombo" HorizontalAlignment="Stretch" SelectedIndex="0">
+                                    <ComboBox x:Name="ExamTargetCombo" HorizontalAlignment="Stretch" SelectedIndex="0" CornerRadius="{ThemeResource ControlCornerRadius}">
                                         <ComboBoxItem Content="TOEIC" Tag="Toeic" />
                                         <ComboBoxItem Content="IELTS" Tag="Ielts" />
                                         <ComboBoxItem Content="VSTEP" Tag="Vstep" />
@@ -135,14 +136,14 @@
 
                                 <StackPanel Grid.Column="1" Spacing="6">
                                     <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_TargetScore')}" FontSize="12" FontWeight="SemiBold" />
-                                    <TextBox x:Name="TargetScoreBox" PlaceholderText="{x:Bind Loc.GetString('StudyPlanner_TargetScorePlaceholder')}" />
+                                    <TextBox x:Name="TargetScoreBox" PlaceholderText="{x:Bind Loc.GetString('StudyPlanner_TargetScorePlaceholder')}" CornerRadius="{ThemeResource ControlCornerRadius}" />
                                 </StackPanel>
                             </Grid>
 
                             <!-- Target Date Picker -->
                             <StackPanel Spacing="6">
                                 <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_TargetDate')}" FontSize="12" FontWeight="SemiBold" />
-                                <CalendarDatePicker x:Name="TargetDatePicker" HorizontalAlignment="Stretch" />
+                                <CalendarDatePicker x:Name="TargetDatePicker" HorizontalAlignment="Stretch" CornerRadius="{ThemeResource ControlCornerRadius}" />
                             </StackPanel>
 
                             <!-- Daily Study Minutes -->
@@ -174,7 +175,7 @@
 
                             <!-- Save Button -->
                             <Button Click="SaveGoal_Click" Style="{ThemeResource AccentButtonStyle}"
-                                    CornerRadius="8" Padding="20,10" HorizontalAlignment="Right" FontWeight="SemiBold">
+                                    CornerRadius="{ThemeResource ControlCornerRadius}" Padding="20,10" HorizontalAlignment="Right" FontWeight="SemiBold">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE74E;" FontSize="13" />
                                     <TextBlock Text="{x:Bind Loc.GetString('StudyPlanner_SaveGoal')}" />
@@ -186,7 +187,7 @@
                                      Severity="Success"
                                      Title="{x:Bind Loc.GetString('Toast_SuccessTitle')}"
                                      Message="{x:Bind Loc.GetString('StudyPlanner_GoalSaved')}"
-                                     CornerRadius="8" />
+                                     CornerRadius="{ThemeResource OverlayCornerRadius}" />
                         </StackPanel>
                     </TabViewItem>
                 </TabView.TabItems>

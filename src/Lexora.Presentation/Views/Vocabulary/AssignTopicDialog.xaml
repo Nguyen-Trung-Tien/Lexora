@@ -8,7 +8,8 @@
     xmlns:dto="using:Lexora.Application.DTOs"
     DefaultButton="Primary"
     mc:Ignorable="d"
-    CornerRadius="8">
+    UseLayoutRounding="True"
+    CornerRadius="{ThemeResource OverlayCornerRadius}">
 
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">480</x:Double>
@@ -18,7 +19,7 @@
     <ContentDialog.TitleTemplate>
         <DataTemplate>
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Border Width="32" Height="32" CornerRadius="8"
+                <Border Width="32" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1">
@@ -32,7 +33,7 @@
     </ContentDialog.TitleTemplate>
 
     <StackPanel Spacing="14" Padding="0,8,0,8">
-        <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" />
+        <InfoBar x:Name="DialogInfoBar" IsOpen="False" Severity="Error" CornerRadius="{ThemeResource OverlayCornerRadius}" />
 
         <TextBlock x:Name="PromptTextBlock"
                    TextWrapping="Wrap"
@@ -41,7 +42,7 @@
 
         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1" CornerRadius="8" Padding="16">
+                BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
             <StackPanel Spacing="10">
                 <TextBlock Text="{x:Bind Loc.GetString('Vocab_TopicFilter')}"
                            FontWeight="Medium" FontSize="12"
@@ -49,6 +50,7 @@
 
                 <ComboBox x:Name="TopicsComboBox"
                           HorizontalAlignment="Stretch"
+                          CornerRadius="{ThemeResource ControlCornerRadius}"
                           PlaceholderText="{x:Bind Loc.GetString('Vocab_AllTopics')}"
                           SelectionChanged="TopicsComboBox_SelectionChanged">
                     <ComboBox.ItemTemplate>

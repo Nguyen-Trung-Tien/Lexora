@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:common="using:Lexora.Presentation.Views.Common"
+    UseLayoutRounding="True"
     mc:Ignorable="d">
 
     <Grid x:Name="RootOverlay"
@@ -24,7 +25,7 @@
                 Background="{ThemeResource LexoraModalBackgroundBrush}"
                 BorderBrush="{ThemeResource LexoraModalBorderBrush}"
                 BorderThickness="1"
-                CornerRadius="12"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
                 Translation="0,0,32"
                 Tapped="PaletteCard_Tapped">
             <Border.Shadow>
@@ -58,14 +59,14 @@
                     </TextBox>
 
                     <Border Grid.Column="2"
-                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            CornerRadius="6"
+                            CornerRadius="12"
                             Padding="8,3"
                             VerticalAlignment="Center">
                         <TextBlock Text="ESC" FontSize="11" FontWeight="SemiBold"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                     </Border>
                 </Grid>
 
@@ -107,14 +108,14 @@
 
                                     <Border Grid.Column="2"
                                             Visibility="{x:Bind HasBadge, Converter={StaticResource BoolToVisibilityConverter}}"
-                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="6"
-                                            Padding="7,2"
+                                            CornerRadius="12"
+                                            Padding="8,3"
                                             VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind Badge}" FontSize="11" FontWeight="SemiBold"
-                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                     </Border>
                                 </Grid>
                             </DataTemplate>
@@ -141,7 +142,7 @@
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="0,1,0,0"
-                        CornerRadius="0,0,12,12"
+                        CornerRadius="0,0,8,8"
                         Padding="16,8">
                     <TextBlock x:Name="FooterHintText"
                                FontSize="11.5"

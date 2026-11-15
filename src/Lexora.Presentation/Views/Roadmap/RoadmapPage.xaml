@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Page
+    UseLayoutRounding="True"
     x:Class="Lexora.Presentation.Views.Roadmap.RoadmapPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -20,7 +21,7 @@
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="8">
+                CornerRadius="{ThemeResource OverlayCornerRadius}">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -46,8 +47,8 @@
                                 Style="{ThemeResource BodyStrongTextBlockStyle}"
                                 Text="{x:Bind Title}" />
                             <Border
-                                Padding="6,2"
-                                CornerRadius="4"
+                                Padding="8,3"
+                                CornerRadius="12"
                                 Background="{ThemeResource AccentFillColorDefaultBrush}">
                                 <TextBlock
                                     FontSize="10"
@@ -84,7 +85,7 @@
                             Loaded="BtnSwitchRoadmap_Loaded"
                             Click="SwitchRoadmapItem_Click"
                             Tag="{x:Bind}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="12,6"
                             Style="{ThemeResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -96,7 +97,7 @@
                             Loaded="BtnResetRoadmap_Loaded"
                             Click="ResetRoadmapItem_Click"
                             Tag="{x:Bind}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="8,6"
                             Style="{ThemeResource SubtleButtonStyle}">
                             <FontIcon Glyph="&#xE777;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -105,7 +106,7 @@
                             Loaded="BtnDeleteRoadmap_Loaded"
                             Click="DeleteCurrentRoadmap_Click"
                             Tag="{x:Bind}"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="8,6"
                             Style="{ThemeResource SubtleButtonStyle}">
                             <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
@@ -143,7 +144,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="42" Height="42" CornerRadius="8"
+                        <Border Width="42" Height="42" CornerRadius="{ThemeResource OverlayCornerRadius}"
                                 Margin="0,0,14,0"
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -181,7 +182,7 @@
                             <Button
                                 Click="SwitchToManageView_Click"
                                 Style="{ThemeResource DefaultButtonStyle}"
-                                CornerRadius="8"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Padding="12,6"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ManageRoadmaps')}"
                                 Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -199,7 +200,7 @@
                             <Button
                                 Command="{x:Bind ViewModel.SyncProgressCommand}"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_SyncProgress')}"
-                                CornerRadius="8"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Padding="12,6"
                                 Style="{ThemeResource DefaultButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -213,7 +214,7 @@
                                 Click="ResetActiveRoadmapProgress_Click"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ResetProgressTooltip')}"
                                 Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                CornerRadius="8"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Padding="12,6"
                                 Style="{ThemeResource DefaultButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -225,7 +226,7 @@
                             <!-- Create Roadmap Button -->
                             <Button
                                 Click="OpenCreateRoadmapDialog_Click"
-                                CornerRadius="8"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Padding="14,6"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CreateGoal')}"
                                 Style="{ThemeResource AccentButtonStyle}">
@@ -264,7 +265,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="{ThemeResource OverlayCornerRadius}">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -293,7 +294,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="{ThemeResource OverlayCornerRadius}">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -325,7 +326,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="{ThemeResource OverlayCornerRadius}">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -355,7 +356,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="{ThemeResource OverlayCornerRadius}">
                         <StackPanel Spacing="8">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -388,8 +389,8 @@
                     Padding="20,16"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
-                    BorderThickness="1.5"
-                    CornerRadius="8"
+                    BorderThickness="1"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
                     Visibility="{x:Bind ViewModel.HasNextActiveNode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
@@ -429,7 +430,7 @@
                         <Button
                             Grid.Column="2"
                             VerticalAlignment="Center"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="16,8"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ActionLearn')}"
                             Command="{x:Bind ViewModel.StartLearningNodeCommand}"
@@ -457,7 +458,7 @@
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
                         Padding="3">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <!-- Pill 1: Milestone Track -->
@@ -465,7 +466,7 @@
                                 x:Name="TrackViewTabButton"
                                 Click="SwitchToTrackView_Click"
                                 Padding="14,6"
-                                CornerRadius="6"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Style="{ThemeResource SubtleButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE81C;" FontSize="14" />
@@ -478,7 +479,7 @@
                                 x:Name="TimelineViewTabButton"
                                 Click="SwitchToTimelineView_Click"
                                 Padding="14,6"
-                                CornerRadius="6"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Style="{ThemeResource SubtleButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE8D2;" FontSize="14" />
@@ -491,7 +492,7 @@
                                 x:Name="ManageViewTabButton"
                                 Click="SwitchToManageView_Click"
                                 Padding="14,6"
-                                CornerRadius="6"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Style="{ThemeResource SubtleButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE713;" FontSize="14" />
@@ -508,13 +509,13 @@
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
                         Padding="4,2"
                         Visibility="{x:Bind ViewModel.IsTrackView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                             <Button
                                 Padding="8,4"
-                                CornerRadius="6"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Command="{x:Bind ViewModel.ZoomOutCommand}"
                                 Style="{ThemeResource SubtleButtonStyle}"
                                 ToolTipService.ToolTip="Zoom Out">
@@ -522,7 +523,7 @@
                             </Button>
                             <Button
                                 Padding="8,4"
-                                CornerRadius="6"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Command="{x:Bind ViewModel.ResetZoomCommand}"
                                 Style="{ThemeResource SubtleButtonStyle}"
                                 ToolTipService.ToolTip="Reset Zoom">
@@ -534,7 +535,7 @@
                             </Button>
                             <Button
                                 Padding="8,4"
-                                CornerRadius="6"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Command="{x:Bind ViewModel.ZoomInCommand}"
                                 Style="{ThemeResource SubtleButtonStyle}"
                                 ToolTipService.ToolTip="Zoom In">
@@ -551,7 +552,7 @@
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
-                    CornerRadius="8"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
                     Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" Spacing="16">
                         <ProgressRing IsActive="True" Width="48" Height="48" />
@@ -570,7 +571,7 @@
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
-                    CornerRadius="8"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
                     Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <StackPanel MaxWidth="880" HorizontalAlignment="Center" Spacing="24">
                         <StackPanel Spacing="8" HorizontalAlignment="Center">
@@ -614,7 +615,7 @@
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8">
+                                CornerRadius="{ThemeResource OverlayCornerRadius}">
                                 <StackPanel Spacing="12">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Border
@@ -639,7 +640,7 @@
                                         TextWrapping="Wrap" />
                                     <Button
                                         HorizontalAlignment="Stretch"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="12,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_QuickStartToeicTitle')}"
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
@@ -662,7 +663,7 @@
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8">
+                                CornerRadius="{ThemeResource OverlayCornerRadius}">
                                 <StackPanel Spacing="12">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Border
@@ -687,7 +688,7 @@
                                         TextWrapping="Wrap" />
                                     <Button
                                         HorizontalAlignment="Stretch"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="12,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_QuickStartIeltsTitle')}"
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
@@ -710,7 +711,7 @@
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8">
+                                CornerRadius="{ThemeResource OverlayCornerRadius}">
                                 <StackPanel Spacing="12">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Border
@@ -735,7 +736,7 @@
                                         TextWrapping="Wrap" />
                                     <Button
                                         HorizontalAlignment="Stretch"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="12,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_QuickStartVstepTitle')}"
                                         Command="{x:Bind ViewModel.QuickCreateRoadmapCommand}"
@@ -752,7 +753,7 @@
 
                         <Button
                             HorizontalAlignment="Center"
-                            CornerRadius="8"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
                             Padding="14,6"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CreateGoal')}"
                             Click="OpenCreateRoadmapDialog_Click"
@@ -791,7 +792,7 @@
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            CornerRadius="8">
+                            CornerRadius="{ThemeResource OverlayCornerRadius}">
                             <ScrollViewer
                                 x:Name="RoadmapCanvasScroller"
                                 MaxHeight="440"
@@ -836,7 +837,7 @@
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
-                        CornerRadius="8">
+                        CornerRadius="{ThemeResource OverlayCornerRadius}">
                         <ScrollViewer
                             MaxHeight="460"
                             HorizontalScrollBarVisibility="Disabled"
@@ -850,20 +851,26 @@
                                     <StackPanel Spacing="6">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <Border
-                                                Padding="6,2"
-                                                CornerRadius="4"
-                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                                Padding="8,3"
+                                                CornerRadius="12"
+                                                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                                BorderThickness="1">
                                                 <TextBlock
                                                     FontSize="11"
-                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                                     Text="{x:Bind ViewModel.SelectedNode.TypeDisplay, Mode=OneWay, FallbackValue=''}" />
                                             </Border>
                                             <Border
-                                                Padding="6,2"
-                                                CornerRadius="4"
-                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                                Padding="8,3"
+                                                CornerRadius="12"
+                                                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                                BorderThickness="1">
                                                 <TextBlock
                                                     FontSize="11"
+                                                    FontWeight="SemiBold"
                                                     Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                     Text="{x:Bind ViewModel.SelectedNode.StatusDisplay, Mode=OneWay, FallbackValue=''}" />
                                             </Border>
@@ -947,7 +954,7 @@
                                     <StackPanel Spacing="8">
                                         <Button
                                             HorizontalAlignment="Stretch"
-                                            CornerRadius="8"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}"
                                             Padding="12,6"
                                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ActionLearn')}"
                                             Command="{x:Bind ViewModel.StartLearningNodeCommand}"
@@ -962,7 +969,7 @@
 
                                         <Button
                                             HorizontalAlignment="Stretch"
-                                            CornerRadius="8"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}"
                                             Padding="12,6"
                                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_MarkMastered')}"
                                             Command="{x:Bind ViewModel.MarkNodeCompletedCommand}"
@@ -977,7 +984,7 @@
 
                                         <Button
                                             HorizontalAlignment="Stretch"
-                                            CornerRadius="8"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}"
                                             Padding="12,6"
                                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_AdvanceProgress')}"
                                             Command="{x:Bind ViewModel.AdvanceNodeProgressCommand}"
@@ -1067,7 +1074,7 @@
                                     Spacing="8">
                                     <Button
                                         Click="ClearInactiveRoadmaps_Click"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="12,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ClearInactiveTooltip')}"
                                         Style="{ThemeResource DefaultButtonStyle}">
@@ -1078,7 +1085,7 @@
                                     </Button>
                                     <Button
                                         Click="ClearAllRoadmaps_Click"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="12,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ClearAll')}"
                                         Style="{ThemeResource DefaultButtonStyle}">
@@ -1089,7 +1096,7 @@
                                     </Button>
                                     <Button
                                         Click="OpenCreateRoadmapDialog_Click"
-                                        CornerRadius="8"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}"
                                         Padding="14,6"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_CreateGoal')}"
                                         Style="{ThemeResource AccentButtonStyle}">
