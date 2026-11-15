@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Lexora.Presentation.Views.MemoryTips.MemoryTipEditorDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    DefaultButton="Primary"
+    PrimaryButtonClick="OnPrimaryButtonClick"
+    mc:Ignorable="d">
+
+    <Grid MaxWidth="720" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Error InfoBar -->
+        <InfoBar
+            x:Name="ValidationInfoBar"
+            Grid.Row="0"
+            IsClosable="True"
+            IsOpen="False"
+            Severity="Error" />
+
+        <!-- Scrollable Form Container -->
+        <ScrollViewer
+            Grid.Row="1"
+            MaxHeight="560"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="0,0,8,0" Spacing="14">
+
+                <!-- Quick Templates Section -->
+                <Border
+                    Padding="12"
+                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                            Text="{x:Bind Loc.GetString('MemoryTips_QuickTemplates')}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <ComboBox
+                                x:Name="TemplateComboBox"
+                                Grid.Column="0"
+                                HorizontalAlignment="Stretch"
+                                DisplayMemberPath="Title"
+                                PlaceholderText="{x:Bind Loc.GetString('MemoryTips_QuickTemplates')}" />
+                            <Button
+                                Grid.Column="1"
+                                Click="OnApplyTemplateClick"
+                                Content="{x:Bind Loc.GetString('MemoryTips_ApplyTemplate')}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tip Title -->
+                <TextBox
+                    x:Name="TitleBox"
+                    Header="{x:Bind Loc.GetString('MemoryTips_FieldTitle')}"
+                    PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldTitlePlaceholder')}" />
+
+                <!-- Category, Technique, Exam Target -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <ComboBox
+                        x:Name="CategoryComboBox"
+                        Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        Header="{x:Bind Loc.GetString('MemoryTips_FieldCategory')}" />
+
+                    <ComboBox
+                        x:Name="TechniqueComboBox"
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        Header="{x:Bind Loc.GetString('MemoryTips_FieldTechnique')}" />
+
+                    <ComboBox
+                        x:Name="ExamTargetComboBox"
+                        Grid.Column="2"
+                        HorizontalAlignment="Stretch"
+                        Header="{x:Bind Loc.GetString('MemoryTips_FieldExamTarget')}" />
+                </Grid>
+
+                <!-- Mnemonic Hook / Quick Recall -->
+                <TextBox
+                    x:Name="MnemonicHookBox"
+                    MinHeight="72"
+                    MaxHeight="180"
+                    AcceptsReturn="True"
+                    Header="{x:Bind Loc.GetString('MemoryTips_FieldHook')}"
+                    PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldHookPlaceholder')}"
+                    TextWrapping="Wrap"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+                <!-- Detailed Explanation -->
+                <TextBox
+                    x:Name="ExplanationBox"
+                    MinHeight="100"
+                    MaxHeight="280"
+                    AcceptsReturn="True"
+                    Header="{x:Bind Loc.GetString('MemoryTips_FieldExplanation')}"
+                    PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldExplanationPlaceholder')}"
+                    TextWrapping="Wrap"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+                <!-- Application Example -->
+                <TextBox
+                    x:Name="ExampleBox"
+                    MinHeight="72"
+                    MaxHeight="180"
+                    AcceptsReturn="True"
+                    Header="{x:Bind Loc.GetString('MemoryTips_FieldExample')}"
+                    PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldExamplePlaceholder')}"
+                    TextWrapping="Wrap"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+                <!-- Common Exam Trap -->
+                <TextBox
+                    x:Name="CommonTrapBox"
+                    MinHeight="72"
+                    MaxHeight="180"
+                    AcceptsReturn="True"
+                    Header="{x:Bind Loc.GetString('MemoryTips_FieldTrap')}"
+                    PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldTrapPlaceholder')}"
+                    TextWrapping="Wrap"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+                <!-- Tags & Pin Options -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" VerticalAlignment="Center">
+                    <TextBox
+                        x:Name="TagsBox"
+                        Grid.Column="0"
+                        Header="{x:Bind Loc.GetString('MemoryTips_FieldTags')}"
+                        PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldTagsPlaceholder')}" />
+
+                    <CheckBox
+                        x:Name="IsPinnedCheckBox"
+                        Grid.Column="1"
+                        VerticalAlignment="Bottom"
+                        Content="{x:Bind Loc.GetString('MemoryTips_FieldIsPinned')}" />
+                </Grid>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</ContentDialog>

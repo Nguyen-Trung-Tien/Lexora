@@ -276,6 +276,22 @@ public sealed class ShortcutManager : IShortcutManager
                 return Task.CompletedTask;
             }
         });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
+            Id = "Global.NavigateMemoryTips",
+            Gesture = new ShortcutGesture(ShortcutKey.M, ShortcutModifiers.Control | ShortcutModifiers.Shift),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Shell_TooltipMemoryTips",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                _navigationService.Navigate(typeof(Lexora.Presentation.Views.MemoryTips.MemoryTipsPage));
+                return Task.CompletedTask;
+            }
+        });
     }
 
     public void RegisterShortcut(ShortcutDefinition shortcut)

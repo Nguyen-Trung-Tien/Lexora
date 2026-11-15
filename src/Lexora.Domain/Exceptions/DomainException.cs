@@ -74,3 +74,24 @@ public class InvalidLearningStateException : DomainException
     {
     }
 }
+
+/// <summary>
+/// Thrown when entity input parameters fail domain validation rules.
+/// </summary>
+public class DomainValidationException : DomainException
+{
+    public string? PropertyName { get; }
+
+    public DomainValidationException(string message) : base(message)
+    {
+    }
+
+    public DomainValidationException(string propertyName, string message) : base(message)
+    {
+        PropertyName = propertyName;
+    }
+
+    public DomainValidationException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+}

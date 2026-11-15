@@ -63,6 +63,11 @@
                         <FontIcon Glyph="&#xE8BD;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemMemoryTips" Content="Memory Tips" Tag="MemoryTips" ToolTipService.ToolTip="Memory Tips (Ctrl+Shift+M)">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8D7;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
 
                 <!-- 3. Practice & Assessment Group -->
                 <NavigationViewItemHeader x:Name="NavHeaderPractice" Content="LUYỆN TẬP &amp; ĐÁNH GIÁ" />

@@ -1,5 +1,7 @@
 using Lexora.Application.Interfaces;
+using Lexora.Application.Interfaces.MemoryTips;
 using Lexora.Application.Services;
+using Lexora.Application.Services.MemoryTips;
 using Lexora.Application.Services.Phrases;
 using Lexora.Application.SpacedRepetition;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IKnowledgeGraphExportImportService, KnowledgeGraphExportImportService>();
         services.AddScoped<IRoadmapService, RoadmapService>();
         services.AddScoped<IConversationPhraseService, ConversationPhraseService>();
+        services.AddScoped<IMemoryTipService, MemoryTipService>();
 
         return services;
     }

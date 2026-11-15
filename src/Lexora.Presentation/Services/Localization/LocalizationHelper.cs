@@ -216,5 +216,37 @@ public static class LocalizationHelper
         var isVi = loc?.CurrentLanguage?.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ?? true;
         return isVi ? (textVi ?? string.Empty) : (textEn ?? textVi ?? string.Empty);
     }
+
+    public static string FormatTipCategory(TipCategory category)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        if (loc == null) return category.ToString();
+        return category switch
+        {
+            TipCategory.Vocabulary => loc.GetString("TipCategory_Vocabulary"),
+            TipCategory.Grammar => loc.GetString("TipCategory_Grammar"),
+            TipCategory.Tenses => loc.GetString("TipCategory_Tenses"),
+            TipCategory.Expressions => loc.GetString("TipCategory_Expressions"),
+            TipCategory.ExamStrategy => loc.GetString("TipCategory_ExamStrategy"),
+            _ => loc.GetString("TipCategory_General")
+        };
+    }
+
+    public static string FormatMnemonicTechnique(MnemonicTechnique technique)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        if (loc == null) return technique.ToString();
+        return technique switch
+        {
+            MnemonicTechnique.Acrostic => loc.GetString("MnemonicTechnique_Acrostic"),
+            MnemonicTechnique.RhymeAndRhythm => loc.GetString("MnemonicTechnique_RhymeAndRhythm"),
+            MnemonicTechnique.VisualImagery => loc.GetString("MnemonicTechnique_VisualImagery"),
+            MnemonicTechnique.SoundAlike => loc.GetString("MnemonicTechnique_SoundAlike"),
+            MnemonicTechnique.Storytelling => loc.GetString("MnemonicTechnique_Storytelling"),
+            MnemonicTechnique.Etymology => loc.GetString("MnemonicTechnique_Etymology"),
+            MnemonicTechnique.EliminationRule => loc.GetString("MnemonicTechnique_EliminationRule"),
+            _ => loc.GetString("MnemonicTechnique_Other")
+        };
+    }
 }
 

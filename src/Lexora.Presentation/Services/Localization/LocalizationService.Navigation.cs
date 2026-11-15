@@ -19,6 +19,7 @@ public partial class LocalizationService
         vi["Nav_Review"] = "Ôn tập ngắt quãng";
         vi["Nav_Test"] = "Luyện tập & Thi";
         vi["Nav_Grammar"] = "Ngữ pháp";
+        vi["Nav_Phrases"] = "Cụm từ giao tiếp";
         // Learning Storage (Kho lưu trữ học tập)
         vi["Nav_LearningStorage"] = "Kho lưu trữ";
         vi["Nav_Help"] = "Trung tâm hướng dẫn";
@@ -31,6 +32,7 @@ public partial class LocalizationService
         vi["Shell_TooltipVocabulary"] = "Kho từ vựng & Tra cứu (Ctrl+2)";
         vi["Shell_TooltipHomophones"] = "Từ đồng âm & Cặp âm dễ nhầm (Ctrl+3)";
         vi["Shell_TooltipGrammar"] = "Sổ tay ngữ pháp (Ctrl+5)";
+        vi["Shell_TooltipPhrases"] = "Cụm từ giao tiếp & Phản xạ (Ctrl+Shift+P)";
         vi["Shell_TooltipReview"] = "Ôn tập ngắt quãng SM-2 (Ctrl+6)";
         vi["Shell_TooltipTest"] = "Luyện tập & Kiểm tra (Ctrl+7)";
         vi["Shell_TooltipLearningStorage"] = "Kho lưu trữ ghi nhớ (Ctrl+8)";
@@ -81,6 +83,7 @@ public partial class LocalizationService
         en["Nav_Review"] = "Spaced Review";
         en["Nav_Test"] = "Practice & Test";
         en["Nav_Grammar"] = "Grammar";
+        en["Nav_Phrases"] = "Conversation Phrases";
         // Learning Storage
         en["Nav_LearningStorage"] = "Learning Storage";
         en["Nav_Help"] = "Help & Guide";
@@ -93,6 +96,7 @@ public partial class LocalizationService
         en["Shell_TooltipVocabulary"] = "Vocabulary & Lookup (Ctrl+2)";
         en["Shell_TooltipHomophones"] = "Homophones & Sound-Alikes (Ctrl+3)";
         en["Shell_TooltipGrammar"] = "Grammar Handbook (Ctrl+5)";
+        en["Shell_TooltipPhrases"] = "Conversation Phrases & Shadowing (Ctrl+Shift+P)";
         en["Shell_TooltipReview"] = "Spaced Repetition Review (Ctrl+6)";
         en["Shell_TooltipTest"] = "Practice & Test (Ctrl+7)";
         en["Shell_TooltipLearningStorage"] = "Learning Storage (Ctrl+8)";

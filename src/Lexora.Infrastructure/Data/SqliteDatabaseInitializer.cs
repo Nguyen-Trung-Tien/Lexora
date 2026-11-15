@@ -56,6 +56,12 @@ public partial class SqliteDatabaseInitializer
                     await SeedEnrichedPhraseStarterDataAsync(cancellationToken);
                 }
 
+                if (!await _context.MemoryTips.AnyAsync(cancellationToken))
+                {
+                    _logger.LogInformation("Seeding starter memory tips and exam mnemonics...");
+                    await SeedMemoryTipsStarterDataAsync(cancellationToken);
+                }
+
                 _logger.LogInformation("SQLite database initialized successfully.");
                 break;
             }
@@ -559,6 +565,37 @@ public partial class SqliteDatabaseInitializer
                 """;
             await _context.Database.ExecuteSqlRawAsync(createPhrasesTableSql, cancellationToken);
             await EnsureConversationPhraseColumnsAndIndexesAsync(cancellationToken);
+
+            const string createMemoryTipsTableSql = """
+                CREATE TABLE IF NOT EXISTS "MemoryTips" (
+                    "Id" TEXT NOT NULL CONSTRAINT "PK_MemoryTips" PRIMARY KEY,
+                    "Title" TEXT NOT NULL,
+                    "MnemonicHook" TEXT NOT NULL,
+                    "Explanation" TEXT NOT NULL,
+                    "Example" TEXT NULL,
+                    "CommonTrap" TEXT NULL,
+                    "Category" INTEGER NOT NULL,
+                    "Technique" INTEGER NOT NULL,
+                    "ExamTarget" INTEGER NULL,
+                    "IsPinned" INTEGER NOT NULL DEFAULT 0,
+                    "Tags" TEXT NULL,
+                    "LinkedWordId" TEXT NULL,
+                    "LinkedGrammarRuleId" TEXT NULL,
+                    "CreatedAt" TEXT NOT NULL,
+                    "UpdatedAt" TEXT NOT NULL,
+                    CONSTRAINT "FK_MemoryTips_Words_LinkedWordId" FOREIGN KEY ("LinkedWordId") REFERENCES "Words" ("Id") ON DELETE SET NULL,
+                    CONSTRAINT "FK_MemoryTips_GrammarRules_LinkedGrammarRuleId" FOREIGN KEY ("LinkedGrammarRuleId") REFERENCES "GrammarRules" ("Id") ON DELETE SET NULL
+                );
+                CREATE INDEX IF NOT EXISTS "IX_MemoryTips_Category" ON "MemoryTips" ("Category");
+                CREATE INDEX IF NOT EXISTS "IX_MemoryTips_Technique" ON "MemoryTips" ("Technique");
+                CREATE INDEX IF NOT EXISTS "IX_MemoryTips_IsPinned" ON "MemoryTips" ("IsPinned");
+                CREATE INDEX IF NOT EXISTS "IX_MemoryTips_ExamTarget" ON "MemoryTips" ("ExamTarget");
+                CREATE INDEX IF NOT EXISTS "IX_MemoryTips_LinkedWordId" ON "MemoryTips" ("LinkedWordId");
+                CREATE INDEX IF NOT EXISTS "IX_MemoryTips_LinkedGrammarRuleId" ON "MemoryTips" ("LinkedGrammarRuleId");
+                CREATE INDEX IF NOT EXISTS "IX_MemoryTips_CreatedAt" ON "MemoryTips" ("CreatedAt");
+                CREATE INDEX IF NOT EXISTS "IX_MemoryTips_Category_IsPinned_CreatedAt" ON "MemoryTips" ("Category", "IsPinned", "CreatedAt");
+                """;
+            await _context.Database.ExecuteSqlRawAsync(createMemoryTipsTableSql, cancellationToken);
 
             // Ensure ReferenceName column exists on RoadmapNodes for existing databases
             using (var checkCmd = connection.CreateCommand())

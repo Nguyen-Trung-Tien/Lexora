@@ -1,5 +1,7 @@
 using Lexora.Domain.Entities;
+using Lexora.Domain.Entities.MemoryTips;
 using Lexora.Domain.Entities.Phrases;
+using Lexora.Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lexora.Infrastructure.Data;
@@ -30,6 +32,7 @@ public class LexoraDbContext : DbContext
     public DbSet<RoadmapMilestone> RoadmapMilestones => Set<RoadmapMilestone>();
     public DbSet<RoadmapNode> RoadmapNodes => Set<RoadmapNode>();
     public DbSet<ConversationPhrase> ConversationPhrases => Set<ConversationPhrase>();
+    public DbSet<MemoryTip> MemoryTips => Set<MemoryTip>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -336,5 +339,8 @@ public class LexoraDbContext : DbContext
             b.HasIndex(p => p.NormalizedPrompt);
             b.HasIndex(p => new { p.Category, p.CefrLevel, p.Register });
         });
+
+        // MemoryTip configuration
+        modelBuilder.ApplyConfiguration(new MemoryTipConfiguration());
     }
 }

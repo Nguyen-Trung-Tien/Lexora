@@ -24,6 +24,7 @@ public class DependencyInjectionResolutionTests
         services.AddScoped(_ => new Mock<IHomophoneRepository>().Object);
         services.AddScoped(_ => new Mock<IRoadmapRepository>().Object);
         services.AddScoped(_ => new Mock<IConversationPhraseRepository>().Object);
+        services.AddScoped(_ => new Mock<IMemoryTipRepository>().Object);
         services.AddScoped(_ => new Mock<IUnitOfWork>().Object);
         services.AddSingleton(_ => new Mock<IVoiceProvider>().Object);
 
@@ -77,5 +78,8 @@ public class DependencyInjectionResolutionTests
 
         var phraseService = scope.ServiceProvider.GetRequiredService<IConversationPhraseService>();
         phraseService.Should().NotBeNull();
+
+        var memoryTipService = scope.ServiceProvider.GetRequiredService<Lexora.Application.Interfaces.MemoryTips.IMemoryTipService>();
+        memoryTipService.Should().NotBeNull();
     }
 }

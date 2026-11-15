@@ -8,6 +8,9 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly LexoraDbContext _context;
     private Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? _transaction;
+    private IMemoryTipRepository? _memoryTips;
+
+    public IMemoryTipRepository MemoryTips => _memoryTips ??= new MemoryTipRepository(_context);
 
     public UnitOfWork(LexoraDbContext context)
     {
