@@ -1,6 +1,7 @@
 using Lexora.Application.DTOs;
 using Lexora.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Media;
 
 namespace Lexora.Presentation.Services;
 
@@ -247,6 +248,28 @@ public static class LocalizationHelper
             MnemonicTechnique.EliminationRule => loc.GetString("MnemonicTechnique_EliminationRule"),
             _ => loc.GetString("MnemonicTechnique_Other")
         };
+    }
+
+    public static string FormatPinTooltip(bool isPinned)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        return isPinned
+            ? (loc?.GetString("MemoryTips_Unpin") ?? "Unpin")
+            : (loc?.GetString("MemoryTips_Pin") ?? "Pin to Top");
+    }
+
+    public static string FormatPinText(bool isPinned)
+    {
+        var loc = App.Current?.Services?.GetService<ILocalizationService>();
+        return isPinned
+            ? (loc?.GetString("MemoryTips_Unpin") ?? "Unpin")
+            : (loc?.GetString("MemoryTips_Pin") ?? "Pin");
+    }
+
+    public static Brush FormatPinBrush(bool isPinned)
+    {
+        var resourceKey = isPinned ? "AccentTextFillColorPrimaryBrush" : "TextFillColorSecondaryBrush";
+        return ThemeResourceHelper.GetThemeBrush(resourceKey);
     }
 }
 

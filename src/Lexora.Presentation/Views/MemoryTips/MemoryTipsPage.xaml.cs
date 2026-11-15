@@ -5,15 +5,18 @@ using Lexora.Presentation.ViewModels.MemoryTips;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace Lexora.Presentation.Views.MemoryTips;
 
-public sealed partial class MemoryTipsPage : Page, ILocalizableView
+public sealed partial class MemoryTipsPage : Page, ILocalizableView, IThemeAwareView
 {
     public MemoryTipsViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
     private readonly IMemoryTipService _tipService;
+    private readonly IThemeService _themeService;
 
     public MemoryTipsPage()
     {
@@ -22,15 +25,32 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView
         ViewModel = App.Current.Services.GetRequiredService<MemoryTipsViewModel>();
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
         _tipService = App.Current.Services.GetRequiredService<IMemoryTipService>();
+        _themeService = App.Current.Services.GetRequiredService<IThemeService>();
 
         InitializeComponent();
 
+        if (_themeService.CurrentTheme != ElementTheme.Default)
+        {
+            RequestedTheme = _themeService.CurrentTheme;
+        }
+
+        ActualThemeChanged += (s, e) => OnThemeChanged();
+        _themeService.ThemeChanged += (s, theme) => OnThemeChanged();
+
         Loaded += OnPageLoaded;
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        OnLanguageChanged();
+        OnThemeChanged();
     }
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
     {
         ApplyLocalization();
+        OnThemeChanged();
         await ViewModel.InitializeAsync();
     }
 
@@ -46,20 +66,48 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView
         }
     }
 
+    public void OnThemeChanged()
+    {
+        void UpdateThemeUI()
+        {
+            if (_themeService.CurrentTheme != ElementTheme.Default)
+            {
+                RequestedTheme = _themeService.CurrentTheme;
+            }
+            UpdateViewModeButtons();
+            UpdateFilterPillStyles();
+            Bindings.Update();
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateThemeUI();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateThemeUI);
+        }
+    }
+
     private void ApplyLocalization()
     {
         PageTitleText.Text = Loc.GetString("MemoryTips_Title");
         PageSubtitleText.Text = Loc.GetString("MemoryTips_Subtitle");
-        StatTotalLabel.Text = Loc.GetString("MemoryTips_StatTotal");
-        StatPinnedLabel.Text = Loc.GetString("MemoryTips_StatPinned");
-        StatTrapsLabel.Text = Loc.GetString("MemoryTips_StatTraps");
+
+        TextViewSplit.Text = Loc.GetString("MemoryTips_ViewSplit");
+        TextViewGrid.Text = Loc.GetString("MemoryTips_ViewGrid");
+        ToolTipService.SetToolTip(BtnViewSplit, Loc.GetString("MemoryTips_TooltipSplit"));
+        ToolTipService.SetToolTip(BtnViewGrid, Loc.GetString("MemoryTips_TooltipGrid"));
+
+        TextFilterAll.Text = Loc.GetString("MemoryTips_FilterAll");
+        TextFilterPinned.Text = Loc.GetString("MemoryTips_FilterPinned");
+        TextFilterTraps.Text = Loc.GetString("MemoryTips_FilterTraps");
+
         TextAddTip.Text = Loc.GetString("MemoryTips_AddButton");
         ToolTipService.SetToolTip(BtnRefresh, Loc.GetString("Action_Refresh"));
         SearchBox.PlaceholderText = Loc.GetString("MemoryTips_SearchPlaceholder");
-        TextOnlyPinned.Text = Loc.GetString("MemoryTips_OnlyPinned");
         ToolTipService.SetToolTip(BtnResetFilters, Loc.GetString("MemoryTips_ResetFilters"));
-        EmptyTitleText.Text = Loc.GetString("MemoryTips_EmptyTitle");
-        EmptySubtitleText.Text = Loc.GetString("MemoryTips_EmptySubtitle");
+        TextTipsCountSuffix.Text = Loc.GetString("MemoryTips_TipsCount");
 
         ComboCatAll.Content = Loc.GetString("MemoryTips_CategoryAll");
         ComboCatVocab.Content = Loc.GetString("TipCategory_Vocabulary");
@@ -83,25 +131,160 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView
 
         TextPageSizeLabel.Text = Loc.GetString("MemoryTips_PageSize");
         TextPageSizeSuffix.Text = Loc.GetString("MemoryTips_PageSizeSuffix");
-        ToolTipService.SetToolTip(BtnFirstPage, Loc.GetString("MemoryTips_FirstPage"));
-        ToolTipService.SetToolTip(BtnPrevPage, Loc.GetString("MemoryTips_PrevPage"));
-        ToolTipService.SetToolTip(BtnNextPage, Loc.GetString("MemoryTips_NextPage"));
-        ToolTipService.SetToolTip(BtnLastPage, Loc.GetString("MemoryTips_LastPage"));
+        ToolTipService.SetToolTip(BtnDetailCopyHook, Loc.GetString("MemoryTips_CopyHook"));
+        ToolTipService.SetToolTip(BtnDetailPin, Loc.GetString("MemoryTips_Pin"));
+        ToolTipService.SetToolTip(BtnDetailEdit, Loc.GetString("MemoryTips_Edit"));
+        ToolTipService.SetToolTip(BtnDetailDelete, Loc.GetString("MemoryTips_Delete"));
 
         Bindings.Update();
+    }
+
+    private void UpdateViewModeButtons()
+    {
+        var cardBg = ThemeResourceHelper.GetThemeBrush("CardBackgroundFillColorDefaultBrush");
+        var cardStroke = ThemeResourceHelper.GetThemeBrush("CardStrokeColorDefaultBrush");
+        var accentText = ThemeResourceHelper.GetThemeBrush("AccentTextFillColorPrimaryBrush");
+        var secondaryText = ThemeResourceHelper.GetThemeBrush("TextFillColorSecondaryBrush");
+        var transparent = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+        void ApplySegment(Button? btn, bool isActive)
+        {
+            if (btn == null) return;
+            btn.Style = null;
+            if (isActive)
+            {
+                btn.Background = cardBg;
+                btn.BorderBrush = cardStroke;
+                btn.BorderThickness = new Thickness(1);
+                btn.Foreground = accentText;
+            }
+            else
+            {
+                btn.Background = transparent;
+                btn.BorderBrush = transparent;
+                btn.BorderThickness = new Thickness(0);
+                btn.Foreground = secondaryText;
+            }
+        }
+
+        ApplySegment(BtnViewSplit, ViewModel.IsSplitViewMode);
+        ApplySegment(BtnViewGrid, ViewModel.IsGridViewMode);
+    }
+
+    private void UpdateFilterPillStyles()
+    {
+        SetPillStyle(ChipFilterAll, ViewModel.ActiveQuickFilter == 0);
+        SetPillStyle(ChipFilterPinned, ViewModel.ActiveQuickFilter == 1);
+        SetPillStyle(ChipFilterTraps, ViewModel.ActiveQuickFilter == 2);
+    }
+
+    private void SetPillStyle(Button? btn, bool isActive)
+    {
+        if (btn == null) return;
+        btn.Style = (Style)App.Current.Resources[isActive ? "AccentButtonStyle" : "DefaultButtonStyle"];
+    }
+
+    private void BtnViewSplit_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SetSplitView();
+        UpdateViewModeButtons();
+    }
+
+    private void BtnViewGrid_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SetGridView();
+        UpdateViewModeButtons();
+    }
+
+    private async void PillFilterAll_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.FilterAllAsync();
+        UpdateFilterPillStyles();
+    }
+
+    private async void PillFilterPinned_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.FilterPinnedAsync();
+        UpdateFilterPillStyles();
+    }
+
+    private async void PillFilterTraps_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.FilterTrapsAsync();
+        UpdateFilterPillStyles();
     }
 
     private InfoBarSeverity GetInfoBarSeverity(bool isError) =>
         isError ? InfoBarSeverity.Error : InfoBarSeverity.Success;
 
+    private void TipsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (TipsListView.SelectedItem is MemoryTipDto selected)
+        {
+            ViewModel.SelectedTip = selected;
+        }
+    }
+
+    private void OnDetailCopyHookClick(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedTip != null)
+        {
+            CopyMnemonicHook(ViewModel.SelectedTip.MnemonicHook);
+        }
+    }
+
+    private void OnCardCopyHookClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: MemoryTipDto tip })
+        {
+            CopyMnemonicHook(tip.MnemonicHook);
+        }
+    }
+
+    private void CopyMnemonicHook(string? hook)
+    {
+        if (string.IsNullOrWhiteSpace(hook)) return;
+        try
+        {
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(hook);
+            Clipboard.SetContent(dataPackage);
+            ViewModel.ShowStatus(Loc.GetString("MemoryTips_CopySuccess"), isError: false);
+        }
+        catch
+        {
+            // Clipboard access fallback
+        }
+    }
+
+    private async void OnDetailPinClick(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedTip != null)
+        {
+            await ViewModel.TogglePinAsync(ViewModel.SelectedTip);
+        }
+    }
+
+    private async void OnDetailEditClick(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedTip != null)
+        {
+            await OpenEditorDialogAsync(ViewModel.SelectedTip);
+        }
+    }
+
+    private async void OnDetailDeleteClick(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedTip != null)
+        {
+            await ConfirmAndDeleteTipAsync(ViewModel.SelectedTip);
+        }
+    }
+
     private async void BtnAddTip_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new MemoryTipEditorDialog(Loc)
-        {
-            XamlRoot = this.XamlRoot
-        };
-
-        var result = await dialog.ShowAsync();
+        var dialog = new MemoryTipEditorDialog(Loc);
+        var result = await dialog.ShowAsyncSafe(this.XamlRoot);
         if (result == ContentDialogResult.Primary && dialog.CreatedResult is not null)
         {
             try
@@ -121,24 +304,25 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView
     {
         if (sender is FrameworkElement { Tag: MemoryTipDto tip })
         {
-            var dialog = new MemoryTipEditorDialog(Loc, tip)
-            {
-                XamlRoot = this.XamlRoot
-            };
+            await OpenEditorDialogAsync(tip);
+        }
+    }
 
-            var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary && dialog.UpdatedResult is not null)
+    private async Task OpenEditorDialogAsync(MemoryTipDto tip)
+    {
+        var dialog = new MemoryTipEditorDialog(Loc, tip);
+        var result = await dialog.ShowAsyncSafe(this.XamlRoot);
+        if (result == ContentDialogResult.Primary && dialog.UpdatedResult is not null)
+        {
+            try
             {
-                try
-                {
-                    var updated = await _tipService.UpdateAsync(dialog.UpdatedResult);
-                    await ViewModel.OnTipCreatedOrUpdatedAsync(updated);
-                    ViewModel.ShowStatus(Loc.GetString("MemoryTips_UpdateSuccess"), isError: false);
-                }
-                catch (Exception ex)
-                {
-                    ViewModel.ShowStatus(ex.Message, isError: true);
-                }
+                var updated = await _tipService.UpdateAsync(dialog.UpdatedResult);
+                await ViewModel.OnTipCreatedOrUpdatedAsync(updated);
+                ViewModel.ShowStatus(Loc.GetString("MemoryTips_UpdateSuccess"), isError: false);
+            }
+            catch (Exception ex)
+            {
+                ViewModel.ShowStatus(ex.Message, isError: true);
             }
         }
     }
@@ -155,22 +339,25 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView
     {
         if (sender is FrameworkElement { Tag: MemoryTipDto tip })
         {
-            var confirmDialog = new ContentDialog
-            {
-                Title = Loc.GetString("MemoryTips_DeleteConfirmTitle"),
-                Content = Loc.GetString("MemoryTips_DeleteConfirmMessage"),
-                PrimaryButtonText = Loc.GetString("Action_Delete"),
-                CloseButtonText = Loc.GetString("Action_Cancel"),
-                DefaultButton = ContentDialogButton.Close,
-                XamlRoot = this.XamlRoot
-            };
+            await ConfirmAndDeleteTipAsync(tip);
+        }
+    }
 
-            var confirmResult = await confirmDialog.ShowAsync();
-            if (confirmResult == ContentDialogResult.Primary)
-            {
-                await ViewModel.DeleteTipAsync(tip);
-                ViewModel.ShowStatus(Loc.GetString("MemoryTips_DeleteSuccess"), isError: false);
-            }
+    private async Task ConfirmAndDeleteTipAsync(MemoryTipDto tip)
+    {
+        var confirmDialog = new ContentDialog
+        {
+            Title = Loc.GetString("MemoryTips_DeleteConfirmTitle"),
+            Content = Loc.GetString("MemoryTips_DeleteConfirmMessage"),
+            PrimaryButtonText = Loc.GetString("Action_Delete"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        var confirmResult = await confirmDialog.ShowAsyncSafe(this.XamlRoot);
+        if (confirmResult == ContentDialogResult.Primary)
+        {
+            await ViewModel.DeleteTipAsync(tip);
         }
     }
 

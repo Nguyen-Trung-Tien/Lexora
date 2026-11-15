@@ -31,6 +31,19 @@ public partial class LocalizationService
         vi["MemoryTips_PageSizeSuffix"] = "/ trang";
         vi["MemoryTips_ShowingRange"] = "Hiển thị {0}-{1} / {2} mẹo";
 
+        vi["MemoryTips_ViewSplit"] = "Danh sách & Chi tiết";
+        vi["MemoryTips_ViewGrid"] = "Lưới thẻ";
+        vi["MemoryTips_TooltipSplit"] = "Xem dạng Danh sách & Chi tiết (Split View)";
+        vi["MemoryTips_TooltipGrid"] = "Xem dạng Lưới thẻ (Grid View)";
+        vi["MemoryTips_FilterAll"] = "Tất cả";
+        vi["MemoryTips_FilterPinned"] = "Đã ghim";
+        vi["MemoryTips_FilterTraps"] = "Mẹo thi & Bẫy";
+        vi["MemoryTips_CopyHook"] = "Sao chép câu thần chú";
+        vi["MemoryTips_CopySuccess"] = "Đã sao chép câu thần chú vào khay nhớ tạm!";
+        vi["MemoryTips_NoSelectedTip"] = "Chọn một mẹo ghi nhớ ở danh sách bên trái để xem nội dung chi tiết";
+        vi["MemoryTips_DetailHeader"] = "Chi tiết mẹo ghi nhớ";
+        vi["MemoryTips_TipsCount"] = "mẹo";
+
         vi["MemoryTips_EmptyTitle"] = "Chưa tìm thấy mẹo ghi nhớ phù hợp";
         vi["MemoryTips_EmptySubtitle"] = "Thử thay đổi bộ lọc tìm kiếm hoặc nhấn 'Thêm mẹo mới' để lưu câu thần chú học tập của bạn.";
 
@@ -120,6 +133,19 @@ public partial class LocalizationService
         en["MemoryTips_PageSize"] = "Per page:";
         en["MemoryTips_PageSizeSuffix"] = "/ page";
         en["MemoryTips_ShowingRange"] = "Showing {0}-{1} of {2} tips";
+
+        en["MemoryTips_ViewSplit"] = "List & Details";
+        en["MemoryTips_ViewGrid"] = "Card Grid";
+        en["MemoryTips_TooltipSplit"] = "Split View: List & Detailed Inspector";
+        en["MemoryTips_TooltipGrid"] = "Grid View: Multi-column Card Grid";
+        en["MemoryTips_FilterAll"] = "All";
+        en["MemoryTips_FilterPinned"] = "Pinned";
+        en["MemoryTips_FilterTraps"] = "Strategies & Traps";
+        en["MemoryTips_CopyHook"] = "Copy Mnemonic Hook";
+        en["MemoryTips_CopySuccess"] = "Mnemonic hook copied to clipboard!";
+        en["MemoryTips_NoSelectedTip"] = "Select a memory tip from the list on the left to view details";
+        en["MemoryTips_DetailHeader"] = "Memory Tip Details";
+        en["MemoryTips_TipsCount"] = "tips";
 
         en["MemoryTips_EmptyTitle"] = "No matching memory tips found";
         en["MemoryTips_EmptySubtitle"] = "Try adjusting your search filters or click 'Add New Tip' to save your own learning mnemonics.";

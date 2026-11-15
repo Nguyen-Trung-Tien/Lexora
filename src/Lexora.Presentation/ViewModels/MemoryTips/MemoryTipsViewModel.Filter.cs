@@ -7,19 +7,31 @@ namespace Lexora.Presentation.ViewModels.MemoryTips;
 public partial class MemoryTipsViewModel
 {
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     public partial string SearchQuery { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     public partial int SelectedCategoryIndex { get; set; } = 0;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     public partial int SelectedTechniqueIndex { get; set; } = 0;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     public partial int SelectedExamTargetIndex { get; set; } = 0;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     public partial bool OnlyPinnedFilter { get; set; } = false;
+
+    public bool HasActiveFilters =>
+        !string.IsNullOrWhiteSpace(SearchQuery) ||
+        SelectedCategoryIndex > 0 ||
+        SelectedTechniqueIndex > 0 ||
+        SelectedExamTargetIndex > 0 ||
+        OnlyPinnedFilter;
 
     // Pagination State
     [ObservableProperty]
@@ -42,7 +54,7 @@ public partial class MemoryTipsViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ItemRangeDisplayInfo))]
-    public partial int PageSize { get; set; } = 6;
+    public partial int PageSize { get; set; } = 10;
 
     public bool HasPreviousPage => CurrentPage > 1;
     public bool HasNextPage => CurrentPage < TotalPages;
@@ -103,6 +115,7 @@ public partial class MemoryTipsViewModel
     [RelayCommand]
     public async Task ResetFiltersAsync()
     {
+        ActiveQuickFilter = 0;
         SearchQuery = string.Empty;
         SelectedCategoryIndex = 0;
         SelectedTechniqueIndex = 0;

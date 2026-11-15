@@ -9,7 +9,7 @@
     PrimaryButtonClick="OnPrimaryButtonClick"
     mc:Ignorable="d">
 
-    <Grid MaxWidth="720" RowSpacing="12">
+    <Grid MaxWidth="520" RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -65,8 +65,8 @@
                     Header="{x:Bind Loc.GetString('MemoryTips_FieldTitle')}"
                     PlaceholderText="{x:Bind Loc.GetString('MemoryTips_FieldTitlePlaceholder')}" />
 
-                <!-- Category, Technique, Exam Target -->
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                <!-- Category & Exam Target (2 Columns) -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <ComboBox
                         x:Name="CategoryComboBox"
                         Grid.Column="0"
@@ -74,17 +74,17 @@
                         Header="{x:Bind Loc.GetString('MemoryTips_FieldCategory')}" />
 
                     <ComboBox
-                        x:Name="TechniqueComboBox"
-                        Grid.Column="1"
-                        HorizontalAlignment="Stretch"
-                        Header="{x:Bind Loc.GetString('MemoryTips_FieldTechnique')}" />
-
-                    <ComboBox
                         x:Name="ExamTargetComboBox"
-                        Grid.Column="2"
+                        Grid.Column="1"
                         HorizontalAlignment="Stretch"
                         Header="{x:Bind Loc.GetString('MemoryTips_FieldExamTarget')}" />
                 </Grid>
+
+                <!-- Technique ComboBox (Full Width so long labels never truncate!) -->
+                <ComboBox
+                    x:Name="TechniqueComboBox"
+                    HorizontalAlignment="Stretch"
+                    Header="{x:Bind Loc.GetString('MemoryTips_FieldTechnique')}" />
 
                 <!-- Mnemonic Hook / Quick Recall -->
                 <TextBox

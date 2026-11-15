@@ -31,6 +31,15 @@ public partial class MemoryTipsViewModel(
     public partial MemoryTipDto? SelectedTip { get; set; }
 
     [ObservableProperty]
+    public partial bool IsSplitViewMode { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsGridViewMode { get; set; } = false;
+
+    [ObservableProperty]
+    public partial int ActiveQuickFilter { get; set; } = 0; // 0: All, 1: Pinned, 2: Traps
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNoTips))]
     [NotifyPropertyChangedFor(nameof(HasTips))]
     public partial bool IsLoading { get; set; }
@@ -62,6 +71,52 @@ public partial class MemoryTipsViewModel(
     [RelayCommand]
     public async Task InitializeAsync()
     {
+        await LoadTipsAsync();
+    }
+
+    [RelayCommand]
+    public void SetSplitView()
+    {
+        IsSplitViewMode = true;
+        IsGridViewMode = false;
+    }
+
+    [RelayCommand]
+    public void SetGridView()
+    {
+        IsSplitViewMode = false;
+        IsGridViewMode = true;
+    }
+
+    [RelayCommand]
+    public async Task FilterAllAsync()
+    {
+        ActiveQuickFilter = 0;
+        OnlyPinnedFilter = false;
+        SelectedCategoryIndex = 0;
+        SelectedTechniqueIndex = 0;
+        SelectedExamTargetIndex = 0;
+        CurrentPage = 1;
+        await LoadTipsAsync();
+    }
+
+    [RelayCommand]
+    public async Task FilterPinnedAsync()
+    {
+        ActiveQuickFilter = 1;
+        OnlyPinnedFilter = true;
+        SelectedCategoryIndex = 0;
+        CurrentPage = 1;
+        await LoadTipsAsync();
+    }
+
+    [RelayCommand]
+    public async Task FilterTrapsAsync()
+    {
+        ActiveQuickFilter = 2;
+        OnlyPinnedFilter = false;
+        SelectedCategoryIndex = 5; // TipCategory.ExamStrategy
+        CurrentPage = 1;
         await LoadTipsAsync();
     }
 
@@ -105,6 +160,10 @@ public partial class MemoryTipsViewModel(
             var success = await _tipService.DeleteAsync(tip.Id);
             if (success)
             {
+                if (SelectedTip?.Id == tip.Id)
+                {
+                    SelectedTip = null;
+                }
                 await LoadTipsAsync();
                 ShowStatus(_localizationService.GetString("MemoryTips_DeleteSuccess"), isError: false);
             }

@@ -1,12 +1,13 @@
 using Lexora.Application.DTOs.MemoryTips;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 namespace Lexora.Presentation.Views.MemoryTips;
 
-public sealed partial class MemoryTipEditorDialog : ContentDialog
+public sealed partial class MemoryTipEditorDialog : ContentDialog, IThemeAwareView
 {
     private readonly Guid? _editingId;
 
@@ -32,6 +33,13 @@ public sealed partial class MemoryTipEditorDialog : ContentDialog
         Loc = localizationService;
         InitializeComponent();
 
+        ActualThemeChanged += (s, e) => OnThemeChanged();
+        var themeService = App.Current?.Services?.GetService<IThemeService>();
+        if (themeService != null && themeService.CurrentTheme != ElementTheme.Default)
+        {
+            RequestedTheme = themeService.CurrentTheme;
+        }
+
         Title = existing is null
             ? Loc.GetString("MemoryTips_DialogAddTitle")
             : Loc.GetString("MemoryTips_DialogEditTitle");
@@ -47,6 +55,16 @@ public sealed partial class MemoryTipEditorDialog : ContentDialog
             _editingId = existing.Id;
             LoadExistingValues(existing);
         }
+    }
+
+    public void OnThemeChanged()
+    {
+        var themeService = App.Current?.Services?.GetService<IThemeService>();
+        if (themeService != null && themeService.CurrentTheme != ElementTheme.Default)
+        {
+            RequestedTheme = themeService.CurrentTheme;
+        }
+        Bindings.Update();
     }
 
     private void PopulateDropdowns()
