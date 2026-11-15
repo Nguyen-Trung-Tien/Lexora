@@ -31,6 +31,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
     private MediaSource? _currentMediaSource;
     private IDisposable? _currentStream;
     private bool _disposed;
+    private int _playRequestVersion;
 
     public double PlaybackRate { get; set; } = 1.0;
 
@@ -63,11 +64,17 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 
     public async Task PlayPronunciationAsync(string term, string accent = "uk", double? rate = null)
     {
-        if (string.IsNullOrWhiteSpace(term)) return;
+        if (string.IsNullOrWhiteSpace(term) || _disposed) return;
+
+        int requestVersion = Interlocked.Increment(ref _playRequestVersion);
+
+        // Immediately silence any active stream so rapid clicks never overlap
+        try { StopInternal(); }
+        catch (Exception ex) { _logger.LogDebug(ex, "Pre-play StopInternal() failed."); }
 
         var safeTerm = term.Trim();
-        if (safeTerm.Length > 150)
-            safeTerm = safeTerm[..150];
+        if (safeTerm.Length > 500)
+            safeTerm = safeTerm[..500];
 
         double effectiveRate = Math.Clamp(rate ?? PlaybackRate, 0.5, 2.0);
 
@@ -82,7 +89,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         await _audioSemaphore.WaitAsync();
         try
         {
-            if (_disposed) return;
+            if (_disposed || requestVersion != Volatile.Read(ref _playRequestVersion)) return;
 
             StopInternal();
             _mediaPlayer.PlaybackSession.PlaybackRate = effectiveRate;
@@ -92,6 +99,8 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             if (cachedPath != null && File.Exists(cachedPath))
             {
                 var bytes = await File.ReadAllBytesAsync(cachedPath).ConfigureAwait(false);
+                if (_disposed || requestVersion != Volatile.Read(ref _playRequestVersion)) return;
+
                 var mimeType = cachedPath.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ? "audio/mpeg" : "audio/wav";
                 var stream = new MemoryStream(bytes).AsRandomAccessStream();
                 var mediaSource = MediaSource.CreateFromStream(stream, mimeType);
@@ -103,7 +112,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             }
 
             // 2. Synthesize via TTS on UI thread (SpeechSynthesizer is WinRT STA)
-            await SynthesizeOnUIThreadAsync(safeTerm, resolution, effectiveRate);
+            await SynthesizeOnUIThreadAsync(safeTerm, resolution, effectiveRate, requestVersion);
         }
         catch (Exception ex)
         {
@@ -115,14 +124,25 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         }
     }
 
-    private async Task SynthesizeOnUIThreadAsync(string term, VoiceResolutionResult resolution, double rate)
+    private async Task SynthesizeOnUIThreadAsync(string term, VoiceResolutionResult resolution, double rate, int requestVersion)
     {
+        if (_disposed || requestVersion != Volatile.Read(ref _playRequestVersion))
+        {
+            return;
+        }
+
         var tcs = new TaskCompletionSource<SpeechSynthesisStream>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         bool enqueued = _dispatcherQueue.TryEnqueue(async () =>
         {
             try
             {
+                if (_disposed || requestVersion != Volatile.Read(ref _playRequestVersion))
+                {
+                    tcs.TrySetCanceled();
+                    return;
+                }
+
                 using var synth = new SpeechSynthesizer();
                 if (resolution.Voice != null)
                 {
@@ -153,10 +173,20 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
         {
             stream = await tcs.Task;
         }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "SpeechSynthesizer failed for '{Term}'. Voice='{Voice}'.",
                 term, resolution.Voice?.DisplayName ?? "default");
+            return;
+        }
+
+        if (_disposed || requestVersion != Volatile.Read(ref _playRequestVersion))
+        {
+            stream.Dispose();
             return;
         }
 
@@ -180,6 +210,12 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
             }
         }
 
+        if (_disposed || requestVersion != Volatile.Read(ref _playRequestVersion))
+        {
+            stream.Dispose();
+            return;
+        }
+
         stream.Seek(0);
         var mediaSource = MediaSource.CreateFromStream(stream, stream.ContentType);
         _currentMediaSource = mediaSource;
@@ -190,6 +226,7 @@ public class WindowsAudioPlayerService : IAudioPlayerService, IDisposable
 
     public void Stop()
     {
+        Interlocked.Increment(ref _playRequestVersion);
         try { StopInternal(); }
         catch (Exception ex) { _logger.LogDebug(ex, "Stop() failed."); }
     }

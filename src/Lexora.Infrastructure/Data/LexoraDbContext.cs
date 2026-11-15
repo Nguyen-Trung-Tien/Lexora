@@ -315,14 +315,26 @@ public class LexoraDbContext : DbContext
             b.Property(p => p.SampleResponse).IsRequired().HasMaxLength(3000);
             b.Property(p => p.ResponseTranslation).IsRequired().HasMaxLength(3000);
             b.Property(p => p.AdditionalSuggestions).HasMaxLength(4000);
+            b.Property(p => p.Register).HasDefaultValue(Lexora.Domain.Enums.PhraseRegister.Neutral);
+            b.Property(p => p.KeyPhrases).HasMaxLength(1000);
+            b.Property(p => p.FormalVariation).HasMaxLength(2000);
+            b.Property(p => p.CasualVariation).HasMaxLength(2000);
+            b.Property(p => p.CommonMistakesVi).HasMaxLength(2000);
+            b.Property(p => p.EaseFactor).HasDefaultValue(2.5);
             b.Property(p => p.NormalizedPrompt).HasMaxLength(2000);
             b.Property(p => p.NormalizedResponse).HasMaxLength(3000);
 
             b.HasIndex(p => p.Category);
+            b.HasIndex(p => p.ContextTag);
+            b.HasIndex(p => p.Register);
+            b.HasIndex(p => p.ExamTarget);
             b.HasIndex(p => p.CefrLevel);
             b.HasIndex(p => p.IsFavorite);
+            b.HasIndex(p => p.Status);
+            b.HasIndex(p => p.NextReviewAt);
             b.HasIndex(p => p.CreatedAt);
             b.HasIndex(p => p.NormalizedPrompt);
+            b.HasIndex(p => new { p.Category, p.CefrLevel, p.Register });
         });
     }
 }

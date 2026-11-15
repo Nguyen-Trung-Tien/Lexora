@@ -1,4 +1,5 @@
 using Lexora.Application.DTOs;
+using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
 using Microsoft.UI.Xaml;
@@ -6,196 +7,256 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Lexora.Presentation.Views.Phrases;
 
+/// <summary>
+/// ContentDialog for creating or editing a ConversationPhrase with scenario,
+/// formality register, exam target, variations, and Vietnamese learner notes.
+/// </summary>
 public sealed partial class PhraseEditorDialog : ContentDialog
 {
-    private readonly ILocalizationService _loc;
-    private readonly ConversationPhraseDto? _existingPhrase;
+    private readonly Guid? _editingId;
 
-    public ILocalizationService Loc => _loc;
+    public ILocalizationService Loc { get; }
     public CreateConversationPhraseDto? CreatedResult { get; private set; }
     public UpdateConversationPhraseDto? UpdatedResult { get; private set; }
 
-    public PhraseEditorDialog(ILocalizationService loc, ConversationPhraseDto? existingPhrase = null)
+    public PhraseEditorDialog(
+        ILocalizationService localizationService,
+        IReadOnlyList<string>? availableCategories = null,
+        IReadOnlyList<PhraseSmartSuggestionDto>? quickTemplates = null,
+        ConversationPhraseDto? existing = null)
     {
-        _loc = loc;
-        _existingPhrase = existingPhrase;
-
+        Loc = localizationService;
         InitializeComponent();
 
-        Title = existingPhrase == null
-            ? _loc.GetString("Phrases_CreateDialogTitle")
-            : _loc.GetString("Phrases_EditDialogTitle");
+        Title = existing is null
+            ? Loc.GetString("Phrases_AddTitle")
+            : Loc.GetString("Phrases_EditTitle");
+        PrimaryButtonText = Loc.GetString("Action_Save");
+        CloseButtonText = Loc.GetString("Action_Cancel");
 
-        PrimaryButtonText = _loc.GetString("Action_Save");
-        CloseButtonText = _loc.GetString("Action_Cancel");
-
-        PrimaryButtonClick += OnPrimaryButtonClick;
-
-        if (existingPhrase != null)
+        PopulateCategories(availableCategories);
+        if (quickTemplates is not null && quickTemplates.Count > 0)
         {
-            LoadExistingData(existingPhrase);
+            TemplateComboBox.ItemsSource = quickTemplates;
+            TemplateComboBox.SelectedIndex = 0;
+        }
+
+        if (existing is not null)
+        {
+            _editingId = existing.Id;
+            LoadExistingValues(existing);
+        }
+        else if (CategoryComboBox.Items.Count > 0)
+        {
+            CategoryComboBox.SelectedIndex = 0;
         }
     }
 
-    private void LoadExistingData(ConversationPhraseDto p)
+    private void PopulateCategories(IReadOnlyList<string>? availableCategories)
     {
-        // Category
-        CategoryComboBox.Text = p.Category;
-        foreach (ComboBoxItem item in CategoryComboBox.Items)
+        var items = (availableCategories ?? [])
+            .Concat(["Workplace & Office", "Business & TOEIC", "Academic & IELTS Speaking", "Travel & Airport", "Daily Life & Social", "VSTEP Practical Situations"])
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var item in items)
         {
-            if (string.Equals(item.Content?.ToString(), p.Category, StringComparison.OrdinalIgnoreCase))
-            {
-                CategoryComboBox.SelectedItem = item;
-                break;
-            }
+            CategoryComboBox.Items.Add(item);
+        }
+    }
+
+    private void LoadExistingValues(ConversationPhraseDto existing)
+    {
+        CategoryComboBox.Text = existing.Category;
+        ContextTagBox.Text = existing.ContextTag;
+        PromptSentenceBox.Text = existing.PromptSentence;
+        PromptTranslationBox.Text = existing.PromptTranslation;
+        SampleResponseBox.Text = existing.SampleResponse;
+        ResponseTranslationBox.Text = existing.ResponseTranslation;
+        KeyPhrasesBox.Text = existing.KeyPhrases;
+        FormalVariationBox.Text = existing.FormalVariation;
+        CasualVariationBox.Text = existing.CasualVariation;
+        CommonMistakesBox.Text = existing.CommonMistakesVi;
+        AdditionalSuggestionsBox.Text = existing.AdditionalSuggestions;
+        IsFavoriteCheckBox.IsChecked = existing.IsFavorite;
+
+        CefrComboBox.SelectedIndex = existing.CefrLevel switch
+        {
+            CefrLevel.A1 => 0,
+            CefrLevel.A2 => 1,
+            CefrLevel.B1 => 2,
+            CefrLevel.B2 => 3,
+            CefrLevel.C1 => 4,
+            CefrLevel.C2 => 5,
+            _ => 2
+        };
+
+        RegisterComboBox.SelectedIndex = existing.Register switch
+        {
+            PhraseRegister.Neutral => 0,
+            PhraseRegister.Formal => 1,
+            PhraseRegister.Casual => 2,
+            PhraseRegister.Idiomatic => 3,
+            _ => 0
+        };
+
+        ExamTargetComboBox.SelectedIndex = existing.ExamTarget switch
+        {
+            ExamTarget.Toeic => 1,
+            ExamTarget.Ielts => 2,
+            ExamTarget.Vstep => 3,
+            _ => 0
+        };
+    }
+
+    private void OnApplyTemplateClick(object sender, RoutedEventArgs e)
+    {
+        if (TemplateComboBox.SelectedItem is not PhraseSmartSuggestionDto template)
+        {
+            return;
         }
 
-        TagTextBox.Text = p.ContextTag ?? string.Empty;
-        PromptTextBox.Text = p.PromptSentence;
-        PromptTransTextBox.Text = p.PromptTranslation;
-        ResponseTextBox.Text = p.SampleResponse;
-        ResponseTransTextBox.Text = p.ResponseTranslation;
-        SuggestionsTextBox.Text = p.AdditionalSuggestions ?? string.Empty;
-
-        // Level
-        foreach (ComboBoxItem item in LevelComboBox.Items)
+        if (!string.IsNullOrWhiteSpace(template.CategoryTag) &&
+            !template.CategoryTag.Equals("Formal", StringComparison.OrdinalIgnoreCase) &&
+            !template.CategoryTag.Equals("Casual", StringComparison.OrdinalIgnoreCase))
         {
-            if (item.Tag?.ToString() == p.CefrLevel.ToString())
-            {
-                LevelComboBox.SelectedItem = item;
-                break;
-            }
+            CategoryComboBox.Text = template.CategoryTag;
         }
+        else if (string.IsNullOrWhiteSpace(CategoryComboBox.Text))
+        {
+            CategoryComboBox.Text = template.Register == PhraseRegister.Formal
+                ? "Workplace & Office"
+                : "Daily Life & Social";
+        }
+
+        if (string.IsNullOrWhiteSpace(SampleResponseBox.Text))
+        {
+            SampleResponseBox.Text = template.TextToAppend;
+        }
+        else if (string.IsNullOrWhiteSpace(PromptSentenceBox.Text))
+        {
+            PromptSentenceBox.Text = template.TextToAppend;
+        }
+
+        KeyPhrasesBox.Text = string.IsNullOrWhiteSpace(KeyPhrasesBox.Text)
+            ? template.KeyPhrases
+            : KeyPhrasesBox.Text;
+        FormalVariationBox.Text = string.IsNullOrWhiteSpace(FormalVariationBox.Text)
+            ? template.FormalVariation
+            : FormalVariationBox.Text;
+        CasualVariationBox.Text = string.IsNullOrWhiteSpace(CasualVariationBox.Text)
+            ? template.CasualVariation
+            : CasualVariationBox.Text;
+        CommonMistakesBox.Text = string.IsNullOrWhiteSpace(CommonMistakesBox.Text)
+            ? template.CommonMistakesVi
+            : CommonMistakesBox.Text;
+
+        RegisterComboBox.SelectedIndex = (int)template.Register;
+        ExamTargetComboBox.SelectedIndex = template.ExamTarget switch
+        {
+            ExamTarget.Toeic => 1,
+            ExamTarget.Ielts => 2,
+            ExamTarget.Vstep => 3,
+            _ => 0
+        };
     }
 
     private void OnPrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        var category = CategoryComboBox.Text?.Trim();
-        if (string.IsNullOrWhiteSpace(category) && CategoryComboBox.SelectedItem is ComboBoxItem cbi)
-        {
-            category = cbi.Content?.ToString()?.Trim();
-        }
+        ValidationInfoBar.IsOpen = false;
 
-        var prompt = PromptTextBox.Text?.Trim();
-        var promptTrans = PromptTransTextBox.Text?.Trim();
-        var response = ResponseTextBox.Text?.Trim();
-        var responseTrans = ResponseTransTextBox.Text?.Trim();
-        var suggestions = SuggestionsTextBox.Text?.Trim() ?? string.Empty;
-        var tag = TagTextBox.Text?.Trim() ?? string.Empty;
+        var prompt = PromptSentenceBox.Text?.Trim() ?? string.Empty;
+        var promptTrans = PromptTranslationBox.Text?.Trim() ?? string.Empty;
+        var response = SampleResponseBox.Text?.Trim() ?? string.Empty;
+        var responseTrans = ResponseTranslationBox.Text?.Trim() ?? string.Empty;
 
-        var selectedLevel = CefrLevel.B1;
-        if (LevelComboBox.SelectedItem is ComboBoxItem levelItem &&
-            Enum.TryParse<CefrLevel>(levelItem.Tag?.ToString(), out var parsedLevel))
+        if (string.IsNullOrWhiteSpace(prompt) ||
+            string.IsNullOrWhiteSpace(promptTrans) ||
+            string.IsNullOrWhiteSpace(response) ||
+            string.IsNullOrWhiteSpace(responseTrans))
         {
-            selectedLevel = parsedLevel;
-        }
-
-        // Validation
-        if (string.IsNullOrWhiteSpace(category))
-        {
-            ShowValidationError(_loc.GetString("Phrases_ValidationCategoryRequired"));
+            ValidationInfoBar.Title = Loc.GetString("Phrases_ValidationRequiredTitle");
+            ValidationInfoBar.Message = Loc.GetString("Phrases_ValidationRequiredMsg");
+            ValidationInfoBar.IsOpen = true;
             args.Cancel = true;
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(prompt))
+        var category = string.IsNullOrWhiteSpace(CategoryComboBox.Text)
+            ? (CategoryComboBox.SelectedItem as string ?? "Daily Life")
+            : CategoryComboBox.Text.Trim();
+
+        var level = CefrComboBox.SelectedIndex switch
         {
-            ShowValidationError(_loc.GetString("Phrases_ValidationPromptRequired"));
-            args.Cancel = true;
-            return;
-        }
+            0 => CefrLevel.A1,
+            1 => CefrLevel.A2,
+            2 => CefrLevel.B1,
+            3 => CefrLevel.B2,
+            4 => CefrLevel.C1,
+            5 => CefrLevel.C2,
+            _ => CefrLevel.B1
+        };
 
-        if (string.IsNullOrWhiteSpace(promptTrans))
+        var register = RegisterComboBox.SelectedIndex switch
         {
-            ShowValidationError(_loc.GetString("Phrases_ValidationPromptTransRequired"));
-            args.Cancel = true;
-            return;
-        }
+            1 => PhraseRegister.Formal,
+            2 => PhraseRegister.Casual,
+            3 => PhraseRegister.Idiomatic,
+            _ => PhraseRegister.Neutral
+        };
 
-        if (string.IsNullOrWhiteSpace(response))
+        ExamTarget? examTarget = ExamTargetComboBox.SelectedIndex switch
         {
-            ShowValidationError(_loc.GetString("Phrases_ValidationResponseRequired"));
-            args.Cancel = true;
-            return;
-        }
+            1 => ExamTarget.Toeic,
+            2 => ExamTarget.Ielts,
+            3 => ExamTarget.Vstep,
+            _ => null
+        };
 
-        if (string.IsNullOrWhiteSpace(responseTrans))
+        if (_editingId.HasValue)
         {
-            ShowValidationError(_loc.GetString("Phrases_ValidationResponseTransRequired"));
-            args.Cancel = true;
-            return;
+            UpdatedResult = new UpdateConversationPhraseDto
+            {
+                Id = _editingId.Value,
+                Category = category,
+                ContextTag = ContextTagBox.Text?.Trim() ?? string.Empty,
+                PromptSentence = prompt,
+                PromptTranslation = promptTrans,
+                SampleResponse = response,
+                ResponseTranslation = responseTrans,
+                AdditionalSuggestions = AdditionalSuggestionsBox.Text?.Trim(),
+                CefrLevel = level,
+                Register = register,
+                ExamTarget = examTarget,
+                KeyPhrases = KeyPhrasesBox.Text?.Trim(),
+                FormalVariation = FormalVariationBox.Text?.Trim(),
+                CasualVariation = CasualVariationBox.Text?.Trim(),
+                CommonMistakesVi = CommonMistakesBox.Text?.Trim(),
+                IsFavorite = IsFavoriteCheckBox.IsChecked == true
+            };
         }
-
-        DialogInfoBar.IsOpen = false;
-
-        if (_existingPhrase == null)
+        else
         {
             CreatedResult = new CreateConversationPhraseDto
             {
                 Category = category,
-                ContextTag = tag,
+                ContextTag = ContextTagBox.Text?.Trim() ?? string.Empty,
                 PromptSentence = prompt,
                 PromptTranslation = promptTrans,
                 SampleResponse = response,
                 ResponseTranslation = responseTrans,
-                AdditionalSuggestions = suggestions,
-                CefrLevel = selectedLevel,
-                IsFavorite = false
+                AdditionalSuggestions = AdditionalSuggestionsBox.Text?.Trim(),
+                CefrLevel = level,
+                Register = register,
+                ExamTarget = examTarget,
+                KeyPhrases = KeyPhrasesBox.Text?.Trim(),
+                FormalVariation = FormalVariationBox.Text?.Trim(),
+                CasualVariation = CasualVariationBox.Text?.Trim(),
+                CommonMistakesVi = CommonMistakesBox.Text?.Trim(),
+                IsFavorite = IsFavoriteCheckBox.IsChecked == true
             };
         }
-        else
-        {
-            UpdatedResult = new UpdateConversationPhraseDto
-            {
-                Id = _existingPhrase.Id,
-                Category = category,
-                ContextTag = tag,
-                PromptSentence = prompt,
-                PromptTranslation = promptTrans,
-                SampleResponse = response,
-                ResponseTranslation = responseTrans,
-                AdditionalSuggestions = suggestions,
-                CefrLevel = selectedLevel,
-                IsFavorite = _existingPhrase.IsFavorite
-            };
-        }
-    }
-
-    private void ShowValidationError(string message)
-    {
-        DialogInfoBar.Message = message;
-        DialogInfoBar.IsOpen = true;
-    }
-
-    private void AppendSnippet(string snippet)
-    {
-        if (string.IsNullOrWhiteSpace(SuggestionsTextBox.Text))
-        {
-            SuggestionsTextBox.Text = snippet;
-        }
-        else
-        {
-            SuggestionsTextBox.Text += "\n" + snippet;
-        }
-    }
-
-    private void BtnInsertFormal_Click(object sender, RoutedEventArgs e)
-    {
-        AppendSnippet("• Formal Alternative: \"May I respectfully inquire about... ?\"\n(Cách diễn đạt trang trọng, lịch thiệp trong công sở/đối tác)");
-    }
-
-    private void BtnInsertCasual_Click(object sender, RoutedEventArgs e)
-    {
-        AppendSnippet("• Casual / Native phrasing: \"What's the latest on this? How's it going?\"\n(Cách nói thân mật hàng ngày, gần gũi)");
-    }
-
-    private void BtnInsertSynonyms_Click(object sender, RoutedEventArgs e)
-    {
-        AppendSnippet("• Synonyms & Vocabulary Expansion:\n  - Thay vì dùng từ quen thuộc, hãy thử các tính từ phong phú hơn (e.g. impressive, remarkable, solid).");
-    }
-
-    private void BtnInsertFollowUp_Click(object sender, RoutedEventArgs e)
-    {
-        AppendSnippet("• Follow-up Question to extend dialogue:\n  \"By the way, what were the key takeaways from your team?\"");
     }
 }

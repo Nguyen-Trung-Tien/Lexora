@@ -1,395 +1,995 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Lexora.Presentation.Views.Phrases.PhrasesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dtos="using:Lexora.Application.DTOs"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    Background="Transparent"
+    NavigationCacheMode="Required">
 
-    <Grid Padding="24,16,24,24">
+    <Grid
+        Padding="24,16,24,20"
+        HorizontalAlignment="Stretch"
+        RowSpacing="12">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- ROW 0: Page Header & Primary Action -->
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="WideLayout">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="960" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="MasterColumn.Width" Value="340" />
+                        <Setter Target="DetailPaneContainer.(Grid.Column)" Value="1" />
+                        <Setter Target="DetailPaneContainer.(Grid.Row)" Value="0" />
+                        <Setter Target="DetailRow.Height" Value="0" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CompactLayout">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="MasterColumn.Width" Value="*" />
+                        <Setter Target="DetailColumn.Width" Value="0" />
+                        <Setter Target="DetailPaneContainer.(Grid.Column)" Value="0" />
+                        <Setter Target="DetailPaneContainer.(Grid.Row)" Value="1" />
+                        <Setter Target="MasterRow.Height" Value="260" />
+                        <Setter Target="DetailRow.Height" Value="*" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
 
-            <StackPanel Spacing="4" VerticalAlignment="Center">
-                <TextBlock Text="{x:Bind Loc.GetString('Phrases_Title')}"
-                           FontSize="24" FontWeight="SemiBold"
-                           Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                <TextBlock Text="{x:Bind Loc.GetString('Phrases_Subtitle')}"
-                           FontSize="13"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           TextWrapping="Wrap" />
+        <!-- Row 0: Header & Primary Actions -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+            <StackPanel Grid.Column="0" Spacing="4">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <FontIcon
+                        FontSize="22"
+                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                        Glyph="&#xE8BD;" />
+                    <TextBlock
+                        Style="{StaticResource TitleTextBlockStyle}"
+                        Text="{x:Bind Loc.GetString('Phrases_HeaderTitle')}" />
+                </StackPanel>
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind Loc.GetString('Phrases_HeaderSubtitle')}"
+                    TextWrapping="Wrap" />
+
+                <!-- Compact Metric Badges -->
+                <StackPanel Margin="0,4,0,0" Orientation="Horizontal" Spacing="8">
+                    <Border
+                        Padding="8,3"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        CornerRadius="6">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind Loc.GetString('Phrases_StatTotal')}" />
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Text="{x:Bind ViewModel.TotalPhraseCount, Mode=OneWay}" />
+                        </StackPanel>
+                    </Border>
+                    <Border
+                        Padding="8,3"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        CornerRadius="6">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind Loc.GetString('Phrases_StatFavorites')}" />
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Text="{x:Bind ViewModel.FavoritePhraseCount, Mode=OneWay}" />
+                        </StackPanel>
+                    </Border>
+                    <Border
+                        Padding="8,3"
+                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                        CornerRadius="6">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                Text="{x:Bind Loc.GetString('Phrases_StatDue')}" />
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                Text="{x:Bind ViewModel.DuePhraseCount, Mode=OneWay}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </StackPanel>
 
-            <Button Grid.Column="1"
-                    Style="{ThemeResource AccentButtonStyle}"
-                    Padding="16,8"
-                    VerticalAlignment="Center"
-                    Click="BtnAddPhrase_Click">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE710;" FontSize="14" />
-                    <TextBlock Text="{x:Bind Loc.GetString('Phrases_AddNew')}" FontWeight="SemiBold" />
-                </StackPanel>
-            </Button>
+            <StackPanel
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    Click="OnStartRoleplayClick"
+                    Style="{StaticResource AccentButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon FontSize="14" Glyph="&#xE8FA;" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Phrases_StartRoleplay')}" />
+                    </StackPanel>
+                </Button>
+
+                <Button Click="OnAddPhraseClick">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon FontSize="14" Glyph="&#xE710;" />
+                        <TextBlock Text="{x:Bind Loc.GetString('Phrases_AddButton')}" />
+                    </StackPanel>
+                </Button>
+
+                <DropDownButton Content="{x:Bind Loc.GetString('Phrases_ImportExportButton')}">
+                    <DropDownButton.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                            <MenuFlyoutItem Click="OnImportFileClick" Text="{x:Bind Loc.GetString('Phrases_ImportAction')}">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE8B5;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Click="OnCopyTemplateClick" Text="{x:Bind Loc.GetString('Phrases_CopyTemplateAction')}">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE8C8;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Click="OnExportJsonClick" Text="{x:Bind Loc.GetString('Phrases_ExportJsonAction')}" />
+                            <MenuFlyoutItem Click="OnExportCsvClick" Text="{x:Bind Loc.GetString('Phrases_ExportCsvAction')}" />
+                            <MenuFlyoutItem Click="OnExportTxtClick" Text="{x:Bind Loc.GetString('Phrases_ExportTxtAction')}" />
+                        </MenuFlyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+            </StackPanel>
         </Grid>
 
-        <!-- ROW 1: Search & Filter Bar -->
-        <Border Grid.Row="1"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="16,12"
-                Margin="0,0,0,12">
-            <Grid ColumnDefinitions="1.5*,1.2*,Auto,Auto,Auto" ColumnSpacing="12" VerticalAlignment="Center">
-                <!-- Search Box -->
-                <AutoSuggestBox x:Name="SearchBox"
-                                QueryIcon="Find"
-                                PlaceholderText="{x:Bind Loc.GetString('Phrases_SearchPlaceholder')}"
-                                Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}"
-                                QuerySubmitted="SearchBox_QuerySubmitted"
-                                TextChanged="SearchBox_TextChanged"
-                                VerticalAlignment="Center" />
+        <!-- Row 1: Filter Bar, Audio Studio & Live Feedback InfoBar -->
+        <Border
+            Grid.Row="1"
+            Padding="12"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+                    <TextBox
+                        Grid.Column="0"
+                        PlaceholderText="{x:Bind Loc.GetString('Phrases_SearchPlaceholder')}"
+                        Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                <!-- Category Filter -->
-                <ComboBox x:Name="CategoryFilterBox" Grid.Column="1"
-                          HorizontalAlignment="Stretch"
-                          VerticalAlignment="Center"
-                          ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}"
-                          SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
-                          SelectionChanged="CategoryFilterBox_SelectionChanged"
-                          PlaceholderText="{x:Bind Loc.GetString('Phrases_FilterCategory')}" />
+                    <ComboBox
+                        Grid.Column="1"
+                        MinWidth="150"
+                        ItemsSource="{x:Bind ViewModel.FilterCategories}"
+                        SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}" />
 
-                <!-- CEFR Level Filter -->
-                <ComboBox x:Name="LevelFilterBox" Grid.Column="2"
-                          VerticalAlignment="Center"
-                          MinWidth="120"
-                          SelectionChanged="LevelFilterBox_SelectionChanged">
-                    <ComboBoxItem Content="{x:Bind Loc.GetString('Phrases_FilterAllLevels')}" Tag="All" IsSelected="True" />
-                    <ComboBoxItem Content="A1" Tag="A1" />
-                    <ComboBoxItem Content="A2" Tag="A2" />
-                    <ComboBoxItem Content="B1" Tag="B1" />
-                    <ComboBoxItem Content="B2" Tag="B2" />
-                    <ComboBoxItem Content="C1" Tag="C1" />
-                    <ComboBoxItem Content="C2" Tag="C2" />
-                </ComboBox>
+                    <ComboBox
+                        Grid.Column="2"
+                        MinWidth="84"
+                        SelectedIndex="{x:Bind ViewModel.SelectedCefrIndex, Mode=TwoWay}">
+                        <ComboBoxItem Content="CEFR" />
+                        <ComboBoxItem Content="A1" />
+                        <ComboBoxItem Content="A2" />
+                        <ComboBoxItem Content="B1" />
+                        <ComboBoxItem Content="B2" />
+                        <ComboBoxItem Content="C1" />
+                        <ComboBoxItem Content="C2" />
+                    </ComboBox>
 
-                <!-- Favorites Toggle -->
-                <ToggleButton x:Name="FavoritesToggle" Grid.Column="3"
-                              VerticalAlignment="Center"
-                              IsChecked="{x:Bind ViewModel.OnlyFavorites, Mode=TwoWay}"
-                              Checked="FavoritesToggle_Checked"
-                              Unchecked="FavoritesToggle_Unchecked">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon Glyph="&#xE735;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        <TextBlock Text="{x:Bind Loc.GetString('Phrases_OnlyFavorites')}" />
-                    </StackPanel>
-                </ToggleButton>
+                    <ComboBox
+                        Grid.Column="3"
+                        MinWidth="112"
+                        SelectedIndex="{x:Bind ViewModel.SelectedRegisterIndex, Mode=TwoWay}">
+                        <ComboBoxItem Content="{x:Bind Loc.GetString('Phrases_RegisterAll')}" />
+                        <ComboBoxItem Content="{x:Bind Loc.GetString('Phrases_RegisterNeutral')}" />
+                        <ComboBoxItem Content="{x:Bind Loc.GetString('Phrases_RegisterFormal')}" />
+                        <ComboBoxItem Content="{x:Bind Loc.GetString('Phrases_RegisterCasual')}" />
+                        <ComboBoxItem Content="{x:Bind Loc.GetString('Phrases_RegisterIdiomatic')}" />
+                    </ComboBox>
 
-                <!-- Reset Filters Button -->
-                <Button Grid.Column="4"
-                        ToolTipService.ToolTip="Đặt lại bộ lọc"
-                        Click="BtnClearFilters_Click"
-                        VerticalAlignment="Center">
-                    <FontIcon Glyph="&#xE72C;" FontSize="13" />
-                </Button>
-            </Grid>
+                    <ComboBox
+                        Grid.Column="4"
+                        MinWidth="104"
+                        SelectedIndex="{x:Bind ViewModel.SelectedExamTargetIndex, Mode=TwoWay}">
+                        <ComboBoxItem Content="{x:Bind Loc.GetString('Phrases_ExamAll')}" />
+                        <ComboBoxItem Content="TOEIC" />
+                        <ComboBoxItem Content="IELTS" />
+                        <ComboBoxItem Content="VSTEP" />
+                    </ComboBox>
+
+                    <ToggleButton
+                        Grid.Column="5"
+                        IsChecked="{x:Bind ViewModel.OnlyFavorites, Mode=TwoWay}">
+                        <FontIcon FontSize="14" Glyph="&#xE734;" />
+                    </ToggleButton>
+
+                    <ToggleButton
+                        Grid.Column="6"
+                        Content="{x:Bind Loc.GetString('Phrases_DueFilter')}"
+                        IsChecked="{x:Bind ViewModel.OnlyDueForReview, Mode=TwoWay}" />
+
+                    <Button
+                        Grid.Column="7"
+                        Command="{x:Bind ViewModel.ResetFiltersCommand}"
+                        Content="{x:Bind Loc.GetString('Phrases_ResetFilters')}" />
+                </Grid>
+
+                <!-- Audio Voice / Speed Studio & Status InfoBar -->
+                <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="10">
+                    <ComboBox
+                        Grid.Column="0"
+                        MinWidth="92"
+                        SelectedIndex="{x:Bind ViewModel.SelectedAccentIndex, Mode=TwoWay}">
+                        <ComboBoxItem Content="US (en-US)" />
+                        <ComboBoxItem Content="UK (en-GB)" />
+                    </ComboBox>
+
+                    <ComboBox
+                        Grid.Column="1"
+                        MinWidth="84"
+                        SelectedIndex="{x:Bind ViewModel.SelectedRateIndex, Mode=TwoWay}">
+                        <ComboBoxItem Content="0.75x" />
+                        <ComboBoxItem Content="1.0x" />
+                        <ComboBoxItem Content="1.25x" />
+                        <ComboBoxItem Content="1.5x" />
+                    </ComboBox>
+
+                    <Button
+                        Grid.Column="2"
+                        Command="{x:Bind ViewModel.StopAudioCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon FontSize="12" Glyph="&#xE71A;" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Phrases_StopAudio')}" />
+                        </StackPanel>
+                    </Button>
+
+                    <InfoBar
+                        Grid.Column="3"
+                        IsClosable="True"
+                        IsOpen="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"
+                        Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                        Severity="Informational" />
+                </Grid>
+            </StackPanel>
         </Border>
 
-        <!-- ROW 2: Results Count & Subtitle -->
-        <Grid Grid.Row="2" Margin="4,0,4,8">
-            <TextBlock Text="{x:Bind ViewModel.CountDisplayInfo, Mode=OneWay}"
-                       FontSize="12" FontWeight="SemiBold"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       VerticalAlignment="Center" />
-        </Grid>
+        <!-- Row 2A: Responsive Master-Detail Browsing Workspace -->
+        <Grid
+            x:Name="MasterDetailWorkspace"
+            Grid.Row="2"
+            ColumnSpacing="16"
+            RowSpacing="12"
+            Visibility="{x:Bind ViewModel.IsRoleplayMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="MasterColumn" Width="340" />
+                <ColumnDefinition x:Name="DetailColumn" Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="MasterRow" Height="*" />
+                <RowDefinition x:Name="DetailRow" Height="0" />
+            </Grid.RowDefinitions>
 
-        <!-- ROW 3: Main Content (List / Cards & Empty / Loading States) -->
-        <Grid Grid.Row="3">
-            <!-- Loading Indicator -->
-            <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-                          Width="44" Height="44"
-                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                          Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+            <!-- Master Pane -->
+            <Border
+                Grid.Row="0"
+                Grid.Column="0"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+                <Grid RowDefinitions="Auto,*">
+                    <ProgressBar
+                        Grid.Row="0"
+                        IsIndeterminate="True"
+                        Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-            <!-- Empty State -->
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Spacing="12"
-                        Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay}">
-                <FontIcon Glyph="&#xE8BD;" FontSize="48" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
-                <TextBlock Text="{x:Bind Loc.GetString('Phrases_EmptyTitle')}"
-                           FontSize="18" FontWeight="SemiBold"
-                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                           HorizontalAlignment="Center" />
-                <TextBlock Text="{x:Bind Loc.GetString('Phrases_EmptySubtitle')}"
-                           FontSize="13"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           HorizontalAlignment="Center"
-                           TextWrapping="Wrap" MaxWidth="450" TextAlignment="Center" />
-                <Button Style="{ThemeResource AccentButtonStyle}"
+                    <StackPanel
+                        Grid.Row="1"
                         HorizontalAlignment="Center"
-                        Margin="0,8,0,0"
-                        Click="BtnAddPhrase_Click">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon Glyph="&#xE710;" FontSize="13" />
-                        <TextBlock Text="{x:Bind Loc.GetString('Phrases_AddNew')}" />
+                        VerticalAlignment="Center"
+                        Padding="20"
+                        Spacing="8"
+                        Visibility="{x:Bind ViewModel.HasNoPhrases, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <FontIcon
+                            HorizontalAlignment="Center"
+                            FontSize="32"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                            Glyph="&#xE8BD;" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind Loc.GetString('Phrases_EmptyTitle')}"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="{x:Bind Loc.GetString('Phrases_EmptySubtitle')}"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
                     </StackPanel>
-                </Button>
-            </StackPanel>
 
-            <!-- Phrases Cards Container -->
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto"
-                          Padding="0,0,0,8"
-                          Visibility="{x:Bind ViewModel.IsEmptyState, Converter={StaticResource InverseBoolToVisibilityConverter}, Mode=OneWay}">
-                <ItemsRepeater x:Name="PhrasesRepeater"
-                               ItemsSource="{x:Bind ViewModel.Phrases, Mode=OneWay}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Vertical" Spacing="12" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="dtos:ConversationPhraseDto">
-                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <ListView
+                        x:Name="MasterListView"
+                        Grid.Row="1"
+                        Padding="6"
+                        ItemsSource="{x:Bind ViewModel.Phrases}"
+                        SelectedItem="{x:Bind ViewModel.SelectedPhrase, Mode=TwoWay}"
+                        SelectionChanged="OnPhraseListSelectionChanged"
+                        SelectionMode="Single">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Margin" Value="0,3" />
+                                <Setter Property="Padding" Value="2" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemContainerTransitions>
+                            <TransitionCollection>
+                                <EntranceThemeTransition IsStaggeringEnabled="True" />
+                                <RepositionThemeTransition />
+                            </TransitionCollection>
+                        </ListView.ItemContainerTransitions>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="dtos:ConversationPhraseDto">
+                                <Border
+                                    Padding="10"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8">
+                                    <StackPanel Spacing="6">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                                                <Border
+                                                    Padding="6,2"
+                                                    Background="{x:Bind CefrLevel, Mode=OneWay, Converter={StaticResource CefrToBrushConverter}}"
+                                                    CornerRadius="4">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        FontWeight="SemiBold"
+                                                        Text="{x:Bind CefrLevel, Mode=OneWay}" />
+                                                </Border>
+                                                <Border
+                                                    Padding="6,2"
+                                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                    CornerRadius="4">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{x:Bind RegisterLabel, Mode=OneWay}" />
+                                                </Border>
+                                                <Border
+                                                    Padding="6,2"
+                                                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    CornerRadius="4"
+                                                    Visibility="{x:Bind IsDueForReview, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                        Text="Due" />
+                                                </Border>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                                <Button Padding="6,4" Click="OnCardPlayPromptClick">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <FontIcon FontSize="12" Glyph="{x:Bind PromptAudioGlyph, Mode=OneWay}" />
+                                                        <ProgressRing
+                                                            Width="12"
+                                                            Height="12"
+                                                            IsActive="{x:Bind IsPlayingPrompt, Mode=OneWay}"
+                                                            Visibility="{x:Bind IsPlayingPrompt, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Padding="6,4" Click="OnCardToggleFavoriteClick">
+                                                    <FontIcon
+                                                        FontSize="12"
+                                                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                        Glyph="{x:Bind IsFavorite, Mode=OneWay, Converter={StaticResource BoolToStarGlyphConverter}}" />
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            MaxLines="2"
+                                            Text="{x:Bind PromptSentence, Mode=OneWay}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="Wrap" />
+
+                                        <TextBlock
+                                            FontSize="12"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            MaxLines="1"
+                                            Text="{x:Bind Category, Mode=OneWay}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+
+            <!-- Detail Pane -->
+            <Border
+                x:Name="DetailPaneContainer"
+                Grid.Row="0"
+                Grid.Column="1"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+                <Grid>
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Padding="24"
+                        Spacing="8"
+                        Visibility="{x:Bind ViewModel.HasSelectedPhrase, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                        <FontIcon
+                            HorizontalAlignment="Center"
+                            FontSize="36"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                            Glyph="&#xE8BD;" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Loc.GetString('Phrases_SelectPromptHint')}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Disabled"
+                        VerticalScrollBarVisibility="Auto"
+                        Visibility="{x:Bind ViewModel.HasSelectedPhrase, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel
+                            x:Name="DetailCardRoot"
+                            Padding="20"
+                            Spacing="14">
+                            <StackPanel.ChildrenTransitions>
+                                <TransitionCollection>
+                                    <EntranceThemeTransition />
+                                    <RepositionThemeTransition />
+                                </TransitionCollection>
+                            </StackPanel.ChildrenTransitions>
+
+                            <!-- Detail Metadata & Actions -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                    <Border
+                                        Padding="8,4"
+                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                        CornerRadius="6">
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                            Text="{x:Bind ViewModel.SelectedPhrase.CefrLevel, Mode=OneWay, FallbackValue=''}" />
+                                    </Border>
+                                    <Border
+                                        Padding="8,4"
+                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        CornerRadius="6">
+                                        <TextBlock
+                                            FontSize="12"
+                                            Text="{x:Bind ViewModel.SelectedPhrase.RegisterLabel, Mode=OneWay, FallbackValue=''}" />
+                                    </Border>
+                                    <Border
+                                        Padding="8,4"
+                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        CornerRadius="6"
+                                        Visibility="{x:Bind ViewModel.SelectedPhrase.HasExamTarget, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                            Text="{x:Bind ViewModel.SelectedPhrase.ExamTargetLabel, Mode=OneWay, FallbackValue=''}" />
+                                    </Border>
+                                    <Border
+                                        Padding="8,4"
+                                        Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                        CornerRadius="6">
+                                        <TextBlock
+                                            FontSize="12"
+                                            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                            Text="{x:Bind ViewModel.SelectedPhrase.StatusLabel, Mode=OneWay, FallbackValue=''}" />
+                                    </Border>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                    <Button Click="OnEnqueueSelectedReviewClick">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon FontSize="13" Glyph="&#xE823;" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Phrases_AddToReviewQueue')}" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Click="OnEditSelectedClick">
+                                        <FontIcon FontSize="14" Glyph="&#xE70F;" />
+                                    </Button>
+                                    <Button Click="OnDeleteSelectedClick">
+                                        <FontIcon
+                                            FontSize="14"
+                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                            Glyph="&#xE74D;" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock
+                                FontSize="13"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.SelectedPhrase.Category, Mode=OneWay, FallbackValue=''}"
+                                TextWrapping="Wrap" />
+
+                            <!-- Speaker A: Prompt Card -->
+                            <Border
+                                Padding="16"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <StackPanel Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                            Text="{x:Bind Loc.GetString('Phrases_SpeakerAPrompt')}" />
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                            <Button Click="OnDetailPlayPromptClick" Padding="8,4">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <FontIcon FontSize="13" Glyph="{x:Bind ViewModel.SelectedPhrase.PromptAudioGlyph, Mode=OneWay}" />
+                                                    <ProgressRing
+                                                        Width="12"
+                                                        Height="12"
+                                                        IsActive="{x:Bind ViewModel.SelectedPhrase.IsPlayingPrompt, Mode=OneWay, FallbackValue=False}"
+                                                        Visibility="{x:Bind ViewModel.SelectedPhrase.IsPlayingPrompt, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                    <TextBlock Text="{x:Bind Loc.GetString('Phrases_Listen')}" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Click="OnCopyPromptClick" Padding="8,4">
+                                                <FontIcon FontSize="13" Glyph="&#xE8C8;" />
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock
+                                        FontSize="17"
+                                        FontWeight="SemiBold"
+                                        IsTextSelectionEnabled="True"
+                                        Text="{x:Bind ViewModel.SelectedPhrase.PromptSentence, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind ViewModel.SelectedPhrase.PromptTranslation, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Speaker B: Sample Response Card -->
+                            <Border
+                                Padding="16"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <StackPanel Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                            Text="{x:Bind Loc.GetString('Phrases_SpeakerBResponse')}" />
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                            <Button Click="OnDetailPlayResponseClick" Padding="8,4">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <FontIcon FontSize="13" Glyph="{x:Bind ViewModel.SelectedPhrase.ResponseAudioGlyph, Mode=OneWay}" />
+                                                    <ProgressRing
+                                                        Width="12"
+                                                        Height="12"
+                                                        IsActive="{x:Bind ViewModel.SelectedPhrase.IsPlayingResponse, Mode=OneWay, FallbackValue=False}"
+                                                        Visibility="{x:Bind ViewModel.SelectedPhrase.IsPlayingResponse, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                    <TextBlock Text="{x:Bind Loc.GetString('Phrases_Listen')}" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Click="OnCopyResponseClick" Padding="8,4">
+                                                <FontIcon FontSize="13" Glyph="&#xE8C8;" />
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        IsTextSelectionEnabled="True"
+                                        Text="{x:Bind ViewModel.SelectedPhrase.SampleResponse, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind ViewModel.SelectedPhrase.ResponseTranslation, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Key Phrases & Variations -->
+                            <Border
+                                Padding="16"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <StackPanel Spacing="10">
+                                    <StackPanel
+                                        Spacing="4"
+                                        Visibility="{x:Bind ViewModel.SelectedPhrase.HasKeyPhrases, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                            Text="{x:Bind Loc.GetString('Phrases_KeyPhrasesHeader')}" />
+                                        <TextBlock
+                                            IsTextSelectionEnabled="True"
+                                            Text="{x:Bind ViewModel.SelectedPhrase.KeyPhrases, Mode=OneWay, FallbackValue=''}"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        Spacing="4"
+                                        Visibility="{x:Bind ViewModel.SelectedPhrase.HasFormalVariation, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind Loc.GetString('Phrases_FormalVariationLabel')}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            IsTextSelectionEnabled="True"
+                                            Text="{x:Bind ViewModel.SelectedPhrase.FormalVariation, Mode=OneWay, FallbackValue=''}"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        Spacing="4"
+                                        Visibility="{x:Bind ViewModel.SelectedPhrase.HasCasualVariation, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind Loc.GetString('Phrases_CasualVariationLabel')}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            IsTextSelectionEnabled="True"
+                                            Text="{x:Bind ViewModel.SelectedPhrase.CasualVariation, Mode=OneWay, FallbackValue=''}"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        Spacing="4"
+                                        Visibility="{x:Bind ViewModel.SelectedPhrase.HasAdditionalSuggestions, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind Loc.GetString('Phrases_AdditionalNotesLabel')}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind ViewModel.SelectedPhrase.AdditionalSuggestions, Mode=OneWay, FallbackValue=''}"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Vietnamese Common Mistakes Callout -->
+                            <Border
+                                Padding="14"
+                                Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Padding="16"
-                                HorizontalAlignment="Stretch">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-                                <!-- Card Header: Badges & Action Buttons -->
-                                <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="8" VerticalAlignment="Center">
-                                    <!-- Category Pill -->
-                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            CornerRadius="4" Padding="8,4" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind Category}" FontSize="12" FontWeight="SemiBold"
-                                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    </Border>
+                                Visibility="{x:Bind ViewModel.SelectedPhrase.HasCommonMistakesVi, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                        Text="{x:Bind Loc.GetString('Phrases_CommonMistakesLabel')}" />
+                                    <TextBlock
+                                        Text="{x:Bind ViewModel.SelectedPhrase.CommonMistakesVi, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
 
-                                    <!-- Subtag Pill (if any) -->
-                                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            CornerRadius="4" Padding="8,4" VerticalAlignment="Center"
-                                            Visibility="{x:Bind ContextTag, Converter={StaticResource NullToVisibilityConverter}}">
-                                        <TextBlock Text="{x:Bind ContextTag}" FontSize="11"
-                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    </Border>
-
-                                    <!-- CEFR Pill -->
-                                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            CornerRadius="4" Padding="6,3" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind CefrLevel}" FontSize="11" FontWeight="Bold"
-                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                    </Border>
-
-                                    <!-- Action: Favorite Toggle -->
-                                    <Button Grid.Column="4" Style="{ThemeResource SubtleButtonStyle}"
-                                            Padding="6" VerticalAlignment="Center"
-                                            Click="CardFavorite_Click"
-                                            ToolTipService.ToolTip="Yêu thích">
-                                        <FontIcon Glyph="{x:Bind IsFavorite, Converter={StaticResource BoolToStarGlyphConverter}}"
-                                                  FontSize="14"
-                                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    </Button>
-
-                                    <!-- Action: Edit -->
-                                    <Button Grid.Column="5" Style="{ThemeResource SubtleButtonStyle}"
-                                            Padding="6" VerticalAlignment="Center"
-                                            Click="CardEdit_Click"
-                                            ToolTipService.ToolTip="Chỉnh sửa">
-                                        <FontIcon Glyph="&#xE70F;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    </Button>
-
-                                    <!-- Action: Delete -->
-                                    <Button Grid.Column="6" Style="{ThemeResource SubtleButtonStyle}"
-                                            Padding="6" VerticalAlignment="Center"
-                                            Click="CardDelete_Click"
-                                            ToolTipService.ToolTip="Xóa">
-                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
-                                    </Button>
-                                </Grid>
-
-                                <!-- Section 1: Prompt Sentence -->
-                                <Border Grid.Row="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                        CornerRadius="6" Padding="14,12">
-                                    <StackPanel Spacing="6">
-                                        <!-- Header Label & Actions -->
-                                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                                            <TextBlock Text="CÂU MỞ ĐẦU / TÌNH HUỐNG"
-                                                       FontSize="11" FontWeight="Bold"
-                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                       VerticalAlignment="Center" />
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                                <Button Style="{ThemeResource SubtleButtonStyle}" Padding="6"
-                                                        Click="CardPlayPrompt_Click" ToolTipService.ToolTip="Nghe phát âm">
-                                                    <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                </Button>
-                                                <Button Style="{ThemeResource SubtleButtonStyle}" Padding="6"
-                                                        Click="CardCopyPrompt_Click" ToolTipService.ToolTip="Sao chép">
-                                                    <FontIcon Glyph="&#xE8C8;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- English Prompt -->
-                                        <TextBlock Text="{x:Bind PromptSentence}"
-                                                   FontSize="15" FontWeight="SemiBold"
-                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                                   TextWrapping="Wrap" />
-
-                                        <!-- Vietnamese Translation -->
-                                        <TextBlock Text="{x:Bind PromptTranslation}"
-                                                   FontSize="13" FontStyle="Italic"
-                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                   TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Section 2: Sample Response -->
-                                <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="6" Padding="14,12">
-                                    <StackPanel Spacing="6">
-                                        <!-- Header Label & Actions -->
-                                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                                            <TextBlock Text="CÂU TRẢ LỜI MẪU TỰ NHIÊN"
-                                                       FontSize="11" FontWeight="Bold"
-                                                       Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                                                       VerticalAlignment="Center" />
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                                <Button Style="{ThemeResource SubtleButtonStyle}" Padding="6"
-                                                        Click="CardPlayResponse_Click" ToolTipService.ToolTip="Nghe câu trả lời">
-                                                    <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                                </Button>
-                                                <Button Style="{ThemeResource SubtleButtonStyle}" Padding="6"
-                                                        Click="CardCopyResponse_Click" ToolTipService.ToolTip="Sao chép">
-                                                    <FontIcon Glyph="&#xE8C8;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- English Sample Response -->
-                                        <TextBlock Text="{x:Bind SampleResponse}"
-                                                   FontSize="14.5"
-                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                                   TextWrapping="Wrap" />
-
-                                        <!-- Vietnamese Translation -->
-                                        <TextBlock Text="{x:Bind ResponseTranslation}"
-                                                   FontSize="13" FontStyle="Italic"
-                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                   TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Section 3: Additional Suggestions & Cultural Notes -->
-                                <Border Grid.Row="3"
-                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                        CornerRadius="6" Padding="12,10"
-                                        Visibility="{x:Bind AdditionalSuggestions, Converter={StaticResource NullToVisibilityConverter}}">
-                                    <StackPanel Spacing="6">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xEA80;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                            <TextBlock Text="GỢI Ý MỞ RỘNG &amp; LƯU Ý NGỮ CẢNH"
-                                                       FontSize="11" FontWeight="Bold"
-                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                        <TextBlock Text="{x:Bind AdditionalSuggestions}"
-                                                   FontSize="12.5"
-                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                                   TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
-        </ScrollViewer>
-    </Grid>
-
-        <!-- ROW 4: Pagination Controls Bar -->
-        <Border Grid.Row="4"
-                Margin="0,8,0,0"
+        <!-- Row 2B: Interactive Roleplay & Shadowing Mode -->
+        <ScrollViewer
+            x:Name="RoleplayWorkspace"
+            Grid.Row="2"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto"
+            Visibility="{x:Bind ViewModel.IsRoleplayMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border
+                Padding="24"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="8"
-                Padding="16,8"
-                Visibility="{x:Bind ViewModel.TotalCount, Converter={StaticResource IntToVisibilityConverter}, Mode=OneWay}">
-            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
-                <!-- Page Size Selector -->
-                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                    <ComboBox x:Name="PageSizeCombo"
-                              SelectedIndex="0"
-                              SelectionChanged="PageSizeCombo_SelectionChanged"
-                              MinWidth="68" Height="32" Padding="8,4" FontSize="12" CornerRadius="6">
-                        <ComboBoxItem Content="5" />
-                        <ComboBoxItem Content="10" />
-                        <ComboBoxItem Content="20" />
-                    </ComboBox>
-                    <TextBlock Text="{x:Bind Loc.GetString('Vocab_PageSizeSuffix')}"
-                               VerticalAlignment="Center" FontSize="12"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                CornerRadius="12">
+                <StackPanel Spacing="16">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                            <FontIcon
+                                FontSize="20"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                Glyph="&#xE8FA;" />
+                            <TextBlock
+                                Style="{StaticResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind Loc.GetString('Phrases_RoleplayTitle')}" />
+                            <Border
+                                Padding="8,2"
+                                VerticalAlignment="Center"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="6">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind ViewModel.RoleplayProgressText, Mode=OneWay}" />
+                            </Border>
+                        </StackPanel>
+
+                        <ToggleSwitch
+                            Grid.Column="1"
+                            OffContent="SM-2"
+                            OnContent="FSRS"
+                            IsOn="{x:Bind ViewModel.UseFsrsScheduler, Mode=TwoWay}" />
+
+                        <Button
+                            Grid.Column="2"
+                            Command="{x:Bind ViewModel.ExitRoleplayCommand}"
+                            Content="{x:Bind Loc.GetString('Phrases_ExitRoleplay')}" />
+                    </Grid>
+
+                    <!-- Roleplay Card Content -->
+                    <StackPanel
+                        Spacing="14"
+                        Visibility="{x:Bind ViewModel.HasRoleplayCard, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Border
+                            Padding="18"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            CornerRadius="8">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                        Text="{x:Bind Loc.GetString('Phrases_RoleplayPromptHeader')}" />
+                                    <Button
+                                        Grid.Column="1"
+                                        Command="{x:Bind ViewModel.PlayRoleplayPromptCommand}"
+                                        Padding="10,4">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon FontSize="13" Glyph="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.PromptAudioGlyph, Mode=OneWay}" />
+                                            <ProgressRing
+                                                Width="12"
+                                                Height="12"
+                                                IsActive="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.IsPlayingPrompt, Mode=OneWay, FallbackValue=False}"
+                                                Visibility="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.IsPlayingPrompt, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Phrases_Listen')}" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                                <TextBlock
+                                    FontSize="19"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.PromptSentence, Mode=OneWay, FallbackValue=''}"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.PromptTranslation, Mode=OneWay, FallbackValue=''}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <TextBox
+                            AcceptsReturn="True"
+                            Header="{x:Bind Loc.GetString('Phrases_RoleplayYourTurn')}"
+                            MinHeight="80"
+                            PlaceholderText="{x:Bind Loc.GetString('Phrases_RoleplayYourTurnPlaceholder')}"
+                            Text="{x:Bind ViewModel.UserPracticeDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextWrapping="Wrap" />
+
+                        <Button
+                            Command="{x:Bind ViewModel.RevealRoleplayAnswerCommand}"
+                            Content="{x:Bind Loc.GetString('Phrases_RoleplayReveal')}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Visibility="{x:Bind ViewModel.IsRoleplayAnswerRevealed, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+
+                        <!-- Revealed Sample Response + Key Phrases + SM-2 Ratings -->
+                        <StackPanel
+                            Spacing="14"
+                            Visibility="{x:Bind ViewModel.IsRoleplayAnswerRevealed, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Border
+                                Padding="18"
+                                Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                CornerRadius="8">
+                                <StackPanel Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                            Text="{x:Bind Loc.GetString('Phrases_RoleplayModelResponse')}" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Command="{x:Bind ViewModel.PlayRoleplayResponseCommand}"
+                                            Padding="10,4">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon FontSize="13" Glyph="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.ResponseAudioGlyph, Mode=OneWay}" />
+                                                <ProgressRing
+                                                    Width="12"
+                                                    Height="12"
+                                                    IsActive="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.IsPlayingResponse, Mode=OneWay, FallbackValue=False}"
+                                                    Visibility="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.IsPlayingResponse, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                <TextBlock Text="{x:Bind Loc.GetString('Phrases_ShadowAudio')}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                    <TextBlock
+                                        FontSize="17"
+                                        FontWeight="SemiBold"
+                                        Text="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.SampleResponse, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.ResponseTranslation, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        FontSize="13"
+                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                        Text="{x:Bind ViewModel.CurrentRoleplayCard.Phrase.KeyPhrases, Mode=OneWay, FallbackValue=''}"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
+                                <Button
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{x:Bind ViewModel.RateRoleplayAgainCommand}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                            Text="{x:Bind Loc.GetString('Review_RatingAgain')}" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind ViewModel.CurrentRoleplayCard.IntervalAgainPreview, Mode=OneWay, FallbackValue=''}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{x:Bind ViewModel.RateRoleplayHardCommand}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                            Text="{x:Bind Loc.GetString('Review_RatingHard')}" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind ViewModel.CurrentRoleplayCard.IntervalHardPreview, Mode=OneWay, FallbackValue=''}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{x:Bind ViewModel.RateRoleplayGoodCommand}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                            Text="{x:Bind Loc.GetString('Review_RatingGood')}" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind ViewModel.CurrentRoleplayCard.IntervalGoodPreview, Mode=OneWay, FallbackValue=''}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    Grid.Column="3"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{x:Bind ViewModel.RateRoleplayEasyCommand}">
+                                    <StackPanel>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                            Text="{x:Bind Loc.GetString('Review_RatingEasy')}" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind ViewModel.CurrentRoleplayCard.IntervalEasyPreview, Mode=OneWay, FallbackValue=''}" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Roleplay Completed Banner -->
+                    <StackPanel
+                        Padding="24"
+                        HorizontalAlignment="Center"
+                        Spacing="12"
+                        Visibility="{x:Bind ViewModel.RoleplayCompletedVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <FontIcon
+                            HorizontalAlignment="Center"
+                            FontSize="40"
+                            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                            Glyph="&#xE73E;" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Style="{StaticResource SubtitleTextBlockStyle}"
+                            Text="{x:Bind Loc.GetString('Phrases_RoleplayCompletedTitle')}" />
+                        <Button
+                            HorizontalAlignment="Center"
+                            Command="{x:Bind ViewModel.ExitRoleplayCommand}"
+                            Content="{x:Bind Loc.GetString('Phrases_ExitRoleplay')}"
+                            Style="{StaticResource AccentButtonStyle}" />
+                    </StackPanel>
                 </StackPanel>
+            </Border>
+        </ScrollViewer>
 
-                <!-- Page Summary / Range Display -->
-                <TextBlock Grid.Column="1"
-                           Text="{x:Bind ViewModel.ItemsRangeDisplay, Mode=OneWay}"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                           FontSize="12"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-
-                <!-- Navigation Buttons & Page Info -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                    <Button Command="{x:Bind ViewModel.FirstPageCommand}"
-                            IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}"
-                            Padding="0" Height="32" Width="32" CornerRadius="6"
-                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_FirstPage')}">
-                        <FontIcon Glyph="&#xE892;" FontSize="12" />
-                    </Button>
-                    <Button Command="{x:Bind ViewModel.PreviousPageCommand}"
-                            IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}"
-                            Padding="0" Height="32" Width="32" CornerRadius="6"
-                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PrevPage')}">
-                        <FontIcon Glyph="&#xE76B;" FontSize="12" />
-                    </Button>
-
-                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="6"
-                            Padding="12,0" Height="32">
-                        <TextBlock Text="{x:Bind ViewModel.PageDisplayInfo, Mode=OneWay}"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center" />
-                    </Border>
-
-                    <Button Command="{x:Bind ViewModel.NextPageCommand}"
-                            IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}"
-                            Padding="0" Height="32" Width="32" CornerRadius="6"
-                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_NextPage')}">
-                        <FontIcon Glyph="&#xE76C;" FontSize="12" />
-                    </Button>
-                    <Button Command="{x:Bind ViewModel.LastPageCommand}"
-                            IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}"
-                            Padding="0" Height="32" Width="32" CornerRadius="6"
-                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_LastPage')}">
-                        <FontIcon Glyph="&#xE893;" FontSize="12" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+        <!-- Row 3: Pagination Bar -->
+        <StackPanel
+            Grid.Row="3"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="12"
+            Visibility="{x:Bind ViewModel.IsRoleplayMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            <Button
+                Command="{x:Bind ViewModel.PreviousPageCommand}"
+                Content="{x:Bind Loc.GetString('Phrases_PrevPage')}"
+                IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}" />
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind ViewModel.PageSummaryText, Mode=OneWay}" />
+            <Button
+                Command="{x:Bind ViewModel.NextPageCommand}"
+                Content="{x:Bind Loc.GetString('Phrases_NextPage')}"
+                IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}" />
+        </StackPanel>
     </Grid>
 </Page>

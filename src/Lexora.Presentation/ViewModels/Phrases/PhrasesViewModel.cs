@@ -3,275 +3,368 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
-using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
-using Microsoft.UI.Dispatching;
 
 namespace Lexora.Presentation.ViewModels;
 
-public partial class PhrasesViewModel : ObservableObject, IDisposable
+/// <summary>
+/// ViewModel for Conversation Phrases supporting responsive Master-Detail browsing,
+/// accent/rate audio playback indicators, interactive Roleplay SM-2/FSRS practice,
+/// and secure import/export.
+/// </summary>
+public partial class PhrasesViewModel(
+    IConversationPhraseService phraseService,
+    IAudioPlayerService audioService,
+    ILocalizationService localizationService) : ObservableObject, IDisposable
 {
-    private readonly IConversationPhraseService _phraseService;
-    private readonly ILocalizationService _localizationService;
-    private readonly IAudioPlayerService? _audioPlayerService;
-    private readonly DispatcherQueue? _dispatcherQueue;
-    private readonly EventHandler? _languageChangedHandler;
+    private const int PageSize = 20;
 
     private readonly List<ConversationPhraseDto> _allFilteredPhrases = [];
     private CancellationTokenSource? _loadCts;
+    private CancellationTokenSource? _searchDebounceCts;
+    private CancellationTokenSource? _audioIndicatorCts;
+    private int _audioRequestToken;
+    private bool _suppressFilterReload;
+    private bool _disposed;
+
+    public ILocalizationService Loc => localizationService;
 
     public ObservableCollection<ConversationPhraseDto> Phrases { get; } = [];
-    public ObservableCollection<string> Categories { get; } = [];
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsEmptyState))]
-    public partial bool IsLoading { get; set; } = true;
-
-    public bool IsEmptyState => !IsLoading && _allFilteredPhrases.Count == 0;
-
-    [ObservableProperty]
-    public partial bool IsSubmitting { get; set; }
-
-    [ObservableProperty]
-    public partial string SearchQuery { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial string? SelectedCategory { get; set; }
-
-    [ObservableProperty]
-    public partial CefrLevel? SelectedLevel { get; set; }
-
-    [ObservableProperty]
-    public partial bool OnlyFavorites { get; set; }
+    public ObservableCollection<string> FilterCategories { get; } = ["All"];
+    public ObservableCollection<string> EditorCategories { get; } = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedPhrase))]
     public partial ConversationPhraseDto? SelectedPhrase { get; set; }
 
-    public bool HasSelectedPhrase => SelectedPhrase != null;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoPhrases))]
+    public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
-    [NotifyPropertyChangedFor(nameof(HasNextPage))]
-    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
-    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
-    [NotifyPropertyChangedFor(nameof(CountDisplayInfo))]
-    public partial int TotalCount { get; set; }
+    public partial bool IsSubmitting { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
-    [NotifyPropertyChangedFor(nameof(HasNextPage))]
-    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
-    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
+    [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
+    public partial string StatusMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsErrorStatus { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedAccentCode))]
+    public partial int SelectedAccentIndex { get; set; } = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedPlaybackRate))]
+    public partial int SelectedRateIndex { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int TotalPhraseCount { get; set; }
+
+    [ObservableProperty]
+    public partial int FavoritePhraseCount { get; set; }
+
+    [ObservableProperty]
+    public partial int DuePhraseCount { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageSummaryText))]
+    public partial int TotalFilteredCount { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageSummaryText))]
     public partial int CurrentPage { get; set; } = 1;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalPages))]
-    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
-    [NotifyPropertyChangedFor(nameof(HasNextPage))]
-    [NotifyPropertyChangedFor(nameof(PageDisplayInfo))]
-    [NotifyPropertyChangedFor(nameof(ItemsRangeDisplay))]
-    public partial int PageSize { get; set; } = 5;
+    [NotifyPropertyChangedFor(nameof(PageSummaryText))]
+    public partial int TotalPages { get; set; } = 1;
 
-    public int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalCount / Math.Max(1, PageSize)));
+    [ObservableProperty]
+    public partial bool HasPreviousPage { get; set; }
 
-    public bool HasPreviousPage => CurrentPage > 1;
+    [ObservableProperty]
+    public partial bool HasNextPage { get; set; }
 
-    public bool HasNextPage => CurrentPage < TotalPages;
-
-    public string PageDisplayInfo => $"{CurrentPage} / {TotalPages}";
-
-    public string ItemsRangeDisplay
+    public bool HasSelectedPhrase => SelectedPhrase is not null;
+    public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
+    public bool HasNoPhrases => Phrases.Count == 0 && !IsLoading;
+    public string SelectedAccentCode => SelectedAccentIndex == 1 ? "uk" : "us";
+    public double SelectedPlaybackRate => SelectedRateIndex switch
     {
-        get
+        0 => 0.75,
+        2 => 1.25,
+        3 => 1.5,
+        _ => 1.0
+    };
+    public string PageSummaryText => TotalFilteredCount == 0
+        ? "0 / 0"
+        : $"{CurrentPage} / {TotalPages} ({TotalFilteredCount})";
+
+    [RelayCommand]
+    public async Task LoadDataAsync()
+    {
+        if (_disposed) return;
+
+        await LoadCategoriesAsync();
+        await RefreshPhrasesAsync(resetPage: true);
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        try
         {
-            if (TotalCount == 0) return string.Empty;
-            int start = ((CurrentPage - 1) * PageSize) + 1;
-            int end = Math.Min(CurrentPage * PageSize, TotalCount);
-            return string.Format(_localizationService.GetString("Phrases_PageSummary"), start, end, TotalCount);
+            var categories = await phraseService.GetCategoriesAsync();
+            var previousFilter = SelectedCategory;
+
+            _suppressFilterReload = true;
+            try
+            {
+                FilterCategories.Clear();
+                FilterCategories.Add("All");
+                EditorCategories.Clear();
+
+                foreach (var cat in categories)
+                {
+                    FilterCategories.Add(cat);
+                    EditorCategories.Add(cat);
+                }
+
+                SelectedCategory = FilterCategories.Contains(previousFilter)
+                    ? previousFilter
+                    : "All";
+            }
+            finally
+            {
+                _suppressFilterReload = false;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"{localizationService.GetString("Phrases_ErrorLoad")}: {ex.Message}", isError: true);
         }
     }
 
-    partial void OnPageSizeChanged(int value)
+    [RelayCommand]
+    public async Task PlayPromptAudioAsync(ConversationPhraseDto? phrase)
     {
-        CurrentPage = 1;
+        if (phrase is null || string.IsNullOrWhiteSpace(phrase.PromptSentence))
+        {
+            return;
+        }
+
+        await ToggleOrPlayAudioAsync(phrase, isPrompt: true, phrase.PromptSentence);
+    }
+
+    [RelayCommand]
+    public async Task PlayResponseAudioAsync(ConversationPhraseDto? phrase)
+    {
+        if (phrase is null || string.IsNullOrWhiteSpace(phrase.SampleResponse))
+        {
+            return;
+        }
+
+        await ToggleOrPlayAudioAsync(phrase, isPrompt: false, phrase.SampleResponse);
+    }
+
+    [RelayCommand]
+    public void StopAudio()
+    {
+        Interlocked.Increment(ref _audioRequestToken);
+        CancelAudioIndicatorCts();
+        ClearAllPlayingIndicators();
+        audioService.Stop();
+    }
+
+    [RelayCommand]
+    public void NextPage()
+    {
+        if (!HasNextPage) return;
+        CurrentPage++;
         RefreshCurrentPageSlice();
     }
 
-    public string CountDisplayInfo => string.Format(_localizationService.GetString("Phrases_TotalCount"), TotalCount);
-
-    public PhrasesViewModel(
-        IConversationPhraseService phraseService,
-        ILocalizationService localizationService,
-        IAudioPlayerService? audioPlayerService = null)
+    [RelayCommand]
+    public void PreviousPage()
     {
-        _phraseService = phraseService;
-        _localizationService = localizationService;
-        _audioPlayerService = audioPlayerService;
-        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-
-        _languageChangedHandler = (_, _) =>
-        {
-            void RefreshTexts()
-            {
-                OnPropertyChanged(nameof(ItemsRangeDisplay));
-                OnPropertyChanged(nameof(CountDisplayInfo));
-            }
-
-            if (_dispatcherQueue != null)
-            {
-                _dispatcherQueue.TryEnqueue(RefreshTexts);
-            }
-            else
-            {
-                RefreshTexts();
-            }
-        };
-        _localizationService.LanguageChanged += _languageChangedHandler;
+        if (!HasPreviousPage) return;
+        CurrentPage--;
+        RefreshCurrentPageSlice();
     }
 
-    [RelayCommand]
-    public async Task LoadDataAsync(CancellationToken cancellationToken = default)
+    private async Task ToggleOrPlayAudioAsync(ConversationPhraseDto phrase, bool isPrompt, string text)
     {
-        IsLoading = true;
+        bool alreadyPlayingSame = isPrompt ? phrase.IsPlayingPrompt : phrase.IsPlayingResponse;
+        if (alreadyPlayingSame)
+        {
+            StopAudio();
+            return;
+        }
+
+        int token = Interlocked.Increment(ref _audioRequestToken);
+        CancelAudioIndicatorCts();
+        ClearAllPlayingIndicators();
+
+        var cts = new CancellationTokenSource();
+        _audioIndicatorCts = cts;
+
+        if (isPrompt)
+        {
+            phrase.IsPlayingPrompt = true;
+        }
+        else
+        {
+            phrase.IsPlayingResponse = true;
+        }
+
         try
         {
-            await LoadCategoriesAsync(cancellationToken);
-            await RefreshPhrasesAsync(cancellationToken);
+            await audioService.PlayPronunciationAsync(text, SelectedAccentCode, SelectedPlaybackRate);
+            int estimatedMs = Math.Clamp((int)(text.Length * 62 / SelectedPlaybackRate) + 650, 1100, 15000);
+            await Task.Delay(estimatedMs, cts.Token);
         }
         catch (OperationCanceledException)
         {
-            // Expected on cancellation
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[PhrasesViewModel] LoadData error: {ex.Message}");
+            SetStatus($"{localizationService.GetString("Phrases_ErrorAudio")}: {ex.Message}", isError: true);
         }
         finally
         {
-            IsLoading = false;
+            if (token == Volatile.Read(ref _audioRequestToken))
+            {
+                phrase.IsPlayingPrompt = false;
+                phrase.IsPlayingResponse = false;
+            }
         }
     }
 
-    private async Task LoadCategoriesAsync(CancellationToken cancellationToken = default)
+    private void ClearAllPlayingIndicators()
     {
-        try
+        foreach (var item in _allFilteredPhrases)
         {
-            var cats = await _phraseService.GetCategoriesAsync(cancellationToken);
-            Categories.Clear();
-            Categories.Add(_localizationService.GetString("Phrases_FilterAllCategories"));
-            foreach (var c in cats)
-            {
-                Categories.Add(c);
-            }
+            item.IsPlayingPrompt = false;
+            item.IsPlayingResponse = false;
         }
-        catch (OperationCanceledException)
+
+        foreach (var item in Phrases)
         {
-            // Expected on cancellation
+            item.IsPlayingPrompt = false;
+            item.IsPlayingResponse = false;
         }
-        catch (Exception ex)
+
+        if (SelectedPhrase is not null)
         {
-            System.Diagnostics.Debug.WriteLine($"[PhrasesViewModel] LoadCategories error: {ex.Message}");
+            SelectedPhrase.IsPlayingPrompt = false;
+            SelectedPhrase.IsPlayingResponse = false;
+        }
+
+        if (CurrentRoleplayCard?.Phrase is not null)
+        {
+            CurrentRoleplayCard.Phrase.IsPlayingPrompt = false;
+            CurrentRoleplayCard.Phrase.IsPlayingResponse = false;
         }
     }
 
-    [RelayCommand]
-    public async Task RefreshPhrasesAsync(CancellationToken cancellationToken = default)
+    private void CancelAudioIndicatorCts()
     {
-        _loadCts?.Cancel();
-        _loadCts?.Dispose();
-        _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var token = _loadCts.Token;
-
-        IsLoading = true;
         try
         {
-            var cat = SelectedCategory;
-            if (string.Equals(cat, _localizationService.GetString("Phrases_FilterAllCategories"), StringComparison.OrdinalIgnoreCase))
-            {
-                cat = null;
-            }
-
-            var filter = new ConversationPhraseFilterDto
-            {
-                Category = cat,
-                CefrLevel = SelectedLevel,
-                OnlyFavorites = OnlyFavorites ? true : null,
-                SearchQuery = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim()
-            };
-
-            var list = await _phraseService.GetPhrasesAsync(filter, token);
-            token.ThrowIfCancellationRequested();
-
-            _allFilteredPhrases.Clear();
-            _allFilteredPhrases.AddRange(list);
-
-            TotalCount = _allFilteredPhrases.Count;
-            CurrentPage = 1;
-            RefreshCurrentPageSlice();
+            _audioIndicatorCts?.Cancel();
+            _audioIndicatorCts?.Dispose();
         }
-        catch (OperationCanceledException)
+        catch (ObjectDisposedException)
         {
-            // Expected when superseded by a newer search/filter request
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[PhrasesViewModel] RefreshPhrases error: {ex.Message}");
         }
         finally
         {
-            IsLoading = false;
+            _audioIndicatorCts = null;
         }
     }
 
     private void RefreshCurrentPageSlice()
     {
+        TotalFilteredCount = _allFilteredPhrases.Count;
+        TotalPages = Math.Max(1, (int)Math.Ceiling(TotalFilteredCount / (double)PageSize));
+        CurrentPage = Math.Clamp(CurrentPage, 1, TotalPages);
+        HasPreviousPage = CurrentPage > 1;
+        HasNextPage = CurrentPage < TotalPages;
+
         var slice = _allFilteredPhrases
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToList();
+
+        for (int i = 0; i < slice.Count; i++)
+        {
+            var target = slice[i];
+            if (i < Phrases.Count)
+            {
+                if (Phrases[i].Id == target.Id)
+                {
+                    Phrases[i].UpdateFrom(target);
+                }
+                else
+                {
+                    Phrases[i] = target;
+                }
+            }
+            else
+            {
+                Phrases.Add(target);
+            }
+        }
 
         while (Phrases.Count > slice.Count)
         {
             Phrases.RemoveAt(Phrases.Count - 1);
         }
 
-        for (int i = 0; i < slice.Count; i++)
+        if (SelectedPhrase is null || !Phrases.Any(p => p.Id == SelectedPhrase.Id))
         {
-            if (i < Phrases.Count)
+            SelectedPhrase = Phrases.FirstOrDefault();
+        }
+        else
+        {
+            var match = Phrases.First(p => p.Id == SelectedPhrase.Id);
+            if (!ReferenceEquals(SelectedPhrase, match))
             {
-                if (Phrases[i].Id != slice[i].Id)
-                {
-                    Phrases[i] = slice[i];
-                }
-            }
-            else
-            {
-                Phrases.Add(slice[i]);
+                SelectedPhrase = match;
             }
         }
 
-        OnPropertyChanged(nameof(TotalPages));
-        OnPropertyChanged(nameof(HasPreviousPage));
-        OnPropertyChanged(nameof(HasNextPage));
-        OnPropertyChanged(nameof(PageDisplayInfo));
-        OnPropertyChanged(nameof(ItemsRangeDisplay));
-        OnPropertyChanged(nameof(IsEmptyState));
+        OnPropertyChanged(nameof(HasNoPhrases));
+        OnPropertyChanged(nameof(PageSummaryText));
+    }
+
+    private void UpdateSummaryCounters()
+    {
+        TotalPhraseCount = _allFilteredPhrases.Count;
+        FavoritePhraseCount = _allFilteredPhrases.Count(p => p.IsFavorite);
+        DuePhraseCount = _allFilteredPhrases.Count(p => p.IsDueForReview);
+    }
+
+    private void SetStatus(string message, bool isError = false)
+    {
+        IsErrorStatus = isError;
+        StatusMessage = message;
     }
 
     public void Dispose()
     {
-        if (_languageChangedHandler != null)
-        {
-            _localizationService.LanguageChanged -= _languageChangedHandler;
-        }
+        if (_disposed) return;
+        _disposed = true;
+
         _loadCts?.Cancel();
         _loadCts?.Dispose();
-        _loadCts = null;
-        _allFilteredPhrases.Clear();
-        Phrases.Clear();
-        Categories.Clear();
+        _searchDebounceCts?.Cancel();
+        _searchDebounceCts?.Dispose();
+        CancelAudioIndicatorCts();
+        audioService.Stop();
+        GC.SuppressFinalize(this);
     }
 }

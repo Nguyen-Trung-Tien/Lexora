@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Lexora.Infrastructure.Data;
 
-public class SqliteDatabaseInitializer
+public partial class SqliteDatabaseInitializer
 {
     private readonly LexoraDbContext _context;
     private readonly ILogger<SqliteDatabaseInitializer> _logger;
@@ -53,7 +53,7 @@ public class SqliteDatabaseInitializer
                 if (!await _context.ConversationPhrases.AnyAsync(cancellationToken))
                 {
                     _logger.LogInformation("Seeding starter conversation phrases and common scenarios...");
-                    await SeedPhraseStarterDataAsync(cancellationToken);
+                    await SeedEnrichedPhraseStarterDataAsync(cancellationToken);
                 }
 
                 _logger.LogInformation("SQLite database initialized successfully.");
@@ -536,19 +536,29 @@ public class SqliteDatabaseInitializer
                     "ResponseTranslation" TEXT NOT NULL,
                     "AdditionalSuggestions" TEXT NOT NULL DEFAULT '',
                     "CefrLevel" INTEGER NOT NULL DEFAULT 3,
+                    "Register" INTEGER NOT NULL DEFAULT 0,
+                    "ExamTarget" INTEGER NULL,
+                    "KeyPhrases" TEXT NOT NULL DEFAULT '',
+                    "FormalVariation" TEXT NOT NULL DEFAULT '',
+                    "CasualVariation" TEXT NOT NULL DEFAULT '',
+                    "CommonMistakesVi" TEXT NOT NULL DEFAULT '',
                     "IsFavorite" INTEGER NOT NULL DEFAULT 0,
+                    "Status" INTEGER NOT NULL DEFAULT 0,
+                    "EaseFactor" REAL NOT NULL DEFAULT 2.5,
+                    "IntervalDays" INTEGER NOT NULL DEFAULT 0,
+                    "Repetitions" INTEGER NOT NULL DEFAULT 0,
+                    "Lapses" INTEGER NOT NULL DEFAULT 0,
+                    "LastReviewedAt" TEXT NULL,
+                    "NextReviewAt" TEXT NULL,
+                    "LinkedWordId" TEXT NULL,
                     "NormalizedPrompt" TEXT NOT NULL DEFAULT '',
                     "NormalizedResponse" TEXT NOT NULL DEFAULT '',
                     "CreatedAt" TEXT NOT NULL,
                     "UpdatedAt" TEXT NOT NULL
                 );
-                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_Category" ON "ConversationPhrases" ("Category");
-                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_CefrLevel" ON "ConversationPhrases" ("CefrLevel");
-                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_IsFavorite" ON "ConversationPhrases" ("IsFavorite");
-                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_CreatedAt" ON "ConversationPhrases" ("CreatedAt");
-                CREATE INDEX IF NOT EXISTS "IX_ConversationPhrases_NormalizedPrompt" ON "ConversationPhrases" ("NormalizedPrompt");
                 """;
             await _context.Database.ExecuteSqlRawAsync(createPhrasesTableSql, cancellationToken);
+            await EnsureConversationPhraseColumnsAndIndexesAsync(cancellationToken);
 
             // Ensure ReferenceName column exists on RoadmapNodes for existing databases
             using (var checkCmd = connection.CreateCommand())
