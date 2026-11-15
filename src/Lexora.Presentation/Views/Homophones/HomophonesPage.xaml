@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dtos="using:Lexora.Application.DTOs"
     xmlns:views="using:Lexora.Presentation.Views.Homophones"
+    Background="Transparent"
     mc:Ignorable="d">
 
     <Grid RowDefinitions="Auto,*">
@@ -97,7 +98,7 @@
             <Border Grid.Column="0"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="0,0,1,0"
-                    Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <Grid RowDefinitions="Auto,Auto,*,Auto">
                     <!-- Search Input with AutoSuggestBox -->
                     <Grid Grid.Row="0" Padding="16,14,16,8">
@@ -213,7 +214,7 @@
                                     <FontIcon Glyph="&#xE76B;" FontSize="11" />
                                 </Button>
 
-                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1" CornerRadius="6"
                                         Padding="8,0" Height="28">

@@ -387,7 +387,7 @@
             <Border
                 Grid.Row="0"
                 Grid.Column="0"
-                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="{ThemeResource OverlayCornerRadius}">
@@ -536,7 +536,7 @@
                 x:Name="DetailPaneContainer"
                 Grid.Row="0"
                 Grid.Column="1"
-                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="{ThemeResource OverlayCornerRadius}">

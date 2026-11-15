@@ -10,6 +10,7 @@
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
     Loaded="Page_Loaded"
     mc:Ignorable="d">
@@ -231,7 +232,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE82D;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     <TextBlock x:Name="TextVocabTab" Text="{x:Bind Loc.GetString('Vocab_NavTab')}" FontWeight="SemiBold" />
-                                    <Border x:Name="BadgeVocab" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="12" Padding="8,3">
+                                    <Border x:Name="BadgeVocab" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="12" Padding="8,3">
                                         <TextBlock Text="{x:Bind ViewModel.VocabCount, Mode=OneWay}" FontSize="11" FontWeight="Bold" />
                                     </Border>
                                 </StackPanel>

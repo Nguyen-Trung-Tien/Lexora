@@ -160,7 +160,7 @@
                                     </StackPanel>
 
                                     <!-- Character Diff Comparison -->
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
                                         <StackPanel Spacing="6">
                                             <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_DiffTitle')}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             <RichTextBlock x:Name="DictationDiffViewer" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -169,7 +169,7 @@
 
                                     <!-- Word-by-Word Diff Comparison -->
                                     <Border x:Name="DictationWordDiffContainer"
-                                            Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10"
                                             Visibility="Collapsed">
                                         <StackPanel Spacing="6">
@@ -188,7 +188,7 @@
                                     </Border>
 
                                     <!-- Revealed Term & Context -->
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
                                         <StackPanel Spacing="6">
                                             <StackPanel Orientation="Horizontal" Spacing="12">
                                                 <TextBlock x:Name="DictationRevealedTerm" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -282,7 +282,7 @@
                                     </StackPanel>
 
                                     <!-- Articulatory Tip -->
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
+                                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
                                         <StackPanel Spacing="4">
                                             <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_ArticulatoryTip')}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             <TextBlock Text="{x:Bind CurrentPair.Tip, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />

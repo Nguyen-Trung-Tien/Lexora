@@ -8,6 +8,7 @@
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
@@ -79,7 +80,7 @@
                                                                 BorderThickness="1">
                                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                                                 <Border Width="36" Height="36" CornerRadius="18"
-                                                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                                         VerticalAlignment="Center">
                                                                     <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="14"
                                                                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
@@ -370,7 +371,7 @@
                                     </Grid>
 
                                     <!-- Hint Banner -->
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,6"
                                             HorizontalAlignment="Center"
@@ -760,14 +761,14 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14" HorizontalAlignment="Stretch">
+                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14" HorizontalAlignment="Stretch">
                                 <StackPanel HorizontalAlignment="Center" Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('Review_CorrectCount')}" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                                     <TextBlock Text="{x:Bind ViewModel.SessionCorrectCount, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="2" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14" HorizontalAlignment="Stretch">
+                            <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14" HorizontalAlignment="Stretch">
                                 <StackPanel HorizontalAlignment="Center" Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('Review_Accuracy')}" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

@@ -8,9 +8,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dtos="using:Lexora.Application.DTOs.MemoryTips"
     xmlns:services="using:Lexora.Presentation.Services"
+    Background="Transparent"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,Auto,*" Background="{ThemeResource LayerFillColorDefaultBrush}">
+    <Grid RowDefinitions="Auto,Auto,*">
         
         <!-- Row 0: Top Command Bar / Header Area -->
         <Border Grid.Row="0"
@@ -453,7 +454,7 @@
                                     Padding="18,14">
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
                                     <Border Width="40" Height="40" CornerRadius="10"
-                                            Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             HorizontalAlignment="Center" VerticalAlignment="Top">
@@ -496,7 +497,7 @@
 
                             <!-- Section 3: Application Example (If present) -->
                             <Border Visibility="{x:Bind ViewModel.SelectedTip.HasExample, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{ThemeResource OverlayCornerRadius}"
@@ -792,7 +793,7 @@
                                 <FontIcon Glyph="&#xE76B;" FontSize="12" />
                             </Button>
 
-                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1" CornerRadius="6"
                                     Padding="12,0" Height="32" MinWidth="64">

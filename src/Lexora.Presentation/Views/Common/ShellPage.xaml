@@ -7,6 +7,7 @@
     xmlns:common="using:Lexora.Presentation.Views.Common"
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
     UseLayoutRounding="True"
     mc:Ignorable="d">

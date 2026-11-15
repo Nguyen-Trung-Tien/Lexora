@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
+    Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
     Loaded="HelpPage_Loaded"
     mc:Ignorable="d">
@@ -16,7 +17,7 @@
             <StackPanel Spacing="20" HorizontalAlignment="Stretch">
 
                 <!-- 1. HERO BANNER: Elegant Fluent Card with Hub Overview -->
-                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
                         BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20,16">
                     <Grid RowDefinitions="Auto,Auto" RowSpacing="18">
@@ -213,7 +214,7 @@
                                     <TextBlock Text="{x:Bind Content}" FontSize="13" LineHeight="20" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
 
                                     <!-- Mathematical Formula / Algorithm Card (if present) -->
-                                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14,10"
                                             Visibility="{x:Bind Formula, Converter={StaticResource NullToVisibilityConverter}}">

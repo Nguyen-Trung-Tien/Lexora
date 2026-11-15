@@ -197,7 +197,7 @@
                                                         <StackPanel Spacing="10">
                                                             <!-- Meaning Header with badge & delete button -->
                                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
-                                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                                         BorderThickness="1" CornerRadius="12" Padding="8,3">
                                                                     <TextBlock Text="{Binding MeaningBadge}" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -244,7 +244,7 @@
                                                                 <ItemsControl ItemsSource="{Binding Examples}">
                                                                     <ItemsControl.ItemTemplate>
                                                                         <DataTemplate>
-                                                                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                                                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                                                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12" Margin="0,2,0,8">
                                                                                 <StackPanel Spacing="8">

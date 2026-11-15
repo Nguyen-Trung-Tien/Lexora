@@ -9,6 +9,7 @@
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
@@ -77,7 +78,7 @@
                 </StackPanel.ChildrenTransitions>
                 
                 <!-- Page Title Banner -->
-                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20,16">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
@@ -261,7 +262,7 @@
                             </Grid>
 
                             <!-- Adaptive CAT Mode Toggle Card -->
-                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16,12" Margin="0,6,0,0">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
@@ -409,7 +410,7 @@
                                 </Border>
 
                                 <!-- Custom Word Candidates Scrollable List -->
-                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" MaxHeight="250">
                                     <ListView ItemsSource="{x:Bind ViewModel.FilteredCustomWordCandidates, Mode=OneWay}"
@@ -443,7 +444,7 @@
                 </Grid>
 
                 <!-- Full-Width Master Start Action Footer -->
-                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20,16">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16" VerticalAlignment="Center">

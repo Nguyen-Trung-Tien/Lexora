@@ -8,6 +8,7 @@
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d" UseLayoutRounding="True">
 
@@ -40,7 +41,7 @@
             </InfoBar>
 
             <!-- HERO BANNER: Elegant Fluent Surface Card with 1-Click Quick Actions -->
-            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                 <Grid x:Name="HeroGrid" RowDefinitions="Auto,Auto" RowSpacing="16">
@@ -301,7 +302,7 @@
             </Grid>
 
             <!-- SMART STUDY ADVISOR: Adaptive Recommendation Hero Card -->
-            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource LexoraAdvisorBorderBrush}"
                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                 <Grid ColumnDefinitions="*,Auto" RowSpacing="12">
@@ -374,7 +375,7 @@
                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                        HorizontalAlignment="Center" />
                                             <Grid Height="84" Width="30" VerticalAlignment="Bottom">
-                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                         CornerRadius="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                                                 <Border Height="{x:Bind BarHeight}" Width="30"
                                                         CornerRadius="4"
@@ -401,9 +402,7 @@
                       BorderThickness="1"
                       CornerRadius="8"
                       Padding="16">
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
+            <Border Padding="16">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="2">
@@ -518,7 +517,7 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="dto:MemoryHealthSegmentDto">
-                                        <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                 BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6" MinWidth="115">
                                             <StackPanel Spacing="2">
@@ -536,7 +535,7 @@
                     </StackPanel>
 
                     <!-- HIGH-IMPACT LEARNING RECOMMENDATION BANNER -->
-                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16,12">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">

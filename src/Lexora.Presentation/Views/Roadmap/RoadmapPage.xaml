@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:enums="using:Lexora.Domain.Enums"
+    Background="Transparent"
     Loaded="Page_Loaded"
     SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
@@ -117,7 +118,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Background="{ThemeResource LayerFillColorDefaultBrush}">
+    <Grid>
         <!-- Single Root ScrollViewer with Smooth Scrolling -->
         <ScrollViewer
             x:Name="PageScrollViewer"

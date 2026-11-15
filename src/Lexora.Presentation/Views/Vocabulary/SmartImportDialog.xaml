@@ -59,7 +59,7 @@
 
                 <!-- Step 2 Indicator -->
                 <StackPanel x:Name="Step2Badge" Grid.Column="2" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                    <Border x:Name="Step2NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
+                    <Border x:Name="Step2NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
                         <TextBlock x:Name="Step2NumberText" Text="2" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <TextBlock x:Name="Step2Text" Text="Xem trước &amp; Kiểm tra" FontSize="12" FontWeight="Normal" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -69,7 +69,7 @@
 
                 <!-- Step 3 Indicator -->
                 <StackPanel x:Name="Step3Badge" Grid.Column="4" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                    <Border x:Name="Step3NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
+                    <Border x:Name="Step3NumberBorder" Width="20" Height="20" CornerRadius="10" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center">
                         <TextBlock x:Name="Step3NumberText" Text="3" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <TextBlock x:Name="Step3Text" Text="Kết quả" FontSize="12" FontWeight="Normal" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -235,7 +235,7 @@
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
                     <!-- Format Detection & Selector DropDownButton -->
                     <DropDownButton x:Name="BtnFormatSelector"
-                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{ThemeResource ControlCornerRadius}"
@@ -391,7 +391,7 @@
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3">
                                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Term}" FontWeight="SemiBold" FontSize="13" />
-                                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                         BorderThickness="1"
                                                         CornerRadius="4"
