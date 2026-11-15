@@ -44,13 +44,59 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
         AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(OnReviewPageKeyDown), handledEventsToo: false);
 
         RegisterShortcuts();
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
         Unloaded += (s, e) =>
         {
+            ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
             ViewModel.StopAudio();
             var sm = App.Current.Services.GetService<IShortcutManager>();
             sm?.UnregisterPageShortcuts(typeof(ReviewPage));
         };
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.IsSessionCompleted) && ViewModel.IsSessionCompleted)
+        {
+            DispatcherQueue.TryEnqueue(AnimateCelebrationBadge);
+        }
+    }
+
+    private void AnimateCelebrationBadge()
+    {
+        if (SessionCelebrationScaleTransform == null)
+        {
+            return;
+        }
+
+        SessionCelebrationScaleTransform.ScaleX = 0.65;
+        SessionCelebrationScaleTransform.ScaleY = 0.65;
+
+        var sb = new Storyboard();
+        var animX = new DoubleAnimation
+        {
+            From = 0.65,
+            To = 1.0,
+            Duration = new Duration(TimeSpan.FromMilliseconds(450)),
+            EasingFunction = new ElasticEase { EasingMode = EasingMode.EaseOut, Oscillations = 1, Springiness = 4 }
+        };
+        Storyboard.SetTarget(animX, SessionCelebrationScaleTransform);
+        Storyboard.SetTargetProperty(animX, "ScaleX");
+
+        var animY = new DoubleAnimation
+        {
+            From = 0.65,
+            To = 1.0,
+            Duration = new Duration(TimeSpan.FromMilliseconds(450)),
+            EasingFunction = new ElasticEase { EasingMode = EasingMode.EaseOut, Oscillations = 1, Springiness = 4 }
+        };
+        Storyboard.SetTarget(animY, SessionCelebrationScaleTransform);
+        Storyboard.SetTargetProperty(animY, "ScaleY");
+
+        sb.Children.Add(animX);
+        sb.Children.Add(animY);
+        sb.Begin();
     }
 
     private void FocusModeToggle_Click(object sender, RoutedEventArgs e)
@@ -574,6 +620,31 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
             Storyboard.SetTarget(da1, FlashcardProjection);
             Storyboard.SetTargetProperty(da1, "RotationY");
             sb1.Children.Add(da1);
+            if (FlashcardScaleTransform != null)
+            {
+                var scaleX1 = new DoubleAnimation
+                {
+                    From = 1.0,
+                    To = 0.96,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(120)),
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+                };
+                Storyboard.SetTarget(scaleX1, FlashcardScaleTransform);
+                Storyboard.SetTargetProperty(scaleX1, "ScaleX");
+
+                var scaleY1 = new DoubleAnimation
+                {
+                    From = 1.0,
+                    To = 0.96,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(120)),
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+                };
+                Storyboard.SetTarget(scaleY1, FlashcardScaleTransform);
+                Storyboard.SetTargetProperty(scaleY1, "ScaleY");
+
+                sb1.Children.Add(scaleX1);
+                sb1.Children.Add(scaleY1);
+            }
             sb1.Completed += (s, e) => tcs1.TrySetResult(true);
             sb1.Begin();
             await tcs1.Task;
@@ -592,6 +663,31 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
             Storyboard.SetTarget(da2, FlashcardProjection);
             Storyboard.SetTargetProperty(da2, "RotationY");
             sb2.Children.Add(da2);
+            if (FlashcardScaleTransform != null)
+            {
+                var scaleX2 = new DoubleAnimation
+                {
+                    From = 0.96,
+                    To = 1.0,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(140)),
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                };
+                Storyboard.SetTarget(scaleX2, FlashcardScaleTransform);
+                Storyboard.SetTargetProperty(scaleX2, "ScaleX");
+
+                var scaleY2 = new DoubleAnimation
+                {
+                    From = 0.96,
+                    To = 1.0,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(140)),
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                };
+                Storyboard.SetTarget(scaleY2, FlashcardScaleTransform);
+                Storyboard.SetTargetProperty(scaleY2, "ScaleY");
+
+                sb2.Children.Add(scaleX2);
+                sb2.Children.Add(scaleY2);
+            }
             sb2.Completed += (s, e) => tcs2.TrySetResult(true);
             sb2.Begin();
             await tcs2.Task;
@@ -601,6 +697,11 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
             if (FlashcardProjection != null)
             {
                 FlashcardProjection.RotationY = 0;
+            }
+            if (FlashcardScaleTransform != null)
+            {
+                FlashcardScaleTransform.ScaleX = 1.0;
+                FlashcardScaleTransform.ScaleY = 1.0;
             }
             _isFlipping = false;
         }

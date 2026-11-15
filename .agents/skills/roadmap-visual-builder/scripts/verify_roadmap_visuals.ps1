@@ -16,7 +16,7 @@ foreach ($f in $domainFiles) {
 Write-Host "  [PASS] Domain Layer Purity: PASSED (Zero external dependencies)" -ForegroundColor Green
 
 # 2. XAML Anti-WMC9999 Invariant Checks
-$roadmapXaml = Get-Content "src/Lexora.Presentation/Views/RoadmapPage.xaml" -Raw
+$roadmapXaml = Get-Content "src/Lexora.Presentation/Views/Roadmap/RoadmapPage.xaml" -Raw
 if ($roadmapXaml.Contains("Loc[")) {
     Write-Error "XAML String indexer detected in RoadmapPage.xaml! Use Loc.GetString(...) to avoid WMC9999."
 }
@@ -26,7 +26,7 @@ if ($roadmapXaml.Contains("ConverterParameter=") -and -not $roadmapXaml.Contains
 Write-Host "  [PASS] XAML Compiler Safety: PASSED (No WMC9999 triggers)" -ForegroundColor Green
 
 # 3. Zero Hardcoded Hex Colors in Roadmap Presentation
-$xamlLines = Get-Content "src/Lexora.Presentation/Views/RoadmapPage.xaml"
+$xamlLines = Get-Content "src/Lexora.Presentation/Views/Roadmap/RoadmapPage.xaml"
 $lineIdx = 0
 foreach ($line in $xamlLines) {
     $lineIdx++

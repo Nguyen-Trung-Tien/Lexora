@@ -6,6 +6,7 @@ using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.Storage.Pickers;
 
@@ -811,6 +812,25 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
 
     private void WordsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (!ViewModel.IsSelectionMode &&
+            e.AddedItems.Count > 0 &&
+            SelectedWordHeaderText is { IsLoaded: true } &&
+            WordsListView.ContainerFromItem(e.AddedItems[0]) is UIElement sourceContainer)
+        {
+            try
+            {
+                var anim = ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("vocabSelectionTransition", sourceContainer);
+                if (!anim.TryStart(SelectedWordHeaderText))
+                {
+                    anim.Cancel();
+                }
+            }
+            catch
+            {
+                // Ignore transient animation errors when detail header is not yet measured
+            }
+        }
+
         if (!ViewModel.IsSelectionMode)
         {
             return;
@@ -1209,6 +1229,10 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         if (ViewModel.SelectedWord == null) return;
         try
         {
+            if (SelectedWordHeaderText is { IsLoaded: true })
+            {
+                ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("vocabToGraphTransition", SelectedWordHeaderText);
+            }
             _navigationService.Navigate(typeof(KnowledgeGraphPage), ViewModel.SelectedWord.Id);
         }
         catch (Exception ex)
@@ -1356,6 +1380,18 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         try
         {
             await PerformExportAsync("txt", "TXT Vocabulary File", ".txt", (p) => ViewModel.ExportToTxtAsync(progress: p));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(Loc.GetString("Vocab_ExportFailed"), ex.Message);
+        }
+    }
+
+    private async void ExportAnkiTsv_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await PerformExportAsync("tsv", "Anki Flashcard Deck (.tsv)", ".tsv", (p) => ViewModel.ExportToAnkiTsvAsync(progress: p));
         }
         catch (Exception ex)
         {

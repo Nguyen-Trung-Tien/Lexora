@@ -1,11 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
-using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
-using Lexora.Presentation.Views;
 
 namespace Lexora.Presentation.ViewModels;
 
@@ -17,6 +14,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly IStudyAdvisorService _advisorService;
     private readonly IRoadmapService? _roadmapService;
     private readonly EventHandler? _languageChangedHandler;
+    private CancellationTokenSource? _loadCts;
     private bool _isLoadingDashboard;
 
     [ObservableProperty]
@@ -62,12 +60,16 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<MemoryHealthSegmentDto> MemoryHealthList { get; } = new();
     public ObservableCollection<RetentionCurvePointDto> RetentionCurveList { get; } = new();
+    public ObservableCollection<ExamScorePredictionDto> ExamPredictionsList { get; } = new();
 
     [ObservableProperty]
     public partial string HighImpactRecommendation { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsSubmitting { get; set; }
 
     [ObservableProperty]
     public partial int TotalWords { get; set; }
@@ -114,6 +116,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     public ObservableCollection<TopicProgressDto> TopicProgressList { get; } = new();
     public ObservableCollection<StudyHistoryDayDto> StudyHeatmapList { get; } = new();
     public ObservableCollection<StudySessionDto> RecentSessionsList { get; } = new();
+
     [ObservableProperty]
     public partial bool HasRecentSessions { get; set; }
 
@@ -161,385 +164,9 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         {
             _localizationService.LanguageChanged -= _languageChangedHandler;
         }
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        _loadCts = null;
         GC.SuppressFinalize(this);
-    }
-
-    private void UpdateGreeting()
-    {
-        int hour = DateTime.Now.Hour;
-        if (hour < 12)
-            GreetingText = _localizationService.GetString("Dashboard_GreetingMorning");
-        else if (hour < 18)
-            GreetingText = _localizationService.GetString("Dashboard_GreetingAfternoon");
-        else
-            GreetingText = _localizationService.GetString("Dashboard_GreetingEvening");
-    }
-
-    private void UpdateAdviceDisplay()
-    {
-        if (DailyAdvice == null) return;
-        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
-        AdviceTitle = isVi ? DailyAdvice.AdviceTitleVi : DailyAdvice.AdviceTitleEn;
-        AdviceDescription = isVi ? DailyAdvice.AdviceDescriptionVi : DailyAdvice.AdviceDescriptionEn;
-        AdviceButtonText = isVi ? DailyAdvice.ActionButtonTextVi : DailyAdvice.ActionButtonTextEn;
-    }
-
-    private string GetLocalizedDayLabel(string dayLabel)
-    {
-        return dayLabel switch
-        {
-            "Today" => _localizationService.GetString("Day_Today"),
-            "Tomorrow" => _localizationService.GetString("Day_Tomorrow"),
-            "Mon" => _localizationService.GetString("Day_Mon"),
-            "Tue" => _localizationService.GetString("Day_Tue"),
-            "Wed" => _localizationService.GetString("Day_Wed"),
-            "Thu" => _localizationService.GetString("Day_Thu"),
-            "Fri" => _localizationService.GetString("Day_Fri"),
-            "Sat" => _localizationService.GetString("Day_Sat"),
-            "Sun" => _localizationService.GetString("Day_Sun"),
-            _ => dayLabel
-        };
-    }
-
-    private string GetLocalizedStatusName(LearningStatus status) => status switch
-    {
-        LearningStatus.Mastered => _localizationService.GetString("Status_Mastered"),
-        LearningStatus.Remembered => _localizationService.GetString("Status_Remembered"),
-        LearningStatus.Learning => _localizationService.GetString("Status_Learning"),
-        LearningStatus.Review => _localizationService.GetString("Status_ReviewDue"),
-        LearningStatus.NotRemembered => _localizationService.GetString("Status_NotRemembered"),
-        LearningStatus.New => _localizationService.GetString("Status_New"),
-        _ => status.ToString()
-    };
-
-    private string GetLocalizedExamName(ExamType exam) => exam switch
-    {
-        ExamType.Toeic => _localizationService.GetString("Exam_Name_Toeic"),
-        ExamType.Vstep => _localizationService.GetString("Exam_Name_Vstep"),
-        ExamType.Ielts => _localizationService.GetString("Exam_Name_Ielts"),
-        _ => _localizationService.GetString("Exam_Name_General")
-    };
-
-    private string GetLocalizedExamDescription(ExamType exam) => exam switch
-    {
-        ExamType.Toeic => _localizationService.GetString("Exam_Target_Toeic"),
-        ExamType.Vstep => _localizationService.GetString("Exam_Target_Vstep"),
-        ExamType.Ielts => _localizationService.GetString("Exam_Target_Ielts"),
-        _ => _localizationService.GetString("Exam_Target_General")
-    };
-
-    private void UpdateLocalizedStatusAndExams()
-    {
-        if (_rawStatusBreakdown != null)
-        {
-            StatusBreakdown.Clear();
-            foreach (var s in _rawStatusBreakdown)
-            {
-                StatusBreakdown.Add(s with { DisplayName = GetLocalizedStatusName(s.Status) });
-            }
-        }
-
-        if (_rawExamProgress != null)
-        {
-            ExamProgressList.Clear();
-            foreach (var ep in _rawExamProgress)
-            {
-                ExamProgressList.Add(ep with
-                {
-                    CustomExamName = GetLocalizedExamName(ep.Exam),
-                    CustomTargetDescription = GetLocalizedExamDescription(ep.Exam)
-                });
-            }
-        }
-    }
-
-    private void UpdateForecastDisplay()
-    {
-        ForecastDaysList.Clear();
-        if (WorkloadForecast != null)
-        {
-            TotalForecastNext7Days = WorkloadForecast.TotalDueNext7Days;
-            foreach (var d in WorkloadForecast.Days)
-            {
-                ForecastDaysList.Add(d with { DayLabel = GetLocalizedDayLabel(d.DayLabel) });
-            }
-        }
-    }
-
-    private void UpdateLocalizedDistributions()
-    {
-        if (_rawCefrDistribution != null)
-        {
-            CefrDistributionList.Clear();
-            foreach (var c in _rawCefrDistribution) CefrDistributionList.Add(c);
-        }
-
-        if (_rawPosDistribution != null)
-        {
-            PosDistributionList.Clear();
-            foreach (var p in _rawPosDistribution) PosDistributionList.Add(p);
-        }
-    }
-
-    public void RefreshVisuals()
-    {
-        UpdateLocalizedHeatmap();
-        OnPropertyChanged(nameof(StudyHeatmapList));
-    }
-
-    private void UpdateLocalizedHeatmap()
-    {
-        if (_rawHeatmap == null) return;
-        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
-        StudyHeatmapList.Clear();
-        foreach (var h in _rawHeatmap)
-        {
-            var tooltip = isVi
-                ? $"{h.Date:dd/MM/yyyy}: {h.ReviewsCount} lượt ôn ({h.CorrectCount} chính xác)"
-                : $"{h.Date:dd/MM/yyyy}: {h.ReviewsCount} reviews ({h.CorrectCount} correct)";
-            StudyHeatmapList.Add(h with { CustomTooltip = tooltip });
-        }
-    }
-
-    private void UpdateLocalizedRecentSessions()
-    {
-        if (_rawRecentSessions == null) return;
-        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
-        RecentSessionsList.Clear();
-        foreach (var rs in _rawRecentSessions)
-        {
-            var duration = rs.CompletedAt.HasValue
-                ? $"{(rs.CompletedAt.Value - rs.StartedAt).Minutes:D2}:{(rs.CompletedAt.Value - rs.StartedAt).Seconds:D2}"
-                : (isVi ? "Đang diễn ra" : "In progress");
-            RecentSessionsList.Add(rs with { CustomDurationText = duration });
-        }
-        HasRecentSessions = RecentSessionsList.Count > 0;
-    }
-
-    private void UpdateIntelligenceDisplay()
-    {
-        if (IntelligenceReport == null) return;
-        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
-        
-        var slot = IntelligenceReport.CognitiveTimeEfficiency.FirstOrDefault(s => s.IsPeakPerformanceSlot) 
-                   ?? IntelligenceReport.CognitiveTimeEfficiency.FirstOrDefault();
-        if (slot != null)
-        {
-            string slotName = isVi ? slot.SlotNameVi : slot.SlotNameEn;
-            string accSuffix = _localizationService.GetString("LearningIntel_AccuracySuffix");
-            PeakEfficiencyDisplay = $"{slotName} ({slot.AccuracyRate:F0}% {accSuffix})";
-        }
-        else
-        {
-            PeakEfficiencyDisplay = _localizationService.GetString("LearningIntel_InsufficientData");
-        }
-
-        var vel = IntelligenceReport.WeeklyVelocity.LastOrDefault();
-        if (vel != null)
-        {
-            var format = _localizationService.GetString("LearningIntel_VelocityFormat");
-            VelocitySummaryDisplay = string.Format(format, vel.NetGrowth, vel.WordsLearned, vel.WordsMastered);
-        }
-        else
-        {
-            VelocitySummaryDisplay = _localizationService.GetString("LearningIntel_VelocityZero");
-        }
-
-        if (IntelligenceReport.ExamReadiness.Count > 0)
-        {
-            var ex = IntelligenceReport.ExamReadiness[0];
-            ExamReadinessDisplay = $"{ex.ExamTitle}: {ex.ReadinessScore:F0}% ({ex.TargetScoreRange})";
-        }
-        else
-        {
-            ExamReadinessDisplay = _localizationService.GetString("LearningIntel_Evaluating");
-        }
-
-        MemoryHealthList.Clear();
-        foreach (var seg in IntelligenceReport.MemoryHealthBreakdown)
-        {
-            MemoryHealthList.Add(seg with
-            {
-                CustomTitle = isVi ? seg.TitleVi : seg.TitleEn,
-                CustomDescription = isVi ? seg.DescriptionVi : seg.DescriptionEn
-            });
-        }
-
-        HighImpactRecommendation = isVi
-            ? IntelligenceReport.HighImpactRecommendationVi
-            : IntelligenceReport.HighImpactRecommendationEn;
-
-        RetentionCurveList.Clear();
-        foreach (var pt in IntelligenceReport.EmpiricalVsTheoreticalRetention)
-        {
-            string label = isVi 
-                ? (pt.IntervalDays <= 30 ? $"Ngày {pt.IntervalDays}" : "60 ngày+")
-                : (pt.IntervalDays <= 30 ? $"Day {pt.IntervalDays}" : "60d+");
-            string wordCount = isVi ? $"{pt.WordCount} từ" : $"{pt.WordCount} words";
-            RetentionCurveList.Add(pt with
-            {
-                CustomLabel = label,
-                CustomWordCountDisplay = wordCount
-            });
-        }
-    }
-
-    [RelayCommand]
-    public async Task LoadDashboardAsync()
-    {
-        if (_isLoadingDashboard) return;
-        _isLoadingDashboard = true;
-        IsLoading = true;
-        try
-        {
-            var analytics = await _statsService.GetDetailedAnalyticsAsync();
-            DailyAdvice = await _advisorService.GetDailyAdviceAsync(analytics.Summary);
-            WorkloadForecast = await _advisorService.Get7DayForecastAsync();
-            IntelligenceReport = await _statsService.GetLearningIntelligenceReportAsync();
-
-            UpdateAdviceDisplay();
-            UpdateForecastDisplay();
-            UpdateIntelligenceDisplay();
-
-            var summary = analytics.Summary;
-
-            TotalWords = summary.TotalWords;
-            DueToday = summary.DueReviewsToday;
-            Mastered = summary.TotalMastered;
-            LearningCount = summary.TotalLearning + summary.TotalRemembered;
-            StreakDays = summary.CurrentStreakDays;
-            LongestStreakDays = summary.LongestStreakDays;
-            AccuracyRate = summary.AccuracyRate;
-            StudiedTodayCount = summary.StudiedTodayCount;
-
-            _rawStatusBreakdown = analytics.StatusBreakdown;
-            _rawExamProgress = analytics.ExamProgress;
-            _rawCefrDistribution = analytics.CefrDistribution;
-            _rawPosDistribution = analytics.PosDistribution;
-            _rawHeatmap = analytics.Last30DaysHeatmap;
-            _rawRecentSessions = analytics.RecentSessions;
-
-            UpdateLocalizedStatusAndExams();
-            UpdateLocalizedDistributions();
-            UpdateLocalizedHeatmap();
-            UpdateLocalizedRecentSessions();
-
-            TopicProgressList.Clear();
-            foreach (var tp in analytics.TopicProgress) TopicProgressList.Add(tp);
-
-            if (_roadmapService != null)
-            {
-                ActiveRoadmap = await _roadmapService.SyncRoadmapProgressAsync()
-                    ?? await _roadmapService.GetActiveRoadmapAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadDashboardAsync error: {ex.Message}");
-        }
-        finally
-        {
-            _isLoadingDashboard = false;
-            IsLoading = false;
-        }
-    }
-
-    [RelayCommand]
-    public void NavigateToRoadmap()
-    {
-        _navService.Navigate(typeof(RoadmapPage));
-    }
-
-    [RelayCommand]
-    public async Task ContinueRoadmapAsync()
-    {
-        if (ActiveRoadmap?.NextActiveNode == null || _roadmapService == null)
-        {
-            _navService.Navigate(typeof(RoadmapPage));
-            return;
-        }
-
-        var targetNode = ActiveRoadmap.NextActiveNode;
-        try
-        {
-            var context = await _roadmapService.GetNodeActionContextAsync(targetNode.Id);
-
-            switch (targetNode.Type)
-            {
-                case RoadmapNodeType.VocabularySet:
-                    if (context?.TopicId != null && !string.IsNullOrWhiteSpace(context.TopicName))
-                    {
-                        var topicDto = new TopicDto(context.TopicId.Value, context.TopicName, null, null, null);
-                        _navService.Navigate(typeof(ReviewPage), topicDto);
-                    }
-                    else if (context != null && context.LinkedWordIds.Count > 0)
-                    {
-                        _navService.Navigate(typeof(ReviewPage), context.LinkedWordIds);
-                    }
-                    else
-                    {
-                        _navService.Navigate(typeof(ReviewPage));
-                    }
-                    break;
-
-                case RoadmapNodeType.GrammarPoint:
-                    string grammarQuery = context?.GrammarQuery ?? targetNode.ReferenceName ?? targetNode.Title;
-                    _navService.Navigate(typeof(GrammarPage), grammarQuery);
-                    break;
-
-                case RoadmapNodeType.MockTest:
-                case RoadmapNodeType.Checkpoint:
-                    _navService.Navigate(typeof(TestPage));
-                    break;
-
-                default:
-                    _navService.Navigate(typeof(RoadmapPage));
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] ContinueRoadmapAsync error: {ex.Message}");
-            _navService.Navigate(typeof(RoadmapPage));
-        }
-    }
-
-    [RelayCommand]
-    public void ExecuteAdviceAction()
-    {
-        if (DailyAdvice == null) return;
-        switch (DailyAdvice.RecommendedAction)
-        {
-            case StudyAdviceActionType.UrgentReview:
-                _navService.Navigate(typeof(ReviewPage));
-                break;
-            case StudyAdviceActionType.WeakWordsQuiz:
-                _navService.Navigate(typeof(TestPage), true);
-                break;
-            case StudyAdviceActionType.MilestonePractice:
-                _navService.Navigate(typeof(TestPage));
-                break;
-            default:
-                _navService.Navigate(typeof(VocabularyPage));
-                break;
-        }
-    }
-
-    [RelayCommand]
-    public void StartReviewSession()
-    {
-        _navService.Navigate(typeof(ReviewPage));
-    }
-
-    [RelayCommand]
-    public void StartPracticeTest()
-    {
-        _navService.Navigate(typeof(TestPage));
-    }
-
-    [RelayCommand]
-    public void OpenVocabulary()
-    {
-        _navService.Navigate(typeof(VocabularyPage));
     }
 }

@@ -153,6 +153,7 @@
                                         <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportJson')}" Click="ExportJson_Click" />
                                         <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportCsv')}" Click="ExportCsv_Click" />
                                         <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportTxt')}" Click="ExportTxt_Click" />
+                                        <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportAnkiTsv')}" Click="ExportAnkiTsv_Click" />
                                     </MenuFlyoutSubItem>
                                     <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_ExportVocabOnly')}">
                                         <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ExportVocabOnlyJson')}" Click="ExportVocabOnlyJson_Click" />
@@ -517,6 +518,12 @@
                                   SelectionChanged="WordsListView_SelectionChanged"
                                   Visibility="{x:Bind ViewModel.Words.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}"
                                   Padding="6">
+                            <ListView.ItemContainerTransitions>
+                                <TransitionCollection>
+                                    <EntranceThemeTransition IsStaggeringEnabled="True" />
+                                    <RepositionThemeTransition />
+                                </TransitionCollection>
+                            </ListView.ItemContainerTransitions>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="dto:WordDto">
                                     <Grid Padding="10,8" ColumnDefinitions="Auto,*,Auto" Margin="0,2">
@@ -646,7 +653,8 @@
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalAlignment="Top">
                                 <!-- Term & CEFR Level Badge -->
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalAlignment="Center" HorizontalAlignment="Stretch">
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedWord.Term, Mode=OneWay}"
+                                    <TextBlock x:Name="SelectedWordHeaderText"
+                                               Text="{x:Bind ViewModel.SelectedWord.Term, Mode=OneWay}"
                                                Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="24"
                                                TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                     <Border Grid.Column="1" Background="{x:Bind ViewModel.SelectedWord.Level, Mode=OneWay, Converter={StaticResource CefrToBrushConverter}}"

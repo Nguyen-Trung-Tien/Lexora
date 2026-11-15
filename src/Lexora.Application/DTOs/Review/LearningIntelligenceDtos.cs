@@ -50,6 +50,25 @@ public record MemoryHealthSegmentDto(
     public string Recommendation => CustomDescription ?? (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? DescriptionVi : DescriptionEn);
 };
 
+public record ExamScorePredictionDto(
+    ExamType Exam,
+    string ExamName,
+    string PredictedScoreDisplay,
+    double ConfidencePercent,
+    double MasteryRatioPercent,
+    int EstimatedDaysToNextMilestone,
+    string TargetBandLabel,
+    string RationaleVi,
+    string RationaleEn,
+    string? CustomRationale = null,
+    string? CustomConfidenceDisplay = null,
+    string? CustomMasteryDisplay = null,
+    string? CustomMilestoneDisplay = null
+)
+{
+    public string Rationale => CustomRationale ?? (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? RationaleVi : RationaleEn);
+};
+
 public record LearningIntelligenceReportDto(
     double GlobalRetentionIndex,
     double AverageRecallSpeedSec,
@@ -60,5 +79,6 @@ public record LearningIntelligenceReportDto(
     IReadOnlyList<MemoryHealthSegmentDto> MemoryHealthBreakdown,
     IReadOnlyList<RetentionCurvePointDto> EmpiricalVsTheoreticalRetention,
     string HighImpactRecommendationVi,
-    string HighImpactRecommendationEn
+    string HighImpactRecommendationEn,
+    IReadOnlyList<ExamScorePredictionDto>? PredictedExamScores = null
 );

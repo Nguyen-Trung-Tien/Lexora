@@ -34,6 +34,11 @@ public interface IExportImportService
     /// </summary>
     Task<string> ExportVocabularyOnlyTxtAsync(IEnumerable<Guid>? wordIds = null, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
 
+    /// <summary>
+    /// Exports vocabulary words as Anki-compatible HTML TSV flashcards (#separator:Tab, #html:true).
+    /// </summary>
+    Task<string> ExportToAnkiTsvAsync(IEnumerable<Guid>? wordIds = null, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
+
     Task<ImportResult> ImportFromJsonAsync(string jsonContent, ImportConflictResolution conflictResolution = ImportConflictResolution.Skip, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
     Task<ImportResult> ImportFromCsvAsync(string csvContent, ImportConflictResolution conflictResolution = ImportConflictResolution.Skip, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);
     Task<ImportResult> ImportFromTxtAsync(string txtContent, ImportConflictResolution conflictResolution = ImportConflictResolution.Skip, CancellationToken cancellationToken = default, IProgress<ProgressReport>? progress = null);

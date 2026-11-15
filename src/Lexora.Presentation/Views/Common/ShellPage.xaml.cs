@@ -34,6 +34,7 @@ public sealed partial class ShellPage : Page
         if (App.Current.Services.GetService<IShortcutManager>() is ShortcutManager sm)
         {
             sm.GlobalSearchRequested += OnGlobalSearchRequested;
+            sm.ListeningLabRequested += OnListeningLabRequested;
         }
 
         Unloaded += (s, e) =>
@@ -44,9 +45,19 @@ public sealed partial class ShellPage : Page
             if (App.Current.Services.GetService<IShortcutManager>() is ShortcutManager smClean)
             {
                 smClean.GlobalSearchRequested -= OnGlobalSearchRequested;
+                smClean.ListeningLabRequested -= OnListeningLabRequested;
             }
             ViewModel.Dispose();
         };
+    }
+
+    private void OnListeningLabRequested(object? sender, EventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            CommandPaletteOverlay?.Hide();
+            CommandPaletteOverlay?.OpenDictationLabDialog();
+        });
     }
 
     private void OnGlobalSearchRequested(object? sender, EventArgs e)

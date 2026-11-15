@@ -20,6 +20,7 @@ public partial class LocalizationService
         vi["Vocab_ExportJson"] = "Xuất file JSON";
         vi["Vocab_ExportCsv"] = "Xuất file CSV";
         vi["Vocab_ExportTxt"] = "Xuất file TXT (Văn bản)";
+        vi["Vocab_ExportAnkiTsv"] = "Xuất bộ thẻ Anki (.tsv)";
         vi["Vocab_ImportJson"] = "Nhập từ file JSON...";
         vi["Vocab_ImportCsv"] = "Nhập từ file CSV...";
         vi["Vocab_ImportTxt"] = "Nhập từ file TXT...";
@@ -261,6 +262,7 @@ public partial class LocalizationService
         en["Vocab_ExportJson"] = "Export to JSON";
         en["Vocab_ExportCsv"] = "Export to CSV";
         en["Vocab_ExportTxt"] = "Export to TXT (Text)";
+        en["Vocab_ExportAnkiTsv"] = "Export Anki Deck (.tsv)";
         en["Vocab_ImportJson"] = "Import from JSON...";
         en["Vocab_ImportCsv"] = "Import from CSV...";
         en["Vocab_ImportTxt"] = "Import from TXT...";

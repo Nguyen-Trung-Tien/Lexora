@@ -53,6 +53,7 @@ public class RoadmapRepository : Repository<StudyRoadmap>, IRoadmapRepository
     public async Task<IReadOnlyList<StudyRoadmap>> GetRoadmapsByTargetAsync(ExamTarget target, CancellationToken cancellationToken = default)
     {
         return await Context.StudyRoadmaps
+            .AsNoTracking()
             .Where(r => r.Target == target)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync(cancellationToken);

@@ -29,6 +29,10 @@ public partial class LocalizationService
         vi["ListeningLab_ModeWord"] = "Chép từ vựng";
         vi["ListeningLab_ModeSentence"] = "Chép câu ví dụ";
         vi["ListeningLab_TypeHeardSentence"] = "Nhập toàn bộ câu bạn nghe được...";
+        vi["ListeningLab_PairCorrectFormat"] = "Chính xác! Từ được đọc là '{0}' ({1}).";
+        vi["ListeningLab_PairIncorrectFormat"] = "Chưa đúng. Từ thực tế được phát âm là '{0}' ({1}).";
+        vi["ListeningLab_WordDiffTitle"] = "Chấm điểm từng từ (Đúng / Nhầm / Thiếu):";
+        vi["ListeningLab_WordsMatchedFormat"] = "{0}/{1} từ khớp ({2}%)";
 
         // ==========================================
         // ListeningLab — en-US (English)
@@ -55,5 +59,9 @@ public partial class LocalizationService
         en["ListeningLab_ModeWord"] = "Dictate Word";
         en["ListeningLab_ModeSentence"] = "Dictate Sentence";
         en["ListeningLab_TypeHeardSentence"] = "Type the sentence you hear...";
+        en["ListeningLab_PairCorrectFormat"] = "Correct! The spoken word was '{0}' ({1}).";
+        en["ListeningLab_PairIncorrectFormat"] = "Not quite. The spoken word was actually '{0}' ({1}).";
+        en["ListeningLab_WordDiffTitle"] = "Word-by-Word Grading (Correct / Incorrect / Missing):";
+        en["ListeningLab_WordsMatchedFormat"] = "{0}/{1} words matched ({2}%)";
     }
 }

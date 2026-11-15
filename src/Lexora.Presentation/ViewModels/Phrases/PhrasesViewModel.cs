@@ -6,7 +6,6 @@ using Lexora.Application.Interfaces;
 using Lexora.Domain.Enums;
 using Lexora.Presentation.Services;
 using Microsoft.UI.Dispatching;
-using Windows.ApplicationModel.DataTransfer;
 
 namespace Lexora.Presentation.ViewModels;
 
@@ -16,8 +15,10 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
     private readonly ILocalizationService _localizationService;
     private readonly IAudioPlayerService? _audioPlayerService;
     private readonly DispatcherQueue? _dispatcherQueue;
+    private readonly EventHandler? _languageChangedHandler;
 
     private readonly List<ConversationPhraseDto> _allFilteredPhrases = [];
+    private CancellationTokenSource? _loadCts;
 
     public ObservableCollection<ConversationPhraseDto> Phrases { get; } = [];
     public ObservableCollection<string> Categories { get; } = [];
@@ -110,16 +111,39 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
         _localizationService = localizationService;
         _audioPlayerService = audioPlayerService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+
+        _languageChangedHandler = (_, _) =>
+        {
+            void RefreshTexts()
+            {
+                OnPropertyChanged(nameof(ItemsRangeDisplay));
+                OnPropertyChanged(nameof(CountDisplayInfo));
+            }
+
+            if (_dispatcherQueue != null)
+            {
+                _dispatcherQueue.TryEnqueue(RefreshTexts);
+            }
+            else
+            {
+                RefreshTexts();
+            }
+        };
+        _localizationService.LanguageChanged += _languageChangedHandler;
     }
 
     [RelayCommand]
-    public async Task LoadDataAsync()
+    public async Task LoadDataAsync(CancellationToken cancellationToken = default)
     {
         IsLoading = true;
         try
         {
-            await LoadCategoriesAsync();
-            await RefreshPhrasesAsync();
+            await LoadCategoriesAsync(cancellationToken);
+            await RefreshPhrasesAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected on cancellation
         }
         catch (Exception ex)
         {
@@ -131,17 +155,21 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
         }
     }
 
-    private async Task LoadCategoriesAsync()
+    private async Task LoadCategoriesAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            var cats = await _phraseService.GetCategoriesAsync();
+            var cats = await _phraseService.GetCategoriesAsync(cancellationToken);
             Categories.Clear();
             Categories.Add(_localizationService.GetString("Phrases_FilterAllCategories"));
             foreach (var c in cats)
             {
                 Categories.Add(c);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected on cancellation
         }
         catch (Exception ex)
         {
@@ -150,8 +178,13 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    public async Task RefreshPhrasesAsync()
+    public async Task RefreshPhrasesAsync(CancellationToken cancellationToken = default)
     {
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var token = _loadCts.Token;
+
         IsLoading = true;
         try
         {
@@ -169,7 +202,8 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
                 SearchQuery = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim()
             };
 
-            var list = await _phraseService.GetPhrasesAsync(filter);
+            var list = await _phraseService.GetPhrasesAsync(filter, token);
+            token.ThrowIfCancellationRequested();
 
             _allFilteredPhrases.Clear();
             _allFilteredPhrases.AddRange(list);
@@ -177,6 +211,10 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
             TotalCount = _allFilteredPhrases.Count;
             CurrentPage = 1;
             RefreshCurrentPageSlice();
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when superseded by a newer search/filter request
         }
         catch (Exception ex)
         {
@@ -195,7 +233,6 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
             .Take(PageSize)
             .ToList();
 
-        // Stable in-place collection update to prevent layout collapse and flickering
         while (Phrases.Count > slice.Count)
         {
             Phrases.RemoveAt(Phrases.Count - 1);
@@ -224,194 +261,15 @@ public partial class PhrasesViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(IsEmptyState));
     }
 
-    [RelayCommand]
-    public void FirstPage() => GoToPage(1);
-
-    [RelayCommand]
-    public void PreviousPage() => GoToPage(CurrentPage - 1);
-
-    [RelayCommand]
-    public void NextPage() => GoToPage(CurrentPage + 1);
-
-    [RelayCommand]
-    public void LastPage() => GoToPage(TotalPages);
-
-    public void GoToPage(int page)
-    {
-        int target = Math.Clamp(page, 1, TotalPages);
-        if (target == CurrentPage && Phrases.Count > 0) return;
-        CurrentPage = target;
-        RefreshCurrentPageSlice();
-    }
-
-    [RelayCommand]
-    public void ChangePageSize(int newSize)
-    {
-        if (newSize <= 0 || newSize == PageSize) return;
-        PageSize = newSize;
-    }
-
-    [RelayCommand]
-    public async Task ToggleFavoriteAsync(ConversationPhraseDto? phrase)
-    {
-        if (phrase == null || IsSubmitting) return;
-
-        IsSubmitting = true;
-        try
-        {
-            var newStatus = await _phraseService.ToggleFavoriteAsync(phrase.Id);
-            phrase.IsFavorite = newStatus;
-
-            // If filtering only favorites and user unfavorited, remove from list
-            if (OnlyFavorites && !newStatus)
-            {
-                _allFilteredPhrases.Remove(phrase);
-                TotalCount = _allFilteredPhrases.Count;
-                if (CurrentPage > TotalPages)
-                {
-                    CurrentPage = Math.Max(1, TotalPages);
-                }
-                RefreshCurrentPageSlice();
-            }
-            else
-            {
-                var match = _allFilteredPhrases.FirstOrDefault(p => p.Id == phrase.Id);
-                if (match != null && match != phrase)
-                {
-                    match.IsFavorite = newStatus;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[PhrasesViewModel] ToggleFavorite error: {ex.Message}");
-        }
-        finally
-        {
-            IsSubmitting = false;
-        }
-    }
-
-    [RelayCommand]
-    public async Task DeletePhraseAsync(ConversationPhraseDto? phrase)
-    {
-        if (phrase == null || IsSubmitting) return;
-
-        IsSubmitting = true;
-        try
-        {
-            await _phraseService.DeleteAsync(phrase.Id);
-            _allFilteredPhrases.Remove(phrase);
-            TotalCount = _allFilteredPhrases.Count;
-            if (CurrentPage > TotalPages)
-            {
-                CurrentPage = Math.Max(1, TotalPages);
-            }
-            RefreshCurrentPageSlice();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[PhrasesViewModel] DeletePhrase error: {ex.Message}");
-        }
-        finally
-        {
-            IsSubmitting = false;
-        }
-    }
-
-    [RelayCommand]
-    public async Task PlayPromptAudioAsync(ConversationPhraseDto? phrase)
-    {
-        if (phrase == null || string.IsNullOrWhiteSpace(phrase.PromptSentence) || _audioPlayerService == null)
-            return;
-
-        try
-        {
-            await _audioPlayerService.PlayPronunciationAsync(phrase.PromptSentence, "us");
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[PhrasesViewModel] PlayPromptAudio error: {ex.Message}");
-        }
-    }
-
-    [RelayCommand]
-    public async Task PlayResponseAudioAsync(ConversationPhraseDto? phrase)
-    {
-        if (phrase == null || string.IsNullOrWhiteSpace(phrase.SampleResponse) || _audioPlayerService == null)
-            return;
-
-        try
-        {
-            await _audioPlayerService.PlayPronunciationAsync(phrase.SampleResponse, "us");
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[PhrasesViewModel] PlayResponseAudio error: {ex.Message}");
-        }
-    }
-
-    [RelayCommand]
-    public void CopyText(string? text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return;
-
-        try
-        {
-            var dataPackage = new DataPackage();
-            dataPackage.SetText(text);
-            Clipboard.SetContent(dataPackage);
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[PhrasesViewModel] CopyText error: {ex.Message}");
-        }
-    }
-
-    [RelayCommand]
-    public async Task ClearFiltersAsync()
-    {
-        SearchQuery = string.Empty;
-        SelectedCategory = null;
-        SelectedLevel = null;
-        OnlyFavorites = false;
-        await RefreshPhrasesAsync();
-    }
-
-    public void OnPhraseSaved(ConversationPhraseDto savedPhrase, bool isNew)
-    {
-        if (isNew)
-        {
-            _allFilteredPhrases.Insert(0, savedPhrase);
-            TotalCount = _allFilteredPhrases.Count;
-            CurrentPage = 1;
-            RefreshCurrentPageSlice();
-            if (!string.IsNullOrEmpty(savedPhrase.Category) && !Categories.Contains(savedPhrase.Category))
-            {
-                Categories.Add(savedPhrase.Category);
-            }
-        }
-        else
-        {
-            var existing = _allFilteredPhrases.FirstOrDefault(p => p.Id == savedPhrase.Id);
-            if (existing != null)
-            {
-                existing.Category = savedPhrase.Category;
-                existing.ContextTag = savedPhrase.ContextTag;
-                existing.PromptSentence = savedPhrase.PromptSentence;
-                existing.PromptTranslation = savedPhrase.PromptTranslation;
-                existing.SampleResponse = savedPhrase.SampleResponse;
-                existing.ResponseTranslation = savedPhrase.ResponseTranslation;
-                existing.AdditionalSuggestions = savedPhrase.AdditionalSuggestions;
-                existing.CefrLevel = savedPhrase.CefrLevel;
-                existing.IsFavorite = savedPhrase.IsFavorite;
-                existing.UpdatedAt = savedPhrase.UpdatedAt;
-            }
-        }
-    }
-
     public void Dispose()
     {
+        if (_languageChangedHandler != null)
+        {
+            _localizationService.LanguageChanged -= _languageChangedHandler;
+        }
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        _loadCts = null;
         _allFilteredPhrases.Clear();
         Phrases.Clear();
         Categories.Clear();

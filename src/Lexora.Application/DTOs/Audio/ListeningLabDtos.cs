@@ -34,7 +34,11 @@ public record DictationEvaluationResultDto(
     string UserInput,
     string FeedbackMessage,
     string? Phonetic,
-    IReadOnlyList<DictationDiffTokenDto>? DiffTokens = null
+    IReadOnlyList<DictationDiffTokenDto>? DiffTokens = null,
+    IReadOnlyList<DictationDiffTokenDto>? WordDiffTokens = null,
+    double WordAccuracyPercent = 0,
+    int MatchedWords = 0,
+    int TotalWords = 0
 );
 
 public record MinimalPairChallengeDto(

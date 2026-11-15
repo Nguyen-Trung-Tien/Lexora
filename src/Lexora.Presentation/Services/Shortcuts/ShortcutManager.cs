@@ -24,6 +24,7 @@ public sealed class ShortcutManager : IShortcutManager
 
     public event EventHandler? ShortcutsChanged;
     public event EventHandler? GlobalSearchRequested;
+    public event EventHandler? ListeningLabRequested;
 
     [DllImport("user32.dll")]
     private static extern short GetKeyState(int nVirtKey);
@@ -240,6 +241,38 @@ public sealed class ShortcutManager : IShortcutManager
             ExecuteAsync = () =>
             {
                 _navigationService.Navigate(typeof(HelpPage));
+                return Task.CompletedTask;
+            }
+        });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
+            Id = "Global.ListeningLab",
+            Gesture = new ShortcutGesture(ShortcutKey.D, ShortcutModifiers.Control | ShortcutModifiers.Shift),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Palette_DictationLab",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                ListeningLabRequested?.Invoke(this, EventArgs.Empty);
+                return Task.CompletedTask;
+            }
+        });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
+            Id = "Global.UrgentReview",
+            Gesture = new ShortcutGesture(ShortcutKey.R, ShortcutModifiers.Control | ShortcutModifiers.Shift),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Dashboard_StartReview",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                _navigationService.Navigate(typeof(ReviewPage));
                 return Task.CompletedTask;
             }
         });

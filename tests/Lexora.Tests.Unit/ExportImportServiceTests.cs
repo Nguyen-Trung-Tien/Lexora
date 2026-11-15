@@ -398,4 +398,76 @@ public class ExportImportServiceTests
         // Assert
         txt.Should().Contain("resilience\tsự kiên cường, khả năng phục hồi");
     }
+
+    [Fact]
+    public async Task ExportToAnkiTsvAsync_ShouldFormatFrontBackNotesAndSanitizedTags()
+    {
+        // Arrange
+        var sampleWord = new Word
+        {
+            Id = Guid.NewGuid(),
+            Term = "ubiquitous",
+            Level = CefrLevel.C1,
+            PrimaryPartOfSpeech = PartOfSpeech.Adjective,
+            PhoneticUk = "/juːˈbɪk.wɪ.təs/",
+            PhoneticUs = "/juːˈbɪk.wɪ.təs/",
+            Notes = "High frequency <academic>\tnote",
+            Meanings = new List<WordMeaning>
+            {
+                new()
+                {
+                    PartOfSpeech = PartOfSpeech.Adjective,
+                    DefinitionVi = "có mặt khắp nơi",
+                    DefinitionEn = "present everywhere",
+                    OrderIndex = 0,
+                    Examples = new List<ExampleSentence>
+                    {
+                        new()
+                        {
+                            SentenceEn = "Smartphones are ubiquitous.",
+                            SentenceVi = "Điện thoại có ở khắp nơi."
+                        }
+                    }
+                }
+            },
+            WordTopics = new List<WordTopic>
+            {
+                new() { Topic = new Topic { Name = "Academic Words" } }
+            },
+            WordExamTags = new List<WordExamTag>
+            {
+                new() { ExamTag = new ExamTag { Name = "IELTS Core", Type = ExamType.Ielts } }
+            }
+        };
+
+        _vocabRepoMock.Setup(r => r.SearchAsync(
+            null, null, null, null, null, null, 0, 100000, null, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Word> { sampleWord });
+
+        // Act
+        var tsv = await _service.ExportToAnkiTsvAsync();
+
+        // Assert
+        tsv.Should().StartWith("#separator:Tab");
+        tsv.Should().Contain("#html:true");
+        tsv.Should().Contain("#tags column:4");
+
+        var dataLine = tsv.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+            .First(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith('#'));
+
+        var cols = dataLine.Split('\t');
+        cols.Should().HaveCount(4);
+        cols[0].Should().Contain("<b>ubiquitous</b>");
+        cols[0].Should().Contain("/juːˈbɪk.wɪ.təs/");
+        cols[0].Should().Contain("[Adjective • C1]");
+        System.Net.WebUtility.HtmlDecode(cols[1]).Should().Contain("có mặt khắp nơi");
+        cols[1].Should().Contain("present everywhere");
+        cols[1].Should().Contain("&rarr;");
+        cols[2].Should().Contain("&lt;academic&gt;");
+        cols[2].Should().NotContain("\t");
+        cols[3].Should().Contain("lexora");
+        cols[3].Should().Contain("cefr_C1");
+        cols[3].Should().Contain("Academic_Words");
+        cols[3].Should().Contain("IELTS_Core");
+    }
 }

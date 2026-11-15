@@ -74,8 +74,14 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
     public DictationEvaluationResultDto EvaluateDictation(string userInput, string expectedTerm, string? phonetic = null)
     {
         var safeExpected = expectedTerm ?? string.Empty;
-        var cleanInput = (userInput ?? string.Empty).Trim().ToLowerInvariant();
+        var safeInput = userInput ?? string.Empty;
+        var cleanInput = safeInput.Trim().ToLowerInvariant();
         var cleanExpected = safeExpected.Trim().ToLowerInvariant();
+
+        var (wordDiffTokens, matchedWords, totalWords) = ComputeWordDiffTokens(safeInput, safeExpected);
+        double wordAccuracy = totalWords == 0
+            ? (string.IsNullOrWhiteSpace(safeInput) ? 100.0 : 0.0)
+            : Math.Round((double)matchedWords / totalWords * 100.0, 1);
 
         if (string.Equals(cleanInput, cleanExpected, StringComparison.OrdinalIgnoreCase))
         {
@@ -85,10 +91,14 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
                 LevenshteinDistance: 0,
                 AccuracyPercent: 100.0,
                 ExpectedTerm: safeExpected,
-                UserInput: userInput ?? string.Empty,
+                UserInput: safeInput,
                 FeedbackMessage: "Chính xác tuyệt đối! Tai nghe và chính tả rất xuất sắc.",
                 Phonetic: phonetic,
-                DiffTokens: matchTokens
+                DiffTokens: matchTokens,
+                WordDiffTokens: wordDiffTokens,
+                WordAccuracyPercent: 100.0,
+                MatchedWords: totalWords,
+                TotalWords: totalWords
             );
         }
 
@@ -113,11 +123,101 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
             LevenshteinDistance: distance,
             AccuracyPercent: Math.Round(accuracy, 1),
             ExpectedTerm: safeExpected,
-            UserInput: userInput ?? string.Empty,
+            UserInput: safeInput,
             FeedbackMessage: feedback,
             Phonetic: phonetic,
-            DiffTokens: diffTokens
+            DiffTokens: diffTokens,
+            WordDiffTokens: wordDiffTokens,
+            WordAccuracyPercent: wordAccuracy,
+            MatchedWords: matchedWords,
+            TotalWords: totalWords
         );
+    }
+
+    private static string[] TokenizeWords(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return [];
+        return text
+            .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)
+            .Select(w => w.Trim('.', ',', '!', '?', ';', ':', '"', '\'', '(', ')', '[', ']'))
+            .Where(w => w.Length > 0)
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Computes word-level Levenshtein alignment tokens along with matched and total expected word counts.
+    /// </summary>
+    public static (IReadOnlyList<DictationDiffTokenDto> Tokens, int MatchedWords, int TotalWords) ComputeWordDiffTokens(
+        string input,
+        string expected)
+    {
+        var inputWords = TokenizeWords(input);
+        var expectedWords = TokenizeWords(expected);
+
+        int m = inputWords.Length;
+        int n = expectedWords.Length;
+        if (m == 0 && n == 0)
+        {
+            return (Array.Empty<DictationDiffTokenDto>(), 0, 0);
+        }
+
+        int[,] dp = new int[m + 1, n + 1];
+        for (int i = 0; i <= m; i++) dp[i, 0] = i;
+        for (int j = 0; j <= n; j++) dp[0, j] = j;
+
+        for (int i = 1; i <= m; i++)
+        {
+            for (int j = 1; j <= n; j++)
+            {
+                bool match = string.Equals(inputWords[i - 1], expectedWords[j - 1], StringComparison.OrdinalIgnoreCase);
+                if (match)
+                {
+                    dp[i, j] = dp[i - 1, j - 1];
+                }
+                else
+                {
+                    int sub = dp[i - 1, j - 1] + 1;
+                    int del = dp[i - 1, j] + 1;
+                    int ins = dp[i, j - 1] + 1;
+                    dp[i, j] = Math.Min(sub, Math.Min(del, ins));
+                }
+            }
+        }
+
+        var tokens = new List<DictationDiffTokenDto>();
+        int matchedWords = 0;
+        int curI = m;
+        int curJ = n;
+
+        while (curI > 0 || curJ > 0)
+        {
+            if (curI > 0 && curJ > 0 && string.Equals(inputWords[curI - 1], expectedWords[curJ - 1], StringComparison.OrdinalIgnoreCase))
+            {
+                tokens.Add(new DictationDiffTokenDto(expectedWords[curJ - 1], DictationDiffType.Correct));
+                matchedWords++;
+                curI--;
+                curJ--;
+            }
+            else if (curJ > 0 && (curI == 0 || dp[curI, curJ] == dp[curI, curJ - 1] + 1))
+            {
+                tokens.Add(new DictationDiffTokenDto(expectedWords[curJ - 1], DictationDiffType.Missing, expectedWords[curJ - 1]));
+                curJ--;
+            }
+            else if (curI > 0 && (curJ == 0 || dp[curI, curJ] == dp[curI - 1, curJ] + 1))
+            {
+                tokens.Add(new DictationDiffTokenDto(inputWords[curI - 1], DictationDiffType.Extra));
+                curI--;
+            }
+            else if (curI > 0 && curJ > 0 && dp[curI, curJ] == dp[curI - 1, curJ - 1] + 1)
+            {
+                tokens.Add(new DictationDiffTokenDto(inputWords[curI - 1], DictationDiffType.Incorrect, expectedWords[curJ - 1]));
+                curI--;
+                curJ--;
+            }
+        }
+
+        tokens.Reverse();
+        return (tokens, matchedWords, n);
     }
 
     public static IReadOnlyList<DictationDiffTokenDto> ComputeDiffTokens(string input, string expected)

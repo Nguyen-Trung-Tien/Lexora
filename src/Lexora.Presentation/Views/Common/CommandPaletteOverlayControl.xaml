@@ -16,11 +16,11 @@
 
         <!-- Centered Floating Palette Card (100% Opaque Modal Surface, Zero Bleed-Through) -->
         <Border x:Name="PaletteCard"
-                Width="640"
+                MaxWidth="640"
                 MaxHeight="540"
-                HorizontalAlignment="Center"
+                HorizontalAlignment="Stretch"
                 VerticalAlignment="Top"
-                Margin="0,80,0,0"
+                Margin="24,80,24,0"
                 Background="{ThemeResource LexoraModalBackgroundBrush}"
                 BorderBrush="{ThemeResource LexoraModalBorderBrush}"
                 BorderThickness="1"
@@ -80,6 +80,12 @@
                               ItemClick="ItemsListView_ItemClick"
                               KeyDown="ItemsListView_KeyDown"
                               Padding="6,6">
+                        <ListView.ItemContainerTransitions>
+                            <TransitionCollection>
+                                <EntranceThemeTransition IsStaggeringEnabled="True" />
+                                <RepositionThemeTransition />
+                            </TransitionCollection>
+                        </ListView.ItemContainerTransitions>
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="common:CommandPaletteDisplayItem">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="8,6" HorizontalAlignment="Stretch">

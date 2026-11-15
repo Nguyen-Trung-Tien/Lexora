@@ -22,6 +22,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     private readonly IReleaseNotesService _releaseNotesService;
     private readonly DispatcherQueue? _dispatcherQueue;
     private readonly EventHandler? _languageChangedHandler;
+    private readonly EventHandler<ElementTheme>? _themeChangedHandler;
 
     [ObservableProperty]
     public partial int SelectedThemeIndex { get; set; } = 0; // 0 = System, 1 = Light, 2 = Dark
@@ -192,7 +193,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         CurrentLanguage = _locService.CurrentLanguage;
         var prefs = _preferencesService.GetPreferences();
         SelectedThemeIndex = prefs.ThemeIndex;
-        _themeService.ThemeChanged += (s, theme) =>
+        _themeChangedHandler = (s, theme) =>
         {
             var idx = theme switch
             {
@@ -202,6 +203,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             };
             RunOnUI(() => SelectedThemeIndex = idx);
         };
+        _themeService.ThemeChanged += _themeChangedHandler;
         AutoPlayAudio = prefs.AutoPlayAudio;
         EnableReviewReminder = prefs.EnableReviewReminder;
         SpeechRate = prefs.SpeechRate;
@@ -246,6 +248,10 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         if (_languageChangedHandler != null)
         {
             _locService.LanguageChanged -= _languageChangedHandler;
+        }
+        if (_themeChangedHandler != null)
+        {
+            _themeService.ThemeChanged -= _themeChangedHandler;
         }
         GC.SuppressFinalize(this);
     }

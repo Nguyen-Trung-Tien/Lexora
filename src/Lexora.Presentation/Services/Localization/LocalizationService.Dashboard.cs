@@ -155,6 +155,11 @@ public partial class LocalizationService
         vi["LearningIntel_VelocityFormat"] = "+{0} từ/tuần ({1} đã học, {2} thành thạo)";
         vi["LearningIntel_VelocityZero"] = "+0 từ/tuần";
         vi["LearningIntel_Evaluating"] = "Đang đánh giá";
+        vi["LearningIntel_PredictedScoresTitle"] = "Dự báo điểm thi (Mô phỏng SM-2 / FSRS)";
+        vi["LearningIntel_ConfidenceFormat"] = "Độ tin cậy: {0}%";
+        vi["LearningIntel_MasteryFormat"] = "Độ phủ: {0}%";
+        vi["LearningIntel_DaysToMilestoneFormat"] = "~{0} ngày tới mốc kế tiếp";
+        vi["LearningIntel_MilestoneReached"] = "Đã đạt ngưỡng mục tiêu";
         // Contextual Help Tips on Screens
         vi["Dashboard_Help_Title"] = "Trợ giúp: Bảng tổng quan";
         vi["Dashboard_Help_Subtitle"] = "Theo dõi chỉ số và trạng thái học tập";
@@ -311,6 +316,11 @@ public partial class LocalizationService
         en["LearningIntel_VelocityFormat"] = "+{0} words/wk ({1} learned, {2} mastered)";
         en["LearningIntel_VelocityZero"] = "+0 words/wk";
         en["LearningIntel_Evaluating"] = "Evaluating";
+        en["LearningIntel_PredictedScoresTitle"] = "Predictive Exam Score Simulator (SM-2 / FSRS)";
+        en["LearningIntel_ConfidenceFormat"] = "Confidence: {0}%";
+        en["LearningIntel_MasteryFormat"] = "Mastery: {0}%";
+        en["LearningIntel_DaysToMilestoneFormat"] = "~{0} days to next milestone";
+        en["LearningIntel_MilestoneReached"] = "Target milestone reached";
         // Contextual Help Tips on Screens
         en["Dashboard_Help_Title"] = "Quick Help: Dashboard";
         en["Dashboard_Help_Subtitle"] = "Track key metrics and learning health";

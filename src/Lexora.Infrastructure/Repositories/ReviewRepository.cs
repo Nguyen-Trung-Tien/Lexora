@@ -59,6 +59,7 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
     public async Task<Dictionary<LearningStatus, int>> GetCardCountsByStatusAsync(CancellationToken cancellationToken = default)
     {
         var grouped = await DbSet
+            .AsNoTracking()
             .GroupBy(rc => rc.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync(cancellationToken);
@@ -88,7 +89,9 @@ public class ReviewRepository : Repository<ReviewCard>, IReviewRepository
 
     public async Task<UserStreak?> GetUserStreakAsync(CancellationToken cancellationToken = default)
     {
-        return await Context.UserStreaks.FirstOrDefaultAsync(cancellationToken);
+        return await Context.UserStreaks
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task UpdateStreakAsync(DateOnly date, CancellationToken cancellationToken = default)

@@ -119,7 +119,8 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
             new(loc.GetString("Nav_Test"), loc.GetString("Search_SmartNav_Test"), "\uE765", "Ctrl+7", () => nav.Navigate(typeof(TestPage))),
             new(loc.GetString("Nav_LearningStorage"), loc.GetString("Search_SmartNav_LearningStorage"), "\uE81C", "Ctrl+8", () => nav.Navigate(typeof(LearningStoragePage))),
             new(loc.GetString("Nav_Roadmap"), loc.GetString("Nav_Roadmap"), "\uE81C", "Ctrl+9", () => nav.Navigate(typeof(RoadmapPage))),
-            new(loc.GetString("Palette_DictationLab"), loc.GetString("Nav_ListeningLab"), "\uE767", null, OpenDictationLabDialog),
+            new(loc.GetString("Dashboard_StartReview"), loc.GetString("Search_SmartNav_Review"), "\uE895", "Ctrl+Shift+R", () => nav.Navigate(typeof(ReviewPage))),
+            new(loc.GetString("Palette_DictationLab"), loc.GetString("Nav_ListeningLab"), "\uE767", "Ctrl+Shift+D", OpenDictationLabDialog),
             new(loc.GetString("Nav_Settings"), loc.GetString("Search_SmartNav_Settings"), "\uE713", null, () => nav.Navigate(typeof(SettingsPage))),
             new(loc.GetString("Nav_Help"), loc.GetString("Nav_Help"), "\uE9CE", "F1", () => nav.Navigate(typeof(HelpPage))),
             new(loc.GetString("Nav_ThemeToggle"), loc.GetString("Nav_ThemeToggle"), "\uE708", "Ctrl+T", () => theme?.ToggleTheme())
@@ -133,7 +134,7 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
         UpdateEmptyState();
     }
 
-    private async void OpenDictationLabDialog()
+    public async void OpenDictationLabDialog()
     {
         try
         {
@@ -145,7 +146,7 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
             {
                 XamlRoot = this.XamlRoot
             };
-            await dialog.ShowAsync();
+            await dialog.ShowAsyncSafe(this.XamlRoot);
         }
         catch (Exception ex)
         {
@@ -191,7 +192,8 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
                 new(loc?.GetString("Nav_Test") ?? "Test", loc?.GetString("Search_SmartNav_Test") ?? "", "\uE765", "Ctrl+7", () => nav?.Navigate(typeof(TestPage))),
                 new(loc?.GetString("Nav_LearningStorage") ?? "Learning Storage", loc?.GetString("Search_SmartNav_LearningStorage") ?? "", "\uE81C", "Ctrl+8", () => nav?.Navigate(typeof(LearningStoragePage))),
                 new(loc?.GetString("Nav_Roadmap") ?? "Roadmap", loc?.GetString("Nav_Roadmap") ?? "", "\uE81C", "Ctrl+9", () => nav?.Navigate(typeof(RoadmapPage))),
-                new(loc?.GetString("Palette_DictationLab") ?? "Listening Lab", loc?.GetString("Nav_ListeningLab") ?? "", "\uE767", null, OpenDictationLabDialog),
+                new(loc?.GetString("Dashboard_StartReview") ?? "Start Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+Shift+R", () => nav?.Navigate(typeof(ReviewPage))),
+                new(loc?.GetString("Palette_DictationLab") ?? "Listening Lab", loc?.GetString("Nav_ListeningLab") ?? "", "\uE767", "Ctrl+Shift+D", OpenDictationLabDialog),
                 new(loc?.GetString("Nav_Settings") ?? "Settings", loc?.GetString("Search_SmartNav_Settings") ?? "", "\uE713", null, () => nav?.Navigate(typeof(SettingsPage))),
                 new(loc?.GetString("Nav_Help") ?? "Help", loc?.GetString("Nav_Help") ?? "", "\uE9CE", "F1", () => nav?.Navigate(typeof(HelpPage)))
             };

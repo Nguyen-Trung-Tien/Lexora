@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.6.2] - 2026-11-14
+## [1.6.2] - 2026-11-15
 
 ### Added
-- **User-Facing Release Notes Log Architecture (`release-notes/`)**: Bổ sung thư mục chuyên biệt `release-notes/` chứa ghi chú phát hành dạng Markdown chuẩn (tiếng Anh súc tích, dễ hiểu) cho từng phiên bản (`vX.Y.Z.md`) cùng tệp mẫu `template.md` và tài liệu hướng dẫn `README.md`.
+- **Word-by-Word Dictation Grading Engine**: Bổ sung thuật toán căn chỉnh cấp độ từ (`ComputeWordDiffTokens`) trong `PronunciationListeningLabService` cùng thẻ hiển thị trực quan và tỷ lệ phần trăm từ khớp trong `ListeningLabDialog` (cả chế độ từ vựng nhiều từ và chép câu ví dụ).
+- **Predictive Exam Score Simulator (TOEIC / IELTS / VSTEP)**: Bổ sung `GetExamScorePredictionsAsync` và `ExamScorePredictionDto` trong `IStatisticsService` / `StatisticsService`, hiển thị thẻ mô phỏng điểm dự đoán (TOEIC 10–990 bước 5, IELTS 0.0–9.0 bước 0.5, VSTEP 0.0–10.0 bước 0.5), độ tin cậy và ước tính số ngày tới mốc tiếp theo trong `DashboardPage`.
+- **Anki Flashcard TSV Export & Global Quick-Action Shortcuts**: Mở rộng `IExportImportService.ExportToAnkiTsvAsync` (kèm mục chọn xuất `.tsv` HTML có gắn tags CEFR/Topic/Exam trên `VocabularyPage`) và bổ sung phím tắt toàn cục `Ctrl+Shift+D` (mở Listening Lab) và `Ctrl+Shift+R` (Ôn tập khẩn cấp) qua `ShortcutManager`, `ShellPage` và `CommandPaletteOverlayControl`.
+- **User-Facing Release Notes Log Architecture (`release-notes/`)**: Bổ sung thư mục chuyên biệt `release-notes/` chứa ghi chú phát hành dạng Markdown chuẩn cho từng phiên bản (`vX.Y.Z.md`) cùng tệp mẫu `template.md` và tài liệu hướng dẫn `README.md`.
 - **In-App Release Notes Log Viewer**: Tích hợp hộp thoại Fluent 2 bản địa `ReleaseNotesLogDialog` cho phép người học xem toàn bộ lịch sử cập nhật và cải tiến qua các phiên bản, hiển thị trực quan thông qua `ReleaseNotesRenderer` với công nghệ render Markdown ngoại tuyến, tự động thích ứng với Light/Dark Theme và bộ lọc phiên bản thông minh.
 - **Offline Release Notes Service Contracts**: Xây dựng `IReleaseNotesService` trong `Lexora.Application` và `ReleaseNotesService` trong `Lexora.Infrastructure` để tự động nạp, phân tích cú pháp và sắp xếp Semantic Versioning giảm dần mà không phụ thuộc kết nối Internet.
 - **Entrypoints in Settings & Help Hub**: Bổ sung nút hành động "Nhật ký phát hành / Release Notes Log" (biểu tượng `\uE81C`) trên thẻ Cập nhật phần mềm trong `SettingsPage` và Hero Banner của `HelpPage`.
@@ -20,12 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Atomic Batch Upsert & Tag Deduplication**: Tự động lọc trùng lặp nội bộ trong cùng batch nhập và auto-healing các bản ghi duplicate `ExamTags` và `Topics` trong SQLite.
 
 ### Fixed
+- **Localization & Memory Safety Fixes**: Bản địa hóa triệt để các chuỗi `ItemsRangeDisplay`, gợi ý tìm kiếm ở `HomophonesViewModel` và phản hồi Minimal Pair ở `ListeningLabDialog`; bổ sung `IDisposable`, hủy đăng ký event handlers (`LanguageChanged`, `ThemeChanged`, `PropertyChanged`) và `CancellationTokenSource` trên `HelpViewModel`, `SettingsViewModel`, `HomophonesViewModel`, `DashboardViewModel`, `KnowledgeGraphViewModel`, `PhrasesViewModel`.
 - **WinUI 3 Post-Import Access Violation (0xc0000005)**: Khắc phục triệt để lỗi crash native trong `Microsoft.UI.Xaml.dll` do gọi `Bindings.Update()` trong khi visual tree của ContentDialog đang đóng hoặc tái chế item.
 - **Safe Dialog Chaining & Visual Tree Detachment**: Bổ sung độ trễ an toàn 80ms trong `SafeDialogExtensions.ShowAsyncSafe` đảm bảo popup dialog tách rời hoàn toàn trước khi nhả semaphore hoặc nạp lại dữ liệu UI.
-- **Double-Click Protection on Import Actions**: Khóa nút "Hoàn tất" (Done) tức thì khi nhấn để chống crash do gọi `Hide()` nhiều lần trên `ContentDialog`.
+- **Double-Click Protection on Import Actions**: Khóa nút "Hoàn tất" (Done) tức thì khi nhấn để chống crash do gọi `Hide()` nhiều lần trên `ContentDialog` và bổ sung cờ `IsSubmitting` trên các thao tác ViewModel.
 - **SQLite Tag Collision Fix**: Xử lý triệt để ngoại lệ `ArgumentException: An item with the same key has already been added` bằng lookup dictionary an toàn cho Exam Tags và Topics.
 
 ### Changed
+- **Fluent 2 Motion & Canvas Optimization**: Gom nhóm đường cong Bézier cubic trong `PathGeometry` kèm viewport culling trên `KnowledgeGraphPage`; bổ sung `ConnectedAnimationService`, `EntranceThemeTransition`/`RepositionThemeTransition` trên `VocabularyPage`; nâng cấp hiệu ứng lật thẻ 3D scale pulse và `ElasticEase` celebration badge trên `ReviewPage`; loại bỏ fixed width trên `CommandPaletteOverlayControl`.
+- **EF Core & Service Modular Refactoring**: Bổ sung `.AsNoTracking()` và SQLite `Chunk(500)` trong `ReviewRepository`, `RoadmapRepository`, `VocabularyRepository`; loại bỏ N+1 `GetByTermAsync` trong `ExportImportService` và tách gọn `ExportImportService`, `HomophonesViewModel`, `DashboardViewModel`, `KnowledgeGraphViewModel`, `PhrasesViewModel` thành các file `partial class`.
 - **Enhanced Release Notes Markdown Renderer**: Mở rộng `ReleaseNotesRenderer` hỗ trợ code tokens (inline backticks), blockquotes trích dẫn, khử trùng lặp tiêu đề `skipTopLevelTitle` và đảm bảo chống tràn 100% trên màn hình độ phân giải thấp (1366x768).
 
 

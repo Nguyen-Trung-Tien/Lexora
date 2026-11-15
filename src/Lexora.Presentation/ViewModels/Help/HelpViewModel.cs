@@ -39,13 +39,17 @@ internal sealed record HelpGuideDefinition(
     IReadOnlyList<string> TipsListKeys,
     IReadOnlyList<string> ShortcutKeys);
 
-public partial class HelpViewModel : ObservableObject
+public partial class HelpViewModel : ObservableObject, IDisposable
 {
     private readonly INavigationService _navigationService;
     private readonly ILocalizationService _localizationService;
+    private readonly EventHandler _languageChangedHandler;
 
     private readonly List<HelpGuideDefinition> _definitions = new();
     private readonly List<HelpGuideDisplayItem> _allDisplayItems = new();
+
+    [ObservableProperty]
+    public partial bool IsSubmitting { get; set; }
 
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
@@ -64,15 +68,22 @@ public partial class HelpViewModel : ObservableObject
         _navigationService = navigationService;
         _localizationService = localizationService;
 
-        _localizationService.LanguageChanged += (s, e) =>
+        _languageChangedHandler = (s, e) =>
         {
             RebuildDisplayItems();
             ApplyFilter();
         };
+        _localizationService.LanguageChanged += _languageChangedHandler;
 
         InitializeDefinitions();
         RebuildDisplayItems();
         ApplyFilter();
+    }
+
+    public void Dispose()
+    {
+        _localizationService.LanguageChanged -= _languageChangedHandler;
+        GC.SuppressFinalize(this);
     }
 
     private void InitializeDefinitions()

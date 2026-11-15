@@ -271,7 +271,11 @@
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource LexoraFlashcardBorderBrush}"
                             BorderThickness="1" CornerRadius="8" Padding="24" MinHeight="440"
-                            HorizontalAlignment="Stretch">
+                            HorizontalAlignment="Stretch"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="FlashcardScaleTransform" ScaleX="1.0" ScaleY="1.0" />
+                        </Border.RenderTransform>
                         <Border.Projection>
                             <PlaneProjection x:Name="FlashcardProjection" CenterOfRotationX="0.5" CenterOfRotationY="0.5" />
                         </Border.Projection>
@@ -734,7 +738,12 @@
                         Visibility="{x:Bind ViewModel.IsSessionCompleted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
 
                     <StackPanel Spacing="20" HorizontalAlignment="Center">
-                        <Border Width="64" Height="64" CornerRadius="16" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="8" HorizontalAlignment="Center">
+                        <Border x:Name="SessionCelebrationBadge" Width="64" Height="64" CornerRadius="16"
+                                Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="8" HorizontalAlignment="Center"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="SessionCelebrationScaleTransform" ScaleX="1.0" ScaleY="1.0" />
+                            </Border.RenderTransform>
                             <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="48" Height="48" />
                         </Border>
                         <TextBlock Text="{x:Bind Loc.GetString('Review_SessionCompletedTitle')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" HorizontalAlignment="Center" />

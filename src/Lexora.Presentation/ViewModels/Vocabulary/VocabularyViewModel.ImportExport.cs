@@ -20,6 +20,11 @@ public partial class VocabularyViewModel
         return await _exportImportService.ExportToTxtAsync(wordIds, progress: progress);
     }
 
+    public async Task<string> ExportToAnkiTsvAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
+    {
+        return await _exportImportService.ExportToAnkiTsvAsync(wordIds, progress: progress);
+    }
+
     public async Task<string> ExportVocabularyOnlyJsonAsync(IEnumerable<Guid>? wordIds = null, IProgress<ProgressReport>? progress = null)
     {
         return await _exportImportService.ExportVocabularyOnlyJsonAsync(wordIds, progress: progress);

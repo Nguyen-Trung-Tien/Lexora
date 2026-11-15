@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
 using Windows.Foundation;
@@ -22,6 +23,7 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
     public ILocalizationService Loc { get; }
     private readonly IToastNotificationService? _toastService;
     private CancellationTokenSource? _headerSearchCts;
+    private string? _pendingConnectedAnimationKey;
 
     public KnowledgeGraphPage()
         : this(
@@ -62,6 +64,16 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+
+        var animService = ConnectedAnimationService.GetForCurrentView();
+        if (animService.GetAnimation("vocabToGraphTransition") != null)
+        {
+            _pendingConnectedAnimationKey = "vocabToGraphTransition";
+        }
+        else if (animService.GetAnimation("graphNodeTransition") != null)
+        {
+            _pendingConnectedAnimationKey = "graphNodeTransition";
+        }
 
         if (e.Parameter is Guid wordId && wordId != Guid.Empty)
         {
@@ -285,6 +297,8 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             {
                 if (s is Border b && b.Tag is GraphNodeDto clickedNode)
                 {
+                    ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("graphNodeTransition", b);
+                    _pendingConnectedAnimationKey = "graphNodeTransition";
                     await ViewModel.PivotToNodeInternalAsync(clickedNode.Id, clickedNode.Term);
                 }
             };
@@ -379,32 +393,81 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             if (!anyOverlap) break;
         }
 
-        // Step 3: Draw Connecting Lines to final resolved coordinates
+        // Clip canvas overflow cleanly during zoom scaling
+        GraphCanvas.Clip = new RectangleGeometry { Rect = new Rect(0, 0, width, height) };
+
+        // Step 3: Draw batched cubic Bezier curves grouped by relation type (1 PathGeometry per category)
+        var edgeGeometries = new Dictionary<KnowledgeGraphNodeType, PathGeometry>();
         for (int i = 0; i < count; i++)
         {
-            var line = new Line
+            double nx = nodeItems[i].X;
+            double ny = nodeItems[i].Y;
+            double halfW = nodeItems[i].Width / 2.0;
+            double halfH = nodeItems[i].Height / 2.0;
+
+            // Viewport bounds culling when zoom extends outside visible area
+            if (nx + halfW < -24 || nx - halfW > width + 24 ||
+                ny + halfH < -24 || ny - halfH > height + 24)
             {
-                X1 = cx,
-                Y1 = cy,
-                X2 = nodeItems[i].X,
-                Y2 = nodeItems[i].Y,
-                Stroke = GetRelationLineBrush(nodeItems[i].Node.NodeType),
+                continue;
+            }
+
+            var nodeType = nodeItems[i].Node.NodeType;
+            if (!edgeGeometries.TryGetValue(nodeType, out var geometry))
+            {
+                geometry = new PathGeometry();
+                edgeGeometries[nodeType] = geometry;
+            }
+
+            double dx = nx - cx;
+            var cp1 = new Point(cx + (dx * 0.38), cy);
+            var cp2 = new Point(cx + (dx * 0.62), ny);
+
+            var figure = new PathFigure
+            {
+                StartPoint = new Point(cx, cy),
+                IsClosed = false,
+                IsFilled = false
+            };
+            figure.Segments.Add(new BezierSegment
+            {
+                Point1 = cp1,
+                Point2 = cp2,
+                Point3 = new Point(nx, ny)
+            });
+            geometry.Figures.Add(figure);
+        }
+
+        foreach (var kvp in edgeGeometries)
+        {
+            var path = new Microsoft.UI.Xaml.Shapes.Path
+            {
+                Data = kvp.Value,
+                Stroke = GetRelationLineBrush(kvp.Key),
                 StrokeThickness = 2.0
             };
 
-            if (nodeItems[i].Node.NodeType == KnowledgeGraphNodeType.Antonym)
+            if (kvp.Key == KnowledgeGraphNodeType.Antonym)
             {
-                line.StrokeDashArray = new DoubleCollection { 4, 3 };
+                path.StrokeDashArray = new DoubleCollection { 4, 3 };
             }
 
-            GraphCanvas.Children.Add(line);
+            GraphCanvas.Children.Add(path);
         }
 
-        // Step 4: Add node cards to canvas
+        // Step 4: Add visible node cards to canvas (viewport culled)
         for (int i = 0; i < count; i++)
         {
-            Canvas.SetLeft(nodeItems[i].Border, nodeItems[i].X - (nodeItems[i].Width / 2.0));
-            Canvas.SetTop(nodeItems[i].Border, nodeItems[i].Y - (nodeItems[i].Height / 2.0));
+            double halfW = nodeItems[i].Width / 2.0;
+            double halfH = nodeItems[i].Height / 2.0;
+            if (nodeItems[i].X + halfW < -24 || nodeItems[i].X - halfW > width + 24 ||
+                nodeItems[i].Y + halfH < -24 || nodeItems[i].Y - halfH > height + 24)
+            {
+                continue;
+            }
+
+            Canvas.SetLeft(nodeItems[i].Border, nodeItems[i].X - halfW);
+            Canvas.SetTop(nodeItems[i].Border, nodeItems[i].Y - halfH);
             GraphCanvas.Children.Add(nodeItems[i].Border);
         }
 
@@ -500,6 +563,17 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         Canvas.SetLeft(centerBorder, cx - (cw / 2.0));
         Canvas.SetTop(centerBorder, cy - (ch / 2.0));
         GraphCanvas.Children.Add(centerBorder);
+
+        if (!string.IsNullOrEmpty(_pendingConnectedAnimationKey))
+        {
+            var animKey = _pendingConnectedAnimationKey;
+            _pendingConnectedAnimationKey = null;
+            var anim = ConnectedAnimationService.GetForCurrentView().GetAnimation(animKey);
+            if (anim != null)
+            {
+                DispatcherQueue.TryEnqueue(() => anim.TryStart(centerBorder));
+            }
+        }
     }
 
     private Brush GetRelationLineBrush(KnowledgeGraphNodeType type) => type switch

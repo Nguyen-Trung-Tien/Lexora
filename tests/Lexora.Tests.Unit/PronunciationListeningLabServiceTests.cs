@@ -223,4 +223,52 @@ public class PronunciationListeningLabServiceTests
         challenge.DefinitionVi.Should().Be("tỉ mỉ, cẩn thận");
         challenge.Level.Should().Be("C1");
     }
+
+    [Fact]
+    public void EvaluateDictation_MultiWordSentence_ExactMatch_ReturnsFullWordAccuracy()
+    {
+        // Act
+        var result = _labService.EvaluateDictation("The quick brown fox.", "The quick brown fox.");
+
+        // Assert
+        result.IsExactMatch.Should().BeTrue();
+        result.WordAccuracyPercent.Should().Be(100.0);
+        result.MatchedWords.Should().Be(4);
+        result.TotalWords.Should().Be(4);
+        result.WordDiffTokens.Should().NotBeNull();
+        result.WordDiffTokens!.Should().HaveCount(4);
+        result.WordDiffTokens!.Should().OnlyContain(t => t.Type == Lexora.Application.DTOs.DictationDiffType.Correct);
+    }
+
+    [Fact]
+    public void EvaluateDictation_MultiWordSentence_PartialMatch_GradesEachWordAccurately()
+    {
+        // Act
+        var result = _labService.EvaluateDictation("The fast brown", "The quick brown fox");
+
+        // Assert
+        result.IsExactMatch.Should().BeFalse();
+        result.TotalWords.Should().Be(4);
+        result.MatchedWords.Should().Be(2);
+        result.WordAccuracyPercent.Should().Be(50.0);
+        result.WordDiffTokens.Should().Contain(t =>
+            t.Type == Lexora.Application.DTOs.DictationDiffType.Incorrect && t.Text == "fast" && t.Expected == "quick");
+        result.WordDiffTokens.Should().Contain(t =>
+            t.Type == Lexora.Application.DTOs.DictationDiffType.Missing && t.Text == "fox");
+    }
+
+    [Fact]
+    public void ComputeWordDiffTokens_ExtraAndMissingWords_IdentifiesAllTokenTypes()
+    {
+        // Act
+        var (tokens, matched, total) = PronunciationListeningLabService.ComputeWordDiffTokens(
+            "we very carefully analyze",
+            "we analyze results");
+
+        // Assert
+        matched.Should().Be(2);
+        total.Should().Be(3);
+        tokens.Should().Contain(t => t.Type == Lexora.Application.DTOs.DictationDiffType.Extra);
+        tokens.Should().Contain(t => t.Type == Lexora.Application.DTOs.DictationDiffType.Missing && t.Text == "results");
+    }
 }

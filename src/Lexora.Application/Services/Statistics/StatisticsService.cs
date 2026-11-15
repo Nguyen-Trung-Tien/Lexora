@@ -339,6 +339,9 @@ public class StatisticsService : IStatisticsService
             BuildExamReadiness(ExamType.Vstep, "VSTEP B2-C1", 500, allWords)
         };
 
+        // 3b. Predictive Exam Score Simulation
+        var predictedExamScores = BuildExamScorePredictions(allWords, recentLogs);
+
         // 4. Memory Health Breakdown
         int permanentCount = cards.Count(c => c.IntervalDays >= 30 && c.Status == LearningStatus.Mastered);
         int strongCount = cards.Count(c => c.IntervalDays is >= 14 and < 30);
@@ -383,7 +386,126 @@ public class StatisticsService : IStatisticsService
             MemoryHealthBreakdown: memoryHealth,
             EmpiricalVsTheoreticalRetention: retentionCurve,
             HighImpactRecommendationVi: tipVi,
-            HighImpactRecommendationEn: tipEn
+            HighImpactRecommendationEn: tipEn,
+            PredictedExamScores: predictedExamScores
+        );
+    }
+
+    public async Task<IReadOnlyList<ExamScorePredictionDto>> GetExamScorePredictionsAsync(CancellationToken cancellationToken = default)
+    {
+        var recentLogs = await _reviewRepo.GetRecentLogsAsync(1000, cancellationToken) ?? Array.Empty<StudyLog>();
+        var allWords = await _vocabRepo.GetWordsForAnalyticsAsync(cancellationToken) ?? new List<Word>();
+        return BuildExamScorePredictions(allWords, recentLogs);
+    }
+
+    private static IReadOnlyList<ExamScorePredictionDto> BuildExamScorePredictions(
+        IReadOnlyList<Word> allWords,
+        IReadOnlyList<StudyLog> recentLogs)
+    {
+        int totalLogs = recentLogs.Count;
+        int correctLogs = recentLogs.Count(l => l.Rating >= ReviewRating.Good);
+        double retentionFactor = totalLogs > 0
+            ? Math.Clamp((double)correctLogs / totalLogs, 0.45, 1.0)
+            : 0.78;
+
+        var twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
+        var recentTwoWeekLogs = recentLogs.Where(l => l.CreatedAt >= twoWeeksAgo).ToList();
+        int recentActiveDays = recentTwoWeekLogs.Select(l => l.CreatedAt.Date).Distinct().Count();
+        double dailyVelocity = recentTwoWeekLogs.Count > 0 && recentActiveDays > 0
+            ? Math.Max(3.0, (double)recentTwoWeekLogs.Count / recentActiveDays * 0.45)
+            : 5.0;
+
+        return new[]
+        {
+            BuildSingleExamPrediction(ExamType.Toeic, "TOEIC", 600, allWords, totalLogs, retentionFactor, dailyVelocity),
+            BuildSingleExamPrediction(ExamType.Ielts, "IELTS", 800, allWords, totalLogs, retentionFactor, dailyVelocity),
+            BuildSingleExamPrediction(ExamType.Vstep, "VSTEP", 500, allWords, totalLogs, retentionFactor, dailyVelocity)
+        };
+    }
+
+    private static ExamScorePredictionDto BuildSingleExamPrediction(
+        ExamType exam,
+        string examName,
+        int targetPool,
+        IReadOnlyList<Word> allWords,
+        int totalLogs,
+        double retentionFactor,
+        double dailyVelocity)
+    {
+        var examWords = allWords
+            .Where(w => w.WordExamTags != null && w.WordExamTags.Any(et => et.ExamTag != null && et.ExamTag.Type == exam))
+            .ToList();
+        var poolWords = examWords.Count > 0 ? examWords : allWords.ToList();
+        int poolCount = poolWords.Count;
+
+        int mastered = poolWords.Count(w => w.ReviewCard?.Status == LearningStatus.Mastered);
+        int remembered = poolWords.Count(w => w.ReviewCard?.Status == LearningStatus.Remembered);
+        int learning = poolWords.Count(w => w.ReviewCard?.Status == LearningStatus.Learning);
+
+        double weightedMastered = mastered + remembered * 0.65 + learning * 0.25;
+        double masteryRatio = poolCount == 0
+            ? 0.0
+            : Math.Clamp(weightedMastered / targetPool, 0.0, 1.0);
+
+        double masteryPercent = Math.Round(masteryRatio * 100.0, 1);
+        double poolCoverageFactor = targetPool > 0
+            ? Math.Min(1.0, (double)poolCount / (targetPool * 0.25))
+            : 0.0;
+
+        double proficiency = poolCount == 0
+            ? 0.0
+            : Math.Clamp(masteryRatio * 0.72 + retentionFactor * 0.28 * poolCoverageFactor, 0.0, 1.0);
+
+        double confidence = poolCount == 0
+            ? 15.0
+            : Math.Clamp(Math.Round(35.0 + Math.Min(totalLogs, 120) / 120.0 * 35.0 + Math.Min(poolCount, 300) / 300.0 * 25.0, 1), 15.0, 95.0);
+
+        int remainingWords = Math.Max(0, (int)Math.Ceiling(Math.Max(0, targetPool * 0.85 - weightedMastered)));
+        int estimatedDays = poolCount == 0
+            ? 90
+            : (masteryRatio >= 0.85 ? 0 : Math.Clamp((int)Math.Ceiling(remainingWords / Math.Max(dailyVelocity, 3.0)), 7, 180));
+
+        string scoreDisplay;
+        string targetBand;
+        if (exam == ExamType.Toeic)
+        {
+            int rawToeic = poolCount == 0 ? 10 : (int)(Math.Round((10.0 + proficiency * 980.0) / 5.0) * 5);
+            int toeicScore = Math.Clamp(rawToeic, 10, 990);
+            scoreDisplay = $"{toeicScore} / 990";
+            targetBand = toeicScore >= 850 ? "850 - 990" : toeicScore >= 650 ? "650 - 845" : "400 - 645";
+        }
+        else if (exam == ExamType.Ielts)
+        {
+            double rawIelts = poolCount == 0 ? 0.0 : Math.Round((proficiency * 9.0) * 2.0, MidpointRounding.AwayFromZero) / 2.0;
+            double ieltsBand = Math.Clamp(rawIelts, 0.0, 9.0);
+            scoreDisplay = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:F1} / 9.0", ieltsBand);
+            targetBand = ieltsBand >= 7.5 ? "Band 7.5 - 9.0" : ieltsBand >= 6.0 ? "Band 6.0 - 7.0" : "Band 4.0 - 5.5";
+        }
+        else
+        {
+            double rawVstep = poolCount == 0 ? 0.0 : Math.Round((proficiency * 10.0) * 2.0, MidpointRounding.AwayFromZero) / 2.0;
+            double vstepScore = Math.Clamp(rawVstep, 0.0, 10.0);
+            scoreDisplay = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:F1} / 10.0", vstepScore);
+            targetBand = vstepScore >= 8.5 ? "C1 (8.5 - 10.0)" : vstepScore >= 6.0 ? "B2 (6.0 - 8.0)" : "B1 (< 6.0)";
+        }
+
+        string rationaleVi = poolCount == 0
+            ? $"Chưa có dữ liệu từ vựng để mô phỏng {examName}. Hãy thêm từ hoặc làm bài ôn đầu tiên."
+            : $"Dựa trên {mastered} từ thành thạo, {remembered} từ đã nhớ và tỷ lệ ghi nhớ {Math.Round(retentionFactor * 100.0, 0)}% từ SM-2/FSRS.";
+        string rationaleEn = poolCount == 0
+            ? $"No vocabulary data yet to simulate {examName}. Add words or complete a review session."
+            : $"Based on {mastered} mastered, {remembered} remembered words, and {Math.Round(retentionFactor * 100.0, 0)}% SM-2/FSRS retention.";
+
+        return new ExamScorePredictionDto(
+            Exam: exam,
+            ExamName: examName,
+            PredictedScoreDisplay: scoreDisplay,
+            ConfidencePercent: confidence,
+            MasteryRatioPercent: masteryPercent,
+            EstimatedDaysToNextMilestone: estimatedDays,
+            TargetBandLabel: targetBand,
+            RationaleVi: rationaleVi,
+            RationaleEn: rationaleEn
         );
     }
 

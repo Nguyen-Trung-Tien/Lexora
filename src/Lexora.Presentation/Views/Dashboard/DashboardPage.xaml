@@ -459,6 +459,52 @@
                         </Border>
                     </Grid>
 
+                    <!-- Exam Score Simulator -->
+                    <StackPanel Spacing="8"
+                                Visibility="{x:Bind ViewModel.ExamPredictionsList.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                        <TextBlock Text="{x:Bind Loc.GetString('LearningIntel_PredictedScoresTitle')}"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.ExamPredictionsList}">
+                            <ItemsRepeater.Layout>
+                                <UniformGridLayout MinItemWidth="210" MinRowSpacing="10" MinColumnSpacing="12" ItemsStretch="Fill" />
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="dto:ExamScorePredictionDto">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="8" Padding="12">
+                                        <StackPanel Spacing="6">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <TextBlock Text="{x:Bind ExamName}" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
+                                                <Border Grid.Column="1" Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                                    <TextBlock Text="{x:Bind TargetBandLabel}"
+                                                               Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                               FontSize="10.5" FontWeight="SemiBold" />
+                                                </Border>
+                                            </Grid>
+                                            <TextBlock Text="{x:Bind PredictedScoreDisplay}"
+                                                       FontSize="20" FontWeight="Bold"
+                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <ProgressBar Value="{x:Bind MasteryRatioPercent}" Maximum="100" Minimum="0" Height="4" />
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <TextBlock Text="{x:Bind CustomConfidenceDisplay}"
+                                                           FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Grid.Column="1" Text="{x:Bind CustomMasteryDisplay}"
+                                                           FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" />
+                                            </Grid>
+                                            <TextBlock Text="{x:Bind CustomMilestoneDisplay}"
+                                                       FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock Text="{x:Bind Rationale}"
+                                                       FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </StackPanel>
+
                     <!-- Memory Health Segments -->
                     <StackPanel Spacing="8">
                         <TextBlock Text="{x:Bind Loc.GetString('LearningIntel_MemoryHealth')}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

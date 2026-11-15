@@ -66,6 +66,11 @@ public partial class LocalizationService
         vi["Homophones_EditorExamplePlaceholder"] = "Câu ví dụ minh họa...";
         vi["Homophones_EditorExampleTransHeader"] = "Bản dịch câu ví dụ";
         vi["Homophones_EditorExampleTransPlaceholder"] = "Dịch nghĩa câu ví dụ...";
+        vi["Homophones_ItemsRangeEmpty"] = "0 nhóm";
+        vi["Homophones_ItemsRangeFormat"] = "Hiển thị {0}–{1} / {2} nhóm";
+        vi["Homophones_SuggestionGroupBadge"] = "Nhóm đồng âm";
+        vi["Homophones_DidYouMeanFormat"] = "Ý bạn là '{0}'?";
+        vi["Homophones_SuggestionHintFormat"] = "Gợi ý: {0}";
 
         // ==========================================
         // Homophones — en-US (English)
@@ -129,5 +134,10 @@ public partial class LocalizationService
         en["Homophones_EditorExamplePlaceholder"] = "Illustrative example sentence...";
         en["Homophones_EditorExampleTransHeader"] = "Example Translation";
         en["Homophones_EditorExampleTransPlaceholder"] = "Vietnamese/English translation...";
+        en["Homophones_ItemsRangeEmpty"] = "0 groups";
+        en["Homophones_ItemsRangeFormat"] = "Showing {0}–{1} of {2} groups";
+        en["Homophones_SuggestionGroupBadge"] = "Homophone Group";
+        en["Homophones_DidYouMeanFormat"] = "Did you mean '{0}'?";
+        en["Homophones_SuggestionHintFormat"] = "Suggestion: {0}";
     }
 }

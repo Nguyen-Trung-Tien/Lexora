@@ -43,7 +43,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
 
         if (idList.Count <= 500)
         {
-            return await QueryWithDetails()
+            return await QueryWithDetails(asNoTracking: false, includeStudyLogs: false)
                 .Where(w => idList.Contains(w.Id))
                 .ToListAsync(cancellationToken);
         }
@@ -52,7 +52,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         foreach (var chunk in idList.Chunk(500))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var batch = await QueryWithDetails()
+            var batch = await QueryWithDetails(asNoTracking: false, includeStudyLogs: false)
                 .Where(w => chunk.Contains(w.Id))
                 .ToListAsync(cancellationToken);
             results.AddRange(batch);
@@ -620,22 +620,26 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         var termList = normalizedTerms.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct().ToList();
         if (termList.Count == 0) return new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
 
-        var words = await DbSet
-            .AsSplitQuery()
-            .Include(w => w.Meanings)
-                .ThenInclude(m => m.Examples)
-            .Include(w => w.WordTopics)
-                .ThenInclude(wt => wt.Topic)
-            .Include(w => w.WordExamTags)
-                .ThenInclude(wet => wet.ExamTag)
-            .Include(w => w.ReviewCard)
-            .Where(w => termList.Contains(w.NormalizedTerm))
-            .ToListAsync(cancellationToken);
-
         var dict = new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
-        foreach (var w in words)
+        foreach (var chunk in termList.Chunk(500))
         {
-            dict[w.NormalizedTerm] = w;
+            cancellationToken.ThrowIfCancellationRequested();
+            var words = await DbSet
+                .AsSplitQuery()
+                .Include(w => w.Meanings)
+                    .ThenInclude(m => m.Examples)
+                .Include(w => w.WordTopics)
+                    .ThenInclude(wt => wt.Topic)
+                .Include(w => w.WordExamTags)
+                    .ThenInclude(wet => wet.ExamTag)
+                .Include(w => w.ReviewCard)
+                .Where(w => chunk.Contains(w.NormalizedTerm))
+                .ToListAsync(cancellationToken);
+
+            foreach (var w in words)
+            {
+                dict[w.NormalizedTerm] = w;
+            }
         }
         return dict;
     }

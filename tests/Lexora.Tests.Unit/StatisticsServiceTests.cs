@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentAssertions;
 using Lexora.Application.Services;
 using Lexora.Domain.Entities;
@@ -171,5 +172,99 @@ public class StatisticsServiceTests
         // Assert: all 250 reviews counted without truncation
         summary.StudiedTodayCount.Should().Be(250);
         summary.AccuracyRate.Should().Be(100.0);
+    }
+
+    [Fact]
+    public async Task GetExamScorePredictionsAsync_ShouldReturnBoundedPredictionsForToeicIeltsVstep()
+    {
+        // Arrange
+        var words = Enumerable.Range(0, 120).Select(i => new Word
+        {
+            Id = Guid.NewGuid(),
+            Term = $"word_{i}",
+            NormalizedTerm = $"word_{i}",
+            ReviewCard = new ReviewCard { Status = LearningStatus.Mastered, IntervalDays = 30 }
+        }).ToList();
+
+        var logs = Enumerable.Range(0, 30)
+            .Select(_ => new StudyLog { CreatedAt = DateTime.UtcNow.AddDays(-1), Rating = ReviewRating.Good })
+            .ToList();
+
+        _mockVocabRepo.Setup(v => v.GetWordsForAnalyticsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(words);
+        _mockReviewRepo.Setup(r => r.GetRecentLogsAsync(1000, It.IsAny<CancellationToken>())).ReturnsAsync(logs);
+
+        // Act
+        var predictions = await _statsService.GetExamScorePredictionsAsync();
+
+        // Assert
+        predictions.Should().HaveCount(3);
+        predictions.Select(p => p.Exam).Should().BeEquivalentTo(new[] { ExamType.Toeic, ExamType.Ielts, ExamType.Vstep });
+
+        var toeic = predictions.First(p => p.Exam == ExamType.Toeic);
+        int toeicScore = int.Parse(toeic.PredictedScoreDisplay.Split('/')[0].Trim(), CultureInfo.InvariantCulture);
+        toeicScore.Should().BeInRange(10, 990);
+        (toeicScore % 5).Should().Be(0);
+
+        var ielts = predictions.First(p => p.Exam == ExamType.Ielts);
+        double ieltsScore = double.Parse(ielts.PredictedScoreDisplay.Split('/')[0].Trim(), CultureInfo.InvariantCulture);
+        ieltsScore.Should().BeInRange(0.0, 9.0);
+        ((ieltsScore * 2.0) % 1.0).Should().BeApproximately(0.0, 0.001);
+
+        var vstep = predictions.First(p => p.Exam == ExamType.Vstep);
+        double vstepScore = double.Parse(vstep.PredictedScoreDisplay.Split('/')[0].Trim(), CultureInfo.InvariantCulture);
+        vstepScore.Should().BeInRange(0.0, 10.0);
+        ((vstepScore * 2.0) % 1.0).Should().BeApproximately(0.0, 0.001);
+
+        predictions.Should().OnlyContain(p => p.ConfidencePercent >= 15.0 && p.ConfidencePercent <= 95.0);
+    }
+
+    [Fact]
+    public async Task GetExamScorePredictionsAsync_MoreMasteredWords_YieldsHigherScoresThanLowMastery()
+    {
+        // Arrange: Low mastery dataset
+        var lowWords = Enumerable.Range(0, 10).Select(i => new Word
+        {
+            Id = Guid.NewGuid(),
+            Term = $"low_{i}",
+            ReviewCard = new ReviewCard { Status = LearningStatus.Learning, IntervalDays = 1 }
+        }).ToList();
+        var lowLogs = Enumerable.Range(0, 10)
+            .Select(_ => new StudyLog { CreatedAt = DateTime.UtcNow, Rating = ReviewRating.Again })
+            .ToList();
+
+        _mockVocabRepo.Setup(v => v.GetWordsForAnalyticsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(lowWords);
+        _mockReviewRepo.Setup(r => r.GetRecentLogsAsync(1000, It.IsAny<CancellationToken>())).ReturnsAsync(lowLogs);
+        var lowPredictions = await _statsService.GetExamScorePredictionsAsync();
+
+        // Arrange: High mastery dataset
+        var highWords = Enumerable.Range(0, 500).Select(i => new Word
+        {
+            Id = Guid.NewGuid(),
+            Term = $"high_{i}",
+            ReviewCard = new ReviewCard { Status = LearningStatus.Mastered, IntervalDays = 45 }
+        }).ToList();
+        var highLogs = Enumerable.Range(0, 80)
+            .Select(_ => new StudyLog { CreatedAt = DateTime.UtcNow, Rating = ReviewRating.Easy })
+            .ToList();
+
+        _mockVocabRepo.Setup(v => v.GetWordsForAnalyticsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(highWords);
+        _mockReviewRepo.Setup(r => r.GetRecentLogsAsync(1000, It.IsAny<CancellationToken>())).ReturnsAsync(highLogs);
+        _mockReviewRepo.Setup(r => r.GetCardCountsByStatusAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<LearningStatus, int> { [LearningStatus.Mastered] = 500 });
+
+        var highPredictions = await _statsService.GetExamScorePredictionsAsync();
+        var report = await _statsService.GetLearningIntelligenceReportAsync();
+
+        // Assert
+        int lowToeic = int.Parse(lowPredictions.First(p => p.Exam == ExamType.Toeic).PredictedScoreDisplay.Split('/')[0].Trim(), CultureInfo.InvariantCulture);
+        int highToeic = int.Parse(highPredictions.First(p => p.Exam == ExamType.Toeic).PredictedScoreDisplay.Split('/')[0].Trim(), CultureInfo.InvariantCulture);
+        highToeic.Should().BeGreaterThan(lowToeic);
+
+        double lowIelts = double.Parse(lowPredictions.First(p => p.Exam == ExamType.Ielts).PredictedScoreDisplay.Split('/')[0].Trim(), CultureInfo.InvariantCulture);
+        double highIelts = double.Parse(highPredictions.First(p => p.Exam == ExamType.Ielts).PredictedScoreDisplay.Split('/')[0].Trim(), CultureInfo.InvariantCulture);
+        highIelts.Should().BeGreaterThan(lowIelts);
+
+        report.PredictedExamScores.Should().NotBeNull();
+        report.PredictedExamScores!.Should().HaveCount(3);
     }
 }

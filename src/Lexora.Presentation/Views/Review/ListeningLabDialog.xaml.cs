@@ -142,6 +142,8 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
         BtnDictateSentence.Style = (Style)App.Current.Resources["DefaultButtonStyle"];
         DictationInputBox.PlaceholderText = Loc.GetString("ListeningLab_TypeHeardWord");
         DictationDiffViewer?.Blocks.Clear();
+        DictationWordDiffViewer?.Blocks.Clear();
+        DictationWordDiffContainer.Visibility = Visibility.Collapsed;
         DictationResultPanel.Visibility = Visibility.Collapsed;
     }
 
@@ -152,6 +154,8 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
         BtnDictateSentence.Style = (Style)App.Current.Resources["AccentButtonStyle"];
         DictationInputBox.PlaceholderText = Loc.GetString("ListeningLab_TypeHeardSentence");
         DictationDiffViewer?.Blocks.Clear();
+        DictationWordDiffViewer?.Blocks.Clear();
+        DictationWordDiffContainer.Visibility = Visibility.Collapsed;
         DictationResultPanel.Visibility = Visibility.Collapsed;
     }
 
@@ -169,6 +173,8 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
     {
         DictationInputBox.Text = string.Empty;
         DictationDiffViewer?.Blocks.Clear();
+        DictationWordDiffViewer?.Blocks.Clear();
+        DictationWordDiffContainer.Visibility = Visibility.Collapsed;
         DictationResultPanel.Visibility = Visibility.Collapsed;
         CurrentDictation = await _labService.GetNextDictationChallengeAsync();
         if (CurrentDictation != null && _audioService != null)
@@ -247,8 +253,96 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
         DictationRevealedExample.Text = CurrentDictation.ExampleSentenceEn ?? string.Empty;
 
         RenderDiff(result.DiffTokens);
+        RenderWordDiff(result);
 
         DictationResultPanel.Visibility = Visibility.Visible;
+    }
+
+    private void RenderWordDiff(DictationEvaluationResultDto result)
+    {
+        if (DictationWordDiffContainer == null || DictationWordDiffViewer == null) return;
+        DictationWordDiffViewer.Blocks.Clear();
+
+        if (result.WordDiffTokens is not { Count: > 0 } || (result.TotalWords <= 1 && !_isSentenceMode))
+        {
+            DictationWordDiffContainer.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        if (DictationWordMatchSummaryText != null)
+        {
+            DictationWordMatchSummaryText.Text = string.Format(
+                Loc.GetString("ListeningLab_WordsMatchedFormat"),
+                result.MatchedWords,
+                result.TotalWords,
+                result.WordAccuracyPercent);
+        }
+
+        var paragraph = new Microsoft.UI.Xaml.Documents.Paragraph();
+        var successBrush = (Brush)App.Current.Resources["SystemFillColorSuccessBrush"];
+        var criticalBrush = (Brush)App.Current.Resources["SystemFillColorCriticalBrush"];
+        var cautionBrush = (Brush)App.Current.Resources["SystemFillColorCautionBrush"];
+
+        bool first = true;
+        foreach (var token in result.WordDiffTokens)
+        {
+            if (!first)
+            {
+                paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = "  " });
+            }
+            first = false;
+
+            switch (token.Type)
+            {
+                case DictationDiffType.Correct:
+                    paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                    {
+                        Text = token.Text,
+                        Foreground = successBrush,
+                        FontWeight = Microsoft.UI.Text.FontWeights.Bold
+                    });
+                    break;
+
+                case DictationDiffType.Incorrect:
+                    paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                    {
+                        Text = token.Text,
+                        Foreground = criticalBrush,
+                        TextDecorations = Windows.UI.Text.TextDecorations.Strikethrough
+                    });
+                    if (!string.IsNullOrEmpty(token.Expected))
+                    {
+                        paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                        {
+                            Text = $" → {token.Expected}",
+                            Foreground = successBrush,
+                            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                        });
+                    }
+                    break;
+
+                case DictationDiffType.Missing:
+                    paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                    {
+                        Text = $"[{token.Text}]",
+                        Foreground = cautionBrush,
+                        FontStyle = Windows.UI.Text.FontStyle.Italic
+                    });
+                    break;
+
+                case DictationDiffType.Extra:
+                    paragraph.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run
+                    {
+                        Text = token.Text,
+                        Foreground = criticalBrush,
+                        TextDecorations = Windows.UI.Text.TextDecorations.Strikethrough
+                    });
+                    break;
+            }
+        }
+
+        DictationWordDiffViewer.Blocks.Add(paragraph);
+        DictationWordDiffContainer.Visibility = Visibility.Visible;
     }
 
     private void RenderDiff(IReadOnlyList<DictationDiffTokenDto>? tokens)
@@ -373,13 +467,13 @@ public sealed partial class ListeningLabDialog : ContentDialog, INotifyPropertyC
         {
             PairFeedbackIcon.Glyph = "\uE73E";
             PairFeedbackIcon.Foreground = (Brush)App.Current.Resources["SystemFillColorSuccessBrush"];
-            PairFeedbackText.Text = $"Chính xác! Từ được đọc là '{CurrentPair.TargetWord}' ({CurrentPair.TargetPhonetic}).";
+            PairFeedbackText.Text = string.Format(Loc.GetString("ListeningLab_PairCorrectFormat"), CurrentPair.TargetWord, CurrentPair.TargetPhonetic);
         }
         else
         {
             PairFeedbackIcon.Glyph = "\uE711";
             PairFeedbackIcon.Foreground = (Brush)App.Current.Resources["SystemFillColorCriticalBrush"];
-            PairFeedbackText.Text = $"Chưa đúng. Từ thực tế được phát âm là '{CurrentPair.TargetWord}' ({CurrentPair.TargetPhonetic}).";
+            PairFeedbackText.Text = string.Format(Loc.GetString("ListeningLab_PairIncorrectFormat"), CurrentPair.TargetWord, CurrentPair.TargetPhonetic);
         }
 
         PairFeedbackPanel.Visibility = Visibility.Visible;
