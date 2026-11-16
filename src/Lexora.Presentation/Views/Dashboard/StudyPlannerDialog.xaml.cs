@@ -137,20 +137,46 @@ public sealed partial class StudyPlannerDialog : ContentDialog, INotifyPropertyC
     {
         if (sender is Button btn && btn.Tag is string navTag && _navService != null)
         {
+            var task = btn.DataContext as CurriculumTaskDto;
             this.Hide();
             switch (navTag)
             {
                 case "Review":
-                    _navService.Navigate(typeof(ReviewPage));
+                    if (task?.Type == CurriculumTaskType.PracticeWeakWords)
+                    {
+                        _navService.Navigate(typeof(ReviewPage), Lexora.Application.DTOs.ReviewSessionMode.Difficult);
+                    }
+                    else if (task?.Type == CurriculumTaskType.LearnNewWords)
+                    {
+                        _navService.Navigate(typeof(ReviewPage), Lexora.Application.DTOs.ReviewSessionMode.LearnNew);
+                    }
+                    else
+                    {
+                        _navService.Navigate(typeof(ReviewPage));
+                    }
                     break;
                 case "Vocabulary":
                     _navService.Navigate(typeof(VocabularyPage));
                     break;
                 case "Grammar":
-                    _navService.Navigate(typeof(GrammarPage));
+                    if (!string.IsNullOrWhiteSpace(Curriculum?.RecommendedGrammarTitle))
+                    {
+                        _navService.Navigate(typeof(GrammarPage), Curriculum.RecommendedGrammarTitle);
+                    }
+                    else
+                    {
+                        _navService.Navigate(typeof(GrammarPage));
+                    }
                     break;
                 case "Test":
-                    _navService.Navigate(typeof(TestPage));
+                    if (task?.Type == CurriculumTaskType.TakeAdaptiveQuiz)
+                    {
+                        _navService.Navigate(typeof(TestPage), "Adaptive");
+                    }
+                    else
+                    {
+                        _navService.Navigate(typeof(TestPage));
+                    }
                     break;
             }
         }

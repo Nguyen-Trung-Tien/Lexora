@@ -19,6 +19,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     private readonly ISoundFeedbackService? _soundFeedback;
     private readonly IToastNotificationService? _toastService;
     private readonly IRoadmapService? _roadmapService;
+    private readonly IStudyPlannerService? _studyPlannerService;
     private readonly Stopwatch _cardTimer = new();
     private readonly SemaphoreSlim _ratingLock = new(1, 1);
 
@@ -220,7 +221,8 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         ILocalizationService localizationService,
         ISoundFeedbackService? soundFeedback = null,
         IToastNotificationService? toastService = null,
-        IRoadmapService? roadmapService = null)
+        IRoadmapService? roadmapService = null,
+        IStudyPlannerService? studyPlannerService = null)
     {
         _reviewService = reviewService;
         _audioPlayer = audioPlayer;
@@ -230,6 +232,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         _soundFeedback = soundFeedback;
         _toastService = toastService;
         _roadmapService = roadmapService;
+        _studyPlannerService = studyPlannerService;
 
         UpdateActiveSessionTitle();
 

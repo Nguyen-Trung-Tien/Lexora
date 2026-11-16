@@ -161,6 +161,27 @@ public partial class GrammarViewModel
 
         IsPracticeMode = false;
         IsPracticeResultMode = true;
+
+        _ = RecordGrammarProgressAsync();
+    }
+
+    private async Task RecordGrammarProgressAsync()
+    {
+        try
+        {
+            if (_studyPlannerService != null)
+            {
+                await _studyPlannerService.RecordTaskCompletionAsync(CurriculumTaskType.StudyGrammar, 1);
+            }
+            if (_roadmapService != null)
+            {
+                await _roadmapService.SyncRoadmapProgressAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GrammarViewModel] RecordGrammarProgressAsync error: {ex.Message}");
+        }
     }
 
     private void UpdatePracticeStatusTip()

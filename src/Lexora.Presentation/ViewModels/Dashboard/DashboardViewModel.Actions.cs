@@ -124,7 +124,32 @@ public partial class DashboardViewModel
 
                 case RoadmapNodeType.MockTest:
                 case RoadmapNodeType.Checkpoint:
-                    _navService.Navigate(typeof(TestPage));
+                    if (context != null)
+                    {
+                        _navService.Navigate(typeof(TestPage), context);
+                    }
+                    else
+                    {
+                        var fallbackExamType = ActiveRoadmap?.Target switch
+                        {
+                            ExamTarget.Toeic => ExamType.Toeic,
+                            ExamTarget.Ielts => ExamType.Ielts,
+                            ExamTarget.Vstep => ExamType.Vstep,
+                            _ => (ExamType?)null
+                        };
+                        _navService.Navigate(typeof(TestPage), new RoadmapNodeActionContextDto(
+                            targetNode.Id,
+                            targetNode.Title,
+                            targetNode.Type,
+                            targetNode.ReferenceId,
+                            targetNode.ReferenceName,
+                            Array.Empty<Guid>(),
+                            targetNode.TargetItemCount,
+                            targetNode.CompletedItemCount,
+                            null,
+                            null,
+                            fallbackExamType));
+                    }
                     break;
 
                 default:

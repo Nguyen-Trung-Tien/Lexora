@@ -38,6 +38,20 @@ public partial class TestViewModel
 
             IsTestingMode = false;
             IsResultMode = true;
+
+            await SyncRoadmapNodeAfterTestAsync(summary.AccuracyPercentage, summary.CorrectCount);
+
+            if (_studyPlannerService != null)
+            {
+                try
+                {
+                    await _studyPlannerService.RecordTaskCompletionAsync(CurriculumTaskType.TakeAdaptiveQuiz, 1);
+                }
+                catch
+                {
+                    // Non-critical Study Planner sync
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -96,6 +110,8 @@ public partial class TestViewModel
             IsTestingMode = false;
             IsSetupMode = false;
             IsResultMode = true;
+
+            await SyncRoadmapNodeAfterTestAsync(ScorePercentage, CorrectCount);
         }
         catch (Exception ex)
         {
@@ -106,6 +122,26 @@ public partial class TestViewModel
         {
             IsLoading = false;
             _isFinishingTest = false;
+        }
+    }
+
+    private async Task SyncRoadmapNodeAfterTestAsync(double scorePercent, int correctCount)
+    {
+        if (ActiveRoadmapContext == null || _roadmapService == null) return;
+
+        try
+        {
+            int target = ActiveRoadmapContext.TargetCount > 0 ? ActiveRoadmapContext.TargetCount : 10;
+            int progressDelta = scorePercent >= 60.0 ? target : Math.Max(0, correctCount);
+            if (progressDelta > 0)
+            {
+                await _roadmapService.UpdateNodeProgressAsync(ActiveRoadmapContext.NodeId, progressDelta);
+            }
+            await _roadmapService.SyncRoadmapProgressAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TestViewModel] SyncRoadmapNodeAfterTestAsync error: {ex.Message}");
         }
     }
 

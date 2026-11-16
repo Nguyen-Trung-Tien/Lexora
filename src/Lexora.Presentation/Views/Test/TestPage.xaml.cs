@@ -167,6 +167,18 @@ public sealed partial class TestPage : Page, ILocalizableView, IThemeAwareView
                 await ViewModel.SetCustomWordSelectionAsync(wordIds);
                 UpdateModeSelectorStyles(true);
             }
+            else if (e.Parameter is RoadmapNodeActionContextDto roadmapContext)
+            {
+                await ViewModel.ApplyRoadmapContextAsync(roadmapContext);
+                UpdateCountButtonStyles(ViewModel.QuestionCount);
+                UpdateModeSelectorStyles(ViewModel.IsCustomListMode);
+            }
+            else if (e.Parameter is string testMode && string.Equals(testMode, "Adaptive", StringComparison.OrdinalIgnoreCase))
+            {
+                ViewModel.EnableAdaptiveCatMode = true;
+                ViewModel.IsCustomListMode = false;
+                UpdateModeSelectorStyles(false);
+            }
             else if (e.Parameter is bool weakOnly && weakOnly)
             {
                 ViewModel.WeakWordsOnly = true;

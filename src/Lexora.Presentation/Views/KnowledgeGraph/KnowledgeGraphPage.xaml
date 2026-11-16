@@ -13,14 +13,9 @@
     SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
         <!-- Top Command Bar / Header Area -->
-        <Border Grid.Row="0"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="24,12">
-            <Grid ColumnDefinitions="Auto,*,Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
                 <!-- Page Title with Compact Navigation Back Button -->
                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                     <Button x:Name="BtnHistoryBack"
@@ -167,17 +162,17 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
-            </Grid>
-        </Border>
+        </Grid>
 
         <!-- Main Body: Two-Pane Master Detail / Catalog & Graph -->
-        <Grid Grid.Row="1" ColumnDefinitions="340,*">
+        <Grid Grid.Row="1" ColumnDefinitions="340,*" ColumnSpacing="16">
 
             <!-- LEFT PANE: Concept Catalog with Pagination & Filters -->
             <Border Grid.Column="0"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="0,0,1,0"
+                    BorderThickness="1"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
                     Padding="16,14,16,14">
                 <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
 

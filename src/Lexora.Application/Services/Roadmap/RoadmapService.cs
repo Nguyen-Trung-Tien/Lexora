@@ -298,17 +298,19 @@ public class RoadmapService : IRoadmapService
         List<Guid> linkedWordIds = new();
         Guid? topicId = targetNode.ReferenceId;
         string? topicName = targetNode.ReferenceName;
-
-        if (targetNode.Type == RoadmapNodeType.VocabularySet && _vocabularyRepository != null)
+        ExamType? examType = activeRoadmap.Target switch
         {
-            var examType = activeRoadmap.Target switch
-            {
-                ExamTarget.Toeic => ExamType.Toeic,
-                ExamTarget.Ielts => ExamType.Ielts,
-                ExamTarget.Vstep => ExamType.Vstep,
-                _ => (ExamType?)null
-            };
+            ExamTarget.Toeic => ExamType.Toeic,
+            ExamTarget.Ielts => ExamType.Ielts,
+            ExamTarget.Vstep => ExamType.Vstep,
+            _ => (ExamType?)null
+        };
 
+        if ((targetNode.Type == RoadmapNodeType.VocabularySet
+             || targetNode.Type == RoadmapNodeType.MockTest
+             || targetNode.Type == RoadmapNodeType.Checkpoint)
+            && _vocabularyRepository != null)
+        {
             int limit = targetNode.TargetItemCount > 0 ? targetNode.TargetItemCount : 50;
             var serverIds = await _vocabularyRepository.GetWordIdsForNodeAsync(
                 targetNode.ReferenceId,
@@ -372,7 +374,8 @@ public class RoadmapService : IRoadmapService
             targetNode.TargetItemCount,
             targetNode.CompletedItemCount,
             grammarQuery,
-            grammarRuleId);
+            grammarRuleId,
+            examType);
     }
 
     private static void UnlockNextNode(StudyRoadmap roadmap, RoadmapNode completedNode)

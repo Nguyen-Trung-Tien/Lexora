@@ -258,6 +258,15 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
                 var topicTitle = string.Format(Loc.GetString("Review_Session_ByTopicFormat"), topic.Name);
                 await ViewModel.StartReviewWithFilterAsync(ReviewSessionMode.ByTopic, topicId: topic.Id, customTitle: topicTitle);
             }
+            else if (e.Parameter is ReviewSessionMode requestedMode)
+            {
+                await ViewModel.LoadAvailableTopicsAsync();
+                var prefs = _preferencesService.GetPreferences();
+                ViewModel.IsTypingPracticeEnabled = prefs.EnableTypingPractice;
+                ViewModel.SpeechRate = prefs.SpeechRate;
+                UpdateModeButtonStyles(requestedMode);
+                await ViewModel.StartReviewWithFilterAsync(requestedMode);
+            }
             else
             {
                 if (ViewModel.CurrentCard == null && !ViewModel.IsCompleted)

@@ -11,7 +11,7 @@
     Background="Transparent"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="24" RowSpacing="16">
         <ProgressBar Grid.Row="0"
                      IsIndeterminate="True"
                      VerticalAlignment="Bottom"
@@ -19,12 +19,7 @@
                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
         
         <!-- Row 0: Top Command Bar / Header Area -->
-        <Border Grid.Row="0"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="24,14">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="16">
                 
                 <!-- Left: Page Title & Subtitle -->
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
@@ -91,15 +86,15 @@
                         <FontIcon Glyph="&#xE72C;" FontSize="13" />
                     </Button>
                 </StackPanel>
-            </Grid>
-        </Border>
+        </Grid>
 
         <!-- Row 1: Unified Search, Quick Filter Chips & Dropdowns Bar -->
         <Border Grid.Row="1"
-                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="24,8">
+                BorderThickness="1"
+                CornerRadius="{ThemeResource OverlayCornerRadius}"
+                Padding="14,10">
             <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
                 
                 <!-- Search Box -->
@@ -209,13 +204,15 @@
             <!-- MODE 1: SPLIT VIEW (Master-Detail)                       -->
             <!-- ======================================================== -->
             <Grid Visibility="{x:Bind ViewModel.IsSplitViewMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                  ColumnDefinitions="380,*">
+                  ColumnDefinitions="360,*"
+                  ColumnSpacing="16">
                 
                 <!-- Left Column: Searchable List & Pagination -->
                 <Border Grid.Column="0"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="0,0,1,0"
-                        Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                        BorderThickness="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <Grid RowDefinitions="*,Auto">
                         
                         <!-- List of Memory Tips -->

@@ -16,6 +16,8 @@ public partial class GrammarViewModel : ObservableObject, IDisposable
     private readonly Services.ILocalizationService _localizationService;
     private readonly Services.ISoundFeedbackService? _soundFeedback;
     private readonly ISmartSearchService? _smartSearchService;
+    private readonly IStudyPlannerService? _studyPlannerService;
+    private readonly IRoadmapService? _roadmapService;
     private readonly List<GrammarQuizSubmissionDto> _practiceSubmissions = new();
     // Captured on the UI thread so post-await mutations can be safely marshalled back.
     private readonly DispatcherQueue? _dispatcherQueue;
@@ -179,13 +181,17 @@ public partial class GrammarViewModel : ObservableObject, IDisposable
         IGrammarExportImportService grammarExportImportService,
         Services.ILocalizationService localizationService,
         Services.ISoundFeedbackService? soundFeedback = null,
-        ISmartSearchService? smartSearchService = null)
+        ISmartSearchService? smartSearchService = null,
+        IStudyPlannerService? studyPlannerService = null,
+        IRoadmapService? roadmapService = null)
     {
         _grammarService = grammarService;
         _grammarExportImportService = grammarExportImportService;
         _localizationService = localizationService;
         _soundFeedback = soundFeedback;
         _smartSearchService = smartSearchService;
+        _studyPlannerService = studyPlannerService;
+        _roadmapService = roadmapService;
         // Must be captured on the UI thread (constructor is always called from UI thread).
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread()
             ?? App.Current?.UIDispatcherQueue

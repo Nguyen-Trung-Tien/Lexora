@@ -140,7 +140,8 @@ public record RoadmapNodeActionContextDto(
     int TargetCount,
     int CompletedCount,
     string? GrammarQuery,
-    Guid? GrammarRuleId)
+    Guid? GrammarRuleId,
+    ExamType? ExamTargetType = null)
 {
     public bool HasWords => LinkedWordIds.Count > 0;
     public bool HasTopic => TopicId.HasValue;

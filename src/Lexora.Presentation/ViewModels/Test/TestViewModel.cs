@@ -21,6 +21,11 @@ public partial class TestViewModel : ObservableObject, IDisposable
     private readonly IUserPreferencesService _preferencesService;
     private readonly IAdaptiveQuizService? _adaptiveQuizService;
     private readonly ILearningStorageService? _storageService;
+    private readonly IRoadmapService? _roadmapService;
+    private readonly IStudyPlannerService? _studyPlannerService;
+
+    [ObservableProperty]
+    public partial RoadmapNodeActionContextDto? ActiveRoadmapContext { get; set; }
 
     private Guid _sessionId;
     private List<TestQuestionDto> _allQuestions = new();
@@ -194,7 +199,9 @@ public partial class TestViewModel : ObservableObject, IDisposable
         ILocalizationService localizationService,
         IUserPreferencesService preferencesService,
         IAdaptiveQuizService? adaptiveQuizService = null,
-        ILearningStorageService? storageService = null)
+        ILearningStorageService? storageService = null,
+        IRoadmapService? roadmapService = null,
+        IStudyPlannerService? studyPlannerService = null)
     {
         _testService = testService;
         _vocabService = vocabService;
@@ -205,6 +212,42 @@ public partial class TestViewModel : ObservableObject, IDisposable
         _preferencesService = preferencesService;
         _adaptiveQuizService = adaptiveQuizService;
         _storageService = storageService;
+        _roadmapService = roadmapService;
+        _studyPlannerService = studyPlannerService;
+    }
+
+    public async Task ApplyRoadmapContextAsync(RoadmapNodeActionContextDto context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ActiveRoadmapContext = context;
+        WeakWordsOnly = false;
+
+        if (context.ExamTargetType.HasValue && ExamTypes.Contains(context.ExamTargetType.Value))
+        {
+            SelectedExamType = context.ExamTargetType.Value;
+        }
+
+        if (context.TargetCount > 0)
+        {
+            QuestionCount = Math.Clamp(context.TargetCount, 5, 50);
+        }
+
+        if (context.TopicId.HasValue)
+        {
+            SelectedTopic = Topics.FirstOrDefault(t => t.Id == context.TopicId.Value);
+        }
+
+        if (context.HasWords)
+        {
+            await SetCustomWordSelectionAsync(context.LinkedWordIds);
+        }
+        else
+        {
+            IsCustomListMode = false;
+        }
+
+        StatusSeverity = InfoBarSeverity.Informational;
+        StatusMessage = $"🗺️ {context.NodeTitle}";
     }
 
     [RelayCommand]
@@ -518,6 +561,7 @@ public partial class TestViewModel : ObservableObject, IDisposable
         IsTestingMode = false;
         IsSetupMode = true;
         WeakWordsOnly = false;
+        ActiveRoadmapContext = null;
     }
 
     public void CleanupSession()

@@ -11,19 +11,14 @@
     Background="Transparent"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
         <ProgressBar Grid.Row="0"
                      IsIndeterminate="True"
                      VerticalAlignment="Bottom"
                      Canvas.ZIndex="10"
                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
         <!-- Top Command Bar / Header Area -->
-        <Border Grid.Row="0"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="24,16">
-            <Grid ColumnDefinitions="Auto,*,Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
                 <!-- Page Title -->
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Border Width="38" Height="38" CornerRadius="{ThemeResource OverlayCornerRadius}"
@@ -94,15 +89,15 @@
                         </Button>
                     </StackPanel>
                 </ScrollViewer>
-            </Grid>
-        </Border>
+        </Grid>
 
         <!-- Main Workspace (Master-Detail) -->
-        <Grid Grid.Row="1" ColumnDefinitions="360,*">
+        <Grid Grid.Row="1" ColumnDefinitions="360,*" ColumnSpacing="16">
             <!-- Left Pane: Search, Filters, Group List & Pagination -->
             <Border Grid.Column="0"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="0,0,1,0"
+                    BorderThickness="1"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <Grid RowDefinitions="Auto,Auto,*,Auto">
                     <!-- Search Input with AutoSuggestBox -->

@@ -7,9 +7,9 @@
     NavigationCacheMode="Required" UseLayoutRounding="True">
 
     <Grid
-        Padding="24,16,24,20"
+        Padding="24"
         HorizontalAlignment="Stretch"
-        RowSpacing="12">
+        RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

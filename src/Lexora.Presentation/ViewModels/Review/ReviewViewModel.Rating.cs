@@ -34,6 +34,24 @@ public partial class ReviewViewModel
 
             await _reviewService.SubmitReviewAsync(CurrentCard.Id, rating, responseTimeMs, _currentSessionId);
 
+            if (_studyPlannerService != null)
+            {
+                try
+                {
+                    var taskType = CurrentMode switch
+                    {
+                        ReviewSessionMode.Difficult => CurriculumTaskType.PracticeWeakWords,
+                        ReviewSessionMode.LearnNew => CurriculumTaskType.LearnNewWords,
+                        _ => CurriculumTaskType.ReviewDueCards
+                    };
+                    await _studyPlannerService.RecordTaskCompletionAsync(taskType, 1);
+                }
+                catch
+                {
+                    // Non-critical Study Planner sync
+                }
+            }
+
             _undoStack.Push(undoState);
             CanUndo = true;
 
