@@ -61,7 +61,11 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Orientation="Horizontal" Spacing="10" Margin="14,0,0,0" VerticalAlignment="Center">
-                <Image Source="ms-appx:///Assets/brand/lexora-icon-only.png" Width="18" Height="18" VerticalAlignment="Center" />
+                <Image Width="18" Height="18" VerticalAlignment="Center">
+                    <Image.Source>
+                        <BitmapImage UriSource="ms-appx:///Assets/brand/lexora-icon-only.png" DecodePixelWidth="36" DecodePixelHeight="36" DecodePixelType="Logical" />
+                    </Image.Source>
+                </Image>
                 <TextBlock x:Name="AppTitleTextBlock"
                            Text="Lexora - English Learning Manager"
                            FontSize="12"

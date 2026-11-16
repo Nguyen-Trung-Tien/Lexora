@@ -99,6 +99,32 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
         Visibility = Visibility.Collapsed;
     }
 
+    private List<CommandPaletteDisplayItem> BuildDefaultCommands(
+        ILocalizationService? loc,
+        INavigationService? nav,
+        IThemeService? theme = null)
+    {
+        return new List<CommandPaletteDisplayItem>
+        {
+            new(loc?.GetString("Nav_Dashboard") ?? "Dashboard", loc?.GetString("Search_SmartNav_Dashboard") ?? "", "\uE80F", "Ctrl+1", () => nav?.Navigate(typeof(DashboardPage))),
+            new(loc?.GetString("Nav_Vocabulary") ?? "Vocabulary", loc?.GetString("Search_SmartNav_Vocab") ?? "", "\uE82D", "Ctrl+2", () => nav?.Navigate(typeof(VocabularyPage))),
+            new(loc?.GetString("Nav_Homophones") ?? "Homophones", loc?.GetString("Search_SmartNav_Homophones") ?? "", "\uE768", "Ctrl+3", () => nav?.Navigate(typeof(HomophonesPage))),
+            new(loc?.GetString("Nav_KnowledgeGraph") ?? "Knowledge Graph", loc?.GetString("Nav_KnowledgeGraph") ?? "", "\uE81E", "Ctrl+4", () => nav?.Navigate(typeof(KnowledgeGraphPage))),
+            new(loc?.GetString("Nav_Grammar") ?? "Grammar", loc?.GetString("Search_SmartNav_Grammar") ?? "", "\uE8D2", "Ctrl+5", () => nav?.Navigate(typeof(GrammarPage))),
+            new(loc?.GetString("Nav_Phrases") ?? "Conversation Phrases", loc?.GetString("Phrases_Subtitle") ?? "", "\uE8BD", "Ctrl+Shift+P", () => nav?.Navigate(typeof(Lexora.Presentation.Views.Phrases.PhrasesPage))),
+            new(loc?.GetString("Nav_MemoryTips") ?? "Memory Tips", loc?.GetString("MemoryTips_Subtitle") ?? "", "\uE8D7", "Ctrl+Shift+M", () => nav?.Navigate(typeof(Lexora.Presentation.Views.MemoryTips.MemoryTipsPage))),
+            new(loc?.GetString("Nav_Review") ?? "Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+6", () => nav?.Navigate(typeof(ReviewPage))),
+            new(loc?.GetString("Nav_Test") ?? "Test", loc?.GetString("Search_SmartNav_Test") ?? "", "\uE765", "Ctrl+7", () => nav?.Navigate(typeof(TestPage))),
+            new(loc?.GetString("Nav_LearningStorage") ?? "Learning Storage", loc?.GetString("Search_SmartNav_LearningStorage") ?? "", "\uE81C", "Ctrl+8", () => nav?.Navigate(typeof(LearningStoragePage))),
+            new(loc?.GetString("Nav_Roadmap") ?? "Roadmap", loc?.GetString("Nav_Roadmap") ?? "", "\uE81C", "Ctrl+9", () => nav?.Navigate(typeof(RoadmapPage))),
+            new(loc?.GetString("Dashboard_StartReview") ?? "Start Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+Shift+R", () => nav?.Navigate(typeof(ReviewPage))),
+            new(loc?.GetString("Palette_DictationLab") ?? "Listening Lab", loc?.GetString("Nav_ListeningLab") ?? "", "\uE767", "Ctrl+Shift+D", OpenDictationLabDialog),
+            new(loc?.GetString("Nav_Settings") ?? "Settings", loc?.GetString("Search_SmartNav_Settings") ?? "", "\uE713", null, () => nav?.Navigate(typeof(SettingsPage))),
+            new(loc?.GetString("Nav_Help") ?? "Help", loc?.GetString("Nav_Help") ?? "", "\uE9CE", "F1", () => nav?.Navigate(typeof(HelpPage))),
+            new(loc?.GetString("Nav_ThemeToggle") ?? "Toggle Theme", loc?.GetString("Nav_ThemeToggle") ?? "", "\uE708", "Ctrl+T", () => theme?.ToggleTheme())
+        };
+    }
+
     private void PopulateDefaultCommands()
     {
         _items.Clear();
@@ -108,25 +134,7 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
 
         if (loc == null || nav == null) return;
 
-        var defaultCommands = new List<CommandPaletteDisplayItem>
-        {
-            new(loc.GetString("Nav_Dashboard"), loc.GetString("Search_SmartNav_Dashboard"), "\uE80F", "Ctrl+1", () => nav.Navigate(typeof(DashboardPage))),
-            new(loc.GetString("Nav_Vocabulary"), loc.GetString("Search_SmartNav_Vocab"), "\uE82D", "Ctrl+2", () => nav.Navigate(typeof(VocabularyPage))),
-            new(loc.GetString("Nav_Homophones"), loc.GetString("Search_SmartNav_Homophones"), "\uE768", "Ctrl+3", () => nav.Navigate(typeof(HomophonesPage))),
-            new(loc.GetString("Nav_KnowledgeGraph"), loc.GetString("Nav_KnowledgeGraph"), "\uE81E", "Ctrl+4", () => nav.Navigate(typeof(KnowledgeGraphPage))),
-            new(loc.GetString("Nav_Grammar"), loc.GetString("Search_SmartNav_Grammar"), "\uE8D2", "Ctrl+5", () => nav.Navigate(typeof(GrammarPage))),
-            new(loc.GetString("Nav_Review"), loc.GetString("Search_SmartNav_Review"), "\uE895", "Ctrl+6", () => nav.Navigate(typeof(ReviewPage))),
-            new(loc.GetString("Nav_Test"), loc.GetString("Search_SmartNav_Test"), "\uE765", "Ctrl+7", () => nav.Navigate(typeof(TestPage))),
-            new(loc.GetString("Nav_LearningStorage"), loc.GetString("Search_SmartNav_LearningStorage"), "\uE81C", "Ctrl+8", () => nav.Navigate(typeof(LearningStoragePage))),
-            new(loc.GetString("Nav_Roadmap"), loc.GetString("Nav_Roadmap"), "\uE81C", "Ctrl+9", () => nav.Navigate(typeof(RoadmapPage))),
-            new(loc.GetString("Dashboard_StartReview"), loc.GetString("Search_SmartNav_Review"), "\uE895", "Ctrl+Shift+R", () => nav.Navigate(typeof(ReviewPage))),
-            new(loc.GetString("Palette_DictationLab"), loc.GetString("Nav_ListeningLab"), "\uE767", "Ctrl+Shift+D", OpenDictationLabDialog),
-            new(loc.GetString("Nav_Settings"), loc.GetString("Search_SmartNav_Settings"), "\uE713", null, () => nav.Navigate(typeof(SettingsPage))),
-            new(loc.GetString("Nav_Help"), loc.GetString("Nav_Help"), "\uE9CE", "F1", () => nav.Navigate(typeof(HelpPage))),
-            new(loc.GetString("Nav_ThemeToggle"), loc.GetString("Nav_ThemeToggle"), "\uE708", "Ctrl+T", () => theme?.ToggleTheme())
-        };
-
-        foreach (var cmd in defaultCommands)
+        foreach (var cmd in BuildDefaultCommands(loc, nav, theme))
         {
             _items.Add(cmd);
         }
@@ -178,25 +186,12 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
             var loc = App.Current.Services.GetService<ILocalizationService>();
             var nav = App.Current.Services.GetService<INavigationService>();
 
+            var theme = App.Current.Services.GetService<IThemeService>();
+
             var results = new List<CommandPaletteDisplayItem>();
 
             // 1. Filter default commands
-            var allCommands = new List<CommandPaletteDisplayItem>
-            {
-                new(loc?.GetString("Nav_Dashboard") ?? "Dashboard", loc?.GetString("Search_SmartNav_Dashboard") ?? "", "\uE80F", "Ctrl+1", () => nav?.Navigate(typeof(DashboardPage))),
-                new(loc?.GetString("Nav_Vocabulary") ?? "Vocabulary", loc?.GetString("Search_SmartNav_Vocab") ?? "", "\uE82D", "Ctrl+2", () => nav?.Navigate(typeof(VocabularyPage))),
-                new(loc?.GetString("Nav_Homophones") ?? "Homophones", loc?.GetString("Search_SmartNav_Homophones") ?? "", "\uE768", "Ctrl+3", () => nav?.Navigate(typeof(HomophonesPage))),
-                new(loc?.GetString("Nav_KnowledgeGraph") ?? "Knowledge Graph", loc?.GetString("Nav_KnowledgeGraph") ?? "", "\uE81E", "Ctrl+4", () => nav?.Navigate(typeof(KnowledgeGraphPage))),
-                new(loc?.GetString("Nav_Grammar") ?? "Grammar", loc?.GetString("Search_SmartNav_Grammar") ?? "", "\uE8D2", "Ctrl+5", () => nav?.Navigate(typeof(GrammarPage))),
-                new(loc?.GetString("Nav_Review") ?? "Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+6", () => nav?.Navigate(typeof(ReviewPage))),
-                new(loc?.GetString("Nav_Test") ?? "Test", loc?.GetString("Search_SmartNav_Test") ?? "", "\uE765", "Ctrl+7", () => nav?.Navigate(typeof(TestPage))),
-                new(loc?.GetString("Nav_LearningStorage") ?? "Learning Storage", loc?.GetString("Search_SmartNav_LearningStorage") ?? "", "\uE81C", "Ctrl+8", () => nav?.Navigate(typeof(LearningStoragePage))),
-                new(loc?.GetString("Nav_Roadmap") ?? "Roadmap", loc?.GetString("Nav_Roadmap") ?? "", "\uE81C", "Ctrl+9", () => nav?.Navigate(typeof(RoadmapPage))),
-                new(loc?.GetString("Dashboard_StartReview") ?? "Start Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+Shift+R", () => nav?.Navigate(typeof(ReviewPage))),
-                new(loc?.GetString("Palette_DictationLab") ?? "Listening Lab", loc?.GetString("Nav_ListeningLab") ?? "", "\uE767", "Ctrl+Shift+D", OpenDictationLabDialog),
-                new(loc?.GetString("Nav_Settings") ?? "Settings", loc?.GetString("Search_SmartNav_Settings") ?? "", "\uE713", null, () => nav?.Navigate(typeof(SettingsPage))),
-                new(loc?.GetString("Nav_Help") ?? "Help", loc?.GetString("Nav_Help") ?? "", "\uE9CE", "F1", () => nav?.Navigate(typeof(HelpPage)))
-            };
+            var allCommands = BuildDefaultCommands(loc, nav, theme);
 
             foreach (var cmd in allCommands)
             {

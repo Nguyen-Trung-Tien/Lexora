@@ -292,6 +292,22 @@ public sealed class ShortcutManager : IShortcutManager
                 return Task.CompletedTask;
             }
         });
+
+        RegisterShortcut(new ShortcutDefinition
+        {
+            Id = "Global.NavigatePhrases",
+            Gesture = new ShortcutGesture(ShortcutKey.P, ShortcutModifiers.Control | ShortcutModifiers.Shift),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "Nav_Phrases",
+            Priority = ShortcutPriority.Global,
+            AllowWhenDialogActive = false,
+            AllowWhenTextInputFocused = false,
+            ExecuteAsync = () =>
+            {
+                _navigationService.Navigate(typeof(Lexora.Presentation.Views.Phrases.PhrasesPage));
+                return Task.CompletedTask;
+            }
+        });
     }
 
     public void RegisterShortcut(ShortcutDefinition shortcut)

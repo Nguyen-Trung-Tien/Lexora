@@ -368,6 +368,12 @@ public class ReviewService : IReviewService
                     }
                     else
                     {
+                        existingStorage.Status = previousStatus switch
+                        {
+                            LearningStatus.Mastered => StorageLearningStatus.Mastered,
+                            LearningStatus.Remembered => StorageLearningStatus.Learning,
+                            _ => StorageLearningStatus.Weak
+                        };
                         existingStorage.Lapses = previousLapses;
                         existingStorage.IntervalDays = previousInterval;
                         existingStorage.NextReviewAt = previousNextReviewAt;
@@ -417,7 +423,16 @@ public class ReviewService : IReviewService
             card.Status = remembered ? LearningStatus.Remembered : LearningStatus.NotRemembered;
             card.NextReviewAt = remembered ? DateTime.UtcNow.AddDays(Math.Max(2, card.IntervalDays)) : DateTime.UtcNow.AddDays(1);
             card.TotalReviews++;
-            if (remembered) card.CorrectReviews++;
+            if (remembered)
+            {
+                card.CorrectReviews++;
+            }
+            else
+            {
+                card.IntervalDays = 1;
+                card.Repetitions = 0;
+                card.Lapses++;
+            }
             card.UpdatedAt = DateTime.UtcNow;
             await _reviewRepo.UpdateAsync(card, cancellationToken);
         }

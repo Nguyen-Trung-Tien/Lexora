@@ -409,7 +409,7 @@
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Height="520" Padding="12">
                         <Grid>
-                            <Canvas x:Name="GraphCanvas" SizeChanged="GraphCanvas_SizeChanged" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Canvas x:Name="GraphCanvas" UseLayoutRounding="False" SizeChanged="GraphCanvas_SizeChanged" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                 <!-- Visual orbit nodes & connecting lines dynamically injected in code-behind -->
                             </Canvas>
 

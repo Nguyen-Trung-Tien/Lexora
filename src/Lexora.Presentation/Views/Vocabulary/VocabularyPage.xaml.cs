@@ -35,9 +35,12 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
 
         RegisterShortcuts();
 
+        ViewModel.PropertyChanged += ViewModel_StatusPropertyChanged;
+
         Unloaded += (s, e) =>
         {
             _searchDebounceTimer?.Stop();
+            ViewModel.PropertyChanged -= ViewModel_StatusPropertyChanged;
             var sm = App.Current.Services.GetService<IShortcutManager>();
             sm?.UnregisterPageShortcuts(typeof(VocabularyPage));
         };
@@ -85,6 +88,29 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
 
         ActualThemeChanged += (s, e) => OnThemeChanged();
+    }
+
+    private void ViewModel_StatusPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ViewModel.StatusMessage)) return;
+
+        DispatcherQueue?.TryEnqueue(() =>
+        {
+            if (StatusInfoBar == null) return;
+            var msg = ViewModel.StatusMessage;
+            StatusInfoBar.IsOpen = !string.IsNullOrWhiteSpace(msg);
+            StatusInfoBar.Severity = (!string.IsNullOrWhiteSpace(msg) &&
+                (msg.Contains("error", StringComparison.OrdinalIgnoreCase)
+                 || msg.Contains("lỗi", StringComparison.OrdinalIgnoreCase)
+                 || msg.Contains("fail", StringComparison.OrdinalIgnoreCase)))
+                ? InfoBarSeverity.Error
+                : InfoBarSeverity.Informational;
+        });
+    }
+
+    private void StatusInfoBar_Closed(InfoBar sender, InfoBarClosedEventArgs args)
+    {
+        ViewModel.StatusMessage = string.Empty;
     }
 
     private void UpdateResponsiveLayout(double width)

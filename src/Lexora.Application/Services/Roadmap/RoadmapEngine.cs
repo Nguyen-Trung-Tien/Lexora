@@ -106,7 +106,7 @@ public class RoadmapEngine
                     CanvasY = Math.Round(canvasY, 1),
                     TargetItemCount = nTemplate.TargetItemCount,
                     CompletedItemCount = 0,
-                    EaseFactorWeight = CalculateInitialEaseFactor(targetScore - startingScore),
+                    EaseFactorWeight = CalculateInitialEaseFactor(target, targetScore - startingScore),
                     ReferenceId = refId,
                     ReferenceName = refName
                 };
@@ -129,13 +129,20 @@ public class RoadmapEngine
         _ => "Personalized Learning Roadmap"
     };
 
-    private static double CalculateInitialEaseFactor(double scoreGap)
+    private static double CalculateInitialEaseFactor(ExamTarget target, double scoreGap)
     {
         // Dynamic SM-2 initial Ease Factor (EF) adjustment based on difficulty gap
         // Standard floor is 1.3, default base is 2.5
-        if (scoreGap > 300) return 2.1; // Harder gradient
-        if (scoreGap > 150) return 2.3;
-        return 2.5;
+        return target switch
+        {
+            ExamTarget.Toeic when scoreGap > 300 => 2.1,
+            ExamTarget.Toeic when scoreGap > 150 => 2.3,
+            ExamTarget.Ielts when scoreGap > 2.5 => 2.1,
+            ExamTarget.Ielts when scoreGap > 1.0 => 2.3,
+            ExamTarget.Vstep when scoreGap > 3.0 => 2.1,
+            ExamTarget.Vstep when scoreGap > 1.5 => 2.3,
+            _ => 2.5
+        };
     }
 
     private sealed record MilestoneTemplate(string Title, string Description, IReadOnlyList<NodeTemplate> Nodes);

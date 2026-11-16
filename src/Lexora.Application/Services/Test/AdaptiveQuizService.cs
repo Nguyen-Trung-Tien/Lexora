@@ -95,61 +95,79 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         int responseTimeMs,
         CancellationToken cancellationToken = default)
     {
-        if (!Sessions.TryGetValue(sessionId, out var session) || session.CurrentQuestion == null)
+        if (!Sessions.TryGetValue(sessionId, out var session))
         {
             throw new InvalidOperationException("Adaptive quiz session not found or expired.");
         }
 
-        var q = session.CurrentQuestion;
-        bool isCorrect = selectedOptionIndex == q.CorrectOptionIndex;
-        var previousLevel = session.CurrentCalibratedLevel;
-
-        if (isCorrect)
+        lock (session)
         {
-            session.ConsecutiveCorrect++;
-            session.ConsecutiveIncorrect = 0;
-            // Promote level if 2 consecutive correct answers
-            if (session.ConsecutiveCorrect >= 2 && session.CurrentCalibratedLevel < CefrLevel.C2)
+            var q = session.CurrentQuestion;
+            if (q == null)
             {
-                session.CurrentCalibratedLevel = (CefrLevel)((int)session.CurrentCalibratedLevel + 1);
-                session.ConsecutiveCorrect = 0;
+                throw new InvalidOperationException("Adaptive quiz session not found or expired.");
             }
-        }
-        else
-        {
-            session.ConsecutiveIncorrect++;
-            session.ConsecutiveCorrect = 0;
-            // Demote level if 2 consecutive incorrect answers
-            if (session.ConsecutiveIncorrect >= 2 && session.CurrentCalibratedLevel > CefrLevel.A1)
+
+            if (questionIndex != q.QuestionIndex)
             {
-                session.CurrentCalibratedLevel = (CefrLevel)((int)session.CurrentCalibratedLevel - 1);
+                throw new InvalidOperationException($"Question index mismatch: expected {q.QuestionIndex}, got {questionIndex}.");
+            }
+
+            if (session.Evaluations.Any(e => e.QuestionIndex == questionIndex))
+            {
+                throw new InvalidOperationException($"Question {questionIndex} has already been submitted.");
+            }
+
+            bool isCorrect = selectedOptionIndex == q.CorrectOptionIndex;
+            var previousLevel = session.CurrentCalibratedLevel;
+
+            if (isCorrect)
+            {
+                session.ConsecutiveCorrect++;
                 session.ConsecutiveIncorrect = 0;
+                // Promote level if 2 consecutive correct answers
+                if (session.ConsecutiveCorrect >= 2 && session.CurrentCalibratedLevel < CefrLevel.C2)
+                {
+                    session.CurrentCalibratedLevel = (CefrLevel)((int)session.CurrentCalibratedLevel + 1);
+                    session.ConsecutiveCorrect = 0;
+                }
             }
+            else
+            {
+                session.ConsecutiveIncorrect++;
+                session.ConsecutiveCorrect = 0;
+                // Demote level if 2 consecutive incorrect answers
+                if (session.ConsecutiveIncorrect >= 2 && session.CurrentCalibratedLevel > CefrLevel.A1)
+                {
+                    session.CurrentCalibratedLevel = (CefrLevel)((int)session.CurrentCalibratedLevel - 1);
+                    session.ConsecutiveIncorrect = 0;
+                }
+            }
+
+            int totalAnswered = session.Evaluations.Count + 1;
+            int correctCount = session.Evaluations.Count(e => e.IsCorrect) + (isCorrect ? 1 : 0);
+            double runningScore = Math.Round((double)correctCount / totalAnswered * 100.0, 1);
+
+            string feedback = isCorrect
+                ? $"Chính xác! Trình độ thích ứng: {session.CurrentCalibratedLevel}."
+                : $"Chưa chính xác. Đáp án đúng: '{q.Options[q.CorrectOptionIndex]}'.";
+
+            var eval = new AdaptiveAnswerEvaluationDto(
+                QuestionIndex: questionIndex,
+                WordId: q.WordId,
+                IsCorrect: isCorrect,
+                SelectedOptionIndex: selectedOptionIndex,
+                CorrectOptionIndex: q.CorrectOptionIndex,
+                ResponseTimeMs: responseTimeMs,
+                PreviousCalibratedLevel: previousLevel,
+                NewCalibratedLevel: session.CurrentCalibratedLevel,
+                RunningScorePercent: runningScore,
+                FeedbackMessage: feedback
+            );
+
+            session.Evaluations.Add(eval);
+            return eval;
         }
-
-        int totalAnswered = session.Evaluations.Count + 1;
-        int correctCount = session.Evaluations.Count(e => e.IsCorrect) + (isCorrect ? 1 : 0);
-        double runningScore = Math.Round((double)correctCount / totalAnswered * 100.0, 1);
-
-        string feedback = isCorrect
-            ? $"Chính xác! Trình độ thích ứng: {session.CurrentCalibratedLevel}."
-            : $"Chưa chính xác. Đáp án đúng: '{q.Options[q.CorrectOptionIndex]}'.";
-
-        var eval = new AdaptiveAnswerEvaluationDto(
-            QuestionIndex: questionIndex,
-            WordId: q.WordId,
-            IsCorrect: isCorrect,
-            SelectedOptionIndex: selectedOptionIndex,
-            CorrectOptionIndex: q.CorrectOptionIndex,
-            ResponseTimeMs: responseTimeMs,
-            PreviousCalibratedLevel: previousLevel,
-            NewCalibratedLevel: session.CurrentCalibratedLevel,
-            RunningScorePercent: runningScore,
-            FeedbackMessage: feedback
-        );
-
-        session.Evaluations.Add(eval);
-        return eval;
     }
 
     public Task<AdaptiveQuestionDto?> GetNextQuestionAsync(Guid sessionId, CancellationToken cancellationToken = default)

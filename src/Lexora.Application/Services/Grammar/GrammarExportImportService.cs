@@ -101,8 +101,8 @@ public class GrammarExportImportService : IGrammarExportImportService
             int pct = (int)(10.0 + 80.0 * current / Math.Max(1, total));
             progress?.Report(new ProgressReport(pct, current, total, "Đang xuất quy tắc ngữ pháp...", $"Rule {current}/{total}: {r.Title}"));
 
-            var examplesEn = string.Join(" | ", r.Examples.Select(e => e.SentenceEn.Replace("\"", "\"\"")));
-            var examplesVi = string.Join(" | ", r.Examples.Select(e => e.SentenceVi.Replace("\"", "\"\"")));
+            var examplesEn = string.Join(" | ", r.Examples.Select(e => e.SentenceEn));
+            var examplesVi = string.Join(" | ", r.Examples.Select(e => e.SentenceVi));
 
             sb.AppendLine(string.Join(",", new[]
             {
@@ -185,6 +185,12 @@ public class GrammarExportImportService : IGrammarExportImportService
         CancellationToken cancellationToken = default,
         IProgress<ProgressReport>? progress = null)
     {
+        if (string.IsNullOrWhiteSpace(content))
+            return new ImportResult(0, 0, ["Import content is empty."], 0);
+
+        if (content.Length > MaxImportPayloadLength)
+            return new ImportResult(0, 0, [$"Payload exceeds maximum allowed size of {MaxImportPayloadLength / 1_048_576} MB."], 0);
+
         var format = SmartContentDetector.DetectFormat(content, fileNameHint);
         return format switch
         {
@@ -914,19 +920,7 @@ public class GrammarExportImportService : IGrammarExportImportService
     private static readonly System.Buffers.SearchValues<char> CsvFormulaTriggers = System.Buffers.SearchValues.Create("=+-@\t\r");
 
     private static string CsvQuote(string value)
-    {
-        if (string.IsNullOrEmpty(value)) return "";
-
-        // Mitigate CSV Formula Injection (CWE-1236)
-        bool isFormula = CsvFormulaTriggers.Contains(value[0]);
-        var safeField = isFormula ? "'" + value : value;
-
-        if (isFormula || safeField.Contains(',') || safeField.Contains('"') || safeField.Contains('\n') || safeField.Contains('\r'))
-        {
-            return $"\"{safeField.Replace("\"", "\"\"")}\"";
-        }
-        return safeField;
-    }
+        => Lexora.Application.Common.SafeCsvHelper.EscapeCsvField(value);
 
     private static CefrLevel ParseCefrLevel(string? input, CefrLevel defaultLevel = CefrLevel.B1)
     {

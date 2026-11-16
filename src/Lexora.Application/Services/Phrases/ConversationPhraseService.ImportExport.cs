@@ -433,11 +433,8 @@ public partial class ConversationPhraseService
     };
 
     private static string EscapeCsv(string? value)
-    {
-        var text = value ?? string.Empty;
-        return $"\"{text.Replace("\"", "\"\"")}\"";
-    }
+        => Lexora.Application.Common.SafeCsvHelper.EscapeCsvField(value, alwaysQuote: true);
 
     private static string SanitizeTabField(string? value)
-        => (value ?? string.Empty).Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ').Trim();
+        => Lexora.Application.Common.SafeCsvHelper.SanitizeTsvField(value);
 }

@@ -18,10 +18,11 @@ namespace Lexora.Presentation.Views.Phrases;
 /// Presentation Page for Conversation Phrases featuring Responsive Master-Detail layout,
 /// audio playback indicators, connected transitions, Roleplay SM-2/FSRS mode, and import/export.
 /// </summary>
-public sealed partial class PhrasesPage : Page
+public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareView
 {
     private const ulong MaxImportBytes = 20UL * 1024 * 1024;
     private bool _hasLoadedOnce;
+    private bool _isOpeningDialog;
 
     public PhrasesViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
@@ -55,17 +56,53 @@ public sealed partial class PhrasesPage : Page
         };
     }
 
-    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    public void OnLanguageChanged()
     {
-        base.OnNavigatedTo(e);
-        if (!_hasLoadedOnce)
+        if (DispatcherQueue.HasThreadAccess)
         {
-            _hasLoadedOnce = true;
-            await ViewModel.LoadDataAsync();
+            Bindings.Update();
+            UpdateFilterPillStyles();
         }
         else
         {
-            await ViewModel.RefreshPhrasesAsync(resetPage: false);
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                Bindings.Update();
+                UpdateFilterPillStyles();
+            });
+        }
+    }
+
+    public void OnThemeChanged()
+    {
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateFilterPillStyles();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateFilterPillStyles);
+        }
+    }
+
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        try
+        {
+            if (!_hasLoadedOnce)
+            {
+                _hasLoadedOnce = true;
+                await ViewModel.LoadDataAsync();
+            }
+            else
+            {
+                await ViewModel.RefreshPhrasesAsync(resetPage: false);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[PhrasesPage] OnNavigatedTo error: {ex.Message}");
         }
     }
 
@@ -99,49 +136,82 @@ public sealed partial class PhrasesPage : Page
 
     private async void OnAddPhraseClick(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.IsSubmitting) return;
-
-        var templates = await ViewModel.GetQuickTemplatesAsync(ViewModel.SelectedCategory);
-        var dialog = new PhraseEditorDialog(Loc, ViewModel.EditorCategories.ToList(), templates);
-        var result = await dialog.ShowAsyncSafe(this.XamlRoot);
-        if (result == ContentDialogResult.Primary && dialog.CreatedResult is not null)
+        if (ViewModel.IsSubmitting || _isOpeningDialog) return;
+        _isOpeningDialog = true;
+        try
         {
-            await ViewModel.CreatePhraseAsync(dialog.CreatedResult);
+            var templates = await ViewModel.GetQuickTemplatesAsync(ViewModel.SelectedCategory);
+            var dialog = new PhraseEditorDialog(Loc, ViewModel.EditorCategories.ToList(), templates);
+            var result = await dialog.ShowAsyncSafe(this.XamlRoot);
+            if (result == ContentDialogResult.Primary && dialog.CreatedResult is not null)
+            {
+                await ViewModel.CreatePhraseAsync(dialog.CreatedResult);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[PhrasesPage] OnAddPhraseClick error: {ex.Message}");
+        }
+        finally
+        {
+            _isOpeningDialog = false;
         }
     }
 
     private async void OnEditSelectedClick(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.SelectedPhrase is null || ViewModel.IsSubmitting) return;
-
-        var templates = await ViewModel.GetQuickTemplatesAsync(ViewModel.SelectedPhrase.Category);
-        var dialog = new PhraseEditorDialog(Loc, ViewModel.EditorCategories.ToList(), templates, ViewModel.SelectedPhrase);
-        var result = await dialog.ShowAsyncSafe(this.XamlRoot);
-        if (result == ContentDialogResult.Primary && dialog.UpdatedResult is not null)
+        if (ViewModel.SelectedPhrase is null || ViewModel.IsSubmitting || _isOpeningDialog) return;
+        _isOpeningDialog = true;
+        try
         {
-            await ViewModel.UpdatePhraseAsync(dialog.UpdatedResult);
+            var templates = await ViewModel.GetQuickTemplatesAsync(ViewModel.SelectedPhrase.Category);
+            var dialog = new PhraseEditorDialog(Loc, ViewModel.EditorCategories.ToList(), templates, ViewModel.SelectedPhrase);
+            var result = await dialog.ShowAsyncSafe(this.XamlRoot);
+            if (result == ContentDialogResult.Primary && dialog.UpdatedResult is not null)
+            {
+                await ViewModel.UpdatePhraseAsync(dialog.UpdatedResult);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[PhrasesPage] OnEditSelectedClick error: {ex.Message}");
+        }
+        finally
+        {
+            _isOpeningDialog = false;
         }
     }
 
     private async void OnDeleteSelectedClick(object sender, RoutedEventArgs e)
     {
         var phrase = ViewModel.SelectedPhrase;
-        if (phrase is null || ViewModel.IsSubmitting) return;
-
-        var confirm = new ContentDialog
+        if (phrase is null || ViewModel.IsSubmitting || _isOpeningDialog) return;
+        _isOpeningDialog = true;
+        try
         {
-            Title = Loc.GetString("Phrases_DeleteConfirmTitle"),
-            Content = string.Format(Loc.GetString("Phrases_DeleteConfirmMsg"), phrase.PromptSentence),
-            PrimaryButtonText = Loc.GetString("Action_Delete"),
-            CloseButtonText = Loc.GetString("Action_Cancel"),
-            DefaultButton = ContentDialogButton.Close
-        };
+            var confirm = new ContentDialog
+            {
+                Title = Loc.GetString("Phrases_DeleteConfirmTitle"),
+                Content = string.Format(Loc.GetString("Phrases_DeleteConfirmMsg"), phrase.PromptSentence),
+                PrimaryButtonText = Loc.GetString("Action_Delete"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close
+            };
 
-        var result = await confirm.ShowAsyncSafe(this.XamlRoot);
-        if (result == ContentDialogResult.Primary)
+            var result = await confirm.ShowAsyncSafe(this.XamlRoot);
+            if (result == ContentDialogResult.Primary)
+            {
+                await Task.Yield();
+                await ViewModel.DeletePhraseAsync(phrase);
+            }
+        }
+        catch (Exception ex)
         {
-            await Task.Yield();
-            await ViewModel.DeletePhraseAsync(phrase);
+            System.Diagnostics.Debug.WriteLine($"[PhrasesPage] OnDeleteSelectedClick error: {ex.Message}");
+        }
+        finally
+        {
+            _isOpeningDialog = false;
         }
     }
 

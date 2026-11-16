@@ -17,6 +17,7 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView, IThemeAware
     public ILocalizationService Loc { get; }
     private readonly IMemoryTipService _tipService;
     private readonly IThemeService _themeService;
+    private readonly EventHandler<ElementTheme> _themeChangedHandler;
 
     public MemoryTipsPage()
     {
@@ -34,10 +35,20 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView, IThemeAware
             RequestedTheme = _themeService.CurrentTheme;
         }
 
-        ActualThemeChanged += (s, e) => OnThemeChanged();
-        _themeService.ThemeChanged += (s, theme) => OnThemeChanged();
+        ActualThemeChanged += Page_ActualThemeChanged;
+        _themeChangedHandler = (s, theme) => OnThemeChanged();
+        _themeService.ThemeChanged += _themeChangedHandler;
 
         Loaded += OnPageLoaded;
+        Unloaded += OnPageUnloaded;
+    }
+
+    private void Page_ActualThemeChanged(FrameworkElement sender, object args) => OnThemeChanged();
+
+    private void OnPageUnloaded(object sender, RoutedEventArgs e)
+    {
+        ActualThemeChanged -= Page_ActualThemeChanged;
+        _themeService.ThemeChanged -= _themeChangedHandler;
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -49,9 +60,16 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView, IThemeAware
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
     {
-        ApplyLocalization();
-        OnThemeChanged();
-        await ViewModel.InitializeAsync();
+        try
+        {
+            ApplyLocalization();
+            OnThemeChanged();
+            await ViewModel.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[MemoryTipsPage] OnPageLoaded error: {ex.Message}");
+        }
     }
 
     public void OnLanguageChanged()

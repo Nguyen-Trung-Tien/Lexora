@@ -420,6 +420,8 @@ public sealed partial class ShellPage : Page
             (Key: "review", Page: "Review", Title: _localizationService.GetString("Nav_Review"), Subtitle: _localizationService.GetString("Search_SmartNav_Review"), Glyph: "\uE895"),
             (Key: "test", Page: "Test", Title: _localizationService.GetString("Nav_Test"), Subtitle: _localizationService.GetString("Search_SmartNav_Test"), Glyph: "\uE765"),
             (Key: "grammar", Page: "Grammar", Title: _localizationService.GetString("Nav_Grammar"), Subtitle: _localizationService.GetString("Search_SmartNav_Grammar"), Glyph: "\uE8D2"),
+            (Key: "phrases", Page: "Phrases", Title: _localizationService.GetString("Nav_Phrases"), Subtitle: _localizationService.GetString("Phrases_Subtitle"), Glyph: "\uE8BD"),
+            (Key: "memorytips", Page: "MemoryTips", Title: _localizationService.GetString("Nav_MemoryTips"), Subtitle: _localizationService.GetString("MemoryTips_Subtitle"), Glyph: "\uE8D7"),
             (Key: "storage", Page: "LearningStorage", Title: _localizationService.GetString("Nav_LearningStorage"), Subtitle: _localizationService.GetString("Search_SmartNav_LearningStorage"), Glyph: "\uE7B8"),
             (Key: "help", Page: "Help", Title: _localizationService.GetString("Nav_Help"), Subtitle: _localizationService.GetString("Help_Subtitle"), Glyph: "\uE9CE"),
             (Key: "settings", Page: "Settings", Title: _localizationService.GetString("Nav_Settings"), Subtitle: _localizationService.GetString("Search_SmartNav_Settings"), Glyph: "\uE713")
@@ -595,6 +597,14 @@ public sealed partial class ShellPage : Page
                     case "Grammar":
                         _navigationService.Navigate(typeof(GrammarPage));
                         NavView.SelectedItem = NavItemGrammar;
+                        break;
+                    case "Phrases":
+                        _navigationService.Navigate(typeof(Lexora.Presentation.Views.Phrases.PhrasesPage));
+                        NavView.SelectedItem = NavItemPhrases;
+                        break;
+                    case "MemoryTips":
+                        _navigationService.Navigate(typeof(Lexora.Presentation.Views.MemoryTips.MemoryTipsPage));
+                        NavView.SelectedItem = NavItemMemoryTips;
                         break;
                     case "LearningStorage":
                         _navigationService.Navigate(typeof(LearningStoragePage));

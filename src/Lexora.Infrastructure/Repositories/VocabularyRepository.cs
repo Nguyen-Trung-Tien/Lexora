@@ -129,7 +129,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         // Diacritic-insensitive fallback for Vietnamese unaccented search
         return await SearchDiacriticFallbackAsync(
             searchTerm, level, partOfSpeech, topicId, examType, status,
-            skip, take, sortBy, isAscending, isDueToday, isWeak, cancellationToken);
+            skip, take, sortBy, isAscending, isDueToday, isWeak, isLeech, cancellationToken);
     }
 
     public Task<int> CountFilteredAsync(
@@ -167,7 +167,7 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         // Diacritic-insensitive fallback count for Vietnamese unaccented search
         return await CountDiacriticFallbackAsync(
             searchTerm, level, partOfSpeech, topicId, examType, status,
-            isDueToday, isWeak, cancellationToken);
+            isDueToday, isWeak, isLeech, cancellationToken);
     }
 
     private async Task<IReadOnlyList<Word>> SearchDiacriticFallbackAsync(
@@ -183,13 +183,14 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         bool isAscending,
         bool? isDueToday,
         bool? isWeak,
+        bool? isLeech,
         CancellationToken cancellationToken)
     {
         var normQuery = Lexora.Domain.Common.SearchTextHelper.Normalize(searchTerm);
         if (string.IsNullOrEmpty(normQuery)) return Array.Empty<Word>();
 
         var fallbackQuery = DbSet.AsNoTracking().AsQueryable();
-        fallbackQuery = ApplyFilters(fallbackQuery, null, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
+        fallbackQuery = ApplyFilters(fallbackQuery, null, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak, isLeech);
 
         var projected = await fallbackQuery
             .Select(w => new
@@ -256,13 +257,14 @@ public class VocabularyRepository : Repository<Word>, IVocabularyRepository
         LearningStatus? status,
         bool? isDueToday,
         bool? isWeak,
+        bool? isLeech,
         CancellationToken cancellationToken)
     {
         var normQuery = Lexora.Domain.Common.SearchTextHelper.Normalize(searchTerm);
         if (string.IsNullOrEmpty(normQuery)) return 0;
 
         var fallbackQuery = DbSet.AsNoTracking().AsQueryable();
-        fallbackQuery = ApplyFilters(fallbackQuery, null, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak);
+        fallbackQuery = ApplyFilters(fallbackQuery, null, level, partOfSpeech, topicId, examType, status, isDueToday, isWeak, isLeech);
 
         var projected = await fallbackQuery
             .Select(w => new

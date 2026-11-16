@@ -42,10 +42,6 @@ public partial class ExportImportService
         var errors = new List<string>();
 
         var selectedItems = request.Items.Where(i => i.IsSelected && i.IsValid).ToList();
-        if (selectedItems.Count == 0 && request.Items.Any(i => i.IsValid))
-        {
-            selectedItems = request.Items.Where(i => i.IsValid).ToList();
-        }
         if (selectedItems.Count == 0)
         {
             return new SmartImportCommitResultDto(0, 0, 0, new List<string> { "Không có mục hợp lệ nào được chọn / No valid items selected." });
@@ -463,7 +459,7 @@ public partial class ExportImportService
                             continue;
                         }
 
-                        var normalized = term.ToLowerInvariant();
+                        var normalized = NormalizeTerm(term);
 
                         if (!seenTerms.Add(normalized))
                         {
@@ -839,7 +835,7 @@ public partial class ExportImportService
                         }
 
                         string term = columns[0].Trim();
-                        string normalized = term.ToLowerInvariant();
+                        string normalized = NormalizeTerm(term);
 
                         if (!seenTerms.Add(normalized))
                         {
@@ -1165,7 +1161,7 @@ public partial class ExportImportService
                     }
                 }
 
-                var normalized = term.ToLowerInvariant();
+                var normalized = NormalizeTerm(term);
 
                 if (!seenTerms.Add(normalized))
                 {

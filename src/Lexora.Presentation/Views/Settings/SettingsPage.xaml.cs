@@ -1028,10 +1028,17 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
 
     private async void OpenDataHealthCenter_Click(object sender, RoutedEventArgs e)
     {
-        if (this.XamlRoot == null) return;
-        var healthService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IDataHealthService>();
-        var dialog = new DataHealthCenterDialog(healthService, Loc);
-        await dialog.ShowAsyncSafe(App.Current?.MainWindow?.Content?.XamlRoot ?? this.XamlRoot);
+        try
+        {
+            if (this.XamlRoot == null) return;
+            var healthService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IDataHealthService>();
+            var dialog = new DataHealthCenterDialog(healthService, Loc);
+            await dialog.ShowAsyncSafe(App.Current?.MainWindow?.Content?.XamlRoot ?? this.XamlRoot);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SettingsPage] OpenDataHealthCenter_Click error: {ex.Message}");
+        }
     }
 
     private void SettingsHelpButton_Click(object sender, RoutedEventArgs e)
@@ -1068,7 +1075,14 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
 
     private async void OpenReleaseNotesLog_Click(object sender, RoutedEventArgs e)
     {
-        await ShowReleaseNotesLogDialogAsync();
+        try
+        {
+            await ShowReleaseNotesLogDialogAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SettingsPage] OpenReleaseNotesLog_Click error: {ex.Message}");
+        }
     }
 
     private async Task ShowReleaseNotesLogDialogAsync(string? version = null)
@@ -1083,9 +1097,16 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
 
     private async void OpenUpdateDetailsPopup_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.AvailableUpdate is { } update)
+        try
         {
-            await ShowUpdateDetailsDialogAsync(update);
+            if (ViewModel.AvailableUpdate is { } update)
+            {
+                await ShowUpdateDetailsDialogAsync(update);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SettingsPage] OpenUpdateDetailsPopup_Click error: {ex.Message}");
         }
     }
 

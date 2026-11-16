@@ -12,6 +12,11 @@
     mc:Ignorable="d">
 
     <Grid RowDefinitions="Auto,*">
+        <ProgressBar Grid.Row="0"
+                     IsIndeterminate="True"
+                     VerticalAlignment="Bottom"
+                     Canvas.ZIndex="10"
+                     Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
         <!-- Top Command Bar / Header Area -->
         <Border Grid.Row="0"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

@@ -46,44 +46,73 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
 
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
-        ActualThemeChanged += (s, e) =>
-        {
-            RenderGraphCanvas();
-        };
+        ActualThemeChanged += Page_ActualThemeChanged;
+        Loaded += Page_Loaded;
+        Unloaded += Page_Unloaded;
+    }
 
-        Loaded += async (s, e) =>
+    private void Page_ActualThemeChanged(FrameworkElement sender, object args)
+    {
+        RenderGraphCanvas();
+    }
+
+    private async void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        try
         {
             if (!ViewModel.HasActiveGraph)
             {
                 await ViewModel.InitializeAsync();
                 RenderGraphCanvas();
             }
-        };
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphPage] Page_Loaded error: {ex.Message}");
+        }
+    }
+
+    private void Page_Unloaded(object sender, RoutedEventArgs e)
+    {
+        ActualThemeChanged -= Page_ActualThemeChanged;
+        Loaded -= Page_Loaded;
+        Unloaded -= Page_Unloaded;
+        ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+        _headerSearchCts?.Cancel();
+        _headerSearchCts?.Dispose();
+        (ViewModel as IDisposable)?.Dispose();
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
 
-        var animService = ConnectedAnimationService.GetForCurrentView();
-        if (animService.GetAnimation("vocabToGraphTransition") != null)
+        try
         {
-            _pendingConnectedAnimationKey = "vocabToGraphTransition";
-        }
-        else if (animService.GetAnimation("graphNodeTransition") != null)
-        {
-            _pendingConnectedAnimationKey = "graphNodeTransition";
-        }
+            var animService = ConnectedAnimationService.GetForCurrentView();
+            if (animService.GetAnimation("vocabToGraphTransition") != null)
+            {
+                _pendingConnectedAnimationKey = "vocabToGraphTransition";
+            }
+            else if (animService.GetAnimation("graphNodeTransition") != null)
+            {
+                _pendingConnectedAnimationKey = "graphNodeTransition";
+            }
 
-        if (e.Parameter is Guid wordId && wordId != Guid.Empty)
-        {
-            await ViewModel.InitializeAsync(wordId);
-            RenderGraphCanvas();
+            if (e.Parameter is Guid wordId && wordId != Guid.Empty)
+            {
+                await ViewModel.InitializeAsync(wordId);
+                RenderGraphCanvas();
+            }
+            else if (e.Parameter is string term && !string.IsNullOrWhiteSpace(term))
+            {
+                await ViewModel.LoadGraphForTermAsync(term);
+                RenderGraphCanvas();
+            }
         }
-        else if (e.Parameter is string term && !string.IsNullOrWhiteSpace(term))
+        catch (Exception ex)
         {
-            await ViewModel.LoadGraphForTermAsync(term);
-            RenderGraphCanvas();
+            System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphPage] OnNavigatedTo error: {ex.Message}");
         }
     }
 
@@ -444,12 +473,16 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             {
                 Data = kvp.Value,
                 Stroke = GetRelationLineBrush(kvp.Key),
-                StrokeThickness = 2.0
+                StrokeThickness = 2.0,
+                StrokeLineJoin = PenLineJoin.Round,
+                StrokeStartLineCap = PenLineCap.Round,
+                StrokeEndLineCap = PenLineCap.Round
             };
 
             if (kvp.Key == KnowledgeGraphNodeType.Antonym)
             {
                 path.StrokeDashArray = new DoubleCollection { 4, 3 };
+                path.StrokeDashCap = PenLineCap.Round;
             }
 
             GraphCanvas.Children.Add(path);

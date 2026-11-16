@@ -66,10 +66,27 @@ public partial class ShellViewModel : ObservableObject, IDisposable
         UpdateLocalizedTexts();
         _languageChangedHandler = async (s, e) =>
         {
-            UpdateLocalizedTexts();
-            await CheckDueReviewsAsync();
+            try
+            {
+                UpdateLocalizedTexts();
+                await CheckDueReviewsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ShellViewModel] LanguageChanged error: {ex.Message}");
+            }
         };
-        _prefsChangedHandler = async (s, prefs) => await CheckDueReviewsAsync();
+        _prefsChangedHandler = async (s, prefs) =>
+        {
+            try
+            {
+                await CheckDueReviewsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ShellViewModel] PreferencesChanged error: {ex.Message}");
+            }
+        };
 
         _localizationService.LanguageChanged += _languageChangedHandler;
         _preferencesService.PreferencesChanged += _prefsChangedHandler;

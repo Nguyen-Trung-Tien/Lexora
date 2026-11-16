@@ -130,6 +130,12 @@
                 Spacing="24">
 
                 <!-- 1. Header & Pathway Controls -->
+                <InfoBar x:Name="StatusInfoBar"
+                         IsOpen="False"
+                         IsClosable="True"
+                         Severity="Informational"
+                         Closed="StatusInfoBar_Closed"
+                         Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
                 <Grid x:Name="PageHeaderGrid" HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -801,6 +807,7 @@
                                 VerticalScrollBarVisibility="Auto">
                                 <Canvas
                                     x:Name="RoadmapCanvas"
+                                    UseLayoutRounding="False"
                                     MinWidth="760"
                                     MinHeight="380"
                                     HorizontalAlignment="Center">
@@ -814,10 +821,17 @@
                                         x:Name="TrackSplinePath"
                                         Stroke="{ThemeResource ControlStrongStrokeColorDisabledBrush}"
                                         StrokeDashArray="3,2"
+                                        StrokeDashCap="Round"
+                                        StrokeLineJoin="Round"
+                                        StrokeStartLineCap="Round"
+                                        StrokeEndLineCap="Round"
                                         StrokeThickness="4" />
                                     <Path
                                         x:Name="ActiveSplinePath"
                                         Stroke="{ThemeResource AccentFillColorDefaultBrush}"
+                                        StrokeLineJoin="Round"
+                                        StrokeStartLineCap="Round"
+                                        StrokeEndLineCap="Round"
                                         StrokeThickness="4" />
                                 </Canvas>
                             </ScrollViewer>

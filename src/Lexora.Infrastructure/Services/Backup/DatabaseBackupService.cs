@@ -62,7 +62,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         // 1. Flush SQLite WAL to ensure all committed pages are written before backup snapshot
         try
         {
-            using var walConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadWrite;Pooling=False");
+            using var walConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(_dbFilePath, Microsoft.Data.Sqlite.SqliteOpenMode.ReadWrite));
             await walConn.OpenAsync(cancellationToken);
             using var walCmd = walConn.CreateCommand();
             walCmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
@@ -90,8 +90,8 @@ public class DatabaseBackupService : IDatabaseBackupService
         // 3. Try SQLite Online Backup API first
         try
         {
-            using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadOnly;Pooling=False"))
-            using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={fullTarget};Mode=ReadWriteCreate;Pooling=False"))
+            using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(_dbFilePath, Microsoft.Data.Sqlite.SqliteOpenMode.ReadOnly)))
+            using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(fullTarget, Microsoft.Data.Sqlite.SqliteOpenMode.ReadWriteCreate)))
             {
                 await sourceConn.OpenAsync(cancellationToken);
                 await destConn.OpenAsync(cancellationToken);
@@ -134,7 +134,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         // 4. Consolidate backup into a standalone single .db file (switch journal_mode from WAL to DELETE)
         try
         {
-            using (var convertConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={fullTarget};Mode=ReadWrite;Pooling=False"))
+            using (var convertConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(fullTarget, Microsoft.Data.Sqlite.SqliteOpenMode.ReadWrite)))
             {
                 await convertConn.OpenAsync(cancellationToken);
                 using var modeCmd = convertConn.CreateCommand();
@@ -183,7 +183,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         {
             try
             {
-                using var verifyConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={fullTarget};Mode=ReadOnly;Pooling=False");
+                using var verifyConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(fullTarget, Microsoft.Data.Sqlite.SqliteOpenMode.ReadOnly));
                 await verifyConn.OpenAsync(cancellationToken);
                 using var verifyCmd = verifyConn.CreateCommand();
                 verifyCmd.CommandText = "PRAGMA quick_check(1);";
@@ -330,7 +330,7 @@ public class DatabaseBackupService : IDatabaseBackupService
 
         try
         {
-            using var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={backupFilePath};Mode=ReadOnly;Pooling=False");
+            using var conn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(backupFilePath, Microsoft.Data.Sqlite.SqliteOpenMode.ReadOnly));
             await conn.OpenAsync(cancellationToken);
 
             // Check integrity
@@ -481,7 +481,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             // First truncate checkpoint on current db to flush pending dirty pages into main db
             try
             {
-                using var flushConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadWrite;Pooling=False");
+                using var flushConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(_dbFilePath, Microsoft.Data.Sqlite.SqliteOpenMode.ReadWrite));
                 await flushConn.OpenAsync(cancellationToken);
                 using var flushCmd = flushConn.CreateCommand();
                 flushCmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
@@ -538,8 +538,8 @@ public class DatabaseBackupService : IDatabaseBackupService
             // Primary Method: SQLite Online Backup API (Atomic, page-level transfer handled safely by SQLite C engine)
             try
             {
-                using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={fullBackupPath};Mode=ReadOnly;Pooling=False"))
-                using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadWriteCreate;Pooling=False"))
+                using (var sourceConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(fullBackupPath, Microsoft.Data.Sqlite.SqliteOpenMode.ReadOnly)))
+                using (var destConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(_dbFilePath, Microsoft.Data.Sqlite.SqliteOpenMode.ReadWriteCreate)))
                 {
                     await sourceConn.OpenAsync(cancellationToken);
                     await destConn.OpenAsync(cancellationToken);
@@ -595,7 +595,7 @@ public class DatabaseBackupService : IDatabaseBackupService
 
             if (File.Exists(_dbFilePath) && new FileInfo(_dbFilePath).Length >= 512)
             {
-                using var verifyConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbFilePath};Mode=ReadWrite;Pooling=False");
+                using var verifyConn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(_dbFilePath, Microsoft.Data.Sqlite.SqliteOpenMode.ReadWrite));
                 await verifyConn.OpenAsync(cancellationToken);
 
                 using (var checkpointCmd = verifyConn.CreateCommand())
@@ -650,11 +650,15 @@ public class DatabaseBackupService : IDatabaseBackupService
                 }
             }
 
+            // Always remove any -wal / -shm created by the failed restore attempt before restoring snapshot
+            if (File.Exists(walFile)) try { File.Delete(walFile); } catch { }
+            if (File.Exists(shmFile)) try { File.Delete(shmFile); } catch { }
+
             if (rollbackWalSnapshot != null && File.Exists(rollbackWalSnapshot))
             {
                 try
                 {
-                    File.Copy(rollbackWalSnapshot, _dbFilePath + "-wal", true);
+                    File.Copy(rollbackWalSnapshot, walFile, true);
                     _logger.LogInformation("Database WAL file rolled back successfully.");
                 }
                 catch { /* best effort */ }
@@ -671,7 +675,7 @@ public class DatabaseBackupService : IDatabaseBackupService
 
         try
         {
-            using var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={target};Mode=ReadOnly;Pooling=False");
+            using var conn = new Microsoft.Data.Sqlite.SqliteConnection(BuildConnectionString(target, Microsoft.Data.Sqlite.SqliteOpenMode.ReadOnly));
             await conn.OpenAsync(cancellationToken);
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "PRAGMA quick_check(1);";
@@ -785,5 +789,16 @@ public class DatabaseBackupService : IDatabaseBackupService
         }
 
         return Task.FromResult<IReadOnlyList<string>>(deletedFiles);
+    }
+
+    private static string BuildConnectionString(string dataSource, Microsoft.Data.Sqlite.SqliteOpenMode mode)
+    {
+        var builder = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
+        {
+            DataSource = dataSource,
+            Mode = mode,
+            Pooling = false
+        };
+        return builder.ToString();
     }
 }

@@ -45,8 +45,31 @@ public class UpdateService : IUpdateService
         _repoName = string.IsNullOrWhiteSpace(repoName) ? DefaultRepoName : repoName.Trim();
     }
 
+    private static bool IsTrustedGitHubUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            return false;
+        }
+
+        if (!string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var host = uri.Host;
+        return string.Equals(host, "github.com", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(host, "api.github.com", StringComparison.OrdinalIgnoreCase)
+            || host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static void AttachAuthHeader(HttpRequestMessage request)
     {
+        if (!IsTrustedGitHubUrl(request.RequestUri?.ToString()))
+        {
+            return;
+        }
+
         var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
             ?? Environment.GetEnvironmentVariable("GH_TOKEN")
             ?? Environment.GetEnvironmentVariable("LEXORA_GITHUB_TOKEN");
@@ -249,6 +272,13 @@ public class UpdateService : IUpdateService
         {
             throw new InvalidOperationException("Update asset download URL is missing.");
         }
+        if (!Uri.TryCreate(update.DownloadUrl, UriKind.Absolute, out var downloadUri)
+            || !string.Equals(downloadUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new SecurityException($"Insecure or invalid update download URL blocked: '{update.DownloadUrl}'.");
+        }
+
+        const long maxUpdateDownloadBytes = 500L * 1024 * 1024; // 500 MB ceiling
 
         var baseTempDir = Path.Combine(Path.GetTempPath(), "Lexora", "updates");
         Directory.CreateDirectory(baseTempDir);
@@ -275,14 +305,17 @@ public class UpdateService : IUpdateService
         response = await _httpClient.SendAsync(primaryReq, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         // If primary download failed with 404 (e.g. private repo) and AssetApiUrl + token are available, fallback to GitHub API asset download
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound && !string.IsNullOrWhiteSpace(update.AssetApiUrl) && !string.IsNullOrWhiteSpace(token))
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound
+            && !string.IsNullOrWhiteSpace(update.AssetApiUrl)
+            && IsTrustedGitHubUrl(update.AssetApiUrl)
+            && !string.IsNullOrWhiteSpace(token))
         {
             response.Dispose();
             _logger.LogInformation("Primary download returned 404, attempting authenticated GitHub API asset download from {ApiUrl}", update.AssetApiUrl);
             var apiReq = new HttpRequestMessage(HttpMethod.Get, update.AssetApiUrl);
             apiReq.Headers.UserAgent.ParseAdd("Lexora-Desktop-Client");
             apiReq.Headers.Accept.ParseAdd("application/octet-stream");
-            apiReq.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Trim());
+            AttachAuthHeader(apiReq);
 
             response = await _httpClient.SendAsync(apiReq, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         }
@@ -292,6 +325,11 @@ public class UpdateService : IUpdateService
             response.EnsureSuccessStatusCode();
 
             var totalBytes = response.Content.Headers.ContentLength ?? update.FileSizeBytes;
+            if (totalBytes > maxUpdateDownloadBytes)
+            {
+                throw new InvalidDataException($"Update package exceeds maximum allowed size ({maxUpdateDownloadBytes / (1024 * 1024)} MB).");
+            }
+
             await using (var remoteStream = await response.Content.ReadAsStreamAsync(cancellationToken))
             await using (var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
             {
@@ -301,8 +339,15 @@ public class UpdateService : IUpdateService
 
                 while ((bytesRead = await remoteStream.ReadAsync(buffer, cancellationToken)) > 0)
                 {
-                    await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
                     totalRead += bytesRead;
+                    if (totalRead > maxUpdateDownloadBytes)
+                    {
+                        fileStream.Dispose();
+                        try { File.Delete(fullPath); } catch { /* best effort cleanup */ }
+                        throw new InvalidDataException($"Update stream exceeded maximum allowed size ({maxUpdateDownloadBytes / (1024 * 1024)} MB).");
+                    }
+
+                    await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
 
                     var percent = totalBytes > 0 ? (double)totalRead / totalBytes * 100 : 0;
                     progress?.Report(new UpdateDownloadProgress(totalRead, totalBytes, percent));

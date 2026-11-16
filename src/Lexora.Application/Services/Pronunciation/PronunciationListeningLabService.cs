@@ -154,8 +154,8 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
         var inputWords = TokenizeWords(input);
         var expectedWords = TokenizeWords(expected);
 
-        int m = inputWords.Length;
-        int n = expectedWords.Length;
+        int m = Math.Min(inputWords.Length, 500);
+        int n = Math.Min(expectedWords.Length, 500);
         if (m == 0 && n == 0)
         {
             return (Array.Empty<DictationDiffTokenDto>(), 0, 0);
@@ -225,8 +225,8 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
         var s1 = input ?? string.Empty;
         var s2 = expected ?? string.Empty;
 
-        int m = s1.Length;
-        int n = s2.Length;
+        int m = Math.Min(s1.Length, 1000);
+        int n = Math.Min(s2.Length, 1000);
 
         if (m == 0 && n == 0) return Array.Empty<DictationDiffTokenDto>();
 
@@ -345,24 +345,30 @@ public class PronunciationListeningLabService(IVocabularyRepository vocabRepo) :
         if (string.IsNullOrEmpty(s)) return t?.Length ?? 0;
         if (string.IsNullOrEmpty(t)) return s.Length;
 
+        const int maxLen = 2000;
+        if (s.Length > maxLen) s = s[..maxLen];
+        if (t.Length > maxLen) t = t[..maxLen];
+
         int n = s.Length;
         int m = t.Length;
-        int[,] d = new int[n + 1, m + 1];
+        var prev = new int[m + 1];
+        var curr = new int[m + 1];
 
-        for (int i = 0; i <= n; d[i, 0] = i++) { }
-        for (int j = 0; j <= m; d[0, j] = j++) { }
+        for (int j = 0; j <= m; j++) prev[j] = j;
 
         for (int i = 1; i <= n; i++)
         {
+            curr[0] = i;
             for (int j = 1; j <= m; j++)
             {
                 int cost = (s[i - 1] == t[j - 1]) ? 0 : 1;
-                d[i, j] = Math.Min(
-                    Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                    d[i - 1, j - 1] + cost);
+                curr[j] = Math.Min(
+                    Math.Min(prev[j] + 1, curr[j - 1] + 1),
+                    prev[j - 1] + cost);
             }
+            (prev, curr) = (curr, prev);
         }
 
-        return d[n, m];
+        return prev[m];
     }
 }

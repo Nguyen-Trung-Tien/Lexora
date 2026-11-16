@@ -50,7 +50,16 @@ public class StudyPlannerService : IStudyPlannerService
 
     public async Task<StudyGoalDto> GetUserGoalAsync(CancellationToken cancellationToken = default)
     {
-        var model = await LoadStorageModelAsync(cancellationToken);
+        PlannerStorageModel model;
+        await PlanLock.WaitAsync(cancellationToken);
+        try
+        {
+            model = await LoadStorageModelAsync(cancellationToken);
+        }
+        finally
+        {
+            PlanLock.Release();
+        }
         if (model.Goal != null)
         {
             return model.Goal;
@@ -133,7 +142,16 @@ public class StudyPlannerService : IStudyPlannerService
         var grammarRules = await _grammarRepo.GetAllAsync(cancellationToken);
         GrammarRule? recommendedGrammar = grammarRules?.FirstOrDefault();
 
-        var model = await LoadStorageModelAsync(cancellationToken);
+        PlannerStorageModel model;
+        await PlanLock.WaitAsync(cancellationToken);
+        try
+        {
+            model = await LoadStorageModelAsync(cancellationToken);
+        }
+        finally
+        {
+            PlanLock.Release();
+        }
         var dateKey = today.ToString("yyyyMMdd");
         var todayProgress = model.DailyProgressMap.TryGetValue(dateKey, out var dict) ? dict : new Dictionary<string, int>();
 

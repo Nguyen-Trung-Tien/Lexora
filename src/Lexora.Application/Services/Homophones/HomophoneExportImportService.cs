@@ -508,13 +508,20 @@ public class HomophoneExportImportService : IHomophoneExportImportService
                 var left = mainParts[0].Trim();
                 itemsPart = mainParts[1].Trim();
 
-                if (left.Contains('[') && left.Contains(']'))
-                {
-                    var pStart = left.IndexOf('[');
-                    var pEnd = left.IndexOf(']');
-                    title = left[..pStart].Trim();
-                    phonetic = left.Substring(pStart + 1, pEnd - pStart - 1).Trim();
-                }
+                        if (left.Contains('[') && left.Contains(']'))
+                        {
+                            var pStart = left.IndexOf('[');
+                            var pEnd = left.IndexOf(']');
+                            if (pEnd > pStart)
+                            {
+                                title = left[..pStart].Trim();
+                                phonetic = left.Substring(pStart + 1, pEnd - pStart - 1).Trim();
+                            }
+                            else
+                            {
+                                title = left;
+                            }
+                        }
                 else
                 {
                     title = left;
@@ -554,8 +561,15 @@ public class HomophoneExportImportService : IHomophoneExportImportService
                         {
                             var posStart = leftSide.IndexOf('(');
                             var posEnd = leftSide.IndexOf(')');
-                            term = leftSide[..posStart].Trim();
-                            pos = leftSide.Substring(posStart + 1, posEnd - posStart - 1).Trim();
+                            if (posEnd > posStart)
+                            {
+                                term = leftSide[..posStart].Trim();
+                                pos = leftSide.Substring(posStart + 1, posEnd - posStart - 1).Trim();
+                            }
+                            else
+                            {
+                                term = leftSide;
+                            }
                         }
                         else
                         {
@@ -617,10 +631,7 @@ public class HomophoneExportImportService : IHomophoneExportImportService
     }
 
     private static string EscapeCsv(string value)
-    {
-        if (string.IsNullOrEmpty(value)) return "\"\"";
-        return $"\"{value.Replace("\"", "\"\"")}\"";
-    }
+        => Lexora.Application.Common.SafeCsvHelper.EscapeCsvField(value, alwaysQuote: true);
 
     private static TEnum ParseEnum<TEnum>(string? value, TEnum defaultValue) where TEnum : struct, Enum
     {

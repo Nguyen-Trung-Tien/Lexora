@@ -306,7 +306,9 @@ public class StatisticsService : IStatisticsService
 
         // 2. Weekly Mastery Velocity (last 6 weeks)
         var weeklyVelocity = new List<WeeklyMasteryVelocityDto>();
-        var currentMonday = DateOnly.FromDateTime(DateTime.Today).AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        int daysSinceMonday = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+        var currentMonday = today.AddDays(-daysSinceMonday);
         for (int i = 5; i >= 0; i--)
         {
             var weekStart = currentMonday.AddDays(-7 * i);

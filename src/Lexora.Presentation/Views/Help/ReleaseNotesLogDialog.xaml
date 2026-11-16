@@ -108,7 +108,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <FontIcon Glyph="&#xE70F;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        <TextBlock x:Name="NotesContentLabel" Text="Features &amp; Improvements" FontWeight="SemiBold" FontSize="12"
+                        <TextBlock x:Name="NotesContentLabel" Text="{x:Bind Loc.GetString('ReleaseNotes_NotesContentLabel')}" FontWeight="SemiBold" FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
                 </Grid>
@@ -128,7 +128,7 @@
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
                 <FontIcon Glyph="&#xE753;" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" />
                 <TextBlock x:Name="OfflineNoteText" Grid.Column="1"
-                           Text="All release notes are stored offline directly within Lexora."
+                           Text="{x:Bind Loc.GetString('ReleaseNotes_OfflineNote')}"
                            FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            TextWrapping="Wrap" VerticalAlignment="Center" />
             </Grid>

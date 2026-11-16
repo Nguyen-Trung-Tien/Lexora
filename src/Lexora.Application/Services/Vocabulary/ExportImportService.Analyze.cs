@@ -44,7 +44,7 @@ public partial class ExportImportService
             existingTerms = null;
         }
 
-        if (existingTerms == null || existingTerms.Count == 0)
+        if (existingTerms == null)
         {
             var existingList = await _vocabRepo.SearchAsync(take: 100000, cancellationToken: cancellationToken)
                 ?? (IReadOnlyList<Word>)Array.Empty<Word>();

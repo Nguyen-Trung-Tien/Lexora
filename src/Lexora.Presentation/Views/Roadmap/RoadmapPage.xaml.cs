@@ -47,12 +47,35 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
                     RenderMilestoneTrack();
                 });
             }
+            else if (e.PropertyName == nameof(ViewModel.StatusMessage))
+            {
+                DispatcherQueue?.TryEnqueue(() =>
+                {
+                    if (StatusInfoBar != null)
+                    {
+                        var msg = ViewModel.StatusMessage;
+                        StatusInfoBar.IsOpen = !string.IsNullOrWhiteSpace(msg);
+                        StatusInfoBar.Severity = (!string.IsNullOrWhiteSpace(msg) &&
+                            (msg.Contains("error", StringComparison.OrdinalIgnoreCase)
+                             || msg.Contains("lỗi", StringComparison.OrdinalIgnoreCase)
+                             || msg.Contains("fail", StringComparison.OrdinalIgnoreCase)
+                             || msg.Contains("exception", StringComparison.OrdinalIgnoreCase)))
+                            ? InfoBarSeverity.Error
+                            : InfoBarSeverity.Informational;
+                    }
+                });
+            }
         };
         ViewModel.PropertyChanged += _propChangedHandler;
 
         Loaded += Page_Loaded;
         SizeChanged += Page_SizeChanged;
         ActualThemeChanged += (s, e) => OnThemeChanged();
+    }
+
+    private void StatusInfoBar_Closed(InfoBar sender, InfoBarClosedEventArgs args)
+    {
+        ViewModel.StatusMessage = string.Empty;
     }
 
     public void OnLanguageChanged()
@@ -1152,144 +1175,186 @@ public sealed partial class RoadmapPage : Page, ILocalizableView, IThemeAwareVie
 
     private async void SwitchRoadmapItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is StudyRoadmapDto roadmap)
+        try
         {
-            await ViewModel.SwitchRoadmapCommand.ExecuteAsync(roadmap.Id);
-            UpdateTabButtonsState();
-            Bindings.Update();
+            if (sender is Button btn && btn.Tag is StudyRoadmapDto roadmap)
+            {
+                await ViewModel.SwitchRoadmapCommand.ExecuteAsync(roadmap.Id);
+                UpdateTabButtonsState();
+                Bindings.Update();
+            }
+        }
+        catch (Exception ex)
+        {
+            ViewModel.StatusMessage = ex.Message;
         }
     }
 
     private async void DeleteCurrentRoadmap_Click(object sender, RoutedEventArgs e)
     {
-        var targetRoadmap = (sender as FrameworkElement)?.Tag as StudyRoadmapDto ?? ViewModel.ActiveRoadmap;
-        if (targetRoadmap == null) return;
-
-        var confirmDialog = new ContentDialog
+        try
         {
-            Title = Loc.GetString("Roadmap_DeleteConfirmTitle"),
-            Content = Loc.GetString("Roadmap_DeleteConfirmMessage"),
-            PrimaryButtonText = Loc.GetString("Roadmap_DeleteRoadmap"),
-            CloseButtonText = Loc.GetString("Action_Cancel"),
-            DefaultButton = ContentDialogButton.Close,
-            CornerRadius = new CornerRadius(14),
-            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
-        };
+            var targetRoadmap = (sender as FrameworkElement)?.Tag as StudyRoadmapDto ?? ViewModel.ActiveRoadmap;
+            if (targetRoadmap == null) return;
 
-        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
-        if (result == ContentDialogResult.Primary)
+            var confirmDialog = new ContentDialog
+            {
+                Title = Loc.GetString("Roadmap_DeleteConfirmTitle"),
+                Content = Loc.GetString("Roadmap_DeleteConfirmMessage"),
+                PrimaryButtonText = Loc.GetString("Roadmap_DeleteRoadmap"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close,
+                CornerRadius = new CornerRadius(14),
+                XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
+            };
+
+            var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+            if (result == ContentDialogResult.Primary)
+            {
+                await Task.Yield();
+                await ViewModel.DeleteRoadmapCommand.ExecuteAsync(targetRoadmap.Id);
+                UpdateTabButtonsState();
+                Bindings.Update();
+                RenderMilestoneTrack();
+                RenderTimelineView();
+            }
+        }
+        catch (Exception ex)
         {
-            await Task.Yield();
-            await ViewModel.DeleteRoadmapCommand.ExecuteAsync(targetRoadmap.Id);
-            UpdateTabButtonsState();
-            Bindings.Update();
-            RenderMilestoneTrack();
-            RenderTimelineView();
+            ViewModel.StatusMessage = ex.Message;
         }
     }
 
     private async void ResetActiveRoadmapProgress_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.ActiveRoadmap == null) return;
-
-        var confirmDialog = new ContentDialog
+        try
         {
-            Title = Loc.GetString("Roadmap_ResetConfirmTitle"),
-            Content = Loc.GetString("Roadmap_ResetConfirmMessage"),
-            PrimaryButtonText = Loc.GetString("Roadmap_ResetProgress"),
-            CloseButtonText = Loc.GetString("Action_Cancel"),
-            DefaultButton = ContentDialogButton.Close,
-            CornerRadius = new CornerRadius(14),
-            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
-        };
+            if (ViewModel.ActiveRoadmap == null) return;
 
-        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
-        if (result == ContentDialogResult.Primary)
+            var confirmDialog = new ContentDialog
+            {
+                Title = Loc.GetString("Roadmap_ResetConfirmTitle"),
+                Content = Loc.GetString("Roadmap_ResetConfirmMessage"),
+                PrimaryButtonText = Loc.GetString("Roadmap_ResetProgress"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close,
+                CornerRadius = new CornerRadius(14),
+                XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
+            };
+
+            var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+            if (result == ContentDialogResult.Primary)
+            {
+                await Task.Yield();
+                await ViewModel.ResetRoadmapProgressCommand.ExecuteAsync(ViewModel.ActiveRoadmap.Id);
+                Bindings.Update();
+                RenderMilestoneTrack();
+                RenderTimelineView();
+            }
+        }
+        catch (Exception ex)
         {
-            await Task.Yield();
-            await ViewModel.ResetRoadmapProgressCommand.ExecuteAsync(ViewModel.ActiveRoadmap.Id);
-            Bindings.Update();
-            RenderMilestoneTrack();
-            RenderTimelineView();
+            ViewModel.StatusMessage = ex.Message;
         }
     }
 
     private async void ResetRoadmapItem_Click(object sender, RoutedEventArgs e)
     {
-        var targetRoadmap = (sender as FrameworkElement)?.Tag as StudyRoadmapDto ?? ViewModel.ActiveRoadmap;
-        if (targetRoadmap == null) return;
-
-        var confirmDialog = new ContentDialog
+        try
         {
-            Title = Loc.GetString("Roadmap_ResetConfirmTitle"),
-            Content = Loc.GetString("Roadmap_ResetConfirmMessage"),
-            PrimaryButtonText = Loc.GetString("Roadmap_ResetProgress"),
-            CloseButtonText = Loc.GetString("Action_Cancel"),
-            DefaultButton = ContentDialogButton.Close,
-            CornerRadius = new CornerRadius(14),
-            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
-        };
+            var targetRoadmap = (sender as FrameworkElement)?.Tag as StudyRoadmapDto ?? ViewModel.ActiveRoadmap;
+            if (targetRoadmap == null) return;
 
-        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
-        if (result == ContentDialogResult.Primary)
+            var confirmDialog = new ContentDialog
+            {
+                Title = Loc.GetString("Roadmap_ResetConfirmTitle"),
+                Content = Loc.GetString("Roadmap_ResetConfirmMessage"),
+                PrimaryButtonText = Loc.GetString("Roadmap_ResetProgress"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close,
+                CornerRadius = new CornerRadius(14),
+                XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
+            };
+
+            var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+            if (result == ContentDialogResult.Primary)
+            {
+                await Task.Yield();
+                await ViewModel.ResetRoadmapProgressCommand.ExecuteAsync(targetRoadmap.Id);
+                Bindings.Update();
+                RenderMilestoneTrack();
+                RenderTimelineView();
+            }
+        }
+        catch (Exception ex)
         {
-            await Task.Yield();
-            await ViewModel.ResetRoadmapProgressCommand.ExecuteAsync(targetRoadmap.Id);
-            Bindings.Update();
-            RenderMilestoneTrack();
-            RenderTimelineView();
+            ViewModel.StatusMessage = ex.Message;
         }
     }
 
     private async void ClearInactiveRoadmaps_Click(object sender, RoutedEventArgs e)
     {
-        var inactivesCount = ViewModel.AllRoadmaps.Count(r => !r.IsActive);
-        if (inactivesCount == 0) return;
-
-        var confirmDialog = new ContentDialog
+        try
         {
-            Title = Loc.GetString("Roadmap_ClearInactiveConfirmTitle"),
-            Content = Loc.GetString("Roadmap_ClearInactiveConfirmMessage"),
-            PrimaryButtonText = Loc.GetString("Roadmap_ClearInactive"),
-            CloseButtonText = Loc.GetString("Action_Cancel"),
-            DefaultButton = ContentDialogButton.Close,
-            CornerRadius = new CornerRadius(14),
-            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
-        };
+            var inactivesCount = ViewModel.AllRoadmaps.Count(r => !r.IsActive);
+            if (inactivesCount == 0) return;
 
-        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
-        if (result == ContentDialogResult.Primary)
+            var confirmDialog = new ContentDialog
+            {
+                Title = Loc.GetString("Roadmap_ClearInactiveConfirmTitle"),
+                Content = Loc.GetString("Roadmap_ClearInactiveConfirmMessage"),
+                PrimaryButtonText = Loc.GetString("Roadmap_ClearInactive"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close,
+                CornerRadius = new CornerRadius(14),
+                XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
+            };
+
+            var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+            if (result == ContentDialogResult.Primary)
+            {
+                await Task.Yield();
+                await ViewModel.ClearInactiveRoadmapsCommand.ExecuteAsync(null);
+                Bindings.Update();
+            }
+        }
+        catch (Exception ex)
         {
-            await Task.Yield();
-            await ViewModel.ClearInactiveRoadmapsCommand.ExecuteAsync(null);
-            Bindings.Update();
+            ViewModel.StatusMessage = ex.Message;
         }
     }
 
     private async void ClearAllRoadmaps_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.AllRoadmaps.Count == 0) return;
-
-        var confirmDialog = new ContentDialog
+        try
         {
-            Title = Loc.GetString("Roadmap_ClearAllConfirmTitle"),
-            Content = Loc.GetString("Roadmap_ClearAllConfirmMessage"),
-            PrimaryButtonText = Loc.GetString("Roadmap_ClearAll"),
-            CloseButtonText = Loc.GetString("Action_Cancel"),
-            DefaultButton = ContentDialogButton.Close,
-            CornerRadius = new CornerRadius(14),
-            XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
-        };
+            if (ViewModel.AllRoadmaps.Count == 0) return;
 
-        var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
-        if (result == ContentDialogResult.Primary)
+            var confirmDialog = new ContentDialog
+            {
+                Title = Loc.GetString("Roadmap_ClearAllConfirmTitle"),
+                Content = Loc.GetString("Roadmap_ClearAllConfirmMessage"),
+                PrimaryButtonText = Loc.GetString("Roadmap_ClearAll"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Close,
+                CornerRadius = new CornerRadius(14),
+                XamlRoot = this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot
+            };
+
+            var result = await confirmDialog.ShowAsyncSafe(this.XamlRoot ?? App.Current.MainWindow?.Content?.XamlRoot);
+            if (result == ContentDialogResult.Primary)
+            {
+                await Task.Yield();
+                await ViewModel.ClearAllRoadmapsCommand.ExecuteAsync(null);
+                Bindings.Update();
+                UpdateTabButtonsState();
+                RenderMilestoneTrack();
+                RenderTimelineView();
+            }
+        }
+        catch (Exception ex)
         {
-            await Task.Yield();
-            await ViewModel.ClearAllRoadmapsCommand.ExecuteAsync(null);
-            Bindings.Update();
-            UpdateTabButtonsState();
-            RenderMilestoneTrack();
-            RenderTimelineView();
+            ViewModel.StatusMessage = ex.Message;
         }
     }
 

@@ -296,7 +296,9 @@ public class TestService : ITestService
                 var userAnswer = ans.SelectedAnswer?.Trim() ?? string.Empty;
 
                 bool isCorrect = string.Equals(userAnswer, word.Term.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                                 string.Equals(userAnswer, word.PrimaryPartOfSpeech.ToString(), StringComparison.OrdinalIgnoreCase) ||
                                  word.Meanings.Any(m => string.Equals(userAnswer, m.DefinitionVi.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                                                        string.Equals(userAnswer, m.PartOfSpeech.ToString(), StringComparison.OrdinalIgnoreCase) ||
                                                         (!string.IsNullOrWhiteSpace(m.DefinitionEn) && string.Equals(userAnswer, m.DefinitionEn.Trim(), StringComparison.OrdinalIgnoreCase)));
 
                 if (isCorrect)
@@ -419,12 +421,19 @@ public class TestService : ITestService
     public async Task<IReadOnlyList<WordDto>> GetWeakWordsAsync(int limit = 20, CancellationToken cancellationToken = default)
     {
         var difficultCards = await _reviewRepo.GetDifficultCardsAsync(limit, cancellationToken);
-        var list = new List<WordDto>();
+        if (difficultCards.Count == 0)
+        {
+            return Array.Empty<WordDto>();
+        }
 
+        var wordIds = difficultCards.Select(c => c.WordId).Distinct().ToList();
+        var words = await _vocabRepo.GetByIdsWithDetailsAsync(wordIds, cancellationToken);
+        var wordMap = words.ToDictionary(w => w.Id);
+
+        var list = new List<WordDto>(difficultCards.Count);
         foreach (var card in difficultCards)
         {
-            var word = await _vocabRepo.GetWithDetailsAsync(card.WordId, cancellationToken);
-            if (word != null)
+            if (wordMap.TryGetValue(card.WordId, out var word))
             {
                 list.Add(MapToDto(word));
             }

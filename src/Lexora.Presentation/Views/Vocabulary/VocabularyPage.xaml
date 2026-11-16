@@ -223,6 +223,12 @@
         <!-- ========================================================= -->
         <StackPanel Grid.Row="1" Spacing="8"
                     Visibility="{x:Bind ViewModel.IsUnitViewMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+            <InfoBar x:Name="StatusInfoBar"
+                     IsOpen="False"
+                     IsClosable="True"
+                     Severity="Informational"
+                     Closed="StatusInfoBar_Closed"
+                     Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
             <!-- Smart Typo Suggestion Banner -->
             <Border Visibility="{x:Bind ViewModel.HasTypoSuggestion, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

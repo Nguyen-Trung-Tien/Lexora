@@ -88,13 +88,31 @@ public class HomophoneRepository : Repository<HomophoneGroup>, IHomophoneReposit
 
     public async Task<IReadOnlyDictionary<string, HomophoneGroup>> GetGroupsByTitlesWithItemsAsync(IEnumerable<string> titles, CancellationToken cancellationToken = default)
     {
-        var titleSet = titles.Select(t => t.Trim().ToLowerInvariant()).ToHashSet();
-        var groups = await DbSet
-            .Include(g => g.Items)
-            .Where(g => titleSet.Contains(g.Title.ToLower()))
-            .ToListAsync(cancellationToken);
+        var titleList = titles
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Select(t => t.Trim().ToLowerInvariant())
+            .Distinct()
+            .ToList();
 
-        return groups.ToDictionary(g => g.Title.Trim().ToLowerInvariant(), StringComparer.OrdinalIgnoreCase);
+        if (titleList.Count == 0)
+        {
+            return new Dictionary<string, HomophoneGroup>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        var groups = new List<HomophoneGroup>();
+        foreach (var chunk in titleList.Chunk(500))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var batch = await DbSet
+                .Include(g => g.Items)
+                .Where(g => chunk.Contains(g.Title.ToLower()))
+                .ToListAsync(cancellationToken);
+            groups.AddRange(batch);
+        }
+
+        return groups
+            .GroupBy(g => g.Title.Trim().ToLowerInvariant(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
     }
 
     public void RemoveItems(IEnumerable<HomophoneItem> items)

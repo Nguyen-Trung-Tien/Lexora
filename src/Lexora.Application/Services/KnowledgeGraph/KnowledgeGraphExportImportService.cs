@@ -298,13 +298,28 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
+        var matchedWords = await _vocabRepo.GetWordsByTermsWithDetailsAsync(distinctTerms, cancellationToken);
         var existingWordsMap = new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
-        foreach (var term in distinctTerms)
+        if (matchedWords != null)
         {
-            var match = await _vocabRepo.GetByTermAsync(term, cancellationToken);
-            if (match != null)
+            foreach (var kvp in matchedWords)
             {
-                existingWordsMap[term] = match;
+                existingWordsMap[kvp.Value.Term] = kvp.Value;
+                if (!string.IsNullOrWhiteSpace(kvp.Value.NormalizedTerm))
+                {
+                    existingWordsMap.TryAdd(kvp.Value.NormalizedTerm, kvp.Value);
+                }
+            }
+        }
+        else
+        {
+            foreach (var term in distinctTerms)
+            {
+                var match = await _vocabRepo.GetByTermAsync(term, cancellationToken);
+                if (match != null)
+                {
+                    existingWordsMap[term] = match;
+                }
             }
         }
 
@@ -485,11 +500,27 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
+            var existingBatch = await _vocabRepo.GetWordsByTermsWithDetailsAsync(wordsToProcess, cancellationToken);
+            var existingByTerm = new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
+            if (existingBatch != null)
+            {
+                foreach (var kvp in existingBatch)
+                {
+                    existingByTerm[kvp.Value.Term] = kvp.Value;
+                    if (!string.IsNullOrWhiteSpace(kvp.Value.NormalizedTerm))
+                    {
+                        existingByTerm.TryAdd(kvp.Value.NormalizedTerm, kvp.Value);
+                    }
+                }
+            }
+
             var wordsMap = new Dictionary<string, Word>(StringComparer.OrdinalIgnoreCase);
             foreach (var term in wordsToProcess)
             {
                 var cleanTerm = term.Trim();
-                var w = await _vocabRepo.GetByTermAsync(cleanTerm, cancellationToken);
+                var w = existingBatch != null
+                    ? existingByTerm.GetValueOrDefault(cleanTerm)
+                    : await _vocabRepo.GetByTermAsync(cleanTerm, cancellationToken);
                 if (w != null)
                 {
                     wordsMap[cleanTerm] = w;
@@ -560,7 +591,7 @@ public class KnowledgeGraphExportImportService : IKnowledgeGraphExportImportServ
                     srcWord.Notes = tag;
                     modifiedWords.Add(srcWord);
                 }
-                else if (!srcWord.Notes.Contains(item.TargetTerm, StringComparison.OrdinalIgnoreCase))
+                else if (!srcWord.Notes.Contains(tag, StringComparison.OrdinalIgnoreCase))
                 {
                     srcWord.Notes += $" {tag}";
                     modifiedWords.Add(srcWord);
@@ -657,14 +688,7 @@ abandon,abandon hope,Collocation,0.88,B2,Cụm từ bỏ hy vọng";
     }
 
     private static string EscapeCsv(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return string.Empty;
-        if (text.Contains(',') || text.Contains('"') || text.Contains('\n'))
-        {
-            return $"\"{text.Replace("\"", "\"\"")}\"";
-        }
-        return text;
-    }
+        => Lexora.Application.Common.SafeCsvHelper.EscapeCsvField(text);
 
     private static List<string> ParseCsvLine(string line)
     {

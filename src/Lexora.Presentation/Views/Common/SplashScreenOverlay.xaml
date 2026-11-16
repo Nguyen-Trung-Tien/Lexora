@@ -321,6 +321,7 @@
 
         <!-- 3. Energy Ripple Shockwave Ring -->
         <Border x:Name="RippleRing" Width="180" Height="180" CornerRadius="90"
+                UseLayoutRounding="False"
                 BorderThickness="1" BorderBrush="{ThemeResource AccentTextFillColorPrimaryBrush}"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 Opacity="0" IsHitTestVisible="False">
@@ -467,7 +468,7 @@
                         <Ellipse Width="7" Height="7" Fill="{ThemeResource SystemFillColorSuccessBrush}" />
                         <TextBlock
                             x:Name="EditionBadgeTextBlock"
-                            Text="DESKTOP v1.0 • OFFLINE FIRST"
+                            Text="DESKTOP v1.6.2 • OFFLINE FIRST"
                             FontSize="10.5"
                             FontWeight="SemiBold"
                             CharacterSpacing="50"

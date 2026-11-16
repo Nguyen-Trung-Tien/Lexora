@@ -10,7 +10,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace Lexora.Presentation.Views.Homophones;
 
-public sealed partial class HomophonesPage : Page, ILocalizableView
+public sealed partial class HomophonesPage : Page, ILocalizableView, IThemeAwareView
 {
     public HomophonesViewModel ViewModel { get; }
     public ILocalizationService Loc { get; }
@@ -44,6 +44,7 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Tick -= SearchDebounceTimer_Tick;
         ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+        (ViewModel as IDisposable)?.Dispose();
     }
 
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -60,21 +61,28 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
 
     private async void SearchDebounceTimer_Tick(object? sender, object e)
     {
-        _searchDebounceTimer.Stop();
-        var query = SearchBox.Text;
-        ViewModel.SearchQuery = query;
-
-        if (!string.IsNullOrWhiteSpace(query))
+        try
         {
-            var suggestions = await ViewModel.GetSearchSuggestionsAsync(query);
-            if (string.Equals(SearchBox.Text, query, StringComparison.Ordinal))
+            _searchDebounceTimer.Stop();
+            var query = SearchBox.Text;
+            ViewModel.SearchQuery = query;
+
+            if (!string.IsNullOrWhiteSpace(query))
             {
-                SearchBox.ItemsSource = suggestions.Count > 0 ? suggestions : null;
+                var suggestions = await ViewModel.GetSearchSuggestionsAsync(query);
+                if (string.Equals(SearchBox.Text, query, StringComparison.Ordinal))
+                {
+                    SearchBox.ItemsSource = suggestions.Count > 0 ? suggestions : null;
+                }
+            }
+            else
+            {
+                SearchBox.ItemsSource = null;
             }
         }
-        else
+        catch (Exception ex)
         {
-            SearchBox.ItemsSource = null;
+            System.Diagnostics.Debug.WriteLine($"[HomophonesPage] SearchDebounceTimer_Tick error: {ex.Message}");
         }
     }
 
@@ -90,10 +98,29 @@ public sealed partial class HomophonesPage : Page, ILocalizableView
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
     {
-        Loaded -= OnPageLoaded;
-        ApplyLocalization();
-        await ViewModel.LoadGroupsAsync();
-        UpdateDetailView();
+        try
+        {
+            Loaded -= OnPageLoaded;
+            ApplyLocalization();
+            await ViewModel.LoadGroupsAsync();
+            UpdateDetailView();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[HomophonesPage] OnPageLoaded error: {ex.Message}");
+        }
+    }
+
+    public void OnThemeChanged()
+    {
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            UpdateDetailView();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(UpdateDetailView);
+        }
     }
 
     public void OnLanguageChanged()
