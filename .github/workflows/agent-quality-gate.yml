@@ -32,26 +32,24 @@ jobs:
       - name: 🔍 Architecture Boundary Check
         shell: pwsh
         run: |
-          Write-Host "Verifying Clean Architecture presentation boundary..."
-          $efMatches = Select-String -Path src/Lexora.Presentation/**/*.cs -Pattern "LexoraDbContext|Microsoft.EntityFrameworkCore" -SimpleMatch
-          if ($efMatches) {
-            Write-Error "Clean Architecture Violation: Presentation layer directly references EF Core!"
-            $efMatches | ForEach-Object { Write-Host "$($_.Path):$($_.LineNumber)" }
-            exit 1
-          }
-          Write-Host "✅ Clean Architecture boundary verified: Presentation layer is pure."
+          powershell -ExecutionPolicy Bypass -File .agents/skills/clean-architecture-lint/scripts/lint_architecture.ps1
+
+      - name: 🌐 Localization Parity Check (i18n)
+        shell: pwsh
+        run: |
+          powershell -ExecutionPolicy Bypass -File .agents/skills/i18n-localization-sync/scripts/sync_localization.ps1
 
       - name: 🔨 Solution Build (Zero Warnings / Errors Gate)
         shell: pwsh
         run: |
-          $buildOutput = dotnet build Lexora.slnx -c Release -v q /clp:ErrorsOnly
+          $buildOutput = dotnet build Lexora.slnx -c Release -v q /clp:ErrorsOnly -p:TreatWarningsAsErrors=true
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "Build failed with errors!"
+            Write-Error "Build failed with errors or warnings!"
             exit 1
           }
-          Write-Host "✅ Build completed with 0 errors."
+          Write-Host "✅ Build completed with 0 warnings and 0 errors."
 
-      - name: 🧪 Execute Automated Test Suite (343 Tests)
+      - name: 🧪 Execute Automated Test Suite
         shell: pwsh
         run: |
           dotnet test Lexora.slnx -c Release --no-build --logger "console;verbosity=minimal"
@@ -59,7 +57,7 @@ jobs:
             Write-Error "Test suite regressions detected!"
             exit 1
           }
-          Write-Host "✅ All 343 tests passed successfully."
+          Write-Host "✅ All tests passed successfully."
 
       - name: 🤖 Execute AI Skill Smoke Test
         shell: pwsh

@@ -99,7 +99,7 @@
                 
                 <!-- Search Box -->
                 <TextBox x:Name="SearchBox" Grid.Column="0"
-                         Width="250"
+                         MinWidth="180" MaxWidth="280" HorizontalAlignment="Stretch"
                          Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          PlaceholderText="{x:Bind Loc.GetString('MemoryTips_SearchPlaceholder')}" />
 

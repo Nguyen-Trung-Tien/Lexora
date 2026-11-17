@@ -292,13 +292,13 @@
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <Button x:Name="LangViButton" Click="LangViButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="16,8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="TextLangVi" Text="🇻🇳 Tiếng Việt" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="TextLangVi" Text="Tiếng Việt (VI)" VerticalAlignment="Center" />
                                     <FontIcon x:Name="CheckLangVi" Glyph="&#xE73E;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                 </StackPanel>
                             </Button>
                             <Button x:Name="LangEnButton" Click="LangEnButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="16,8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="TextLangEn" Text="🇬🇧 English" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="TextLangEn" Text="English (EN)" VerticalAlignment="Center" />
                                     <FontIcon x:Name="CheckLangEn" Glyph="&#xE73E;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                 </StackPanel>
                             </Button>
@@ -398,7 +398,7 @@
                                 <!-- UK Voice Info -->
                                 <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
                                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
-                                        <TextBlock Text="🇬🇧 British English (UK)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="British English (UK)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UkVoiceStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         <Button Grid.Row="2" Click="TestVoiceUk_Click" Style="{ThemeResource SubtleButtonStyle}" HorizontalAlignment="Left" Padding="10,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -412,7 +412,7 @@
                                 <!-- US Voice Info -->
                                 <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
                                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
-                                        <TextBlock Text="🇺🇸 American English (US)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                        <TextBlock Text="American English (US)" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UsVoiceStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         <Button Grid.Row="2" Click="TestVoiceUs_Click" Style="{ThemeResource SubtleButtonStyle}" HorizontalAlignment="Left" Padding="10,4" CornerRadius="{ThemeResource ControlCornerRadius}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">

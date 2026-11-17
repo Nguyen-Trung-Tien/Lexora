@@ -1,3 +1,6 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Lexora.Presentation.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -7,20 +10,67 @@ using Microsoft.UI.Xaml.Media;
 
 namespace Lexora.Presentation.Views.Common;
 
+public sealed class ToastCardItem : INotifyPropertyChanged
+{
+    private double _remainingPercent = 100.0;
+
+    public Guid Id { get; init; }
+    public string Title { get; init; } = string.Empty;
+    public string Message { get; init; } = string.Empty;
+    public string? ActionText { get; init; }
+    public Action? ActionCallback { get; init; }
+    public string CloseTooltip { get; init; } = string.Empty;
+    public string IconGlyph { get; init; } = "\uE946";
+    public Brush? AccentBrush { get; init; }
+    public Brush? BadgeBackground { get; init; }
+    public int TotalDurationMs { get; init; } = 4000;
+    public int RemainingMs { get; set; } = 4000;
+    public bool IsPaused { get; set; }
+
+    public Visibility TitleVisibility => string.IsNullOrWhiteSpace(Title) ? Visibility.Collapsed : Visibility.Visible;
+    public Visibility ActionVisibility => string.IsNullOrWhiteSpace(ActionText) ? Visibility.Collapsed : Visibility.Visible;
+
+    public double RemainingPercent
+    {
+        get => _remainingPercent;
+        set
+        {
+            if (Math.Abs(_remainingPercent - value) > 0.1)
+            {
+                _remainingPercent = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+}
+
 public sealed partial class ToastOverlayControl : UserControl
 {
+    private const int MaxVisibleToasts = 3;
+    private const int TickIntervalMs = 50;
+
     public ILocalizationService Loc { get; }
-    private int _totalDurationMs = 4000;
-    private bool _isPaused;
-    private bool _isDismissing;
-    private Action? _currentActionCallback;
+    private readonly ObservableCollection<ToastCardItem> _visibleToasts = new();
+    private readonly Queue<ToastNotification> _pendingQueue = new();
+    private readonly DispatcherTimer _tickTimer;
 
     public ToastOverlayControl()
     {
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
         InitializeComponent();
 
-        ProgressStoryboard.Completed += ProgressStoryboard_Completed;
+        ToastItemsControl.ItemsSource = _visibleToasts;
+
+        _tickTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(TickIntervalMs)
+        };
+        _tickTimer.Tick += TickTimer_Tick;
 
         Loaded += ToastOverlayControl_Loaded;
         Unloaded += ToastOverlayControl_Unloaded;
@@ -40,177 +90,192 @@ public sealed partial class ToastOverlayControl : UserControl
         {
             toastService.ToastRequested -= OnToastRequested;
         }
-        ProgressStoryboard.Stop();
+        _tickTimer.Stop();
     }
 
     private void OnToastRequested(ToastNotification notification)
     {
-        DispatcherQueue.TryEnqueue(() =>
-        {
-            Show(notification);
-        });
+        DispatcherQueue.TryEnqueue(() => Show(notification));
     }
 
     public void Show(ToastNotification notification)
     {
-        // Stop any running animations immediately to avoid conflicting storyboard completions
-        EntranceStoryboard.Stop();
-        UpdatePulseStoryboard.Stop();
-        ExitStoryboard.Stop();
-        ProgressStoryboard.Stop();
-
-        _isDismissing = false;
-        _isPaused = false;
-
-        _totalDurationMs = Math.Max(1500, notification.DurationMs);
-        ProgressBarScale.ScaleX = 1.0;
-        ProgressAnimation.Duration = new Duration(TimeSpan.FromMilliseconds(_totalDurationMs));
-
-        TitleTextBlock.Text = notification.Title;
-        TitleTextBlock.Visibility = string.IsNullOrWhiteSpace(notification.Title) ? Visibility.Collapsed : Visibility.Visible;
-
-        MessageTextBlock.Text = notification.Message;
-        ToolTipService.SetToolTip(MessageTextBlock, notification.Message);
-
-        if (!string.IsNullOrWhiteSpace(notification.ActionText))
+        if (_visibleToasts.Count >= MaxVisibleToasts)
         {
-            ActionButton.Content = notification.ActionText;
-            ActionButton.Visibility = Visibility.Visible;
-            _currentActionCallback = notification.ActionCallback;
-        }
-        else
-        {
-            ActionButton.Visibility = Visibility.Collapsed;
-            _currentActionCallback = null;
+            _pendingQueue.Enqueue(notification);
+            return;
         }
 
-        ApplyToastTheme(notification.Type);
-
-        IsHitTestVisible = true;
-        bool wasVisible = ToastRoot.Visibility == Visibility.Visible;
-        ToastRoot.Visibility = Visibility.Visible;
-        ToastRoot.Opacity = 1.0;
-        ToastTranslate.Y = 0;
-        ToastScale.ScaleX = 1.0;
-        ToastScale.ScaleY = 1.0;
-
-        if (wasVisible)
-        {
-            UpdatePulseStoryboard.Begin();
-        }
-        else
-        {
-            EntranceStoryboard.Begin();
-        }
-
-        ProgressStoryboard.Begin();
-    }
-
-    private void ApplyToastTheme(ToastType type)
-    {
-        Brush? themeBrush = null;
-        Brush? badgeBgBrush = null;
-        string glyph = "\uE946";
-
-        switch (type)
-        {
-            case ToastType.Success:
-                glyph = "\uE73E"; // Checkmark
-                themeBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
-                badgeBgBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBackgroundBrush");
-                break;
-
-            case ToastType.Error:
-                glyph = "\uE783"; // Critical error
-                themeBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
-                badgeBgBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBackgroundBrush");
-                break;
-
-            case ToastType.Warning:
-                glyph = "\uE7BA"; // Warning
-                themeBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush");
-                badgeBgBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBackgroundBrush");
-                break;
-
-            case ToastType.Information:
-            default:
-                glyph = "\uE946"; // Info
-                themeBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush");
-                badgeBgBrush = Services.ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush");
-                break;
-        }
-
-        themeBrush ??= Services.ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush");
-        badgeBgBrush ??= Services.ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush");
-
-        TypeIcon.Glyph = glyph;
-        if (themeBrush != null)
-        {
-            TypeIcon.Foreground = themeBrush;
-            TimeProgressBar.Background = themeBrush;
-        }
-        if (badgeBgBrush != null)
-        {
-            IconBadgeBorder.Background = badgeBgBrush;
-        }
-    }
-
-    private void ProgressStoryboard_Completed(object? sender, object e)
-    {
-        if (!_isDismissing && !_isPaused)
-        {
-            Dismiss();
-        }
+        AddToastCard(notification);
     }
 
     public void Dismiss()
     {
-        if (_isDismissing) return;
-        _isDismissing = true;
-        ProgressStoryboard.Stop();
-
-        ExitStoryboard.Stop();
-        ExitStoryboard.Completed -= ExitStoryboard_Completed;
-        ExitStoryboard.Completed += ExitStoryboard_Completed;
-        ExitStoryboard.Begin();
+        _pendingQueue.Clear();
+        _visibleToasts.Clear();
+        UpdateTimerAndHitTest();
     }
 
-    private void ExitStoryboard_Completed(object? sender, object e)
+    private void AddToastCard(ToastNotification notification)
     {
-        ExitStoryboard.Completed -= ExitStoryboard_Completed;
-        if (_isDismissing)
+        var durationMs = Math.Max(1500, notification.DurationMs);
+        var (glyph, accentBrush, badgeBgBrush) = ResolveTheme(notification.Type);
+
+        var card = new ToastCardItem
         {
-            ToastRoot.Visibility = Visibility.Collapsed;
-            IsHitTestVisible = false;
-            _isDismissing = false;
+            Id = notification.Id,
+            Title = notification.Title,
+            Message = notification.Message,
+            ActionText = notification.ActionText,
+            ActionCallback = notification.ActionCallback,
+            CloseTooltip = Loc.GetString("Toast_Close"),
+            IconGlyph = glyph,
+            AccentBrush = accentBrush,
+            BadgeBackground = badgeBgBrush,
+            TotalDurationMs = durationMs,
+            RemainingMs = durationMs,
+            RemainingPercent = 100.0
+        };
+
+        _visibleToasts.Insert(0, card);
+        UpdateTimerAndHitTest();
+    }
+
+    private void RemoveToastById(Guid id)
+    {
+        for (int i = _visibleToasts.Count - 1; i >= 0; i--)
+        {
+            if (_visibleToasts[i].Id == id)
+            {
+                _visibleToasts.RemoveAt(i);
+                break;
+            }
         }
+
+        while (_visibleToasts.Count < MaxVisibleToasts && _pendingQueue.Count > 0)
+        {
+            AddToastCard(_pendingQueue.Dequeue());
+        }
+
+        UpdateTimerAndHitTest();
+    }
+
+    private void UpdateTimerAndHitTest()
+    {
+        bool hasToasts = _visibleToasts.Count > 0;
+        IsHitTestVisible = hasToasts;
+
+        if (hasToasts && !_tickTimer.IsEnabled)
+        {
+            _tickTimer.Start();
+        }
+        else if (!hasToasts && _tickTimer.IsEnabled)
+        {
+            _tickTimer.Stop();
+        }
+    }
+
+    private void TickTimer_Tick(object? sender, object e)
+    {
+        List<Guid>? expiredIds = null;
+
+        foreach (var item in _visibleToasts)
+        {
+            if (item.IsPaused) continue;
+
+            item.RemainingMs -= TickIntervalMs;
+            if (item.RemainingMs <= 0)
+            {
+                item.RemainingPercent = 0;
+                expiredIds ??= new List<Guid>();
+                expiredIds.Add(item.Id);
+            }
+            else
+            {
+                item.RemainingPercent = (double)item.RemainingMs / item.TotalDurationMs * 100.0;
+            }
+        }
+
+        if (expiredIds != null)
+        {
+            foreach (var id in expiredIds)
+            {
+                RemoveToastById(id);
+            }
+        }
+    }
+
+    private (string Glyph, Brush? AccentBrush, Brush? BadgeBgBrush) ResolveTheme(ToastType type)
+    {
+        Brush? accentBrush;
+        Brush? badgeBgBrush;
+        string glyph;
+
+        switch (type)
+        {
+            case ToastType.Success:
+                glyph = "\uE73E";
+                accentBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBrush");
+                badgeBgBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorSuccessBackgroundBrush");
+                break;
+
+            case ToastType.Error:
+                glyph = "\uE783";
+                accentBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBrush");
+                badgeBgBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCriticalBackgroundBrush");
+                break;
+
+            case ToastType.Warning:
+                glyph = "\uE7BA";
+                accentBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBrush");
+                badgeBgBrush = ThemeResourceHelper.GetThemeBrush(this, "SystemFillColorCautionBackgroundBrush");
+                break;
+
+            case ToastType.Information:
+            default:
+                glyph = "\uE946";
+                accentBrush = ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush");
+                badgeBgBrush = ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush");
+                break;
+        }
+
+        accentBrush ??= ThemeResourceHelper.GetThemeBrush(this, "AccentFillColorDefaultBrush");
+        badgeBgBrush ??= ThemeResourceHelper.GetThemeBrush(this, "SubtleFillColorSecondaryBrush");
+        return (glyph, accentBrush, badgeBgBrush);
     }
 
     private void ActionButton_Click(object sender, RoutedEventArgs e)
     {
-        var callback = _currentActionCallback;
-        _currentActionCallback = null;
-        Dismiss();
-        callback?.Invoke();
+        if (sender is FrameworkElement { Tag: Guid id })
+        {
+            var item = _visibleToasts.FirstOrDefault(t => t.Id == id);
+            var callback = item?.ActionCallback;
+            RemoveToastById(id);
+            callback?.Invoke();
+        }
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        _currentActionCallback = null;
-        Dismiss();
+        if (sender is FrameworkElement { Tag: Guid id })
+        {
+            RemoveToastById(id);
+        }
     }
 
-    private void ToastRoot_PointerEntered(object sender, PointerRoutedEventArgs e)
+    private void ToastCard_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
-        if (_isDismissing) return;
-        _isPaused = true;
-        ProgressStoryboard.Pause();
+        if (sender is FrameworkElement { DataContext: ToastCardItem item })
+        {
+            item.IsPaused = true;
+        }
     }
 
-    private void ToastRoot_PointerExited(object sender, PointerRoutedEventArgs e)
+    private void ToastCard_PointerExited(object sender, PointerRoutedEventArgs e)
     {
-        if (_isDismissing || !_isPaused) return;
-        _isPaused = false;
-        ProgressStoryboard.Resume();
+        if (sender is FrameworkElement { DataContext: ToastCardItem item })
+        {
+            item.IsPaused = false;
+        }
     }
 }

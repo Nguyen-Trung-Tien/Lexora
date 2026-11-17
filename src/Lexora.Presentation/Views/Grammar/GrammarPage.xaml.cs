@@ -32,8 +32,6 @@ public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareVie
             _toastService?.ShowWarning(Loc.GetString("Grammar_Practice_NoQuestions"));
         };
 
-        RegisterShortcuts();
-
         Unloaded += (s, e) =>
         {
             _searchDebounceTimer?.Stop();
@@ -55,7 +53,11 @@ public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareVie
             }
         };
 
-        Loaded += (s, e) => UpdateResponsiveLayout(ActualWidth);
+        Loaded += (s, e) =>
+        {
+            RegisterShortcuts();
+            UpdateResponsiveLayout(ActualWidth);
+        };
         SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
         ActualThemeChanged += (s, e) => OnThemeChanged();
     }

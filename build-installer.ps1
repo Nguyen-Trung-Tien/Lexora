@@ -220,7 +220,7 @@ if (-not $SkipPublish) {
         -r $Runtime `
         --self-contained true `
         -p:WindowsAppSDKSelfContained=true `
-        -p:PublishReadyToRun=false `
+        -p:PublishReadyToRun=true `
         -o "$publishDir"
 
     if ($LASTEXITCODE -ne 0) {

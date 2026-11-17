@@ -36,8 +36,8 @@ public partial class LocalizationService
         vi["Settings_AutoPlayAudio_Off"] = "Tắt";
         vi["Settings_PronunciationPreference"] = "Giọng phát âm mặc định";
         vi["Settings_PronunciationSubtitle"] = "Chọn giọng đọc UK (Anh - Anh) hoặc US (Anh - Mỹ) ưu tiên khi học, ôn tập và làm bài kiểm tra.";
-        vi["Settings_Accent_UK"] = "🇬🇧 Tiếng Anh - Anh (UK)";
-        vi["Settings_Accent_US"] = "🇺🇸 Tiếng Anh - Mỹ (US)";
+        vi["Settings_Accent_UK"] = "Tiếng Anh - Anh (UK)";
+        vi["Settings_Accent_US"] = "Tiếng Anh - Mỹ (US)";
         vi["Settings_VoiceDiagnostic_Title"] = "Trạng thái Giọng đọc TTS hệ thống";
         vi["Settings_Voice_Installed"] = "Đã nhận diện: {0}";
         vi["Settings_Voice_FallbackWarning"] = "Chưa có giọng native UK trên Windows. Đang tạm dùng: {0}";
@@ -73,8 +73,8 @@ public partial class LocalizationService
         vi["Settings_TtsTitle"] = "Thử nghiệm Giọng đọc & Phát âm (TTS)";
         vi["Settings_TtsSubtitle"] = "Kiểm tra giọng đọc tiếng Anh Text-to-Speech. Lexora ưu tiên phát âm thanh người thật bản xứ và tự động chuyển sang Windows TTS khi cần.";
         vi["Settings_TtsPlaceholder"] = "Nhập từ hoặc câu mẫu để nghe thử...";
-        vi["Settings_TestUkVoice"] = "🔊 Nghe giọng UK (Anh)";
-        vi["Settings_TestUsVoice"] = "🔊 Nghe giọng US (Mỹ)";
+        vi["Settings_TestUkVoice"] = "Nghe giọng UK (Anh)";
+        vi["Settings_TestUsVoice"] = "Nghe giọng US (Mỹ)";
         // Settings - Keyboard Shortcuts
         vi["Settings_ShortcutsTitle"] = "Bảng Tra cứu Phím tắt Nhanh";
         vi["Settings_ShortcutsSubtitle"] = "Thao tác nhanh và học tập hiệu quả mà không cần chạm chuột.";
@@ -209,8 +209,8 @@ public partial class LocalizationService
         en["Settings_AutoPlayAudio_Off"] = "Disabled";
         en["Settings_PronunciationPreference"] = "Default Pronunciation Accent";
         en["Settings_PronunciationSubtitle"] = "Choose British English (UK) or American English (US) as your preferred accent across study and test sessions.";
-        en["Settings_Accent_UK"] = "🇬🇧 British English (UK)";
-        en["Settings_Accent_US"] = "🇺🇸 American English (US)";
+        en["Settings_Accent_UK"] = "British English (UK)";
+        en["Settings_Accent_US"] = "American English (US)";
         en["Settings_VoiceDiagnostic_Title"] = "System TTS Voice Status";
         en["Settings_Voice_Installed"] = "Detected: {0}";
         en["Settings_Voice_FallbackWarning"] = "No native UK voice found on Windows. Falling back to: {0}";
@@ -246,8 +246,8 @@ public partial class LocalizationService
         en["Settings_TtsTitle"] = "Voice & Pronunciation (TTS)";
         en["Settings_TtsSubtitle"] = "Test English Text-to-Speech audio output. Lexora caches native human pronunciations and falls back to Windows Speech Synthesis.";
         en["Settings_TtsPlaceholder"] = "Enter sample word or phrase...";
-        en["Settings_TestUkVoice"] = "🔊 Test UK Voice";
-        en["Settings_TestUsVoice"] = "🔊 Test US Voice";
+        en["Settings_TestUkVoice"] = "Test UK Voice";
+        en["Settings_TestUsVoice"] = "Test US Voice";
         // Settings - Keyboard Shortcuts
         en["Settings_ShortcutsTitle"] = "Keyboard Shortcuts Reference Guide";
         en["Settings_ShortcutsSubtitle"] = "Navigate and study rapidly without reaching for the mouse.";

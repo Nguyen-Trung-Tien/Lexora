@@ -236,8 +236,46 @@
         <!-- ========================================== -->
         <!-- 1. MASTER-DETAIL VIEW (Main Mode)          -->
         <!-- ========================================== -->
-        <Grid x:Name="GrammarMasterDetailGrid" Grid.Row="1" ColumnDefinitions="360,*" ColumnSpacing="16"
+        <Grid x:Name="GrammarMasterDetailGrid" Grid.Row="1" ColumnSpacing="16" RowSpacing="12"
               Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                    <VisualState x:Name="GrammarWideLayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="1040" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="GrammarMasterColumn.Width" Value="360" />
+                            <Setter Target="GrammarDetailColumn.Width" Value="*" />
+                            <Setter Target="GrammarMasterRow.Height" Value="*" />
+                            <Setter Target="GrammarDetailRow.Height" Value="0" />
+                            <Setter Target="GrammarDetailPaneBorder.(Grid.Column)" Value="1" />
+                            <Setter Target="GrammarDetailPaneBorder.(Grid.Row)" Value="0" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="GrammarCompactLayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="0" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="GrammarMasterColumn.Width" Value="*" />
+                            <Setter Target="GrammarDetailColumn.Width" Value="0" />
+                            <Setter Target="GrammarMasterRow.Height" Value="280" />
+                            <Setter Target="GrammarDetailRow.Height" Value="*" />
+                            <Setter Target="GrammarDetailPaneBorder.(Grid.Column)" Value="0" />
+                            <Setter Target="GrammarDetailPaneBorder.(Grid.Row)" Value="1" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="GrammarMasterColumn" Width="360" />
+                <ColumnDefinition x:Name="GrammarDetailColumn" Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="GrammarMasterRow" Height="*" />
+                <RowDefinition x:Name="GrammarDetailRow" Height="0" />
+            </Grid.RowDefinitions>
             
             <!-- Left: Rules List -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -416,7 +454,7 @@
             </Border>
 
             <!-- Right: Rule Detail (Modern, Non-Overlapping Layout) -->
-            <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            <Border x:Name="GrammarDetailPaneBorder" Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

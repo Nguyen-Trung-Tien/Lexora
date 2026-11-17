@@ -118,6 +118,17 @@ public partial class LocalizationService
         vi["GrammarEditor_PlaceholderNote"] = "Lưu ý về thì, trạng từ, đảo ngữ...";
         vi["GrammarEditor_TooltipRemoveExample"] = "Xóa câu ví dụ này";
 
+        // Exception & Error Dialog
+        vi["ExceptionDialog_Title"] = "Đã xảy ra sự cố không mong muốn";
+        vi["ExceptionDialog_Subtitle"] = "Ứng dụng gặp lỗi trong quá trình xử lý. Dữ liệu của bạn vẫn an toàn; bạn có thể sao chép chi tiết lỗi hoặc tiếp tục sử dụng.";
+        vi["ExceptionDialog_DetailsHeader"] = "Chi tiết kỹ thuật (Stack Trace)";
+        vi["ExceptionDialog_CopyDetails"] = "Sao chép lỗi";
+        vi["ExceptionDialog_Copied"] = "Đã sao chép!";
+        vi["ExceptionDialog_OpenLogs"] = "Mở thư mục Log";
+        vi["ExceptionDialog_Close"] = "Đóng";
+        vi["Toast_CopyError"] = "Sao chép";
+        vi["Toast_ViewDetails"] = "Chi tiết";
+
         // ==========================================
         // Dialogs — en-US (English)
         // ==========================================
@@ -231,5 +242,16 @@ public partial class LocalizationService
         en["GrammarEditor_HeaderNote"] = "Grammar Note";
         en["GrammarEditor_PlaceholderNote"] = "Notes on tenses, adverbs, inversions...";
         en["GrammarEditor_TooltipRemoveExample"] = "Remove this example";
+
+        // Exception & Error Dialog
+        en["ExceptionDialog_Title"] = "Something went wrong";
+        en["ExceptionDialog_Subtitle"] = "The application encountered an unexpected error. Your data remains safe; you can copy the diagnostic details or continue working.";
+        en["ExceptionDialog_DetailsHeader"] = "Technical Details (Stack Trace)";
+        en["ExceptionDialog_CopyDetails"] = "Copy Details";
+        en["ExceptionDialog_Copied"] = "Copied!";
+        en["ExceptionDialog_OpenLogs"] = "Open Log Folder";
+        en["ExceptionDialog_Close"] = "Close";
+        en["Toast_CopyError"] = "Copy";
+        en["Toast_ViewDetails"] = "Details";
     }
 }

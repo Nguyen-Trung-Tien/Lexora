@@ -11,6 +11,7 @@ public class NavigationService : INavigationService
     private Type? _currentTargetPageType;
     private bool _isNavigating;
     private NavigationRequest? _pendingRequest;
+    private WeakReference<Page>? _outgoingPageRef;
 
     public event EventHandler<Type>? Navigated;
 
@@ -18,12 +19,21 @@ public class NavigationService : INavigationService
     public bool HasPendingNavigation => _pendingRequest != null;
     public bool IsNavigating => _isNavigating;
 
+    private readonly Microsoft.UI.Xaml.Navigation.NavigatingCancelEventHandler _navigatingHandler;
     private readonly Microsoft.UI.Xaml.Navigation.NavigatedEventHandler _navigatedHandler;
     private readonly Microsoft.UI.Xaml.Navigation.NavigationFailedEventHandler _navigationFailedHandler;
     private readonly Microsoft.UI.Xaml.Navigation.NavigationStoppedEventHandler _navigationStoppedHandler;
 
     public NavigationService()
     {
+        _navigatingHandler = (s, e) =>
+        {
+            if (_frame?.Content is Page outgoingPage)
+            {
+                _outgoingPageRef = new WeakReference<Page>(outgoingPage);
+            }
+        };
+
         _navigatedHandler = (s, e) =>
         {
             _isNavigating = false;
@@ -32,6 +42,20 @@ public class NavigationService : INavigationService
                 _currentTargetPageType = e.SourcePageType;
                 Navigated?.Invoke(this, e.SourcePageType);
             }
+
+            if (_outgoingPageRef != null &&
+                _outgoingPageRef.TryGetTarget(out var outgoingPage) &&
+                !ReferenceEquals(outgoingPage, e.Content) &&
+                outgoingPage.NavigationCacheMode == Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled)
+            {
+                _outgoingPageRef = null;
+                App.ReleaseScopeForPage(outgoingPage);
+            }
+            else
+            {
+                _outgoingPageRef = null;
+            }
+
             ProcessPendingNavigation();
         };
 
@@ -56,12 +80,14 @@ public class NavigationService : INavigationService
     {
         if (_frame != null)
         {
+            _frame.Navigating -= _navigatingHandler;
             _frame.Navigated -= _navigatedHandler;
             _frame.NavigationFailed -= _navigationFailedHandler;
             _frame.NavigationStopped -= _navigationStoppedHandler;
         }
 
         _frame = frame;
+        _frame.Navigating += _navigatingHandler;
         _frame.Navigated += _navigatedHandler;
         _frame.NavigationFailed += _navigationFailedHandler;
         _frame.NavigationStopped += _navigationStoppedHandler;
@@ -103,7 +129,7 @@ public class NavigationService : INavigationService
         {
             _isNavigating = true;
             _currentTargetPageType = pageType;
-            transitionInfo ??= new SlideNavigationTransitionInfo { Effect = SlideNavigationTransitionEffect.FromRight };
+            transitionInfo ??= new EntranceNavigationTransitionInfo();
             bool result = _frame.Navigate(pageType, parameter, transitionInfo);
             if (!result)
             {

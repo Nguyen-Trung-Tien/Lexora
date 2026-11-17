@@ -778,13 +778,44 @@
                     x:Name="RoadmapWorkspaceGrid"
                     HorizontalAlignment="Stretch"
                     Visibility="{x:Bind ViewModel.IsTrackView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup>
+                            <VisualState x:Name="RoadmapWideLayout">
+                                <VisualState.StateTriggers>
+                                    <AdaptiveTrigger MinWindowWidth="1120" />
+                                </VisualState.StateTriggers>
+                                <VisualState.Setters>
+                                    <Setter Target="RoadmapCanvasColumn.Width" Value="*" />
+                                    <Setter Target="RoadmapInspectorColumn.Width" Value="380" />
+                                    <Setter Target="RoadmapCanvasRow.Height" Value="Auto" />
+                                    <Setter Target="RoadmapInspectorRow.Height" Value="0" />
+                                    <Setter Target="InspectorHostBorder.(Grid.Column)" Value="1" />
+                                    <Setter Target="InspectorHostBorder.(Grid.Row)" Value="0" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="RoadmapCompactLayout">
+                                <VisualState.StateTriggers>
+                                    <AdaptiveTrigger MinWindowWidth="0" />
+                                </VisualState.StateTriggers>
+                                <VisualState.Setters>
+                                    <Setter Target="RoadmapCanvasColumn.Width" Value="*" />
+                                    <Setter Target="RoadmapInspectorColumn.Width" Value="0" />
+                                    <Setter Target="RoadmapCanvasRow.Height" Value="Auto" />
+                                    <Setter Target="RoadmapInspectorRow.Height" Value="Auto" />
+                                    <Setter Target="InspectorHostBorder.(Grid.Column)" Value="0" />
+                                    <Setter Target="InspectorHostBorder.(Grid.Row)" Value="1" />
+                                    <Setter Target="InspectorHostBorder.Margin" Value="0,16,0,0" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="380" />
+                        <ColumnDefinition x:Name="RoadmapCanvasColumn" Width="*" />
+                        <ColumnDefinition x:Name="RoadmapInspectorColumn" Width="380" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition x:Name="RoadmapCanvasRow" Height="Auto" />
+                        <RowDefinition x:Name="RoadmapInspectorRow" Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <!-- Left: Interactive S-Curve Bézier Pathway Canvas + Milestones & Lessons List -->

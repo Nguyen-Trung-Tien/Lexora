@@ -29,7 +29,6 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         InitializeComponent();
 
         _themeChangedHandler = (s, e) => OnThemeChanged();
-        ActualThemeChanged += _themeChangedHandler;
 
         _propChangedHandler = (s, e) =>
         {
@@ -38,7 +37,14 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
                 DispatcherQueue.TryEnqueue(UpdateFilterPillsState);
             }
         };
-        ViewModel.PropertyChanged += _propChangedHandler;
+
+        Loaded += (s, e) =>
+        {
+            ActualThemeChanged -= _themeChangedHandler;
+            ActualThemeChanged += _themeChangedHandler;
+            ViewModel.PropertyChanged -= _propChangedHandler;
+            ViewModel.PropertyChanged += _propChangedHandler;
+        };
 
         Unloaded += (s, e) =>
         {

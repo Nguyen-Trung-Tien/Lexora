@@ -28,7 +28,7 @@
                 <Border Background="{ThemeResource SmokeFillColorDefaultBrush}" />
 
                 <!-- Elevated Card -->
-                <Border Width="280" Padding="24" CornerRadius="{ThemeResource OverlayCornerRadius}"
+                <Border MaxWidth="320" MinWidth="240" Padding="24" CornerRadius="{ThemeResource OverlayCornerRadius}"
                         Background="{ThemeResource LexoraModalBackgroundBrush}"
                         BorderBrush="{ThemeResource LexoraModalBorderBrush}"
                         BorderThickness="1"

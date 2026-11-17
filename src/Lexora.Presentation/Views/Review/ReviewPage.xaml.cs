@@ -33,6 +33,9 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
         IsTabStop = true;
         Loaded += (s, e) =>
         {
+            ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+            RegisterShortcuts();
             UpdateSpeedFlyoutLabels();
             UpdateResponsiveLayout(ActualWidth);
             Focus(FocusState.Programmatic);
@@ -42,9 +45,6 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
         ActualThemeChanged += (s, e) => OnThemeChanged();
 
         AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(OnReviewPageKeyDown), handledEventsToo: false);
-
-        RegisterShortcuts();
-        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
         Unloaded += (s, e) =>
         {

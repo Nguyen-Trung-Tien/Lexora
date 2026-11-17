@@ -96,7 +96,7 @@ public partial class LocalizationService
         vi["Storage_Dialog_QuickAddTooltip"] = "Thêm ngay vào Kho lưu trữ";
         vi["Storage_Dialog_FilterAll"] = "Tất cả";
         vi["Storage_Dialog_FilterWeak"] = "⭐ Gợi ý củng cố";
-        vi["Storage_Dialog_FilterExam"] = "🎯 IELTS / TOEIC";
+        vi["Storage_Dialog_FilterExam"] = "IELTS / TOEIC";
         vi["Storage_Dialog_FilterCore"] = "⭐ Trọng tâm bài thi";
         vi["Storage_Dialog_FilterA1A2"] = "A1-A2";
         vi["Storage_Dialog_FilterB1B2"] = "B1-B2";
@@ -205,7 +205,7 @@ public partial class LocalizationService
         en["Storage_Dialog_QuickAddTooltip"] = "Add to Learning Storage immediately";
         en["Storage_Dialog_FilterAll"] = "All";
         en["Storage_Dialog_FilterWeak"] = "⭐ Recommended Review";
-        en["Storage_Dialog_FilterExam"] = "🎯 IELTS / TOEIC";
+        en["Storage_Dialog_FilterExam"] = "IELTS / TOEIC";
         en["Storage_Dialog_FilterCore"] = "⭐ Core Rules";
         en["Storage_Dialog_FilterA1A2"] = "A1-A2";
         en["Storage_Dialog_FilterB1B2"] = "B1-B2";

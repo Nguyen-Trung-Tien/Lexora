@@ -59,7 +59,7 @@
                             </StackPanel>
                             <DropDownButton.Flyout>
                                 <Flyout x:Name="SmartPresetsFlyout" Placement="Bottom">
-                                    <Border Width="380" MaxHeight="450">
+                                    <Border MaxWidth="380" MinWidth="280" HorizontalAlignment="Stretch" MaxHeight="450">
                                         <StackPanel Spacing="10">
                                             <!-- Flyout Header -->
                                             <StackPanel Spacing="2">
@@ -304,7 +304,7 @@
                                         </Border>
                                         <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="🎯" FontSize="11" />
+                                                <FontIcon Glyph="&#xE9D9;" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                 <TextBlock Text="{x:Bind ViewModel.CurrentCard.Confidence, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
                                                 <TextBlock Text="%" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             </StackPanel>
@@ -425,7 +425,7 @@
                                         <!-- Confidence Badge -->
                                         <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
                                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="🎯" FontSize="11" />
+                                                <FontIcon Glyph="&#xE9D9;" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                 <TextBlock Text="{x:Bind ViewModel.CurrentCard.Confidence, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
                                                 <TextBlock Text="%" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             </StackPanel>

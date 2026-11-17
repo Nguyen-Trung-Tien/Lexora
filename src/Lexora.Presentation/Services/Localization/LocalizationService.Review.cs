@@ -17,7 +17,7 @@ public partial class LocalizationService
         vi["Review_UndoSuccess"] = "Đã hoàn tác đánh giá thẻ ôn tập vừa rồi.";
         vi["Review_CardProgress"] = "Thẻ ôn tập";
         vi["Review_FlipCard"] = "Nhấn Phím Cách (Space) hoặc Click để lật thẻ";
-        vi["Review_CompletedTitle"] = "Hoàn Thành Ôn Tập Hôm Nay! 🎉";
+        vi["Review_CompletedTitle"] = "Hoàn Thành Ôn Tập Hôm Nay!";
         vi["Review_CompletedSubtitle"] = "Xuất sắc! Bạn đã ôn tập hết các thẻ từ vựng đến hạn hôm nay theo thuật toán SM-2.";
         vi["Review_BackDashboard"] = "Về Trang Chủ";
         vi["Review_TodayDue"] = "Cần ôn hôm nay";
@@ -25,7 +25,7 @@ public partial class LocalizationService
         vi["Review_Difficult"] = "Từ khó & Lapses";
         vi["Review_TypingDrill"] = "Luyện gõ từ";
         vi["Review_Remaining"] = "Còn lại:";
-        vi["Review_AllCaughtUp"] = "Đã hoàn thành hết! 🎉";
+        vi["Review_AllCaughtUp"] = "Đã hoàn thành hết!";
         vi["Review_AllCaughtUpDesc"] = "Bạn có 0 thẻ cần ôn trong danh sách này. Thật xuất sắc trong việc duy trì chuỗi học tập!";
         vi["Review_ShowMeaning"] = "Hiện nghĩa (Phím cách)";
         vi["Review_RatingAgain"] = "Quên (Again)";
@@ -54,7 +54,7 @@ public partial class LocalizationService
         vi["Review_PatternHint"] = "Gợi ý mẫu:";
         vi["Review_TypePlaceholder"] = "Nhập từ tiếng Anh...";
         vi["Review_BtnCheck"] = "Kiểm tra";
-        vi["Review_BtnHint"] = "💡 Gợi ý";
+        vi["Review_BtnHint"] = "Gợi ý";
         vi["Review_BtnShowAnswer"] = "Hiện đáp án";
         vi["Review_AudioUk"] = "Phát âm (UK)";
         vi["Review_AudioUs"] = "Phát âm (US)";
@@ -69,14 +69,14 @@ public partial class LocalizationService
         vi["Review_HotkeysTitle"] = "Phím tắt thao tác";
         vi["Review_HotkeyFlip"] = "Phím cách: Lật thẻ";
         vi["Review_HotkeyRate"] = "1 - 4: Đánh giá độ nhớ";
-        vi["Review_SessionCompletedTitle"] = "Hoàn thành phiên học! 🎉";
+        vi["Review_SessionCompletedTitle"] = "Hoàn thành phiên học!";
         vi["Review_SessionCompletedDesc"] = "Bạn đã ôn tập xuất sắc tất cả các thẻ trong phiên này!";
         vi["Review_TotalStudied"] = "Tổng số thẻ đã học";
         vi["Review_CorrectCount"] = "Số câu nhớ đúng";
         vi["Review_BtnMoreCards"] = "Ôn thêm thẻ khác";
         vi["Review_BtnLearnNew"] = "Học từ vựng mới";
         // Newly Added Review
-        vi["Review_TypingFeedbackCorrect"] = "Chính xác! Hoàn hảo 👏";
+        vi["Review_TypingFeedbackCorrect"] = "Chính xác! Hoàn hảo";
         vi["Review_TypingFeedbackIncorrectFormat"] = "Chưa chính xác: \"{0}\" ➔ Đáp án đúng: \"{1}\"";
         vi["Review_LettersCountFormat"] = "{0} ký tự";
         vi["Review_UnitPrefix"] = "Chủ đề";
@@ -119,7 +119,7 @@ public partial class LocalizationService
         en["Review_UndoSuccess"] = "Last card rating undone successfully.";
         en["Review_CardProgress"] = "Card";
         en["Review_FlipCard"] = "Press Spacebar or Click to Flip Card";
-        en["Review_CompletedTitle"] = "Today's Review Completed! 🎉";
+        en["Review_CompletedTitle"] = "Today's Review Completed!";
         en["Review_CompletedSubtitle"] = "Awesome! You've reviewed all due words scheduled for today according to SM-2.";
         en["Review_BackDashboard"] = "Back to Dashboard";
         en["Review_TodayDue"] = "Today's Due";
@@ -127,7 +127,7 @@ public partial class LocalizationService
         en["Review_Difficult"] = "Difficult & Lapses";
         en["Review_TypingDrill"] = "Typing Drill";
         en["Review_Remaining"] = "Remaining:";
-        en["Review_AllCaughtUp"] = "All Caught Up! 🎉";
+        en["Review_AllCaughtUp"] = "All Caught Up!";
         en["Review_AllCaughtUpDesc"] = "You have 0 pending reviews in this queue. Excellent job keeping your review streak active!";
         en["Review_ShowMeaning"] = "Show Meaning (Space)";
         en["Review_RatingAgain"] = "Again";
@@ -156,7 +156,7 @@ public partial class LocalizationService
         en["Review_PatternHint"] = "Pattern hint:";
         en["Review_TypePlaceholder"] = "Type the English term...";
         en["Review_BtnCheck"] = "Check";
-        en["Review_BtnHint"] = "💡 Hint";
+        en["Review_BtnHint"] = "Hint";
         en["Review_BtnShowAnswer"] = "Show Answer";
         en["Review_AudioUk"] = "Audio (UK)";
         en["Review_AudioUs"] = "Audio (US)";
@@ -171,14 +171,14 @@ public partial class LocalizationService
         en["Review_HotkeysTitle"] = "Hotkeys";
         en["Review_HotkeyFlip"] = "Space: Flip card";
         en["Review_HotkeyRate"] = "1 - 4: Rate recall";
-        en["Review_SessionCompletedTitle"] = "Session Completed! 🎉";
+        en["Review_SessionCompletedTitle"] = "Session Completed!";
         en["Review_SessionCompletedDesc"] = "You've successfully reviewed all cards in this session!";
         en["Review_TotalStudied"] = "Total Studied";
         en["Review_CorrectCount"] = "Correct";
         en["Review_BtnMoreCards"] = "Review More Cards";
         en["Review_BtnLearnNew"] = "Learn New Words";
         // Newly Added Review
-        en["Review_TypingFeedbackCorrect"] = "Correct! Well done 👏";
+        en["Review_TypingFeedbackCorrect"] = "Correct! Well done";
         en["Review_TypingFeedbackIncorrectFormat"] = "Incorrect: \"{0}\" ➔ Correct answer: \"{1}\"";
         en["Review_LettersCountFormat"] = "{0} letters";
         en["Review_UnitPrefix"] = "Unit";

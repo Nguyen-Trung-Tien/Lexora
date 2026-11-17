@@ -25,26 +25,30 @@ public sealed partial class TestPage : Page, ILocalizableView, IThemeAwareView
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
 
         InitializeComponent();
-        RegisterShortcuts();
+
+        var themeService = App.Current.Services.GetService<IThemeService>();
+        void OnThemeChangedHandler(object? sender, ElementTheme theme) => OnThemeChanged();
 
         Loaded += (s, e) =>
         {
+            RegisterShortcuts();
+            if (themeService != null)
+            {
+                themeService.ThemeChanged -= OnThemeChangedHandler;
+                themeService.ThemeChanged += OnThemeChangedHandler;
+            }
             RefreshAllStyles();
             UpdateResponsiveLayout(ActualWidth);
         };
 
         SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
 
-        var themeService = App.Current.Services.GetService<IThemeService>();
-        if (themeService != null)
-        {
-            void OnThemeChangedHandler(object? sender, ElementTheme theme) => OnThemeChanged();
-            themeService.ThemeChanged += OnThemeChangedHandler;
-            Unloaded += (s, e) => themeService.ThemeChanged -= OnThemeChangedHandler;
-        }
-
         Unloaded += (s, e) =>
         {
+            if (themeService != null)
+            {
+                themeService.ThemeChanged -= OnThemeChangedHandler;
+            }
             ViewModel.CleanupSession();
             var sm = App.Current.Services.GetService<IShortcutManager>();
             sm?.UnregisterPageShortcuts(typeof(TestPage));

@@ -53,7 +53,7 @@ public partial class LocalizationService
         vi["Test_SearchCustomPool"] = "Tìm kiếm từ trong kho...";
         vi["Test_SelectAll"] = "Chọn tất cả";
         vi["Test_ClearSelection"] = "Bỏ chọn";
-        vi["Test_WeakWordsFilter"] = "⚡ Từ còn yếu";
+        vi["Test_WeakWordsFilter"] = "Từ còn yếu";
         vi["Test_PasteWordList"] = "Dán danh sách từ";
         vi["Test_PastePrompt"] = "Dán danh sách từ vựng (phân tách bởi dấu phẩy hoặc dòng mới):";
         vi["Test_ApplyPasted"] = "Áp dụng";
@@ -170,7 +170,7 @@ public partial class LocalizationService
         en["Test_SearchCustomPool"] = "Search word pool...";
         en["Test_SelectAll"] = "Select All";
         en["Test_ClearSelection"] = "Clear";
-        en["Test_WeakWordsFilter"] = "⚡ Weak Words";
+        en["Test_WeakWordsFilter"] = "Weak Words";
         en["Test_PasteWordList"] = "Paste Word List";
         en["Test_PastePrompt"] = "Paste vocabulary terms (separated by commas or newlines):";
         en["Test_ApplyPasted"] = "Apply";

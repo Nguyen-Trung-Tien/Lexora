@@ -32,6 +32,8 @@ public partial class App : Microsoft.UI.Xaml.Application
     public Window? MainWindow => _window;
     public Microsoft.UI.Dispatching.DispatcherQueue UIDispatcherQueue { get; }
     private readonly IHost _host;
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, IServiceScope> _viewModelScopeTable = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<IServiceScope, byte> _activeScopes = new();
 
     public static new App Current => (App)Microsoft.UI.Xaml.Application.Current;
     public IServiceProvider Services => _host.Services;
@@ -51,6 +53,14 @@ public partial class App : Microsoft.UI.Xaml.Application
         {
             LogCrash("Xaml.UnhandledException", e.Exception, e.Message);
             e.Handled = true;
+            if (e.Exception != null)
+            {
+                var errorService = _host?.Services?.GetService<IErrorHandlingService>();
+                if (errorService != null)
+                {
+                    _ = errorService.HandleExceptionAsync(e.Exception, "Application.UnhandledException", showDialog: true);
+                }
+            }
         };
 
         InitializeComponent();
@@ -66,8 +76,13 @@ public partial class App : Microsoft.UI.Xaml.Application
         _host = Host.CreateDefaultBuilder()
             .UseDefaultServiceProvider(options =>
             {
+#if DEBUG
+                options.ValidateScopes = true;
+                options.ValidateOnBuild = true;
+#else
                 options.ValidateScopes = false;
                 options.ValidateOnBuild = false;
+#endif
             })
             .ConfigureLogging(logging =>
             {
@@ -96,6 +111,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                         sp.GetService<ILogger<WindowsAudioPlayerService>>()));
                 services.AddSingleton<ISoundFeedbackService, SoundFeedbackService>();
                 services.AddSingleton<IToastNotificationService, ToastNotificationService>();
+                services.AddSingleton<IErrorHandlingService, ErrorHandlingService>();
                 services.AddSingleton<IStartupOrchestrator, StartupOrchestrator>();
                 services.AddSingleton<IShortcutManager, ShortcutManager>();
 
@@ -141,6 +157,7 @@ public partial class App : Microsoft.UI.Xaml.Application
 
         // 1. Setup Main Window (hosts the splash overlay and main shell)
         _window = new MainWindow();
+        _window.Closed += (_, _) => DisposeTrackedScopes();
 
         // 2. Initialize Theme
         var themeService = Services.GetRequiredService<IThemeService>();
@@ -162,8 +179,46 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddTransient<TViewModel>(sp =>
         {
             var scope = sp.CreateScope();
-            return ActivatorUtilities.CreateInstance<TViewModel>(scope.ServiceProvider);
+            var instance = ActivatorUtilities.CreateInstance<TViewModel>(scope.ServiceProvider);
+            _activeScopes.TryAdd(scope, 0);
+            _viewModelScopeTable.AddOrUpdate(instance, scope);
+            return instance;
         });
+    }
+
+    /// <summary>
+    /// Releases the isolated DI scope (and DbContext) associated with a non-cached Page's ViewModel.
+    /// </summary>
+    public static void ReleaseScopeForPage(Microsoft.UI.Xaml.Controls.Page? page)
+    {
+        if (page == null) return;
+
+        var viewModel = page.GetType().GetProperty("ViewModel")?.GetValue(page);
+        if (viewModel == null) return;
+
+        if (viewModel is IDisposable disposable)
+        {
+            try { disposable.Dispose(); } catch { }
+        }
+
+        if (_viewModelScopeTable.TryGetValue(viewModel, out var scope))
+        {
+            _viewModelScopeTable.Remove(viewModel);
+            _activeScopes.TryRemove(scope, out _);
+            try { scope.Dispose(); } catch { }
+        }
+    }
+
+    private void DisposeTrackedScopes()
+    {
+        foreach (var scope in _activeScopes.Keys.ToList())
+        {
+            if (_activeScopes.TryRemove(scope, out _))
+            {
+                try { scope.Dispose(); } catch { }
+            }
+        }
+        try { _host.Dispose(); } catch { }
     }
 
     public static void LogCrash(string source, Exception? ex, string? extra = null)

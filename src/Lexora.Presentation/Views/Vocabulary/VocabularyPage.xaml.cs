@@ -33,10 +33,6 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
 
         PopulateFilterCombos();
 
-        RegisterShortcuts();
-
-        ViewModel.PropertyChanged += ViewModel_StatusPropertyChanged;
-
         Unloaded += (s, e) =>
         {
             _searchDebounceTimer?.Stop();
@@ -66,6 +62,10 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         {
             try
             {
+                ViewModel.PropertyChanged -= ViewModel_StatusPropertyChanged;
+                ViewModel.PropertyChanged += ViewModel_StatusPropertyChanged;
+                RegisterShortcuts();
+
                 if (ViewModel.Words.Count == 0)
                 {
                     _isInitializing = true;

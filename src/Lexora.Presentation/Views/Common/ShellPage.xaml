@@ -149,11 +149,11 @@
             <Frame x:Name="ContentFrame" />
         </NavigationView>
 
-        <!-- Modern Floating Toast Notification Overlay (Top-Center, Non-blocking, Zero Layout Shift) -->
+        <!-- Modern Floating Toast Notification Overlay (Top-Right Stack, Non-blocking, Zero Layout Shift) -->
         <common:ToastOverlayControl x:Name="ToastOverlay"
-                                   HorizontalAlignment="Center"
+                                   HorizontalAlignment="Right"
                                    VerticalAlignment="Top"
-                                   Margin="0,16,0,0"
+                                   Margin="0,16,20,0"
                                    IsHitTestVisible="False"
                                    Canvas.ZIndex="1000" />
 

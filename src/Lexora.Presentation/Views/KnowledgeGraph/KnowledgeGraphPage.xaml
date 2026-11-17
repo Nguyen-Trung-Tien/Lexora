@@ -81,7 +81,7 @@
                         </StackPanel>
                         <DropDownButton.Flyout>
                             <Flyout Placement="Bottom">
-                                <Border Width="340" MaxHeight="420" Padding="8">
+                                <Border MaxWidth="340" MinWidth="260" HorizontalAlignment="Stretch" MaxHeight="420" Padding="8">
                                     <StackPanel Spacing="10">
                                         <StackPanel Spacing="2">
                                             <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_RecommendTitle')}" FontWeight="Bold" FontSize="13" />

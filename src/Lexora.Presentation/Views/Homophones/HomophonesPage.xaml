@@ -92,7 +92,45 @@
         </Grid>
 
         <!-- Main Workspace (Master-Detail) -->
-        <Grid Grid.Row="1" ColumnDefinitions="360,*" ColumnSpacing="16">
+        <Grid x:Name="HomophonesMasterDetailGrid" Grid.Row="1" ColumnSpacing="16" RowSpacing="12">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                    <VisualState x:Name="HomophonesWideLayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="1040" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="HomophonesMasterColumn.Width" Value="360" />
+                            <Setter Target="HomophonesDetailColumn.Width" Value="*" />
+                            <Setter Target="HomophonesMasterRow.Height" Value="*" />
+                            <Setter Target="HomophonesDetailRow.Height" Value="0" />
+                            <Setter Target="HomophonesDetailScroll.(Grid.Column)" Value="1" />
+                            <Setter Target="HomophonesDetailScroll.(Grid.Row)" Value="0" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="HomophonesCompactLayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="0" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="HomophonesMasterColumn.Width" Value="*" />
+                            <Setter Target="HomophonesDetailColumn.Width" Value="0" />
+                            <Setter Target="HomophonesMasterRow.Height" Value="280" />
+                            <Setter Target="HomophonesDetailRow.Height" Value="*" />
+                            <Setter Target="HomophonesDetailScroll.(Grid.Column)" Value="0" />
+                            <Setter Target="HomophonesDetailScroll.(Grid.Row)" Value="1" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="HomophonesMasterColumn" Width="360" />
+                <ColumnDefinition x:Name="HomophonesDetailColumn" Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="HomophonesMasterRow" Height="*" />
+                <RowDefinition x:Name="HomophonesDetailRow" Height="0" />
+            </Grid.RowDefinitions>
             <!-- Left Pane: Search, Filters, Group List & Pagination -->
             <Border Grid.Column="0"
                     CornerRadius="{ThemeResource OverlayCornerRadius}"
@@ -254,7 +292,7 @@
             </Border>
 
             <!-- Right Pane: Detail & Side-by-Side Comparison Workspace -->
-            <ScrollViewer Grid.Column="1" Padding="28,20,28,24" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer x:Name="HomophonesDetailScroll" Grid.Column="1" Padding="28,20,28,24" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel x:Name="DetailContentPanel" Spacing="20">
                     <!-- Selected Group Header Bar -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
