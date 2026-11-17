@@ -164,7 +164,7 @@ Lexora includes a high-performance, offline, dual-dictionary localization system
 - Key naming convention: `Category_Descriptor` (e.g. `Nav_Dashboard`, `Vocab_AddWord`, `Review_RatingGood`, `Settings_Theme`).
 
 ### 4.2 Partial Class Dictionary Partitioning
-To guarantee zero dictionary merge conflicts, optimal code maintainability, and clean domain boundaries, `LocalizationService` is partitioned into **16 modular partial classes** in `src/Lexora.Presentation/Services/Localization/`:
+To guarantee zero dictionary merge conflicts, optimal code maintainability, and clean domain boundaries, `LocalizationService` is partitioned into **18 domain partial classes** (plus core `LocalizationService.cs`) in `src/Lexora.Presentation/Services/Localization/`:
 1. `LocalizationService.cs`: Core dictionary engine, active culture state, `SetLanguage`, and string indexer/resolver.
 2. `LocalizationService.Common.cs`: Global actions (Save, Cancel, Delete, Confirm, Loading, Success, Error).
 3. `LocalizationService.Dashboard.cs`: Dashboard metrics, streak banners, daily goals, and exam countdowns.
@@ -174,14 +174,16 @@ To guarantee zero dictionary merge conflicts, optimal code maintainability, and 
 7. `LocalizationService.Homophones.cs`: Sound-alike pairs, IPA comparisons, and distinction notes.
 8. `LocalizationService.KnowledgeGraph.cs`: Graph nodes, semantic links, clustering, and visual filters.
 9. `LocalizationService.ListeningLab.cs`: Voice accents (US/UK), audio speeds, and dictation controls.
-10. `LocalizationService.Navigation.cs`: Shell navigation menu items, sidebar titles, and header breadcrumbs.
-11. `LocalizationService.Review.cs`: Spaced repetition ratings (Again, Hard, Good, Easy), cards, and session summaries.
-12. `LocalizationService.Roadmap.cs`: Milestones, target exam scores (TOEIC/IELTS/VSTEP), and adaptive nodes.
-13. `LocalizationService.Settings.cs`: Appearance themes, audio voice selection, database backup/restore, and updates.
-14. `LocalizationService.SmartImport.cs`: Intelligent CSV/JSON/Text parser labels, column mapping, and import preview.
-15. `LocalizationService.Storage.cs`: Learning notebooks, personalized tags, and custom memory categories.
-16. `LocalizationService.Test.cs`: Mock test modes, adaptive quiz questions, countdown timers, and score reports.
-17. `LocalizationService.Vocabulary.cs`: Word definitions, phonetic transcriptions, CEFR levels, and word filters.
+10. `LocalizationService.MemoryTips.cs`: Memory tips, mnemonics, and exam strategies.
+11. `LocalizationService.Navigation.cs`: Shell navigation menu items, sidebar titles, and header breadcrumbs.
+12. `LocalizationService.Phrases.cs`: Conversation phrases, registers, dialogues, and scenario tags.
+13. `LocalizationService.Review.cs`: Spaced repetition ratings (Again, Hard, Good, Easy), cards, and session summaries.
+14. `LocalizationService.Roadmap.cs`: Milestones, target exam scores (TOEIC/IELTS/VSTEP), and adaptive nodes.
+15. `LocalizationService.Settings.cs`: Appearance themes, audio voice selection, database backup/restore, and updates.
+16. `LocalizationService.SmartImport.cs`: Intelligent CSV/JSON/Text parser labels, column mapping, and import preview.
+17. `LocalizationService.Storage.cs`: Learning notebooks, personalized tags, and custom memory categories.
+18. `LocalizationService.Test.cs`: Mock test modes, adaptive quiz questions, countdown timers, and score reports.
+19. `LocalizationService.Vocabulary.cs`: Word definitions, phonetic transcriptions, CEFR levels, and word filters.
 
 > [!IMPORTANT]
 > Whenever adding or altering user-facing text, developers and agents **MUST** add both `vi-VN` and `en-US` entries to the relevant partial file and verify parity using the script:
@@ -258,7 +260,7 @@ Before completing any task, committing code, or declaring an issue resolved, dev
 # 1. Build the entire solution (Must finish with 0 warnings and 0 errors)
 dotnet build Lexora.slnx -v q /clp:ErrorsOnly
 
-# 2. Run all unit and integration test suites (All 524 tests MUST pass)
+# 2. Run all unit and integration test suites (All 617 tests MUST pass)
 dotnet test Lexora.slnx --no-build
 
 # 3. Packaging & Installer Verification (When modifying deployment scripts)
@@ -267,7 +269,7 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.6.2"
 
 ### Current Quality Gate Benchmark
 - **Build Status**: `0 Warning(s)`, `0 Error(s)`.
-- **Test Suite**: **524 / 524 Tests Passing** (462 Unit Tests + 62 Integration Tests, 0 Failed, 0 Skipped).
+- **Test Suite**: **617 / 617 Tests Passing** (540 Unit Tests + 77 Integration Tests, 0 Failed, 0 Skipped).
 - **Architecture Integrity**: Clean Architecture invariants strictly satisfied with 0 boundary violations.
 
 ### 8.1 Release Notes Log & User-Facing Documentation Protocol (`release-notes/`)
@@ -357,12 +359,14 @@ Lexora/
 │   ├── Lexora.Domain/                        # Pure domain layer (Entities, Enums, Exceptions, Repositories)
 │   │   ├── Common/                           # BaseEntity, ValueObject base contracts
 │   │   ├── Entities/                         # Domain-grouped POCO entities
-│   │   │   ├── Grammar/                      # GrammarRule, GrammarCategory
+│   │   │   ├── Grammar/                      # GrammarRule, GrammarExample
 │   │   │   ├── Homophones/                   # HomophoneGroup, HomophoneItem
-│   │   │   ├── LearningStorage/              # LearningStorageItem, StorageCategory
-│   │   │   ├── Review/                       # StudyLog
+│   │   │   ├── LearningStorage/              # LearningStorageItem
+│   │   │   ├── MemoryTips/                   # MemoryTip
+│   │   │   ├── Phrases/                      # ConversationPhrase
+│   │   │   ├── Review/                       # ReviewCard, StudyLog, StudySession, UserStreak
 │   │   │   ├── Roadmap/                      # StudyRoadmap, RoadmapMilestone, RoadmapNode
-│   │   │   └── Vocabulary/                   # Word, WordMeaning, ExampleSentence, ContextUnit, Topic, KnowledgeNode, KnowledgeEdge
+│   │   │   └── Vocabulary/                   # Word, WordMeaning, ExampleSentence, Topic, ExamTag, WordTopic, WordExamTag
 │   │   ├── Enums/                            # CefrLevel, ExamType, ExamTarget, RoadmapNodeType, NodeStatus, LearningStatus, PartOfSpeech, etc.
 │   │   ├── Exceptions/                       # DomainValidationException, EntityNotFoundException, SecurityException
 │   │   └── Interfaces/                       # Domain repository contracts (IVocabularyRepository, IReviewRepository, IRoadmapRepository, etc.) & IUnitOfWork
@@ -376,6 +380,8 @@ Lexora/
 │   │   │   ├── Homophones/                   # HomophoneGroupDto, HomophoneItemDto, HomophoneSmartImportDtos
 │   │   │   ├── KnowledgeGraph/               # KnowledgeGraphDtos
 │   │   │   ├── LearningStorage/              # LearningStorageDtos
+│   │   │   ├── MemoryTips/                   # MemoryTipDtos
+│   │   │   ├── Phrases/                      # ConversationPhraseDtos
 │   │   │   ├── Preferences/                  # UserPreferences
 │   │   │   ├── Review/                       # ReviewCardDto, LearningIntelligenceDtos, SmartReviewDtos, StudyAdviceDto, StudyPlannerDtos
 │   │   │   ├── Roadmap/                      # RoadmapDtos, MilestoneDto, StudyRoadmapDto
@@ -391,6 +397,8 @@ Lexora/
 │   │   │   ├── Homophones/                   # IHomophoneService, IHomophoneExportImportService
 │   │   │   ├── KnowledgeGraph/               # IVocabularyKnowledgeGraphService, IKnowledgeGraphExportImportService
 │   │   │   ├── LearningStorage/              # ILearningStorageService
+│   │   │   ├── MemoryTips/                   # IMemoryTipService
+│   │   │   ├── Phrases/                      # IConversationPhraseService
 │   │   │   ├── Preferences/                  # IUserPreferencesService
 │   │   │   ├── Review/                       # IReviewService, IReviewReminderService, IStudyAdvisorService, IStudyPlannerService
 │   │   │   ├── Roadmap/                      # IRoadmapService
@@ -405,6 +413,8 @@ Lexora/
 │   │   │   ├── Homophones/                   # HomophoneService, HomophoneExportImportService
 │   │   │   ├── KnowledgeGraph/               # VocabularyKnowledgeGraphService, KnowledgeGraphExportImportService
 │   │   │   ├── LearningStorage/              # LearningStorageService
+│   │   │   ├── MemoryTips/                   # MemoryTipService
+│   │   │   ├── Phrases/                      # ConversationPhraseService
 │   │   │   ├── Pronunciation/                # PronunciationListeningLabService, PronunciationVoiceResolver
 │   │   │   ├── Review/                       # ReviewService, StudyAdvisorService, StudyPlannerService
 │   │   │   ├── Roadmap/                      # RoadmapService, RoadmapEngine
@@ -430,9 +440,9 @@ Lexora/
 │       ├── Services/                         # Presentation services & contracts
 │       │   ├── Audio/                        # AudioPlayerService, WindowsVoiceProvider
 │       │   ├── Extensions/                   # ResourceExtensions
-│       │   ├── Localization/                 # LocalizationService (Core engine) + 16 domain partial classes:
+│       │   ├── Localization/                 # LocalizationService (Core engine) + 18 domain partial classes:
 │       │   │                                 # (.Common, .Dashboard, .Dialogs, .Grammar, .Help, .Homophones, .KnowledgeGraph,
-│       │   │                                 #  .ListeningLab, .Navigation, .Review, .Roadmap, .Settings, .SmartImport, .Storage, .Test, .Vocabulary)
+│       │   │                                 #  .ListeningLab, .MemoryTips, .Navigation, .Phrases, .Review, .Roadmap, .Settings, .SmartImport, .Storage, .Test, .Vocabulary)
 │       │   ├── Navigation/                   # NavigationService, PageService
 │       │   ├── Notifications/                # InAppNotificationService (Toast overlays)
 │       │   ├── Orchestration/                # PresentationOrchestrationService
@@ -448,6 +458,8 @@ Lexora/
 │       │   ├── Homophones/                   # HomophonesViewModel (.Editor, .ImportExport)
 │       │   ├── KnowledgeGraph/               # KnowledgeGraphViewModel (.Interaction)
 │       │   ├── LearningStorage/              # LearningStorageViewModel (.Operations, .Practice)
+│   │   │   ├── MemoryTips/                   # MemoryTipsViewModel
+│   │   │   ├── Phrases/                      # PhrasesViewModel
 │       │   ├── Review/                       # ReviewViewModel (.Rating, .Typing)
 │       │   ├── Roadmap/                      # RoadmapViewModel (.Generation)
 │       │   ├── Settings/                     # SettingsViewModel (.Backup, .Updates)
@@ -461,14 +473,16 @@ Lexora/
 │           ├── Homophones/                   # HomophonesPage, HomophoneEditorDialog
 │           ├── KnowledgeGraph/               # KnowledgeGraphPage, KnowledgeGraphDialog, KnowledgeGraphImportDialog
 │           ├── LearningStorage/              # LearningStoragePage
+│   │   │   ├── MemoryTips/                   # MemoryTipsPage, MemoryTipEditorDialog
+│   │   │   ├── Phrases/                      # PhrasesPage, PhraseEditorDialog
 │           ├── Review/                       # ReviewPage, ListeningLabDialog
 │           ├── Roadmap/                      # RoadmapPage
 │           ├── Settings/                     # SettingsPage, UpdateDetailsDialog
 │           ├── Test/                         # TestPage
 │           └── Vocabulary/                   # VocabularyPage, WordEditorDialog, TopicEditorDialog, AssignTopicDialog, SmartImportDialog
 ├── tests/
-│   ├── Lexora.Tests.Unit/                    # 462 xUnit Unit Tests (Roadmap, SM-2, FSRS, Listening Lab, CAT, DTOs, Services)
-│   └── Lexora.Tests.Integration/             # 62 xUnit Integration Tests (SQLite in-memory, Repositories, Workflows)
+│   ├── Lexora.Tests.Unit/                    # 540 xUnit Unit Tests (Roadmap, SM-2, FSRS, Listening Lab, CAT, MemoryTips, Phrases, DTOs, Services)
+│   └── Lexora.Tests.Integration/             # 77 xUnit Integration Tests (SQLite in-memory, Repositories, Workflows)
 └── .github/
     └── workflows/
         ├── agent-quality-gate.yml            # CI build & automated test quality gate
@@ -493,7 +507,7 @@ Before marking any task as complete, verify:
 - [ ] **Anti-Hallucination & Type Reusability**: Existing types and services verified before declaring new contracts; Clean Architecture cascade strictly followed.
 - [ ] **Release Notes Log Created**: User-friendly, concise markdown release note created in `release-notes/vX.Y.Z.md` following `template.md` and verified in `ReleaseNotesLogDialog`.
 - [ ] **Clean Build**: `dotnet build Lexora.slnx -v q /clp:ErrorsOnly` completes with **0 warnings and 0 errors**.
-- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 524 tests** (462 Unit + 62 Integration).
+- [ ] **All Tests Green**: `dotnet test Lexora.slnx --no-build` runs and passes **all 617 tests** (540 Unit + 77 Integration).
 
 ---
 

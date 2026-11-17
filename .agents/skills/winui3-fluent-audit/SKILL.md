@@ -44,7 +44,7 @@ powershell -ExecutionPolicy Bypass -File .agents/skills/winui3-fluent-audit/scri
 
 #### Scan Single File:
 ```powershell
-powershell -ExecutionPolicy Bypass -File .agents/skills/winui3-fluent-audit/scripts/audit_fluent_ui.ps1 -TargetFile "src/Lexora.Presentation/Views/VocabularyPage.xaml"
+powershell -ExecutionPolicy Bypass -File .agents/skills/winui3-fluent-audit/scripts/audit_fluent_ui.ps1 -TargetFile "src/Lexora.Presentation/Views/Vocabulary/VocabularyPage.xaml"
 ```
 
 #### JSON Output (for CI / Quality Gates):

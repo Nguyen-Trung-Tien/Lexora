@@ -17,6 +17,10 @@ Lexora.Application
 ├── IAdaptiveQuizService             # Computerized Adaptive Testing (CAT) dynamic CEFR recalibration
 ├── IStudyPlannerService             # Daily curriculum generation, pacing indicators, streak protection
 ├── ILearningStorageService          # Targeted vault for marked words and grammar rules
+├── IRoadmapService                  # Adaptive TOEIC/IELTS/VSTEP roadmap synthesis & progress tracking
+├── IConversationPhraseService       # Situational conversation phrases & dialogue management
+├── IMemoryTipService                # Mnemonics & exam strategies CRUD and filtering
+├── IReleaseNotesService             # Offline Markdown release notes parsing & SemVer sorting
 ├── ITestService                    # Practice quiz generation, question scoring, session maintenance
 ├── IGrammarService                 # Grammar rule catalog, formula lookups, rule practice
 ├── IStatisticsService              # Retention analytics, streak queries, CEFR & exam readiness
@@ -257,3 +261,12 @@ Namespace: `Lexora.Application.Interfaces` & `Lexora.Infrastructure.Services`
 
 - **`ILearningStorageService`**: Dedicated CRUD and status transition manager for `LearningStorageItem` entries.
 - **`IDataHealthService`**: Executes SQLite `PRAGMA integrity_check`, WAL checkpointing, database vacuuming, orphan record purging, and audio cache analysis.
+
+---
+
+## 12. `IRoadmapService`, `IConversationPhraseService`, `IMemoryTipService` & `IReleaseNotesService`
+
+- **`IRoadmapService`** (`Lexora.Application.Interfaces.Roadmap`): Generates adaptive TOEIC/IELTS/VSTEP study roadmaps via `RoadmapEngine`, tracks milestone/node mastery, and supports progress reset & history cleanup.
+- **`IConversationPhraseService`** (`Lexora.Application.Interfaces.Phrases`): Full CRUD, register filtering, and dialogue management for `ConversationPhrase` entries.
+- **`IMemoryTipService`** (`Lexora.Application.Interfaces.MemoryTips`): Full CRUD, pagination, and exam/category filtering for `MemoryTip` entries.
+- **`IReleaseNotesService`** (`Lexora.Application.Interfaces.Updates`): Loads and parses offline `release-notes/vX.Y.Z.md` files with descending SemVer sorting for `ReleaseNotesLogDialog`.

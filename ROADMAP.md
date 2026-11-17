@@ -70,10 +70,12 @@ gantt
 - [x] **Interactive Learning Roadmap & Adaptive Study Pathways**:
   - Trực quan hóa lộ trình học cá nhân hóa với đường cong Bézier spline mượt mà, phân hệ mục tiêu TOEIC / IELTS / VSTEP.
   - Tự động mở khóa chặng học (Milestone unlocking) dựa trên điều kiện tiên quyết và hiệu chỉnh độ khó SM-2 Ease Factor ban đầu theo khoảng cách điểm mục tiêu.
+- [x] **Conversation Phrases, Memory Tips & Release Notes Log**:
+  - Bổ sung module Hội thoại theo ngữ cảnh (`PhrasesPage`), Mẹo ghi nhớ & Chiến lược thi (`MemoryTipsPage`) và Nhật ký phát hành ngoại tuyến (`ReleaseNotesLogDialog`).
 - [x] **Quality Gate Benchmark**:
-  - Nâng cấp bộ kiểm thử lên **439 / 439 Automated Tests** (388 Unit Tests + 51 Integration Tests) với 0 Warning, 0 Error.
+  - Nâng cấp bộ kiểm thử lên **617 / 617 Automated Tests** (540 Unit Tests + 77 Integration Tests) với 0 Warning, 0 Error.
 - [x] **Automated CI/CD Quality Gates & DevSecOps Skills**:
-  - Thiết lập GitHub Actions workflow (`changelog-enforcer.yml`, `agent-quality-gate.yml`) cùng bộ 8 agent skills chuẩn hóa.
+  - Thiết lập GitHub Actions workflow (`changelog-enforcer.yml`, `agent-quality-gate.yml`) cùng bộ 9 agent skills chuẩn hóa.
 
 ### 🔵 Phase 3: Autonomous Mesh, Cloud & AI Extensions (Kế hoạch tương lai)
 - [ ] **End-to-End Encrypted Sync**: Đồng bộ hóa dữ liệu học qua WebDAV / Nextcloud hoặc giao thức P2P an toàn.

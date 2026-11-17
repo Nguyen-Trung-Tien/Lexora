@@ -13,7 +13,7 @@ This skill validates that all user-facing strings in the Lexora desktop applicat
 ### Key Invariants Enforced:
 1. **100% Dictionary Parity**: Every key present in `_resources["vi-VN"]` must have an exact matching entry in `_resources["en-US"]`, and vice versa.
 2. **Standard Key Nomenclature**: Keys must follow `Category_Descriptor` (e.g. `Vocab_AddWord`, `Review_RatingGood`). See [Localization Guidelines](./references/localization_guidelines.md).
-3. **XAML Reference Integrity**: Every key used via `{x:Bind Loc['Key']}` or `Loc.GetString('Key')` must exist in `LocalizationService.cs`.
+3. **XAML Reference Integrity**: Every key used via `{x:Bind Loc['Key']}` or `Loc.GetString('Key')` must exist in `LocalizationService` (partitioned across domain partial files in `src/Lexora.Presentation/Services/Localization/`).
 
 ---
 
@@ -48,7 +48,7 @@ powershell -ExecutionPolicy Bypass -File .agents/skills/i18n-localization-sync/s
 
 ## 3. Adding New Localization Keys Protocol
 When adding a new key (e.g. `Vocab_ExportCsv`):
-1. Locate `src/Lexora.Presentation/Services/LocalizationService.cs`.
+1. Locate the matching domain partial file in `src/Lexora.Presentation/Services/Localization/LocalizationService.<Domain>.cs`.
 2. Insert the Vietnamese key into the `["vi-VN"]` section under the corresponding category:
    ```csharp
    ["Vocab_ExportCsv"] = "Xuất danh sách (CSV)",

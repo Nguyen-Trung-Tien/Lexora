@@ -10,9 +10,9 @@ Lexora maintains a strict **Zero Error & Zero Warning** policy with **100% test 
 
 | Test Project | Type | Test Count | Target Duration | Dependencies |
 | :--- | :--- | :---: | :---: | :--- |
-| **`Lexora.Tests.Unit`** | Unit | 40 | < 1.0 s | In-Memory, No I/O, No Database |
-| **`Lexora.Tests.Integration`** | Integration | 24 | ~3.0 s | SQLite In-Memory / Isolated Temp DB |
-| **Total** | | **64** | **< 5.0 s** | |
+| **`Lexora.Tests.Unit`** | Unit | 540 | ~5.0 s | In-Memory, No I/O, No Database |
+| **`Lexora.Tests.Integration`** | Integration | 77 | ~4.0 s | SQLite In-Memory / Isolated Temp DB |
+| **Total** | | **617** | **< 10.0 s** | |
 
 ---
 
@@ -99,7 +99,7 @@ dotnet test Lexora.slnx --logger "console;verbosity=detailed"
 Before submitting a Pull Request or completing any engineering task:
 
 - [ ] `dotnet build Lexora.slnx` completes with **0 errors and 0 warnings**.
-- [ ] `dotnet test Lexora.slnx` completes with **64/64 tests passed**.
+- [ ] `dotnet test Lexora.slnx` completes with **617/617 tests passed** (540 Unit + 77 Integration).
 - [ ] No raw hex colors added to XAML (only Fluent `{ThemeResource ...}` brushes).
 - [ ] No direct `LexoraDbContext` queries made from `Lexora.Presentation`.
 - [ ] All new public methods accept `CancellationToken` and pass it down.

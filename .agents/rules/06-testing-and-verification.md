@@ -15,29 +15,45 @@ All code in `Lexora.slnx` must build cleanly with:
 
 ```text
 tests/
-├── Lexora.Tests.Unit/          # 40 Unit Tests
-│   ├── Sm2SpacedRepetitionEngineTests.cs
+├── Lexora.Tests.Unit/          # 540 Unit Tests
+│   ├── AdaptiveQuizServiceTests.cs
+│   ├── ConversationPhraseServiceTests.cs
 │   ├── ExportImportServiceTests.cs
+│   ├── FsrsSpacedRepetitionEngineTests.cs
 │   ├── GrammarServiceTests.cs
+│   ├── HomophoneServiceAndExportImportTests.cs
+│   ├── LearningStorageServiceTests.cs
+│   ├── LocalizationServiceTests.cs
+│   ├── MemoryTipServiceTests.cs
+│   ├── PronunciationListeningLabServiceTests.cs
+│   ├── ReleaseNotesServiceTests.cs
 │   ├── ReviewSessionTests.cs
+│   ├── RoadmapEngineTests.cs
 │   ├── SecurityAndResilienceTests.cs
+│   ├── Sm2SpacedRepetitionEngineTests.cs
 │   ├── StatisticsServiceTests.cs
 │   ├── TestServiceTests.cs
-│   └── UserPreferencesServiceTests.cs
-└── Lexora.Tests.Integration/   # 24 Integration Tests
-    ├── VocabularyCrudIntegrationTests.cs
-    ├── DatabaseIntegrityAndPerformanceTests.cs
+│   ├── UserPreferencesServiceTests.cs
+│   └── VocabularyKnowledgeGraphServiceTests.cs (and additional unit suites)
+└── Lexora.Tests.Integration/   # 77 Integration Tests
+    ├── ConversationPhraseIntegrationTests.cs
+    ├── ConversationPhraseUpgradeIntegrationTests.cs
     ├── DatabaseBackupServiceTests.cs
+    ├── DatabaseIntegrityAndPerformanceTests.cs
     ├── GrammarIntegrationTests.cs
+    ├── LearningStorageIntegrationTests.cs
+    ├── MemoryTipRepositoryTests.cs
+    ├── RoadmapPersistenceIntegrationTests.cs
     ├── SqliteDatabaseTests.cs
     ├── StatisticsIntegrationTests.cs
-    └── TestPracticeIntegrationTests.cs
+    ├── TestPracticeIntegrationTests.cs
+    └── VocabularyCrudIntegrationTests.cs
 ```
 
 ### 2.1. Unit Test Rules (`Lexora.Tests.Unit`)
 - Must run completely in-memory without accessing the local disk, network, or live SQLite files.
-- Verify purely mathematical models (SM-2 calculations, Ease Factor bounds, rating impacts), DTO transformations, boundary security filters, and business rules.
-- Fast execution target: All 40 unit tests must execute in **< 1.5 seconds**.
+- Verify purely mathematical models (SM-2 & FSRS calculations, Ease Factor bounds, rating impacts), DTO transformations, boundary security filters, and business rules.
+- Fast execution target: All 540 unit tests must execute in **< 10 seconds**.
 
 ### 2.2. Integration Test Rules (`Lexora.Tests.Integration`)
 - Test repositories, EF Core entity mappings, foreign key cascades, and database transactions.

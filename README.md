@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/Architecture-Clean%20Architecture-107C41?style=flat-square" alt="Clean Architecture" />
   <img src="https://img.shields.io/badge/Database-SQLite%20WAL%20%2F%20EF%20Core%2010-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
   <img src="https://img.shields.io/badge/Version-1.6.2-0078D4?style=flat-square" alt="Version" />
-  <img src="https://img.shields.io/badge/Tests-477%2F477%20Passed-2EA44F?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-617%2F617%20Passed-2EA44F?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/Installer-Inno%20Setup%206-FF8C00?style=flat-square" alt="Inno Setup" />
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
 </p>
@@ -67,8 +67,12 @@
 | 🕸️ **Knowledge Graph** | **Interactive Semantic Vocabulary Network** | Semantic graph traversal across Synonyms, Antonyms, Topics, and CEFR tiers with dynamic node pivoting, instant preview flyout, and native audio. |
 | 🩺 **Data Health Center** | **SQLite Diagnostics & Self-Healing** | PRAGMA integrity check, WAL/SHM maintenance, orphan record cleanup, database vacuuming, and pronunciation audio cache management. |
 | 📐 **Grammar** | **Structured Grammar Engine** | Structural formula highlighting, in-depth bilingual explanations (Vietnamese & English), and prominent *Common Mistakes* guidance. |
-| 📊 **Analytics** | **Dashboard & Activity Heatmap** | GitHub-style 365-day review activity heatmap, streak counters, CEFR level distribution charts, and exam certification readiness meters. |
-| 🔄 **Data & Sync** | **Robust Import / Export & Backup** | High-throughput RFC-4180 multiline CSV and JSON exchange, 20MB payload ceiling, and 16-byte header verified database backup/restore. |
+| 💬 **Phrases** | **Conversation Phrases & Dialogues** | Real-world situational dialogues, register tags (Formal / Neutral / Casual), audio playback, and inline phrase editor. |
+| 💡 **Memory Tips** | **Mnemonics & Exam Strategies** | Curated memory hooks, root/affix breakdowns, and TOEIC/IELTS/VSTEP exam strategies with full CRUD and bilingual filtering. |
+| 🗺️ **Roadmap** | **Adaptive Learning Pathways** | Goal-driven TOEIC/IELTS/VSTEP study tracks, milestone unlocking, and dynamic SM-2 Ease Factor calibration. |
+| 📊 **Analytics** | **Dashboard & Activity Heatmap** | GitHub-style 365-day review activity heatmap, streak counters, CEFR level distribution charts, and exam score predictions. |
+| 🔄 **Data & Sync** | **Robust Import / Export & Backup** | High-throughput RFC-4180 multiline CSV, JSON, and Anki TSV exchange, 20MB payload ceiling, and 16-byte header verified database backup/restore. |
+| 📋 **Release Notes** | **Offline In-App Release Notes Log** | Native Fluent 2 Markdown viewer (`ReleaseNotesLogDialog`) with SemVer sorting and automatic Dark/Light theme adaptation. |
 | 🚀 **Updates** | **Production Software Updates** | Automatic background check via GitHub Releases API, pre-update SQLite safety snapshots, and Inno Setup silent install handoff. |
 | 🎨 **Design** | **Windows 11 Fluent Design** | Modern Mica backdrop, adaptive Light/Dark theme switching, responsive layouts, 250ms debounced search, and zero UI thread stalls. |
 
@@ -149,6 +153,12 @@ $$Interval(n) = \begin{cases} 1 \text{ day}, & n = 1 \\ 6 \text{ days}, & n = 2 
 | <kbd>Ctrl</kbd> + <kbd>7</kbd> | Navigate to **Practice & Test** | Global |
 | <kbd>Ctrl</kbd> + <kbd>8</kbd> | Navigate to **Learning Storage** | Global |
 | <kbd>Ctrl</kbd> + <kbd>9</kbd> | Navigate to **Roadmap** | Global |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> | Navigate to **Conversation Phrases** | Global |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd> | Navigate to **Memory Tips** | Global |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>D</kbd> | Open **Pronunciation & Listening Lab** | Global |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> | Open **Smart / Urgent Review** | Global |
+| <kbd>Ctrl</kbd> + <kbd>T</kbd> | Toggle **Light / Dark Theme** | Global |
+| <kbd>F1</kbd> | Navigate to **Help & Guide** | Global |
 | <kbd>Ctrl</kbd> + <kbd>K</kbd> / <kbd>Ctrl</kbd> + <kbd>F</kbd> | Focus Global Search Box | Global |
 | <kbd>Ctrl</kbd> + <kbd>N</kbd> | Add New Word / Grammar Rule | Vocabulary & Grammar Pages |
 | <kbd>Ctrl</kbd> + <kbd>E</kbd> | Edit Selected Word / Rule | Vocabulary & Grammar Pages |
@@ -178,7 +188,7 @@ cd Lexora
 # 2. Build entire solution (must finish with 0 errors and 0 warnings)
 dotnet build Lexora.slnx
 
-# 3. Run all unit and integration tests (390 tests)
+# 3. Run all unit and integration tests (617 tests)
 dotnet test Lexora.slnx
 ```
 
@@ -228,9 +238,10 @@ Lexora/
 ├── .agents/                        # AI Agent Workspaces, Personas, Rules & Skills
 │   ├── hooks.json                  # Lifecycle validation hooks
 │   ├── personas/                   # Domain specialized agent personas
-│   ├── rules/                      # Modular repository rules & invariants (01-07)
+│   ├── rules/                      # Modular repository rules & invariants (01-08)
 │   └── skills/                     # Standardized, executable agent skills
 ├── changelog/                      # Keep-a-Changelog unreleased & archive fragments
+├── release-notes/                  # User-facing Markdown release notes per version
 ├── installer/                      # Inno Setup compiler scripts
 │   └── LexoraSetup.iss             # Inno Setup 6 configuration script
 ├── publish/                        # Generated build artifacts & installers
@@ -240,8 +251,8 @@ Lexora/
 │   ├── Lexora.Infrastructure/      # EF Core 10, SQLite, caching, backup & update engines
 │   └── Lexora.Presentation/        # WinUI 3 Fluent UI, MVVM ViewModels, Pages, Dialogs
 ├── tests/
-│   ├── Lexora.Tests.Unit/          # 339 Unit tests (SM-2, FSRS, Listening Lab, CAT, DTOs, Services)
-│   └── Lexora.Tests.Integration/   # 51 Integration tests (EF Core SQLite in-memory, Repositories)
+│   ├── Lexora.Tests.Unit/          # 540 Unit tests (SM-2, FSRS, Listening Lab, CAT, Roadmap, MemoryTips, Phrases, DTOs, Services)
+│   └── Lexora.Tests.Integration/   # 77 Integration tests (EF Core SQLite in-memory, Repositories)
 ├── AGENTS.md                       # Developer & AI Agent development guidelines
 ├── PROGRESS.md                     # Comprehensive phase completion tracking
 ├── build-installer.ps1             # Automated packaging & installer script
@@ -275,6 +286,7 @@ All contributors and autonomous agents must follow the repository invariants:
 - 🧠 [**Rule 05: Spaced Repetition (SM-2) Integrity**](.agents/rules/05-spaced-repetition-sm2.md)
 - 🧪 [**Rule 06: Testing & Quality Gate Protocols**](.agents/rules/06-testing-and-verification.md)
 - ⚡ [**Rule 07: AI Agent Token Optimization & Precision**](.agents/rules/07-agent-token-efficiency-and-accuracy.md)
+- 📋 [**Rule 08: Release Notes & Version Documentation**](.agents/rules/08-release-notes-and-versioning.md)
 
 ---
 

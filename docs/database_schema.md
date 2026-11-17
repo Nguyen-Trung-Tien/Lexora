@@ -165,6 +165,15 @@ Dedicated repository holding words or grammar rules marked for focused review or
 | `NextReviewAt` | `TEXT` (ISO8601)| No | Indexed | Scheduled review timestamp |
 | `LastReviewedAt`| `TEXT` (ISO8601)| Yes | | Last review timestamp |
 
+### `StudyRoadmaps`, `RoadmapMilestones`, & `RoadmapNodes`
+Persists adaptive TOEIC / IELTS / VSTEP study roadmaps, phase milestones, and individual learning nodes with progressive unlocking and SM-2 Ease Factor calibration.
+
+### `ConversationPhrases`
+Stores contextual conversation phrases, dialogue turns, register classifications (`PhraseRegister`), and bilingual translations.
+
+### `MemoryTips`
+Stores mnemonic hooks, root/affix breakdowns, and exam strategies (`MemoryTip`) linked to target exam types and CEFR levels.
+
 ---
 
 ## 4. Cascading & Deletion Invariants
@@ -174,5 +183,7 @@ Dedicated repository holding words or grammar rules marked for focused review or
    - Cleans up `WordTopics` and `WordExamTags` junction records without deleting the shared `Topic` or `ExamTag` entities.
 2. **Deleting a `GrammarRule`**:
    - Automatically cascades and deletes child `GrammarExamples`.
-3. **Restoring Backups**:
+3. **Deleting a `StudyRoadmap`**:
+   - Automatically cascades and deletes child `RoadmapMilestones` and `RoadmapNodes`.
+4. **Restoring Backups**:
    - Flushes connection pools via `SqliteConnection.ClearAllPools()` to release file locks before atomic swap.
