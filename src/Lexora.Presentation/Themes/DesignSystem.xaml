@@ -16,7 +16,6 @@
             <!-- Crisp border & surface tokens for Light mode (eliminates washed out cards, chips & badges) -->
             <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#000000" Opacity="0.13" />
             <SolidColorBrush x:Key="SubtleFillColorSecondaryBrush" Color="#EEF2F6" />
-            <SolidColorBrush x:Key="SubtleFillColorTertiaryBrush" Color="#E2E8F0" />
             <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#475467" />
             <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#667085" />
             <!-- High-contrast semantic solid brushes for Light mode badges, chips & stats -->
@@ -25,18 +24,10 @@
             <SolidColorBrush x:Key="SystemFillColorCautionBrush" Color="#B54708" />
             <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#0066CC" />
             <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#0052A3" />
-            <!-- Metric stat card border: crisp edge so cards pop against light Mica -->
-            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="#000000" Opacity="0.12" />
             <!-- Advisor card accent border -->
             <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.65" />
-            <!-- Subtle card stroke token -->
-            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="#000000" Opacity="0.10" />
-            <!-- Input background & border tokens for crisp contrast -->
-            <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="#FAFAFA" />
-            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="#000000" Opacity="0.18" />
             <!-- Flashcard crisp border for tactile elevation in light mode -->
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="#000000" Opacity="0.12" />
-            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="#000000" Opacity="0.12" />
             <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="LexoraToastBorderBrush" Color="#000000" Opacity="0.15" />
@@ -52,9 +43,6 @@
             <!-- Formula card & syntax tokens for Grammar & Test -->
             <SolidColorBrush x:Key="LexoraFormulaCardBackgroundBrush" Color="#F0F6FF" />
             <SolidColorBrush x:Key="LexoraFormulaCardBorderBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.35" />
-            <SolidColorBrush x:Key="LexoraCodeTokenConditionBrush" Color="#006687" />
-            <SolidColorBrush x:Key="LexoraCodeTokenResultBrush" Color="#107C41" />
-            <SolidColorBrush x:Key="LexoraOptionSelectedBorderBrush" Color="{ThemeResource SystemAccentColor}" />
             <SolidColorBrush x:Key="LexoraOptionSelectedBackgroundBrush" Color="#EBF3FC" />
             <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColor}" />
             <!-- Activity Heatmap Level Brushes -->
@@ -75,7 +63,6 @@
             <!-- Fluent 2 surface & text depth tokens for Dark / Default mode -->
             <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#FFFFFF" Opacity="0.09" />
             <SolidColorBrush x:Key="SubtleFillColorSecondaryBrush" Color="#FFFFFF" Opacity="0.06" />
-            <SolidColorBrush x:Key="SubtleFillColorTertiaryBrush" Color="#FFFFFF" Opacity="0.09" />
             <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#C5C5C5" />
             <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="#A0A0A0" />
             <SolidColorBrush x:Key="SystemFillColorSuccessBrush" Color="#6CCB5F" />
@@ -83,18 +70,10 @@
             <SolidColorBrush x:Key="SystemFillColorCautionBrush" Color="#FFD580" />
             <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#60CDFF" />
             <SolidColorBrush x:Key="AccentTextFillColorPrimaryBrush" Color="#60CDFF" />
-            <!-- Metric stat card border: luminous edge so cards don't dissolve in dark background -->
-            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
             <!-- Advisor card accent border -->
             <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.65" />
-            <!-- Subtle card stroke token -->
-            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.5" />
-            <!-- Input background & border tokens for dark mode -->
-            <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="#242424" />
-            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.55" />
             <!-- Flashcard glowing border for tactile elevation in dark mode -->
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.7" />
-            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemChromeDisabledLowColor}" Opacity="0.65" />
             <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" />
             <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="#282828" />
@@ -111,9 +90,6 @@
             <!-- Formula card & syntax tokens for Grammar & Test -->
             <SolidColorBrush x:Key="LexoraFormulaCardBackgroundBrush" Color="#0A192F" />
             <SolidColorBrush x:Key="LexoraFormulaCardBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" Opacity="0.45" />
-            <SolidColorBrush x:Key="LexoraCodeTokenConditionBrush" Color="#60CDFF" />
-            <SolidColorBrush x:Key="LexoraCodeTokenResultBrush" Color="#39D353" />
-            <SolidColorBrush x:Key="LexoraOptionSelectedBorderBrush" Color="{ThemeResource SystemAccentColorLight2}" />
             <SolidColorBrush x:Key="LexoraOptionSelectedBackgroundBrush" Color="#0C2548" />
             <!-- Activity Heatmap Level Brushes -->
             <SolidColorBrush x:Key="HeatmapLevel0Brush" Color="#2D333B" />
@@ -128,13 +104,8 @@
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <SolidColorBrush x:Key="LexoraHeroCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-            <SolidColorBrush x:Key="LexoraMetricCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraAdvisorBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-            <SolidColorBrush x:Key="LexoraCardStrokeSubtleBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-            <SolidColorBrush x:Key="LexoraInputBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
-            <SolidColorBrush x:Key="LexoraInputBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
             <SolidColorBrush x:Key="LexoraFlashcardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-            <SolidColorBrush x:Key="LexoraElevatedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraThemeCardSelectedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <!-- Floating Toast notification tokens (100% opaque, zero bleed-through) -->
             <SolidColorBrush x:Key="LexoraToastBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
@@ -150,9 +121,6 @@
             <!-- Formula card & syntax tokens for Grammar & Test -->
             <SolidColorBrush x:Key="LexoraFormulaCardBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="LexoraFormulaCardBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-            <SolidColorBrush x:Key="LexoraCodeTokenConditionBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-            <SolidColorBrush x:Key="LexoraCodeTokenResultBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-            <SolidColorBrush x:Key="LexoraOptionSelectedBorderBrush" Color="{ThemeResource SystemColorHighlightColor}" />
             <SolidColorBrush x:Key="LexoraOptionSelectedBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <!-- Activity Heatmap Level Brushes -->
             <SolidColorBrush x:Key="HeatmapLevel0Brush" Color="{ThemeResource SystemColorWindowColor}" />
@@ -213,36 +181,6 @@
         <Setter Property="Foreground" Value="{ThemeResource TextFillColorTertiaryBrush}" />
     </Style>
 
-    <!-- Card & Surface Hierarchy -->
-    <Style x:Key="ModernElevatedCard" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
-        <Setter Property="Padding" Value="20" />
-    </Style>
-
-    <Style x:Key="ModernHeroCard" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource RadiusCard}" />
-        <Setter Property="Padding" Value="24" />
-    </Style>
-
-    <Style x:Key="ModernSubtleCard" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
-        <Setter Property="Padding" Value="16" />
-    </Style>
-
-    <Style x:Key="ModernInteractiveCard" TargetType="Border" BasedOn="{StaticResource ModernElevatedCard}">
-        <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
-        <Setter Property="Padding" Value="18" />
-    </Style>
-
     <!-- Syntax & Formula Display Card -->
     <Style x:Key="LexoraFormulaCard" TargetType="Border">
         <Setter Property="Background" Value="{ThemeResource LexoraFormulaCardBackgroundBrush}" />
@@ -250,33 +188,6 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource RadiusLarge}" />
         <Setter Property="Padding" Value="18,14" />
-    </Style>
-
-    <!-- Exam Option Card Style -->
-    <Style x:Key="LexoraOptionCard" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
-        <Setter Property="Padding" Value="14,12" />
-    </Style>
-
-    <!-- Filter Buttons (Pills) -->
-    <Style x:Key="PillFilterButton" TargetType="Button">
-        <Setter Property="helpers:CursorHelper.Cursor" Value="Hand" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="14,6" />
-        <Setter Property="FontSize" Value="13" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-    </Style>
-
-    <Style x:Key="PillFilterActiveButton" TargetType="Button" BasedOn="{StaticResource PillFilterButton}">
-        <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
-        <Setter Property="Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
     </Style>
 
     <!-- Circular Icon Button -->
@@ -330,58 +241,6 @@
         <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource SystemFillColorSuccessBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-    </Style>
-
-    <!-- Badges & Chips -->
-    <Style x:Key="BadgeLevelCefr" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource ControlFillColorSecondaryBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="8,3" />
-    </Style>
-
-    <Style x:Key="BadgePartOfSpeech" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource ControlFillColorSecondaryBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="8,3" />
-    </Style>
-
-    <Style x:Key="BadgeExamTag" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource ControlFillColorSecondaryBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="8,3" />
-    </Style>
-
-    <!-- Semantic Standard Badges (High Contrast Fluent 2 Pairings) -->
-    <Style x:Key="LexoraBadgeSuccessStyle" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource SystemFillColorSuccessBackgroundBrush}" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="8,3" />
-    </Style>
-
-    <Style x:Key="LexoraBadgeCautionStyle" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource SystemFillColorCautionBackgroundBrush}" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="8,3" />
-    </Style>
-
-    <Style x:Key="LexoraBadgeCriticalStyle" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource SystemFillColorCriticalBackgroundBrush}" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="8,3" />
-    </Style>
-
-    <Style x:Key="LexoraBadgeNeutralStyle" TargetType="Border">
-        <Setter Property="Background" Value="{ThemeResource ControlFillColorSecondaryBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="8,3" />
     </Style>
 
     <!-- Empty State Style -->
@@ -504,12 +363,6 @@
     <!-- Specialized Typography Tokens -->
     <Style x:Key="LexoraDisplayTitleStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="22" />
-        <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
-    </Style>
-
-    <Style x:Key="LexoraMetricNumberStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="30" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
     </Style>
