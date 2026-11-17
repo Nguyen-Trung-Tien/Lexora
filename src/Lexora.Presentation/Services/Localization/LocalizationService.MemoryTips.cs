@@ -11,7 +11,7 @@ public partial class LocalizationService
         vi["Shell_TooltipMemoryTips"] = "Mẹo ghi nhớ & Mẹo làm bài (Ctrl+Shift+M)";
 
         vi["MemoryTips_Title"] = "Mẹo ghi nhớ & Bí kíp làm bài";
-        vi["MemoryTips_Subtitle"] = "Kho câu thần chú, mẹo liên tưởng và bẫy đề thi kinh điển cho TOEIC, IELTS, VSTEP";
+        vi["MemoryTips_Subtitle"] = "Mẹo ghi nhớ nhanh, câu thần chú và bẫy đề thi TOEIC, IELTS, VSTEP";
         vi["MemoryTips_StatTotal"] = "Tổng số mẹo:";
         vi["MemoryTips_StatPinned"] = "Đã ghim:";
         vi["MemoryTips_StatTraps"] = "Bẫy đề thi:";
@@ -116,7 +116,7 @@ public partial class LocalizationService
         en["Shell_TooltipMemoryTips"] = "Memory Tips & Exam Strategies (Ctrl+Shift+M)";
 
         en["MemoryTips_Title"] = "Memory Tips & Exam Strategies";
-        en["MemoryTips_Subtitle"] = "High-yield mnemonic hooks, cognitive associations, and classic exam traps for TOEIC, IELTS, and VSTEP";
+        en["MemoryTips_Subtitle"] = "Mnemonic hooks and common exam traps for TOEIC, IELTS, and VSTEP";
         en["MemoryTips_StatTotal"] = "Total Tips:";
         en["MemoryTips_StatPinned"] = "Pinned:";
         en["MemoryTips_StatTraps"] = "Exam Traps:";

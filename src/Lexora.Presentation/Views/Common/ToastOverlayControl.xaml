@@ -98,17 +98,20 @@
                             </Button>
                         </Grid>
 
-                        <!-- Remaining Time Indicator Bar Track -->
-                        <ProgressBar Grid.Row="1"
-                                     Minimum="0"
-                                     Maximum="100"
-                                     Value="{x:Bind RemainingPercent, Mode=OneWay}"
-                                     Foreground="{x:Bind AccentBrush, Mode=OneWay}"
-                                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                     Margin="0,8,0,0"
-                                     MinHeight="2"
-                                     Height="2"
-                                     CornerRadius="1" />
+                        <!-- Smooth GPU-composited Remaining Time Bar -->
+                        <Border Grid.Row="1"
+                                Margin="0,8,0,0"
+                                Height="2.5"
+                                CornerRadius="1.25"
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                            <Border Background="{x:Bind AccentBrush, Mode=OneWay}"
+                                    CornerRadius="1.25"
+                                    RenderTransformOrigin="0,0.5">
+                                <Border.RenderTransform>
+                                    <ScaleTransform ScaleX="{x:Bind RemainingFraction, Mode=OneWay}" />
+                                </Border.RenderTransform>
+                            </Border>
+                        </Border>
                     </Grid>
                 </Border>
             </DataTemplate>

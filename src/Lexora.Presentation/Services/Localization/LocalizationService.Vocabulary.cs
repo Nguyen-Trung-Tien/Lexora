@@ -71,7 +71,7 @@ public partial class LocalizationService
         vi["Vocab_Import"] = "Nhập dữ liệu";
         vi["Vocab_ImportFailed"] = "Lỗi nhập từ vựng: {0}";
         vi["Vocab_WordAlreadyExists"] = "Từ vựng '{0}' đã tồn tại trong kho từ vựng.";
-        vi["Vocab_SmartImport"] = "Nhập thông minh (Tự động)...";
+        vi["Vocab_SmartImport"] = "Nhập thông minh...";
         vi["Vocab_SortBy"] = "Sắp xếp theo";
         vi["Vocab_SortDefault"] = "Mặc định (Mới nhất)";
         vi["Vocab_SortAlpha"] = "Bảng chữ cái (A - Z)";
@@ -313,7 +313,7 @@ public partial class LocalizationService
         en["Vocab_Import"] = "Import Data";
         en["Vocab_ImportFailed"] = "Vocabulary import failed: {0}";
         en["Vocab_WordAlreadyExists"] = "Word '{0}' already exists in vocabulary.";
-        en["Vocab_SmartImport"] = "Smart Import (Auto-detect)...";
+        en["Vocab_SmartImport"] = "Smart Import...";
         en["Vocab_SortBy"] = "Sort by";
         en["Vocab_SortDefault"] = "Default (Newest)";
         en["Vocab_SortAlpha"] = "Alphabetical (A - Z)";

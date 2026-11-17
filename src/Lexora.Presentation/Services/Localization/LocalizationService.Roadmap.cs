@@ -41,7 +41,7 @@ public partial class LocalizationService
         vi["Roadmap_ViewInVocab"] = "Xem trong từ điển";
         vi["Roadmap_LaunchFlashcards"] = "Học thẻ ghi nhớ (SM-2)";
         vi["Roadmap_DashboardWidgetTitle"] = "Lộ trình học tập cá nhân";
-        vi["Roadmap_ContinueRoadmap"] = "Tiếp tục học lộ trình";
+        vi["Roadmap_ContinueRoadmap"] = "Tiếp tục học";
         vi["Roadmap_ReturnToRoadmap"] = "Quay lại Lộ trình";
         vi["Roadmap_AdvanceProgress"] = "+25% Tiến độ";
         vi["Roadmap_MarkMastered"] = "Hoàn thành";
@@ -133,7 +133,7 @@ public partial class LocalizationService
         en["Roadmap_ViewInVocab"] = "View in Dictionary";
         en["Roadmap_LaunchFlashcards"] = "Study Flashcards (SM-2)";
         en["Roadmap_DashboardWidgetTitle"] = "Personalized Learning Roadmap";
-        en["Roadmap_ContinueRoadmap"] = "Continue Roadmap";
+        en["Roadmap_ContinueRoadmap"] = "Continue";
         en["Roadmap_ReturnToRoadmap"] = "Return to Roadmap";
         en["Roadmap_AdvanceProgress"] = "+25% Progress";
         en["Roadmap_MarkMastered"] = "Complete";

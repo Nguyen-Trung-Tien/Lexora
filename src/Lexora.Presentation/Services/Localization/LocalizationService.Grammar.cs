@@ -7,7 +7,7 @@ public partial class LocalizationService
         // ==========================================
         // Grammar — vi-VN (Tiếng Việt)
         // ==========================================
-        vi["Grammar_SmartImport"] = "Nhập thông minh (Tự động)...";
+        vi["Grammar_SmartImport"] = "Nhập thông minh...";
         vi["Grammar_ImportFailed"] = "Lỗi nhập ngữ pháp: {0}";
         vi["Grammar_RelatedTitle"] = "Cấu trúc liên quan & Gợi ý";
         vi["Grammar_RelatedSubtitle"] = "Cấu trúc tương tự, điểm ngữ pháp dễ nhầm lẫn và từ vựng liên kết";
@@ -91,7 +91,7 @@ public partial class LocalizationService
         vi["Grammar_Practice_NextQuestionTip"] = "Nhấn 'Câu tiếp theo' để tiếp tục";
         vi["Grammar_SmartImport_Title"] = "Nhập dữ liệu Ngữ pháp thông minh";
         vi["Grammar_SmartImport_Subtitle"] = "Dán trực tiếp hoặc tải tệp (JSON, CSV, TXT) chứa danh sách cấu trúc ngữ pháp, giải thích và ví dụ câu.";
-        vi["Grammar_SmartImport_AnalyzeBtn"] = "Tiến hành nhập dữ liệu";
+        vi["Grammar_SmartImport_AnalyzeBtn"] = "Nhập dữ liệu";
         vi["Grammar_ServiceNotAvailable"] = "Dịch vụ nhập/xuất ngữ pháp không khả dụng.";
         vi["Grammar_Help_Title"] = "Trợ giúp: Ngữ pháp & Cấu trúc câu";
         vi["Grammar_Help_Subtitle"] = "Làm chủ công thức và quy tắc ngữ pháp";
@@ -100,7 +100,7 @@ public partial class LocalizationService
         // ==========================================
         // Grammar — en-US (English)
         // ==========================================
-        en["Grammar_SmartImport"] = "Smart Import (Auto-detect)...";
+        en["Grammar_SmartImport"] = "Smart Import...";
         en["Grammar_ImportFailed"] = "Grammar import failed: {0}";
         en["Grammar_RelatedTitle"] = "Related Structures & Suggestions";
         en["Grammar_RelatedSubtitle"] = "Similar structures, commonly confused grammar, and linked vocabulary";

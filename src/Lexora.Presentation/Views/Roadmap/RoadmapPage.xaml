@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:enums="using:Lexora.Domain.Enums"
+    xmlns:services="using:Lexora.Presentation.Services"
     Background="Transparent"
     Loaded="Page_Loaded"
     SizeChanged="Page_SizeChanged"
@@ -91,7 +92,7 @@
                             Style="{ThemeResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE73E;" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                <TextBlock Text="Select" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Action_Select')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontWeight="SemiBold" />
                             </StackPanel>
                         </Button>
                         <Button
@@ -499,7 +500,7 @@
                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Command="{x:Bind ViewModel.ZoomOutCommand}"
                                 Style="{ThemeResource SubtleButtonStyle}"
-                                ToolTipService.ToolTip="Zoom Out">
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_ZoomOut')}">
                                 <FontIcon Glyph="&#xE71F;" FontSize="12" />
                             </Button>
                             <Button
@@ -507,7 +508,7 @@
                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Command="{x:Bind ViewModel.ResetZoomCommand}"
                                 Style="{ThemeResource SubtleButtonStyle}"
-                                ToolTipService.ToolTip="Reset Zoom">
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_ResetZoom')}">
                                 <TextBlock
                                     FontSize="12"
                                     FontWeight="SemiBold"
@@ -519,7 +520,7 @@
                                 CornerRadius="{ThemeResource ControlCornerRadius}"
                                 Command="{x:Bind ViewModel.ZoomInCommand}"
                                 Style="{ThemeResource SubtleButtonStyle}"
-                                ToolTipService.ToolTip="Zoom In">
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_ZoomIn')}">
                                 <FontIcon Glyph="&#xE8A3;" FontSize="12" />
                             </Button>
                         </StackPanel>

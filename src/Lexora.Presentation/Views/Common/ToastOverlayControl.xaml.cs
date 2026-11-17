@@ -23,22 +23,25 @@ public sealed class ToastCardItem : INotifyPropertyChanged
     public string IconGlyph { get; init; } = "\uE946";
     public Brush? AccentBrush { get; init; }
     public Brush? BadgeBackground { get; init; }
-    public int TotalDurationMs { get; init; } = 4000;
-    public int RemainingMs { get; set; } = 4000;
+    public double TotalDurationMs { get; init; } = 4000;
+    public double RemainingMs { get; set; } = 4000;
     public bool IsPaused { get; set; }
 
     public Visibility TitleVisibility => string.IsNullOrWhiteSpace(Title) ? Visibility.Collapsed : Visibility.Visible;
     public Visibility ActionVisibility => string.IsNullOrWhiteSpace(ActionText) ? Visibility.Collapsed : Visibility.Visible;
+
+    public double RemainingFraction => Math.Clamp(_remainingPercent / 100.0, 0.0, 1.0);
 
     public double RemainingPercent
     {
         get => _remainingPercent;
         set
         {
-            if (Math.Abs(_remainingPercent - value) > 0.1)
+            if (Math.Abs(_remainingPercent - value) > 0.05)
             {
                 _remainingPercent = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(RemainingFraction));
             }
         }
     }
@@ -52,12 +55,13 @@ public sealed class ToastCardItem : INotifyPropertyChanged
 public sealed partial class ToastOverlayControl : UserControl
 {
     private const int MaxVisibleToasts = 3;
-    private const int TickIntervalMs = 50;
+    private const int TickIntervalMs = 16;
 
     public ILocalizationService Loc { get; }
     private readonly ObservableCollection<ToastCardItem> _visibleToasts = new();
     private readonly Queue<ToastNotification> _pendingQueue = new();
     private readonly DispatcherTimer _tickTimer;
+    private long _lastTickTimestamp;
 
     public ToastOverlayControl()
     {
@@ -167,6 +171,7 @@ public sealed partial class ToastOverlayControl : UserControl
 
         if (hasToasts && !_tickTimer.IsEnabled)
         {
+            _lastTickTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
             _tickTimer.Start();
         }
         else if (!hasToasts && _tickTimer.IsEnabled)
@@ -177,13 +182,19 @@ public sealed partial class ToastOverlayControl : UserControl
 
     private void TickTimer_Tick(object? sender, object e)
     {
+        var now = System.Diagnostics.Stopwatch.GetTimestamp();
+        double elapsedMs = (_lastTickTimestamp == 0)
+            ? TickIntervalMs
+            : Math.Clamp((now - _lastTickTimestamp) * 1000.0 / System.Diagnostics.Stopwatch.Frequency, 1.0, 100.0);
+        _lastTickTimestamp = now;
+
         List<Guid>? expiredIds = null;
 
         foreach (var item in _visibleToasts)
         {
             if (item.IsPaused) continue;
 
-            item.RemainingMs -= TickIntervalMs;
+            item.RemainingMs -= elapsedMs;
             if (item.RemainingMs <= 0)
             {
                 item.RemainingPercent = 0;
@@ -192,7 +203,7 @@ public sealed partial class ToastOverlayControl : UserControl
             }
             else
             {
-                item.RemainingPercent = (double)item.RemainingMs / item.TotalDurationMs * 100.0;
+                item.RemainingPercent = item.RemainingMs / item.TotalDurationMs * 100.0;
             }
         }
 

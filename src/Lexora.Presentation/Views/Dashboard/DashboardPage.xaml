@@ -367,10 +367,10 @@
                         </Border>
                     </Grid>
 
-                    <!-- 7-Day Visual Workload Bar Chart -->
+                    <!-- 7-Day Visual Workload Bar Chart (7 equal columns stretching 100% width) -->
                     <ItemsRepeater ItemsSource="{x:Bind ViewModel.ForecastDaysList}">
                         <ItemsRepeater.Layout>
-                            <UniformGridLayout MinItemWidth="72" MinColumnSpacing="8" MinRowSpacing="8" ItemsStretch="Fill" />
+                            <UniformGridLayout MinItemWidth="64" MaximumRowsOrColumns="7" MinColumnSpacing="8" MinRowSpacing="8" ItemsStretch="Fill" />
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate x:DataType="dto:DailyForecastItemDto">
@@ -526,43 +526,6 @@
                             </ItemsControl>
                         </StackPanel>
                     </Border>
-
-                    <!-- Memory Status Breakdown & Retention (Balances Right Column Height) -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
-                        <StackPanel Spacing="14">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionDistribution')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                </StackPanel>
-                                <Border Grid.Column="1" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_OverallAccuracy')}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="12" FontWeight="SemiBold" />
-                                        <TextBlock Text="{x:Bind ViewModel.AccuracyRate, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                        <TextBlock Text="%" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-
-                            <ItemsControl ItemsSource="{x:Bind ViewModel.StatusBreakdown}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="dto:LearningStatusDistributionDto">
-                                        <Grid ColumnDefinitions="120,*,50,50" Margin="0,5" VerticalAlignment="Center">
-                                            <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold" FontSize="12.5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                                            <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="7" CornerRadius="4" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12.5" />
-                                            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                <TextBlock Text="{x:Bind Percentage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
-                                                <TextBlock Text="%" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </Border>
                 </StackPanel>
             </Grid>
 
@@ -639,7 +602,7 @@
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <ItemsRepeater ItemsSource="{x:Bind ViewModel.ExamPredictionsList}">
                             <ItemsRepeater.Layout>
-                                <UniformGridLayout MinItemWidth="210" MinRowSpacing="10" MinColumnSpacing="12" ItemsStretch="Fill" />
+                                <UniformGridLayout MinItemWidth="210" MaximumRowsOrColumns="3" MinRowSpacing="10" MinColumnSpacing="12" ItemsStretch="Fill" />
                             </ItemsRepeater.Layout>
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="dto:ExamScorePredictionDto">
@@ -677,34 +640,29 @@
                         </ItemsRepeater>
                     </StackPanel>
 
-                    <!-- Memory Health Segments -->
+                    <!-- Memory Health Segments (4 equal columns stretching 100% width) -->
                     <StackPanel Spacing="8">
                         <TextBlock Text="{x:Bind Loc.GetString('LearningIntel_MemoryHealth')}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                                      HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                            <ItemsControl ItemsSource="{x:Bind ViewModel.MemoryHealthList}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="8" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="dto:MemoryHealthSegmentDto">
-                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6" MinWidth="115">
-                                            <StackPanel Spacing="2">
-                                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <TextBlock Text="{x:Bind StatusName}" FontSize="11.5" FontWeight="Bold" />
-                                                    <TextBlock Text="{x:Bind WordCount}" FontSize="11.5" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                </StackPanel>
-                                                <TextBlock Text="{x:Bind Recommendation}" FontSize="10.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxWidth="140" />
+                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.MemoryHealthList}">
+                            <ItemsRepeater.Layout>
+                                <UniformGridLayout MinItemWidth="160" MaximumRowsOrColumns="4" MinColumnSpacing="10" MinRowSpacing="10" ItemsStretch="Fill" />
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="dto:MemoryHealthSegmentDto">
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
+                                        <StackPanel Spacing="3">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{x:Bind StatusName}" FontSize="12" FontWeight="Bold" />
+                                                <TextBlock Text="{x:Bind WordCount}" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                             </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                                            <TextBlock Text="{x:Bind Recommendation}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
                     </StackPanel>
 
                     <!-- HIGH-IMPACT LEARNING RECOMMENDATION BANNER -->
@@ -730,7 +688,8 @@
                 </StackPanel>
             </Expander>
 
-            <!-- FORGETTING CURVE & RETENTION COMPARISON CARD -->
+            <!-- FORGETTING CURVE & MEMORY STATUS BREAKDOWN (Balanced 2-Column Row) -->
+            <Grid ColumnDefinitions="1.15*,1*" ColumnSpacing="16">
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
@@ -800,6 +759,45 @@
                     </ItemsControl>
                 </StackPanel>
             </Border>
+
+            <!-- Memory Status Breakdown & Retention -->
+            <Border Grid.Column="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionDistribution')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_OverallAccuracy')}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="12" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Bind ViewModel.AccuracyRate, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Text="%" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.StatusBreakdown}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="dto:LearningStatusDistributionDto">
+                                <Grid ColumnDefinitions="120,*,50,50" Margin="0,5" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold" FontSize="12.5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="7" CornerRadius="4" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12.5" />
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind Percentage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                                        <TextBlock Text="%" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+            </Grid>
 
             <!-- SECTION 2: Exam Target Progress -->
             <StackPanel Spacing="14">

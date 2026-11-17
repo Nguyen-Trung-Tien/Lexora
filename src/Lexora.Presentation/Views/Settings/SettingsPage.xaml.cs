@@ -53,7 +53,6 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             }
             else if (e.PropertyName == nameof(ViewModel.CurrentVersionNotes) || (e.PropertyName == nameof(ViewModel.IsShowingCurrentVersionNotes) && ViewModel.IsShowingCurrentVersionNotes))
             {
-                DispatcherQueue.TryEnqueue(UpdateInlineCurrentVersionNotes);
             }
         };
 
@@ -72,7 +71,6 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
             UpdateInlineReleaseNotes();
-            UpdateInlineCurrentVersionNotes();
             ViewModel.UpdateLanguageState();
             Bindings.Update();
         }
@@ -96,8 +94,6 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
             UpdateInlineReleaseNotes();
-            UpdateInlineCurrentVersionNotes();
-            UpdateInlineCurrentVersionNotes();
             Bindings.Update();
         }
 
@@ -132,7 +128,6 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
             UpdateAccentButtons();
             UpdateAlgorithmButtons();
             UpdateInlineReleaseNotes();
-            UpdateInlineCurrentVersionNotes();
 
             SpeechRateCombo.SelectedIndex = ViewModel.SpeechRate switch
             {
@@ -1060,16 +1055,6 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
         if (!string.IsNullOrWhiteSpace(notes))
         {
             Helpers.ReleaseNotesRenderer.RenderMarkdown(notes, InlineReleaseNotesPanel, this, Loc);
-        }
-    }
-
-    private void UpdateInlineCurrentVersionNotes()
-    {
-        if (InlineCurrentVersionNotesPanel == null) return;
-        var notes = ViewModel.CurrentVersionNotes;
-        if (!string.IsNullOrWhiteSpace(notes))
-        {
-            Helpers.ReleaseNotesRenderer.RenderMarkdown(notes, InlineCurrentVersionNotesPanel, this, Loc);
         }
     }
 

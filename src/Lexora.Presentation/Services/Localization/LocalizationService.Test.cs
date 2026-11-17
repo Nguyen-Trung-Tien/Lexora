@@ -10,15 +10,15 @@ public partial class LocalizationService
         // Practice & Test
         vi["Test_Title"] = "Luyện Tập & Kiểm Tra";
         vi["Test_Subtitle"] = "Chọn thể loại câu hỏi và số lượng để kiểm tra mức độ ghi nhớ từ vựng";
-        vi["Test_StartTest"] = "Bắt đầu làm bài thi";
+        vi["Test_StartTest"] = "Bắt đầu thi";
         vi["Test_ExitTest"] = "Thoát bài thi";
         vi["Test_Question"] = "Câu hỏi";
         vi["Test_SubmitAnswer"] = "Xác nhận đáp án";
         vi["Test_NextQuestion"] = "Câu tiếp theo";
         vi["Test_FinishTest"] = "Hoàn thành bài thi";
         vi["Test_ResultTitle"] = "Kết Quả Bài Kiểm Tra";
-        vi["Test_RetakeTest"] = "Làm lại bài thi";
-        vi["Test_ReviewWeakWords"] = "Ôn lại các từ làm sai";
+        vi["Test_RetakeTest"] = "Làm lại";
+        vi["Test_ReviewWeakWords"] = "Ôn từ sai";
         vi["Test_ChooseFormat"] = "1. Chọn dạng bài kiểm tra";
         vi["Test_ChooseFormatDesc"] = "Chọn định dạng câu hỏi để kiểm tra khả năng nhận diện, chính tả hoặc phản xạ từ";
         vi["Test_FormatMixed"] = "Kiểm tra hỗn hợp";
@@ -68,8 +68,8 @@ public partial class LocalizationService
         vi["Test_Incorrect"] = "Số câu sai";
         vi["Test_Accuracy"] = "Độ chính xác";
         vi["Test_TimeTaken"] = "Thời gian làm bài";
-        vi["Test_ReviewInSm2"] = "Ôn tập theo Spaced Repetition (SM-2)";
-        vi["Test_SaveWeakWordsToStorage"] = "Lưu vào Kho lưu trữ";
+        vi["Test_ReviewInSm2"] = "Ôn tập SM-2";
+        vi["Test_SaveWeakWordsToStorage"] = "Lưu vào kho";
         vi["Test_SavedWeakWordsToStorageSuccess"] = "Đã lưu thành công {0} từ yếu vào Kho lưu trữ cá nhân.";
         vi["Test_WeakWordsSection"] = "Từ vựng cần ôn tập lại";
         vi["Test_NeedsReview"] = "Cần ôn tập";
@@ -134,8 +134,8 @@ public partial class LocalizationService
         en["Test_NextQuestion"] = "Next Question";
         en["Test_FinishTest"] = "Finish Test";
         en["Test_ResultTitle"] = "Test Results";
-        en["Test_RetakeTest"] = "Retake Test";
-        en["Test_ReviewWeakWords"] = "Review Weak Words";
+        en["Test_RetakeTest"] = "Retake";
+        en["Test_ReviewWeakWords"] = "Review Mistakes";
         en["Test_ChooseFormat"] = "1. Choose Test Format";
         en["Test_ChooseFormatDesc"] = "Select question style to test recognition, spelling, or active recall";
         en["Test_FormatMixed"] = "Mixed Test";
@@ -185,7 +185,7 @@ public partial class LocalizationService
         en["Test_Incorrect"] = "Incorrect";
         en["Test_Accuracy"] = "Accuracy";
         en["Test_TimeTaken"] = "Time Taken";
-        en["Test_ReviewInSm2"] = "Review in Spaced Repetition (SM-2)";
+        en["Test_ReviewInSm2"] = "Review in SM-2";
         en["Test_SaveWeakWordsToStorage"] = "Save to Storage";
         en["Test_SavedWeakWordsToStorageSuccess"] = "Successfully saved {0} weak words to Learning Storage.";
         en["Test_WeakWordsSection"] = "Weak Words Requiring Review";

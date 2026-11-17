@@ -62,6 +62,7 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
         {
             Bindings.Update();
             UpdateFilterPillStyles();
+            UpdateAudioFlyoutLabels();
         }
         else
         {
@@ -69,8 +70,23 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
             {
                 Bindings.Update();
                 UpdateFilterPillStyles();
+                UpdateAudioFlyoutLabels();
             });
         }
+    }
+
+    private void UpdateAudioFlyoutLabels()
+    {
+        var us = Loc.GetString("Settings_Pronunciation_US");
+        var uk = Loc.GetString("Settings_Pronunciation_UK");
+        if (AudioAccentUsItem != null) AudioAccentUsItem.Content = us;
+        if (AudioAccentUkItem != null) AudioAccentUkItem.Content = uk;
+        if (RoleplayAccentUsItem != null) RoleplayAccentUsItem.Content = us;
+        if (RoleplayAccentUkItem != null) RoleplayAccentUkItem.Content = uk;
+        if (AudioSpeedSlowItem != null) AudioSpeedSlowItem.Content = Loc.GetString("Settings_Speed_Slow");
+        if (AudioSpeedNormalItem != null) AudioSpeedNormalItem.Content = Loc.GetString("Settings_Speed_Normal");
+        if (AudioSpeedFastItem != null) AudioSpeedFastItem.Content = Loc.GetString("Settings_Speed_Fast");
+        if (AudioSpeedVeryFastItem != null) AudioSpeedVeryFastItem.Content = Loc.GetString("Settings_Speed_VeryFast");
     }
 
     public void OnThemeChanged()

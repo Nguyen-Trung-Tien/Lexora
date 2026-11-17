@@ -11,8 +11,8 @@ public partial class LocalizationService
         vi["Dashboard_HeroTitle"] = "Ôn tập ngắt quãng (SM-2)";
         vi["Dashboard_OfflineReady"] = "Sẵn sàng ngoại tuyến";
         vi["Dashboard_HeroGreeting"] = "Sẵn sàng chinh phục mục tiêu từ vựng hôm nay?";
-        vi["Dashboard_StartReview"] = "Bắt đầu ôn tập hôm nay";
-        vi["Dashboard_QuickPractice"] = "Luyện trắc nghiệm nhanh";
+        vi["Dashboard_StartReview"] = "Ôn tập ngay";
+        vi["Dashboard_QuickPractice"] = "Kiểm tra nhanh";
         vi["Dashboard_TotalWords"] = "Tổng số từ";
         vi["Dashboard_DueToday"] = "Cần ôn hôm nay";
         vi["Dashboard_Mastered"] = "Đã thành thạo";
@@ -59,7 +59,7 @@ public partial class LocalizationService
         vi["Dashboard_DailyConsistency"] = "Thói quen hàng ngày";
         vi["Dashboard_StudyPlannerAction"] = "Lộ trình học";
         vi["Dashboard_ListeningLabAction"] = "Luyện nghe";
-        vi["Dashboard_Subtitle"] = "Chinh phục từ vựng tiếng Anh khoa học với phương pháp lặp lại ngắt quãng, truy xuất chủ động và theo dõi kỳ thi.";
+        vi["Dashboard_Subtitle"] = "Tổng quan tiến độ học tập, từ đến hạn và mục tiêu mỗi ngày";
         vi["Dashboard_StatActive"] = "Đang học";
         vi["Dashboard_StatUrgent"] = "Cần ôn";
         vi["Dashboard_StatRetention"] = "Ghi nhớ";
@@ -220,7 +220,7 @@ public partial class LocalizationService
         en["Dashboard_DailyConsistency"] = "Daily Consistency";
         en["Dashboard_StudyPlannerAction"] = "Study Planner";
         en["Dashboard_ListeningLabAction"] = "Listening Lab";
-        en["Dashboard_Subtitle"] = "Master English vocabulary scientifically with active recall drills, spaced repetition, and exam readiness tracking.";
+        en["Dashboard_Subtitle"] = "Daily progress, due reviews, and study goals at a glance";
         en["Dashboard_StatActive"] = "Active";
         en["Dashboard_StatUrgent"] = "Urgent";
         en["Dashboard_StatRetention"] = "Retention";
@@ -306,7 +306,7 @@ public partial class LocalizationService
         en["Intelligence_ExamReadiness"] = "Exam Readiness Index";
         en["Intelligence_WordsPerWeek"] = "words/week";
         en["LearningIntel_Title"] = "Learning Intelligence & Cognitive Analytics";
-        en["LearningIntel_Desc"] = "Real-time Ebbinghaus retrievability, cognitive load forecast and memory dynamics";
+        en["LearningIntel_Desc"] = "Ebbinghaus retention forecast, learning velocity, and score estimates";
         en["LearningIntel_PeakTime"] = "Peak Time";
         en["LearningIntel_MasteryVelocity"] = "Mastery Velocity";
         en["LearningIntel_ExamReadiness"] = "Exam Readiness";
