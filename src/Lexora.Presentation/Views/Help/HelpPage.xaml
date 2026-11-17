@@ -143,36 +143,35 @@
                 </Grid>
 
                 <!-- 3. BALANCED 2-COLUMN GUIDE CARDS GRID -->
-                <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredGuides, Mode=OneWay}">
+                <ItemsRepeater x:Name="GuidesRepeater" ItemsSource="{x:Bind ViewModel.FilteredGuides, Mode=OneWay}">
                     <ItemsRepeater.Layout>
-                        <UniformGridLayout MinItemWidth="440" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
+                        <UniformGridLayout x:Name="GuidesLayout" MinItemWidth="380" MaximumRowsOrColumns="2" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="vm:HelpGuideDisplayItem">
                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="18"
-                                    VerticalAlignment="Top">
+                                    VerticalAlignment="Stretch">
                                 <StackPanel Spacing="14">
                                     <!-- Card Header -->
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
                                         <Border Width="44" Height="44" CornerRadius="{ThemeResource OverlayCornerRadius}"
                                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                VerticalAlignment="Center">
+                                                VerticalAlignment="Top">
                                             <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="18"
                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
 
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <TextBlock Text="{x:Bind Title}" FontWeight="Bold" FontSize="16" />
-                                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3"
-                                                        Visibility="{x:Bind Badge, Converter={StaticResource NullToVisibilityConverter}}">
-                                                    <TextBlock Text="{x:Bind Badge}" FontSize="11" FontWeight="SemiBold"
-                                                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                                </Border>
-                                            </StackPanel>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                            <TextBlock Text="{x:Bind Title}" FontWeight="Bold" FontSize="16" TextWrapping="Wrap" />
+                                            <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,2"
+                                                    HorizontalAlignment="Left"
+                                                    Visibility="{x:Bind Badge, Converter={StaticResource NullToVisibilityConverter}}">
+                                                <TextBlock Text="{x:Bind Badge}" FontSize="10.5" FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </Border>
                                             <TextBlock Text="{x:Bind Subtitle}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
 
@@ -181,6 +180,7 @@
                                                 Click="GuideActionButton_Click"
                                                 Tag="{x:Bind ActionTargetTag}"
                                                 CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6"
+                                                VerticalAlignment="Top"
                                                 Visibility="{x:Bind ActionTargetTag, Converter={StaticResource NullToVisibilityConverter}}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <TextBlock Text="{x:Bind ActionLabel}" FontWeight="SemiBold" FontSize="12" />
@@ -218,10 +218,10 @@
                                         <ItemsControl ItemsSource="{x:Bind TipsList}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="x:String">
-                                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,3">
-                                                        <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Top" Margin="0,2,0,0" />
-                                                        <TextBlock Text="{x:Bind ToString()}" FontSize="12" TextWrapping="Wrap" />
-                                                    </StackPanel>
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="0,3">
+                                                        <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Top" Margin="0,3,0,0" />
+                                                        <TextBlock Grid.Column="1" Text="{x:Bind ToString()}" FontSize="12" TextWrapping="Wrap" />
+                                                    </Grid>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
@@ -232,11 +232,11 @@
                                         <TextBlock Text="{x:Bind ShortcutsHeader}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         <ItemsRepeater ItemsSource="{x:Bind ShortcutKeys}">
                                             <ItemsRepeater.Layout>
-                                                <UniformGridLayout MinItemWidth="90" MinColumnSpacing="6" MinRowSpacing="6" ItemsStretch="None" />
+                                                <UniformGridLayout MinItemWidth="155" MinColumnSpacing="6" MinRowSpacing="6" ItemsStretch="None" />
                                             </ItemsRepeater.Layout>
                                             <ItemsRepeater.ItemTemplate>
                                                 <DataTemplate x:DataType="x:String">
-                                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="8,4" HorizontalAlignment="Left">
+                                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="8,4">
                                                         <TextBlock Text="{x:Bind ToString()}" FontFamily="Consolas, Cascadia Code" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                     </Border>
                                                 </DataTemplate>

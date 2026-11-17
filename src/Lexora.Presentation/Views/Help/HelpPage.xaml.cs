@@ -34,9 +34,19 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         {
             if (e.PropertyName == nameof(ViewModel.SelectedCategory))
             {
-                DispatcherQueue.TryEnqueue(UpdateFilterPillsState);
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    UpdateFilterPillsState();
+                    UpdateGuidesLayout();
+                });
+            }
+            else if (e.PropertyName == nameof(ViewModel.SearchQuery))
+            {
+                DispatcherQueue.TryEnqueue(UpdateGuidesLayout);
             }
         };
+
+        SizeChanged += (s, e) => UpdateGuidesLayout();
 
         Loaded += (s, e) =>
         {
@@ -44,6 +54,7 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
             ActualThemeChanged += _themeChangedHandler;
             ViewModel.PropertyChanged -= _propChangedHandler;
             ViewModel.PropertyChanged += _propChangedHandler;
+            UpdateGuidesLayout();
         };
 
         Unloaded += (s, e) =>
@@ -77,7 +88,15 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         ViewModel.PropertyChanged += _propChangedHandler;
 
         UpdateFilterPillsState();
+        UpdateGuidesLayout();
         DispatcherQueue.TryEnqueue(UpdateScrollButtonsVisibility);
+    }
+
+    private void UpdateGuidesLayout()
+    {
+        if (GuidesLayout == null) return;
+        int count = ViewModel.FilteredGuides.Count;
+        GuidesLayout.MaximumRowsOrColumns = (count <= 1 || ActualWidth < 960) ? 1 : 2;
     }
 
     private void UpdateScrollButtonsVisibility()
@@ -129,6 +148,7 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         ViewModel.ApplyFilter();
         Bindings.Update();
         UpdateFilterPillsState();
+        UpdateGuidesLayout();
         DispatcherQueue.TryEnqueue(UpdateScrollButtonsVisibility);
     }
 
@@ -143,6 +163,7 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         {
             ViewModel.SelectCategory(category);
             UpdateFilterPillsState();
+            UpdateGuidesLayout();
             btn.StartBringIntoView();
         }
     }
@@ -151,6 +172,7 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
     {
         ViewModel.ResetFilter();
         UpdateFilterPillsState();
+        UpdateGuidesLayout();
     }
 
     private void GuideActionButton_Click(object sender, RoutedEventArgs e)
