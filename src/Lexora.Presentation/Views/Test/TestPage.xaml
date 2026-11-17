@@ -94,7 +94,7 @@
                             <Button CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6"
                                     Click="OpenListeningLab_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Subtitle')}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE767;" FontSize="13.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <FontIcon Glyph="&#xE767;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Title')}" FontWeight="SemiBold" FontSize="12.5" />
                                 </StackPanel>
                             </Button>
@@ -553,7 +553,7 @@
                                         <Grid ColumnDefinitions="Auto,*">
                                             <Border Background="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Background}"
                                                     CornerRadius="{ThemeResource ControlCornerRadius}" Width="26" Height="26" Margin="0,0,12,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <FontIcon Glyph="{x:Bind Glyph, Mode=OneWay}" FontSize="11.5"
+                                                <FontIcon Glyph="{x:Bind Glyph, Mode=OneWay}" FontSize="12"
                                                           Foreground="{x:Bind State, Mode=OneWay, Converter={StaticResource OptionStateToBrushConverter}, ConverterParameter=Foreground}" />
                                             </Border>
                                             <TextBlock Grid.Column="1" Text="{x:Bind Text}" FontSize="14" VerticalAlignment="Center" TextWrapping="Wrap" />

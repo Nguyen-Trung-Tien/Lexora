@@ -71,13 +71,13 @@
                 <StackPanel Orientation="Horizontal" Spacing="3">
                     <Button x:Name="BtnViewList" Click="BtnViewList_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xE8C0;" FontSize="12.5" />
+                            <FontIcon Glyph="&#xE8C0;" FontSize="12" />
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_ViewList')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnViewUnits" Click="BtnViewUnits_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xE8F1;" FontSize="12.5" />
+                            <FontIcon Glyph="&#xE8F1;" FontSize="12" />
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_ViewUnits')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                     </Button>
@@ -117,7 +117,7 @@
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TooltipAddWord')}"
                             CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5" Click="AddWordButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xE710;" FontSize="12.5" />
+                            <FontIcon Glyph="&#xE710;" FontSize="12" />
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_AddWord')}" FontWeight="Bold" FontSize="12" />
                         </StackPanel>
                     </Button>
@@ -128,7 +128,7 @@
                             CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="12.5" />
+                            <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="12" />
                             <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                     </Button>
@@ -136,7 +136,7 @@
                     <!-- Import / Export DropDown -->
                     <DropDownButton CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xE8B7;" FontSize="12.5" />
+                            <FontIcon Glyph="&#xE8B7;" FontSize="12" />
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                         <DropDownButton.Flyout>
@@ -181,7 +181,7 @@
                     <Button Click="OpenListeningLab_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_ListeningLab')}">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xE767;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <FontIcon Glyph="&#xE767;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_BtnListeningLab')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                     </Button>
@@ -189,7 +189,7 @@
                     <!-- Contextual Help Button -->
                     <Button x:Name="VocabHelpButton" Click="VocabHelpButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7,5"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_Help_Title')}">
-                        <FontIcon Glyph="&#xE9CE;" FontSize="12.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <FontIcon Glyph="&#xE9CE;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Button>
                 </StackPanel>
             </ScrollViewer>
@@ -272,7 +272,7 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_FilterWeak')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                     </Button>
-                    <!-- Leech / Từ khó nhớ -->
+                    <!-- Leech / Tá»« khÃ³ nhá»› -->
                     <Button x:Name="ChipFilterLeech" Click="QuickFilter_Click" Tag="Leech"
                             CornerRadius="12" Padding="10,4">
                         <StackPanel Orientation="Horizontal" Spacing="5">
@@ -711,19 +711,19 @@
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                     <Button x:Name="BtnCopyWord" Click="CopyWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Copy')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7,5">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
-                                            <FontIcon x:Name="IconCopyWord" Glyph="&#xE8C8;" FontSize="12.5" />
+                                            <FontIcon x:Name="IconCopyWord" Glyph="&#xE8C8;" FontSize="12" />
                                             <TextBlock x:Name="TextCopyWord" Text="{x:Bind Loc.GetString('Action_Copy')}" FontSize="11.5" />
                                         </StackPanel>
                                     </Button>
                                     <Button Click="EditWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TooltipEditWord')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7,5">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
-                                            <FontIcon Glyph="&#xE70F;" FontSize="12.5" />
+                                            <FontIcon Glyph="&#xE70F;" FontSize="12" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Action_Edit')}" FontSize="11.5" />
                                         </StackPanel>
                                     </Button>
                                     <Button Foreground="{ThemeResource SystemFillColorCriticalBrush}" Click="DeleteWordButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_TooltipDeleteWord')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7,5" Margin="4,0,0,0">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
-                                            <FontIcon Glyph="&#xE74D;" FontSize="12.5" />
+                                            <FontIcon Glyph="&#xE74D;" FontSize="12" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Action_Delete')}" FontSize="11.5" />
                                         </StackPanel>
                                     </Button>

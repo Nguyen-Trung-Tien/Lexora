@@ -22,8 +22,8 @@
                             Click="BtnHistoryBack_Click"
                             IsEnabled="{x:Bind ViewModel.HasHistory, Mode=OneWay}"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_HistoryBack')}"
-                            CornerRadius="{ThemeResource ControlCornerRadius}" Width="36" Height="36" Padding="0" VerticalAlignment="Center">
-                        <FontIcon Glyph="&#xE72B;" FontSize="12.5" />
+                            CornerRadius="{ThemeResource ControlCornerRadius}" Width="32" Height="32" Padding="0" VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE72B;" FontSize="12" />
                     </Button>
 
                     <Border Width="38" Height="38" CornerRadius="{ThemeResource OverlayCornerRadius}"
@@ -35,7 +35,7 @@
                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel VerticalAlignment="Center" MaxWidth="300">
-                        <TextBlock x:Name="PageTitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Title')}" FontWeight="Bold" FontSize="17" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="PageTitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Title')}" Style="{StaticResource LexoraDisplayTitleStyle}" TextTrimming="CharacterEllipsis" />
                         <TextBlock x:Name="PageSubtitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Subtitle')}"
                                    FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
@@ -76,7 +76,7 @@
                     <!-- Recommendations Flyout Button -->
                     <DropDownButton x:Name="BtnRecommendations" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_RecommendButton')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xE8B5;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <FontIcon Glyph="&#xE8B5;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                             <TextBlock x:Name="BtnRecommendationsText" Text="{x:Bind Loc.GetString('KnowledgeGraph_RecommendButton')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                         <DropDownButton.Flyout>
@@ -122,7 +122,7 @@
                     <!-- Smart Import Button -->
                     <Button x:Name="BtnSmartImport" Click="BtnSmartImport_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_SmartImport')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xED43;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <FontIcon Glyph="&#xED43;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                             <TextBlock x:Name="BtnSmartImportText" Text="{x:Bind Loc.GetString('KnowledgeGraph_SmartImport')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                     </Button>
@@ -130,7 +130,7 @@
                     <!-- Export Dropdown -->
                     <DropDownButton x:Name="BtnExport" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_Export')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xEDE1;" FontSize="12.5" />
+                            <FontIcon Glyph="&#xEDE1;" FontSize="12" />
                             <TextBlock x:Name="BtnExportText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Export')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                         <DropDownButton.Flyout>
@@ -157,7 +157,7 @@
                     <!-- View Mode Toggle -->
                     <Button x:Name="BtnViewMode" Click="BtnViewMode_Click" ToolTipService.ToolTip="{x:Bind ViewModel.ViewModeButtonText, Mode=OneWay}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="{x:Bind ViewModel.ViewModeIconGlyph, Mode=OneWay}" FontSize="12.5" />
+                            <FontIcon Glyph="{x:Bind ViewModel.ViewModeIconGlyph, Mode=OneWay}" FontSize="12" />
                             <TextBlock x:Name="BtnViewModeText" Text="{x:Bind ViewModel.ViewModeButtonText, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
@@ -166,7 +166,7 @@
                     <Button Click="OpenHelp_Click"
                             Width="32" Height="32" Padding="0" CornerRadius="{ThemeResource ControlCornerRadius}"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_Help')}">
-                        <FontIcon Glyph="&#xE897;" FontSize="12.5" />
+                        <FontIcon Glyph="&#xE897;" FontSize="12" />
                     </Button>
                 </StackPanel>
         </Grid>

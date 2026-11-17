@@ -30,7 +30,7 @@
                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="PageTitleText" Text="{x:Bind Loc.GetString('Homophones_Title')}" FontWeight="Bold" FontSize="18" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="PageTitleText" Text="{x:Bind Loc.GetString('Homophones_Title')}" Style="{StaticResource LexoraDisplayTitleStyle}" TextTrimming="CharacterEllipsis" />
                         <TextBlock x:Name="PageSubtitleText" Text="{x:Bind Loc.GetString('Homophones_Subtitle')}"
                                    FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="360" />
                     </StackPanel>
@@ -41,24 +41,24 @@
                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <Button x:Name="BtnAddGroup" Click="BtnAddGroup_Click"
                                 Style="{ThemeResource AccentButtonStyle}"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5.5">
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE710;" FontSize="12.5" />
+                                <FontIcon Glyph="&#xE710;" FontSize="12" />
                                 <TextBlock x:Name="TextAddGroup" Text="{x:Bind Loc.GetString('Homophones_AddGroup')}" FontWeight="Bold" FontSize="12" />
                             </StackPanel>
                         </Button>
 
                         <Button x:Name="BtnSmartImport" Click="BtnSmartImport_Click"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5.5">
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE8B5;" FontSize="12.5" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <FontIcon Glyph="&#xE8B5;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                 <TextBlock x:Name="TextSmartImport" Text="{x:Bind Loc.GetString('Homophones_SmartImport')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                         </Button>
 
-                        <DropDownButton x:Name="BtnExport" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5.5">
+                        <DropDownButton x:Name="BtnExport" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xEDE1;" FontSize="12.5" />
+                                <FontIcon Glyph="&#xEDE1;" FontSize="12" />
                                 <TextBlock x:Name="TextExport" Text="{x:Bind Loc.GetString('Action_Export')}" FontWeight="SemiBold" FontSize="12" />
                             </StackPanel>
                             <DropDownButton.Flyout>
@@ -85,13 +85,13 @@
                         <Button x:Name="BtnRefresh" Click="BtnRefresh_Click"
                                 Width="32" Height="32" Padding="0" CornerRadius="{ThemeResource ControlCornerRadius}"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Refresh')}">
-                            <FontIcon Glyph="&#xE72C;" FontSize="12.5" />
+                            <FontIcon Glyph="&#xE72C;" FontSize="12" />
                         </Button>
 
                         <Button Click="OpenHelp_Click"
                                 Width="32" Height="32" Padding="0" CornerRadius="{ThemeResource ControlCornerRadius}"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_Help')}">
-                            <FontIcon Glyph="&#xE897;" FontSize="12.5" />
+                            <FontIcon Glyph="&#xE897;" FontSize="12" />
                         </Button>
                     </StackPanel>
                 </ScrollViewer>
@@ -316,7 +316,7 @@
                                             CornerRadius="6"
                                             Padding="10,3"
                                             VerticalAlignment="Center">
-                                        <TextBlock x:Name="DetailGroupIpa" Text="/beə(r)/" FontSize="14" FontWeight="SemiBold"
+                                        <TextBlock x:Name="DetailGroupIpa" Text="/beÉ™(r)/" FontSize="14" FontWeight="SemiBold"
                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                    FontFamily="Consolas, Segoe UI" />
                                     </Border>
@@ -373,7 +373,7 @@
                             <StackPanel Grid.Column="1" Spacing="2">
                                 <TextBlock Text="{x:Bind Loc.GetString('Homophones_TipTitle')}" FontWeight="SemiBold" FontSize="13" />
                                 <TextBlock x:Name="TextDifferentiationTip"
-                                           Text="'Bare' là tính từ nghĩa là trần trụi..."
+                                           Text="'Bare' lÃ  tÃ­nh tá»« nghÄ©a lÃ  tráº§n trá»¥i..."
                                            TextWrapping="Wrap" FontSize="12"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </StackPanel>
@@ -421,7 +421,7 @@
 
                                 <StackPanel Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('Homophones_VietnameseMeaning')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
-                                    <TextBlock x:Name="Word1MeaningVi" Text="trần trụi, trống không" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
+                                    <TextBlock x:Name="Word1MeaningVi" Text="tráº§n trá»¥i, trá»‘ng khÃ´ng" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
                                 </StackPanel>
 
                                 <StackPanel Spacing="4">
@@ -429,7 +429,7 @@
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="12,8">
                                         <StackPanel Spacing="4">
                                             <TextBlock x:Name="Word1Example" Text="He walked on the floor with bare feet." FontStyle="Italic" TextWrapping="Wrap" FontSize="13" />
-                                            <TextBlock x:Name="Word1Translation" Text="Anh ấy đi chân trần trên sàn nhà." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock x:Name="Word1Translation" Text="Anh áº¥y Ä‘i chÃ¢n tráº§n trÃªn sÃ n nhÃ ." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
@@ -472,7 +472,7 @@
 
                                 <StackPanel Spacing="4">
                                     <TextBlock Text="{x:Bind Loc.GetString('Homophones_VietnameseMeaning')}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontWeight="SemiBold" />
-                                    <TextBlock x:Name="Word2MeaningVi" Text="chịu đựng" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
+                                    <TextBlock x:Name="Word2MeaningVi" Text="chá»‹u Ä‘á»±ng" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
                                 </StackPanel>
 
                                 <StackPanel Spacing="4">
@@ -480,7 +480,7 @@
                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="12,8">
                                         <StackPanel Spacing="4">
                                             <TextBlock x:Name="Word2Example" Text="I can hardly bear the continuous noise." FontStyle="Italic" TextWrapping="Wrap" FontSize="13" />
-                                            <TextBlock x:Name="Word2Translation" Text="Tôi khó lòng chịu đựng nổi tiếng ồn." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                            <TextBlock x:Name="Word2Translation" Text="TÃ´i khÃ³ lÃ²ng chá»‹u Ä‘á»±ng ná»•i tiáº¿ng á»“n." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>

@@ -643,7 +643,7 @@
                                             Visibility="{x:Bind ViewModel.IsPracticeAnswerSubmitted, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                             Click="SubmitPractice_Click">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE73E;" FontSize="12.5" />
+                                            <FontIcon Glyph="&#xE73E;" FontSize="12" />
                                             <TextBlock Text="{x:Bind Loc.GetString('Storage_Practice_Submit')}" FontWeight="SemiBold" FontSize="13" />
                                         </StackPanel>
                                     </Button>
