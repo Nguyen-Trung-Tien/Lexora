@@ -24,10 +24,11 @@ public sealed partial class HomophonesPage : Page, ILocalizableView, IThemeAware
     public HomophonesPage()
     {
         ViewModel = App.Current.Services.GetRequiredService<HomophonesViewModel>();
+        var scopeProvider = App.GetScopeProviderFor(ViewModel);
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
-        _storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
-        _vocabService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IVocabularyService>();
+        _storageService = scopeProvider.GetRequiredService<ILearningStorageService>();
+        _vocabService = scopeProvider.GetRequiredService<Lexora.Application.Interfaces.IVocabularyService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
 
         InitializeComponent();
@@ -89,11 +90,60 @@ public sealed partial class HomophonesPage : Page, ILocalizableView, IThemeAware
     protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        RegisterShortcuts();
         if (e.Parameter is string searchTerm && !string.IsNullOrWhiteSpace(searchTerm))
         {
             SearchBox.Text = searchTerm;
             ViewModel.SearchQuery = searchTerm;
         }
+    }
+
+    protected override void OnNavigatedFrom(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        App.Current.Services.GetService<IShortcutManager>()?.UnregisterPageShortcuts(typeof(HomophonesPage));
+    }
+
+    private void RegisterShortcuts()
+    {
+        var sm = App.Current.Services.GetService<IShortcutManager>();
+        if (sm == null) return;
+
+        sm.RegisterPageShortcuts(typeof(HomophonesPage), new[]
+        {
+            new ShortcutDefinition
+            {
+                Id = "Homophones.AddGroup",
+                Gesture = new ShortcutGesture(ShortcutKey.N, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(HomophonesPage),
+                DescriptionKey = "Homophones_AddGroup",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = true,
+                AllowWhenDialogActive = false,
+                ExecuteAsync = () =>
+                {
+                    BtnAddGroup_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "Homophones.FocusSearch",
+                Gesture = new ShortcutGesture(ShortcutKey.F, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(HomophonesPage),
+                DescriptionKey = "Homophones_SearchPlaceholder",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = true,
+                AllowWhenDialogActive = false,
+                ExecuteAsync = () =>
+                {
+                    SearchBox.Focus(FocusState.Programmatic);
+                    return Task.CompletedTask;
+                }
+            }
+        });
     }
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
@@ -720,5 +770,10 @@ public sealed partial class HomophonesPage : Page, ILocalizableView, IThemeAware
                 _toastService?.ShowError(ex.Message, Loc.GetString("Common_Error"));
             }
         }
+    }
+
+    private void OpenHelp_Click(object sender, RoutedEventArgs e)
+    {
+        _navigationService.Navigate(typeof(Help.HelpPage), "Homophones");
     }
 }

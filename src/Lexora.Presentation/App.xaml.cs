@@ -196,6 +196,18 @@ public partial class App : Microsoft.UI.Xaml.Application
     }
 
     /// <summary>
+    /// Returns the isolated IServiceProvider scope associated with a ViewModel, falling back to the root provider.
+    /// </summary>
+    public static IServiceProvider GetScopeProviderFor(object? viewModel)
+    {
+        if (viewModel != null && _viewModelScopeTable.TryGetValue(viewModel, out var scope))
+        {
+            return scope.ServiceProvider;
+        }
+        return Current.Services;
+    }
+
+    /// <summary>
     /// Releases the isolated DI scope (and DbContext) associated with a non-cached Page's ViewModel.
     /// </summary>
     public static void ReleaseScopeForPage(Microsoft.UI.Xaml.Controls.Page? page)

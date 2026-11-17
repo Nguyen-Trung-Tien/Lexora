@@ -1031,7 +1031,7 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
         try
         {
             if (this.XamlRoot == null) return;
-            var healthService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IDataHealthService>();
+            var healthService = App.GetScopeProviderFor(ViewModel).GetRequiredService<Lexora.Application.Interfaces.IDataHealthService>();
             var dialog = new DataHealthCenterDialog(healthService, Loc);
             await dialog.ShowAsyncSafe(App.Current?.MainWindow?.Content?.XamlRoot ?? this.XamlRoot);
         }

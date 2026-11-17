@@ -760,6 +760,15 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         TabTopBtn.Style = defaultStyle;
     }
 
+    private async void ConceptsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ListView listView &&
+            listView.SelectedItem is Lexora.Application.DTOs.KnowledgeGraphConceptSummaryDto concept)
+        {
+            await ViewModel.LoadGraphAsync(concept.Id);
+        }
+    }
+
     private async void ConceptItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button btn && btn.Tag is Guid wordId)
@@ -977,5 +986,10 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             System.Diagnostics.Debug.WriteLine($"[KnowledgeGraphPage] ExportToFileAsync error: {ex.Message}");
             _toastService?.ShowError(ex.Message);
         }
+    }
+
+    private void OpenHelp_Click(object sender, RoutedEventArgs e)
+    {
+        App.Current.Services.GetService<INavigationService>()?.Navigate(typeof(Help.HelpPage), "KnowledgeGraph");
     }
 }

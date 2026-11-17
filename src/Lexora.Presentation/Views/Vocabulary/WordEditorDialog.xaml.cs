@@ -529,7 +529,8 @@ public sealed partial class WordEditorDialog : ContentDialog
             return;
         }
 
-        var vocabService = App.Current.Services.GetService<Lexora.Application.Interfaces.IVocabularyService>();
+        using var scope = App.Current.Services.CreateScope();
+        var vocabService = scope.ServiceProvider.GetService<Lexora.Application.Interfaces.IVocabularyService>();
         if (vocabService == null) return;
 
         try

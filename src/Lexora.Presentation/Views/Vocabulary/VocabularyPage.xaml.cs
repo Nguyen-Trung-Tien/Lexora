@@ -1272,7 +1272,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         if (ViewModel.SelectedWord == null) return;
         try
         {
-            var graphService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IVocabularyKnowledgeGraphService>();
+            var graphService = App.GetScopeProviderFor(ViewModel).GetRequiredService<Lexora.Application.Interfaces.IVocabularyKnowledgeGraphService>();
             var audioService = App.Current.Services.GetService<IAudioPlayerService>();
             var dialog = new KnowledgeGraphDialog(ViewModel.SelectedWord.Id, graphService, Loc, audioService)
             {
@@ -1305,7 +1305,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         {
             await DispatcherQueue.EnsureOnUIThreadAsync();
             var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
-            var labService = App.Current.Services.GetRequiredService<Lexora.Application.Interfaces.IPronunciationListeningLabService>();
+            var labService = App.GetScopeProviderFor(ViewModel).GetRequiredService<Lexora.Application.Interfaces.IPronunciationListeningLabService>();
             var audioService = App.Current.Services.GetService<IAudioPlayerService>();
             var dialog = new ListeningLabDialog(labService, Loc, audioService)
             {
@@ -2006,7 +2006,7 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
 
             try
             {
-                var storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
+                var storageService = App.GetScopeProviderFor(ViewModel).GetRequiredService<ILearningStorageService>();
                 await storageService.MoveWordToStorageAsync(ViewModel.SelectedWord.Id, StorageAdditionReason.Manual);
                 
                 string toastMsg = string.Format(Loc.GetString("Storage_Toast_Added"), ViewModel.SelectedWord.Term);

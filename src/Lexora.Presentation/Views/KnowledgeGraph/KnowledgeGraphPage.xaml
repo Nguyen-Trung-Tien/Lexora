@@ -161,6 +161,13 @@
                             <TextBlock x:Name="BtnViewModeText" Text="{x:Bind ViewModel.ViewModeButtonText, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
+
+                    <!-- Help Button -->
+                    <Button Click="OpenHelp_Click"
+                            Width="32" Height="32" Padding="0" CornerRadius="{ThemeResource ControlCornerRadius}"
+                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_Help')}">
+                        <FontIcon Glyph="&#xE897;" FontSize="12.5" />
+                    </Button>
                 </StackPanel>
         </Grid>
 
@@ -209,9 +216,11 @@
                     </ScrollViewer>
 
                     <!-- Paged Concepts List -->
-                    <ListView Grid.Row="2"
+                    <ListView x:Name="ConceptsListView"
+                              Grid.Row="2"
                               ItemsSource="{x:Bind ViewModel.PagedConcepts, Mode=OneWay}"
-                              SelectionMode="None"
+                              SelectionMode="Single"
+                              SelectionChanged="ConceptsListView_SelectionChanged"
                               Padding="0,4,0,4">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">

@@ -393,7 +393,7 @@ public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareVie
 
             try
             {
-                var storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
+                var storageService = App.GetScopeProviderFor(ViewModel).GetRequiredService<ILearningStorageService>();
                 await storageService.MoveGrammarToStorageAsync(ViewModel.SelectedRule.Id, StorageAdditionReason.Manual);
                 
                 string toastMsg = string.Format(Loc.GetString("Storage_Toast_Added"), ViewModel.SelectedRule.Title);
@@ -1110,5 +1110,10 @@ public sealed partial class GrammarPage : Page, ILocalizableView, IThemeAwareVie
         {
             System.Diagnostics.Debug.WriteLine($"[GrammarPage] PlayExampleAudio_Click error: {ex.Message}");
         }
+    }
+
+    private void OpenHelp_Click(object sender, RoutedEventArgs e)
+    {
+        App.Current.Services.GetService<INavigationService>()?.Navigate(typeof(Help.HelpPage), "Grammar");
     }
 }

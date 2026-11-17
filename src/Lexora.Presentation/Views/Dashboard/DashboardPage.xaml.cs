@@ -220,7 +220,7 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
         {
             await DispatcherQueue.EnsureOnUIThreadAsync();
             var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
-            var plannerService = App.Current.Services.GetRequiredService<IStudyPlannerService>();
+            var plannerService = App.GetScopeProviderFor(ViewModel).GetRequiredService<IStudyPlannerService>();
             var navService = App.Current.Services.GetService<INavigationService>();
             var dialog = new StudyPlannerDialog(plannerService, Loc, navService)
             {
@@ -241,7 +241,7 @@ public sealed partial class DashboardPage : Page, ILocalizableView, IThemeAwareV
         {
             await DispatcherQueue.EnsureOnUIThreadAsync();
             var xamlRoot = App.Current.MainWindow?.Content?.XamlRoot ?? this.XamlRoot;
-            var labService = App.Current.Services.GetRequiredService<IPronunciationListeningLabService>();
+            var labService = App.GetScopeProviderFor(ViewModel).GetRequiredService<IPronunciationListeningLabService>();
             var audioService = App.Current.Services.GetService<IAudioPlayerService>();
             var dialog = new ListeningLabDialog(labService, Loc, audioService)
             {

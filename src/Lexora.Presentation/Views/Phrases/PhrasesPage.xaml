@@ -134,6 +134,13 @@
                     </DropDownButton.Flyout>
                 </DropDownButton>
 
+                <Button Click="OpenHelp_Click"
+                        Width="34" Height="34" Padding="0"
+                        CornerRadius="{ThemeResource ControlCornerRadius}"
+                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_Help')}">
+                    <FontIcon Glyph="&#xE897;" FontSize="13" />
+                </Button>
+
                 <!-- Audio Accent & Speed Settings Flyout -->
                 <DropDownButton
                     CornerRadius="{ThemeResource ControlCornerRadius}"

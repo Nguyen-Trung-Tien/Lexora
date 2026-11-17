@@ -142,7 +142,8 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
     {
         try
         {
-            var labService = App.Current.Services.GetRequiredService<IPronunciationListeningLabService>();
+            using var scope = App.Current.Services.CreateScope();
+            var labService = scope.ServiceProvider.GetRequiredService<IPronunciationListeningLabService>();
             var loc = App.Current.Services.GetRequiredService<ILocalizationService>();
             var audioService = App.Current.Services.GetService<IAudioPlayerService>();
 

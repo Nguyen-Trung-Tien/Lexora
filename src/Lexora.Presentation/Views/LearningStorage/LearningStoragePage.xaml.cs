@@ -29,11 +29,12 @@ public sealed partial class LearningStoragePage : Page, ILocalizableView, ITheme
     {
         NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
         ViewModel = App.Current.Services.GetRequiredService<LearningStorageViewModel>();
+        var scopeProvider = App.GetScopeProviderFor(ViewModel);
         Loc = App.Current.Services.GetRequiredService<Services.ILocalizationService>();
         _navigationService = App.Current.Services.GetRequiredService<INavigationService>();
-        _vocabService = App.Current.Services.GetRequiredService<IVocabularyService>();
-        _grammarService = App.Current.Services.GetRequiredService<IGrammarService>();
-        _storageService = App.Current.Services.GetRequiredService<ILearningStorageService>();
+        _vocabService = scopeProvider.GetRequiredService<IVocabularyService>();
+        _grammarService = scopeProvider.GetRequiredService<IGrammarService>();
+        _storageService = scopeProvider.GetRequiredService<ILearningStorageService>();
         _smartSearchService = App.Current.Services.GetRequiredService<ISmartSearchService>();
         _toastService = App.Current.Services.GetService<IToastNotificationService>();
         ViewModel.NoPracticeQuestionsAvailable += () =>

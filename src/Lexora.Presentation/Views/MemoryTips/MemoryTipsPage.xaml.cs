@@ -24,8 +24,9 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView, IThemeAware
         NavigationCacheMode = NavigationCacheMode.Required;
 
         ViewModel = App.Current.Services.GetRequiredService<MemoryTipsViewModel>();
+        var scopeProvider = App.GetScopeProviderFor(ViewModel);
         Loc = App.Current.Services.GetRequiredService<ILocalizationService>();
-        _tipService = App.Current.Services.GetRequiredService<IMemoryTipService>();
+        _tipService = scopeProvider.GetRequiredService<IMemoryTipService>();
         _themeService = App.Current.Services.GetRequiredService<IThemeService>();
 
         InitializeComponent();
@@ -54,8 +55,57 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView, IThemeAware
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        RegisterShortcuts();
         OnLanguageChanged();
         OnThemeChanged();
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        App.Current.Services.GetService<IShortcutManager>()?.UnregisterPageShortcuts(typeof(MemoryTipsPage));
+    }
+
+    private void RegisterShortcuts()
+    {
+        var sm = App.Current.Services.GetService<IShortcutManager>();
+        if (sm == null) return;
+
+        sm.RegisterPageShortcuts(typeof(MemoryTipsPage), new[]
+        {
+            new ShortcutDefinition
+            {
+                Id = "MemoryTips.AddTip",
+                Gesture = new ShortcutGesture(ShortcutKey.N, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(MemoryTipsPage),
+                DescriptionKey = "MemoryTips_AddButton",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = true,
+                AllowWhenDialogActive = false,
+                ExecuteAsync = () =>
+                {
+                    BtnAddTip_Click(this, new RoutedEventArgs());
+                    return Task.CompletedTask;
+                }
+            },
+            new ShortcutDefinition
+            {
+                Id = "MemoryTips.FocusSearch",
+                Gesture = new ShortcutGesture(ShortcutKey.F, ShortcutModifiers.Control),
+                Scope = ShortcutScope.Page,
+                TargetPageType = typeof(MemoryTipsPage),
+                DescriptionKey = "MemoryTips_SearchPlaceholder",
+                Priority = ShortcutPriority.Page,
+                AllowWhenTextInputFocused = true,
+                AllowWhenDialogActive = false,
+                ExecuteAsync = () =>
+                {
+                    SearchBox.Focus(FocusState.Programmatic);
+                    return Task.CompletedTask;
+                }
+            }
+        });
     }
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
@@ -390,5 +440,10 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView, IThemeAware
         {
             await ViewModel.ChangePageSizeAsync(size);
         }
+    }
+
+    private void OpenHelp_Click(object sender, RoutedEventArgs e)
+    {
+        App.Current.Services.GetService<INavigationService>()?.Navigate(typeof(Help.HelpPage), "MemoryTips");
     }
 }

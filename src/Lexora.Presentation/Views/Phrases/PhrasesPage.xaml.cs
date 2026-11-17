@@ -468,4 +468,9 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
             WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
         }
     }
+
+    private void OpenHelp_Click(object sender, RoutedEventArgs e)
+    {
+        App.Current.Services.GetService<INavigationService>()?.Navigate(typeof(Help.HelpPage), "Phrases");
+    }
 }
