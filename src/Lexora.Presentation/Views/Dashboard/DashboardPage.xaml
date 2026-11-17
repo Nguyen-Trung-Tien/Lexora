@@ -234,19 +234,7 @@
                     </Border>
             </Grid>
 
-            <!-- 2. BALANCED 2-COLUMN PRIMARY WORKSPACE -->
-            <Grid x:Name="DashboardMainGrid" ColumnSpacing="16" RowSpacing="16">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition x:Name="DashboardLeftCol" Width="1.35*" />
-                    <ColumnDefinition x:Name="DashboardRightCol" Width="1*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <StackPanel x:Name="DashboardLeftStack" Grid.Column="0" Grid.Row="0" Spacing="16">
-            <!-- 1.5 Active Roadmap Pathway Widget -->
+            <!-- 1.5 Active Roadmap Pathway Widget (Full-width so 2-column grid below always stays height-balanced) -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16"
@@ -316,11 +304,11 @@
                 </Grid>
             </Border>
 
-            <!-- SMART STUDY ADVISOR: Adaptive Recommendation Hero Card -->
+            <!-- SMART STUDY ADVISOR: Adaptive Recommendation Hero Card (Full-width) -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource LexoraAdvisorBorderBrush}"
                     BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
-                <Grid ColumnDefinitions="*,Auto" RowSpacing="12">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                     <StackPanel Spacing="8" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="7,3">
@@ -333,7 +321,7 @@
                         </StackPanel>
 
                         <TextBlock Text="{x:Bind ViewModel.AdviceTitle, Mode=OneWay}" FontSize="18" FontWeight="Bold" />
-                        <TextBlock Text="{x:Bind ViewModel.AdviceDescription, Mode=OneWay}" Style="{StaticResource LexoraBodyStyle}" TextWrapping="Wrap" MaxWidth="680" />
+                        <TextBlock Text="{x:Bind ViewModel.AdviceDescription, Mode=OneWay}" Style="{StaticResource LexoraBodyStyle}" TextWrapping="Wrap" />
                     </StackPanel>
 
                     <Button Grid.Column="1"
@@ -349,10 +337,18 @@
                 </Grid>
             </Border>
 
-            <!-- 7-DAY WORKLOAD FORECAST: Spaced Repetition Schedule Projection -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
+            <!-- 2. BALANCED 2-COLUMN PRIMARY WORKSPACE (Both cards stretch to equal height) -->
+            <Grid x:Name="DashboardMainGrid" ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="DashboardLeftCol" Width="1.35*" />
+                    <ColumnDefinition x:Name="DashboardRightCol" Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT COLUMN: 7-Day Workload Forecast -->
+                <Border Grid.Column="0" VerticalAlignment="Stretch"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="2">
@@ -404,14 +400,12 @@
                     </ItemsRepeater>
                 </StackPanel>
             </Border>
-                </StackPanel>
 
-                <!-- RIGHT COLUMN: Study Activity Heatmap + Recent Sessions -->
-                <StackPanel x:Name="DashboardRightStack" Grid.Column="1" Grid.Row="0" Spacing="16">
-                    <!-- Study Activity Heatmap (Last 30 Days) -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
+                <!-- RIGHT COLUMN: Study Activity Heatmap -->
+                <Border Grid.Column="1" VerticalAlignment="Stretch"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
                         <StackPanel Spacing="14">
                             <Grid ColumnDefinitions="*,Auto">
                                 <StackPanel Spacing="2">
@@ -483,7 +477,6 @@
                             </Grid>
                         </StackPanel>
                     </Border>
-                </StackPanel>
             </Grid>
 
             <!-- 3. DETAILED ANALYTICS & BREAKDOWN (Collapsed by default to keep Dashboard calm & scannable) -->
