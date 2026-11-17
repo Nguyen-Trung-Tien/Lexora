@@ -28,8 +28,8 @@ public static class ThemeResourceHelper
     private static readonly Brush DarkCardBackground = new SolidColorBrush(Color.FromArgb(255, 43, 43, 43));
     private static readonly Brush DarkCardStroke = new SolidColorBrush(Color.FromArgb(25, 255, 255, 255));
     private static readonly Brush DarkSubtleBackground = new SolidColorBrush(Color.FromArgb(16, 255, 255, 255));
-    // Semantic background fills — dark mode: dark muted tinted fills (WinUI 3 dark theme values)
-    private static readonly Brush DarkSuccessBackground = new SolidColorBrush(Color.FromArgb(255, 57, 61, 27));  // #393D1B olive-green
+    // Semantic background fills — dark mode: dark muted tinted fills
+    private static readonly Brush DarkSuccessBackground = new SolidColorBrush(Color.FromArgb(255, 18, 53, 36));  // #123524 deep emerald
     private static readonly Brush DarkCriticalBackground = new SolidColorBrush(Color.FromArgb(255, 68, 39, 38)); // #442726 dark-red
     private static readonly Brush DarkCautionBackground = new SolidColorBrush(Color.FromArgb(255, 67, 53, 25));  // #433519 dark-amber
 

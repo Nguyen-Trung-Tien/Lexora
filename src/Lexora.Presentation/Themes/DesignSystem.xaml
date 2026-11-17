@@ -105,7 +105,7 @@
             <!-- Modal Backdrop token for visual depth & focus -->
             <SolidColorBrush x:Key="LexoraOverlayBackdropBrush" Color="#000000" Opacity="0.55" />
             <!-- Semantic state background fills -->
-            <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#393D1B" />
+            <SolidColorBrush x:Key="SystemFillColorSuccessBackgroundBrush" Color="#123524" />
             <SolidColorBrush x:Key="SystemFillColorCriticalBackgroundBrush" Color="#442726" />
             <SolidColorBrush x:Key="SystemFillColorCautionBackgroundBrush" Color="#433519" />
             <!-- Formula card & syntax tokens for Grammar & Test -->
@@ -496,6 +496,10 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
     </Style>
+
+    <!-- Implicit App-Wide Dropdown & Menu Polish -->
+    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource LexoraComboBoxItemStyle}" />
+    <Style TargetType="MenuFlyoutPresenter" BasedOn="{StaticResource LexoraMenuFlyoutPresenterStyle}" />
 
     <!-- Specialized Typography Tokens -->
     <Style x:Key="LexoraDisplayTitleStyle" TargetType="TextBlock">

@@ -1557,34 +1557,11 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
             var res = await dialog.ShowAsyncSafe();
             if (res == ContentDialogResult.Primary && File.Exists(savedPath))
             {
-                try
-                {
-                    var cleanPath = Path.GetFullPath(savedPath);
-                    var ext = Path.GetExtension(cleanPath).ToLowerInvariant();
-                    if (ext is ".csv" or ".json" or ".txt" or ".db" or ".tsv")
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(cleanPath) { UseShellExecute = true });
-                    }
-                }
-                catch
-                {
-                    // Fallback
-                }
+                App.Current.Services.GetService<IShellLauncherService>()?.OpenExportedFile(savedPath);
             }
             else if (res == ContentDialogResult.Secondary && File.Exists(savedPath))
             {
-                try
-                {
-                    var cleanPath = Path.GetFullPath(savedPath);
-                    var psi = new System.Diagnostics.ProcessStartInfo("explorer.exe");
-                    psi.ArgumentList.Add($"/select,{cleanPath}");
-                    psi.UseShellExecute = false;
-                    System.Diagnostics.Process.Start(psi);
-                }
-                catch
-                {
-                    // Explorer launch fallback
-                }
+                App.Current.Services.GetService<IShellLauncherService>()?.RevealInExplorer(savedPath);
             }
         }
     }

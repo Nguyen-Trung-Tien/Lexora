@@ -241,7 +241,7 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
                         sub,
                         "\uE8D2",
                         rule.Level.ToString(),
-                        () => nav?.Navigate(typeof(GrammarPage))
+                        () => nav?.Navigate(typeof(GrammarPage), rule.Title)
                     ));
                 }
             }

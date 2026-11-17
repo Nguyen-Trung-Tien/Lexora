@@ -355,11 +355,16 @@ public class UpdateService : IUpdateService
             }
         }
 
-        // Cryptographic integrity verification
-        if (!string.IsNullOrWhiteSpace(update.Sha256Checksum))
+        // Mandatory cryptographic integrity verification
+        if (string.IsNullOrWhiteSpace(update.Sha256Checksum))
         {
-            _logger.LogInformation("Verifying SHA-256 checksum for {File}", fullPath);
-            await using var verifyStream = File.OpenRead(fullPath);
+            try { File.Delete(fullPath); } catch { /* best effort cleanup */ }
+            throw new InvalidDataException("Update package is missing a required SHA-256 checksum. File has been discarded.");
+        }
+
+        _logger.LogInformation("Verifying SHA-256 checksum for {File}", fullPath);
+        await using (var verifyStream = File.OpenRead(fullPath))
+        {
             var computedHashBytes = await SHA256.HashDataAsync(verifyStream, cancellationToken);
             var computedHashHex = Convert.ToHexString(computedHashBytes);
 
@@ -368,9 +373,9 @@ public class UpdateService : IUpdateService
                 try { File.Delete(fullPath); } catch { /* best effort cleanup */ }
                 throw new InvalidDataException($"SHA-256 checksum mismatch. Expected '{update.Sha256Checksum}', computed '{computedHashHex}'. File has been discarded.");
             }
-
-            _logger.LogInformation("SHA-256 verification passed for {File}", fullPath);
         }
+
+        _logger.LogInformation("SHA-256 verification passed for {File}", fullPath);
 
         return fullPath;
     }

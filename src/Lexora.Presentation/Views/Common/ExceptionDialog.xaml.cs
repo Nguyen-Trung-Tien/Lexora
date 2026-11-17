@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using Lexora.Presentation.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
@@ -56,21 +56,10 @@ public sealed partial class ExceptionDialog : ContentDialog
 
     private void OpenLogsButton_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            var logDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Lexora");
-            Directory.CreateDirectory(logDir);
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = logDir,
-                UseShellExecute = true
-            });
-        }
-        catch
-        {
-            // Ignore shell launch failures
-        }
+        var logDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Lexora",
+            "logs");
+        App.Current.Services.GetService<IShellLauncherService>()?.OpenDirectory(logDir);
     }
 }

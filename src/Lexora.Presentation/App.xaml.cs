@@ -88,7 +88,7 @@ public partial class App : Microsoft.UI.Xaml.Application
             {
                 logging.ClearProviders();
                 logging.AddDebug();
-                logging.AddConsole();
+                logging.AddProvider(new Lexora.Infrastructure.Logging.RollingFileLoggerProvider());
                 logging.SetMinimumLevel(LogLevel.Information);
             })
             .ConfigureServices((context, services) =>
@@ -112,6 +112,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddSingleton<ISoundFeedbackService, SoundFeedbackService>();
                 services.AddSingleton<IToastNotificationService, ToastNotificationService>();
                 services.AddSingleton<IErrorHandlingService, ErrorHandlingService>();
+                services.AddSingleton<IShellLauncherService, ShellLauncherService>();
                 services.AddSingleton<IStartupOrchestrator, StartupOrchestrator>();
                 services.AddSingleton<IShortcutManager, ShortcutManager>();
 

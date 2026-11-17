@@ -28,6 +28,11 @@ public static class DependencyInjection
             options.UseSqlite(connectionString);
         });
 
+        services.AddDbContextFactory<LexoraDbContext>(options =>
+        {
+            options.UseSqlite(connectionString);
+        }, ServiceLifetime.Scoped);
+
         // Repositories & Unit of Work
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IVocabularyRepository, VocabularyRepository>();

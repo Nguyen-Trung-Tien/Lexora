@@ -620,7 +620,7 @@ public sealed partial class ShellPage : Page
 
             if (chosen.TargetType == "Homophone")
             {
-                _navigationService.Navigate(typeof(HomophonesPage));
+                _navigationService.Navigate(typeof(HomophonesPage), chosen.SearchTerm ?? chosen.Title);
                 NavView.SelectedItem = NavItemHomophones;
                 return;
             }
