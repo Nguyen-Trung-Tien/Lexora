@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.6.2] - 2026-11-15
+## [1.7.0] - 2026-11-17
 
 ### Added
 - **Word-by-Word Dictation Grading Engine**: Bổ sung thuật toán căn chỉnh cấp độ từ (`ComputeWordDiffTokens`) trong `PronunciationListeningLabService` cùng thẻ hiển thị trực quan và tỷ lệ phần trăm từ khớp trong `ListeningLabDialog` (cả chế độ từ vựng nhiều từ và chép câu ví dụ).

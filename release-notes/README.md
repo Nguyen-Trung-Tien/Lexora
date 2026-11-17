@@ -2,7 +2,7 @@
 
 This directory contains the user-facing **Release Notes Logs** for each official version of the Lexora desktop application.
 
-Whenever a new version is released or bumped, developers or AI Agents **MUST** create a corresponding markdown file (e.g., `v1.6.2.md`) based on the canonical [`template.md`](./template.md).
+Whenever a new version is released or bumped, developers or AI Agents **MUST** create a corresponding markdown file (e.g., `v1.7.0.md`) based on the canonical [`template.md`](./template.md).
 
 ---
 
@@ -23,7 +23,7 @@ Unlike `CHANGELOG.md` (which focuses on low-level developer commits, internal cl
 release-notes/
 ├── README.md               # This specification and guideline document
 ├── template.md             # Standard template for authoring new release notes
-├── v1.6.2.md               # Version 1.6.2 (Current)
+├── v1.7.0.md               # Version 1.7.0 (Current)
 ├── v1.6.1.md               # Version 1.6.1
 ....
 ```

@@ -1,7 +1,7 @@
 # 🚀 Lexora Development & Optimization Progress
 
 ## 📊 Quality Gates Benchmark
-- **Application Version**: `v1.6.2` (Smart Import Resilience, Crash Fixes & SQLite Deduplication)
+- **Application Version**: `v1.7.0` (Exam Intelligence, Dictation Grading, Anki Export, Release Notes Log & Fluent 2 Motion)
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
 - **Automated Tests**: **617 / 617 Tests Passing** (540 Unit Tests + 77 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
@@ -206,7 +206,12 @@
 - **Synchronized Version Bump to 1.6.1**:
   - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `build-installer.ps1`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
 
-### 14. Lexora v1.6.2 — Smart Import Resilience, UI Stability & Tag Auto-Healing
+### 14. Lexora v1.7.0 — Exam Intelligence, Dictation Grading, Anki Export & Fluent 2 Motion
+- **New Learner Capabilities**:
+  - Added Word-by-Word Dictation Grading (`ComputeWordDiffTokens`) in `ListeningLabDialog` and `PronunciationListeningLabService`.
+  - Added Predictive Exam Score Simulator (TOEIC / IELTS / VSTEP) in Dashboard AI Intelligence (`StatisticsService` & `DashboardPage`).
+  - Added Anki Flashcard HTML TSV Export (`ExportToAnkiTsvAsync`) and global quick-action shortcuts (`Ctrl+Shift+D`, `Ctrl+Shift+R`).
+  - Added Offline Release Notes Log architecture (`release-notes/v1.7.0.md`, `IReleaseNotesService`, `ReleaseNotesService`, `ReleaseNotesLogDialog`, `ReleaseNotesRenderer`).
 - **WinUI 3 Post-Import Access Violation Elimination**:
   - Removed hazardous manual `Bindings.Update()` calls during ContentDialog dismissal and large collection refreshing in `VocabularyPage.xaml.cs` and `GrammarPage.xaml.cs`.
   - Added safe dialog detachment delays (80ms in `SafeDialogExtensions.ShowAsyncSafe`, 50ms in Page callers) to ensure ContentDialog visual tree detachment completes before UI reloads.
@@ -215,8 +220,8 @@
   - Hardened `SmartImportDialog.Unloaded` lifecycle event with exception safety and null-guards.
 - **SQLite Tag Collision Auto-Healing**:
   - Replaced throwing `ToDictionary` with safe `BuildExamTagLookup` and `BuildTopicLookup` to handle pre-existing duplicate or case-variant tags in SQLite.
-- **Synchronized Version Bump to 1.6.2**:
-  - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `SettingsViewModel.cs`, `ReleaseNotesService.cs`, `build-installer.ps1`, `release-notes/v1.6.2.md`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+- **Synchronized Version Bump to 1.7.0**:
+  - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `app.manifest`, `SettingsViewModel.cs`, `SplashScreenOverlay.xaml`, `ReleaseNotesService.cs`, `build-installer.ps1`, `installer/LexoraSetup.iss`, `release-notes/v1.7.0.md`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
 
 
 

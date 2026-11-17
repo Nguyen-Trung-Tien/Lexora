@@ -161,7 +161,7 @@ public sealed class ReleaseNotesService : IReleaseNotesService
             // Fallback
         }
 
-        return "1.6.2";
+        return "1.7.0";
     }
 
     private static string ResolveReleaseNotesDirectory()
@@ -220,12 +220,12 @@ public sealed class ReleaseNotesService : IReleaseNotesService
         return new List<ReleaseNoteItem>
         {
             new(
-                Version: "1.6.2",
-                Title: "Lexora v1.6.2 — Smart Import Resilience & UI Stability Patch",
-                ReleaseDate: "2026-11-14",
-                Summary: "Lexora v1.6.2 delivers a major stability and resilience patch for Smart Data Import, resolving native teardown crashes and automating SQLite tag deduplication.",
-                MarkdownContent: "# Lexora v1.6.2 — Smart Import Resilience & UI Stability Patch\n> Release Date: 2026-11-14 | Version: 1.6.2\n\n## 🌟 Highlights\nLexora v1.6.2 delivers a major stability and resilience patch for **Smart Data Import**, resolving native application teardown crashes upon import completion, automating SQLite tag deduplication, and streamlining post-import library refreshes.\n\n## 🚀 New Features\n- **Resilient Multi-Format Smart Parser**: Automatically recognizes TSV, CSV, Colon-separated, Hyphen-separated, and AI-generated vocabulary and grammar lists.\n- **Atomic Batch Upsert & Tag Auto-Healing**: Safely handles duplicate entries within batch payloads and auto-heals pre-existing duplicate exam/topic tags in SQLite.\n\n## ⚡ Improvements & UX\n- **Seamless Dialog Teardown & Chaining**: Hardened SafeDialogExtensions with guaranteed visual tree popup detachment delays.\n- **Double-Click Protection on Import Actions**: Guard against re-entrant clicks with instantaneous state locking.\n\n## 🛠️ Bug Fixes & Stability\n- **Resolved Post-Import Native Crash (0xc0000005)**: Fixed an Access Violation in Microsoft.UI.Xaml.dll triggered when dismissing SmartImportDialog.\n- **Fixed Exam Tag Dictionary Key Collision**: Eliminated duplicate tag key collisions during batch imports.",
-                IsCurrent: NormalizeVersion("1.6.2") == NormalizeVersion(currentVersion)),
+                Version: "1.7.0",
+                Title: "Lexora v1.7.0 — Exam Intelligence, Dictation Grading, Anki Export & Fluent 2 Motion",
+                ReleaseDate: "2026-11-17",
+                Summary: "Lexora v1.7.0 introduces Word-by-Word Dictation Grading, Predictive Exam Score Simulator (TOEIC/IELTS/VSTEP), Anki HTML TSV Export, Offline Release Notes Log Viewer, Fluent 2 motion upgrades, and Smart Import resilience.",
+                MarkdownContent: "# Lexora v1.7.0 — Exam Intelligence, Dictation Grading, Anki Export & Fluent 2 Motion\n> Release Date: 2026-11-17 | Version: 1.7.0\n\n## 🌟 Highlights\nLexora v1.7.0 delivers a major feature and UX upgrade featuring **Word-by-Word Dictation Grading**, a **Predictive Exam Score Simulator** (TOEIC/IELTS/VSTEP), **Anki HTML TSV Export** with global shortcuts (`Ctrl+Shift+D`, `Ctrl+Shift+R`), an **Offline Release Notes Log Viewer**, Fluent 2 motion physics, EF Core read optimizations, and Smart Import stability fixes.\n\n## 🚀 New Features\n- **Word-by-Word Dictation Grading**: Listening Lab grades dictation at the word level (correct, substituted, missing, extra) with match percentage.\n- **Predictive Exam Score Simulator**: Dashboard AI Intelligence predicts TOEIC (10–990), IELTS (0.0–9.0), and VSTEP (0.0–10.0) scores from SM-2/FSRS retention and target coverage.\n- **Anki HTML TSV Export & Global Shortcuts**: Export vocabulary with IPA, bilingual meanings, examples, and CEFR/Topic/Exam tags to `.tsv`, plus `Ctrl+Shift+D` and `Ctrl+Shift+R`.\n- **Offline Release Notes Log Viewer**: Browse version history in-app via `ReleaseNotesLogDialog`.\n- **Resilient Multi-Format Smart Parser & Tag Auto-Healing**: Supports TSV, CSV, Colon/Hyphen lists with automatic SQLite tag deduplication.\n\n## ⚡ Improvements & UX\n- **Fluent 2 Motion & 3D Flashcard Physics**: `ConnectedAnimationService`, 3D scale pulse flip, elastic celebration badge, and batched Bézier Knowledge Graph splines.\n- **EF Core & Responsive Optimizations**: `.AsNoTracking()` read queries, N+1 removal, and 1366x768 responsive layouts.\n\n## 🛠️ Bug Fixes & Stability\n- **Resolved Post-Import Native Crash (0xc0000005)**: Hardened `SafeDialogExtensions` popup detachment and double-click locking.\n- **Fixed Exam Tag Dictionary Key Collision**: Eliminated duplicate tag key collisions during batch imports.",
+                IsCurrent: NormalizeVersion("1.7.0") == NormalizeVersion(currentVersion)),
 
             new(
                 Version: "1.6.1",

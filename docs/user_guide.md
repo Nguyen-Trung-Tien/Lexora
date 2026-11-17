@@ -21,7 +21,7 @@ Welcome to **Lexora**, an intelligent desktop English learning platform engineer
 ## 1. Getting Started
 
 ### 1.1. Installation
-1. Download `Lexora-Setup-v1.0.0.exe` from the latest release.
+1. Download `Lexora-Setup-v1.7.0.exe` from the latest release.
 2. Double-click the installer.
 3. Follow the wizard steps to choose the install location (Default: `%LocalAppData%\Programs\Lexora` for per-user install or `C:\Program Files\Lexora` for administrator install).
 4. Launch Lexora from your Start Menu or Desktop shortcut.

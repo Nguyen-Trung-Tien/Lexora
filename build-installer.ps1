@@ -13,7 +13,7 @@
       7. Optional automated end-to-end install/smoke-test/uninstall verification.
 
 .PARAMETER Version
-    Semantic version of the application (e.g. 1.0.0). Defaults to "1.0.0".
+    Semantic version of the application (e.g. 1.7.0). Defaults to "1.7.0".
 
 .PARAMETER Configuration
     Build configuration ("Release" or "Debug"). Defaults to "Release".
@@ -37,13 +37,13 @@
     Custom path to Inno Setup Compiler (ISCC.exe).
 
 .EXAMPLE
-    .\build-installer.ps1 -Version "1.0.0"
+    .\build-installer.ps1 -Version "1.7.0"
     .\build-installer.ps1 -TestInstall
 #>
 
 [CmdletBinding()]
 param (
-    [string]$Version = "1.6.2",
+    [string]$Version = "1.7.0",
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
     [switch]$SkipTests,
