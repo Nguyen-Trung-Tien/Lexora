@@ -173,23 +173,20 @@
                                     <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportCsv')}" Click="ImportCsv_Click" />
                                     <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_ImportTxt')}" Click="ImportTxt_Click" />
                                 </MenuFlyoutSubItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_BtnListeningLab')}" Click="OpenListeningLab_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE767;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
                             </MenuFlyout>
                         </DropDownButton.Flyout>
                     </DropDownButton>
 
-                    <!-- Pronunciation & Listening Lab -->
-                    <Button Click="OpenListeningLab_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5"
-                            ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_ListeningLab')}">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <FontIcon Glyph="&#xE767;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Vocab_BtnListeningLab')}" FontWeight="SemiBold" FontSize="12" />
-                        </StackPanel>
-                    </Button>
-
                     <!-- Contextual Help Button -->
-                    <Button x:Name="VocabHelpButton" Click="VocabHelpButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7,5"
+                    <Button x:Name="VocabHelpButton" Click="VocabHelpButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7,6"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_Help_Title')}">
-                        <FontIcon Glyph="&#xE9CE;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <FontIcon Glyph="&#xE9CE;" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Button>
                 </StackPanel>
             </ScrollViewer>
@@ -307,33 +304,25 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Filter Toolbar: Clean Fluent 2 Inline Row (Optimized widths to eliminate horizontal scrolling) -->
+            <!-- Filter Toolbar: Clean Fluent 2 Inline Row (Removed duplicate counter & redundant label) -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,4">
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                               HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-
-                        <!-- Filter Icon & Label -->
-                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center" Margin="0,0,2,0">
-                            <FontIcon Glyph="&#xE71C;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Action_Filter')}" FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-
                         <!-- Topic Filter -->
                         <ComboBox x:Name="TopicFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllTopics')}"
                                   SelectionChanged="TopicFilterCombo_SelectionChanged"
-                                  MinWidth="115" MaxWidth="140" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11" />
+                                  MinWidth="115" MaxWidth="145" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11.5" />
 
                         <!-- Level Filter -->
                         <ComboBox x:Name="LevelFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllLevels')}"
                                   SelectionChanged="LevelFilterCombo_SelectionChanged"
-                                  MinWidth="95" MaxWidth="120" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11">
+                                  MinWidth="95" MaxWidth="120" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11.5">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11" />
+                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11.5" />
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
@@ -341,10 +330,10 @@
                         <!-- POS Filter -->
                         <ComboBox x:Name="PosFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllPos')}"
                                   SelectionChanged="PosFilterCombo_SelectionChanged"
-                                  MinWidth="110" MaxWidth="135" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11">
+                                  MinWidth="105" MaxWidth="135" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11.5">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11" />
+                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11.5" />
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
@@ -352,10 +341,10 @@
                         <!-- Status Filter -->
                         <ComboBox x:Name="StatusFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_AllStatus')}"
                                   SelectionChanged="StatusFilterCombo_SelectionChanged"
-                                  MinWidth="105" MaxWidth="130" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11">
+                                  MinWidth="100" MaxWidth="130" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11.5">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11" />
+                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11.5" />
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
@@ -363,15 +352,14 @@
                         <!-- Exam Target Filter -->
                         <ComboBox x:Name="ExamFilterCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_ExamFilter')}"
                                   SelectionChanged="ExamFilterCombo_SelectionChanged"
-                                  MinWidth="110" MaxWidth="135" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11">
+                                  MinWidth="105" MaxWidth="135" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11.5">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11" />
+                                    <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedTextConverter}}" FontSize="11.5" />
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
 
-                        <!-- Divider -->
                         <Border Width="1" Height="20" Background="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" Margin="2,0" />
 
                         <!-- Sort -->
@@ -379,31 +367,18 @@
                             <FontIcon Glyph="&#xE8CB;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                             <ComboBox x:Name="SortCombo" PlaceholderText="{x:Bind Loc.GetString('Vocab_SortBy')}"
                                       SelectionChanged="SortCombo_SelectionChanged"
-                                      MinWidth="120" MaxWidth="150" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11" />
+                                      MinWidth="120" MaxWidth="150" Height="32" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="11.5" />
                         </StackPanel>
 
-                        <!-- Divider -->
-                        <Border Width="1" Height="20" Background="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" Margin="2,0" />
-
-                        <!-- Reset + Word Count -->
+                        <!-- Reset -->
                         <Button Click="ResetFiltersButton_Click"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Reset')}"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5" Height="32" FontSize="11">
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5" Height="32" FontSize="11.5">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <FontIcon Glyph="&#xE777;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                 <TextBlock Text="{x:Bind Loc.GetString('Action_Reset')}" />
                             </StackPanel>
                         </Button>
-
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6"
-                                Padding="8,0" Height="32" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE82D;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                <TextBlock Text="{x:Bind ViewModel.TotalWordCount, Mode=OneWay}" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_WordsCount')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Border>
-
                     </StackPanel>
                 </ScrollViewer>
             </Border>
@@ -578,13 +553,13 @@
                                                  Fill="{x:Bind LearningStatus, Converter={StaticResource StatusToBrushConverter}}" />
 
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,8,0">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" MaxWidth="150" TextTrimming="CharacterEllipsis" />
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                                <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                                <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
                                                     <TextBlock Text="{x:Bind PartsOfSpeechDisplay}" FontSize="10" FontWeight="SemiBold"
                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </Border>
-                                            </StackPanel>
+                                            </Grid>
                                             <TextBlock Text="{x:Bind PrimaryDefinition}" FontSize="12"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                        TextTrimming="CharacterEllipsis" />
@@ -895,7 +870,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <MenuFlyoutSeparator />
+                            <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
                             <!-- Ebbinghaus Memory Retention Gauge Card -->
                             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
@@ -966,7 +941,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <MenuFlyoutSeparator />
+                            <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
                             <!-- Meanings List -->
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_DefinitionsSection')}" FontWeight="Bold" FontSize="16" />
@@ -1179,7 +1154,7 @@
 
 
                     <!-- Cards Grid -->
-                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredContextUnits, Mode=OneWay}"
+                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.PagedContextUnits, Mode=OneWay}"
                                    Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                         <ItemsRepeater.Layout>
                             <UniformGridLayout Orientation="Horizontal" MinItemWidth="310" MinColumnSpacing="14" MinRowSpacing="14" ItemsStretch="Fill" />
@@ -1269,7 +1244,7 @@
                                             </Grid>
                                         </StackPanel>
 
-                                        <MenuFlyoutSeparator Grid.Row="2" Margin="0,-4" />
+                                        <Border Grid.Row="2" Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,-4" />
 
                                         <!-- Actions: View Words, Add Word, Review Unit (SM-2) & Test Unit -->
                                         <Grid Grid.Row="3" ColumnDefinitions="*,*,*,*" ColumnSpacing="6">
@@ -1310,6 +1285,66 @@
                             </DataTemplate>
                         </ItemsRepeater.ItemTemplate>
                     </ItemsRepeater>
+
+                    <!-- Context Units Pagination Bar -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}"
+                            Padding="14,8"
+                            Visibility="{x:Bind ViewModel.FilteredContextUnits.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <ComboBox x:Name="UnitPageSizeCombo" SelectionChanged="UnitPageSizeCombo_SelectionChanged"
+                                          SelectedIndex="0" CornerRadius="{ThemeResource ControlCornerRadius}"
+                                          MinWidth="68" FontSize="11.5" Padding="8,4" Height="30">
+                                    <ComboBoxItem Content="12" />
+                                    <ComboBoxItem Content="24" />
+                                    <ComboBoxItem Content="48" />
+                                    <ComboBoxItem Content="96" />
+                                </ComboBox>
+                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_PageSizeSuffix')}"
+                                           VerticalAlignment="Center" FontSize="11.5"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <Button Command="{x:Bind ViewModel.FirstUnitPageCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasUnitPreviousPage, Mode=OneWay}"
+                                        Padding="0" Height="28" Width="28" CornerRadius="{ThemeResource ControlCornerRadius}"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_FirstPage')}">
+                                    <FontIcon Glyph="&#xE892;" FontSize="11" />
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.PreviousUnitPageCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasUnitPreviousPage, Mode=OneWay}"
+                                        Padding="0" Height="28" Width="28" CornerRadius="{ThemeResource ControlCornerRadius}"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_PrevPage')}">
+                                    <FontIcon Glyph="&#xE76B;" FontSize="11" />
+                                </Button>
+
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="6"
+                                        Padding="10,0" Height="28">
+                                    <TextBlock Text="{x:Bind ViewModel.UnitPageDisplayInfo, Mode=OneWay}"
+                                               FontSize="11.5" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </Border>
+
+                                <Button Command="{x:Bind ViewModel.NextUnitPageCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasUnitNextPage, Mode=OneWay}"
+                                        Padding="0" Height="28" Width="28" CornerRadius="{ThemeResource ControlCornerRadius}"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_NextPage')}">
+                                    <FontIcon Glyph="&#xE76C;" FontSize="11" />
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.LastUnitPageCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasUnitNextPage, Mode=OneWay}"
+                                        Padding="0" Height="28" Width="28" CornerRadius="{ThemeResource ControlCornerRadius}"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_LastPage')}">
+                                    <FontIcon Glyph="&#xE893;" FontSize="11" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

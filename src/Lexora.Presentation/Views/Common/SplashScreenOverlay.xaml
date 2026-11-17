@@ -14,13 +14,13 @@
         <!-- Multi-layered atmospheric depth, ambient aurora bloom,  -->
         <!-- specular sheen glide, and synchronized typography reveal-->
         <!-- ======================================================= -->
-        <Storyboard x:Name="EntranceStoryboard" Duration="0:0:0.95">
+        <Storyboard x:Name="EntranceStoryboard" Duration="0:0:0.55">
             <!-- 1. Outer Ambient Aurora Glow Expand -->
             <DoubleAnimation
                 Storyboard.TargetName="AuraScale"
                 Storyboard.TargetProperty="ScaleX"
-                From="0.6" To="1.25"
-                Duration="0:0:0.90"
+                From="0.7" To="1.2"
+                Duration="0:0:0.55"
                 BeginTime="0:0:0.0">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
@@ -29,8 +29,8 @@
             <DoubleAnimation
                 Storyboard.TargetName="AuraScale"
                 Storyboard.TargetProperty="ScaleY"
-                From="0.6" To="1.25"
-                Duration="0:0:0.90"
+                From="0.7" To="1.2"
+                Duration="0:0:0.55"
                 BeginTime="0:0:0.0">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
@@ -39,8 +39,8 @@
             <DoubleAnimation
                 Storyboard.TargetName="AuroraGlow"
                 Storyboard.TargetProperty="Opacity"
-                From="0.0" To="0.45"
-                Duration="0:0:0.75"
+                From="0.0" To="0.38"
+                Duration="0:0:0.45"
                 BeginTime="0:0:0.0">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
@@ -51,9 +51,9 @@
             <DoubleAnimation
                 Storyboard.TargetName="InnerAuraScale"
                 Storyboard.TargetProperty="ScaleX"
-                From="0.5" To="1.15"
-                Duration="0:0:0.85"
-                BeginTime="0:0:0.05">
+                From="0.6" To="1.1"
+                Duration="0:0:0.50"
+                BeginTime="0:0:0.02">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -61,9 +61,9 @@
             <DoubleAnimation
                 Storyboard.TargetName="InnerAuraScale"
                 Storyboard.TargetProperty="ScaleY"
-                From="0.5" To="1.15"
-                Duration="0:0:0.85"
-                BeginTime="0:0:0.05">
+                From="0.6" To="1.1"
+                Duration="0:0:0.50"
+                BeginTime="0:0:0.02">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -71,9 +71,9 @@
             <DoubleAnimation
                 Storyboard.TargetName="InnerAuroraGlow"
                 Storyboard.TargetProperty="Opacity"
-                From="0.0" To="0.35"
-                Duration="0:0:0.65"
-                BeginTime="0:0:0.05">
+                From="0.0" To="0.28"
+                Duration="0:0:0.40"
+                BeginTime="0:0:0.02">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -83,9 +83,9 @@
             <DoubleAnimation
                 Storyboard.TargetName="RippleScale"
                 Storyboard.TargetProperty="ScaleX"
-                From="0.70" To="1.65"
-                Duration="0:0:0.85"
-                BeginTime="0:0:0.15">
+                From="0.78" To="1.55"
+                Duration="0:0:0.50"
+                BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -93,9 +93,9 @@
             <DoubleAnimation
                 Storyboard.TargetName="RippleScale"
                 Storyboard.TargetProperty="ScaleY"
-                From="0.70" To="1.65"
-                Duration="0:0:0.85"
-                BeginTime="0:0:0.15">
+                From="0.78" To="1.55"
+                Duration="0:0:0.50"
+                BeginTime="0:0:0.05">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -103,19 +103,19 @@
             <DoubleAnimationUsingKeyFrames
                 Storyboard.TargetName="RippleRing"
                 Storyboard.TargetProperty="Opacity"
-                BeginTime="0:0:0.15">
+                BeginTime="0:0:0.05">
                 <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.20" Value="0.65" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.85" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.14" Value="0.50" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.50" Value="0.0" />
             </DoubleAnimationUsingKeyFrames>
 
-            <!-- 4. Logo Camera Push-In Easing (Scale from 0.84 to 1.0) -->
+            <!-- 4. Logo Camera Push-In Easing (Scale from 0.88 to 1.0) -->
             <DoubleAnimation
                 Storyboard.TargetName="LogoScale"
                 Storyboard.TargetProperty="ScaleX"
-                From="0.84" To="1.0"
-                Duration="0:0:0.70"
-                BeginTime="0:0:0.05">
+                From="0.88" To="1.0"
+                Duration="0:0:0.42"
+                BeginTime="0:0:0.02">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -123,9 +123,9 @@
             <DoubleAnimation
                 Storyboard.TargetName="LogoScale"
                 Storyboard.TargetProperty="ScaleY"
-                From="0.84" To="1.0"
-                Duration="0:0:0.70"
-                BeginTime="0:0:0.05">
+                From="0.88" To="1.0"
+                Duration="0:0:0.42"
+                BeginTime="0:0:0.02">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -134,8 +134,8 @@
                 Storyboard.TargetName="LogoTileCard"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.50"
-                BeginTime="0:0:0.05">
+                Duration="0:0:0.32"
+                BeginTime="0:0:0.02">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -146,16 +146,16 @@
                 Storyboard.TargetName="SpecularSheen"
                 Storyboard.TargetProperty="Opacity">
                 <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.35" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.55" Value="0.50" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.85" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.18" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.34" Value="0.45" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.52" Value="0.0" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimation
                 Storyboard.TargetName="SheenTransform"
                 Storyboard.TargetProperty="TranslateX"
-                From="-150" To="150"
-                Duration="0:0:0.55"
-                BeginTime="0:0:0.35">
+                From="-140" To="140"
+                Duration="0:0:0.36"
+                BeginTime="0:0:0.18">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut" />
                 </DoubleAnimation.EasingFunction>
@@ -166,8 +166,8 @@
                 Storyboard.TargetName="DividerScale"
                 Storyboard.TargetProperty="ScaleX"
                 From="0.0" To="1.0"
-                Duration="0:0:0.50"
-                BeginTime="0:0:0.40">
+                Duration="0:0:0.35"
+                BeginTime="0:0:0.18">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -176,8 +176,8 @@
                 Storyboard.TargetName="GlowingDivider"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.40"
-                BeginTime="0:0:0.40">
+                Duration="0:0:0.28"
+                BeginTime="0:0:0.18">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -188,8 +188,8 @@
                 Storyboard.TargetName="TypographyContainer"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.50"
-                BeginTime="0:0:0.35">
+                Duration="0:0:0.35"
+                BeginTime="0:0:0.14">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -197,9 +197,9 @@
             <DoubleAnimation
                 Storyboard.TargetName="TypographyTranslate"
                 Storyboard.TargetProperty="Y"
-                From="18" To="0"
-                Duration="0:0:0.50"
-                BeginTime="0:0:0.35">
+                From="14" To="0"
+                Duration="0:0:0.35"
+                BeginTime="0:0:0.14">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -210,8 +210,8 @@
                 Storyboard.TargetName="LoadingContainer"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.40"
-                BeginTime="0:0:0.30">
+                Duration="0:0:0.30"
+                BeginTime="0:0:0.15">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
@@ -221,20 +221,20 @@
         <!-- ======================================================= -->
         <!-- CINEMATIC EXIT STORYBOARD (Camera Push-through & Dissolve)-->
         <!-- ======================================================= -->
-        <Storyboard x:Name="ExitStoryboard" Duration="0:0:0.35">
+        <Storyboard x:Name="ExitStoryboard" Duration="0:0:0.24">
             <!-- Loading indicator quick fade -->
             <DoubleAnimation
                 Storyboard.TargetName="LoadingContainer"
                 Storyboard.TargetProperty="Opacity"
                 To="0.0"
-                Duration="0:0:0.12" />
+                Duration="0:0:0.08" />
 
-            <!-- Cinematic Push-through zoom on exit (1.0 -> 1.05) -->
+            <!-- Smooth Push-through zoom on exit (1.0 -> 1.03) -->
             <DoubleAnimation
                 Storyboard.TargetName="MainStackScale"
                 Storyboard.TargetProperty="ScaleX"
-                To="1.05"
-                Duration="0:0:0.35">
+                To="1.03"
+                Duration="0:0:0.24">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseIn" />
                 </DoubleAnimation.EasingFunction>
@@ -242,8 +242,8 @@
             <DoubleAnimation
                 Storyboard.TargetName="MainStackScale"
                 Storyboard.TargetProperty="ScaleY"
-                To="1.05"
-                Duration="0:0:0.35">
+                To="1.03"
+                Duration="0:0:0.24">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseIn" />
                 </DoubleAnimation.EasingFunction>
@@ -254,7 +254,7 @@
                 Storyboard.TargetName="RootGrid"
                 Storyboard.TargetProperty="Opacity"
                 To="0.0"
-                Duration="0:0:0.35">
+                Duration="0:0:0.24">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut" />
                 </DoubleAnimation.EasingFunction>
@@ -509,24 +509,19 @@
                         VerticalAlignment="Center" />
                 </Grid>
 
-                <!-- Fluent Capsule Progress Track -->
-                <Border Height="6" CornerRadius="3"
-                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1">
-                    <ProgressBar
-                        x:Name="StartupProgressBar"
-                        Minimum="0"
-                        Maximum="100"
-                        Value="12"
-                        IsIndeterminate="False"
-                        Height="6"
-                        CornerRadius="3"
-                        Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
-                </Border>
+                <!-- Sleek Frameless Fluent Capsule Progress Track -->
+                <ProgressBar
+                    x:Name="StartupProgressBar"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="12"
+                    IsIndeterminate="False"
+                    Height="4"
+                    CornerRadius="2"
+                    Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
 
-                <!-- 4 Real-Stage Milestone Indicators -->
-                <Grid Margin="0,4,0,0">
+                <!-- 4 Minimal Stage Milestone Indicators -->
+                <Grid Margin="0,2,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -535,27 +530,27 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Stage 1: Core System -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                        <Ellipse x:Name="Step1Dot" Width="8" Height="8" Fill="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="Step1TextBlock" Text="Core" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                        <Ellipse x:Name="Step1Dot" Width="6" Height="6" Fill="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="Step1TextBlock" Text="Core" FontSize="10.5" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Stage 2: SQLite Database -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                        <Ellipse x:Name="Step2Dot" Width="8" Height="8" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="Step2TextBlock" Text="Database" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                        <Ellipse x:Name="Step2Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="Step2TextBlock" Text="Database" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Stage 3: Study Data & Preferences -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                        <Ellipse x:Name="Step3Dot" Width="8" Height="8" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="Step3TextBlock" Text="Data" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                        <Ellipse x:Name="Step3Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="Step3TextBlock" Text="Data" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Stage 4: Launch Ready -->
-                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                        <Ellipse x:Name="Step4Dot" Width="8" Height="8" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="Step4TextBlock" Text="Ready" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                        <Ellipse x:Name="Step4Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="Step4TextBlock" Text="Ready" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Grid>
             </StackPanel>

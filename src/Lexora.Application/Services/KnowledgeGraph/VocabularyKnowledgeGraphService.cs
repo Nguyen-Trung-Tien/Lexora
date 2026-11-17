@@ -48,8 +48,20 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
             return popular.Select(MapToWordDto).ToList();
         }
 
-        var results = await _vocabRepo.SearchAsync(searchTerm: searchTerm, take: limit, cancellationToken: cancellationToken);
-        return results.Select(MapToWordDto).ToList();
+        var candidates = await _vocabRepo.SearchAsync(take: 400, cancellationToken: cancellationToken);
+        return candidates
+            .Select(MapToWordDto)
+            .Select(w => (Word: w, Score: Lexora.Domain.Common.SearchTextHelper.ScoreMatch(
+                searchTerm,
+                w.Term,
+                (w.PrimaryDefinition, 0.90),
+                (w.PhoneticUs, 0.70),
+                (w.Notes, 0.65))))
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .Take(limit)
+            .Select(x => x.Word)
+            .ToList();
     }
 
     public async Task<KnowledgeGraphConceptsPagedResultDto> GetConceptsPagedAsync(KnowledgeGraphQueryDto query, CancellationToken cancellationToken = default)
@@ -58,7 +70,10 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         var pageSize = Math.Clamp(query.PageSize, 1, 100);
         var skip = (page - 1) * pageSize;
 
-        var totalCount = await _vocabRepo.CountFilteredAsync(
+        int totalCount;
+        IReadOnlyList<Word> wordList;
+
+        totalCount = await _vocabRepo.CountFilteredAsync(
             searchTerm: query.SearchTerm,
             level: query.Level,
             partOfSpeech: query.PartOfSpeech,
@@ -74,7 +89,52 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
             isAscending: true,
             cancellationToken: cancellationToken);
 
-        var wordList = words ?? Array.Empty<Word>();
+        wordList = words ?? Array.Empty<Word>();
+
+        if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+        {
+            if (wordList.Count == 0 && page == 1)
+            {
+                // Fallback to diacritic-insensitive & typo-tolerant smart search
+                var candidates = await _vocabRepo.SearchAsync(
+                    searchTerm: null,
+                    level: query.Level,
+                    partOfSpeech: query.PartOfSpeech,
+                    skip: 0,
+                    take: 1000,
+                    sortBy: query.SortBy ?? "term",
+                    isAscending: true,
+                    cancellationToken: cancellationToken);
+
+                var ranked = (candidates ?? Array.Empty<Word>())
+                    .Select(w => (Word: w, Score: Lexora.Domain.Common.SearchTextHelper.ScoreMatch(
+                        query.SearchTerm,
+                        w.Term,
+                        (w.Meanings?.FirstOrDefault()?.DefinitionVi, 0.90),
+                        (w.Meanings?.FirstOrDefault()?.DefinitionEn, 0.85),
+                        (w.PhoneticUs, 0.70),
+                        (w.Notes, 0.65))))
+                    .Where(x => x.Score > 0)
+                    .OrderByDescending(x => x.Score)
+                    .Select(x => x.Word)
+                    .ToList();
+
+                totalCount = ranked.Count;
+                wordList = ranked.Skip(skip).Take(pageSize).ToList();
+            }
+            else if (wordList.Count > 1)
+            {
+                wordList = wordList
+                    .OrderByDescending(w => Lexora.Domain.Common.SearchTextHelper.ScoreMatch(
+                        query.SearchTerm,
+                        w.Term,
+                        (w.Meanings?.FirstOrDefault()?.DefinitionVi, 0.90),
+                        (w.Meanings?.FirstOrDefault()?.DefinitionEn, 0.85),
+                        (w.PhoneticUs, 0.70),
+                        (w.Notes, 0.65)))
+                    .ToList();
+            }
+        }
         var items = new List<KnowledgeGraphConceptSummaryDto>();
         foreach (var w in wordList)
         {

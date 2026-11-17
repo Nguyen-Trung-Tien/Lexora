@@ -235,6 +235,7 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
             {
                 FilteredContextUnits.Add(unit);
             }
+            RefreshUnitPagination(resetToFirstPage: true);
             return;
         }
 
@@ -253,6 +254,7 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
         {
             FilteredContextUnits.Add(unit);
         }
+        RefreshUnitPagination(resetToFirstPage: true);
     }
 
     [RelayCommand]
@@ -398,6 +400,7 @@ public partial class VocabularyViewModel : ObservableObject, IDisposable
             {
                 if (FilteredContextUnits[i].Id == id) FilteredContextUnits.RemoveAt(i);
             }
+            RefreshUnitPagination();
             for (int i = AvailableTopics.Count - 1; i >= 0; i--)
             {
                 if (AvailableTopics[i].Id == id) AvailableTopics.RemoveAt(i);

@@ -25,14 +25,26 @@ public class HomophoneService : IHomophoneService
         string? searchTerm = null,
         CancellationToken cancellationToken = default)
     {
-        var groups = await _homophoneRepo.GetFilteredAsync(
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var groups = await _homophoneRepo.GetFilteredAsync(
+                type: typeFilter,
+                level: levelFilter,
+                examType: examFilter,
+                query: null,
+                cancellationToken: cancellationToken);
+
+            return groups.Select(MapToDto).ToList();
+        }
+
+        var candidates = await _homophoneRepo.GetFilteredAsync(
             type: typeFilter,
             level: levelFilter,
             examType: examFilter,
-            query: searchTerm,
+            query: null,
             cancellationToken: cancellationToken);
 
-        return groups.Select(MapToDto).ToList();
+        return RankHomophones(candidates, searchTerm);
     }
 
     public async Task<HomophoneGroupDto?> GetGroupByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -150,13 +162,30 @@ public class HomophoneService : IHomophoneService
 
     public async Task<IReadOnlyList<HomophoneGroupDto>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            return await GetAllGroupsAsync(cancellationToken: cancellationToken);
-        }
+        return await GetAllGroupsAsync(searchTerm: query, cancellationToken: cancellationToken);
+    }
 
-        var results = await _homophoneRepo.SearchAsync(query, cancellationToken);
-        return results.Select(MapToDto).ToList();
+    private static IReadOnlyList<HomophoneGroupDto> RankHomophones(IEnumerable<HomophoneGroup> groups, string searchTerm)
+    {
+        return groups
+            .Select(g =>
+            {
+                var itemsText = g.Items != null
+                    ? string.Join(" ", g.Items.Select(i => $"{i.Term} {i.MeaningVi} {i.ExampleSentence}"))
+                    : string.Empty;
+                var score = Lexora.Domain.Common.SearchTextHelper.ScoreMatch(
+                    searchTerm,
+                    g.Title,
+                    (itemsText, 0.95),
+                    (g.PhoneticIpa, 0.90),
+                    (g.DifferentiationTip, 0.75),
+                    (g.Notes, 0.65));
+                return (Group: g, Score: score);
+            })
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .Select(x => MapToDto(x.Group))
+            .ToList();
     }
 
     public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)

@@ -607,6 +607,15 @@ public sealed partial class VocabularyPage : Page, ILocalizableView, IThemeAware
         }
     }
 
+    private void UnitPageSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        if (UnitPageSizeCombo.SelectedItem is ComboBoxItem cbi && int.TryParse(cbi.Content?.ToString(), out int size))
+        {
+            ViewModel.ChangeUnitPageSize(size);
+        }
+    }
+
     private void ResetFiltersButton_Click(object sender, RoutedEventArgs e)
     {
         SearchBox.Text = string.Empty;

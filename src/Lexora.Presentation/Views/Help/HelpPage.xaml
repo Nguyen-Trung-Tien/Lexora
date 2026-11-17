@@ -5,6 +5,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:common="using:Lexora.Presentation.Views.Common"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     Background="Transparent"
@@ -14,62 +15,41 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Padding="24" HorizontalAlignment="Stretch">
-            <StackPanel Spacing="20" HorizontalAlignment="Stretch" MaxWidth="1120">
+            <StackPanel Spacing="16" HorizontalAlignment="Stretch">
 
-                <!-- 1. HERO BANNER: Elegant Fluent Card with Hub Overview -->
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
-                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20,16">
-                    <Grid RowDefinitions="Auto,Auto" RowSpacing="18">
-                        <StackPanel Spacing="8">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="8,3">
-                                    <TextBlock Text="{x:Bind Loc.GetString('Help_HeroBadge')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
-                                </Border>
-                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <FontIcon Glyph="&#xE9CE;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('Help_OnboardingSystem')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <FontIcon Glyph="&#xE753;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('Help_OfflineBadge')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
-                                    </StackPanel>
-                                </Border>
+                <!-- 1. UNIFIED PAGE HEADER -->
+                <common:PageHeaderControl Title="{x:Bind Loc.GetString('Help_Title')}"
+                                          Subtitle="{x:Bind Loc.GetString('Help_Subtitle')}"
+                                          IconGlyph="&#xE9CE;">
+                    <common:PageHeaderControl.ActionsContent>
+                        <Button Click="OpenReleaseNotesLog_Click"
+                                Style="{StaticResource LexoraStandardButtonStyle}"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ReleaseNotesLogTooltip')}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE81C;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Help_ReleaseNotesLog')}" FontWeight="SemiBold" FontSize="12.5" />
                             </StackPanel>
+                        </Button>
+                    </common:PageHeaderControl.ActionsContent>
+                </common:PageHeaderControl>
 
-                            <TextBlock Text="{x:Bind Loc.GetString('Help_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="26" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Help_Subtitle')}" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxWidth="680" />
-                        </StackPanel>
-
-                        <!-- Search Box for Help Center & Release Notes Button -->
-                        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-                            <TextBox x:Name="SearchBox"
-                                     PlaceholderText="{x:Bind Loc.GetString('Help_SearchPlaceholder')}"
-                                     Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,8">
-                                <TextBox.Resources>
-                                    <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
-                                </TextBox.Resources>
-                            </TextBox>
-                            <Button Grid.Column="1" Click="ResetFilterButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5"
-                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ResetFilterTooltip')}">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE72C;" FontSize="12" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Help_ResetFilter')}" FontWeight="SemiBold" FontSize="12" />
-                                </StackPanel>
-                            </Button>
-                            <Button Grid.Column="2" Click="OpenReleaseNotesLog_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,5"
-                                    Style="{ThemeResource DefaultButtonStyle}"
-                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ReleaseNotesLogTooltip')}">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE81C;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Help_ReleaseNotesLog')}" FontWeight="SemiBold" FontSize="12" />
-                                </StackPanel>
-                            </Button>
-                        </Grid>
+                <!-- Search & Reset Bar -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <TextBox x:Name="SearchBox"
+                                 PlaceholderText="{x:Bind Loc.GetString('Help_SearchPlaceholder')}"
+                                 Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 CornerRadius="{ThemeResource ControlCornerRadius}" />
+                        <Button Grid.Column="1" Click="ResetFilterButton_Click"
+                                Style="{StaticResource LexoraStandardButtonStyle}"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ResetFilterTooltip')}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE72C;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Help_ResetFilter')}" FontWeight="SemiBold" FontSize="12" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
                 </Border>
 
@@ -162,13 +142,17 @@
                     </Button>
                 </Grid>
 
-                <!-- 3. LIST OF GUIDE CARDS -->
-                <ItemsControl ItemsSource="{x:Bind ViewModel.FilteredGuides, Mode=OneWay}">
-                    <ItemsControl.ItemTemplate>
+                <!-- 3. BALANCED 2-COLUMN GUIDE CARDS GRID -->
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredGuides, Mode=OneWay}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout MinItemWidth="440" MinColumnSpacing="16" MinRowSpacing="16" ItemsStretch="Fill" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="vm:HelpGuideDisplayItem">
                             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16" Margin="0,0,0,14">
+                                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="18"
+                                    VerticalAlignment="Top">
                                 <StackPanel Spacing="14">
                                     <!-- Card Header -->
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
@@ -243,24 +227,27 @@
                                         </ItemsControl>
                                     </StackPanel>
 
-                                    <!-- Keyboard Shortcuts Reference -->
+                                    <!-- Keyboard Shortcuts Reference (Horizontal Wrapping) -->
                                     <StackPanel Spacing="6" Visibility="{x:Bind ShortcutKeys, Converter={StaticResource NullToVisibilityConverter}}">
                                         <TextBlock Text="{x:Bind ShortcutsHeader}" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <ItemsControl ItemsSource="{x:Bind ShortcutKeys}">
-                                            <ItemsControl.ItemTemplate>
+                                        <ItemsRepeater ItemsSource="{x:Bind ShortcutKeys}">
+                                            <ItemsRepeater.Layout>
+                                                <UniformGridLayout MinItemWidth="90" MinColumnSpacing="6" MinRowSpacing="6" ItemsStretch="None" />
+                                            </ItemsRepeater.Layout>
+                                            <ItemsRepeater.ItemTemplate>
                                                 <DataTemplate x:DataType="x:String">
-                                                    <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="8,4" Margin="0,2" HorizontalAlignment="Left">
+                                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="8,4" HorizontalAlignment="Left">
                                                         <TextBlock Text="{x:Bind ToString()}" FontFamily="Consolas, Cascadia Code" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                                     </Border>
                                                 </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                            </ItemsRepeater.ItemTemplate>
+                                        </ItemsRepeater>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
 
                 <!-- 4. FOOTER NOTE -->
                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20,16">

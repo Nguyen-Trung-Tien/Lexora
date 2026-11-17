@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
+    xmlns:common="using:Lexora.Presentation.Views.Common"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -22,109 +23,78 @@
                       Grid.RowSpan="2" Canvas.ZIndex="10" />
 
         <!-- ======================================================== -->
-        <!-- TOP STREAMLINED TOOLBAR                                  -->
+        <!-- UNIFIED PAGE HEADER + SINGLE SEARCH & FILTER BAR         -->
         <!-- ======================================================== -->
-        <StackPanel Grid.Row="0" Spacing="8">
-            <!-- Row 1: Search & Primary Action Buttons (Responsive & Clean) -->
-            <Grid Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                  ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                
-                <!-- Search Box with Live Debounce -->
-                <TextBox x:Name="GrammarSearchBox"
-                         PlaceholderText="{x:Bind Loc.GetString('Grammar_SearchPlaceholder')}"
-                         Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}"
-                         TextChanged="SearchBox_TextChanged"
-                         CornerRadius="10" Padding="14,8"
-                         VerticalAlignment="Center" />
-
-                <!-- Action Controls Group (Streamlined) -->
-                <ScrollViewer Grid.Column="1"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Disabled"
-                              HorizontalScrollMode="Enabled"
-                              VerticalScrollMode="Disabled">
-                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+        <StackPanel Grid.Row="0" Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <common:PageHeaderControl Title="{x:Bind Loc.GetString('Nav_Grammar')}"
+                                      IconGlyph="&#xE8D2;">
+                <common:PageHeaderControl.ActionsContent>
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <!-- Add Rule Primary Button -->
                         <Button Click="AddRuleButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipAdd')}"
-                                Style="{ThemeResource AccentButtonStyle}" Padding="10,5" CornerRadius="{ThemeResource ControlCornerRadius}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE710;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Grammar_AddRule')}" FontWeight="Bold" FontSize="12" />
+                                Style="{ThemeResource AccentButtonStyle}" Padding="12,7" CornerRadius="{ThemeResource ControlCornerRadius}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE710;" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Grammar_AddRule')}" FontWeight="SemiBold" FontSize="12.5" />
                             </StackPanel>
                         </Button>
 
                         <!-- Practice Secondary Button -->
                         <Button Click="PracticeButton_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Grammar_TooltipPractice')}"
-                                Padding="10,5" CornerRadius="{ThemeResource ControlCornerRadius}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE768;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Grammar_Practice')}" FontWeight="SemiBold" FontSize="12" />
+                                Style="{StaticResource LexoraStandardButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE768;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Grammar_Practice')}" FontSize="12.5" />
                             </StackPanel>
                         </Button>
 
                         <!-- Multi-Select Toggle Button -->
                         <Button x:Name="BtnSelectMode"
                                 Click="BtnSelectMode_Click"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5"
+                                Style="{StaticResource LexoraStandardButtonStyle}"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_SelectMultiple')}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="12" />
-                                <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontWeight="SemiBold" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon x:Name="IconSelectMode" Glyph="&#xE762;" FontSize="13" />
+                                <TextBlock x:Name="TextSelectMode" Text="{x:Bind Loc.GetString('Action_SelectMultiple')}" FontSize="12.5" />
                             </StackPanel>
                         </Button>
 
                         <!-- Import / Export Dropdown -->
-                        <DropDownButton Padding="9,5" CornerRadius="{ThemeResource ControlCornerRadius}"
+                        <DropDownButton Style="{StaticResource LexoraStandardButtonStyle}"
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Vocab_ImportExport')}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE8B5;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontWeight="SemiBold" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE8B5;" FontSize="13" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontSize="12.5" />
                             </StackPanel>
                             <DropDownButton.Flyout>
-                                <MenuFlyout Placement="Bottom" Opening="ExportImportFlyout_Opening">
-                                    <!-- Smart Import (Primary) -->
+                                <MenuFlyout Placement="BottomEdgeAlignedRight" Opening="ExportImportFlyout_Opening">
                                     <MenuFlyoutItem Text="{x:Bind Loc.GetString('Grammar_SmartImport')}" Click="SmartImport_Click">
                                         <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" /></MenuFlyoutItem.Icon>
                                     </MenuFlyoutItem>
                                     <MenuFlyoutSeparator />
-
-                                    <!-- Export SubItem -->
                                     <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Export')}">
-                                        <MenuFlyoutItem x:Name="ExportJsonMenuItem"
-                                                       Text="{x:Bind Loc.GetString('Grammar_ExportJson')}"
-                                                       Click="ExportJson_Click">
+                                        <MenuFlyoutItem x:Name="ExportJsonMenuItem" Text="{x:Bind Loc.GetString('Grammar_ExportJson')}" Click="ExportJson_Click">
                                             <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8A5;" /></MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutItem x:Name="ExportCsvMenuItem"
-                                                       Text="{x:Bind Loc.GetString('Grammar_ExportCsv')}"
-                                                       Click="ExportCsv_Click">
+                                        <MenuFlyoutItem x:Name="ExportCsvMenuItem" Text="{x:Bind Loc.GetString('Grammar_ExportCsv')}" Click="ExportCsv_Click">
                                             <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8A5;" /></MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutItem x:Name="ExportTxtMenuItem"
-                                                       Text="{x:Bind Loc.GetString('Grammar_ExportTxt')}"
-                                                       Click="ExportTxt_Click">
+                                        <MenuFlyoutItem x:Name="ExportTxtMenuItem" Text="{x:Bind Loc.GetString('Grammar_ExportTxt')}" Click="ExportTxt_Click">
                                             <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8A5;" /></MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
                                         <MenuFlyoutSeparator />
                                         <MenuFlyoutItem x:Name="ExportSelectedMenuItem" Click="ExportSelected_Click" IsEnabled="False" />
                                     </MenuFlyoutSubItem>
                                     <MenuFlyoutSeparator />
-
-                                    <!-- Manual Import SubItem -->
                                     <MenuFlyoutSubItem Text="{x:Bind Loc.GetString('Vocab_Import')}">
-                                        <MenuFlyoutItem x:Name="ImportJsonMenuItem"
-                                                       Text="{x:Bind Loc.GetString('Grammar_ImportJson')}"
-                                                       Click="ImportJson_Click">
+                                        <MenuFlyoutItem x:Name="ImportJsonMenuItem" Text="{x:Bind Loc.GetString('Grammar_ImportJson')}" Click="ImportJson_Click">
                                             <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" /></MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutItem x:Name="ImportCsvMenuItem"
-                                                       Text="{x:Bind Loc.GetString('Grammar_ImportCsv')}"
-                                                       Click="ImportCsv_Click">
+                                        <MenuFlyoutItem x:Name="ImportCsvMenuItem" Text="{x:Bind Loc.GetString('Grammar_ImportCsv')}" Click="ImportCsv_Click">
                                             <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" /></MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutItem x:Name="ImportTxtMenuItem"
-                                                       Text="{x:Bind Loc.GetString('Grammar_ImportTxt')}"
-                                                       Click="ImportTxt_Click">
+                                        <MenuFlyoutItem x:Name="ImportTxtMenuItem" Text="{x:Bind Loc.GetString('Grammar_ImportTxt')}" Click="ImportTxt_Click">
                                             <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" /></MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
                                     </MenuFlyoutSubItem>
@@ -134,22 +104,28 @@
 
                         <!-- Contextual Help Button -->
                         <Button Click="OpenHelp_Click"
-                                Width="32" Height="32" Padding="0"
-                                CornerRadius="{ThemeResource ControlCornerRadius}"
+                                Style="{ThemeResource SubtleButtonStyle}"
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Nav_Help')}">
-                            <FontIcon Glyph="&#xE897;" FontSize="12" />
+                            <FontIcon Glyph="&#xE9CE;" FontSize="15" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </Button>
                     </StackPanel>
-                </ScrollViewer>
-            </Grid>
+                </common:PageHeaderControl.ActionsContent>
+            </common:PageHeaderControl>
 
-            <!-- Row 2: Secondary Filter & Category Strip (Fluent 2 Surface) -->
-            <Border Visibility="{x:Bind ViewModel.IsMainMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            <!-- Unified Search + Filter Bar (Single clean row) -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,4">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,6">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                    <TextBox x:Name="GrammarSearchBox"
+                             PlaceholderText="{x:Bind Loc.GetString('Grammar_SearchPlaceholder')}"
+                             Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}"
+                             TextChanged="SearchBox_TextChanged"
+                             CornerRadius="{ThemeResource ControlCornerRadius}"
+                             VerticalAlignment="Center" />
+
+                    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Disabled"
                                   HorizontalScrollMode="Enabled"
                                   VerticalScrollMode="Disabled">
@@ -210,7 +186,7 @@
                     </ScrollViewer>
 
                     <!-- Right Info / Rule Count Badge -->
-                    <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
+                    <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE8D2;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                             <TextBlock Text="{x:Bind ViewModel.TotalRuleCount, Mode=OneWay}"
@@ -657,13 +633,11 @@
                                                 Visibility="{x:Bind ViewModel.RelatedSuggestions.RelatedVocabulary.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
                                         <TextBlock Text="{x:Bind Loc.GetString('Grammar_LinkedVocab')}" FontWeight="SemiBold" FontSize="12"
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        <ItemsControl ItemsSource="{x:Bind ViewModel.RelatedSuggestions.RelatedVocabulary, Mode=OneWay}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal" Spacing="6" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
+                                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.RelatedSuggestions.RelatedVocabulary, Mode=OneWay}">
+                                            <ItemsRepeater.Layout>
+                                                <UniformGridLayout MinItemWidth="110" MinColumnSpacing="6" MinRowSpacing="6" ItemsStretch="None" />
+                                            </ItemsRepeater.Layout>
+                                            <ItemsRepeater.ItemTemplate>
                                                 <DataTemplate x:DataType="dto:WordSuggestionItemDto">
                                                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -674,8 +648,8 @@
                                                         </StackPanel>
                                                     </Border>
                                                 </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                            </ItemsRepeater.ItemTemplate>
+                                        </ItemsRepeater>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>

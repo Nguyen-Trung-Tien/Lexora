@@ -197,6 +197,7 @@ public partial class VocabularyViewModel
                     FilteredContextUnits.RemoveAt(i);
                 }
             }
+            RefreshUnitPagination();
 
             for (int i = AvailableTopics.Count - 1; i >= 0; i--)
             {

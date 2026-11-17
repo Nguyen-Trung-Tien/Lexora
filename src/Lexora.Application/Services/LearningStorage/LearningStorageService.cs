@@ -143,13 +143,35 @@ public class LearningStorageService : ILearningStorageService
         int validPageSize = Math.Clamp(pageSize, 5, 100);
         int skip = (validPage - 1) * validPageSize;
 
-        var items = await _storageRepo.GetFilteredPagedAsync(
-            itemType, status, search, dueTodayOnly, skip, validPageSize, cancellationToken);
-        var totalCount = await _storageRepo.CountFilteredAsync(
-            itemType, status, search, dueTodayOnly, cancellationToken);
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            var items = await _storageRepo.GetFilteredPagedAsync(
+                itemType, status, null, dueTodayOnly, skip, validPageSize, cancellationToken);
+            var totalCount = await _storageRepo.CountFilteredAsync(
+                itemType, status, null, dueTodayOnly, cancellationToken);
 
-        var dtos = items.Select(MapToDto).ToList();
-        return new StoragePagedResultDto(dtos, totalCount, validPage, validPageSize);
+            var dtos = items.Select(MapToDto).ToList();
+            return new StoragePagedResultDto(dtos, totalCount, validPage, validPageSize);
+        }
+
+        var allFiltered = await _storageRepo.GetFilteredPagedAsync(
+            itemType, status, null, dueTodayOnly, 0, 5000, cancellationToken);
+
+        var ranked = allFiltered
+            .Select(MapToDto)
+            .Select(dto => (Dto: dto, Score: Lexora.Domain.Common.SearchTextHelper.ScoreMatch(
+                search,
+                dto.Title,
+                (dto.DefinitionOrExplanation, 0.92),
+                (dto.Subtitle, 0.85),
+                (dto.Note, 0.70))))
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .Select(x => x.Dto)
+            .ToList();
+
+        var pagedDtos = ranked.Skip(skip).Take(validPageSize).ToList();
+        return new StoragePagedResultDto(pagedDtos, ranked.Count, validPage, validPageSize);
     }
 
     public async Task<StorageStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default)

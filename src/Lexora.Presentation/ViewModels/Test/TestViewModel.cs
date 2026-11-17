@@ -324,9 +324,15 @@ public partial class TestViewModel : ObservableObject, IDisposable
         var term = CustomListSearchTerm?.Trim();
         var list = string.IsNullOrEmpty(term)
             ? CustomWordCandidates
-            : CustomWordCandidates.Where(w =>
-                w.Word.Term.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                w.Word.PrimaryDefinition.Contains(term, StringComparison.OrdinalIgnoreCase));
+            : CustomWordCandidates
+                .Select(w => (Item: w, Score: Lexora.Domain.Common.SearchTextHelper.ScoreMatch(
+                    term,
+                    w.Word.Term,
+                    (w.Word.PrimaryDefinition, 0.90),
+                    (w.Word.PhoneticUs, 0.70))))
+                .Where(x => x.Score > 0)
+                .OrderByDescending(x => x.Score)
+                .Select(x => x.Item);
 
         foreach (var item in list)
         {

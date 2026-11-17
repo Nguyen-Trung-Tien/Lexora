@@ -71,8 +71,10 @@
                     </AutoSuggestBox.ItemTemplate>
                 </AutoSuggestBox>
 
-                <!-- Action Controls Row -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Right">
+                <!-- Action Controls Row (Wrapped in ScrollViewer for safe compact overflow) -->
+                <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                              HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <!-- Recommendations Flyout Button -->
                     <DropDownButton x:Name="BtnRecommendations" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_RecommendButton')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5">
                         <StackPanel Orientation="Horizontal" Spacing="5">
@@ -87,7 +89,7 @@
                                             <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_RecommendTitle')}" FontWeight="Bold" FontSize="13" />
                                             <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_RecommendSubtitle')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <MenuFlyoutSeparator Margin="0,2,0,2" />
+                                        <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,2" />
                                         <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                             <ItemsControl ItemsSource="{x:Bind ViewModel.Recommendations, Mode=OneWay}">
                                                 <ItemsControl.ItemTemplate>
@@ -169,6 +171,7 @@
                         <FontIcon Glyph="&#xE897;" FontSize="12" />
                     </Button>
                 </StackPanel>
+                </ScrollViewer>
         </Grid>
 
         <!-- Main Body: Two-Pane Master Detail / Catalog & Graph -->
@@ -184,8 +187,8 @@
                             <Setter Target="KgDetailColumn.Width" Value="*" />
                             <Setter Target="KgMasterRow.Height" Value="*" />
                             <Setter Target="KgDetailRow.Height" Value="0" />
-                            <Setter Target="KgDetailScroll.(Grid.Column)" Value="1" />
-                            <Setter Target="KgDetailScroll.(Grid.Row)" Value="0" />
+                            <Setter Target="KgDetailPaneBorder.(Grid.Column)" Value="1" />
+                            <Setter Target="KgDetailPaneBorder.(Grid.Row)" Value="0" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="KgCompactLayout">
@@ -195,10 +198,10 @@
                         <VisualState.Setters>
                             <Setter Target="KgMasterColumn.Width" Value="*" />
                             <Setter Target="KgDetailColumn.Width" Value="0" />
-                            <Setter Target="KgMasterRow.Height" Value="280" />
+                            <Setter Target="KgMasterRow.Height" Value="300" />
                             <Setter Target="KgDetailRow.Height" Value="*" />
-                            <Setter Target="KgDetailScroll.(Grid.Column)" Value="0" />
-                            <Setter Target="KgDetailScroll.(Grid.Row)" Value="1" />
+                            <Setter Target="KgDetailPaneBorder.(Grid.Column)" Value="0" />
+                            <Setter Target="KgDetailPaneBorder.(Grid.Row)" Value="1" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -283,7 +286,7 @@
                                                 <TextBlock Text="{x:Bind Term}" FontWeight="Bold" FontSize="13" />
                                                 <TextBlock Text="{x:Bind Ipa}" FontFamily="Consolas, Segoe UI" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind MeaningVi}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="190" />
+                                            <TextBlock Text="{x:Bind MeaningVi}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
 
                                         <!-- Connections count badge & Open Button -->
@@ -324,9 +327,13 @@
                 </Grid>
             </Border>
 
-            <!-- RIGHT PANE: Graph Canvas & Semantic Relations Hub -->
-            <ScrollViewer x:Name="KgDetailScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Spacing="16" Padding="24,18,24,24">
+            <!-- RIGHT PANE: Framed Graph Canvas & Semantic Relations Hub -->
+            <Border x:Name="KgDetailPaneBorder" Grid.Column="1" Grid.Row="0"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}">
+            <ScrollViewer x:Name="KgDetailScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="16" Padding="20">
 
                     <!-- Loading Indicator -->
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center"
@@ -336,20 +343,20 @@
                     </StackPanel>
 
                     <!-- Center Word Hero Card -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20,16">
-                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="18,14">
+                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
                             <!-- Top row: Status, POS, Level & Actions -->
                             <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
                                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="12" Padding="8,3">
+                                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="{StaticResource RadiusPill}" Padding="8,3">
                                         <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_CoreConcept')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
                                     </Border>
-                                    <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
+                                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{StaticResource RadiusPill}" Padding="8,3">
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.PartOfSpeech, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     </Border>
-                                    <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
+                                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{StaticResource RadiusPill}" Padding="8,3">
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Level, Mode=OneWay}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </Border>
                                 </StackPanel>
@@ -376,47 +383,47 @@
                             <!-- Middle row: Term, IPA, Meaning -->
                             <StackPanel Grid.Row="1" Spacing="4">
                                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Term, Mode=OneWay}" FontSize="28" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Term, Mode=OneWay}" FontSize="26" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.Ipa, Mode=OneWay}" FontFamily="Consolas, Segoe UI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="15" VerticalAlignment="Center" />
                                 </StackPanel>
-                                <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningVi, Mode=OneWay}" FontSize="15" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
-                                <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningEn, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" FontStyle="Italic"
+                                <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningVi, Mode=OneWay}" FontSize="14.5" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
+                                <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningEn, Mode=OneWay}" FontSize="12.5" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" FontStyle="Italic"
                                            Visibility="{x:Bind ViewModel.ActiveGraph.CenterNode.MeaningEn, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" />
                             </StackPanel>
 
                             <!-- Bottom row: Semantic Connectivity Counters -->
                             <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*,*" ColumnSpacing="8" Margin="0,4,0,0">
-                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                                     <StackPanel Spacing="2">
                                         <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_SynonymsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.SynonymsCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
-                                <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
+                                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                                     <StackPanel Spacing="2">
                                         <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_AntonymsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.AntonymsCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
-                                <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
+                                <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                                     <StackPanel Spacing="2">
                                         <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_FamilyTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.WordFamilyCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
-                                <Border Grid.Column="3" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
+                                <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                                     <StackPanel Spacing="2">
                                         <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_CollocationsTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.CollocationsCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
-                                <Border Grid.Column="4" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
+                                <Border Grid.Column="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                                     <StackPanel Spacing="2">
                                         <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_TopicTab')}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.TopicWordsCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
                                     </StackPanel>
                                 </Border>
-                                <Border Grid.Column="5" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
+                                <Border Grid.Column="5" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                                     <StackPanel Spacing="2">
                                         <TextBlock Text="{x:Bind Loc.GetString('KnowledgeGraph_Connections')}" FontSize="10" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{x:Bind ViewModel.ActiveGraph.TotalConnections, Mode=OneWay}" FontWeight="Bold" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
@@ -632,6 +639,7 @@
 
                 </StackPanel>
             </ScrollViewer>
+            </Border>
 
         </Grid>
     </Grid>

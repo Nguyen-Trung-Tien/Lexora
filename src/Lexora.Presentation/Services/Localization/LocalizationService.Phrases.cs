@@ -19,6 +19,7 @@ public partial class LocalizationService
         vi["Phrases_StartRoleplay"] = "Luyện Roleplay";
         vi["Phrases_AddButton"] = "Thêm mẫu câu";
         vi["Phrases_ImportExportButton"] = "Nhập / Xuất";
+        vi["Phrases_SmartImport"] = "Nhập thông minh (Paste / Tệp)...";
         vi["Phrases_ImportAction"] = "Nhập từ tệp (JSON/CSV/TXT)...";
         vi["Phrases_CopyTemplateAction"] = "Sao chép mẫu JSON chuẩn";
         vi["Phrases_ExportJsonAction"] = "Xuất JSON (.json)";
@@ -134,6 +135,7 @@ public partial class LocalizationService
         en["Phrases_StartRoleplay"] = "Roleplay Practice";
         en["Phrases_AddButton"] = "Add Phrase";
         en["Phrases_ImportExportButton"] = "Import / Export";
+        en["Phrases_SmartImport"] = "Smart Import (Paste / File)...";
         en["Phrases_ImportAction"] = "Import from file (JSON/CSV/TXT)...";
         en["Phrases_CopyTemplateAction"] = "Copy JSON sample template";
         en["Phrases_ExportJsonAction"] = "Export JSON (.json)";

@@ -442,6 +442,63 @@ public sealed partial class MemoryTipsPage : Page, ILocalizableView, IThemeAware
         }
     }
 
+    private async void BtnSmartImport_Click(object sender, RoutedEventArgs e)
+    {
+        var pasteBox = new TextBox
+        {
+            AcceptsReturn = true,
+            TextWrapping = TextWrapping.Wrap,
+            Height = 200,
+            PlaceholderText = Loc.GetString("SmartImport_PastePlaceholder")
+        };
+
+        var browseBtn = new Button { Content = Loc.GetString("SmartImport_BrowseFile") };
+        browseBtn.Click += async (_, _) =>
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.FileTypeFilter.Add(".json");
+            picker.FileTypeFilter.Add(".csv");
+            picker.FileTypeFilter.Add(".txt");
+            picker.FileTypeFilter.Add(".tsv");
+            if (App.Current.MainWindow is not null)
+            {
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Current.MainWindow);
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+            var file = await picker.PickSingleFileAsync();
+            if (file is null) return;
+            var props = await file.GetBasicPropertiesAsync();
+            if (props.Size > 20 * 1024 * 1024) return;
+            pasteBox.Text = await Windows.Storage.FileIO.ReadTextAsync(file);
+        };
+
+        var sampleBtn = new Button { Content = Loc.GetString("SmartImport_ViewSample") };
+        sampleBtn.Click += (_, _) => pasteBox.Text = ViewModel.GetSampleImportTemplate();
+
+        var toolbar = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+        toolbar.Children.Add(browseBtn);
+        toolbar.Children.Add(sampleBtn);
+
+        var panel = new StackPanel { Spacing = 10, MinWidth = 460 };
+        panel.Children.Add(toolbar);
+        panel.Children.Add(pasteBox);
+
+        var dialog = new ContentDialog
+        {
+            Title = Loc.GetString("MemoryTips_SmartImport"),
+            Content = panel,
+            PrimaryButtonText = Loc.GetString("Action_Import"),
+            CloseButtonText = Loc.GetString("Action_Cancel"),
+            DefaultButton = ContentDialogButton.Primary
+        };
+
+        var result = await dialog.ShowAsyncSafe(this.XamlRoot);
+        if (result == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(pasteBox.Text))
+        {
+            await ViewModel.ImportTipsSmartAsync(pasteBox.Text);
+        }
+    }
+
     private void OpenHelp_Click(object sender, RoutedEventArgs e)
     {
         App.Current.Services.GetService<INavigationService>()?.Navigate(typeof(Help.HelpPage), "MemoryTips");

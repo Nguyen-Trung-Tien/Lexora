@@ -446,35 +446,29 @@ public partial class HelpViewModel : ObservableObject, IDisposable
     public void ApplyFilter()
     {
         var rawQuery = SearchQuery?.Trim() ?? string.Empty;
-        var normQuery = SearchTextHelper.Normalize(rawQuery);
         var category = SelectedCategory;
 
-        var results = _allDisplayItems.Where(g =>
-        {
-            // Category check
-            if (!string.Equals(category, "All", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(g.Category, category, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
+        var categoryFiltered = _allDisplayItems.Where(g =>
+            string.Equals(category, "All", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(g.Category, category, StringComparison.OrdinalIgnoreCase));
 
-            // Search query check with diacritic-insensitive intelligence
-            if (!string.IsNullOrWhiteSpace(normQuery))
-            {
-                var match = SearchTextHelper.Normalize(g.Id).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
-                            SearchTextHelper.Normalize(g.Title).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
-                            SearchTextHelper.Normalize(g.Subtitle).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
-                            SearchTextHelper.Normalize(g.Summary).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
-                            SearchTextHelper.Normalize(g.Content).Contains(normQuery, StringComparison.OrdinalIgnoreCase) ||
-                            (g.Formula != null && SearchTextHelper.Normalize(g.Formula).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
-                            g.TipsList.Any(t => SearchTextHelper.Normalize(t).Contains(normQuery, StringComparison.OrdinalIgnoreCase)) ||
-                            g.ShortcutKeys.Any(s => SearchTextHelper.Normalize(s).Contains(normQuery, StringComparison.OrdinalIgnoreCase));
-
-                if (!match) return false;
-            }
-
-            return true;
-        }).ToList();
+        var results = string.IsNullOrWhiteSpace(rawQuery)
+            ? categoryFiltered.ToList()
+            : categoryFiltered
+                .Select(g => (Guide: g, Score: SearchTextHelper.ScoreMatch(
+                    rawQuery,
+                    g.Title,
+                    (g.Subtitle, 0.90),
+                    (g.Summary, 0.85),
+                    (g.Id, 0.80),
+                    (g.Formula, 0.75),
+                    (g.TipsList != null ? string.Join(" ", g.TipsList) : null, 0.75),
+                    (g.ShortcutKeys != null ? string.Join(" ", g.ShortcutKeys) : null, 0.75),
+                    (g.Content, 0.65))))
+                .Where(x => x.Score > 0)
+                .OrderByDescending(x => x.Score)
+                .Select(x => x.Guide)
+                .ToList();
 
         FilteredGuides.Clear();
         foreach (var item in results)

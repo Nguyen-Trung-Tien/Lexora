@@ -17,6 +17,8 @@ public partial class LocalizationService
         vi["MemoryTips_StatTraps"] = "Bẫy đề thi:";
 
         vi["MemoryTips_AddButton"] = "Thêm mẹo mới";
+        vi["MemoryTips_SmartImport"] = "Nhập thông minh";
+        vi["MemoryTips_SmartImport_Summary"] = "Đã nhập {0} mẹo mới, bỏ qua {1} mục trùng/lỗi.";
         vi["MemoryTips_SearchPlaceholder"] = "Tìm mẹo, câu thần chú, bẫy đề thi hoặc thẻ tag...";
         vi["MemoryTips_CategoryAll"] = "Mọi phân loại";
         vi["MemoryTips_TechniqueAll"] = "Mọi kỹ thuật nhớ";
@@ -120,6 +122,8 @@ public partial class LocalizationService
         en["MemoryTips_StatTraps"] = "Exam Traps:";
 
         en["MemoryTips_AddButton"] = "Add New Tip";
+        en["MemoryTips_SmartImport"] = "Smart Import";
+        en["MemoryTips_SmartImport_Summary"] = "Imported {0} new tips, skipped {1} duplicate/invalid items.";
         en["MemoryTips_SearchPlaceholder"] = "Search tips, mnemonic hooks, traps, or tags...";
         en["MemoryTips_CategoryAll"] = "All Categories";
         en["MemoryTips_TechniqueAll"] = "All Techniques";

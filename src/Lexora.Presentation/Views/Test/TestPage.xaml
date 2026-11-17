@@ -6,6 +6,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
+    xmlns:common="using:Lexora.Presentation.Views.Common"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,7 +15,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="24" HorizontalAlignment="Stretch" MaxWidth="1080">
+        <Grid Padding="24" HorizontalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -77,34 +78,29 @@
                     </TransitionCollection>
                 </StackPanel.ChildrenTransitions>
                 
-                <!-- Page Title Banner -->
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20,16">
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18">
-                        <Border Width="44" Height="44" CornerRadius="{ThemeResource OverlayCornerRadius}" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Padding="8" VerticalAlignment="Center">
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE9D9;" FontSize="22" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_Title')}" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" FontSize="22" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_Subtitle')}"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12.5" TextTrimming="CharacterEllipsis" MaxWidth="520" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <Button CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6"
-                                    Click="OpenListeningLab_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Subtitle')}">
+                <!-- Unified Page Header -->
+                <common:PageHeaderControl Title="{x:Bind Loc.GetString('Test_Title')}"
+                                          Subtitle="{x:Bind Loc.GetString('Test_Subtitle')}"
+                                          IconGlyph="&#xE9D9;">
+                    <common:PageHeaderControl.ActionsContent>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button Style="{StaticResource LexoraStandardButtonStyle}"
+                                    Click="OpenListeningLab_Click"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Subtitle')}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE767;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     <TextBlock Text="{x:Bind Loc.GetString('ListeningLab_Title')}" FontWeight="SemiBold" FontSize="12.5" />
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="TestHelpButton" Click="TestHelpButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Width="36" Height="36" Padding="0"
+                            <Button x:Name="TestHelpButton" Click="TestHelpButton_Click"
+                                    Style="{ThemeResource SubtleButtonStyle}"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7"
                                     ToolTipService.ToolTip="{x:Bind Loc.GetString('Test_Help_Title')}">
-                                <FontIcon Glyph="&#xE9CE;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <FontIcon Glyph="&#xE9CE;" FontSize="15" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </Button>
                         </StackPanel>
-                    </Grid>
-                </Border>
+                    </common:PageHeaderControl.ActionsContent>
+                </common:PageHeaderControl>
 
                 <TeachingTip x:Name="TestHelpTeachingTip"
                              Target="{x:Bind TestHelpButton}"
@@ -144,7 +140,7 @@
                     <Border x:Name="TestFormatBorder" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20"
-                            VerticalAlignment="Stretch">
+                            VerticalAlignment="Top">
                         <StackPanel Spacing="16">
                             <StackPanel Spacing="2">
                                 <TextBlock Text="{x:Bind Loc.GetString('Test_ChooseFormat')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" FontSize="16" />
@@ -379,15 +375,31 @@
 
                             <!-- Option Area B: Custom Word List Mode -->
                             <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsCustomListMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                     <TextBox x:Name="CustomWordSearchBox"
                                              PlaceholderText="{x:Bind Loc.GetString('Test_SearchCustomPool')}"
                                              Text="{x:Bind ViewModel.CustomListSearchTerm, Mode=TwoWay}"
                                              TextChanged="CustomWordSearchBox_TextChanged"
                                              CornerRadius="{ThemeResource ControlCornerRadius}" />
-                                    <Button Grid.Column="1" Content="{x:Bind Loc.GetString('Test_SelectAll')}" Click="SelectAllCustomWords_Click" CornerRadius="{ThemeResource ControlCornerRadius}" />
-                                    <Button Grid.Column="2" Content="{x:Bind Loc.GetString('Test_ClearSelection')}" Click="DeselectAllCustomWords_Click" CornerRadius="{ThemeResource ControlCornerRadius}" />
-                                    <Button Grid.Column="3" Content="{x:Bind Loc.GetString('Test_WeakWordsFilter')}" Click="SelectWeakCustomWords_Click" CornerRadius="{ThemeResource ControlCornerRadius}" />
+                                    <DropDownButton Grid.Column="1" Style="{StaticResource LexoraStandardButtonStyle}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE762;" FontSize="13" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Action_Select')}" FontSize="12.5" />
+                                        </StackPanel>
+                                        <DropDownButton.Flyout>
+                                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Test_SelectAll')}" Click="SelectAllCustomWords_Click">
+                                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B3;" /></MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Test_ClearSelection')}" Click="DeselectAllCustomWords_Click">
+                                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8E6;" /></MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Test_WeakWordsFilter')}" Click="SelectWeakCustomWords_Click">
+                                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE7BA;" /></MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                            </MenuFlyout>
+                                        </DropDownButton.Flyout>
+                                    </DropDownButton>
                                 </Grid>
 
                                 <!-- Optional: Paste Terms Expander -->
@@ -633,10 +645,8 @@
                     </Grid>
                 </Border>
 
-                <!-- Statistics Metrics Grid (Streamlined) -->
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                              HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10" MinWidth="440">
+                <!-- Statistics Metrics Grid (Streamlined, responsive without horizontal scroll) -->
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14,10">
                         <StackPanel Spacing="3">
@@ -672,7 +682,6 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-            </ScrollViewer>
 
                 <!-- ADAPTIVE CAT EXAM PROJECTION & SUMMARY -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -730,21 +739,28 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Action Bar -->
-                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
-                    <Button Content="{x:Bind Loc.GetString('Test_RetakeTest')}" Command="{x:Bind ViewModel.RestartSetupCommand}" Padding="18,10" CornerRadius="{ThemeResource ControlCornerRadius}" />
-                    <Button Content="{x:Bind Loc.GetString('Test_ReviewWeakWords')}" Command="{x:Bind ViewModel.RetestWeakWordsCommand}"
-                            Visibility="{x:Bind ViewModel.WeakWordsList.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}"
-                            Padding="18,10" CornerRadius="{ThemeResource ControlCornerRadius}" />
-                    <Button Command="{x:Bind ViewModel.SaveWeakWordsToStorageCommand}"
-                            Visibility="{x:Bind ViewModel.WeakWordsList.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}"
-                            Padding="18,10" CornerRadius="{ThemeResource ControlCornerRadius}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE8B7;" FontSize="15" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Test_SaveWeakWordsToStorage')}" FontWeight="SemiBold" />
+                <!-- Action Bar (Compact & Non-clipping) -->
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                    <Button Content="{x:Bind Loc.GetString('Test_RetakeTest')}" Command="{x:Bind ViewModel.RestartSetupCommand}"
+                            Style="{StaticResource LexoraStandardButtonStyle}" Padding="16,9" />
+                    <DropDownButton Style="{StaticResource LexoraStandardButtonStyle}" Padding="14,9"
+                                    Visibility="{x:Bind ViewModel.WeakWordsList.Count, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                            <TextBlock Text="{x:Bind Loc.GetString('Test_WeakWordsSection')}" FontWeight="SemiBold" />
                         </StackPanel>
-                    </Button>
-                    <Button Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.ReviewWeakWordsInSpacedRepetitionCommand}" Padding="22,10" CornerRadius="{ThemeResource ControlCornerRadius}">
+                        <DropDownButton.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Test_ReviewWeakWords')}" Command="{x:Bind ViewModel.RetestWeakWordsCommand}">
+                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE765;" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="{x:Bind Loc.GetString('Test_SaveWeakWordsToStorage')}" Command="{x:Bind ViewModel.SaveWeakWordsToStorageCommand}">
+                                    <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B7;" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </DropDownButton.Flyout>
+                    </DropDownButton>
+                    <Button Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.ReviewWeakWordsInSpacedRepetitionCommand}" Padding="18,9" CornerRadius="{ThemeResource ControlCornerRadius}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE895;" FontSize="15" />
                             <TextBlock Text="{x:Bind Loc.GetString('Test_ReviewInSm2')}" FontWeight="Bold" />

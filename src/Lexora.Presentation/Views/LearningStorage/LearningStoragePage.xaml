@@ -23,14 +23,11 @@
                       HorizontalAlignment="Center" VerticalAlignment="Center"
                       Canvas.ZIndex="20" />
 
-        <!-- Main Content Area -->
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      Padding="24">
-            <StackPanel Spacing="16" HorizontalAlignment="Stretch" MaxWidth="1360">
+        <!-- Main Content Area (Grid with * row for proper ListView virtualization) -->
+        <Grid Padding="24" RowSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
 
                 <!-- 1. Top Header -->
-                <Grid x:Name="TopHeaderGrid" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <Grid Grid.Row="0" x:Name="TopHeaderGrid" ColumnDefinitions="*,Auto" ColumnSpacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
                         <Border Width="42" Height="42" CornerRadius="{ThemeResource OverlayCornerRadius}"
                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
@@ -107,7 +104,7 @@
                 </TeachingTip>
 
                 <!-- 2. Overview Metrics Cards (Responsive with smooth fallback) -->
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
                               HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
                     <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="10" MinWidth="580">
                         
@@ -224,7 +221,7 @@
                 </ScrollViewer>
 
                 <!-- 3. Unified Streamlined Toolbar (Segmented Tabs, Search, Filter, Action) -->
-                <Grid x:Name="StorageToolbarGrid" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                <Grid Grid.Row="2" x:Name="StorageToolbarGrid" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                     <!-- Segmented View Mode Switcher -->
                     <Border x:Name="TabSwitcherBorder" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="4">
                         <StackPanel Orientation="Horizontal" Spacing="4">
@@ -297,7 +294,7 @@
                 </Grid>
 
                 <!-- Multi-Selection Action Bar -->
-                <Border x:Name="SelectionActionBar"
+                <Border Grid.Row="3" x:Name="SelectionActionBar"
                         Visibility="{x:Bind ViewModel.IsSelectionMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -329,9 +326,10 @@
                 </Border>
 
                 <!-- 4. Empty State -->
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                <Border Grid.Row="4" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
                         CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="48,40"
+                        VerticalAlignment="Center"
                         Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Border Width="64" Height="64" CornerRadius="32"
@@ -361,7 +359,7 @@
                 </Border>
 
                 <!-- 5. Virtualized Storage Items List -->
-                <ListView x:Name="StorageListView"
+                <ListView Grid.Row="4" x:Name="StorageListView"
                           ItemsSource="{x:Bind ViewModel.StorageItems, Mode=OneWay}"
                           SelectionMode="None"
                           SelectionChanged="StorageListView_SelectionChanged"
@@ -392,13 +390,13 @@
                                         <!-- Word / Grammar Rule Title -->
                                         <TextBlock Text="{x:Bind Title}"
                                                    FontSize="16" FontWeight="SemiBold"
-                                                   MaxWidth="200" TextTrimming="CharacterEllipsis"
+                                                   TextTrimming="CharacterEllipsis"
                                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
                                         <!-- Subtitle (Phonetic / Structure formula) -->
                                         <TextBlock Text="{x:Bind Subtitle}"
                                                    FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                   MaxWidth="220" TextTrimming="CharacterEllipsis"
+                                                   TextTrimming="CharacterEllipsis"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
 
@@ -505,7 +503,7 @@
                 </ListView>
 
                 <!-- 6. Pagination Bar -->
-                <Grid ColumnDefinitions="*,Auto,*"
+                <Grid Grid.Row="5" ColumnDefinitions="*,Auto,*"
                       Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <Button HorizontalAlignment="Left" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="14,6"
                             IsEnabled="{x:Bind ViewModel.HasPreviousPage, Mode=OneWay}"
@@ -530,8 +528,7 @@
                     </Button>
                 </Grid>
 
-            </StackPanel>
-        </ScrollViewer>
+        </Grid>
 
         <!-- 7. Interactive Practice Modal Overlay -->
         <Grid Background="{ThemeResource SmokeFillColorDefaultBrush}"

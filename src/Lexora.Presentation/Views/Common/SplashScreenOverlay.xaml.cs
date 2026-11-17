@@ -140,8 +140,8 @@ public sealed partial class SplashScreenOverlay : UserControl
             return;
         }
 
-        // Fluid ease-out step for smooth visual motion
-        double step = Math.Max(0.006, Math.Abs(diff) * 0.08);
+        // Snappy fluid ease-out step for responsive visual motion
+        double step = Math.Max(0.018, Math.Abs(diff) * 0.18);
         if (diff > 0)
         {
             _currentVisualProgress = Math.Min(_targetProgress, _currentVisualProgress + step);

@@ -56,18 +56,50 @@ public class MemoryTipService : IMemoryTipService
         var validPage = Math.Max(1, page);
         var validPageSize = Math.Clamp(pageSize, 1, 100);
 
-        var (items, totalCount) = await _repository.GetPagedAsync(
-            validPage,
-            validPageSize,
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            var (items, totalCount) = await _repository.GetPagedAsync(
+                validPage,
+                validPageSize,
+                category,
+                technique,
+                examTarget,
+                onlyPinned,
+                null,
+                cancellationToken);
+
+            var dtos = items.Select(MapToDto).ToList();
+            return new MemoryTipsPagedResultDto(dtos, totalCount, validPage, validPageSize);
+        }
+
+        var candidates = await _repository.GetFilteredAsync(
             category,
             technique,
             examTarget,
             onlyPinned,
-            search,
+            search: null,
             cancellationToken);
 
-        var dtos = items.Select(MapToDto).ToList();
-        return new MemoryTipsPagedResultDto(dtos, totalCount, validPage, validPageSize);
+        var ranked = candidates
+            .Select(t => (Tip: t, Score: Lexora.Domain.Common.SearchTextHelper.ScoreMatch(
+                search,
+                t.Title,
+                (t.MnemonicHook, 0.95),
+                (t.Tags, 0.90),
+                (t.CommonTrap, 0.85),
+                (t.Explanation, 0.80),
+                (t.Example, 0.70))))
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .Select(x => MapToDto(x.Tip))
+            .ToList();
+
+        var pagedDtos = ranked
+            .Skip((validPage - 1) * validPageSize)
+            .Take(validPageSize)
+            .ToList();
+
+        return new MemoryTipsPagedResultDto(pagedDtos, ranked.Count, validPage, validPageSize);
     }
 
     public async Task<MemoryTipDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

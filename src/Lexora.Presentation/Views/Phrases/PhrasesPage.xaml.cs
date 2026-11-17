@@ -360,6 +360,95 @@ public sealed partial class PhrasesPage : Page, ILocalizableView, IThemeAwareVie
         ViewModel.CopyTextCommand.Execute(jsonSample);
     }
 
+    private async void OnSmartImportClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var pasteBox = new TextBox
+            {
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                Height = 200,
+                PlaceholderText = Loc.GetString("SmartImport_PastePlaceholder")
+            };
+
+            var conflictCombo = new ComboBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                SelectedIndex = 0
+            };
+            conflictCombo.Items.Add(Loc.GetString("Phrases_ImportSkipDuplicates"));
+            conflictCombo.Items.Add(Loc.GetString("Phrases_ImportOverwriteDuplicates"));
+
+            var browseBtn = new Button
+            {
+                Content = Loc.GetString("SmartImport_BrowseFile")
+            };
+            string? selectedFileName = null;
+            browseBtn.Click += async (_, _) =>
+            {
+                var picker = new FileOpenPicker();
+                picker.FileTypeFilter.Add(".json");
+                picker.FileTypeFilter.Add(".csv");
+                picker.FileTypeFilter.Add(".txt");
+                picker.FileTypeFilter.Add(".tsv");
+                InitializePickerWindow(picker);
+                var file = await picker.PickSingleFileAsync();
+                if (file is null) return;
+                var props = await file.GetBasicPropertiesAsync();
+                if (props.Size > MaxImportBytes)
+                {
+                    return;
+                }
+                selectedFileName = file.Name;
+                pasteBox.Text = await FileIO.ReadTextAsync(file);
+            };
+
+            var sampleBtn = new Button
+            {
+                Content = Loc.GetString("SmartImport_ViewSample")
+            };
+            sampleBtn.Click += (_, _) =>
+            {
+                pasteBox.Text = ViewModel.GetSampleTemplate("json");
+            };
+
+            var toolbar = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+            toolbar.Children.Add(browseBtn);
+            toolbar.Children.Add(sampleBtn);
+
+            var panel = new StackPanel { Spacing = 10, MinWidth = 460 };
+            panel.Children.Add(toolbar);
+            panel.Children.Add(pasteBox);
+            panel.Children.Add(conflictCombo);
+
+            var dialog = new ContentDialog
+            {
+                Title = Loc.GetString("Phrases_SmartImport"),
+                Content = panel,
+                PrimaryButtonText = Loc.GetString("Action_Import"),
+                CloseButtonText = Loc.GetString("Action_Cancel"),
+                DefaultButton = ContentDialogButton.Primary
+            };
+
+            var result = await dialog.ShowAsyncSafe(this.XamlRoot);
+            if (result != ContentDialogResult.Primary || string.IsNullOrWhiteSpace(pasteBox.Text))
+            {
+                return;
+            }
+
+            var resolution = conflictCombo.SelectedIndex == 1
+                ? ImportConflictResolution.Overwrite
+                : ImportConflictResolution.Skip;
+
+            await ViewModel.ImportPhrasesContentAsync(pasteBox.Text, selectedFileName, resolution);
+        }
+        catch (Exception ex)
+        {
+            await ShowInfoDialogAsync(Loc.GetString("Phrases_ErrorImport"), ex.Message);
+        }
+    }
+
     private async void OnImportFileClick(object sender, RoutedEventArgs e)
     {
         try

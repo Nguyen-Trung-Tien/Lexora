@@ -79,6 +79,16 @@
                         </StackPanel>
                     </Button>
 
+                    <!-- Smart Import Button -->
+                    <Button x:Name="BtnSmartImport" Click="BtnSmartImport_Click"
+                            Style="{StaticResource LexoraStandardButtonStyle}"
+                            CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE8B5;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock x:Name="TextSmartImport" Text="{x:Bind Loc.GetString('MemoryTips_SmartImport')}" FontWeight="SemiBold" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+
                     <!-- Refresh Button -->
                     <Button x:Name="BtnRefresh" Click="BtnRefresh_Click"
                             Width="32" Height="32" Padding="0" CornerRadius="{ThemeResource ControlCornerRadius}"
@@ -101,12 +111,12 @@
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="{ThemeResource OverlayCornerRadius}"
-                Padding="14,10">
-            <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                Padding="12,8">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
                 
                 <!-- Search Box -->
                 <TextBox x:Name="SearchBox" Grid.Column="0"
-                         MinWidth="180" MaxWidth="280" HorizontalAlignment="Stretch"
+                         MinWidth="170" MaxWidth="250" HorizontalAlignment="Stretch"
                          Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          PlaceholderText="{x:Bind Loc.GetString('MemoryTips_SearchPlaceholder')}" />
 
@@ -116,7 +126,7 @@
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                     <Button x:Name="ChipFilterAll"
                             Click="PillFilterAll_Click"
-                            CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,5">
+                            CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE8D2;" FontSize="11" />
                             <TextBlock x:Name="TextFilterAll" Text="{x:Bind Loc.GetString('MemoryTips_FilterAll')}" FontSize="12" FontWeight="SemiBold" />
@@ -125,7 +135,7 @@
 
                     <Button x:Name="ChipFilterPinned"
                             Click="PillFilterPinned_Click"
-                            CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,5">
+                            CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE840;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                             <TextBlock x:Name="TextFilterPinned" Text="{x:Bind Loc.GetString('MemoryTips_FilterPinned')}" FontSize="12" FontWeight="SemiBold" />
@@ -134,7 +144,7 @@
 
                     <Button x:Name="ChipFilterTraps"
                             Click="PillFilterTraps_Click"
-                            CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,5">
+                            CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,5">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE7BA;" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
                             <TextBlock x:Name="TextFilterTraps" Text="{x:Bind Loc.GetString('MemoryTips_FilterTraps')}" FontSize="12" FontWeight="SemiBold" />
@@ -142,8 +152,11 @@
                     </Button>
                 </StackPanel>
 
-                <!-- Right: Dropdowns, Reset, and Total Count -->
-                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <!-- Right: Dropdowns, Reset, and Total Count (Scroll-safe on 1280px) -->
+                <ScrollViewer Grid.Column="3" HorizontalAlignment="Right"
+                              HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                              HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                     <!-- Category ComboBox -->
                     <ComboBox x:Name="CategoryFilterComboBox"
                               MinWidth="120"
@@ -192,7 +205,7 @@
                     </Button>
 
                     <!-- Total Count Badge -->
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,4">
                         <StackPanel Orientation="Horizontal" Spacing="4">
@@ -201,6 +214,7 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Border>
 
@@ -221,12 +235,12 @@
                                 <AdaptiveTrigger MinWindowWidth="1040" />
                             </VisualState.StateTriggers>
                             <VisualState.Setters>
-                                <Setter Target="TipsMasterColumn.Width" Value="360" />
+                                <Setter Target="TipsMasterColumn.Width" Value="340" />
                                 <Setter Target="TipsDetailColumn.Width" Value="*" />
                                 <Setter Target="TipsMasterRow.Height" Value="*" />
                                 <Setter Target="TipsDetailRow.Height" Value="0" />
-                                <Setter Target="TipsDetailScroll.(Grid.Column)" Value="1" />
-                                <Setter Target="TipsDetailScroll.(Grid.Row)" Value="0" />
+                                <Setter Target="TipsDetailPaneBorder.(Grid.Column)" Value="1" />
+                                <Setter Target="TipsDetailPaneBorder.(Grid.Row)" Value="0" />
                             </VisualState.Setters>
                         </VisualState>
                         <VisualState x:Name="TipsCompactLayout">
@@ -236,10 +250,10 @@
                             <VisualState.Setters>
                                 <Setter Target="TipsMasterColumn.Width" Value="*" />
                                 <Setter Target="TipsDetailColumn.Width" Value="0" />
-                                <Setter Target="TipsMasterRow.Height" Value="280" />
+                                <Setter Target="TipsMasterRow.Height" Value="300" />
                                 <Setter Target="TipsDetailRow.Height" Value="*" />
-                                <Setter Target="TipsDetailScroll.(Grid.Column)" Value="0" />
-                                <Setter Target="TipsDetailScroll.(Grid.Row)" Value="1" />
+                                <Setter Target="TipsDetailPaneBorder.(Grid.Column)" Value="0" />
+                                <Setter Target="TipsDetailPaneBorder.(Grid.Row)" Value="1" />
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>
@@ -395,8 +409,12 @@
                     </Grid>
                 </Border>
 
-                <!-- Right Column: Detail Inspector Workspace (Widescreen Optimized) -->
-                <ScrollViewer x:Name="TipsDetailScroll" Grid.Column="1" Padding="28,20,28,24"
+                <!-- Right Column: Framed Detail Inspector Workspace -->
+                <Border x:Name="TipsDetailPaneBorder" Grid.Column="1" Grid.Row="0"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}">
+                <ScrollViewer x:Name="TipsDetailScroll" Padding="20"
                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <Grid>
                         <!-- Status InfoBar inside detail pane if active -->
@@ -624,6 +642,7 @@
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>
+                </Border>
             </Grid>
 
             <!-- ======================================================== -->
@@ -635,7 +654,7 @@
                 <ScrollViewer Grid.Row="0"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
-                              Padding="24,16">
+                              Padding="0,4">
                     <StackPanel Spacing="16">
                         <!-- Status InfoBar -->
                         <InfoBar IsOpen="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"

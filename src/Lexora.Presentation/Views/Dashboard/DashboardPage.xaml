@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
+    xmlns:common="using:Lexora.Presentation.Views.Common"
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,7 +14,36 @@
     mc:Ignorable="d" UseLayoutRounding="True">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="24">
-        <StackPanel Spacing="16" HorizontalAlignment="Stretch" MaxWidth="1360">
+        <StackPanel Spacing="18" HorizontalAlignment="Stretch">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="DashboardLayoutStates">
+                    <VisualState x:Name="DashboardWideState">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="1050" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="DashboardLeftCol.Width" Value="1.35*" />
+                            <Setter Target="DashboardRightCol.Width" Value="1*" />
+                            <Setter Target="DashboardRightStack.(Grid.Column)" Value="1" />
+                            <Setter Target="DashboardRightStack.(Grid.Row)" Value="0" />
+                            <Setter Target="DashboardRightStack.Margin" Value="0" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="DashboardCompactState">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="0" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="DashboardLeftCol.Width" Value="*" />
+                            <Setter Target="DashboardRightCol.Width" Value="0" />
+                            <Setter Target="DashboardRightStack.(Grid.Column)" Value="0" />
+                            <Setter Target="DashboardRightStack.(Grid.Row)" Value="1" />
+                            <Setter Target="DashboardRightStack.Margin" Value="0,16,0,0" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+
             <StackPanel.ChildrenTransitions>
                 <TransitionCollection>
                     <EntranceThemeTransition FromVerticalOffset="0" />
@@ -25,197 +55,100 @@
                           Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                           Width="36" Height="36" HorizontalAlignment="Center" />
 
-            <!-- Due Review Reminder Banner -->
-            <InfoBar x:Name="DueReviewInfoBar"
-                     IsOpen="{x:Bind ViewModel.HasDueReviews, Mode=OneWay}"
-                     Severity="Informational"
-                     Title="{x:Bind Loc.GetString('Review_Reminder_Title')}"
-                     Message="{x:Bind ViewModel.DueReviewMessage, Mode=OneWay}"
-                     CornerRadius="{ThemeResource OverlayCornerRadius}"
-                     IsClosable="True">
-                <InfoBar.ActionButton>
-                    <Button Content="{x:Bind Loc.GetString('Review_Now')}"
-                            Style="{ThemeResource AccentButtonStyle}"
-                            Click="StartReviewButton_Click" />
-                </InfoBar.ActionButton>
-            </InfoBar>
-
-            <!-- HERO BANNER: Elegant Fluent Surface Card with 1-Click Quick Actions -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
-                <Grid x:Name="HeroGrid" RowDefinitions="Auto,Auto" RowSpacing="16">
-                    <!-- Top Section: Badges, Greeting, Subtitle and Help Button -->
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="8" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="4" Padding="8,3">
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeroBadge')}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" FontSize="11" FontWeight="Bold" />
-                                </Border>
-                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="8,3">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <FontIcon Glyph="&#xEC08;" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DailyConsistency')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" />
-                                    </StackPanel>
+            <!-- CLEAN UNIFIED PAGE HEADER -->
+            <common:PageHeaderControl Title="{x:Bind ViewModel.GreetingText, Mode=OneWay}"
+                                      Subtitle="{x:Bind Loc.GetString('Dashboard_Subtitle')}"
+                                      IconGlyph="&#xE80F;">
+                <common:PageHeaderControl.ActionsContent>
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Click="StartReviewButton_Click"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
+                                Padding="14,7">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <FontIcon Glyph="&#xE895;" FontSize="14" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_StartReview')}" FontSize="13" FontWeight="SemiBold" />
+                                <Border Background="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                        CornerRadius="{StaticResource RadiusPill}" Padding="6,1"
+                                        Visibility="{x:Bind ViewModel.DueToday, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
+                                    <TextBlock Text="{x:Bind ViewModel.DueToday, Mode=OneWay}"
+                                               Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                               FontSize="11" FontWeight="Bold" />
                                 </Border>
                             </StackPanel>
+                        </Button>
 
-                            <TextBlock Text="{x:Bind ViewModel.GreetingText, Mode=OneWay}" Style="{StaticResource LexoraHeroHeaderStyle}" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_Subtitle')}"
-                                       Style="{StaticResource LexoraBodyStyle}" TextWrapping="Wrap" MaxWidth="720" />
-                        </StackPanel>
+                        <Button Click="StartPracticeButton_Click"
+                                Style="{StaticResource LexoraStandardButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <FontIcon Glyph="&#xE765;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_QuickPractice')}" FontSize="13" />
+                            </StackPanel>
+                        </Button>
 
-                        <!-- Contextual Quick Help Button -->
-                        <Button Grid.Column="1" x:Name="DashboardHelpButton" Click="DashboardHelpButton_Click"
+                        <DropDownButton Style="{StaticResource LexoraStandardButtonStyle}" Padding="10,7"
+                                        ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_More')}">
+                            <FontIcon Glyph="&#xE712;" FontSize="14" />
+                            <DropDownButton.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                    <MenuFlyoutItem Text="{x:Bind Loc.GetString('Dashboard_StudyPlannerAction')}"
+                                                    Click="OpenStudyPlanner_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE787;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Text="{x:Bind Loc.GetString('Dashboard_ListeningLabAction')}"
+                                                    Click="OpenListeningLab_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE767;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem Text="{x:Bind Loc.GetString('Help_OpenFullGuide')}"
+                                                    Tag="GettingStarted"
+                                                    Click="OpenFullGuide_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE9CE;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </DropDownButton.Flyout>
+                        </DropDownButton>
+
+                        <Button x:Name="DashboardHelpButton" Click="DashboardHelpButton_Click"
                                 Style="{ThemeResource SubtleButtonStyle}"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="6"
-                                VerticalAlignment="Top"
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="7"
                                 ToolTipService.ToolTip="{x:Bind Loc.GetString('Dashboard_Help_Title')}">
                             <FontIcon Glyph="&#xE9CE;" FontSize="15" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </Button>
-                    </Grid>
-
-                    <TeachingTip x:Name="DashboardHelpTeachingTip"
-                                 Target="{x:Bind DashboardHelpButton}"
-                                 Title="{x:Bind Loc.GetString('Dashboard_Help_Title')}"
-                                 Subtitle="{x:Bind Loc.GetString('Dashboard_Help_Subtitle')}"
-                                 IsOpen="False"
-                                 IsLightDismissEnabled="True"
-                                 PreferredPlacement="BottomRight">
-                        <TeachingTip.Content>
-                            <StackPanel Spacing="10" MaxWidth="320">
-                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_Help_Content')}" TextWrapping="Wrap" FontSize="13" />
-                                <Button Style="{ThemeResource AccentButtonStyle}"
-                                        Click="OpenFullGuide_Click"
-                                        Tag="GettingStarted"
-                                        CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="{x:Bind Loc.GetString('Help_OpenFullGuide')}" FontWeight="SemiBold" FontSize="12" />
-                                        <FontIcon Glyph="&#xE76C;" FontSize="11" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </TeachingTip.Content>
-                    </TeachingTip>
-
-                    <!-- Primary actions remain visible without requiring horizontal scrolling. -->
-                    <Grid Grid.Row="1" x:Name="HeroActionsPanel" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                            <Button Click="StartReviewButton_Click"
-                                    Style="{ThemeResource AccentButtonStyle}"
-                                    FontWeight="Bold" Padding="16,9" CornerRadius="{ThemeResource ControlCornerRadius}">
-                                <StackPanel Orientation="Horizontal" Spacing="7">
-                                    <FontIcon Glyph="&#xE895;" FontSize="15" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_StartReview')}" FontSize="13" TextTrimming="CharacterEllipsis" />
-                                    <Border Background="{ThemeResource TextOnAccentFillColorPrimaryBrush}" CornerRadius="8" Padding="5,1" Margin="4,0,0,0"
-                                            Visibility="{x:Bind ViewModel.DueToday, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}}">
-                                        <TextBlock Text="{x:Bind ViewModel.DueToday, Mode=OneWay}" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontSize="11" FontWeight="Bold" />
-                                    </Border>
-                                </StackPanel>
-                            </Button>
-
-                            <Button Grid.Column="1" Click="StartPracticeButton_Click"
-                                    Style="{ThemeResource DefaultButtonStyle}"
-                                    FontWeight="SemiBold" Padding="16,9" CornerRadius="{ThemeResource ControlCornerRadius}">
-                                <StackPanel Orientation="Horizontal" Spacing="7">
-                                    <FontIcon Glyph="&#xE765;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_QuickPractice')}" FontSize="13" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button Grid.Row="1" Click="OpenStudyPlanner_Click"
-                                    Style="{ThemeResource DefaultButtonStyle}"
-                                    FontWeight="SemiBold" Padding="16,9" CornerRadius="{ThemeResource ControlCornerRadius}"
-                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('StudyPlanner_Title')}">
-                                <StackPanel Orientation="Horizontal" Spacing="7">
-                                    <FontIcon Glyph="&#xE787;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_StudyPlannerAction')}" FontSize="13" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button Grid.Row="1" Grid.Column="1" Click="OpenListeningLab_Click"
-                                    Style="{ThemeResource DefaultButtonStyle}"
-                                    FontWeight="SemiBold" Padding="16,9" CornerRadius="{ThemeResource ControlCornerRadius}"
-                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('ListeningLab_Title')}">
-                                <StackPanel Orientation="Horizontal" Spacing="7">
-                                    <FontIcon Glyph="&#xE767;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_ListeningLabAction')}" FontSize="13" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </Button>
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <!-- 1.5 Active Roadmap Pathway Widget -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16"
-                    Tapped="RoadmapWidget_Tapped"
-                    helpers:CursorHelper.Cursor="Hand"
-                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}"
-                    Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Width="40" Height="40" CornerRadius="20"
-                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                            VerticalAlignment="Center">
-                        <FontIcon Glyph="&#xE81C;" FontSize="18" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_DashboardWidgetTitle')}"
-                                       FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.Title, Mode=OneWay, FallbackValue=''}"
-                                       FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-
-                        <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.NextActiveNode.Title, Mode=OneWay, FallbackValue=''}"
-                                   Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                   TextTrimming="CharacterEllipsis" />
-
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <ProgressBar Maximum="100" Width="140" Height="4" VerticalAlignment="Center"
-                                         Value="{x:Bind ViewModel.ActiveRoadmap.OverallProgress, Mode=OneWay, FallbackValue=0}" />
-                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.OverallProgressDisplay, Mode=OneWay, FallbackValue='0%'}"
-                                       FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.NodesMasteredDisplay, Mode=OneWay, FallbackValue=''}"
-                                       FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
                     </StackPanel>
+                </common:PageHeaderControl.ActionsContent>
+            </common:PageHeaderControl>
 
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <Button Command="{x:Bind ViewModel.NavigateToRoadmapCommand}"
-                                Style="{ThemeResource SubtleButtonStyle}"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6"
-                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <FontIcon Glyph="&#xE81C;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Nav_Roadmap')}" FontSize="12" />
-                            </StackPanel>
-                        </Button>
-                        <Button Command="{x:Bind ViewModel.ContinueRoadmapCommand}"
-                                Style="{ThemeResource AccentButtonStyle}"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6"
-                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ContinueRoadmap')}">
+            <TeachingTip x:Name="DashboardHelpTeachingTip"
+                         Target="{x:Bind DashboardHelpButton}"
+                         Title="{x:Bind Loc.GetString('Dashboard_Help_Title')}"
+                         Subtitle="{x:Bind Loc.GetString('Dashboard_Help_Subtitle')}"
+                         IsOpen="False"
+                         IsLightDismissEnabled="True"
+                         PreferredPlacement="BottomRight">
+                <TeachingTip.Content>
+                    <StackPanel Spacing="10" MaxWidth="320">
+                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_Help_Content')}" TextWrapping="Wrap" FontSize="13" />
+                        <Button Style="{ThemeResource AccentButtonStyle}"
+                                Click="OpenFullGuide_Click"
+                                Tag="GettingStarted"
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE768;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ContinueRoadmap')}" FontWeight="SemiBold" FontSize="12.5" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Help_OpenFullGuide')}" FontWeight="SemiBold" FontSize="12" />
+                                <FontIcon Glyph="&#xE76C;" FontSize="11" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </Grid>
-            </Border>
+                </TeachingTip.Content>
+            </TeachingTip>
 
-            <!-- Priority metrics adapt to narrow windows without horizontal scrolling. -->
+            <!-- 1. KPI METRICS ROW (4-column wide / 2x2 compact) -->
             <Grid x:Name="MetricsGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
                     <!-- Total Vocabulary -->
                     <Border x:Name="CardTotalWords" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -301,6 +234,88 @@
                     </Border>
             </Grid>
 
+            <!-- 2. BALANCED 2-COLUMN PRIMARY WORKSPACE -->
+            <Grid x:Name="DashboardMainGrid" ColumnSpacing="16" RowSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="DashboardLeftCol" Width="1.35*" />
+                    <ColumnDefinition x:Name="DashboardRightCol" Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel x:Name="DashboardLeftStack" Grid.Column="0" Grid.Row="0" Spacing="16">
+            <!-- 1.5 Active Roadmap Pathway Widget -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16"
+                    Tapped="RoadmapWidget_Tapped"
+                    helpers:CursorHelper.Cursor="Hand"
+                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}"
+                    Visibility="{x:Bind ViewModel.HasActiveRoadmap, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Width="40" Height="40" CornerRadius="20"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE81C;" FontSize="18" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{x:Bind Loc.GetString('Roadmap_DashboardWidgetTitle')}"
+                                       FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.Title, Mode=OneWay, FallbackValue=''}"
+                                       FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.NextActiveNode.Title, Mode=OneWay, FallbackValue=''}"
+                                   Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                   TextTrimming="CharacterEllipsis" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ProgressBar Maximum="100" MinWidth="100" MaxWidth="160" Height="4" VerticalAlignment="Center"
+                                         Value="{x:Bind ViewModel.ActiveRoadmap.OverallProgress, Mode=OneWay, FallbackValue=0}" />
+                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.OverallProgressDisplay, Mode=OneWay, FallbackValue='0%'}"
+                                       FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Bind ViewModel.ActiveRoadmap.NodesMasteredDisplay, Mode=OneWay, FallbackValue=''}"
+                                       FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Command="{x:Bind ViewModel.NavigateToRoadmapCommand}"
+                                Style="{ThemeResource SubtleButtonStyle}"
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ReturnToRoadmap')}">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <FontIcon Glyph="&#xE81C;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Nav_Roadmap')}" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{x:Bind ViewModel.ContinueRoadmapCommand}"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6"
+                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Roadmap_ContinueRoadmap')}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE768;" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Roadmap_ContinueRoadmap')}" FontWeight="SemiBold" FontSize="12.5" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
             <!-- SMART STUDY ADVISOR: Adaptive Recommendation Hero Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource LexoraAdvisorBorderBrush}"
@@ -353,56 +368,214 @@
                     </Grid>
 
                     <!-- 7-Day Visual Workload Bar Chart -->
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                                  HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.ForecastDaysList}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Stretch" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="dto:DailyForecastItemDto">
-                                    <Border MinWidth="92" Padding="10,12" CornerRadius="10"
-                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1">
-                                        <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                            <TextBlock Text="{x:Bind DayLabel}" FontSize="12" FontWeight="SemiBold"
-                                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                                       HorizontalAlignment="Center" />
-                                            <TextBlock Text="{x:Bind DueCount}" FontSize="14" FontWeight="Bold"
-                                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                       HorizontalAlignment="Center" />
-                                            <Grid Height="84" Width="30" VerticalAlignment="Bottom">
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                        CornerRadius="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-                                                <Border Height="{x:Bind BarHeight}" Width="30"
-                                                        CornerRadius="4"
-                                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                                        VerticalAlignment="Bottom" />
-                                            </Grid>
-                                            <TextBlock Text="{x:Bind DisplayDate}" FontSize="11"
-                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                       HorizontalAlignment="Center" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.ForecastDaysList}">
+                        <ItemsRepeater.Layout>
+                            <UniformGridLayout MinItemWidth="72" MinColumnSpacing="8" MinRowSpacing="8" ItemsStretch="Fill" />
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="dto:DailyForecastItemDto">
+                                <Border Padding="8,10" CornerRadius="{ThemeResource OverlayCornerRadius}"
+                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1">
+                                    <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                        <TextBlock Text="{x:Bind DayLabel}" FontSize="11.5" FontWeight="SemiBold"
+                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                   HorizontalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind DueCount}" FontSize="13.5" FontWeight="Bold"
+                                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                   HorizontalAlignment="Center" />
+                                        <Grid Height="76" Width="26" VerticalAlignment="Bottom">
+                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                    CornerRadius="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                                            <Border Height="{x:Bind BarHeight}" Width="26"
+                                                    CornerRadius="4"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    VerticalAlignment="Bottom" />
+                                        </Grid>
+                                        <TextBlock Text="{x:Bind DisplayDate}" FontSize="10.5"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
                 </StackPanel>
             </Border>
+                </StackPanel>
 
-            <!-- Detailed analytics stay available without competing with today's work. -->
+                <!-- RIGHT COLUMN: Study Activity Heatmap + Recent Sessions -->
+                <StackPanel x:Name="DashboardRightStack" Grid.Column="1" Grid.Row="0" Spacing="16">
+                    <!-- Study Activity Heatmap (Last 30 Days) -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xEC08;" FontSize="16" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapTitle')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                                    </StackPanel>
+                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapLess')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Width="14" Height="14" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel0Brush}" />
+                                    <Border Width="14" Height="14" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel1Brush}" />
+                                    <Border Width="14" Height="14" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel2Brush}" />
+                                    <Border Width="14" Height="14" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel3Brush}" />
+                                    <Border Width="14" Height="14" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel4Brush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapMore')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+
+                            <ItemsRepeater ItemsSource="{x:Bind ViewModel.StudyHeatmapList, Mode=OneWay}">
+                                <ItemsRepeater.Layout>
+                                    <UniformGridLayout MinItemWidth="32" MinItemHeight="32" MinColumnSpacing="6" MinRowSpacing="6" ItemsStretch="None" />
+                                </ItemsRepeater.Layout>
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:StudyHistoryDayDto">
+                                        <Border Width="28" Height="28" CornerRadius="4"
+                                                BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                Background="{x:Bind HeatmapLevel, Converter={StaticResource HeatmapLevelToBrushConverter}}"
+                                                ToolTipService.ToolTip="{x:Bind TooltipText}">
+                                            <TextBlock Text="{x:Bind Date.Day}" FontSize="10" FontWeight="SemiBold"
+                                                       Foreground="{x:Bind HeatmapLevel, Converter={StaticResource HeatmapLevelToForegroundConverter}}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,8">
+                                    <StackPanel Spacing="3" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind ViewModel.StudiedTodayCount, Mode=OneWay}" FontWeight="Bold" FontSize="14" />
+                                        </StackPanel>
+                                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_ReviewedToday')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,8">
+                                    <StackPanel Spacing="3" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xEC08;" FontSize="13" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                            <TextBlock Text="{x:Bind ViewModel.StreakDays, Mode=OneWay}" FontWeight="Bold" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DaysUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" VerticalAlignment="Bottom" />
+                                        </StackPanel>
+                                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_CurrentStreak')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="10,8">
+                                    <StackPanel Spacing="3" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                                            <FontIcon Glyph="&#xE735;" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                            <TextBlock Text="{x:Bind ViewModel.LongestStreakDays, Mode=OneWay}" FontWeight="Bold" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DaysUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" VerticalAlignment="Bottom" />
+                                        </StackPanel>
+                                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_BestStreak')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Recent Sessions -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RecentSessions')}" FontWeight="Bold" FontSize="15" />
+                            <StackPanel Spacing="10" Padding="16" HorizontalAlignment="Center"
+                                        Visibility="{x:Bind ViewModel.HasRecentSessions, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                <Border Width="42" Height="42" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" HorizontalAlignment="Center">
+                                    <FontIcon Glyph="&#xE81C;" FontSize="18" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_NoRecentSessions')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12.5" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="360" TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.RecentSessionsList}"
+                                          Visibility="{x:Bind ViewModel.HasRecentSessions, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:StudySessionDto">
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" Padding="4,10" ColumnSpacing="10"
+                                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.FormatSessionType(SessionType)}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{x:Bind StartedAtText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Cards')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                                                <TextBlock Text="{x:Bind TotalCards}" FontWeight="Bold" FontSize="12" />
+                                                <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Correct')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                                                <TextBlock Text="{x:Bind CorrectCards}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                            </StackPanel>
+                                            <Border Grid.Column="2" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" Spacing="2">
+                                                    <TextBlock Text="{x:Bind AccuracyRate}" FontWeight="Bold" FontSize="12" />
+                                                    <TextBlock Text="%" FontSize="12" />
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Grid.Column="3" Text="{x:Bind DurationText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Memory Status Breakdown & Retention (Balances Right Column Height) -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionDistribution')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                </StackPanel>
+                                <Border Grid.Column="1" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_OverallAccuracy')}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="12" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Bind ViewModel.AccuracyRate, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                        <TextBlock Text="%" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.StatusBreakdown}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:LearningStatusDistributionDto">
+                                        <Grid ColumnDefinitions="120,*,50,50" Margin="0,5" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold" FontSize="12.5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="7" CornerRadius="4" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12.5" />
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind Percentage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                                                <TextBlock Text="%" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11.5" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- 3. DETAILED ANALYTICS & BREAKDOWN (Collapsed by default to keep Dashboard calm & scannable) -->
             <Expander Header="{x:Bind Loc.GetString('LearningIntel_Title')}"
                       IsExpanded="False"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Stretch"
                       Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                       BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                       BorderThickness="1"
-                      CornerRadius="8"
+                      CornerRadius="{ThemeResource OverlayCornerRadius}"
                       Padding="16">
-            <Border Padding="16">
                 <StackPanel Spacing="16">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="2">
@@ -555,7 +728,6 @@
                         </Grid>
                     </Border>
                 </StackPanel>
-            </Border>
             </Expander>
 
             <!-- FORGETTING CURVE & RETENTION COMPARISON CARD -->
@@ -629,46 +801,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- SECTION 1: Memory Status Breakdown & Retention -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
-                <StackPanel Spacing="16">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="2">
-                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionDistribution')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RetentionSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="8,3">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_OverallAccuracy')}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="12" FontWeight="SemiBold" />
-                                    <TextBlock Text="{x:Bind ViewModel.AccuracyRate, Mode=OneWay}" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                    <TextBlock Text="%" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- Status Items list -->
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.StatusBreakdown}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="dto:LearningStatusDistributionDto">
-                                <Grid ColumnDefinitions="140,*,70,60" Margin="0,6" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                                    <ProgressBar Grid.Column="1" Value="{x:Bind Percentage}" Maximum="100" Height="8" CornerRadius="4" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="2" Text="{x:Bind Count}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="13" />
-                                    <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind Percentage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                        <TextBlock Text="%" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                    </StackPanel>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
-
             <!-- SECTION 2: Exam Target Progress -->
             <StackPanel Spacing="14">
                 <TextBlock Text="{x:Bind Loc.GetString('Dashboard_ExamTargetProgress')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
@@ -718,87 +850,6 @@
                 </ItemsRepeater>
             </StackPanel>
 
-            <!-- SECTION 3: Study Activity Heatmap (Last 30 Days) -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="20">
-                <StackPanel Spacing="16">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="2">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xEC08;" FontSize="16" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapTitle')}" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="Bold" />
-                            </StackPanel>
-                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapSubtitle')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapLess')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                            <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel0Brush}" />
-                            <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel1Brush}" />
-                            <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel2Brush}" />
-                            <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel3Brush}" />
-                            <Border Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource HeatmapLevel4Brush}" />
-                            <TextBlock Text="{x:Bind Loc.GetString('Dashboard_HeatmapMore')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- Heatmap Grid -->
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.StudyHeatmapList, Mode=OneWay}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="15" ItemWidth="36" ItemHeight="36" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="dto:StudyHistoryDayDto">
-                                    <Border Width="28" Height="28" CornerRadius="4" Margin="4"
-                                            BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            Background="{x:Bind HeatmapLevel, Converter={StaticResource HeatmapLevelToBrushConverter}}"
-                                            ToolTipService.ToolTip="{x:Bind TooltipText}">
-                                        <TextBlock Text="{x:Bind Date.Day}" FontSize="10" FontWeight="SemiBold"
-                                                   Foreground="{x:Bind HeatmapLevel, Converter={StaticResource HeatmapLevelToForegroundConverter}}"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" Margin="0,4,0,0">
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
-                            <StackPanel Spacing="4" HorizontalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind ViewModel.StudiedTodayCount, Mode=OneWay}" FontWeight="Bold" FontSize="15" />
-                                </StackPanel>
-                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_ReviewedToday')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                        </Border>
-                        <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
-                            <StackPanel Spacing="4" HorizontalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                    <FontIcon Glyph="&#xEC08;" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                    <TextBlock Text="{x:Bind ViewModel.StreakDays, Mode=OneWay}" FontWeight="Bold" FontSize="15" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DaysUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Bottom" Margin="0,0,0,1" />
-                                </StackPanel>
-                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_CurrentStreak')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                        </Border>
-                        <Border Grid.Column="2" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,8">
-                            <StackPanel Spacing="4" HorizontalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                    <FontIcon Glyph="&#xE735;" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                    <TextBlock Text="{x:Bind ViewModel.LongestStreakDays, Mode=OneWay}" FontWeight="Bold" FontSize="15" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_DaysUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Bottom" Margin="0,0,0,1" />
-                                </StackPanel>
-                                <TextBlock Text="{x:Bind Loc.GetString('Dashboard_BestStreak')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
             <!-- SECTION 4: CEFR & POS Breakdown -->
             <Grid x:Name="BreakdownGrid" ColumnDefinitions="*,*" ColumnSpacing="16">
                 <!-- CEFR Breakdown -->
@@ -841,50 +892,6 @@
                     </StackPanel>
                 </Border>
             </Grid>
-
-            <!-- SECTION 5: Recent Sessions -->
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16">
-                <StackPanel Spacing="14">
-                    <TextBlock Text="{x:Bind Loc.GetString('Dashboard_RecentSessions')}" FontWeight="Bold" FontSize="15" />
-                    <!-- Empty State for Recent Sessions -->
-                    <StackPanel Spacing="10" Padding="20" HorizontalAlignment="Center"
-                                Visibility="{x:Bind ViewModel.HasRecentSessions, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                        <Border Width="48" Height="48" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" HorizontalAlignment="Center">
-                            <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <TextBlock Text="{x:Bind Loc.GetString('Dashboard_NoRecentSessions')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="440" TextWrapping="Wrap" />
-                    </StackPanel>
-
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.RecentSessionsList}"
-                                  Visibility="{x:Bind ViewModel.HasRecentSessions, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="dto:StudySessionDto">
-                                <Grid ColumnDefinitions="160,*,Auto,Auto" Padding="8,10" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind services:LocalizationHelper.FormatSessionType(SessionType)}" FontWeight="SemiBold" FontSize="13" />
-                                        <TextBlock Text="{x:Bind StartedAtText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Cards')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                        <TextBlock Text="{x:Bind TotalCards}" FontWeight="Bold" FontSize="12" />
-                                        <TextBlock Text="{x:Bind services:LocalizationHelper.GetString('Dashboard_Correct')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                        <TextBlock Text="{x:Bind CorrectCards}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                    </StackPanel>
-                                    <Border Grid.Column="2" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}" CornerRadius="4" Padding="8,2" Margin="0,0,12,0" VerticalAlignment="Center">
-                                        <StackPanel Orientation="Horizontal" Spacing="2">
-                                            <TextBlock Text="{x:Bind AccuracyRate}" FontWeight="Bold" FontSize="12" />
-                                            <TextBlock Text="%" FontSize="12" />
-                                        </StackPanel>
-                                    </Border>
-                                    <TextBlock Grid.Column="3" Text="{x:Bind DurationText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
 
         </StackPanel>
     </ScrollViewer>
