@@ -57,10 +57,6 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
         Loaded += (s, e) =>
         {
             UpdateLocalizedTexts();
-            if (PaletteCard.Shadow is Microsoft.UI.Xaml.Media.ThemeShadow ts && !ts.Receivers.Contains(RootOverlay))
-            {
-                ts.Receivers.Add(RootOverlay);
-            }
         };
     }
 

@@ -32,6 +32,7 @@ public partial class App : Microsoft.UI.Xaml.Application
     public Window? MainWindow => _window;
     public Microsoft.UI.Dispatching.DispatcherQueue UIDispatcherQueue { get; }
     private readonly IHost _host;
+    private volatile bool _isShuttingDown;
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, IServiceScope> _viewModelScopeTable = new();
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<IServiceScope, byte> _activeScopes = new();
 
@@ -53,12 +54,19 @@ public partial class App : Microsoft.UI.Xaml.Application
         {
             LogCrash("Xaml.UnhandledException", e.Exception, e.Message);
             e.Handled = true;
-            if (e.Exception != null)
+            if (!_isShuttingDown && e.Exception != null)
             {
-                var errorService = _host?.Services?.GetService<IErrorHandlingService>();
-                if (errorService != null)
+                try
                 {
-                    _ = errorService.HandleExceptionAsync(e.Exception, "Application.UnhandledException", showDialog: true);
+                    var errorService = _host?.Services?.GetService<IErrorHandlingService>();
+                    if (errorService != null)
+                    {
+                        _ = errorService.HandleExceptionAsync(e.Exception, "Application.UnhandledException", showDialog: true);
+                    }
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Host is already tearing down during shutdown
                 }
             }
         };
@@ -212,6 +220,7 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     private void DisposeTrackedScopes()
     {
+        _isShuttingDown = true;
         foreach (var scope in _activeScopes.Keys.ToList())
         {
             if (_activeScopes.TryRemove(scope, out _))
