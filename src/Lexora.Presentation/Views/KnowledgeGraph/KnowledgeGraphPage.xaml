@@ -172,7 +172,45 @@
         </Grid>
 
         <!-- Main Body: Two-Pane Master Detail / Catalog & Graph -->
-        <Grid Grid.Row="1" ColumnDefinitions="340,*" ColumnSpacing="16">
+        <Grid x:Name="KgMasterDetailGrid" Grid.Row="1" ColumnSpacing="16" RowSpacing="12">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                    <VisualState x:Name="KgWideLayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="1040" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="KgMasterColumn.Width" Value="340" />
+                            <Setter Target="KgDetailColumn.Width" Value="*" />
+                            <Setter Target="KgMasterRow.Height" Value="*" />
+                            <Setter Target="KgDetailRow.Height" Value="0" />
+                            <Setter Target="KgDetailScroll.(Grid.Column)" Value="1" />
+                            <Setter Target="KgDetailScroll.(Grid.Row)" Value="0" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="KgCompactLayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="0" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="KgMasterColumn.Width" Value="*" />
+                            <Setter Target="KgDetailColumn.Width" Value="0" />
+                            <Setter Target="KgMasterRow.Height" Value="280" />
+                            <Setter Target="KgDetailRow.Height" Value="*" />
+                            <Setter Target="KgDetailScroll.(Grid.Column)" Value="0" />
+                            <Setter Target="KgDetailScroll.(Grid.Row)" Value="1" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="KgMasterColumn" Width="340" />
+                <ColumnDefinition x:Name="KgDetailColumn" Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="KgMasterRow" Height="*" />
+                <RowDefinition x:Name="KgDetailRow" Height="0" />
+            </Grid.RowDefinitions>
 
             <!-- LEFT PANE: Concept Catalog with Pagination & Filters -->
             <Border Grid.Column="0"
@@ -287,7 +325,7 @@
             </Border>
 
             <!-- RIGHT PANE: Graph Canvas & Semantic Relations Hub -->
-            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer x:Name="KgDetailScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="16" Padding="24,18,24,24">
 
                     <!-- Loading Indicator -->

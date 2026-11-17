@@ -14,7 +14,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Padding="24" HorizontalAlignment="Stretch">
-            <StackPanel Spacing="20" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="20" HorizontalAlignment="Stretch" MaxWidth="1120">
 
                 <!-- 1. HERO BANNER: Elegant Fluent Card with Hub Overview -->
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

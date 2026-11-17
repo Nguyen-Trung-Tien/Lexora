@@ -210,9 +210,48 @@
             <!-- ======================================================== -->
             <!-- MODE 1: SPLIT VIEW (Master-Detail)                       -->
             <!-- ======================================================== -->
-            <Grid Visibility="{x:Bind ViewModel.IsSplitViewMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                  ColumnDefinitions="360,*"
-                  ColumnSpacing="16">
+            <Grid x:Name="TipsMasterDetailGrid"
+                  Visibility="{x:Bind ViewModel.IsSplitViewMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                  ColumnSpacing="16"
+                  RowSpacing="12">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup>
+                        <VisualState x:Name="TipsWideLayout">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="1040" />
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters>
+                                <Setter Target="TipsMasterColumn.Width" Value="360" />
+                                <Setter Target="TipsDetailColumn.Width" Value="*" />
+                                <Setter Target="TipsMasterRow.Height" Value="*" />
+                                <Setter Target="TipsDetailRow.Height" Value="0" />
+                                <Setter Target="TipsDetailScroll.(Grid.Column)" Value="1" />
+                                <Setter Target="TipsDetailScroll.(Grid.Row)" Value="0" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="TipsCompactLayout">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="0" />
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters>
+                                <Setter Target="TipsMasterColumn.Width" Value="*" />
+                                <Setter Target="TipsDetailColumn.Width" Value="0" />
+                                <Setter Target="TipsMasterRow.Height" Value="280" />
+                                <Setter Target="TipsDetailRow.Height" Value="*" />
+                                <Setter Target="TipsDetailScroll.(Grid.Column)" Value="0" />
+                                <Setter Target="TipsDetailScroll.(Grid.Row)" Value="1" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="TipsMasterColumn" Width="360" />
+                    <ColumnDefinition x:Name="TipsDetailColumn" Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition x:Name="TipsMasterRow" Height="*" />
+                    <RowDefinition x:Name="TipsDetailRow" Height="0" />
+                </Grid.RowDefinitions>
                 
                 <!-- Left Column: Searchable List & Pagination -->
                 <Border Grid.Column="0"
@@ -357,7 +396,7 @@
                 </Border>
 
                 <!-- Right Column: Detail Inspector Workspace (Widescreen Optimized) -->
-                <ScrollViewer Grid.Column="1" Padding="28,20,28,24"
+                <ScrollViewer x:Name="TipsDetailScroll" Grid.Column="1" Padding="28,20,28,24"
                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <Grid>
                         <!-- Status InfoBar inside detail pane if active -->

@@ -27,7 +27,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="24">
-            <StackPanel Spacing="16" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="16" HorizontalAlignment="Stretch" MaxWidth="1360">
 
                 <!-- 1. Top Header -->
                 <Grid x:Name="TopHeaderGrid" ColumnDefinitions="*,Auto" ColumnSpacing="16">

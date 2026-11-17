@@ -13,7 +13,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Padding="24" HorizontalAlignment="Stretch">
-            <StackPanel Spacing="20" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="20" HorizontalAlignment="Stretch" MaxWidth="1040">
                 <!-- Page Title -->
                 <TextBlock Text="{x:Bind Loc.GetString('Settings_Title')}" Style="{StaticResource LexoraDisplayTitleStyle}" TextTrimming="CharacterEllipsis" />
 

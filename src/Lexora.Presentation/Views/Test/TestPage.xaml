@@ -14,7 +14,7 @@
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Padding="24" HorizontalAlignment="Stretch">
+        <Grid Padding="24" HorizontalAlignment="Stretch" MaxWidth="1080">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
