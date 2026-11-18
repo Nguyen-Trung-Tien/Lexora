@@ -41,8 +41,16 @@ public sealed partial class MainWindow : Window
 
         if (Content is FrameworkElement root)
         {
-            root.Loaded += (s, e) => UpdateTitleBarButtons();
-            root.ActualThemeChanged += (s, e) => UpdateTitleBarButtons();
+            root.Loaded += (s, e) =>
+            {
+                ThemeResourceHelper.RefreshLiveBrushes();
+                UpdateTitleBarButtons();
+            };
+            root.ActualThemeChanged += (s, e) =>
+            {
+                ThemeResourceHelper.RefreshLiveBrushes();
+                UpdateTitleBarButtons();
+            };
 
             // Centralized keyboard shortcut router
             root.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((s, e) =>

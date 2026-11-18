@@ -799,12 +799,8 @@
                                         <StackPanel Spacing="8">
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                                 <Grid Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                                    <Border
-                                                        Grid.Column="0"
-                                                        Width="22"
-                                                        Height="22"
-                                                        CornerRadius="11"
-                                                        Background="{ThemeResource AccentFillColorDefaultBrush}">
+                                                    <Grid Grid.Column="0" Width="22" Height="22">
+                                                        <Ellipse Fill="{ThemeResource AccentFillColorDefaultBrush}" />
                                                         <TextBlock
                                                             HorizontalAlignment="Center"
                                                             VerticalAlignment="Center"
@@ -812,7 +808,7 @@
                                                             FontWeight="Bold"
                                                             Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                                                             Text="A" />
-                                                    </Border>
+                                                    </Grid>
                                                     <TextBlock
                                                         Grid.Column="1"
                                                         VerticalAlignment="Center"
@@ -866,18 +862,15 @@
                                     <Border
                                         Padding="14"
                                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        BackgroundSizing="InnerBorderEdge"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
                                         CornerRadius="{ThemeResource OverlayCornerRadius}">
                                         <StackPanel Spacing="8">
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                                 <Grid Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="6" VerticalAlignment="Center">
-                                                    <Border
-                                                        Grid.Column="0"
-                                                        Width="22"
-                                                        Height="22"
-                                                        CornerRadius="11"
-                                                        Background="{ThemeResource SystemFillColorSuccessBrush}">
+                                                    <Grid Grid.Column="0" Width="22" Height="22">
+                                                        <Ellipse Fill="{ThemeResource SystemFillColorSuccessBrush}" />
                                                         <TextBlock
                                                             HorizontalAlignment="Center"
                                                             VerticalAlignment="Center"
@@ -885,7 +878,7 @@
                                                             FontWeight="Bold"
                                                             Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                                                             Text="B" />
-                                                    </Border>
+                                                    </Grid>
                                                     <TextBlock
                                                         Grid.Column="1"
                                                         VerticalAlignment="Center"

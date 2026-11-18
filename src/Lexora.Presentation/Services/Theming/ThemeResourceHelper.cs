@@ -94,11 +94,69 @@ public static class ThemeResourceHelper
         return App.Current?.RequestedTheme == ApplicationTheme.Light;
     }
 
+    private static readonly Dictionary<string, SolidColorBrush> _liveBrushes = new(StringComparer.Ordinal);
+
     public static Brush GetThemeBrush(string key) => GetThemeBrush(null, key);
 
     public static Brush GetThemeBrush(FrameworkElement? element, string key)
     {
         bool isLight = DetermineIsLight(element);
+        bool appIsLight = DetermineIsLight(null);
+
+        if (element == null || isLight == appIsLight)
+        {
+            return GetOrCreateLiveBrush(key, appIsLight);
+        }
+
+        return ResolveBrushForTheme(key, isLight);
+    }
+
+    /// <summary>
+    /// Updates all live theme-bound SolidColorBrush instances in place so every UIElement
+    /// (including DataTemplates, ItemsControls, dialogs, and cached pages) reflects theme changes immediately.
+    /// </summary>
+    public static void RefreshLiveBrushes()
+    {
+        if (_liveBrushes.Count == 0) return;
+
+        bool isLight = DetermineIsLight(null);
+        foreach (var (key, liveBrush) in _liveBrushes)
+        {
+            var resolved = ResolveBrushForTheme(key, isLight);
+            if (resolved is SolidColorBrush scb)
+            {
+                if (liveBrush.Color != scb.Color)
+                {
+                    liveBrush.Color = scb.Color;
+                }
+                if (Math.Abs(liveBrush.Opacity - scb.Opacity) > 0.001)
+                {
+                    liveBrush.Opacity = scb.Opacity;
+                }
+            }
+        }
+    }
+
+    private static Brush GetOrCreateLiveBrush(string key, bool isLight)
+    {
+        if (_liveBrushes.TryGetValue(key, out var existing))
+        {
+            return existing;
+        }
+
+        var resolved = ResolveBrushForTheme(key, isLight);
+        if (resolved is SolidColorBrush scb)
+        {
+            var live = new SolidColorBrush(scb.Color) { Opacity = scb.Opacity };
+            _liveBrushes[key] = live;
+            return live;
+        }
+
+        return resolved;
+    }
+
+    private static Brush ResolveBrushForTheme(string key, bool isLight)
+    {
 
         // Keys in WinUI 3: "Light" vs "Default" (standard Dark) / "Dark"
         string[] targetThemes = isLight ? ["Light"] : ["Default", "Dark"];

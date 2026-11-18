@@ -15,10 +15,12 @@
 
     <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
         <!-- Top Command Bar / Header Area -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Grid.Row="0" Spacing="12">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                 <!-- Page Title with Compact Navigation Back Button -->
-                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Grid Grid.Column="0" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
                     <Button x:Name="BtnHistoryBack"
+                            Grid.Column="0"
                             Click="BtnHistoryBack_Click"
                             IsEnabled="{x:Bind ViewModel.HasHistory, Mode=OneWay}"
                             ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_HistoryBack')}"
@@ -26,54 +28,36 @@
                         <FontIcon Glyph="&#xE72B;" FontSize="12" />
                     </Button>
 
-                    <Border Width="38" Height="38" CornerRadius="{ThemeResource OverlayCornerRadius}"
+                    <Border Grid.Column="1" Width="38" Height="38" CornerRadius="{ThemeResource OverlayCornerRadius}"
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BackgroundSizing="InnerBorderEdge"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1">
+                            BorderThickness="1"
+                            VerticalAlignment="Center">
                         <FontIcon Glyph="&#xE81E;" FontSize="18"
                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel VerticalAlignment="Center" MaxWidth="300">
-                        <TextBlock x:Name="PageTitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Title')}" Style="{StaticResource LexoraDisplayTitleStyle}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock x:Name="PageSubtitleText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Subtitle')}"
-                                   FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </StackPanel>
 
-                <!-- Search Box in Header -->
-                <AutoSuggestBox x:Name="HeaderSearchBox"
-                                Grid.Column="1"
-                                Margin="16,0,16,0"
-                                MinWidth="180"
-                                MaxWidth="320"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Center"
-                                PlaceholderText="{x:Bind Loc.GetString('KnowledgeGraph_SearchPlaceholder')}"
-                                QueryIcon="Find"
-                                TextChanged="HeaderSearchBox_TextChanged"
-                                SuggestionChosen="HeaderSearchBox_SuggestionChosen"
-                                QuerySubmitted="HeaderSearchBox_QuerySubmitted"
-                                CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
-                    <AutoSuggestBox.ItemTemplate>
-                        <DataTemplate x:DataType="dto:WordDto">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="4,4">
-                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind Level}" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                </Border>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                    <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="13" />
-                                    <TextBlock Text="{x:Bind PrimaryDefinition}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="260" />
-                                </StackPanel>
-                                <TextBlock Grid.Column="2" Text="{x:Bind PrimaryPartOfSpeech}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-                            </Grid>
-                        </DataTemplate>
-                    </AutoSuggestBox.ItemTemplate>
-                </AutoSuggestBox>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock x:Name="PageTitleText"
+                                   Text="{x:Bind Loc.GetString('KnowledgeGraph_Title')}"
+                                   Style="{StaticResource LexoraDisplayTitleStyle}"
+                                   TextWrapping="WrapWholeWords"
+                                   ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_Title')}" />
+                        <TextBlock x:Name="PageSubtitleText"
+                                   Text="{x:Bind Loc.GetString('KnowledgeGraph_Subtitle')}"
+                                   FontSize="12"
+                                   LineHeight="17"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap"
+                                   ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_Subtitle')}" />
+                    </StackPanel>
+                </Grid>
 
                 <!-- Action Controls Row (Wrapped in ScrollViewer for safe compact overflow) -->
-                <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                              HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled">
+                <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                              HorizontalScrollMode="Enabled" VerticalScrollMode="Disabled" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <!-- Recommendations Flyout Button -->
                     <DropDownButton x:Name="BtnRecommendations" ToolTipService.ToolTip="{x:Bind Loc.GetString('KnowledgeGraph_RecommendButton')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="9,5">
@@ -172,7 +156,35 @@
                     </Button>
                 </StackPanel>
                 </ScrollViewer>
-        </Grid>
+            </Grid>
+
+            <!-- Dedicated Full-Width Search Box Row (prevents header title truncation on narrow windows) -->
+            <AutoSuggestBox x:Name="HeaderSearchBox"
+                            MinWidth="240"
+                            MaxWidth="480"
+                            HorizontalAlignment="Left"
+                            PlaceholderText="{x:Bind Loc.GetString('KnowledgeGraph_SearchPlaceholder')}"
+                            QueryIcon="Find"
+                            TextChanged="HeaderSearchBox_TextChanged"
+                            SuggestionChosen="HeaderSearchBox_SuggestionChosen"
+                            QuerySubmitted="HeaderSearchBox_QuerySubmitted"
+                            CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
+                <AutoSuggestBox.ItemTemplate>
+                    <DataTemplate x:DataType="dto:WordDto">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="4,4">
+                            <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind Level}" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{x:Bind Term}" FontWeight="SemiBold" FontSize="13" />
+                                <TextBlock Text="{x:Bind PrimaryDefinition}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="260" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="2" Text="{x:Bind PrimaryPartOfSpeech}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </AutoSuggestBox.ItemTemplate>
+            </AutoSuggestBox>
+        </StackPanel>
 
         <!-- Main Body: Two-Pane Master Detail / Catalog & Graph -->
         <Grid x:Name="KgMasterDetailGrid" Grid.Row="1" ColumnSpacing="16" RowSpacing="12">

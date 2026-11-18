@@ -125,16 +125,6 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
         if (BtnSmartImportText != null) BtnSmartImportText.Visibility = btnTextVisibility;
         if (BtnExportText != null) BtnExportText.Visibility = btnTextVisibility;
         if (BtnViewModeText != null) BtnViewModeText.Visibility = btnTextVisibility;
-
-        if (PageSubtitleText != null)
-        {
-            PageSubtitleText.Visibility = e.NewSize.Width < 1180 ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        if (HeaderSearchBox != null)
-        {
-            HeaderSearchBox.MaxWidth = e.NewSize.Width < 1100 ? 220 : 320;
-        }
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

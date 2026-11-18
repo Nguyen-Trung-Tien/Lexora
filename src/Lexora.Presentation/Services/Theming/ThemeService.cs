@@ -78,6 +78,9 @@ public class ThemeService : IThemeService
             mainWindow.UpdateTitleBarButtons();
         }
 
+        // Update all live theme brushes so DataTemplates, converters, and cached views repaint immediately
+        ThemeResourceHelper.RefreshLiveBrushes();
+
         // Dynamically propagate theme change to any currently open modal ContentDialog
         if (SafeDialogExtensions.CurrentlyActiveDialog is { } activeDialog)
         {
