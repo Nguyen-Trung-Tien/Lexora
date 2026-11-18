@@ -111,6 +111,13 @@ public sealed partial class MainWindow : Window
         };
     }
 
+    private void OnMainEntranceStoryboardCompleted(object? sender, object e)
+    {
+        MainEntranceStoryboard.Completed -= OnMainEntranceStoryboardCompleted;
+        // Detach ScaleTransform after entrance animation so the entire app renders at 1:1 native pixel alignment without aliasing
+        MainContentGrid.RenderTransform = null;
+    }
+
     public void UpdateTitleBarButtons()
     {
         if (!AppWindowTitleBar.IsCustomizationSupported()) return;
@@ -299,13 +306,13 @@ public sealed partial class MainWindow : Window
                 // Seamless concurrent cross-fade: reveal main shell while fading out splash
                 if (SplashOverlay.IsAnimationEnabled)
                 {
+                    MainEntranceStoryboard.Completed += OnMainEntranceStoryboardCompleted;
                     MainEntranceStoryboard.Begin();
                 }
                 else
                 {
                     MainContentGrid.Opacity = 1.0;
-                    MainContentScale.ScaleX = 1.0;
-                    MainContentScale.ScaleY = 1.0;
+                    MainContentGrid.RenderTransform = null;
                 }
 
                 // Disable hit-testing on splash immediately before exit begins

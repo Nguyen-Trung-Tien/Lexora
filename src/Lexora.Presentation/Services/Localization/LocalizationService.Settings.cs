@@ -65,7 +65,7 @@ public partial class LocalizationService
         vi["Settings_DbLocation"] = "Vị trí cơ sở dữ liệu:";
         vi["Settings_DbSize"] = "Dung lượng tệp CSDL:";
         vi["Settings_DbTotalData"] = "Tổng dữ liệu lưu trữ:";
-        vi["Settings_DbWordsUnit"] = "Từ vựng •";
+        vi["Settings_DbWordsUnit"] = "Từ vựng";
         vi["Settings_DbGrammarUnit"] = "Quy tắc ngữ pháp";
         vi["Settings_CreateBackupBtn"] = "Tạo bản sao lưu (.db)";
         vi["Settings_RestoreBackupBtn"] = "Khôi phục từ bản sao lưu (.db)...";
@@ -238,7 +238,7 @@ public partial class LocalizationService
         en["Settings_DbLocation"] = "Database Location:";
         en["Settings_DbSize"] = "Database File Size:";
         en["Settings_DbTotalData"] = "Total Stored Data:";
-        en["Settings_DbWordsUnit"] = "Words •";
+        en["Settings_DbWordsUnit"] = "Words";
         en["Settings_DbGrammarUnit"] = "Grammar Rules";
         en["Settings_CreateBackupBtn"] = "Create Backup (.db)";
         en["Settings_RestoreBackupBtn"] = "Restore from Backup (.db)...";

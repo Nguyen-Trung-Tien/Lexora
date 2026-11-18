@@ -605,10 +605,10 @@
                     </Grid>
 
                     <!-- Database Stats Grid -->
-                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="18,14">
-                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="140,*,Auto" RowSpacing="10" ColumnSpacing="12">
+                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" BackgroundSizing="InnerBorderEdge" CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="16,14">
+                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto" RowSpacing="10" ColumnSpacing="14">
                             <TextBlock Text="{x:Bind Loc.GetString('Settings_DbLocation')}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
-                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.DatabasePath, Mode=OneWay}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.DatabasePath, Mode=OneWay}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12.5" VerticalAlignment="Center" />
                             <Button x:Name="BtnCopyDbPath" Grid.Column="2" Click="CopyDbPath_Click" ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Copy')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="8,4" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                     <FontIcon x:Name="IconCopyDbPath" Glyph="&#xE8C8;" FontSize="12" />
@@ -617,17 +617,17 @@
                             </Button>
 
                             <TextBlock Grid.Row="1" Text="{x:Bind Loc.GetString('Settings_DbSize')}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind ViewModel.DatabaseSizeFormatted, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{x:Bind ViewModel.DatabaseSizeFormatted, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" VerticalAlignment="Center" />
 
                             <TextBlock Grid.Row="2" Text="{x:Bind Loc.GetString('Settings_DbTotalData')}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
-                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
+                            <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BackgroundSizing="InnerBorderEdge" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="10,3">
                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                         <TextBlock Text="{x:Bind ViewModel.TotalWordsCount, Mode=OneWay}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                         <TextBlock Text="{x:Bind Loc.GetString('Settings_DbWordsUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                     </StackPanel>
                                 </Border>
-                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="8,3">
+                                <Border Background="{ThemeResource ControlFillColorSecondaryBrush}" BackgroundSizing="InnerBorderEdge" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Padding="10,3">
                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                         <TextBlock Text="{x:Bind ViewModel.TotalGrammarCount, Mode=OneWay}" FontWeight="Bold" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                         <TextBlock Text="{x:Bind Loc.GetString('Settings_DbGrammarUnit')}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
@@ -637,27 +637,27 @@
                         </Grid>
                     </Border>
 
-                    <!-- Backup Actions -->
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Button Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                    <!-- Backup Actions (Responsive 2-row balanced grid to prevent horizontal overflow) -->
+                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" RowSpacing="8" ColumnSpacing="10">
+                        <Button Grid.Row="0" Grid.Column="0" Style="{ThemeResource AccentButtonStyle}" Click="BackupButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,8" HorizontalAlignment="Stretch" ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_CreateBackupBtn')}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                 <FontIcon Glyph="&#xEA35;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Settings_CreateBackupBtn')}" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_CreateBackupBtn')}" FontWeight="SemiBold" FontSize="12" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </Button>
-                        <Button Click="RestoreButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Grid.Row="0" Grid.Column="1" Click="RestoreButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,8" HorizontalAlignment="Stretch" ToolTipService.ToolTip="{x:Bind Loc.GetString('Settings_RestoreBackupBtn')}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                 <FontIcon Glyph="&#xE777;" FontSize="12" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Settings_RestoreBackupBtn')}" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('Settings_RestoreBackupBtn')}" FontSize="12" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </Button>
-                        <Button Click="OpenDataHealthCenter_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Click="OpenDataHealthCenter_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="12,8" HorizontalAlignment="Stretch" ToolTipService.ToolTip="{x:Bind Loc.GetString('DataHealth_Title')}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                 <FontIcon Glyph="&#xE958;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('DataHealth_Title')}" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock Text="{x:Bind Loc.GetString('DataHealth_Title')}" FontWeight="SemiBold" FontSize="12" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </Button>
-                    </StackPanel>
+                    </Grid>
 
                     <TextBlock Text="{x:Bind ViewModel.BackupStatusMessage, Mode=OneWay}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
                 </StackPanel>

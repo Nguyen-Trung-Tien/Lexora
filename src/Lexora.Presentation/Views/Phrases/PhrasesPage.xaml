@@ -758,9 +758,10 @@
                             <Border
                                 Padding="16"
                                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BackgroundSizing="InnerBorderEdge"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="10">
+                                CornerRadius="{ThemeResource OverlayCornerRadius}">
                                 <StackPanel Spacing="14">
                                     <!-- Dialogue Container Header -->
                                     <Grid ColumnDefinitions="*,Auto">
@@ -791,6 +792,7 @@
                                     <Border
                                         Padding="14"
                                         Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        BackgroundSizing="InnerBorderEdge"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
                                         CornerRadius="{ThemeResource OverlayCornerRadius}">
