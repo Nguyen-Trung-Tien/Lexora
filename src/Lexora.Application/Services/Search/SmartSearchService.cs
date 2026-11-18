@@ -892,8 +892,9 @@ public class SmartSearchService : ISmartSearchService
     {
         if (string.IsNullOrWhiteSpace(text)) return Array.Empty<string>();
 
-        // Split by whitespace, punctuation except hyphens inside words
-        var parts = Regex.Split(text.Trim(), @"[^\p{L}\p{N}\-]+");
+        // Normalize to NFC first and preserve combining marks (\p{M}) so NFD Vietnamese text is never split on diacritics
+        var nfc = text.Trim().Normalize(NormalizationForm.FormC);
+        var parts = Regex.Split(nfc, @"[^\p{L}\p{M}\p{N}\-]+");
         return parts.Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
     }
 

@@ -115,4 +115,27 @@ public class FuzzySearchServiceTests
         int dist = _fuzzyService.CalculateDistance(longStr1, longStr2);
         dist.Should().BeGreaterThan(0);
     }
+
+    [Theory]
+    [InlineData("hoc", "học", 0)]
+    [InlineData("dep", "đẹp", 0)]
+    [InlineData("tieng viet", "tiếng   việt", 0)]
+    [InlineData("tu\u200Bvung", "từ vựng", 1)]
+    public void CalculateDistance_VietnameseDiacriticsAndWhitespace_NormalizesCorrectly(string source, string target, int expected)
+    {
+        int dist = _fuzzyService.CalculateDistance(source, target);
+        dist.Should().Be(expected);
+    }
+
+    [Fact]
+    public void Search_VietnameseUnaccentedQuery_FindsAccentedCandidates()
+    {
+        var candidates = new List<string> { "học tập", "đẹp đẽ", "ngôn ngữ", "từ vựng" };
+
+        var results = _fuzzyService.Search("hoc tap", candidates, c => c);
+
+        results.Should().NotBeEmpty();
+        results[0].Item.Should().Be("học tập");
+        results[0].IsExactOrPrefixMatch.Should().BeTrue();
+    }
 }

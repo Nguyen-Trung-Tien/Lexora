@@ -344,25 +344,12 @@ public static class SafeDialogExtensions
 
     private static Brush TryGetThemeBrush(string resourceKey)
     {
-        if (App.Current?.Resources?.TryGetValue(resourceKey, out var res) == true && res is Brush brush)
-        {
-            return brush;
-        }
-
-        return resourceKey switch
-        {
-            "SystemFillColorCriticalBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 217, 45, 32)),
-            "SystemFillColorCriticalBackgroundBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(40, 217, 45, 32)),
-            "AccentTextFillColorPrimaryBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 102, 204)),
-            "SubtleFillColorSecondaryBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(25, 128, 128, 128)),
-            "CardStrokeColorDefaultBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(30, 128, 128, 128)),
-            "TextFillColorPrimaryBrush" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 32, 32, 32)),
-            _ => new SolidColorBrush(Microsoft.UI.Colors.Transparent)
-        };
+        return ThemeResourceHelper.GetThemeBrush(resourceKey);
     }
 
     private static void Dialog_Opened_ApplyPointerCursor(ContentDialog sender, ContentDialogOpenedEventArgs args)
     {
+        sender.Opened -= Dialog_Opened_ApplyPointerCursor;
         try
         {
             ApplyHandCursorRecursive(sender);

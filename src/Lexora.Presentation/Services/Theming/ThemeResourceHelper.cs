@@ -237,7 +237,7 @@ public static class ThemeResourceHelper
             "CardStrokeColorDefaultBrush" => isLight ? LightCardStroke : DarkCardStroke,
             "SubtleFillColorSecondaryBrush" => isLight ? LightSubtleBackground : DarkSubtleBackground,
             "AccentFillColorDefaultBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 0, 102, 204)) : DarkAccentText,
-            "TextOnAccentFillColorPrimaryBrush" => new SolidColorBrush(Colors.White),
+            "TextOnAccentFillColorPrimaryBrush" => isLight ? new SolidColorBrush(Colors.White) : LightPrimaryText,
             "LexoraThemeCardSelectedBorderBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 0, 102, 204)) : DarkAccentText,
             // Semantic state solid fills (High contrast AA standard)
             "SystemFillColorSuccessBrush" => isLight ? new SolidColorBrush(Color.FromArgb(255, 8, 116, 67)) : new SolidColorBrush(Color.FromArgb(255, 108, 203, 95)),

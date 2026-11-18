@@ -146,8 +146,20 @@ public sealed partial class KnowledgeGraphPage : Page, ILocalizableView, IThemeA
             e.PropertyName == nameof(ViewModel.HasSelectedNode) ||
             e.PropertyName == nameof(ViewModel.IsVisualMapMode))
         {
-            Bindings.Update();
-            RenderGraphCanvas();
+            void UpdateGraph()
+            {
+                Bindings.Update();
+                RenderGraphCanvas();
+            }
+
+            if (DispatcherQueue == null || DispatcherQueue.HasThreadAccess)
+            {
+                UpdateGraph();
+            }
+            else
+            {
+                DispatcherQueue.TryEnqueue(UpdateGraph);
+            }
         }
     }
 

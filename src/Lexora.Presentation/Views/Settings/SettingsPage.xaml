@@ -337,7 +337,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <Button x:Name="LangViButton" Click="LangViButton_Click" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="16,8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="TextLangVi" Text="Tiáº¿ng Viá»‡t (VI)" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="TextLangVi" Text="Tiếng Việt (VI)" VerticalAlignment="Center" />
                                     <FontIcon x:Name="CheckLangVi" Glyph="&#xE73E;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
                                 </StackPanel>
                             </Button>

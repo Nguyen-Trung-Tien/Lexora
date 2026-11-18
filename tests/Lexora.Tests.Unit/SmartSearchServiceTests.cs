@@ -282,4 +282,19 @@ public class SmartSearchServiceTests
         ranked[0].Item.Term.Should().Be("serendipity");
         sw.ElapsedMilliseconds.Should().BeLessThan(300, "5,000 words ranking should complete well within 300ms");
     }
+
+    [Fact]
+    public void Tokenize_NfdDecomposedVietnameseText_PreservesWholeWords()
+    {
+        // NFD decomposed form (e.g. copied from macOS or PDF) should not split on combining diacritic marks
+        var nfd = "tiếng việt hiện đại".Normalize(System.Text.NormalizationForm.FormD);
+
+        var tokens = _sut.Tokenize(nfd);
+
+        tokens.Should().HaveCount(4);
+        tokens[0].Should().Be("tiếng");
+        tokens[1].Should().Be("việt");
+        tokens[2].Should().Be("hiện");
+        tokens[3].Should().Be("đại");
+    }
 }

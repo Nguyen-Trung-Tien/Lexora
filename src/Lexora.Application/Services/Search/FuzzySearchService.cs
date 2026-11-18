@@ -1,4 +1,5 @@
 using Lexora.Application.Interfaces;
+using Lexora.Domain.Common;
 
 namespace Lexora.Application.Services;
 
@@ -9,14 +10,14 @@ public class FuzzySearchService : IFuzzySearchService
         if (string.Equals(source, target, StringComparison.OrdinalIgnoreCase))
             return 0;
 
-        if (string.IsNullOrEmpty(source))
-            return target?.Length ?? 0;
+        var s = SearchTextHelper.Normalize(source);
+        var t = SearchTextHelper.Normalize(target);
 
-        if (string.IsNullOrEmpty(target))
-            return source.Length;
+        if (string.IsNullOrEmpty(s))
+            return t.Length;
 
-        var s = source.Trim().ToLowerInvariant();
-        var t = target.Trim().ToLowerInvariant();
+        if (string.IsNullOrEmpty(t))
+            return s.Length;
 
         if (s == t) return 0;
 
@@ -94,13 +95,13 @@ public class FuzzySearchService : IFuzzySearchService
         if (string.Equals(source, target, StringComparison.OrdinalIgnoreCase))
             return 1.0;
 
-        if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(target))
+        var s = SearchTextHelper.Normalize(source);
+        var t = SearchTextHelper.Normalize(target);
+
+        if (string.IsNullOrEmpty(s) || string.IsNullOrEmpty(t))
             return 0.0;
 
-        var s = source.Trim();
-        var t = target.Trim();
-
-        if (string.Equals(s, t, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(s, t, StringComparison.Ordinal))
             return 1.0;
 
         int maxLen = Math.Max(s.Length, t.Length);
@@ -120,7 +121,10 @@ public class FuzzySearchService : IFuzzySearchService
         if (string.IsNullOrWhiteSpace(query) || candidates == null)
             return Array.Empty<FuzzyMatchResult<T>>();
 
-        var cleanQuery = query.Trim().ToLowerInvariant();
+        var cleanQuery = SearchTextHelper.Normalize(query);
+        if (string.IsNullOrEmpty(cleanQuery))
+            return Array.Empty<FuzzyMatchResult<T>>();
+
         var results = new List<FuzzyMatchResult<T>>();
 
         foreach (var item in candidates)
@@ -128,7 +132,8 @@ public class FuzzySearchService : IFuzzySearchService
             var text = textSelector(item);
             if (string.IsNullOrWhiteSpace(text)) continue;
 
-            var cleanText = text.Trim().ToLowerInvariant();
+            var cleanText = SearchTextHelper.Normalize(text);
+            if (string.IsNullOrEmpty(cleanText)) continue;
 
             // 1. Exact match
             if (cleanText == cleanQuery)
@@ -173,7 +178,7 @@ public class FuzzySearchService : IFuzzySearchService
         if (string.IsNullOrWhiteSpace(query) || vocabularyTerms == null)
             return null;
 
-        var cleanQuery = query.Trim().ToLowerInvariant();
+        var cleanQuery = SearchTextHelper.Normalize(query);
         if (cleanQuery.Length < 3) return null;
 
         string? bestCandidate = null;
@@ -183,7 +188,8 @@ public class FuzzySearchService : IFuzzySearchService
         foreach (var term in vocabularyTerms)
         {
             if (string.IsNullOrWhiteSpace(term)) continue;
-            var cleanTerm = term.Trim().ToLowerInvariant();
+            var cleanTerm = SearchTextHelper.Normalize(term);
+            if (string.IsNullOrEmpty(cleanTerm)) continue;
 
             // If exact match already exists, no typo suggestion needed
             if (cleanTerm == cleanQuery)

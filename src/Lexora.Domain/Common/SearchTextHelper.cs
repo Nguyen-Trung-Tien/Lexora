@@ -18,24 +18,38 @@ public static class SearchTextHelper
 
         var normalized = text.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
         var sb = new StringBuilder(normalized.Length);
+        bool prevWasSpace = false;
 
         foreach (char c in normalized)
         {
             var category = CharUnicodeInfo.GetUnicodeCategory(c);
-            if (category != UnicodeCategory.NonSpacingMark)
+            if (category == UnicodeCategory.NonSpacingMark || category == UnicodeCategory.Format)
             {
-                if (c == 'đ' || c == 'Đ')
+                continue;
+            }
+
+            if (char.IsWhiteSpace(c))
+            {
+                if (!prevWasSpace && sb.Length > 0)
                 {
-                    sb.Append('d');
+                    sb.Append(' ');
+                    prevWasSpace = true;
                 }
-                else
-                {
-                    sb.Append(c);
-                }
+                continue;
+            }
+
+            prevWasSpace = false;
+            if (c == 'đ' || c == 'Đ')
+            {
+                sb.Append('d');
+            }
+            else
+            {
+                sb.Append(c);
             }
         }
 
-        return sb.ToString().Normalize(NormalizationForm.FormC);
+        return sb.ToString().TrimEnd().Normalize(NormalizationForm.FormC);
     }
 
     /// <summary>
