@@ -198,7 +198,7 @@ public partial class LocalizationService
         // ==========================================
         // Help — en-US (English)
         // ==========================================
-        en["ReleaseNotes_DialogTitle"] = "Release Notes Log";
+        en["ReleaseNotes_DialogTitle"] = "Release Notes";
         en["ReleaseNotes_DialogSubtitle"] = "Detailed update history and feature improvements across Lexora versions";
         en["ReleaseNotes_SelectVersion"] = "Select version:";
         en["ReleaseNotes_CurrentBadge"] = "Current Version";
@@ -206,7 +206,7 @@ public partial class LocalizationService
         en["ReleaseNotes_NotesContentLabel"] = "Features & Improvements Details";
         en["ReleaseNotes_OfflineNote"] = "All release notes are stored offline directly within the Lexora desktop application.";
         en["ReleaseNotes_CloseButton"] = "Close";
-        en["Help_ReleaseNotesLog"] = "Release Notes Log";
+        en["Help_ReleaseNotesLog"] = "Release Notes";
         en["Help_ReleaseNotesLogTooltip"] = "View what's new and recent improvements in Lexora versions";
 
         // ==========================================

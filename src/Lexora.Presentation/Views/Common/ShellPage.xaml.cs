@@ -14,6 +14,7 @@ public sealed partial class ShellPage : Page
     private readonly INavigationService _navigationService;
     private readonly ILocalizationService _localizationService;
     private readonly IThemeService _themeService;
+    private readonly Dictionary<Type, bool> _pageThemeStates = new();
 
     public ShellPage()
     {
@@ -137,6 +138,16 @@ public sealed partial class ShellPage : Page
                     if (ContentFrame.Content is IThemeAwareView navThemeAwareView)
                     {
                         navThemeAwareView.OnThemeChanged();
+                    }
+
+                    if (ContentFrame.Content is Page navPage)
+                    {
+                        bool isLight = ThemeResourceHelper.DetermineIsLight();
+                        if (_pageThemeStates.TryGetValue(navPage.GetType(), out bool prevIsLight) && prevIsLight != isLight)
+                        {
+                            ThemeResourceHelper.RefreshVisualTreeItemsControls(navPage);
+                        }
+                        _pageThemeStates[navPage.GetType()] = isLight;
                     }
 
                     if (_navigationService.HasPendingNavigation)
@@ -311,6 +322,7 @@ public sealed partial class ShellPage : Page
     {
         void UpdateThemeUI()
         {
+            ThemeResourceHelper.RefreshLiveBrushes();
             UpdateThemeToggleState();
             if (ContentFrame != null)
             {
@@ -319,6 +331,18 @@ public sealed partial class ShellPage : Page
                 {
                     themeAwareView.OnThemeChanged();
                 }
+                if (ContentFrame.Content is DependencyObject contentDep)
+                {
+                    ThemeResourceHelper.RefreshVisualTreeItemsControls(contentDep);
+                    if (ContentFrame.Content is Page p)
+                    {
+                        _pageThemeStates[p.GetType()] = ThemeResourceHelper.DetermineIsLight();
+                    }
+                }
+            }
+            if (SafeDialogExtensions.CurrentlyActiveDialog is DependencyObject activeDialog)
+            {
+                ThemeResourceHelper.RefreshVisualTreeItemsControls(activeDialog);
             }
             Bindings.Update();
         }
@@ -337,6 +361,7 @@ public sealed partial class ShellPage : Page
     {
         void UpdateActualThemeUI()
         {
+            ThemeResourceHelper.RefreshLiveBrushes();
             UpdateThemeToggleState();
             if (ContentFrame != null)
             {
@@ -344,6 +369,18 @@ public sealed partial class ShellPage : Page
                 {
                     themeAwareView.OnThemeChanged();
                 }
+                if (ContentFrame.Content is DependencyObject contentDep)
+                {
+                    ThemeResourceHelper.RefreshVisualTreeItemsControls(contentDep);
+                    if (ContentFrame.Content is Page p)
+                    {
+                        _pageThemeStates[p.GetType()] = ThemeResourceHelper.DetermineIsLight();
+                    }
+                }
+            }
+            if (SafeDialogExtensions.CurrentlyActiveDialog is DependencyObject activeDialog)
+            {
+                ThemeResourceHelper.RefreshVisualTreeItemsControls(activeDialog);
             }
             Bindings.Update();
         }

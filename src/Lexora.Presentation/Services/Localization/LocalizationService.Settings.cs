@@ -291,7 +291,7 @@ public partial class LocalizationService
         en["Settings_RemindLater"] = "Later";
         en["Settings_SizeFormat"] = "Download size: {0:F1} MB";
         en["Settings_ReleaseDate"] = "Release date:";
-        en["Settings_BtnViewReleaseNotesLog"] = "Release Notes Log";
+        en["Settings_BtnViewReleaseNotesLog"] = "Release Notes";
         en["Settings_ViewReleaseNotesLogTooltip"] = "View complete release history and feature logs across versions";
         en["Settings_AutoBackupNote"] = "Lexora will automatically snapshot your study database before updating.";
         en["Settings_AutoCheckUpdates"] = "Automatically check for updates";

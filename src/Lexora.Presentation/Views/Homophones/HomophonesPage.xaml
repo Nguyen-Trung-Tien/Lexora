@@ -19,22 +19,31 @@
                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
         <!-- Top Command Bar / Header Area (Clean, no horizontal scroll) -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <!-- Page Title -->
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <Border Width="38" Height="38" CornerRadius="{ThemeResource OverlayCornerRadius}"
+                <!-- Page Title (Grid with Star column prevents horizontal StackPanel clipping) -->
+                <Grid Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalAlignment="Center">
+                    <Border Grid.Column="0" Width="38" Height="38" CornerRadius="{ThemeResource OverlayCornerRadius}"
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BackgroundSizing="InnerBorderEdge"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1">
+                            BorderThickness="1"
+                            VerticalAlignment="Center">
                         <FontIcon Glyph="&#xE768;" FontSize="18"
                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel VerticalAlignment="Center" Spacing="2">
-                        <TextBlock x:Name="PageTitleText" Text="{x:Bind Loc.GetString('Homophones_Title')}" Style="{StaticResource LexoraDisplayTitleStyle}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock x:Name="PageSubtitleText" Text="{x:Bind Loc.GetString('Homophones_Subtitle')}"
-                                   Style="{StaticResource LexoraBodyStyle}" TextTrimming="CharacterEllipsis" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock x:Name="PageTitleText"
+                                   Text="{x:Bind Loc.GetString('Homophones_Title')}"
+                                   Style="{StaticResource LexoraDisplayTitleStyle}"
+                                   TextWrapping="WrapWholeWords"
+                                   ToolTipService.ToolTip="{x:Bind Loc.GetString('Homophones_Title')}" />
+                        <TextBlock x:Name="PageSubtitleText"
+                                   Text="{x:Bind Loc.GetString('Homophones_Subtitle')}"
+                                   Style="{StaticResource LexoraBodyStyle}"
+                                   TextWrapping="Wrap"
+                                   ToolTipService.ToolTip="{x:Bind Loc.GetString('Homophones_Subtitle')}" />
                     </StackPanel>
-                </StackPanel>
+                </Grid>
 
                 <!-- Streamlined Header Actions -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -238,9 +247,11 @@
                             BorderThickness="0,1,0,0"
                             Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                             Padding="12,8">
-                        <Grid ColumnDefinitions="*,Auto">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <TextBlock Text="{x:Bind ViewModel.ItemsRangeDisplay, Mode=OneWay}"
                                        VerticalAlignment="Center" FontSize="11"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTipService.ToolTip="{x:Bind ViewModel.ItemsRangeDisplay, Mode=OneWay}"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">

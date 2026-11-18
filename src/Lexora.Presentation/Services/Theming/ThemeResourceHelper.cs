@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
 
@@ -133,6 +135,59 @@ public static class ThemeResourceHelper
                 {
                     liveBrush.Opacity = scb.Opacity;
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Re-binds ItemsControl, ListViewBase, and ItemsRepeater item containers within the given visual subtree
+    /// so DataTemplates using Brush IValueConverters (e.g. OptionStateToBrushConverter, CefrToBrushConverter)
+    /// re-evaluate with the active theme's brushes.
+    /// </summary>
+    public static void RefreshVisualTreeItemsControls(DependencyObject? root)
+    {
+        if (root == null) return;
+
+        var stack = new Stack<DependencyObject>();
+        stack.Push(root);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+
+            if (current is ListViewBase listViewBase && listViewBase.ItemsSource != null)
+            {
+                var src = listViewBase.ItemsSource;
+                var selected = listViewBase.SelectedItem;
+                listViewBase.ItemsSource = null;
+                listViewBase.ItemsSource = src;
+                if (selected != null)
+                {
+                    listViewBase.SelectedItem = selected;
+                }
+                continue;
+            }
+
+            if (current.GetType() == typeof(ItemsControl) && current is ItemsControl ic && ic.ItemsSource != null)
+            {
+                var src = ic.ItemsSource;
+                ic.ItemsSource = null;
+                ic.ItemsSource = src;
+                continue;
+            }
+
+            if (current is ItemsRepeater repeater && repeater.ItemsSource != null)
+            {
+                var src = repeater.ItemsSource;
+                repeater.ItemsSource = null;
+                repeater.ItemsSource = src;
+                continue;
+            }
+
+            int childCount = VisualTreeHelper.GetChildrenCount(current);
+            for (int i = 0; i < childCount; i++)
+            {
+                stack.Push(VisualTreeHelper.GetChild(current, i));
             }
         }
     }
