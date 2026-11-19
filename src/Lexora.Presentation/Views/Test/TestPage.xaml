@@ -9,6 +9,7 @@
     xmlns:common="using:Lexora.Presentation.Views.Common"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:services="using:Lexora.Presentation.Services"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
@@ -103,6 +104,7 @@
                 </common:PageHeaderControl>
 
                 <TeachingTip x:Name="TestHelpTeachingTip"
+                             helpers:ThemeSyncHelper.SyncTheme="True"
                              Target="{x:Bind TestHelpButton}"
                              Title="{x:Bind Loc.GetString('Test_Help_Title')}"
                              Subtitle="{x:Bind Loc.GetString('Test_Help_Subtitle')}"
@@ -134,7 +136,33 @@
                          CornerRadius="{ThemeResource ControlCornerRadius}" />
 
                 <!-- 2-Column Responsive Workspace for Test Setup -->
-                <Grid x:Name="TestSetupWorkspaceGrid" ColumnDefinitions="1.15*,1*" ColumnSpacing="18">
+                <Grid x:Name="TestSetupWorkspaceGrid" ColumnDefinitions="1.15*,1*" RowDefinitions="Auto,Auto" ColumnSpacing="18" RowSpacing="16">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="TestSetupLayoutStates">
+                            <VisualState x:Name="TestSetupWide">
+                                <VisualState.StateTriggers>
+                                    <AdaptiveTrigger MinWindowWidth="920" />
+                                </VisualState.StateTriggers>
+                                <VisualState.Setters>
+                                    <Setter Target="TestFormatBorder.(Grid.ColumnSpan)" Value="1" />
+                                    <Setter Target="TestSettingsBorder.(Grid.Row)" Value="0" />
+                                    <Setter Target="TestSettingsBorder.(Grid.Column)" Value="1" />
+                                    <Setter Target="TestSettingsBorder.(Grid.ColumnSpan)" Value="1" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="TestSetupCompact">
+                                <VisualState.StateTriggers>
+                                    <AdaptiveTrigger MinWindowWidth="0" />
+                                </VisualState.StateTriggers>
+                                <VisualState.Setters>
+                                    <Setter Target="TestFormatBorder.(Grid.ColumnSpan)" Value="2" />
+                                    <Setter Target="TestSettingsBorder.(Grid.Row)" Value="1" />
+                                    <Setter Target="TestSettingsBorder.(Grid.Column)" Value="0" />
+                                    <Setter Target="TestSettingsBorder.(Grid.ColumnSpan)" Value="2" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
                     
                     <!-- Left Column: Choose Test Format -->
                     <Border x:Name="TestFormatBorder" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

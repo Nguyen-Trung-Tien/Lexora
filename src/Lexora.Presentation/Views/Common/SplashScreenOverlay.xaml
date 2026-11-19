@@ -10,611 +10,387 @@
 
     <UserControl.Resources>
         <!-- ======================================================= -->
-        <!-- CINEMATIC ENTRANCE STORYBOARD                           -->
-        <!-- Multi-layered atmospheric depth, ambient aurora bloom,  -->
-        <!-- specular sheen glide, and synchronized typography reveal-->
+        <!-- MODERN FLUENT 2 ENTRANCE STORYBOARD (380ms)             -->
         <!-- ======================================================= -->
-        <Storyboard x:Name="EntranceStoryboard" Duration="0:0:0.55">
-            <!-- 1. Outer Ambient Aurora Glow Expand -->
+        <Storyboard x:Name="EntranceStoryboard" Duration="0:0:0.38">
+            <!-- Glass Card Scale & Fade In -->
             <DoubleAnimation
-                Storyboard.TargetName="AuraScale"
-                Storyboard.TargetProperty="ScaleX"
-                From="0.7" To="1.2"
-                Duration="0:0:0.55"
-                BeginTime="0:0:0.0">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="AuraScale"
-                Storyboard.TargetProperty="ScaleY"
-                From="0.7" To="1.2"
-                Duration="0:0:0.55"
-                BeginTime="0:0:0.0">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="AuroraGlow"
-                Storyboard.TargetProperty="Opacity"
-                From="0.0" To="0.38"
-                Duration="0:0:0.45"
-                BeginTime="0:0:0.0">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-
-            <!-- 2. Inner Core Radiant Bloom -->
-            <DoubleAnimation
-                Storyboard.TargetName="InnerAuraScale"
-                Storyboard.TargetProperty="ScaleX"
-                From="0.6" To="1.1"
-                Duration="0:0:0.50"
-                BeginTime="0:0:0.02">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="InnerAuraScale"
-                Storyboard.TargetProperty="ScaleY"
-                From="0.6" To="1.1"
-                Duration="0:0:0.50"
-                BeginTime="0:0:0.02">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="InnerAuroraGlow"
-                Storyboard.TargetProperty="Opacity"
-                From="0.0" To="0.28"
-                Duration="0:0:0.40"
-                BeginTime="0:0:0.02">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-
-            <!-- 3. Energy Ripple Shockwave Ring (Expands & Fades Out) -->
-            <DoubleAnimation
-                Storyboard.TargetName="RippleScale"
-                Storyboard.TargetProperty="ScaleX"
-                From="0.78" To="1.55"
-                Duration="0:0:0.50"
-                BeginTime="0:0:0.05">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="RippleScale"
-                Storyboard.TargetProperty="ScaleY"
-                From="0.78" To="1.55"
-                Duration="0:0:0.50"
-                BeginTime="0:0:0.05">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimationUsingKeyFrames
-                Storyboard.TargetName="RippleRing"
-                Storyboard.TargetProperty="Opacity"
-                BeginTime="0:0:0.05">
-                <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.14" Value="0.50" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.50" Value="0.0" />
-            </DoubleAnimationUsingKeyFrames>
-
-            <!-- 4. Logo Camera Push-In Easing (Scale from 0.88 to 1.0) -->
-            <DoubleAnimation
-                Storyboard.TargetName="LogoScale"
-                Storyboard.TargetProperty="ScaleX"
-                From="0.88" To="1.0"
-                Duration="0:0:0.42"
-                BeginTime="0:0:0.02">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="LogoScale"
-                Storyboard.TargetProperty="ScaleY"
-                From="0.88" To="1.0"
-                Duration="0:0:0.42"
-                BeginTime="0:0:0.02">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="LogoTileCard"
+                Storyboard.TargetName="SplashCard"
                 Storyboard.TargetProperty="Opacity"
                 From="0.0" To="1.0"
-                Duration="0:0:0.32"
-                BeginTime="0:0:0.02">
+                Duration="0:0:0.28">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="SplashCardScale"
+                Storyboard.TargetProperty="ScaleX"
+                From="0.95" To="1.0"
+                Duration="0:0:0.34">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="SplashCardScale"
+                Storyboard.TargetProperty="ScaleY"
+                From="0.95" To="1.0"
+                Duration="0:0:0.34">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
 
-            <!-- 5. Specular Sheen Sweep Across Logo Tile -->
+            <!-- Logo Pop -->
+            <DoubleAnimation
+                Storyboard.TargetName="LogoScale"
+                Storyboard.TargetProperty="ScaleX"
+                From="0.88" To="1.0"
+                Duration="0:0:0.34"
+                BeginTime="0:0:0.04">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="LogoScale"
+                Storyboard.TargetProperty="ScaleY"
+                From="0.88" To="1.0"
+                Duration="0:0:0.34"
+                BeginTime="0:0:0.04">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+
+            <!-- Specular Sheen Sweep Across Logo Tile -->
             <DoubleAnimationUsingKeyFrames
                 Storyboard.TargetName="SpecularSheen"
                 Storyboard.TargetProperty="Opacity">
                 <DiscreteDoubleKeyFrame KeyTime="0:0:0.0" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.18" Value="0.0" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.34" Value="0.45" />
-                <LinearDoubleKeyFrame KeyTime="0:0:0.52" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.12" Value="0.0" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.24" Value="0.45" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.38" Value="0.0" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimation
                 Storyboard.TargetName="SheenTransform"
                 Storyboard.TargetProperty="TranslateX"
-                From="-140" To="140"
-                Duration="0:0:0.36"
-                BeginTime="0:0:0.18">
+                From="-120" To="120"
+                Duration="0:0:0.28"
+                BeginTime="0:0:0.10">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
 
-            <!-- 6. Horizontal Energy Divider Line Expand -->
+            <!-- Ambient Orbs Subtle Bloom -->
             <DoubleAnimation
-                Storyboard.TargetName="DividerScale"
-                Storyboard.TargetProperty="ScaleX"
-                From="0.0" To="1.0"
-                Duration="0:0:0.35"
-                BeginTime="0:0:0.18">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="GlowingDivider"
+                Storyboard.TargetName="TopLeftOrb"
                 Storyboard.TargetProperty="Opacity"
-                From="0.0" To="1.0"
-                Duration="0:0:0.28"
-                BeginTime="0:0:0.18">
+                From="0.0" To="0.18"
+                Duration="0:0:0.38">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
-
-            <!-- 7. Wordmark "Lexora" Slide Up & Fade In -->
             <DoubleAnimation
-                Storyboard.TargetName="TypographyContainer"
+                Storyboard.TargetName="BottomRightOrb"
                 Storyboard.TargetProperty="Opacity"
-                From="0.0" To="1.0"
-                Duration="0:0:0.35"
-                BeginTime="0:0:0.14">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="TypographyTranslate"
-                Storyboard.TargetProperty="Y"
-                From="14" To="0"
-                Duration="0:0:0.35"
-                BeginTime="0:0:0.14">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-
-            <!-- 8. Loading Status Fade In -->
-            <DoubleAnimation
-                Storyboard.TargetName="LoadingContainer"
-                Storyboard.TargetProperty="Opacity"
-                From="0.0" To="1.0"
-                Duration="0:0:0.30"
-                BeginTime="0:0:0.15">
+                From="0.0" To="0.14"
+                Duration="0:0:0.38">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
         </Storyboard>
 
-        <!-- ======================================================= -->
-        <!-- CINEMATIC EXIT STORYBOARD (Camera Push-through & Dissolve)-->
-        <!-- ======================================================= -->
-        <Storyboard x:Name="ExitStoryboard" Duration="0:0:0.24">
-            <!-- Loading indicator quick fade -->
-            <DoubleAnimation
-                Storyboard.TargetName="LoadingContainer"
-                Storyboard.TargetProperty="Opacity"
-                To="0.0"
-                Duration="0:0:0.08" />
+        <!-- Reduced Motion Instant Reveal -->
+        <Storyboard x:Name="ReducedMotionEntrance" Duration="0:0:0.01">
+            <DoubleAnimation Storyboard.TargetName="SplashCard" Storyboard.TargetProperty="Opacity" To="1.0" Duration="0:0:0.01" />
+        </Storyboard>
 
-            <!-- Smooth Push-through zoom on exit (1.0 -> 1.03) -->
-            <DoubleAnimation
-                Storyboard.TargetName="MainStackScale"
-                Storyboard.TargetProperty="ScaleX"
-                To="1.03"
-                Duration="0:0:0.24">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseIn" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation
-                Storyboard.TargetName="MainStackScale"
-                Storyboard.TargetProperty="ScaleY"
-                To="1.03"
-                Duration="0:0:0.24">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseIn" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-
-            <!-- Overall Splash Dissolve -->
+        <!-- Seamless Cross-Fade Exit (250ms) -->
+        <Storyboard x:Name="ExitStoryboard" Duration="0:0:0.25">
             <DoubleAnimation
                 Storyboard.TargetName="RootGrid"
                 Storyboard.TargetProperty="Opacity"
-                To="0.0"
-                Duration="0:0:0.24">
+                From="1.0" To="0.0"
+                Duration="0:0:0.25">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
-        </Storyboard>
-
-        <!-- Reduced Motion Entrance (Accessibility Compliant) -->
-        <Storyboard x:Name="ReducedMotionEntrance">
             <DoubleAnimation
-                Storyboard.TargetName="LogoTileCard"
-                Storyboard.TargetProperty="Opacity"
-                From="0.0" To="1.0"
-                Duration="0:0:0.15" />
+                Storyboard.TargetName="SplashCardScale"
+                Storyboard.TargetProperty="ScaleX"
+                From="1.0" To="1.03"
+                Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
             <DoubleAnimation
-                Storyboard.TargetName="TypographyContainer"
-                Storyboard.TargetProperty="Opacity"
-                From="0.0" To="1.0"
-                Duration="0:0:0.15" />
-            <DoubleAnimation
-                Storyboard.TargetName="LoadingContainer"
-                Storyboard.TargetProperty="Opacity"
-                From="0.0" To="1.0"
-                Duration="0:0:0.15" />
-            <DoubleAnimation
-                Storyboard.TargetName="GlowingDivider"
-                Storyboard.TargetProperty="Opacity"
-                From="0.0" To="1.0"
-                Duration="0:0:0.15" />
+                Storyboard.TargetName="SplashCardScale"
+                Storyboard.TargetProperty="ScaleY"
+                From="1.0" To="1.03"
+                Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
         </Storyboard>
     </UserControl.Resources>
 
-    <Grid x:Name="RootGrid" Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
-
-        <!-- 1. Ambient Aurora Outer Glow (Atmospheric Soft Diffuse) -->
-        <Border x:Name="AuroraGlow" Width="440" Height="440"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Opacity="0" IsHitTestVisible="False">
-            <Border.RenderTransform>
-                <ScaleTransform x:Name="AuraScale" CenterX="220" CenterY="220" ScaleX="0.6" ScaleY="0.6" />
-            </Border.RenderTransform>
-            <Border.Background>
-                <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
-                    <GradientStop Color="{ThemeResource SystemAccentColor}" Offset="0" />
-                    <GradientStop Color="{ThemeResource SystemAccentColorLight1}" Offset="0.4" />
-                    <GradientStop Color="Transparent" Offset="1" />
+    <Grid x:Name="RootGrid" Background="{ThemeResource LayerFillColorDefaultBrush}">
+        <!-- Subtle Ambient Accent Orbs -->
+        <Ellipse x:Name="TopLeftOrb"
+                 Width="420" Height="420"
+                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                 Margin="-140,-140,0,0"
+                 Opacity="0"
+                 IsHitTestVisible="False">
+            <Ellipse.Fill>
+                <RadialGradientBrush>
+                    <GradientStop Color="{ThemeResource SystemAccentColor}" Offset="0.0" />
+                    <GradientStop Color="Transparent" Offset="1.0" />
                 </RadialGradientBrush>
-            </Border.Background>
-        </Border>
+            </Ellipse.Fill>
+        </Ellipse>
 
-        <!-- 2. Ambient Aurora Inner Radiant Core -->
-        <Border x:Name="InnerAuroraGlow" Width="260" Height="260"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Opacity="0" IsHitTestVisible="False">
-            <Border.RenderTransform>
-                <ScaleTransform x:Name="InnerAuraScale" CenterX="130" CenterY="130" ScaleX="0.5" ScaleY="0.5" />
-            </Border.RenderTransform>
-            <Border.Background>
-                <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
-                    <GradientStop Color="{ThemeResource SystemAccentColor}" Offset="0" />
-                    <GradientStop Color="Transparent" Offset="1" />
+        <Ellipse x:Name="BottomRightOrb"
+                 Width="380" Height="380"
+                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                 Margin="0,0,-120,-120"
+                 Opacity="0"
+                 IsHitTestVisible="False">
+            <Ellipse.Fill>
+                <RadialGradientBrush>
+                    <GradientStop Color="{ThemeResource SystemAccentColorLight2}" Offset="0.0" />
+                    <GradientStop Color="Transparent" Offset="1.0" />
                 </RadialGradientBrush>
-            </Border.Background>
-        </Border>
+            </Ellipse.Fill>
+        </Ellipse>
 
-        <!-- 3. Energy Ripple Shockwave Ring -->
-        <Border x:Name="RippleRing" Width="180" Height="180" CornerRadius="90"
-                UseLayoutRounding="False"
-                BorderThickness="1" BorderBrush="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Opacity="0" IsHitTestVisible="False">
-            <Border.RenderTransform>
-                <ScaleTransform x:Name="RippleScale" CenterX="90" CenterY="90" ScaleX="0.70" ScaleY="0.70" />
-            </Border.RenderTransform>
-        </Border>
-
-        <!-- 4. Main Visual Center Stack -->
-        <StackPanel
-            x:Name="MainVisualStack"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Spacing="20"
-            Padding="24"
-            MaxWidth="480">
-            <StackPanel.RenderTransform>
-                <ScaleTransform x:Name="MainStackScale" CenterX="240" CenterY="160" ScaleX="1" ScaleY="1" />
-            </StackPanel.RenderTransform>
-
-            <!-- Hero Logo Emblem Container -->
-            <Grid
-                x:Name="LogoContainer"
-                Width="160"
-                Height="160"
-                HorizontalAlignment="Center">
-                <Grid.RenderTransform>
-                    <ScaleTransform x:Name="LogoScale" CenterX="80" CenterY="80" ScaleX="0.84" ScaleY="0.84" />
-                </Grid.RenderTransform>
-
-                <!-- Subtle Accent Bloom Glow Behind Tile -->
-                <Border Width="144" Height="144" CornerRadius="36"
-                        Background="{ThemeResource AccentFillColorDefaultBrush}"
-                        Opacity="0.22" HorizontalAlignment="Center" VerticalAlignment="Center" />
-
-                <!-- Master Glassmorphic Squircle Vessel -->
-                <Border
-                    x:Name="LogoTileCard"
-                    Width="140" Height="140" CornerRadius="34"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    Opacity="0"
-                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Border.Shadow>
-                        <ThemeShadow />
-                    </Border.Shadow>
-
-                    <Grid CornerRadius="34">
-                        <!-- High-Fidelity Brand Emblem (Lightweight Pre-scaled Asset with Direct Decoding) -->
-                        <Image
-                            x:Name="LogoTile"
-                            Width="126"
-                            Height="126"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                            <Image.Source>
-                                <BitmapImage
-                                    UriSource="ms-appx:///Assets/brand/lexora-logo-splash.png"
-                                    DecodePixelWidth="256"
-                                    DecodePixelHeight="256"
-                                    DecodePixelType="Logical" />
-                            </Image.Source>
-                        </Image>
-
-                        <!-- Specular Sheen Sweep Strip -->
-                        <Rectangle
-                            x:Name="SpecularSheen"
-                            Width="50"
-                            Height="200"
-                            Opacity="0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            IsHitTestVisible="False">
-                            <Rectangle.RenderTransform>
-                                <CompositeTransform x:Name="SheenTransform" Rotation="-28" TranslateX="-150" />
-                            </Rectangle.RenderTransform>
-                            <Rectangle.Fill>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                    <GradientStop Color="Transparent" Offset="0" />
-                                    <GradientStop Color="{ThemeResource SystemAccentColorLight3}" Offset="0.5" />
-                                    <GradientStop Color="Transparent" Offset="1" />
-                                </LinearGradientBrush>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                    </Grid>
-                </Border>
-            </Grid>
-
-            <!-- Wordmark, Divider, Tagline & Platform Edition Badge -->
-            <StackPanel
-                x:Name="TypographyContainer"
+        <!-- Centered Modern Fluent 2 Floating Glass Card -->
+        <Border x:Name="SplashCard"
+                MaxWidth="440"
                 HorizontalAlignment="Center"
-                Spacing="8"
-                Opacity="0">
-                <StackPanel.RenderTransform>
-                    <TranslateTransform x:Name="TypographyTranslate" Y="18" />
-                </StackPanel.RenderTransform>
-
-                <!-- App Brand Name -->
-                <TextBlock
-                    Text="Lexora"
-                    FontSize="46"
-                    FontWeight="Bold"
-                    HorizontalAlignment="Center"
-                    CharacterSpacing="45"
-                    Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-
-                <!-- Glowing Beam Divider -->
-                <Border x:Name="GlowingDivider" Width="180" Height="2" CornerRadius="1"
-                        HorizontalAlignment="Center" Opacity="0">
-                    <Border.RenderTransform>
-                        <ScaleTransform x:Name="DividerScale" CenterX="90" CenterY="1" ScaleX="0" ScaleY="1" />
-                    </Border.RenderTransform>
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Color="Transparent" Offset="0" />
-                            <GradientStop Color="{ThemeResource SystemAccentColor}" Offset="0.5" />
-                            <GradientStop Color="Transparent" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                </Border>
-
-                <!-- Brand Tagline -->
-                <TextBlock
-                    x:Name="TaglineTextBlock"
-                    Text="INTELLIGENT VOCABULARY &amp; SPACED REPETITION"
-                    FontSize="11.5"
-                    FontWeight="SemiBold"
-                    HorizontalAlignment="Center"
-                    CharacterSpacing="130"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-
-                <!-- Platform / Edition Pill Badge -->
-                <Border
-                    Margin="0,4,0,0"
-                    CornerRadius="12"
-                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
-                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    Padding="8,3"
-                    HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                        <Ellipse Width="7" Height="7" Fill="{ThemeResource SystemFillColorSuccessBrush}" />
-                        <TextBlock
-                            x:Name="EditionBadgeTextBlock"
-                            Text="DESKTOP v1.7.0 • OFFLINE FIRST"
-                            FontSize="10.5"
-                            FontWeight="SemiBold"
-                            CharacterSpacing="50"
-                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                            VerticalAlignment="Center" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-
-            <!-- Deterministic Modern Loading System -->
-            <StackPanel
-                x:Name="LoadingContainer"
-                HorizontalAlignment="Center"
-                Spacing="10"
-                Width="320"
-                Opacity="0">
-
-                <!-- Status Feedback Label & Percentage Counter -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock
-                        x:Name="StatusTextBlock"
-                        Text="Đang khởi tạo hệ thống..."
-                        FontSize="12"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        TextTrimming="CharacterEllipsis"
-                        VerticalAlignment="Center" />
-                    <TextBlock
-                        x:Name="ProgressPercentageTextBlock"
-                        Grid.Column="1"
-                        Text="12%"
-                        FontSize="12"
-                        FontWeight="SemiBold"
-                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                        VerticalAlignment="Center" />
-                </Grid>
-
-                <!-- Sleek Frameless Fluent Capsule Progress Track -->
-                <ProgressBar
-                    x:Name="StartupProgressBar"
-                    Minimum="0"
-                    Maximum="100"
-                    Value="12"
-                    IsIndeterminate="False"
-                    Height="4"
-                    CornerRadius="2"
-                    Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
-
-                <!-- 4 Minimal Stage Milestone Indicators -->
-                <Grid Margin="0,2,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Stage 1: Core System -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                        <Ellipse x:Name="Step1Dot" Width="6" Height="6" Fill="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="Step1TextBlock" Text="Core" FontSize="10.5" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                    </StackPanel>
-
-                    <!-- Stage 2: SQLite Database -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                        <Ellipse x:Name="Step2Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="Step2TextBlock" Text="Database" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-                    </StackPanel>
-
-                    <!-- Stage 3: Study Data & Preferences -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                        <Ellipse x:Name="Step3Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="Step3TextBlock" Text="Data" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-                    </StackPanel>
-
-                    <!-- Stage 4: Launch Ready -->
-                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                        <Ellipse x:Name="Step4Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="Step4TextBlock" Text="Ready" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-
-            <!-- Error State Card (Initially Collapsed) -->
-            <Border
-                x:Name="ErrorCard"
-                Visibility="Collapsed"
-                MaxWidth="420"
-                Padding="22"
-                CornerRadius="{ThemeResource OverlayCornerRadius}"
+                VerticalAlignment="Center"
+                Margin="24"
+                Padding="32,28"
+                CornerRadius="16"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
-                BorderThickness="1">
-                <Border.Shadow>
-                    <ThemeShadow />
-                </Border.Shadow>
-                <StackPanel Spacing="14">
+                BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
+                BorderThickness="1"
+                Opacity="0"
+                Translation="0,0,32"
+                RenderTransformOrigin="0.5,0.5">
+            <Border.Shadow>
+                <ThemeShadow />
+            </Border.Shadow>
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="SplashCardScale" ScaleX="0.95" ScaleY="0.95" />
+            </Border.RenderTransform>
+
+            <StackPanel Spacing="22">
+                <!-- Brand Header: Logo Tile + Wordmark + Version Badge -->
+                <StackPanel Spacing="14" HorizontalAlignment="Center">
+                    <Border x:Name="LogoTileCard"
+                            Width="84" Height="84"
+                            CornerRadius="20"
+                            HorizontalAlignment="Center"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource LexoraHeroCardBorderBrush}"
+                            BorderThickness="1.5"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="LogoScale" ScaleX="0.88" ScaleY="0.88" />
+                        </Border.RenderTransform>
+                        <Grid Clip="{x:Null}">
+                            <Image x:Name="LogoTile"
+                                   Width="68" Height="68"
+                                   Stretch="Uniform"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                            <!-- Specular Sheen Sweep -->
+                            <Rectangle x:Name="SpecularSheen"
+                                       Width="36" Height="140"
+                                       Opacity="0"
+                                       IsHitTestVisible="False"
+                                       RenderTransformOrigin="0.5,0.5">
+                                <Rectangle.RenderTransform>
+                                    <CompositeTransform x:Name="SheenTransform" Rotation="-26" TranslateX="-120" />
+                                </Rectangle.RenderTransform>
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="Transparent" Offset="0" />
+                                        <GradientStop Color="{ThemeResource SystemAccentColorLight3}" Offset="0.5" />
+                                        <GradientStop Color="Transparent" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Spacing="6" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                            <TextBlock Text="Lexora"
+                                       FontSize="34"
+                                       FontWeight="Bold"
+                                       CharacterSpacing="25"
+                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center" />
+                            <Border CornerRadius="{StaticResource RadiusPill}"
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    Padding="9,3"
+                                    VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                    <Ellipse Width="6" Height="6" Fill="{ThemeResource SystemFillColorSuccessBrush}" />
+                                    <TextBlock x:Name="VersionBadgeTextBlock"
+                                               Text="v1.8.0"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               FontFamily="Consolas, Cascadia Code"
+                                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <TextBlock x:Name="TaglineTextBlock"
+                                   Text="INTELLIGENT VOCABULARY &amp; SPACED REPETITION"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   CharacterSpacing="90"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <TextBlock x:Name="EditionBadgeTextBlock"
+                                   Text="DESKTOP • OFFLINE FIRST"
+                                   FontSize="10.5"
+                                   CharacterSpacing="40"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Sleek Divider -->
+                <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+                <!-- Deterministic Modern Loading System -->
+                <StackPanel x:Name="LoadingContainer" Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <TextBlock x:Name="StatusTextBlock"
+                                   Text="Đang khởi tạo hệ thống..."
+                                   FontSize="12.5"
+                                   FontWeight="Medium"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center" />
+                        <TextBlock x:Name="ProgressPercentageTextBlock"
+                                   Grid.Column="1"
+                                   Text="12%"
+                                   FontSize="12.5"
+                                   FontWeight="Bold"
+                                   FontFamily="Consolas, Cascadia Code"
+                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+
+                    <ProgressBar x:Name="StartupProgressBar"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="12"
+                                 IsIndeterminate="False"
+                                 Height="5"
+                                 CornerRadius="2.5"
+                                 Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+
+                    <!-- 4 Modern Milestone Step Pills -->
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="6" Margin="0,2,0,0">
+                        <Border x:Name="Step1Pill" Grid.Column="0" CornerRadius="{StaticResource RadiusSmall}" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Padding="6,5">
+                            <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                                <Ellipse x:Name="Step1Dot" Width="6" Height="6" Fill="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="Step1TextBlock" Text="Core" FontSize="10.5" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Step2Pill" Grid.Column="1" CornerRadius="{StaticResource RadiusSmall}" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Padding="6,5">
+                            <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                                <Ellipse x:Name="Step2Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="Step2TextBlock" Text="Database" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Step3Pill" Grid.Column="2" CornerRadius="{StaticResource RadiusSmall}" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Padding="6,5">
+                            <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                                <Ellipse x:Name="Step3Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="Step3TextBlock" Text="Data" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Step4Pill" Grid.Column="3" CornerRadius="{StaticResource RadiusSmall}" Background="{ThemeResource SubtleFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Padding="6,5">
+                            <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                                <Ellipse x:Name="Step4Dot" Width="6" Height="6" Fill="{ThemeResource CardStrokeColorDefaultBrush}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="Step4TextBlock" Text="Ready" FontSize="10.5" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Error State Panel (Initially Collapsed) -->
+                <StackPanel x:Name="ErrorCard" Visibility="Collapsed" Spacing="14">
                     <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                         <Border Width="36" Height="36" CornerRadius="18"
-                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
                                 BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
                                 BorderThickness="1"
                                 HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <FontIcon Glyph="&#xE783;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <FontIcon Glyph="&#xE783;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <TextBlock x:Name="ErrorTitleTextBlock"
                                    Text="Không thể khởi tạo Lexora"
                                    FontWeight="Bold"
-                                   FontSize="16"
+                                   FontSize="15.5"
                                    VerticalAlignment="Center"
                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                     </StackPanel>
 
                     <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                            CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="12,10">
-                        <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                            <TextBlock
-                                x:Name="ErrorDetailsTextBlock"
-                                Text="Đã có lỗi xảy ra khi tải cơ sở dữ liệu."
-                                TextWrapping="Wrap"
-                                FontSize="12"
-                                TextAlignment="Center"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{ThemeResource OverlayCornerRadius}"
+                            Padding="12,10">
+                        <ScrollViewer MaxHeight="84" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <TextBlock x:Name="ErrorDetailsTextBlock"
+                                       Text="Đã có lỗi xảy ra khi tải cơ sở dữ liệu."
+                                       TextWrapping="Wrap"
+                                       FontSize="12"
+                                       TextAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </ScrollViewer>
                     </Border>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12" Margin="0,4,0,0">
-                        <Button
-                            x:Name="RetryButton"
-                            Content="Thử lại"
-                            Style="{StaticResource AccentButtonStyle}"
-                            CornerRadius="{ThemeResource ControlCornerRadius}"
-                            Padding="18,8"
-                            Click="RetryButton_Click" />
-                        <Button
-                            x:Name="ExitButton"
-                            Content="Đóng ứng dụng"
-                            CornerRadius="{ThemeResource ControlCornerRadius}"
-                            Padding="18,8"
-                            Click="ExitButton_Click" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                        <Button x:Name="RetryButton"
+                                Content="Thử lại"
+                                Style="{StaticResource AccentButtonStyle}"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
+                                Padding="18,8"
+                                Click="RetryButton_Click" />
+                        <Button x:Name="ExitButton"
+                                Content="Đóng ứng dụng"
+                                Style="{StaticResource LexoraStandardButtonStyle}"
+                                CornerRadius="{ThemeResource ControlCornerRadius}"
+                                Padding="18,8"
+                                Click="ExitButton_Click" />
                     </StackPanel>
                 </StackPanel>
-            </Border>
-        </StackPanel>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

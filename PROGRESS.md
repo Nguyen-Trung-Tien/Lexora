@@ -1,7 +1,7 @@
 # 🚀 Lexora Development & Optimization Progress
 
 ## 📊 Quality Gates Benchmark
-- **Application Version**: `v1.7.0` (Exam Intelligence, Dictation Grading, Anki Export, Release Notes Log & Fluent 2 Motion)
+- **Application Version**: `v1.8.0` (Smart Search, Command Palette, Redesigned Settings & Theme Sync)
 - **Build Status**: `0 Warning(s)`, `0 Error(s)` (`dotnet build Lexora.slnx -v q /clp:ErrorsOnly`)
 - **Automated Tests**: **617 / 617 Tests Passing** (540 Unit Tests + 77 Integration Tests, 0 Failed, 0 Skipped).
 - **Target Frameworks**: `.NET 10` (`net10.0` core libraries & tests, `net10.0-windows10.0.26100.0` WinUI 3 presentation).
@@ -222,6 +222,17 @@
   - Replaced throwing `ToDictionary` with safe `BuildExamTagLookup` and `BuildTopicLookup` to handle pre-existing duplicate or case-variant tags in SQLite.
 - **Synchronized Version Bump to 1.7.0**:
   - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `app.manifest`, `SettingsViewModel.cs`, `SplashScreenOverlay.xaml`, `ReleaseNotesService.cs`, `build-installer.ps1`, `installer/LexoraSetup.iss`, `release-notes/v1.7.0.md`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`.
+
+### 15. Lexora v1.8.0 — Smart Search, Command Palette, Redesigned Settings & Theme Sync
+- **New Learner Capabilities**:
+  - Added Fuzzy & Smart Search (`FuzzySearchService`, `SmartSearchService`) and global Command Palette (`Ctrl+K`).
+  - Redesigned `SettingsPage` with Fluent 2 `SelectorBar` tabs (`Appearance`, `Study`, `Data & Updates`, `Help & About`) and consolidated `HelpPage` into Settings.
+  - Added reusable `PageHeaderControl`, shortcut routing, and streamlined `SplashScreenOverlay`.
+- **Theme Switching & Popup Synchronization Fix**:
+  - Fixed `ThemeSyncHelper` to track `TeachingTip.IsOpenProperty` changes and `IThemeService.ThemeChanged` events so `TeachingTip`s and open popups never retain stale `RequestedTheme` values when switching between Light, Dark, and System themes.
+  - Enabled `helpers:ThemeSyncHelper.SyncTheme="True"` across all 6 Quick Help `TeachingTip`s (`DashboardPage`, `LearningStoragePage`, `ReviewPage`, `SettingsPage`, `TestPage`, `VocabularyPage`).
+- **Synchronized Version Bump to 1.8.0**:
+  - Synchronized across `Directory.Build.props`, `Package.appxmanifest`, `app.manifest`, `SettingsViewModel.cs`, `SplashScreenOverlay.xaml`, `ReleaseNotesService.cs`, `build-installer.ps1`, `installer/LexoraSetup.iss`, `prep_release.ps1`, `release-notes/v1.8.0.md`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `PROGRESS.md`, `docs/`.
 
 
 

@@ -65,16 +65,6 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem x:Name="NavItemThemeToggle" Content="Theme" Tag="ThemeToggle" SelectsOnInvoked="False" ToolTipService.ToolTip="Toggle Theme (Ctrl+T)">
-                    <NavigationViewItem.Icon>
-                        <FontIcon x:Name="ThemeToggleIcon" Glyph="&#xE708;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Name="NavItemHelp" Content="Help &amp; Guide" Tag="Help" ToolTipService.ToolTip="Help &amp; Guide (F1)">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE9CE;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
                 <NavigationViewItem x:Name="NavItemSettings" Content="Settings" Tag="Settings" ToolTipService.ToolTip="Settings">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Setting" />

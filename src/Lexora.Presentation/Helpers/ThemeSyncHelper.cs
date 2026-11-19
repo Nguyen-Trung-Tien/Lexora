@@ -1,7 +1,10 @@
+using System.Runtime.CompilerServices;
+using Lexora.Presentation.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media;
 
 namespace Lexora.Presentation.Helpers;
 
@@ -12,6 +15,14 @@ namespace Lexora.Presentation.Helpers;
 /// </summary>
 public static class ThemeSyncHelper
 {
+    private sealed class TeachingTipSubscription
+    {
+        public long? IsOpenCallbackToken { get; set; }
+        public EventHandler<ElementTheme>? ThemeChangedHandler { get; set; }
+    }
+
+    private static readonly ConditionalWeakTable<TeachingTip, TeachingTipSubscription> _tipSubscriptions = new();
+
     public static readonly DependencyProperty SyncThemeProperty =
         DependencyProperty.RegisterAttached(
             "SyncTheme",
@@ -36,13 +47,73 @@ public static class ThemeSyncHelper
         }
         else if (d is TeachingTip tip)
         {
-            tip.Loading -= TeachingTip_Loading;
+            CleanupTeachingTip(tip);
             if (enabled)
             {
                 tip.Loading += TeachingTip_Loading;
-                ApplyCurrentTheme(tip);
+                tip.Loaded += TeachingTip_Loaded;
+                tip.Unloaded += TeachingTip_Unloaded;
+
+                var sub = _tipSubscriptions.GetOrCreateValue(tip);
+                sub.IsOpenCallbackToken = tip.RegisterPropertyChangedCallback(TeachingTip.IsOpenProperty, OnTeachingTipIsOpenChanged);
+
+                if (tip.IsLoaded)
+                {
+                    SubscribeThemeChanged(tip, sub);
+                }
+
+                SyncTeachingTipTheme(tip);
             }
         }
+    }
+
+    private static void CleanupTeachingTip(TeachingTip tip)
+    {
+        tip.Loading -= TeachingTip_Loading;
+        tip.Loaded -= TeachingTip_Loaded;
+        tip.Unloaded -= TeachingTip_Unloaded;
+
+        if (_tipSubscriptions.TryGetValue(tip, out var sub))
+        {
+            if (sub.IsOpenCallbackToken is { } token)
+            {
+                tip.UnregisterPropertyChangedCallback(TeachingTip.IsOpenProperty, token);
+                sub.IsOpenCallbackToken = null;
+            }
+
+            UnsubscribeThemeChanged(sub);
+            _tipSubscriptions.Remove(tip);
+        }
+    }
+
+    private static void SubscribeThemeChanged(TeachingTip tip, TeachingTipSubscription sub)
+    {
+        if (sub.ThemeChangedHandler != null) return;
+
+        var themeService = App.Current?.Services?.GetService<IThemeService>();
+        if (themeService == null) return;
+
+        var weakTip = new WeakReference<TeachingTip>(tip);
+        sub.ThemeChangedHandler = (_, _) =>
+        {
+            if (weakTip.TryGetTarget(out var target))
+            {
+                SyncTeachingTipTheme(target);
+            }
+        };
+        themeService.ThemeChanged += sub.ThemeChangedHandler;
+    }
+
+    private static void UnsubscribeThemeChanged(TeachingTipSubscription sub)
+    {
+        if (sub.ThemeChangedHandler == null) return;
+
+        var themeService = App.Current?.Services?.GetService<IThemeService>();
+        if (themeService != null)
+        {
+            themeService.ThemeChanged -= sub.ThemeChangedHandler;
+        }
+        sub.ThemeChangedHandler = null;
     }
 
     private static void Flyout_Opening(object? sender, object e)
@@ -67,7 +138,63 @@ public static class ThemeSyncHelper
 
     private static void TeachingTip_Loading(FrameworkElement sender, object args)
     {
-        ApplyCurrentTheme(sender);
+        if (sender is TeachingTip tip)
+        {
+            SyncTeachingTipTheme(tip);
+        }
+        else
+        {
+            ApplyCurrentTheme(sender);
+        }
+    }
+
+    private static void TeachingTip_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is TeachingTip tip)
+        {
+            var sub = _tipSubscriptions.GetOrCreateValue(tip);
+            SubscribeThemeChanged(tip, sub);
+            SyncTeachingTipTheme(tip);
+        }
+    }
+
+    private static void TeachingTip_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is TeachingTip tip && _tipSubscriptions.TryGetValue(tip, out var sub))
+        {
+            UnsubscribeThemeChanged(sub);
+        }
+    }
+
+    private static void OnTeachingTipIsOpenChanged(DependencyObject sender, DependencyProperty dp)
+    {
+        if (sender is TeachingTip tip && tip.IsOpen)
+        {
+            SyncTeachingTipTheme(tip);
+        }
+    }
+
+    private static void SyncTeachingTipTheme(TeachingTip tip)
+    {
+        var theme = ResolveCurrentTheme(tip);
+        tip.RequestedTheme = theme;
+
+        if (tip.Content is FrameworkElement contentFe)
+        {
+            contentFe.RequestedTheme = theme;
+        }
+
+        if (tip.IsOpen && tip.XamlRoot is { } xamlRoot)
+        {
+            foreach (var popup in VisualTreeHelper.GetOpenPopupsForXamlRoot(xamlRoot))
+            {
+                popup.RequestedTheme = theme;
+                if (popup.Child is FrameworkElement child)
+                {
+                    child.RequestedTheme = theme;
+                }
+            }
+        }
     }
 
     public static void ApplyCurrentTheme(FrameworkElement element)
@@ -77,20 +204,20 @@ public static class ThemeSyncHelper
 
     public static ElementTheme ResolveCurrentTheme(FrameworkElement? reference = null)
     {
-        var themeService = App.Current?.Services?.GetService<Services.IThemeService>();
+        var themeService = App.Current?.Services?.GetService<IThemeService>();
         if (themeService != null && themeService.CurrentTheme != ElementTheme.Default)
         {
             return themeService.CurrentTheme;
         }
 
-        if (reference != null && reference.ActualTheme != ElementTheme.Default)
-        {
-            return reference.ActualTheme;
-        }
-
         if (App.Current?.MainWindow?.Content is FrameworkElement root && root.ActualTheme != ElementTheme.Default)
         {
             return root.ActualTheme;
+        }
+
+        if (reference != null && reference.ActualTheme != ElementTheme.Default)
+        {
+            return reference.ActualTheme;
         }
 
         return ElementTheme.Default;

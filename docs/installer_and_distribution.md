@@ -13,7 +13,7 @@ Lexora uses **Inno Setup 6** to produce an enterprise-ready, single-file Windows
   - Windows App SDK / WinUI 3 native components (MRT Core, DWriteCore, WinUI XAML engines).
   - SQLite native dynamic link libraries (`e_sqlite3.dll`).
   - High-resolution brand assets and default seed templates.
-- **End-user experience**: The user simply double-clicks `Lexora-Setup-v1.7.0.exe`, completes the wizard, and runs the app. **Zero external runtime downloads are required.**
+- **End-user experience**: The user simply double-clicks `Lexora-Setup-v1.8.0.exe`, completes the wizard, and runs the app. **Zero external runtime downloads are required.**
 
 ---
 
@@ -23,11 +23,11 @@ The repository includes a PowerShell automation script `build-installer.ps1` tha
 
 ```powershell
 # Standard usage:
-powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.7.0"
+powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.8.0"
 
 # Optional parameters:
 powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 `
-    -Version "1.7.0" `
+    -Version "1.8.0" `
     -Configuration "Release" `
     -Runtime "win-x64" `
     -SkipTests `
@@ -39,7 +39,7 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 `
 2. **Quality Gate**: Executes `dotnet test Lexora.slnx --configuration Release` to ensure no broken builds are ever packaged (all 64 tests must pass).
 3. **Self-Contained Publish**: Runs `dotnet publish src/Lexora.Presentation/Lexora.Presentation.csproj -c Release -r win-x64 --self-contained true -p:WindowsAppSDKSelfContained=true -o publish/win-x64`.
 4. **Inno Setup Compilation**: Invokes `ISCC.exe` with dynamic arguments, applying `lzma2/ultra64` solid compression.
-5. **Output Verification**: Verifies the final binary in `publish/installer/Lexora-Setup-v1.7.0.exe` and reports file size (~73 MB).
+5. **Output Verification**: Verifies the final binary in `publish/installer/Lexora-Setup-v1.8.0.exe` and reports file size (~73 MB).
 
 ---
 

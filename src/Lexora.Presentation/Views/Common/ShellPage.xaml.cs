@@ -173,7 +173,7 @@ public sealed partial class ShellPage : Page
                         TestPage => NavItemPracticeArena,
                         LearningStoragePage => NavItemLearningStorage,
                         SettingsPage => NavItemSettings,
-                        HelpPage => NavItemHelp,
+                        HelpPage => NavItemSettings,
                         _ => null
                     };
 
@@ -295,7 +295,6 @@ public sealed partial class ShellPage : Page
         NavItemKnowledgeStudio.Content = _localizationService.GetString("Nav_KnowledgeStudio");
         NavItemPracticeArena.Content = _localizationService.GetString("Nav_PracticeArena");
         NavItemLearningStorage.Content = _localizationService.GetString("Nav_LearningStorage");
-        NavItemHelp.Content = _localizationService.GetString("Nav_Help");
         NavItemSettings.Content = _localizationService.GetString("Nav_Settings");
         GlobalSearchBox.PlaceholderText = _localizationService.GetString("Search_Placeholder");
 
@@ -304,11 +303,8 @@ public sealed partial class ShellPage : Page
         ToolTipService.SetToolTip(NavItemKnowledgeStudio, $"{_localizationService.GetString("Nav_KnowledgeStudio")} (Ctrl+2)");
         ToolTipService.SetToolTip(NavItemPracticeArena, $"{_localizationService.GetString("Nav_PracticeArena")} (Ctrl+6)");
         ToolTipService.SetToolTip(NavItemLearningStorage, _localizationService.GetString("Shell_TooltipLearningStorage"));
-        ToolTipService.SetToolTip(NavItemHelp, $"{_localizationService.GetString("Nav_Help")} (F1)");
         ToolTipService.SetToolTip(NavItemSettings, _localizationService.GetString("Shell_TooltipSettings"));
         ToolTipService.SetToolTip(GlobalSearchBox, _localizationService.GetString("Shell_SearchTooltip"));
-
-        UpdateThemeToggleState();
     }
 
     private void OnThemeChanged(object? sender, ElementTheme theme)
@@ -316,7 +312,6 @@ public sealed partial class ShellPage : Page
         void UpdateThemeUI()
         {
             ThemeResourceHelper.RefreshLiveBrushes();
-            UpdateThemeToggleState();
             if (ContentFrame != null)
             {
                 ContentFrame.RequestedTheme = theme;
@@ -355,7 +350,6 @@ public sealed partial class ShellPage : Page
         void UpdateActualThemeUI()
         {
             ThemeResourceHelper.RefreshLiveBrushes();
-            UpdateThemeToggleState();
             if (ContentFrame != null)
             {
                 if (ContentFrame.Content is IThemeAwareView themeAwareView)
@@ -385,25 +379,6 @@ public sealed partial class ShellPage : Page
         else
         {
             DispatcherQueue.TryEnqueue(UpdateActualThemeUI);
-        }
-    }
-
-    private void UpdateThemeToggleState()
-    {
-        var isDark = _themeService.CurrentTheme == ElementTheme.Dark
-            || (_themeService.CurrentTheme == ElementTheme.Default && ActualTheme == ElementTheme.Dark);
-
-        if (isDark)
-        {
-            ThemeToggleIcon.Glyph = "\uE706"; // Sun icon -> click to switch to light
-            NavItemThemeToggle.Content = _localizationService.GetString("Nav_ThemeLight");
-            ToolTipService.SetToolTip(NavItemThemeToggle, _localizationService.GetString("Shell_TooltipThemeToggleLight"));
-        }
-        else
-        {
-            ThemeToggleIcon.Glyph = "\uE708"; // Moon icon -> click to switch to dark
-            NavItemThemeToggle.Content = _localizationService.GetString("Nav_ThemeDark");
-            ToolTipService.SetToolTip(NavItemThemeToggle, _localizationService.GetString("Shell_TooltipThemeToggleDark"));
         }
     }
 
@@ -606,7 +581,7 @@ public sealed partial class ShellPage : Page
                         break;
                     case "Help":
                         _navigationService.Navigate(typeof(HelpPage));
-                        NavView.SelectedItem = NavItemHelp;
+                        NavView.SelectedItem = NavItemSettings;
                         break;
                     case "Vocabulary":
                         _navigationService.Navigate(typeof(KnowledgeStudioPage), "Vocabulary");

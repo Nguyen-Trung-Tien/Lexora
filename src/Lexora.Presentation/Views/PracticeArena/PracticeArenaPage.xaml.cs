@@ -103,8 +103,9 @@ public sealed partial class PracticeArenaPage : Page, ILocalizableView, IThemeAw
 
     private async void OpenListeningLab_Click(object sender, RoutedEventArgs e)
     {
-        var labService = App.Current.Services.GetRequiredService<IPronunciationListeningLabService>();
-        var audioService = App.Current.Services.GetService<IAudioPlayerService>();
+        using var scope = App.Current.Services.CreateScope();
+        var labService = scope.ServiceProvider.GetRequiredService<IPronunciationListeningLabService>();
+        var audioService = scope.ServiceProvider.GetService<IAudioPlayerService>();
         var dialog = new ListeningLabDialog(labService, _localizationService, audioService);
         await dialog.ShowAsyncSafe(this.XamlRoot);
     }

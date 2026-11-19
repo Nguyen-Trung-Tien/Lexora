@@ -1,4 +1,5 @@
 using Lexora.Application.DTOs;
+using Lexora.Presentation.Helpers;
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -418,6 +419,30 @@ public sealed partial class SettingsPage : Page, ILocalizableView, IThemeAwareVi
         if (ThemeSystemButton != null && ThemeSystemCheck != null) ApplyThemeBtn(ThemeSystemButton, ThemeSystemCheck, index == 0);
         if (ThemeLightButton != null && ThemeLightCheck != null) ApplyThemeBtn(ThemeLightButton, ThemeLightCheck, index == 1);
         if (ThemeDarkButton != null && ThemeDarkCheck != null) ApplyThemeBtn(ThemeDarkButton, ThemeDarkCheck, index == 2);
+    }
+
+    private void SettingsSelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
+    {
+        if (PanelAppearance == null || PanelStudy == null || PanelDataUpdates == null || PanelHelpAbout == null)
+        {
+            return;
+        }
+
+        var tag = (sender.SelectedItem as SelectorBarItem)?.Tag?.ToString() ?? "Appearance";
+
+        PanelAppearance.Visibility = tag == "Appearance" ? Visibility.Visible : Visibility.Collapsed;
+        PanelStudy.Visibility = tag == "Study" ? Visibility.Visible : Visibility.Collapsed;
+        PanelDataUpdates.Visibility = tag == "DataUpdates" ? Visibility.Visible : Visibility.Collapsed;
+        PanelHelpAbout.Visibility = tag == "HelpAbout" ? Visibility.Visible : Visibility.Collapsed;
+
+        FrameworkElement activePanel = tag switch
+        {
+            "Study" => PanelStudy,
+            "DataUpdates" => PanelDataUpdates,
+            "HelpAbout" => PanelHelpAbout,
+            _ => PanelAppearance
+        };
+        AnimationHelper.PlayEntranceFadeSlide(activePanel, 10f, 190);
     }
 
     private void LangViButton_Click(object sender, RoutedEventArgs e)

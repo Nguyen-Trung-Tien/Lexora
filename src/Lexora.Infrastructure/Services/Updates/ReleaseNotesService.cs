@@ -161,7 +161,7 @@ public sealed class ReleaseNotesService : IReleaseNotesService
             // Fallback
         }
 
-        return "1.7.0";
+        return "1.8.0";
     }
 
     private static string ResolveReleaseNotesDirectory()
@@ -219,6 +219,14 @@ public sealed class ReleaseNotesService : IReleaseNotesService
     {
         return new List<ReleaseNoteItem>
         {
+            new(
+                Version: "1.8.0",
+                Title: "Lexora v1.8.0 — Smart Search, Command Palette, Redesigned Settings & Theme Sync",
+                ReleaseDate: "2026-11-19",
+                Summary: "Lexora v1.8.0 introduces Fuzzy & Smart Search with a global Command Palette (Ctrl+K), a tabbed SelectorBar Settings hub, a streamlined Fluent 2 splash screen, and full Light/Dark theme synchronization for TeachingTips and popups.",
+                MarkdownContent: "# Lexora v1.8.0 — Smart Search, Command Palette, Redesigned Settings & Theme Sync\n> Release Date: 2026-11-19 | Version: 1.8.0\n\n## 🌟 Highlights\nLexora v1.8.0 delivers faster navigation and a cleaner Fluent 2 workspace with **Fuzzy & Smart Search**, a global **Command Palette (`Ctrl+K`)**, a redesigned tabbed **Settings & Help Hub**, a sleeker **Splash Screen**, and reliable **Light/Dark Theme Synchronization**.\n\n## 🚀 New Features\n- **Fuzzy & Smart Search + Command Palette (`Ctrl+K`)**: Jump instantly to vocabulary, grammar rules, pages, or quick actions with typo-tolerant search.\n- **Tabbed Settings & Unified Help Hub**: Settings are organized cleanly into Appearance, Study, Data & Updates, and Help & About tabs via Fluent 2 `SelectorBar`.\n- **Reusable Layout Controls & Shortcut Routing**: Standardized page headers and consistent keyboard shortcut routing across workspaces.\n\n## ⚡ Improvements & UX\n- **Faster, Cleaner Splash Screen**: Streamlined startup animation and crisp Fluent 2 branding.\n- **Consistent Navigation Sidebar**: Consolidated Help into Settings for a distraction-free sidebar.\n\n## 🛠️ Bug Fixes & Stability\n- **Fixed Theme Switching Glitches**: Resolved Light/Dark theme mismatch on `TeachingTip` Quick Help popups and open overlays when toggling themes.",
+                IsCurrent: NormalizeVersion("1.8.0") == NormalizeVersion(currentVersion)),
+
             new(
                 Version: "1.7.0",
                 Title: "Lexora v1.7.0 — Exam Intelligence, Dictation Grading, Anki Export & Fluent 2 Motion",

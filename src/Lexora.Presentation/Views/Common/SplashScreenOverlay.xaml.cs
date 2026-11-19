@@ -1,8 +1,10 @@
+using System.Reflection;
+using Lexora.Presentation.Helpers;
+using Lexora.Presentation.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.UI.ViewManagement;
-using Lexora.Presentation.Services;
 
 namespace Lexora.Presentation.Views.Common;
 
@@ -38,6 +40,7 @@ public sealed partial class SplashScreenOverlay : UserControl
     private double _targetProgress = 0.12;
     private readonly DispatcherTimer _progressAnimationTimer = new();
     private TaskCompletionSource<bool>? _progressCompletionTcs;
+    private readonly int[] _stepStates = [-1, -1, -1, -1]; // -1: uninit, 0: pending, 1: current, 2: done
 
     public event EventHandler? RetryRequested;
     public event EventHandler? ExitRequested;
@@ -47,6 +50,14 @@ public sealed partial class SplashScreenOverlay : UserControl
     public SplashScreenOverlay()
     {
         InitializeComponent();
+        RequestedTheme = ThemeSyncHelper.ResolveCurrentTheme(this);
+
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        if (version != null)
+        {
+            VersionBadgeTextBlock.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
+        }
+
         if (_preloadedLogo != null)
         {
             LogoTile.Source = _preloadedLogo;
@@ -63,6 +74,8 @@ public sealed partial class SplashScreenOverlay : UserControl
 
         _progressAnimationTimer.Interval = TimeSpan.FromMilliseconds(16);
         _progressAnimationTimer.Tick += OnProgressAnimationTick;
+
+        Unloaded += (_, _) => _progressAnimationTimer.Stop();
 
         EntranceStoryboard.Completed += (s, e) => _entranceTcs?.TrySetResult(true);
         ExitStoryboard.Completed += (s, e) =>
@@ -166,10 +179,10 @@ public sealed partial class SplashScreenOverlay : UserControl
         StartupProgressBar.Value = percent * 100.0;
         ProgressPercentageTextBlock.Text = $"{(int)Math.Round(percent * 100)}%";
 
-        UpdateStepIndicator(Step1Dot, Step1TextBlock, isDone: percent >= 0.35, isCurrent: percent >= 0.10 && percent < 0.35);
-        UpdateStepIndicator(Step2Dot, Step2TextBlock, isDone: percent >= 0.70, isCurrent: percent >= 0.35 && percent < 0.70);
-        UpdateStepIndicator(Step3Dot, Step3TextBlock, isDone: percent >= 0.98, isCurrent: percent >= 0.70 && percent < 0.98);
-        UpdateStepIndicator(Step4Dot, Step4TextBlock, isDone: percent >= 1.0, isCurrent: percent >= 0.98);
+        UpdateStepIndicator(0, Step1Pill, Step1Dot, Step1TextBlock, isDone: percent >= 0.35, isCurrent: percent >= 0.10 && percent < 0.35);
+        UpdateStepIndicator(1, Step2Pill, Step2Dot, Step2TextBlock, isDone: percent >= 0.70, isCurrent: percent >= 0.35 && percent < 0.70);
+        UpdateStepIndicator(2, Step3Pill, Step3Dot, Step3TextBlock, isDone: percent >= 0.98, isCurrent: percent >= 0.70 && percent < 0.98);
+        UpdateStepIndicator(3, Step4Pill, Step4Dot, Step4TextBlock, isDone: percent >= 1.0, isCurrent: percent >= 0.98);
     }
 
     public async Task WaitForProgressCompletionAsync(CancellationToken cancellationToken = default)
@@ -186,8 +199,15 @@ public sealed partial class SplashScreenOverlay : UserControl
         await Task.WhenAny(_progressCompletionTcs.Task, timeout);
     }
 
-    private static void UpdateStepIndicator(Microsoft.UI.Xaml.Shapes.Ellipse dot, TextBlock text, bool isDone, bool isCurrent)
+    private void UpdateStepIndicator(int stepIndex, Border pill, Microsoft.UI.Xaml.Shapes.Ellipse dot, TextBlock text, bool isDone, bool isCurrent)
     {
+        int newState = isDone ? 2 : (isCurrent ? 1 : 0);
+        if (_stepStates[stepIndex] == newState)
+        {
+            return; // State unchanged: skip redundant ThemeResource lookups
+        }
+        _stepStates[stepIndex] = newState;
+
         string dotBrushKey = isDone
             ? "SystemFillColorSuccessBrush"
             : (isCurrent ? "AccentFillColorDefaultBrush" : "CardStrokeColorDefaultBrush");
@@ -196,17 +216,24 @@ public sealed partial class SplashScreenOverlay : UserControl
             ? "TextFillColorPrimaryBrush"
             : (isCurrent ? "AccentTextFillColorPrimaryBrush" : "TextFillColorTertiaryBrush");
 
+        string pillBorderKey = isDone
+            ? "SystemFillColorSuccessBrush"
+            : (isCurrent ? "AccentFillColorDefaultBrush" : "CardStrokeColorDefaultBrush");
+
         var rootElement = (App.Current as App)?.MainWindow?.Content as Microsoft.UI.Xaml.FrameworkElement;
-        var dotBrush = ThemeResourceHelper.GetThemeBrush(rootElement, dotBrushKey);
-        if (dotBrush != null)
+        if (ThemeResourceHelper.GetThemeBrush(rootElement, dotBrushKey) is { } dotBrush)
         {
             dot.Fill = dotBrush;
         }
 
-        var textBrush = ThemeResourceHelper.GetThemeBrush(rootElement, textBrushKey);
-        if (textBrush != null)
+        if (ThemeResourceHelper.GetThemeBrush(rootElement, textBrushKey) is { } textBrush)
         {
             text.Foreground = textBrush;
+        }
+
+        if (ThemeResourceHelper.GetThemeBrush(rootElement, pillBorderKey) is { } borderBrush)
+        {
+            pill.BorderBrush = borderBrush;
         }
 
         text.FontWeight = (isDone || isCurrent) ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal;
@@ -219,10 +246,7 @@ public sealed partial class SplashScreenOverlay : UserControl
 
         if (!IsAnimationEnabled)
         {
-            LogoTileCard.Opacity = 1.0;
-            TypographyContainer.Opacity = 1.0;
-            LoadingContainer.Opacity = 1.0;
-            GlowingDivider.Opacity = 1.0;
+            SplashCard.Opacity = 1.0;
             ReducedMotionEntrance.Begin();
         }
         else
@@ -294,14 +318,12 @@ public sealed partial class SplashScreenOverlay : UserControl
 
         _currentVisualProgress = 0.12;
         _targetProgress = 0.12;
+        Array.Fill(_stepStates, -1);
         RenderProgress(0.12);
 
         if (!IsAnimationEnabled)
         {
-            LogoTileCard.Opacity = 1.0;
-            TypographyContainer.Opacity = 1.0;
-            LoadingContainer.Opacity = 1.0;
-            GlowingDivider.Opacity = 1.0;
+            SplashCard.Opacity = 1.0;
         }
     }
 

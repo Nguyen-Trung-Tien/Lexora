@@ -176,6 +176,23 @@ public partial class LocalizationService
         vi["Settings_Help_Title"] = "Trợ giúp: Cài đặt & Sao lưu";
         vi["Settings_Help_Subtitle"] = "Bảo vệ dữ liệu và cá nhân hóa";
         vi["Settings_Help_Content"] = "Tạo bản sao lưu cơ sở dữ liệu (.db), kích hoạt sao lưu tự động và chuyển đổi thuật toán học (SM-2 hoặc FSRS) phù hợp với mục tiêu của bạn.";
+        vi["Settings_Subtitle"] = "Cá nhân hóa giao diện, âm thanh, thuật toán học, sao lưu dữ liệu và hướng dẫn sử dụng";
+        vi["Settings_Tab_Appearance"] = "Giao diện & Ngôn ngữ";
+        vi["Settings_Tab_Study"] = "Học tập & Thuật toán";
+        vi["Settings_Tab_DataUpdates"] = "Dữ liệu & Cập nhật";
+        vi["Settings_Tab_HelpAbout"] = "Trợ giúp & Thông tin";
+        vi["Settings_HelpCard_Title"] = "Trợ giúp & Hướng dẫn sử dụng (Help & Guide)";
+        vi["Settings_HelpCard_Subtitle"] = "Tài liệu hướng dẫn chi tiết từng phân hệ, lộ trình ôn thi TOEIC/IELTS/VSTEP và mẹo ghi nhớ";
+        vi["Settings_HelpCard_OpenBtn"] = "Mở Hướng dẫn đầy đủ";
+        vi["Settings_HelpCard_QuickTopics"] = "Truy cập nhanh chuyên mục:";
+        vi["Settings_HelpCard_TopicGettingStarted"] = "Bắt đầu nhanh";
+        vi["Settings_HelpCard_TopicVocabulary"] = "Từ vựng & Smart Import";
+        vi["Settings_HelpCard_TopicReview"] = "Ôn tập SM-2 / FSRS";
+        vi["Settings_HelpCard_TopicRoadmap"] = "Lộ trình Roadmap";
+        vi["Settings_Shortcut_Theme"] = "Chuyển đổi nhanh giao diện Sáng / Tối (Light / Dark)";
+        vi["Settings_Shortcut_Help"] = "Mở trang Trợ giúp & Hướng dẫn sử dụng (Help & Guide)";
+        vi["Settings_Pronunciation_UK"] = "Giọng Anh (UK)";
+        vi["Settings_Pronunciation_US"] = "Giọng Mỹ (US)";
 
         // ==========================================
         // Settings — en-US (English)
@@ -349,5 +366,22 @@ public partial class LocalizationService
         en["Settings_Help_Title"] = "Quick Help: Settings & Backup";
         en["Settings_Help_Subtitle"] = "Data integrity and preferences";
         en["Settings_Help_Content"] = "Create snapshot database backups (.db), toggle automatic backup schedules, and select your preferred memory engine (SM-2 or FSRS).";
+        en["Settings_Subtitle"] = "Customize appearance, audio, learning algorithms, backups, and user guide";
+        en["Settings_Tab_Appearance"] = "Appearance & Language";
+        en["Settings_Tab_Study"] = "Study & Algorithm";
+        en["Settings_Tab_DataUpdates"] = "Data & Updates";
+        en["Settings_Tab_HelpAbout"] = "Help & About";
+        en["Settings_HelpCard_Title"] = "Help & User Guide";
+        en["Settings_HelpCard_Subtitle"] = "Comprehensive documentation for each module, TOEIC/IELTS/VSTEP study paths, and memory tips";
+        en["Settings_HelpCard_OpenBtn"] = "Open Full Guide";
+        en["Settings_HelpCard_QuickTopics"] = "Quick jump to guide topics:";
+        en["Settings_HelpCard_TopicGettingStarted"] = "Getting Started";
+        en["Settings_HelpCard_TopicVocabulary"] = "Vocabulary & Smart Import";
+        en["Settings_HelpCard_TopicReview"] = "Spaced Review (SM-2/FSRS)";
+        en["Settings_HelpCard_TopicRoadmap"] = "Learning Roadmap";
+        en["Settings_Shortcut_Theme"] = "Quick toggle Light / Dark theme";
+        en["Settings_Shortcut_Help"] = "Open Help & User Guide";
+        en["Settings_Pronunciation_UK"] = "British English (UK)";
+        en["Settings_Pronunciation_US"] = "American English (US)";
     }
 }

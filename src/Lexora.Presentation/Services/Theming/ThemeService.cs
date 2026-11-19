@@ -91,12 +91,16 @@ public class ThemeService : IThemeService
         // Propagate theme change to any open Popups (MenuFlyout, TeachingTip, ComboBox dropdown, etc.)
         if (_window?.Content?.XamlRoot is { } xamlRoot)
         {
+            var popupTheme = theme == ElementTheme.Default && _window.Content is FrameworkElement rootFe && rootFe.ActualTheme != ElementTheme.Default
+                ? rootFe.ActualTheme
+                : theme;
+
             foreach (var popup in VisualTreeHelper.GetOpenPopupsForXamlRoot(xamlRoot))
             {
-                popup.RequestedTheme = theme;
+                popup.RequestedTheme = popupTheme;
                 if (popup.Child is FrameworkElement child)
                 {
-                    child.RequestedTheme = theme;
+                    child.RequestedTheme = popupTheme;
                 }
             }
         }

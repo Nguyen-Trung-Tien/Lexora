@@ -66,7 +66,35 @@
         <!-- ========================================================= -->
         <!-- TOP COMMAND BAR: Segmented Mode, Search, Actions           -->
         <!-- ========================================================= -->
-        <Grid Grid.Row="0" x:Name="TopCommandBarGrid" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+        <Grid Grid.Row="0" x:Name="TopCommandBarGrid" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="VocabCommandBarStates">
+                    <VisualState x:Name="VocabCommandWide">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="960" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="SearchBox.(Grid.ColumnSpan)" Value="1" />
+                            <Setter Target="ActionControlsScrollViewer.(Grid.Row)" Value="0" />
+                            <Setter Target="ActionControlsScrollViewer.(Grid.Column)" Value="2" />
+                            <Setter Target="ActionControlsScrollViewer.(Grid.ColumnSpan)" Value="1" />
+                            <Setter Target="ActionControlsScrollViewer.HorizontalAlignment" Value="Right" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="VocabCommandCompact">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="0" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="SearchBox.(Grid.ColumnSpan)" Value="2" />
+                            <Setter Target="ActionControlsScrollViewer.(Grid.Row)" Value="1" />
+                            <Setter Target="ActionControlsScrollViewer.(Grid.Column)" Value="0" />
+                            <Setter Target="ActionControlsScrollViewer.(Grid.ColumnSpan)" Value="3" />
+                            <Setter Target="ActionControlsScrollViewer.HorizontalAlignment" Value="Left" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
             <!-- Segmented View Mode Switcher -->
             <Border x:Name="ViewModeContainer" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="3">
                 <StackPanel Orientation="Horizontal" Spacing="3">

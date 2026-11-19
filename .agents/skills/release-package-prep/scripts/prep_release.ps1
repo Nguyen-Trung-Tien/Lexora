@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    [string]$TargetVersion = "1.7.0",
+    [string]$TargetVersion = "1.8.0",
     [switch]$SkipTests,
     [switch]$JsonOutput
 )

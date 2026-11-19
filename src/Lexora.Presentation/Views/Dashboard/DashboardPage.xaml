@@ -127,6 +127,7 @@
             </common:PageHeaderControl>
 
             <TeachingTip x:Name="DashboardHelpTeachingTip"
+                         helpers:ThemeSyncHelper.SyncTheme="True"
                          Target="{x:Bind DashboardHelpButton}"
                          Title="{x:Bind Loc.GetString('Dashboard_Help_Title')}"
                          Subtitle="{x:Bind Loc.GetString('Dashboard_Help_Subtitle')}"

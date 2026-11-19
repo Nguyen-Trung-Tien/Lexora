@@ -29,6 +29,7 @@ public partial class LocalizationService
         vi["Action_Refresh"] = "Làm mới";
         vi["Action_Export"] = "Xuất tệp";
         vi["Action_Import"] = "Nhập tệp";
+        vi["Action_Back"] = "Quay lại";
         // Toast Notifications
         vi["Toast_SuccessTitle"] = "Thành công";
         vi["Toast_ErrorTitle"] = "Đã xảy ra lỗi";
@@ -72,6 +73,7 @@ public partial class LocalizationService
         vi["Action_View"] = "Xem";
         vi["Action_Review"] = "Ôn tập";
         vi["Action_Quiz"] = "Thi thử";
+        vi["Action_More"] = "Thêm";
         // Newly Added Splash Screen
         vi["Splash_Tagline"] = "HỌC TỪ VỰNG THÔNG MINH & LẶP LẠI NGẮT QUÃNG";
         vi["Splash_Badge"] = "PHIÊN BẢN DESKTOP • NGOẠI TUYẾN";
@@ -169,6 +171,7 @@ public partial class LocalizationService
         en["Action_Refresh"] = "Refresh";
         en["Action_Export"] = "Export";
         en["Action_Import"] = "Import";
+        en["Action_Back"] = "Back";
         // Toast Notifications
         en["Toast_SuccessTitle"] = "Success";
         en["Toast_ErrorTitle"] = "Error Occurred";
@@ -212,6 +215,7 @@ public partial class LocalizationService
         en["Action_View"] = "View";
         en["Action_Review"] = "Review";
         en["Action_Quiz"] = "Quiz";
+        en["Action_More"] = "More";
         // Newly Added Splash Screen
         en["Splash_Tagline"] = "INTELLIGENT VOCABULARY & SPACED REPETITION";
         en["Splash_Badge"] = "DESKTOP EDITION • OFFLINE FIRST";

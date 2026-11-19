@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-11-19
+
+### Added
+- **Fuzzy & Smart Search + Command Palette (`Ctrl+K`)**: Bổ sung dịch vụ tìm kiếm mờ (`FuzzySearchService`, `SmartSearchService`) và bảng lệnh toàn cục `CommandPaletteOverlayControl` hỗ trợ nhảy nhanh tới từ vựng, ngữ pháp, trang và thao tác.
+- **Tabbed Settings & Unified Help Hub**: Tái cấu trúc `SettingsPage` với `SelectorBar` chia 4 phân khu rõ ràng (*Appearance*, *Study*, *Data & Updates*, *Help & About*), đồng thời hợp nhất `HelpPage` vào mục Settings giúp thanh điều hướng gọn gàng.
+- **Reusable Layout Controls & Theme Sync Infrastructure**: Bổ sung các điều khiển bố cục dùng chung (`PageHeaderControl`), `ThemeSyncHelper` cho `Flyout`/`TeachingTip` và định tuyến phím tắt thống nhất.
+
+### Changed
+- **Redesigned Splash Screen & Fluent 2 Polish**: Làm mới `SplashScreenOverlay` với bố cục tinh gọn, rút ngắn thời gian chờ khởi động trong `MainWindow.xaml.cs`, và tinh chỉnh đồng bộ Fluent 2 trên `VocabularyPage`, `LearningStoragePage`, `TestPage`, `PracticeArenaPage`, `HelpPage`.
+
+### Fixed
+- **Theme Switching & TeachingTip Sync Bug**: Khắc phục triệt để lỗi `TeachingTip` (Quick Help) và các popup giữ `RequestedTheme` cũ hoặc hiển thị khung nền lệch tông khi chuyển đổi giữa Light, Dark và System theme; bổ sung `ThemeSyncHelper.SyncTheme="True"` đồng bộ cho toàn bộ 6 trang có Quick Help.
+
 ## [1.7.0] - 2026-11-17
 
 ### Added

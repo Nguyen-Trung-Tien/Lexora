@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:services="using:Lexora.Presentation.Services"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
@@ -177,6 +178,7 @@
             </Grid>
 
             <TeachingTip x:Name="ReviewHelpTeachingTip"
+                         helpers:ThemeSyncHelper.SyncTheme="True"
                          Target="{x:Bind ReviewHelpButton}"
                          Title="{x:Bind Loc.GetString('Review_Help_Title')}"
                          Subtitle="{x:Bind Loc.GetString('Review_Help_Subtitle')}"

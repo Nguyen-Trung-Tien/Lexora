@@ -1,6 +1,6 @@
 # 🏛️ AGENTS.md — Developer & AI Agent Guidelines for Lexora
 
-> **Lexora** is a high-performance, offline-first English learning and vocabulary management desktop application designed for TOEIC, IELTS, and VSTEP exam preparation. Built with **.NET 10**, **WinUI 3 / Windows App SDK (v1.6+)**, and **Entity Framework Core 10 (SQLite)** following strict **Clean Architecture** patterns. Current Version: **v1.7.0**.
+> **Lexora** is a high-performance, offline-first English learning and vocabulary management desktop application designed for TOEIC, IELTS, and VSTEP exam preparation. Built with **.NET 10**, **WinUI 3 / Windows App SDK (v1.6+)**, and **Entity Framework Core 10 (SQLite)** following strict **Clean Architecture** patterns. Current Version: **v1.8.0**.
 
 Any developer or AI agent contributing to this repository **MUST** strictly adhere to the architectural, design, code quality, and verification invariants outlined below.
 
@@ -264,7 +264,7 @@ dotnet build Lexora.slnx -v q /clp:ErrorsOnly
 dotnet test Lexora.slnx --no-build
 
 # 3. Packaging & Installer Verification (When modifying deployment scripts)
-powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.7.0"
+powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.8.0"
 ```
 
 ### Current Quality Gate Benchmark
@@ -303,7 +303,7 @@ powershell -ExecutionPolicy Bypass -File ./build-installer.ps1 -Version "1.7.0"
 ```
 Lexora/
 ├── Lexora.slnx                               # Solution file (.NET 10 slnx format)
-├── Directory.Build.props                     # Global solution assembly versioning (v1.7.0)
+├── Directory.Build.props                     # Global solution assembly versioning (v1.8.0)
 ├── AGENTS.md                                 # Developer & AI Agent master guidelines
 ├── CHANGELOG.md                              # High-level version history (Semantic Versioning 2.0.0)
 ├── PROGRESS.md                               # Project progress tracking and milestones
@@ -344,7 +344,7 @@ Lexora/
 ├── release-notes/                            # User-facing Release Notes log (Markdown format per version)
 │   ├── README.md                             # Release notes guidelines & authoring rules
 │   ├── template.md                           # Standard release note markdown template
-│   └── v1.7.0.md                             # Current release notes log (v1.7.0, v1.6.1, v1.6.0, ...)
+│   └── v1.8.0.md                             # Current release notes log (v1.8.0, v1.7.0, v1.6.1, ...)
 ├── docs/                                     # Architecture, specs & documentation hub
 │   ├── adr/                                  # Architecture Decision Records (ADRs)
 │   ├── architecture.md                       # System architecture & Clean Architecture layout

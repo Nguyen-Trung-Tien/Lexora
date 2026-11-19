@@ -16,20 +16,37 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Padding="24" HorizontalAlignment="Stretch">
             <StackPanel Spacing="16" HorizontalAlignment="Stretch">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="0" />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
 
                 <!-- 1. UNIFIED PAGE HEADER -->
                 <common:PageHeaderControl Title="{x:Bind Loc.GetString('Help_Title')}"
                                           Subtitle="{x:Bind Loc.GetString('Help_Subtitle')}"
                                           IconGlyph="&#xE9CE;">
                     <common:PageHeaderControl.ActionsContent>
-                        <Button Click="OpenReleaseNotesLog_Click"
-                                Style="{StaticResource LexoraStandardButtonStyle}"
-                                ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ReleaseNotesLogTooltip')}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE81C;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{x:Bind Loc.GetString('Help_ReleaseNotesLog')}" FontWeight="SemiBold" FontSize="12.5" />
-                            </StackPanel>
-                        </Button>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button x:Name="BtnBack"
+                                    Click="BackButton_Click"
+                                    Style="{StaticResource LexoraStandardButtonStyle}"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_Back')}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE72B;" FontSize="13" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Action_Back')}" FontWeight="SemiBold" FontSize="12.5" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Click="OpenReleaseNotesLog_Click"
+                                    Style="{StaticResource LexoraStandardButtonStyle}"
+                                    ToolTipService.ToolTip="{x:Bind Loc.GetString('Help_ReleaseNotesLogTooltip')}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE81C;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Help_ReleaseNotesLog')}" FontWeight="SemiBold" FontSize="12.5" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
                     </common:PageHeaderControl.ActionsContent>
                 </common:PageHeaderControl>
 

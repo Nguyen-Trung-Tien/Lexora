@@ -79,6 +79,18 @@ public sealed partial class HelpPage : Page, ILocalizableView, IThemeAwareView
         }
     }
 
+    private void BackButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_navigationService.CanGoBack)
+        {
+            _navigationService.GoBack();
+        }
+        else
+        {
+            _navigationService.Navigate(typeof(Views.Settings.SettingsPage));
+        }
+    }
+
     private void HelpPage_Loaded(object sender, RoutedEventArgs e)
     {
         ActualThemeChanged -= _themeChangedHandler;
