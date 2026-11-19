@@ -1,6 +1,8 @@
 using Lexora.Application.Interfaces;
+using Lexora.Application.Interfaces.AI;
 using Lexora.Application.Interfaces.MemoryTips;
 using Lexora.Application.Services;
+using Lexora.Application.Services.AI;
 using Lexora.Application.Services.MemoryTips;
 using Lexora.Application.Services.Phrases;
 using Lexora.Application.SpacedRepetition;
@@ -44,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<IRoadmapService, RoadmapService>();
         services.AddScoped<IConversationPhraseService, ConversationPhraseService>();
         services.AddScoped<IMemoryTipService, MemoryTipService>();
+        services.AddSingleton<IAiEnrichmentProvider, NullAiEnrichmentProvider>();
 
         return services;
     }

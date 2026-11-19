@@ -7,7 +7,9 @@ using Lexora.Presentation.Views.Grammar;
 using Lexora.Presentation.Views.Help;
 using Lexora.Presentation.Views.Homophones;
 using Lexora.Presentation.Views.KnowledgeGraph;
+using Lexora.Presentation.Views.KnowledgeStudio;
 using Lexora.Presentation.Views.LearningStorage;
+using Lexora.Presentation.Views.PracticeArena;
 using Lexora.Presentation.Views.Review;
 using Lexora.Presentation.Views.Roadmap;
 using Lexora.Presentation.Views.Settings;
@@ -74,6 +76,10 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
     {
         UpdateLocalizedTexts();
         Visibility = Visibility.Visible;
+        if (App.Current.Services.GetService<IShortcutManager>() is { } sm)
+        {
+            sm.IsOverlayOpen = true;
+        }
         SearchBox.Text = string.Empty;
         PopulateDefaultCommands();
 
@@ -93,6 +99,10 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
         _searchCts?.Dispose();
         _searchCts = null;
         Visibility = Visibility.Collapsed;
+        if (App.Current.Services.GetService<IShortcutManager>() is { } sm)
+        {
+            sm.IsOverlayOpen = false;
+        }
     }
 
     private List<CommandPaletteDisplayItem> BuildDefaultCommands(
@@ -103,17 +113,17 @@ public sealed partial class CommandPaletteOverlayControl : UserControl
         return new List<CommandPaletteDisplayItem>
         {
             new(loc?.GetString("Nav_Dashboard") ?? "Dashboard", loc?.GetString("Search_SmartNav_Dashboard") ?? "", "\uE80F", "Ctrl+1", () => nav?.Navigate(typeof(DashboardPage))),
-            new(loc?.GetString("Nav_Vocabulary") ?? "Vocabulary", loc?.GetString("Search_SmartNav_Vocab") ?? "", "\uE82D", "Ctrl+2", () => nav?.Navigate(typeof(VocabularyPage))),
-            new(loc?.GetString("Nav_Homophones") ?? "Homophones", loc?.GetString("Search_SmartNav_Homophones") ?? "", "\uE768", "Ctrl+3", () => nav?.Navigate(typeof(HomophonesPage))),
-            new(loc?.GetString("Nav_KnowledgeGraph") ?? "Knowledge Graph", loc?.GetString("Nav_KnowledgeGraph") ?? "", "\uE81E", "Ctrl+4", () => nav?.Navigate(typeof(KnowledgeGraphPage))),
-            new(loc?.GetString("Nav_Grammar") ?? "Grammar", loc?.GetString("Search_SmartNav_Grammar") ?? "", "\uE8D2", "Ctrl+5", () => nav?.Navigate(typeof(GrammarPage))),
-            new(loc?.GetString("Nav_Phrases") ?? "Conversation Phrases", loc?.GetString("Phrases_Subtitle") ?? "", "\uE8BD", "Ctrl+Shift+P", () => nav?.Navigate(typeof(Lexora.Presentation.Views.Phrases.PhrasesPage))),
-            new(loc?.GetString("Nav_MemoryTips") ?? "Memory Tips", loc?.GetString("MemoryTips_Subtitle") ?? "", "\uE8D7", "Ctrl+Shift+M", () => nav?.Navigate(typeof(Lexora.Presentation.Views.MemoryTips.MemoryTipsPage))),
-            new(loc?.GetString("Nav_Review") ?? "Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+6", () => nav?.Navigate(typeof(ReviewPage))),
-            new(loc?.GetString("Nav_Test") ?? "Test", loc?.GetString("Search_SmartNav_Test") ?? "", "\uE765", "Ctrl+7", () => nav?.Navigate(typeof(TestPage))),
+            new(loc?.GetString("Nav_Vocabulary") ?? "Vocabulary", loc?.GetString("Search_SmartNav_Vocab") ?? "", "\uE82D", "Ctrl+2", () => nav?.Navigate(typeof(KnowledgeStudioPage), "Vocabulary", force: nav.CurrentPageType == typeof(KnowledgeStudioPage))),
+            new(loc?.GetString("Nav_Homophones") ?? "Homophones", loc?.GetString("Search_SmartNav_Homophones") ?? "", "\uE768", "Ctrl+3", () => nav?.Navigate(typeof(KnowledgeStudioPage), "Homophones", force: nav.CurrentPageType == typeof(KnowledgeStudioPage))),
+            new(loc?.GetString("Nav_KnowledgeGraph") ?? "Knowledge Graph", loc?.GetString("Nav_KnowledgeGraph") ?? "", "\uE81E", "Ctrl+4", () => nav?.Navigate(typeof(KnowledgeStudioPage), "KnowledgeGraph", force: nav.CurrentPageType == typeof(KnowledgeStudioPage))),
+            new(loc?.GetString("Nav_Grammar") ?? "Grammar", loc?.GetString("Search_SmartNav_Grammar") ?? "", "\uE8D2", "Ctrl+5", () => nav?.Navigate(typeof(KnowledgeStudioPage), "Grammar", force: nav.CurrentPageType == typeof(KnowledgeStudioPage))),
+            new(loc?.GetString("Nav_Phrases") ?? "Conversation Phrases", loc?.GetString("Phrases_Subtitle") ?? "", "\uE8BD", "Ctrl+Shift+P", () => nav?.Navigate(typeof(KnowledgeStudioPage), "Phrases", force: nav.CurrentPageType == typeof(KnowledgeStudioPage))),
+            new(loc?.GetString("Nav_MemoryTips") ?? "Memory Tips", loc?.GetString("MemoryTips_Subtitle") ?? "", "\uE8D7", "Ctrl+Shift+M", () => nav?.Navigate(typeof(KnowledgeStudioPage), "MemoryTips", force: nav.CurrentPageType == typeof(KnowledgeStudioPage))),
+            new(loc?.GetString("Nav_Review") ?? "Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+6", () => nav?.Navigate(typeof(PracticeArenaPage), "Review", force: nav.CurrentPageType == typeof(PracticeArenaPage))),
+            new(loc?.GetString("Nav_Test") ?? "Test", loc?.GetString("Search_SmartNav_Test") ?? "", "\uE765", "Ctrl+7", () => nav?.Navigate(typeof(PracticeArenaPage), "Test", force: nav.CurrentPageType == typeof(PracticeArenaPage))),
             new(loc?.GetString("Nav_LearningStorage") ?? "Learning Storage", loc?.GetString("Search_SmartNav_LearningStorage") ?? "", "\uE81C", "Ctrl+8", () => nav?.Navigate(typeof(LearningStoragePage))),
             new(loc?.GetString("Nav_Roadmap") ?? "Roadmap", loc?.GetString("Nav_Roadmap") ?? "", "\uE81C", "Ctrl+9", () => nav?.Navigate(typeof(RoadmapPage))),
-            new(loc?.GetString("Dashboard_StartReview") ?? "Start Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+Shift+R", () => nav?.Navigate(typeof(ReviewPage))),
+            new(loc?.GetString("Dashboard_StartReview") ?? "Start Review", loc?.GetString("Search_SmartNav_Review") ?? "", "\uE895", "Ctrl+Shift+R", () => nav?.Navigate(typeof(PracticeArenaPage), "Review", force: nav.CurrentPageType == typeof(PracticeArenaPage))),
             new(loc?.GetString("Palette_DictationLab") ?? "Listening Lab", loc?.GetString("Nav_ListeningLab") ?? "", "\uE767", "Ctrl+Shift+D", OpenDictationLabDialog),
             new(loc?.GetString("Nav_Settings") ?? "Settings", loc?.GetString("Search_SmartNav_Settings") ?? "", "\uE713", null, () => nav?.Navigate(typeof(SettingsPage))),
             new(loc?.GetString("Nav_Help") ?? "Help", loc?.GetString("Nav_Help") ?? "", "\uE9CE", "F1", () => nav?.Navigate(typeof(HelpPage))),

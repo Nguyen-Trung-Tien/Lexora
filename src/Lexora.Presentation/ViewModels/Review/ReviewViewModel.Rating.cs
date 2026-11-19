@@ -18,11 +18,13 @@ public partial class ReviewViewModel
 
         try
         {
+            StopBlitzTimer();
             _cardTimer.Stop();
             int responseTimeMs = (int)_cardTimer.ElapsedMilliseconds;
+            var ratedCard = CurrentCard;
 
             var undoState = new ReviewUndoState(
-                CurrentCard,
+                ratedCard,
                 rating,
                 SessionCorrectCount,
                 SessionIncorrectCount,
@@ -32,7 +34,12 @@ public partial class ReviewViewModel
                 IsCompleted
             );
 
-            await _reviewService.SubmitReviewAsync(CurrentCard.Id, rating, responseTimeMs, _currentSessionId);
+            var evalResult = await _reviewService.SubmitReviewAsync(
+                ratedCard.Id,
+                rating,
+                responseTimeMs,
+                _currentSessionId,
+                usedHint: IsHintVisible);
 
             if (_studyPlannerService != null)
             {
@@ -72,7 +79,31 @@ public partial class ReviewViewModel
                 ReviewQueue.RemoveAt(0);
             }
 
-            CompletedCount++;
+            // Intra-session adaptive re-queueing for forgotten cards (max 2 re-queues per card per session)
+            bool requeued = false;
+            if (rating == ReviewRating.Again && CurrentSmartPreset != SmartReviewPresetMode.SpeedBlitz)
+            {
+                int count = _sessionRequeueCounts.GetValueOrDefault(ratedCard.Id, 0);
+                if (count < 2)
+                {
+                    _sessionRequeueCounts[ratedCard.Id] = count + 1;
+                    var updatedCard = ratedCard with
+                    {
+                        Status = evalResult.NewStatus,
+                        Lapses = ratedCard.Lapses + 1,
+                        IsLeech = evalResult.IsLeech,
+                        Stability = evalResult.Stability
+                    };
+                    int insertIndex = Math.Min(ReviewQueue.Count, 4);
+                    ReviewQueue.Insert(insertIndex, updatedCard);
+                    requeued = true;
+                }
+            }
+
+            if (!requeued)
+            {
+                CompletedCount++;
+            }
             RemainingCount = ReviewQueue.Count;
             ProgressPercent = _initialQueueCount == 0 ? 100.0 : Math.Round((double)CompletedCount / _initialQueueCount * 100, 1);
             IsAnswerVisible = false;
@@ -107,6 +138,7 @@ public partial class ReviewViewModel
 
                 await RefreshDueCountAsync();
                 await LoadHistoryAsync();
+                await LoadAnalyticsAsync();
 
                 if (_roadmapService != null)
                 {
@@ -153,7 +185,11 @@ public partial class ReviewViewModel
                 state.Card.EaseFactor,
                 state.Card.Repetitions,
                 state.Card.Lapses,
-                state.Card.NextReviewAt);
+                state.Card.NextReviewAt,
+                previousStability: state.Card.Stability,
+                previousDifficulty: state.Card.Difficulty,
+                previousLastReviewedAt: state.Card.LastReviewedAt,
+                previousIsLeech: state.Card.IsLeech);
 
             SessionCorrectCount = state.SessionCorrectCount;
             SessionIncorrectCount = state.SessionIncorrectCount;

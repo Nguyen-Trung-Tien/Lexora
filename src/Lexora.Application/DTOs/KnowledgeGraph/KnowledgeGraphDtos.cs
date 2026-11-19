@@ -26,6 +26,8 @@ public class GraphNodeDto
     public bool IsCenter { get; set; }
     public double ConnectionWeight { get; set; }
     public string RelationshipLabel { get; set; } = string.Empty;
+    public double LayoutX { get; set; }
+    public double LayoutY { get; set; }
 
     public string MeaningEn { get; set; } = string.Empty;
     public string Explanation { get; set; } = string.Empty;

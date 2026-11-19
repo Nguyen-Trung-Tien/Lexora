@@ -495,4 +495,48 @@ public class ShortcutResolverTests
         match.ExecuteAsync();
         paletteInvoked.Should().BeTrue();
     }
+
+    [Fact]
+    public void ShortcutResolver_Resolve_NumPadDigits_ShouldNormalizeToNumberKeys()
+    {
+        var resolver = new ShortcutResolver();
+        resolver.Register(new ShortcutDefinition
+        {
+            Id = "Global.NavigateDashboard",
+            Gesture = new ShortcutGesture(ShortcutKey.Number1, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "desc",
+            Priority = ShortcutPriority.Global,
+            AllowWhenTextInputFocused = true,
+            ExecuteAsync = () => Task.CompletedTask
+        });
+
+        var match = resolver.Resolve(ShortcutKey.NumPad1, ShortcutModifiers.Control, isTextInputFocused: true, isDialogOpen: false, typeof(DummyDashboardPage));
+        match.Should().NotBeNull();
+        match!.Id.Should().Be("Global.NavigateDashboard");
+    }
+
+    [Fact]
+    public void ShortcutResolver_Resolve_NonEditingCtrlChords_WorkWhenTextInputFocused()
+    {
+        var resolver = new ShortcutResolver();
+        resolver.Register(new ShortcutDefinition
+        {
+            Id = "Global.ToggleTheme",
+            Gesture = new ShortcutGesture(ShortcutKey.T, ShortcutModifiers.Control),
+            Scope = ShortcutScope.Global,
+            DescriptionKey = "desc",
+            Priority = ShortcutPriority.Global,
+            AllowWhenTextInputFocused = true,
+            ExecuteAsync = () => Task.CompletedTask
+        });
+
+        var themeMatch = resolver.Resolve(ShortcutKey.T, ShortcutModifiers.Control, isTextInputFocused: true, isDialogOpen: false, typeof(DummyVocabularyPage));
+        themeMatch.Should().NotBeNull();
+        themeMatch!.Id.Should().Be("Global.ToggleTheme");
+
+        // Native Ctrl+C remains protected
+        var copyMatch = resolver.Resolve(ShortcutKey.C, ShortcutModifiers.Control, isTextInputFocused: true, isDialogOpen: false, typeof(DummyVocabularyPage));
+        copyMatch.Should().BeNull();
+    }
 }

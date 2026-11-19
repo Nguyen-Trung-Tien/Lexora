@@ -8,12 +8,18 @@
     xmlns:common="using:Lexora.Presentation.Views.Common"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:services="using:Lexora.Presentation.Services"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d" UseLayoutRounding="True">
 
     <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
+        <Grid.ChildrenTransitions>
+            <TransitionCollection>
+                <EntranceThemeTransition FromVerticalOffset="0" />
+            </TransitionCollection>
+        </Grid.ChildrenTransitions>
         
         <!-- Loading Ring Overlay -->
         <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
@@ -68,7 +74,7 @@
                                 <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontSize="12.5" />
                             </StackPanel>
                             <DropDownButton.Flyout>
-                                <MenuFlyout Placement="BottomEdgeAlignedRight" Opening="ExportImportFlyout_Opening">
+                                <MenuFlyout Placement="BottomEdgeAlignedRight" helpers:ThemeSyncHelper.SyncTheme="True" Opening="ExportImportFlyout_Opening">
                                     <MenuFlyoutItem Text="{x:Bind Loc.GetString('Grammar_SmartImport')}" Click="SmartImport_Click">
                                         <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B5;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" /></MenuFlyoutItem.Icon>
                                     </MenuFlyoutItem>

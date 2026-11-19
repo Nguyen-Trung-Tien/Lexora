@@ -17,6 +17,9 @@ public interface IShortcutManager
     /// <summary>Indicates if an asynchronous shortcut operation is currently executing.</summary>
     bool IsRunning { get; }
 
+    /// <summary>Indicates whether a non-ContentDialog modal overlay (such as CommandPalette) is currently open.</summary>
+    bool IsOverlayOpen { get; set; }
+
     /// <summary>Registers an individual shortcut.</summary>
     void RegisterShortcut(ShortcutDefinition shortcut);
 

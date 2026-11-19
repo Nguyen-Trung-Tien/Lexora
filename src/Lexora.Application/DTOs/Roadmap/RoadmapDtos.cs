@@ -63,6 +63,23 @@ public record RoadmapNodeDto(
         NodeStatus.Available => "Ready",
         _ => "Locked"
     };
+
+    public string TypeLocalizationKey => Type switch
+    {
+        RoadmapNodeType.VocabularySet => "Roadmap_NodeType_VocabularySet",
+        RoadmapNodeType.GrammarPoint => "Roadmap_NodeType_GrammarPoint",
+        RoadmapNodeType.MockTest => "Roadmap_NodeType_MockTest",
+        RoadmapNodeType.Checkpoint => "Roadmap_NodeType_Checkpoint",
+        _ => "Roadmap_NodeType_VocabularySet"
+    };
+
+    public string StatusLocalizationKey => Status switch
+    {
+        NodeStatus.Mastered => "Roadmap_NodeStatus_Mastered",
+        NodeStatus.InProgress => "Roadmap_NodeStatus_InProgress",
+        NodeStatus.Available => "Roadmap_NodeStatus_Available",
+        _ => "Roadmap_NodeStatus_Locked"
+    };
 }
 
 public record MilestoneDto(
@@ -121,6 +138,32 @@ public record StudyRoadmapDto(
         .OrderBy(m => m.OrderIndex)
         .SelectMany(m => m.Nodes.OrderBy(n => n.OrderIndex))
         .FirstOrDefault(n => n.Status == NodeStatus.InProgress || n.Status == NodeStatus.Available);
+
+    public int TotalTargetItems => Milestones
+        .SelectMany(m => m.Nodes)
+        .Sum(n => Math.Max(1, n.TargetItemCount));
+
+    public int TotalCompletedItems => Milestones
+        .SelectMany(m => m.Nodes)
+        .Sum(n => Math.Clamp(n.CompletedItemCount, 0, Math.Max(1, n.TargetItemCount)));
+
+    public int RemainingItems => Math.Max(0, TotalTargetItems - TotalCompletedItems);
+
+    public int RecommendedDailyItems => RemainingItems == 0
+        ? 0
+        : (int)Math.Ceiling((double)RemainingItems / Math.Max(1, DaysRemaining));
+
+    public string PacingStatusKey
+    {
+        get
+        {
+            if (TotalNodes == 0 || MasteredNodes >= TotalNodes) return "Roadmap_Pace_Ahead";
+            int totalDays = Math.Max(1, (TargetDate.Date - DateTime.UtcNow.Date).Days);
+            if (RecommendedDailyItems <= 10) return "Roadmap_Pace_Ahead";
+            if (RecommendedDailyItems <= 25 && totalDays >= 7) return "Roadmap_Pace_OnTrack";
+            return "Roadmap_Pace_Behind";
+        }
+    }
 }
 
 public record GenerateRoadmapRequestDto(

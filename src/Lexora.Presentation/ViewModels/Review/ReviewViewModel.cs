@@ -26,6 +26,8 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     private Guid? _currentSessionId;
     private int _initialQueueCount;
     private string? _customTitle;
+    private readonly Dictionary<Guid, int> _sessionRequeueCounts = new();
+    private CancellationTokenSource? _blitzTimerCts;
 
     public void UpdateActiveSessionTitle()
     {
@@ -33,6 +35,11 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         {
             ActiveSessionTitle = CurrentSmartPreset.Value switch
             {
+                SmartReviewPresetMode.StandardDue => _localizationService.GetString("SmartReview_StandardDue"),
+                SmartReviewPresetMode.SpeedBlitz => _localizationService.GetString("SmartReview_SpeedBlitz"),
+                SmartReviewPresetMode.LeechRescue => _localizationService.GetString("SmartReview_LeechRescue"),
+                SmartReviewPresetMode.HighYieldExam => _localizationService.GetString("SmartReview_HighYieldExam"),
+                SmartReviewPresetMode.ContextImmersion => _localizationService.GetString("SmartReview_ContextImmersion"),
                 SmartReviewPresetMode.UrgentOverdue => _localizationService.GetString("SmartReview_UrgentOverdue"),
                 SmartReviewPresetMode.HighForgettingRisk => _localizationService.GetString("SmartReview_HighForgettingRisk"),
                 SmartReviewPresetMode.ExamHighYield => _localizationService.GetString("SmartReview_ExamHighYield"),
@@ -177,6 +184,42 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial MemoryStabilityMetricsDto? CurrentCardMemoryStability { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsCurrentCardRequeued { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsCurrentCardLeech { get; set; }
+
+    [ObservableProperty]
+    public partial string LeechBannerDescription { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAgainSuggested))]
+    [NotifyPropertyChangedFor(nameof(IsHardSuggested))]
+    [NotifyPropertyChangedFor(nameof(IsGoodSuggested))]
+    [NotifyPropertyChangedFor(nameof(IsEasySuggested))]
+    public partial ReviewRating? SuggestedRating { get; set; }
+
+    public bool IsAgainSuggested => IsAnswerVisible && SuggestedRating == ReviewRating.Again;
+    public bool IsHardSuggested => IsAnswerVisible && SuggestedRating == ReviewRating.Hard;
+    public bool IsGoodSuggested => IsAnswerVisible && SuggestedRating == ReviewRating.Good;
+    public bool IsEasySuggested => IsAnswerVisible && SuggestedRating == ReviewRating.Easy;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BlitzTimerText))]
+    public partial double BlitzRemainingSeconds { get; set; } = 3.0;
+
+    [ObservableProperty]
+    public partial double BlitzProgressPercent { get; set; } = 100.0;
+
+    [ObservableProperty]
+    public partial bool IsSpeedBlitzActive { get; set; }
+
+    public string BlitzTimerText => string.Format(_localizationService.GetString("Review_BlitzTimerFormat"), Math.Max(0.0, BlitzRemainingSeconds));
+
+    [ObservableProperty]
+    public partial ReviewAnalyticsSummaryDto? AnalyticsSummary { get; set; }
+
     public ObservableCollection<SmartReviewPresetDisplayItem> SmartPresetsList { get; } = new();
 
     [ObservableProperty]
@@ -248,8 +291,22 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         await LoadAvailableTopicsAsync();
         await RefreshDueCountAsync();
         await LoadSmartPresetsAsync();
+        await LoadAnalyticsAsync();
         await StartReviewAsync(CurrentMode);
         await LoadHistoryAsync();
+    }
+
+    [RelayCommand]
+    public async Task LoadAnalyticsAsync()
+    {
+        try
+        {
+            AnalyticsSummary = await _reviewService.GetReviewAnalyticsSummaryAsync(30);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ReviewViewModel] LoadAnalyticsAsync error: {ex.Message}");
+        }
     }
 
     [RelayCommand]
@@ -319,6 +376,11 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         CurrentSmartPreset = presetMode;
         var title = presetMode switch
         {
+            SmartReviewPresetMode.StandardDue => _localizationService.GetString("SmartReview_StandardDue"),
+            SmartReviewPresetMode.SpeedBlitz => _localizationService.GetString("SmartReview_SpeedBlitz"),
+            SmartReviewPresetMode.LeechRescue => _localizationService.GetString("SmartReview_LeechRescue"),
+            SmartReviewPresetMode.HighYieldExam => _localizationService.GetString("SmartReview_HighYieldExam"),
+            SmartReviewPresetMode.ContextImmersion => _localizationService.GetString("SmartReview_ContextImmersion"),
             SmartReviewPresetMode.UrgentOverdue => _localizationService.GetString("SmartReview_UrgentOverdue"),
             SmartReviewPresetMode.HighForgettingRisk => _localizationService.GetString("SmartReview_HighForgettingRisk"),
             SmartReviewPresetMode.ExamHighYield => _localizationService.GetString("SmartReview_ExamHighYield"),
@@ -379,6 +441,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
             }
 
             _undoStack.Clear();
+            _sessionRequeueCounts.Clear();
             CanUndo = false;
 
             _initialQueueCount = ReviewQueue.Count;
@@ -427,8 +490,21 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
     [RelayCommand]
     public void RevealAnswer()
     {
+        StopBlitzTimer();
         IsAnswerVisible = true;
+        UpdateSuggestedRating();
         _soundFeedback?.PlayCardFlipSound();
+    }
+
+    private void UpdateSuggestedRating()
+    {
+        if (CurrentCard == null)
+        {
+            SuggestedRating = null;
+            return;
+        }
+        int elapsedMs = (int)_cardTimer.ElapsedMilliseconds;
+        SuggestedRating = _reviewService.SuggestRatingByResponseTime(CurrentCard, elapsedMs, IsHintVisible, IsTypingCorrect);
     }
 
     [ObservableProperty]
@@ -459,8 +535,16 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
 
     private void SetCurrentCard(ReviewCardDto card)
     {
+        StopBlitzTimer();
         CurrentCard = card;
         _cardTimer.Restart();
+        SuggestedRating = null;
+
+        IsCurrentCardRequeued = _sessionRequeueCounts.GetValueOrDefault(card.Id, 0) > 0;
+        IsCurrentCardLeech = card.IsLeech;
+        LeechBannerDescription = card.IsLeech
+            ? string.Format(_localizationService.GetString("Review_LeechBannerDescFormat"), card.Lapses)
+            : string.Empty;
 
         TypedWord = string.Empty;
         IsTypingCorrect = null;
@@ -476,6 +560,11 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         EasyIntervalText = preview.EasyText;
 
         CurrentCardMemoryStability = _reviewService.GetMemoryStabilityMetrics(card);
+
+        if (CurrentSmartPreset == SmartReviewPresetMode.SpeedBlitz)
+        {
+            StartBlitzTimer();
+        }
 
         if (card.Examples != null && card.Examples.Count > 0)
         {
@@ -532,6 +621,49 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
         return $"{string.Join("   ", parts)}  ({countLabel})";
     }
 
+    private void StartBlitzTimer()
+    {
+        StopBlitzTimer();
+        IsSpeedBlitzActive = true;
+        BlitzRemainingSeconds = 3.0;
+        BlitzProgressPercent = 100.0;
+
+        var cts = new CancellationTokenSource();
+        _blitzTimerCts = cts;
+        _ = RunBlitzTimerAsync(cts.Token);
+    }
+
+    private async Task RunBlitzTimerAsync(CancellationToken token)
+    {
+        try
+        {
+            const double totalSeconds = 3.0;
+            while (!token.IsCancellationRequested && BlitzRemainingSeconds > 0.0)
+            {
+                await Task.Delay(100, token);
+                BlitzRemainingSeconds = Math.Max(0.0, Math.Round(BlitzRemainingSeconds - 0.1, 1));
+                BlitzProgressPercent = Math.Round(BlitzRemainingSeconds / totalSeconds * 100.0, 1);
+            }
+
+            if (!token.IsCancellationRequested && !IsAnswerVisible && CurrentCard != null)
+            {
+                RevealAnswer();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when user flips early or navigates away
+        }
+    }
+
+    private void StopBlitzTimer()
+    {
+        _blitzTimerCts?.Cancel();
+        _blitzTimerCts?.Dispose();
+        _blitzTimerCts = null;
+        IsSpeedBlitzActive = false;
+    }
+
     public void StopAudio()
     {
         _audioPlayer.Stop();
@@ -539,6 +671,7 @@ public partial class ReviewViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        StopBlitzTimer();
         _ratingLock.Dispose();
         GC.SuppressFinalize(this);
     }

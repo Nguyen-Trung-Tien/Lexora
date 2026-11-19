@@ -95,6 +95,17 @@ public partial class LocalizationService
         vi["Roadmap_Help_Title"] = "Trợ giúp: Lộ trình học thích ứng";
         vi["Roadmap_Help_Subtitle"] = "Chinh phục mục tiêu TOEIC, IELTS & VSTEP";
         vi["Roadmap_Help_Content"] = "Lộ trình học trực quan hóa các mốc kiến thức (Milestones) dạng uốn lượn. Hoàn thành mục tiêu hoặc đạt điểm ôn tập q >= 3 sẽ tự động mở khóa các node tiếp theo. Nhấp vào node bất kỳ để bắt đầu thử thách.";
+        vi["Roadmap_NodeType_VocabularySet"] = "Bộ từ vựng";
+        vi["Roadmap_NodeType_GrammarPoint"] = "Điểm ngữ pháp";
+        vi["Roadmap_NodeType_MockTest"] = "Bài thi thử";
+        vi["Roadmap_NodeType_Checkpoint"] = "Kiểm tra mốc";
+        vi["Roadmap_DailyPace"] = "Nhịp độ đề xuất";
+        vi["Roadmap_Pace_OnTrack"] = "Đúng tiến độ";
+        vi["Roadmap_Pace_Ahead"] = "Vượt tiến độ";
+        vi["Roadmap_Pace_Behind"] = "Cần tăng tốc";
+        vi["Roadmap_ItemsPerDay"] = "{0} mục/ngày";
+        vi["Roadmap_EstimatedPacePreview"] = "Dự kiến: ~{0} mục/ngày trong {1} tuần ({2} giai đoạn)";
+        vi["Roadmap_MarkCompletedOffline"] = "Đánh dấu hoàn thành (tự học)";
 
         // ==========================================
         // Roadmap — en-US (English)
@@ -187,5 +198,16 @@ public partial class LocalizationService
         en["Roadmap_Help_Title"] = "Quick Help: Adaptive Roadmap";
         en["Roadmap_Help_Subtitle"] = "Conquer TOEIC, IELTS & VSTEP Goals";
         en["Roadmap_Help_Content"] = "The Roadmap visualizes your milestone tree with smooth adaptive paths. Mastering items with rating q >= 3 automatically unlocks downstream nodes. Click any milestone node to inspect details and launch challenges.";
+        en["Roadmap_NodeType_VocabularySet"] = "Vocabulary Set";
+        en["Roadmap_NodeType_GrammarPoint"] = "Grammar Rule";
+        en["Roadmap_NodeType_MockTest"] = "Practice Test";
+        en["Roadmap_NodeType_Checkpoint"] = "Checkpoint";
+        en["Roadmap_DailyPace"] = "Recommended Pace";
+        en["Roadmap_Pace_OnTrack"] = "On Track";
+        en["Roadmap_Pace_Ahead"] = "Ahead of Pace";
+        en["Roadmap_Pace_Behind"] = "Needs Focus";
+        en["Roadmap_ItemsPerDay"] = "{0} items/day";
+        en["Roadmap_EstimatedPacePreview"] = "Estimated: ~{0} items/day over {1} weeks ({2} phases)";
+        en["Roadmap_MarkCompletedOffline"] = "Mark Completed (Offline)";
     }
 }

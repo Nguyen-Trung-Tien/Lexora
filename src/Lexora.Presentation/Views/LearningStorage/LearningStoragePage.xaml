@@ -8,6 +8,7 @@
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:enums="using:Lexora.Domain.Enums"
     xmlns:services="using:Lexora.Presentation.Services"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:vm="using:Lexora.Presentation.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="Transparent"
@@ -81,6 +82,7 @@
                 </Grid>
 
                 <TeachingTip x:Name="StorageHelpTeachingTip"
+                             helpers:ThemeSyncHelper.SyncTheme="True"
                              Target="{x:Bind StorageHelpButton}"
                              Title="{x:Bind Loc.GetString('Storage_Help_Title')}"
                              Subtitle="{x:Bind Loc.GetString('Storage_Help_Subtitle')}"
@@ -425,7 +427,7 @@
                                         <Button Width="36" Height="36" Padding="0" CornerRadius="18" Tag="{x:Bind}">
                                             <FontIcon Glyph="&#xE712;" FontSize="13" />
                                             <Button.Flyout>
-                                                <MenuFlyout Opening="CardMenuFlyout_Opening">
+                                                <MenuFlyout helpers:ThemeSyncHelper.SyncTheme="True" Opening="CardMenuFlyout_Opening">
                                                     <MenuFlyoutItem Text="{x:Bind services:LocalizationHelper.GetString('Storage_FilterWeak')}" Click="MenuMarkWeak_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE7BA;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />

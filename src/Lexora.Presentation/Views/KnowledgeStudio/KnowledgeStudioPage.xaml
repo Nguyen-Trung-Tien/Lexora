@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Lexora.Presentation.Views.KnowledgeStudio.KnowledgeStudioPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="Transparent"
+    UseLayoutRounding="True"
+    mc:Ignorable="d">
+
+    <Grid RowDefinitions="Auto,*" Background="Transparent">
+        <Border Grid.Row="0"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="20,8">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled"
+                          HorizontalScrollMode="Enabled"
+                          VerticalScrollMode="Disabled">
+                <SelectorBar x:Name="StudioSelectorBar" SelectionChanged="StudioSelectorBar_SelectionChanged">
+                    <SelectorBarItem x:Name="TabVocabulary" Tag="Vocabulary" Text="Vocabulary">
+                        <SelectorBarItem.Icon>
+                            <FontIcon Glyph="&#xE82D;" />
+                        </SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                    <SelectorBarItem x:Name="TabKnowledgeGraph" Tag="KnowledgeGraph" Text="Knowledge Graph">
+                        <SelectorBarItem.Icon>
+                            <FontIcon Glyph="&#xE81E;" />
+                        </SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                    <SelectorBarItem x:Name="TabHomophones" Tag="Homophones" Text="Homophones">
+                        <SelectorBarItem.Icon>
+                            <FontIcon Glyph="&#xE768;" />
+                        </SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                    <SelectorBarItem x:Name="TabGrammar" Tag="Grammar" Text="Grammar">
+                        <SelectorBarItem.Icon>
+                            <FontIcon Glyph="&#xE8D2;" />
+                        </SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                    <SelectorBarItem x:Name="TabPhrases" Tag="Phrases" Text="Phrases">
+                        <SelectorBarItem.Icon>
+                            <FontIcon Glyph="&#xE8BD;" />
+                        </SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                    <SelectorBarItem x:Name="TabMemoryTips" Tag="MemoryTips" Text="Memory Tips">
+                        <SelectorBarItem.Icon>
+                            <FontIcon Glyph="&#xE8D7;" />
+                        </SelectorBarItem.Icon>
+                    </SelectorBarItem>
+                </SelectorBar>
+            </ScrollViewer>
+        </Border>
+
+        <Frame x:Name="StudioContentFrame" Grid.Row="1" />
+    </Grid>
+</Page>

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Domain.Entities;
+using Lexora.Domain.Entities.Test;
 using Lexora.Domain.Enums;
 using Lexora.Domain.Interfaces;
 
@@ -12,20 +13,27 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     private readonly IVocabularyRepository _vocabRepo;
     private readonly IReviewRepository _reviewRepo;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IItemCalibrationRepository? _calibrationRepo;
+
+    private const double MinTheta = -3.0;
+    private const double MaxTheta = 3.0;
+    private const double AbilityStepK = 0.55;
+    private const double ItemStepK = 0.18;
 
     private class ActiveSessionState
     {
         public Guid SessionId { get; set; }
         public AdaptiveQuizConfigDto Config { get; set; } = null!;
         public CefrLevel CurrentCalibratedLevel { get; set; }
-        public int ConsecutiveCorrect { get; set; }
-        public int ConsecutiveIncorrect { get; set; }
+        public double AbilityTheta { get; set; }
+        public double CurrentQuestionDifficultyB { get; set; }
         public int CurrentQuestionIndex { get; set; }
         public AdaptiveQuestionDto? CurrentQuestion { get; set; }
         public List<AdaptiveAnswerEvaluationDto> Evaluations { get; } = new();
         public List<Guid> UsedWordIds { get; } = new();
         public List<Word> CandidateWordsPool { get; set; } = new();
         public List<Word> DistractorPool { get; set; } = new();
+        public Dictionary<Guid, ItemCalibration> Calibrations { get; set; } = new();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 
@@ -34,11 +42,13 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     public AdaptiveQuizService(
         IVocabularyRepository vocabRepo,
         IReviewRepository reviewRepo,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IItemCalibrationRepository? calibrationRepo = null)
     {
         _vocabRepo = vocabRepo;
         _reviewRepo = reviewRepo;
         _unitOfWork = unitOfWork;
+        _calibrationRepo = calibrationRepo;
     }
 
     public async Task<AdaptiveQuestionDto?> StartQuizAsync(AdaptiveQuizConfigDto config, CancellationToken cancellationToken = default)
@@ -73,13 +83,19 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             throw new InvalidOperationException("No vocabulary words available for adaptive quiz.");
         }
 
+        var calibrations = _calibrationRepo != null
+            ? new Dictionary<Guid, ItemCalibration>(await _calibrationRepo.GetByWordIdsAsync(candidates.Select(w => w.Id), cancellationToken))
+            : new Dictionary<Guid, ItemCalibration>();
+
         var sessionState = new ActiveSessionState
         {
             SessionId = sessionId,
             Config = config,
             CurrentCalibratedLevel = config.InitialLevel,
+            AbilityTheta = MapCefrToTheta(config.InitialLevel),
             CandidateWordsPool = candidates,
             DistractorPool = distractorPool.Count >= 4 ? distractorPool : candidates,
+            Calibrations = calibrations,
             CurrentQuestionIndex = 0
         };
 
@@ -121,27 +137,47 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             bool isCorrect = selectedOptionIndex == q.CorrectOptionIndex;
             var previousLevel = session.CurrentCalibratedLevel;
 
-            if (isCorrect)
+            // 1PL/Rasch + Elo-Hybrid Ability Update with Response-Time Fluency Weighting
+            double b = session.CurrentQuestionDifficultyB;
+            double expectedP = 1.0 / (1.0 + Math.Exp(-(session.AbilityTheta - b)));
+            double observed = isCorrect ? 1.0 : 0.0;
+            double fluencyFactor = ComputeFluencyWeight(isCorrect, responseTimeMs);
+
+            session.AbilityTheta = Math.Clamp(
+                Math.Round(session.AbilityTheta + AbilityStepK * fluencyFactor * (observed - expectedP), 3),
+                MinTheta,
+                MaxTheta);
+            session.CurrentCalibratedLevel = MapThetaToCefr(session.AbilityTheta);
+
+            // Update in-memory ItemCalibration for this word
+            if (session.Calibrations.TryGetValue(q.WordId, out var cal))
             {
-                session.ConsecutiveCorrect++;
-                session.ConsecutiveIncorrect = 0;
-                // Promote level if 2 consecutive correct answers
-                if (session.ConsecutiveCorrect >= 2 && session.CurrentCalibratedLevel < CefrLevel.C2)
+                cal.DifficultyB = Math.Clamp(Math.Round(cal.DifficultyB + ItemStepK * (expectedP - observed), 3), MinTheta, MaxTheta);
+                cal.AttemptCount++;
+                if (isCorrect) cal.CorrectCount++;
+                if (responseTimeMs > 0)
                 {
-                    session.CurrentCalibratedLevel = (CefrLevel)((int)session.CurrentCalibratedLevel + 1);
-                    session.ConsecutiveCorrect = 0;
+                    cal.MedianResponseTimeMs = cal.MedianResponseTimeMs <= 0
+                        ? responseTimeMs
+                        : (int)Math.Round(cal.MedianResponseTimeMs * 0.7 + responseTimeMs * 0.3);
                 }
+                cal.LastCalibratedAt = DateTime.UtcNow;
+                cal.UpdatedAt = DateTime.UtcNow;
             }
             else
             {
-                session.ConsecutiveIncorrect++;
-                session.ConsecutiveCorrect = 0;
-                // Demote level if 2 consecutive incorrect answers
-                if (session.ConsecutiveIncorrect >= 2 && session.CurrentCalibratedLevel > CefrLevel.A1)
+                var word = session.CandidateWordsPool.FirstOrDefault(w => w.Id == q.WordId);
+                double baseB = word != null ? MapCefrToTheta(word.Level) : b;
+                session.Calibrations[q.WordId] = new ItemCalibration
                 {
-                    session.CurrentCalibratedLevel = (CefrLevel)((int)session.CurrentCalibratedLevel - 1);
-                    session.ConsecutiveIncorrect = 0;
-                }
+                    WordId = q.WordId,
+                    DifficultyB = Math.Clamp(Math.Round(baseB + ItemStepK * (expectedP - observed), 3), MinTheta, MaxTheta),
+                    DiscriminationA = 1.0,
+                    AttemptCount = 1,
+                    CorrectCount = isCorrect ? 1 : 0,
+                    MedianResponseTimeMs = Math.Max(0, responseTimeMs),
+                    LastCalibratedAt = DateTime.UtcNow
+                };
             }
 
             int totalAnswered = session.Evaluations.Count + 1;
@@ -149,8 +185,8 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             double runningScore = Math.Round((double)correctCount / totalAnswered * 100.0, 1);
 
             string feedback = isCorrect
-                ? $"Chính xác! Trình độ thích ứng: {session.CurrentCalibratedLevel}."
-                : $"Chưa chính xác. Đáp án đúng: '{q.Options[q.CorrectOptionIndex]}'.";
+                ? $"Chính xác! Trình độ thích ứng: {session.CurrentCalibratedLevel} (θ = {session.AbilityTheta:F2})."
+                : $"Chưa chính xác. Đáp án đúng: '{q.Options[q.CorrectOptionIndex]}' (θ = {session.AbilityTheta:F2}).";
 
             var eval = new AdaptiveAnswerEvaluationDto(
                 QuestionIndex: questionIndex,
@@ -162,7 +198,8 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                 PreviousCalibratedLevel: previousLevel,
                 NewCalibratedLevel: session.CurrentCalibratedLevel,
                 RunningScorePercent: runningScore,
-                FeedbackMessage: feedback
+                FeedbackMessage: feedback,
+                EstimatedAbilityTheta: session.AbilityTheta
             );
 
             session.Evaluations.Add(eval);
@@ -245,6 +282,26 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         };
 
         await _reviewRepo.CreateStudySessionAsync(studySession, cancellationToken);
+
+        // Persist updated IRT ItemCalibrations atomically
+        if (_calibrationRepo != null && session.Evaluations.Count > 0)
+        {
+            var answeredWordIds = session.Evaluations.Select(e => e.WordId).Distinct().ToList();
+            var existingInDb = await _calibrationRepo.GetByWordIdsAsync(answeredWordIds, cancellationToken);
+            foreach (var wordId in answeredWordIds)
+            {
+                if (!session.Calibrations.TryGetValue(wordId, out var cal)) continue;
+                if (existingInDb.ContainsKey(wordId))
+                {
+                    await _calibrationRepo.UpdateAsync(cal, cancellationToken);
+                }
+                else
+                {
+                    await _calibrationRepo.AddAsync(cal, cancellationToken);
+                }
+            }
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new AdaptiveQuizSummaryDto(
@@ -262,7 +319,8 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             DifficultWordsToReview: weakWords,
             KeyStrengths: strengths,
             RecommendedNextSteps: recommendations,
-            CompletedAt: DateTime.UtcNow
+            CompletedAt: DateTime.UtcNow,
+            FinalAbilityTheta: session.AbilityTheta
         );
     }
 
@@ -277,8 +335,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             return Task.FromResult<AdaptiveQuestionDto?>(null);
         }
 
-        // Select next word targeting CurrentCalibratedLevel that has not been used yet
-        var targetLevel = session.CurrentCalibratedLevel;
+        // Maximum Fisher Information selection: choose unused word with difficulty b closest to current theta
         var availableWords = session.CandidateWordsPool
             .Where(w => !session.UsedWordIds.Contains(w.Id))
             .ToList();
@@ -288,22 +345,39 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             availableWords = session.CandidateWordsPool.ToList();
         }
 
-        var matchedLevelWords = availableWords.Where(w => w.Level == targetLevel).ToList();
-        var selectedWord = matchedLevelWords.Count > 0
-            ? matchedLevelWords[Random.Shared.Next(matchedLevelWords.Count)]
-            : availableWords[Random.Shared.Next(availableWords.Count)];
+        var rankedCandidates = availableWords
+            .Select(w => (Word: w, DiffB: GetWordDifficultyB(session, w)))
+            .Select(x => (x.Word, x.DiffB, Dist: Math.Abs(x.DiffB - session.AbilityTheta)))
+            .OrderBy(x => x.Dist)
+            .ToList();
 
+        double minDist = rankedCandidates[0].Dist;
+        var bestTier = rankedCandidates
+            .Where(x => Math.Abs(x.Dist - minDist) <= 0.25)
+            .Take(5)
+            .ToList();
+
+        var chosen = bestTier[Random.Shared.Next(bestTier.Count)];
+        var selectedWord = chosen.Word;
+        session.CurrentQuestionDifficultyB = chosen.DiffB;
         session.UsedWordIds.Add(selectedWord.Id);
 
-        // Generate multiple-choice options with realistic distractors
+        // Smart Distractor Selection: prioritize same PartOfSpeech or shared Topic
         var meaning = selectedWord.Meanings.FirstOrDefault();
         string correctMeaning = meaning?.DefinitionVi ?? "Đang cập nhật";
+        var selectedTopicIds = selectedWord.WordTopics.Select(wt => wt.TopicId).ToHashSet();
 
         var otherDistractors = session.DistractorPool
             .Where(w => w.Id != selectedWord.Id && w.Meanings.Count > 0)
-            .OrderBy(_ => Random.Shared.Next())
+            .Where(w => !string.Equals(w.Meanings.First().DefinitionVi, correctMeaning, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(w =>
+                (w.PrimaryPartOfSpeech == selectedWord.PrimaryPartOfSpeech ? 2 : 0) +
+                (w.WordTopics.Any(wt => selectedTopicIds.Contains(wt.TopicId)) ? 2 : 0) +
+                (Math.Abs((int)w.Level - (int)selectedWord.Level) <= 1 ? 1 : 0))
+            .ThenBy(_ => Random.Shared.Next())
             .Take(3)
             .Select(w => w.Meanings.First().DefinitionVi)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         while (otherDistractors.Count < 3)
@@ -329,14 +403,58 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             DifficultyLevel: selectedWord.Level,
             Options: options,
             CorrectOptionIndex: correctIndex,
-            Explanation: $"'{selectedWord.Term}': {correctMeaning} [Cấp độ CEFR: {selectedWord.Level}]",
+            Explanation: $"'{selectedWord.Term}': {correctMeaning} [CEFR: {selectedWord.Level} | b={chosen.DiffB:F2}]",
             ExampleSentence: exampleEn,
-            AudioPath: selectedWord.AudioUsPath ?? selectedWord.AudioUkPath
+            AudioPath: selectedWord.AudioUsPath ?? selectedWord.AudioUkPath,
+            ItemDifficultyB: chosen.DiffB,
+            CurrentTheta: session.AbilityTheta
         );
 
         session.CurrentQuestion = question;
         return Task.FromResult<AdaptiveQuestionDto?>(question);
     }
+
+    private static double GetWordDifficultyB(ActiveSessionState session, Word word)
+    {
+        if (session.Calibrations.TryGetValue(word.Id, out var cal) && cal.AttemptCount > 0)
+        {
+            return cal.DifficultyB;
+        }
+        return MapCefrToTheta(word.Level);
+    }
+
+    private static double ComputeFluencyWeight(bool isCorrect, int responseTimeMs)
+    {
+        if (responseTimeMs <= 0) return 1.0;
+        if (isCorrect)
+        {
+            if (responseTimeMs <= 3500) return 1.20;
+            if (responseTimeMs >= 10000) return 0.65;
+            return 1.0;
+        }
+        return responseTimeMs <= 2500 ? 1.10 : 1.0;
+    }
+
+    private static double MapCefrToTheta(CefrLevel level) => level switch
+    {
+        CefrLevel.A1 => -2.0,
+        CefrLevel.A2 => -1.0,
+        CefrLevel.B1 => 0.0,
+        CefrLevel.B2 => 1.0,
+        CefrLevel.C1 => 2.0,
+        CefrLevel.C2 => 2.8,
+        _ => 0.0
+    };
+
+    private static CefrLevel MapThetaToCefr(double theta) => theta switch
+    {
+        < -1.5 => CefrLevel.A1,
+        < -0.5 => CefrLevel.A2,
+        < 0.5 => CefrLevel.B1,
+        < 1.5 => CefrLevel.B2,
+        < 2.4 => CefrLevel.C1,
+        _ => CefrLevel.C2
+    };
 
     private static void PruneStaleSessions()
     {

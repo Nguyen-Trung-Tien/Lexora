@@ -14,19 +14,22 @@ public class GrammarService : IGrammarService
     private readonly ISmartSearchService? _smartSearch;
     private readonly ISmartSearchCacheService? _cacheService;
     private readonly IVocabularyService? _vocabService;
+    private readonly IReviewRepository? _reviewRepository;
 
     public GrammarService(
         IGrammarRepository grammarRepo,
         IUnitOfWork unitOfWork,
         ISmartSearchService? smartSearch = null,
         ISmartSearchCacheService? cacheService = null,
-        IVocabularyService? vocabService = null)
+        IVocabularyService? vocabService = null,
+        IReviewRepository? reviewRepository = null)
     {
         _grammarRepo = grammarRepo;
         _unitOfWork = unitOfWork;
         _smartSearch = smartSearch;
         _cacheService = cacheService;
         _vocabService = vocabService;
+        _reviewRepository = reviewRepository;
     }
 
     public async Task<IReadOnlyList<GrammarRuleDto>> GetAllRulesAsync(CancellationToken cancellationToken = default)
@@ -387,6 +390,37 @@ public class GrammarService : IGrammarService
             scorePercent,
             evaluatedQuestions
         );
+    }
+
+    public async Task RecordGrammarPracticeSessionAsync(
+        string? topicOrRuleName,
+        int totalQuestions,
+        int correctCount,
+        CancellationToken cancellationToken = default)
+    {
+        if (_reviewRepository == null || totalQuestions <= 0)
+        {
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        var suffix = string.IsNullOrWhiteSpace(topicOrRuleName) ? "Quiz" : topicOrRuleName.Trim();
+        if (suffix.Length > 40)
+        {
+            suffix = suffix[..40];
+        }
+
+        var session = new StudySession
+        {
+            StartedAt = now,
+            CompletedAt = now,
+            TotalCards = totalQuestions,
+            CorrectCards = Math.Clamp(correctCount, 0, totalQuestions),
+            SessionType = $"Grammar_{suffix}"
+        };
+
+        await _reviewRepository.CreateStudySessionAsync(session, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<GrammarRelatedSuggestionsDto> GetGrammarSuggestionsAsync(Guid ruleId, CancellationToken cancellationToken = default)

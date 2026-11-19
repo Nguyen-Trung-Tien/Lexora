@@ -20,5 +20,18 @@ public record StudyAdviceSummaryDto(
     string AdviceDescriptionEn,
     string ActionButtonTextVi,
     string ActionButtonTextEn,
-    string? TargetExamContext
+    string? TargetExamContext,
+    double ExamReadinessPercent = 0.0,
+    int LeechCardsCount = 0
+);
+
+public record TimeBudgetPlanDto(
+    int AvailableMinutes,
+    int UrgentReviewCount,
+    int LeechDrillCount,
+    int NewWordsCount,
+    int EstimatedTotalCards,
+    double ExamReadinessPercent,
+    string SummaryVi,
+    string SummaryEn
 );

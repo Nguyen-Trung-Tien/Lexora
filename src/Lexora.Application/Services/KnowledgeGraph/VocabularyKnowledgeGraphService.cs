@@ -415,6 +415,8 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
         int colCount = connectedNodes.Count(n => n.NodeType == KnowledgeGraphNodeType.Collocation);
         int topCount = connectedNodes.Count(n => n.NodeType == KnowledgeGraphNodeType.TopicCluster);
 
+        ApplyClusterRadialLayout(centerNode, connectedNodes);
+
         return new VocabularyKnowledgeGraphDto(
             CenterNode: centerNode,
             ConnectedNodes: connectedNodes,
@@ -426,6 +428,40 @@ public class VocabularyKnowledgeGraphService : IVocabularyKnowledgeGraphService
             TopicWordsCount: topCount,
             TotalConnections: connectedNodes.Count
         );
+    }
+
+    private static void ApplyClusterRadialLayout(GraphNodeDto centerNode, IReadOnlyList<GraphNodeDto> nodes)
+    {
+        const double centerX = 480.0;
+        const double centerY = 340.0;
+        centerNode.LayoutX = centerX;
+        centerNode.LayoutY = centerY;
+
+        if (nodes.Count == 0) return;
+
+        // Assign angular sectors by relationship cluster for clear visual separation
+        var groups = nodes.GroupBy(n => n.NodeType).ToList();
+        foreach (var group in groups)
+        {
+            var (startAngle, sweep) = group.Key switch
+            {
+                KnowledgeGraphNodeType.Synonym => (-Math.PI * 0.45, Math.PI * 0.65),
+                KnowledgeGraphNodeType.WordFamily => (Math.PI * 0.25, Math.PI * 0.50),
+                KnowledgeGraphNodeType.Antonym => (Math.PI * 0.80, Math.PI * 0.55),
+                KnowledgeGraphNodeType.Collocation => (-Math.PI * 0.95, Math.PI * 0.45),
+                _ => (Math.PI * 1.38, Math.PI * 0.45)
+            };
+
+            var list = group.ToList();
+            for (int i = 0; i < list.Count; i++)
+            {
+                double fraction = list.Count == 1 ? 0.5 : (double)i / (list.Count - 1);
+                double angle = startAngle + fraction * sweep;
+                double radius = 210.0 + (i % 2) * 55.0;
+                list[i].LayoutX = Math.Round(centerX + Math.Cos(angle) * radius, 1);
+                list[i].LayoutY = Math.Round(centerY + Math.Sin(angle) * radius, 1);
+            }
+        }
     }
 
     private static GraphNodeDto CreateNodeFromSuggestion(

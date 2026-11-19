@@ -276,12 +276,33 @@ public sealed class ShortcutResolver
     }
 
     /// <summary>
+    /// Normalizes NumPad digits (NumPad0..NumPad9) to top-row digits (Number0..Number9)
+    /// so numeric shortcuts work identically across main keyboard and numeric keypad.
+    /// </summary>
+    public static ShortcutKey NormalizeKey(ShortcutKey key) => key switch
+    {
+        ShortcutKey.NumPad0 => ShortcutKey.Number0,
+        ShortcutKey.NumPad1 => ShortcutKey.Number1,
+        ShortcutKey.NumPad2 => ShortcutKey.Number2,
+        ShortcutKey.NumPad3 => ShortcutKey.Number3,
+        ShortcutKey.NumPad4 => ShortcutKey.Number4,
+        ShortcutKey.NumPad5 => ShortcutKey.Number5,
+        ShortcutKey.NumPad6 => ShortcutKey.Number6,
+        ShortcutKey.NumPad7 => ShortcutKey.Number7,
+        ShortcutKey.NumPad8 => ShortcutKey.Number8,
+        ShortcutKey.NumPad9 => ShortcutKey.Number9,
+        _ => key
+    };
+
+    /// <summary>
     /// Resolves the winning shortcut definition based on priority hierarchy and active context.
     /// </summary>
     public ShortcutDefinition? Resolve(ShortcutKey key, ShortcutModifiers modifiers, bool isTextInputFocused, bool isDialogOpen, Type? currentPageType)
     {
+        var normalizedKey = NormalizeKey(key);
+
         // 1. Text input protection
-        if (isTextInputFocused && IsNativeTextEditingKey(key, modifiers))
+        if (isTextInputFocused && IsNativeTextEditingKey(normalizedKey, modifiers))
         {
             return null;
         }
@@ -290,7 +311,7 @@ public sealed class ShortcutResolver
         lock (_lock)
         {
             candidates = _shortcuts.Values
-                .Where(s => s.Matches(key, modifiers))
+                .Where(s => s.Matches(normalizedKey, modifiers))
                 .ToList();
         }
 

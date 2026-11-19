@@ -27,12 +27,14 @@ public partial class ReviewViewModel
         {
             TypingFeedbackMessage = _localizationService.GetString("Review_TypingFeedbackCorrect");
             IsAnswerVisible = true;
+            UpdateSuggestedRating();
             _ = PlayPreferredAudioAsync();
         }
         else
         {
             TypingFeedbackMessage = string.Format(_localizationService.GetString("Review_TypingFeedbackIncorrectFormat"), actual, CurrentCard.Term);
             IsAnswerVisible = true;
+            UpdateSuggestedRating();
         }
     }
 

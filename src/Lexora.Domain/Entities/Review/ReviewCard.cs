@@ -22,5 +22,11 @@ public class ReviewCard : Entity
     public int CorrectReviews { get; set; } = 0;
     public double Confidence => TotalReviews == 0 ? 0.0 : Math.Round((double)CorrectReviews / TotalReviews * 100, 1);
 
+    // FSRS-5 native telemetry & leech guard
+    public double? DesiredRetention { get; set; }
+    public bool IsLeech { get; set; } = false;
+    public double LastElapsedDays { get; set; } = 0.0;
+    public int AverageResponseTimeMs { get; set; } = 0;
+
     public ICollection<StudyLog> StudyLogs { get; set; } = new List<StudyLog>();
 }

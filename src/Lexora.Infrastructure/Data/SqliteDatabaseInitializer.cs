@@ -1,6 +1,7 @@
 using Lexora.Domain.Entities;
 using Lexora.Domain.Entities.Phrases;
 using Lexora.Domain.Enums;
+using Lexora.Infrastructure.Data.Migrations;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,7 @@ public partial class SqliteDatabaseInitializer
                     cancellationToken);
 
                 await EnsureSchemaCompatibilityAsync(cancellationToken);
+                await VersionedSqliteMigrator.MigrateToLatestAsync(_context, _logger, cancellationToken);
 
                 if (!await _context.Words.AnyAsync(cancellationToken))
                 {

@@ -11,7 +11,7 @@ public record UserPreferences
     public bool IsNavPaneOpen { get; init; } = true;
     public string PreferredAccent { get; init; } = "uk"; // "uk" (en-GB) or "us" (en-US)
     public bool AutoCheckUpdates { get; init; } = true;
-    public string SpacedRepetitionAlgorithm { get; init; } = "SM2"; // "SM2" or "FSRS"
+    public string SpacedRepetitionAlgorithm { get; init; } = "FSRS"; // "FSRS" or "SM2"
     public double TargetRetention { get; init; } = 0.90; // 0.85, 0.90, 0.95
 
     // Roadmap view state persistence

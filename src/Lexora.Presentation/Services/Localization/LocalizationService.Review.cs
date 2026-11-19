@@ -105,6 +105,21 @@ public partial class LocalizationService
         vi["Review_Help_Title"] = "Trợ giúp: Ôn tập Spaced Repetition";
         vi["Review_Help_Subtitle"] = "Quy tắc đánh giá 4 mức nhớ";
         vi["Review_Help_Content"] = "Nhấn Phím Cách (Space) để lật thẻ. Chọn 1 (Again: quên hẳn), 2 (Hard: nhớ khó khăn), 3 (Good: nhớ chuẩn), 4 (Easy: thuộc lòng). Dùng Ctrl+Z nếu đánh giá nhầm.";
+        vi["SmartReview_StandardDue"] = "Ôn tập định kỳ thông minh";
+        vi["SmartReview_SpeedBlitz"] = "Speed Blitz (Phản xạ 3s)";
+        vi["SmartReview_LeechRescue"] = "Leech Rescue (Giải cứu từ khó)";
+        vi["SmartReview_HighYieldExam"] = "Trọng tâm Đề thi (High-Yield)";
+        vi["SmartReview_ContextImmersion"] = "Đắm chìm Ngữ cảnh";
+        vi["Review_RequeuedInSession"] = "Ôn lại trong phiên";
+        vi["Review_SuggestedBadge"] = "Gợi ý";
+        vi["Review_BlitzTimerFormat"] = "Phản xạ: {0:0.0}s";
+        vi["Review_LeechBannerTitle"] = "Từ hay quên (Leech)";
+        vi["Review_LeechBannerDescFormat"] = "Bạn đã quên từ này {0} lần. Hãy đọc kỹ câu ví dụ hoặc dùng gợi ý để khắc sâu.";
+        vi["Review_TrueRetentionLabel"] = "Tỷ lệ nhớ thực tế (30 ngày)";
+        vi["Review_TargetRetentionLabel"] = "Mục tiêu";
+        vi["Review_Calibration_Optimal"] = "Nhịp ôn tập đang tối ưu theo mục tiêu.";
+        vi["Review_Calibration_RaiseRetention"] = "Tỷ lệ nhớ thấp hơn mục tiêu — nên tăng Target Retention.";
+        vi["Review_Calibration_LowerRetention"] = "Bạn nhớ rất tốt — có thể giảm nhẹ Target Retention để giảm tải.";
 
         // ==========================================
         // Review — en-US (English)
@@ -207,5 +222,20 @@ public partial class LocalizationService
         en["Review_Help_Title"] = "Quick Help: Spaced Repetition";
         en["Review_Help_Subtitle"] = "4-Tier Rating Guidelines";
         en["Review_Help_Content"] = "Press Space to flip the card. Choose 1 (Again: complete blackout), 2 (Hard: hesitation), 3 (Good: standard recall), 4 (Easy: instant reflex). Press Ctrl+Z to undo mistakes.";
+        en["SmartReview_StandardDue"] = "Smart Spaced Repetition";
+        en["SmartReview_SpeedBlitz"] = "Speed Blitz (3s Reflex)";
+        en["SmartReview_LeechRescue"] = "Leech & Difficult Rescue";
+        en["SmartReview_HighYieldExam"] = "High-Yield Exam Focus";
+        en["SmartReview_ContextImmersion"] = "Contextual Immersion";
+        en["Review_RequeuedInSession"] = "Re-learning in session";
+        en["Review_SuggestedBadge"] = "Suggested";
+        en["Review_BlitzTimerFormat"] = "Reflex: {0:0.0}s";
+        en["Review_LeechBannerTitle"] = "Stubborn Word (Leech)";
+        en["Review_LeechBannerDescFormat"] = "You've lapsed on this word {0} times. Focus on context or hints to reinforce recall.";
+        en["Review_TrueRetentionLabel"] = "True Retention (30d)";
+        en["Review_TargetRetentionLabel"] = "Target";
+        en["Review_Calibration_Optimal"] = "Your recall pace aligns well with your target retention.";
+        en["Review_Calibration_RaiseRetention"] = "True retention is below target — consider raising Target Retention.";
+        en["Review_Calibration_LowerRetention"] = "Strong recall! You can lower Target Retention slightly to reduce workload.";
     }
 }

@@ -8,27 +8,67 @@
     UseLayoutRounding="True"
     mc:Ignorable="d">
 
-    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Spacing="10">
+    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="16" RowSpacing="10">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="HeaderLayoutStates">
+                <VisualState x:Name="WideHeaderState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="860" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ActionsPresenter.(Grid.Row)" Value="0" />
+                        <Setter Target="ActionsPresenter.(Grid.Column)" Value="1" />
+                        <Setter Target="ActionsPresenter.HorizontalAlignment" Value="Right" />
+                        <Setter Target="TitleContainer.(Grid.ColumnSpan)" Value="1" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CompactHeaderState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ActionsPresenter.(Grid.Row)" Value="1" />
+                        <Setter Target="ActionsPresenter.(Grid.Column)" Value="0" />
+                        <Setter Target="ActionsPresenter.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="ActionsPresenter.HorizontalAlignment" Value="Left" />
+                        <Setter Target="TitleContainer.(Grid.ColumnSpan)" Value="2" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Grid x:Name="TitleContainer" Grid.Row="0" Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalAlignment="Center">
+            <Border Grid.Column="0"
+                    Width="38" Height="38"
+                    CornerRadius="{ThemeResource OverlayCornerRadius}"
+                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                    BackgroundSizing="InnerBorderEdge"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Visibility="{x:Bind IconVisibility, Mode=OneWay}"
+                    VerticalAlignment="Center">
                 <FontIcon x:Name="HeaderIcon"
                           Glyph="{x:Bind IconGlyph, Mode=OneWay}"
-                          Visibility="{x:Bind IconVisibility, Mode=OneWay}"
-                          FontSize="20"
+                          FontSize="18"
                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                          HorizontalAlignment="Center"
                           VerticalAlignment="Center" />
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                 <TextBlock Text="{x:Bind Title, Mode=OneWay}"
                            Style="{StaticResource LexoraDisplayTitleStyle}"
                            TextWrapping="Wrap"
                            VerticalAlignment="Center" />
+                <TextBlock Text="{x:Bind Subtitle, Mode=OneWay}"
+                           Visibility="{x:Bind SubtitleVisibility, Mode=OneWay}"
+                           Style="{StaticResource LexoraBodyStyle}"
+                           TextWrapping="Wrap" />
             </StackPanel>
-            <TextBlock Text="{x:Bind Subtitle, Mode=OneWay}"
-                       Visibility="{x:Bind SubtitleVisibility, Mode=OneWay}"
-                       Style="{StaticResource LexoraBodyStyle}"
-                       TextWrapping="Wrap" />
-        </StackPanel>
+        </Grid>
 
-        <ContentPresenter Grid.Column="1"
+        <ContentPresenter x:Name="ActionsPresenter"
+                          Grid.Row="0"
+                          Grid.Column="1"
                           Content="{x:Bind ActionsContent, Mode=OneWay}"
                           VerticalAlignment="Center" />
     </Grid>

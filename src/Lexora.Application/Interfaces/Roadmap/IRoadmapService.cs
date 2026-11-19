@@ -16,4 +16,5 @@ public interface IRoadmapService
     Task<StudyRoadmapDto?> ResetRoadmapProgressAsync(Guid roadmapId, CancellationToken cancellationToken = default);
     Task<int> ClearInactiveRoadmapsAsync(CancellationToken cancellationToken = default);
     Task<bool> ClearAllRoadmapsAsync(CancellationToken cancellationToken = default);
+    Task<StudyRoadmapDto?> RebalanceRoadmapPacingAsync(CancellationToken cancellationToken = default);
 }

@@ -86,6 +86,10 @@ public sealed partial class ToastOverlayControl : UserControl
         {
             toastService.ToastRequested += OnToastRequested;
         }
+        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService)
+        {
+            themeService.ThemeChanged += OnThemeChanged;
+        }
     }
 
     private void ToastOverlayControl_Unloaded(object sender, RoutedEventArgs e)
@@ -94,7 +98,20 @@ public sealed partial class ToastOverlayControl : UserControl
         {
             toastService.ToastRequested -= OnToastRequested;
         }
+        if (App.Current?.Services?.GetService<IThemeService>() is { } themeService)
+        {
+            themeService.ThemeChanged -= OnThemeChanged;
+        }
         _tickTimer.Stop();
+    }
+
+    private void OnThemeChanged(object? sender, ElementTheme theme)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            RequestedTheme = theme;
+            ThemeResourceHelper.RefreshLiveBrushes();
+        });
     }
 
     private void OnToastRequested(ToastNotification notification)

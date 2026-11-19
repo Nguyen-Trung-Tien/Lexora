@@ -18,19 +18,25 @@ public class FsrsSpacedRepetitionEngine : IFsrsSpacedRepetitionEngine
     private const double MinDifficulty = 1.0;
     private const double MaxDifficulty = 10.0;
 
-    // FSRS default calibrated parameters
+    // FSRS v5 19-parameter calibrated weight vector
     private static readonly double[] W =
     {
-        0.4072, 1.1827, 3.1262, 15.4722,  // Initial stabilities for Again, Hard, Good, Easy
-        7.2102,                            // Initial difficulty base
-        0.5316,                            // Difficulty grade adjustment factor
-        1.0651,                            // Mean reversion factor
-        0.0234,                            // Stability recall decay
-        1.6160,                            // Stability recall power
-        0.1544,                            // Stability lapse base
-        1.0824,                            // Stability lapse difficulty power
-        1.9813,                            // Stability lapse stability power
-        0.0953                             // Stability lapse retrievability factor
+        0.40255, 1.18385, 3.17300, 15.69105, // W[0..3]: Initial stabilities for Again, Hard, Good, Easy
+        7.19490,                             // W[4]: Initial difficulty base
+        0.53450,                             // W[5]: Initial difficulty grade adjustment
+        1.46040,                             // W[6]: Difficulty delta factor
+        0.00460,                             // W[7]: Difficulty mean reversion factor
+        1.54575,                             // W[8]: Recall stability growth exponent
+        0.11920,                             // W[9]: Recall stability power decay
+        1.01925,                             // W[10]: Recall retrievability sensitivity
+        1.93950,                             // W[11]: Lapse stability base
+        0.11000,                             // W[12]: Lapse difficulty power
+        0.29605,                             // W[13]: Lapse stability power
+        2.26980,                             // W[14]: Lapse retrievability sensitivity
+        0.23150,                             // W[15]: Hard penalty factor
+        2.98980,                             // W[16]: Easy bonus factor
+        0.51655,                             // W[17]: Same-day short-term stability scale
+        0.66210                              // W[18]: Same-day short-term grade offset
     };
 
     public SpacedRepetitionResult CalculateNextReview(ReviewCard card, ReviewRating rating, DateTime? reviewTimeUtc = null)
@@ -68,9 +74,9 @@ public class FsrsSpacedRepetitionEngine : IFsrsSpacedRepetitionEngine
 
         if (reps == 0 || card.Status == LearningStatus.New)
         {
-            // First learning step
+            // First learning step (FSRS-5 initial stability & difficulty)
             newS = W[grade - 1];
-            newD = Math.Clamp(W[4] - Math.Exp(W[5] * (grade - 1)) + 1, MinDifficulty, MaxDifficulty);
+            newD = Math.Clamp(W[4] - Math.Exp(W[5] * (grade - 1)) + 1.0, MinDifficulty, MaxDifficulty);
             reps = 1;
             if (grade == 1) lapses++;
         }
@@ -81,33 +87,58 @@ public class FsrsSpacedRepetitionEngine : IFsrsSpacedRepetitionEngine
             double elapsedDays = Math.Max(0.0, (now - lastReview).TotalDays);
             double retrievability = CalculateRetrievability(currentS, elapsedDays);
 
-            // Update difficulty: D' = D + deltaD
-            double deltaD = -W[5] * (grade - 3);
-            newD = Math.Clamp(W[6] * W[4] + (1 - W[6]) * (currentD + deltaD), MinDifficulty, MaxDifficulty);
+            // FSRS-5 Difficulty update with mean reversion toward D0(4)
+            double d0Easy = W[4] - Math.Exp(W[5] * 3) + 1.0;
+            double deltaD = -W[6] * (grade - 3);
+            double nextD = currentD + deltaD * ((10.0 - currentD) / 9.0);
+            newD = Math.Clamp(W[7] * d0Easy + (1.0 - W[7]) * nextD, MinDifficulty, MaxDifficulty);
 
-            if (grade == 1)
+            if (card.LastReviewedAt.HasValue && elapsedDays < 1.0)
+            {
+                // FSRS-5 Same-day short-term stability formula
+                newS = Math.Clamp(
+                    currentS * Math.Exp(W[17] * (grade - 3 + W[18])),
+                    MinStability,
+                    MaxStability
+                );
+                if (grade == 1)
+                {
+                    lapses++;
+                    reps = 0;
+                }
+                else
+                {
+                    reps++;
+                }
+            }
+            else if (grade == 1)
             {
                 // Lapse
                 lapses++;
                 reps = 0;
                 newS = Math.Clamp(
-                    W[9] * Math.Pow(currentD, -W[10]) * Math.Pow(currentS, W[11]) * Math.Exp((1 - retrievability) * W[12]),
+                    W[11] * Math.Pow(newD, -W[12]) * (Math.Pow(currentS + 1.0, W[13]) - 1.0) * Math.Exp(W[14] * (1.0 - retrievability)),
                     MinStability,
-                    Math.Max(MinStability, currentS * 0.5)
+                    Math.Max(MinStability, currentS * 0.6)
                 );
             }
             else
             {
-                // Recall success
+                // Long-term recall success
                 reps++;
-                double hardPenalty = grade == 2 ? 0.8 : 1.0;
-                double easyBonus = grade == 4 ? 1.3 : 1.0;
-                double minMultiplier = grade == 2 ? 1.05 : (grade == 3 ? 1.2 : 1.4);
+                double hardPenalty = grade == 2 ? W[15] : 1.0;
+                double easyBonus = grade == 4 ? W[16] : 1.0;
+                double minMultiplier = grade == 2 ? 1.05 : (grade == 3 ? 1.15 : 1.35);
 
-                double stabilityGrowth = Math.Exp(W[7]) * (11 - newD) * Math.Pow(currentS, -W[8]) * (Math.Exp((1 - retrievability) * 0.1) - 1) * hardPenalty * easyBonus;
+                double stabilityGrowth = Math.Exp(W[8])
+                    * (11.0 - newD)
+                    * Math.Pow(currentS, -W[9])
+                    * (Math.Exp(W[10] * (1.0 - retrievability)) - 1.0)
+                    * hardPenalty
+                    * easyBonus;
 
                 newS = Math.Clamp(
-                    currentS * Math.Max(minMultiplier, 1 + stabilityGrowth),
+                    currentS * Math.Max(minMultiplier, 1.0 + stabilityGrowth),
                     MinStability,
                     MaxStability
                 );
@@ -176,11 +207,15 @@ public class FsrsSpacedRepetitionEngine : IFsrsSpacedRepetitionEngine
     }
 
     public IntervalPreviewDto GetIntervalPreview(ReviewCard card, DateTime? reviewTimeUtc = null)
+        => GetIntervalPreview(card, reviewTimeUtc, card.DesiredRetention ?? DefaultDesiredRetention);
+
+    public IntervalPreviewDto GetIntervalPreview(ReviewCard card, DateTime? reviewTimeUtc, double desiredRetention)
     {
-        var again = CalculateFsrsNextReview(card, ReviewRating.Again, reviewTimeUtc);
-        var hard = CalculateFsrsNextReview(card, ReviewRating.Hard, reviewTimeUtc);
-        var good = CalculateFsrsNextReview(card, ReviewRating.Good, reviewTimeUtc);
-        var easy = CalculateFsrsNextReview(card, ReviewRating.Easy, reviewTimeUtc);
+        double targetR = Math.Clamp(desiredRetention, 0.70, 0.98);
+        var again = CalculateFsrsNextReview(card, ReviewRating.Again, reviewTimeUtc, targetR);
+        var hard = CalculateFsrsNextReview(card, ReviewRating.Hard, reviewTimeUtc, targetR);
+        var good = CalculateFsrsNextReview(card, ReviewRating.Good, reviewTimeUtc, targetR);
+        var easy = CalculateFsrsNextReview(card, ReviewRating.Easy, reviewTimeUtc, targetR);
 
         return new IntervalPreviewDto(
             AgainText: FormatInterval(again.IntervalDays),
@@ -204,6 +239,72 @@ public class FsrsSpacedRepetitionEngine : IFsrsSpacedRepetitionEngine
 
         double r = CalculateRetrievability(s, elapsedDays);
         return Math.Clamp(Math.Round(r * 100.0, 1), 5.0, 100.0);
+    }
+
+    public bool IsLeechCard(ReviewCard card)
+    {
+        if (card.Lapses >= 6) return true;
+        return card.Lapses >= 4 && card.TotalReviews > 0 && card.Confidence < 40.0;
+    }
+
+    public double CalculatePriorityScore(ReviewCard card, DateTime? asOfUtc = null, ExamTarget? activeExamTarget = null)
+    {
+        var now = asOfUtc ?? DateTime.UtcNow;
+        double retentionPct = CalculateRetentionProbability(card, now);
+        double targetPct = (card.DesiredRetention ?? DefaultDesiredRetention) * 100.0;
+
+        // Cards near or just below target retention get highest priority; leeches get a modest boost
+        double urgency = Math.Max(0.0, targetPct - retentionPct);
+        double overdueDays = Math.Max(0.0, (now - card.NextReviewAt).TotalDays);
+        double leechBoost = IsLeechCard(card) ? 12.0 : 0.0;
+
+        double examBoost = 0.0;
+        if (activeExamTarget.HasValue && card.Word?.WordExamTags != null && card.Word.WordExamTags.Count > 0)
+        {
+            var mappedExam = activeExamTarget.Value switch
+            {
+                ExamTarget.Toeic => ExamType.Toeic,
+                ExamTarget.Ielts => ExamType.Ielts,
+                ExamTarget.Vstep => ExamType.Vstep,
+                _ => (ExamType?)null
+            };
+
+            if (mappedExam.HasValue && card.Word.WordExamTags.Any(t => t.ExamTag?.Type == mappedExam.Value))
+            {
+                examBoost = 15.0;
+            }
+        }
+
+        return Math.Round(urgency * 1.5 + Math.Min(30.0, overdueDays * 3.0) + leechBoost + examBoost, 2);
+    }
+
+    public int ApplyWorkloadFuzz(int intervalDays, IReadOnlyDictionary<DateOnly, int>? dueForecast, DateTime? reviewTimeUtc = null)
+    {
+        if (intervalDays < 4 || dueForecast == null || dueForecast.Count == 0)
+        {
+            return intervalDays;
+        }
+
+        int fuzzRadius = Math.Clamp((int)Math.Round(intervalDays * 0.05), 1, 3);
+        int minInterval = Math.Max(4, intervalDays - fuzzRadius);
+        int maxInterval = intervalDays + fuzzRadius;
+
+        var now = reviewTimeUtc ?? DateTime.UtcNow;
+        int bestInterval = intervalDays;
+        int lowestLoad = dueForecast.GetValueOrDefault(DateOnly.FromDateTime(now.Date.AddDays(intervalDays)), 0);
+
+        for (int candidate = minInterval; candidate <= maxInterval; candidate++)
+        {
+            var date = DateOnly.FromDateTime(now.Date.AddDays(candidate));
+            int load = dueForecast.GetValueOrDefault(date, 0);
+            if (load < lowestLoad)
+            {
+                lowestLoad = load;
+                bestInterval = candidate;
+            }
+        }
+
+        return bestInterval;
     }
 
     private static double CalculateRetrievability(double stability, double elapsedDays)

@@ -1,5 +1,6 @@
 using Lexora.Application.Interfaces;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 
 namespace Lexora.Presentation.Services;
 
@@ -85,6 +86,19 @@ public class ThemeService : IThemeService
         if (SafeDialogExtensions.CurrentlyActiveDialog is { } activeDialog)
         {
             activeDialog.RequestedTheme = theme;
+        }
+
+        // Propagate theme change to any open Popups (MenuFlyout, TeachingTip, ComboBox dropdown, etc.)
+        if (_window?.Content?.XamlRoot is { } xamlRoot)
+        {
+            foreach (var popup in VisualTreeHelper.GetOpenPopupsForXamlRoot(xamlRoot))
+            {
+                popup.RequestedTheme = theme;
+                if (popup.Child is FrameworkElement child)
+                {
+                    child.RequestedTheme = theme;
+                }
+            }
         }
     }
 }

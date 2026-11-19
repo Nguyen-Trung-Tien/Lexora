@@ -23,6 +23,8 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(HasNextActiveNode))]
     [NotifyPropertyChangedFor(nameof(HasActiveRoadmap))]
     [NotifyPropertyChangedFor(nameof(Milestones))]
+    [NotifyPropertyChangedFor(nameof(DailyPaceItemsDisplay))]
+    [NotifyPropertyChangedFor(nameof(DailyPaceStatusDisplay))]
     public partial StudyRoadmapDto? ActiveRoadmap { get; set; }
 
     public bool HasActiveRoadmap => ActiveRoadmap != null;
@@ -34,14 +36,12 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTrackView))]
     [NotifyPropertyChangedFor(nameof(IsMapView))]
-    [NotifyPropertyChangedFor(nameof(IsTimelineView))]
     [NotifyPropertyChangedFor(nameof(IsManageView))]
     public partial int SelectedViewMode { get; set; } = 0;
 
     public bool IsTrackView => SelectedViewMode == 0;
     public bool IsMapView => SelectedViewMode == 0; // Compatibility alias
-    public bool IsTimelineView => SelectedViewMode == 1;
-    public bool IsManageView => SelectedViewMode == 2;
+    public bool IsManageView => SelectedViewMode == 1;
 
     partial void OnSelectedViewModeChanged(int value)
     {
@@ -67,12 +67,30 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanAdvanceProgress))]
+    [NotifyPropertyChangedFor(nameof(CanMarkSelectedNodeCompleted))]
     public partial bool IsSubmittingAction { get; set; }
 
     public bool CanAdvanceProgress => !IsSubmittingAction && SelectedNode != null && SelectedNode.CanStartPractice;
+    public bool CanMarkSelectedNodeCompleted => !IsSubmittingAction && SelectedNode != null && SelectedNode.Status != NodeStatus.Locked && SelectedNode.Status != NodeStatus.Mastered;
 
     public RoadmapNodeDto? NextActiveNode => ActiveRoadmap?.NextActiveNode;
     public bool HasNextActiveNode => NextActiveNode != null;
+
+    public string DailyPaceItemsDisplay => ActiveRoadmap == null
+        ? string.Empty
+        : string.Format(_localizationService.GetString("Roadmap_ItemsPerDay"), ActiveRoadmap.RecommendedDailyItems);
+
+    public string DailyPaceStatusDisplay => ActiveRoadmap == null
+        ? string.Empty
+        : _localizationService.GetString(ActiveRoadmap.PacingStatusKey);
+
+    public string SelectedNodeTypeDisplay => SelectedNode == null
+        ? string.Empty
+        : _localizationService.GetString(SelectedNode.TypeLocalizationKey);
+
+    public string SelectedNodeStatusDisplay => SelectedNode == null
+        ? string.Empty
+        : _localizationService.GetString(SelectedNode.StatusLocalizationKey);
 
     [ObservableProperty]
     public partial ExamTarget SelectedExamTarget { get; set; } = ExamTarget.Toeic;
@@ -88,7 +106,10 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanAdvanceProgress))]
+    [NotifyPropertyChangedFor(nameof(CanMarkSelectedNodeCompleted))]
     [NotifyPropertyChangedFor(nameof(SelectedNodeLinkedTopicDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedNodeTypeDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedNodeStatusDisplay))]
     public partial RoadmapNodeDto? SelectedNode { get; set; }
 
     public string SelectedNodeLinkedTopicDisplay => SelectedNode?.ReferenceDisplay ?? string.Empty;
@@ -121,21 +142,25 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
         _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
         _preferencesService = preferencesService ?? throw new ArgumentNullException(nameof(preferencesService));
 
-        _languageChangedHandler = (s, e) => OnPropertyChanged(nameof(Loc));
+        _languageChangedHandler = (s, e) =>
+        {
+            OnPropertyChanged(nameof(Loc));
+            OnPropertyChanged(nameof(DailyPaceItemsDisplay));
+            OnPropertyChanged(nameof(DailyPaceStatusDisplay));
+            OnPropertyChanged(nameof(SelectedNodeTypeDisplay));
+            OnPropertyChanged(nameof(SelectedNodeStatusDisplay));
+        };
         _localizationService.LanguageChanged += _languageChangedHandler;
 
         // Restore saved view mode preference
         var prefs = _preferencesService.GetPreferences();
-        if (prefs.RoadmapViewMode >= 0 && prefs.RoadmapViewMode <= 2)
-        {
-            SelectedViewMode = prefs.RoadmapViewMode;
-        }
+        SelectedViewMode = (prefs.RoadmapViewMode >= 0 && prefs.RoadmapViewMode <= 1) ? prefs.RoadmapViewMode : 0;
     }
 
     [RelayCommand]
     public void SetViewMode(int mode)
     {
-        if (mode >= 0 && mode <= 2)
+        if (mode >= 0 && mode <= 1)
         {
             SelectedViewMode = mode;
         }
@@ -400,36 +425,6 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    public async Task AdvanceNodeProgressAsync(RoadmapNodeDto? node)
-    {
-        var target = node ?? SelectedNode;
-        if (target == null || target.Status == NodeStatus.Locked || !_actionLock.Wait(0)) return;
-
-        try
-        {
-            IsSubmittingAction = true;
-            int batch = Math.Max(1, (int)Math.Ceiling(target.TargetItemCount * 0.25));
-            await _roadmapService.UpdateNodeProgressAsync(target.Id, batch, 2.6);
-            await LoadActiveRoadmapCoreAsync();
-
-            if (SelectedNode != null)
-            {
-                SelectedNode = VisualNodes.FirstOrDefault(n => n.Id == target.Id) ?? SelectedNode;
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = ex.Message;
-        }
-        finally
-        {
-            IsSubmittingAction = false;
-            _actionLock.Release();
-            OnPropertyChanged(nameof(CanAdvanceProgress));
-        }
-    }
-
-    [RelayCommand]
     public async Task MarkNodeCompletedAsync(RoadmapNodeDto? node)
     {
         var target = node ?? SelectedNode;
@@ -456,6 +451,7 @@ public partial class RoadmapViewModel : ObservableObject, IDisposable
             IsSubmittingAction = false;
             _actionLock.Release();
             OnPropertyChanged(nameof(CanAdvanceProgress));
+            OnPropertyChanged(nameof(CanMarkSelectedNodeCompleted));
         }
     }
 

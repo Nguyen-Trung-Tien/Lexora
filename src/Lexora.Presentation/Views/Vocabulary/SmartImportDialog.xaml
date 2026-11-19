@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:Lexora.Presentation.Converters"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     mc:Ignorable="d"
     UseLayoutRounding="True" CornerRadius="{ThemeResource OverlayCornerRadius}">
 
@@ -246,7 +247,7 @@
                             <TextBlock x:Name="TextFormatBadge" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
                         </StackPanel>
                         <DropDownButton.Flyout>
-                            <MenuFlyout>
+                            <MenuFlyout helpers:ThemeSyncHelper.SyncTheme="True">
                                 <MenuFlyoutItem x:Name="MenuFormatAuto" Text="Tự động nhận diện (Auto-detect)" Click="MenuFormatAuto_Click" />
                                 <MenuFlyoutSeparator />
                                 <MenuFlyoutItem x:Name="MenuFormatJson" Text="JSON (.json / AI Prompts)" Click="MenuFormatJson_Click" />
@@ -263,7 +264,7 @@
                             <TextBlock x:Name="TextViewSample" FontSize="12" />
                         </StackPanel>
                         <DropDownButton.Flyout>
-                            <MenuFlyout>
+                            <MenuFlyout helpers:ThemeSyncHelper.SyncTheme="True">
                                 <MenuFlyoutItem x:Name="MenuItemSampleJson" Text="Mẫu JSON" Click="MenuItemSampleJson_Click" />
                                 <MenuFlyoutItem x:Name="MenuItemSampleCsv" Text="Mẫu CSV" Click="MenuItemSampleCsv_Click" />
                                 <MenuFlyoutItem x:Name="MenuItemSampleTxt" Text="Mẫu TXT / Anki / Quizlet" Click="MenuItemSampleTxt_Click" />

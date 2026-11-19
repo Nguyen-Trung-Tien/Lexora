@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IRoadmapRepository, RoadmapRepository>();
         services.AddScoped<IConversationPhraseRepository, ConversationPhraseRepository>();
         services.AddScoped<IMemoryTipRepository, MemoryTipRepository>();
+        services.AddScoped<IItemCalibrationRepository, ItemCalibrationRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Initializer

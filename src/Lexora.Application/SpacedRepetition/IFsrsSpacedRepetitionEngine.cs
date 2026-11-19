@@ -17,6 +17,10 @@ public record FsrsCardState(
 public interface IFsrsSpacedRepetitionEngine : ISpacedRepetitionEngine
 {
     FsrsCardState CalculateFsrsNextReview(ReviewCard card, ReviewRating rating, DateTime? reviewTimeUtc = null, double desiredRetention = 0.90);
+    IntervalPreviewDto GetIntervalPreview(ReviewCard card, DateTime? reviewTimeUtc, double desiredRetention);
     double CalculateStability(ReviewCard card);
     double CalculateDifficulty(ReviewCard card);
+    bool IsLeechCard(ReviewCard card);
+    double CalculatePriorityScore(ReviewCard card, DateTime? asOfUtc = null, ExamTarget? activeExamTarget = null);
+    int ApplyWorkloadFuzz(int intervalDays, IReadOnlyDictionary<DateOnly, int>? dueForecast, DateTime? reviewTimeUtc = null);
 }

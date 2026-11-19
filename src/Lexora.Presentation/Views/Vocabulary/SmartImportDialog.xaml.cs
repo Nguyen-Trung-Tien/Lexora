@@ -10,6 +10,7 @@ using Microsoft.UI.Xaml.Media;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
 using Lexora.Application.Services;
+using Lexora.Presentation.Helpers;
 using Lexora.Presentation.Services;
 using Lexora.Domain.Enums;
 
@@ -354,6 +355,14 @@ public sealed partial class SmartImportDialog : ContentDialog
         PanelStep1.Visibility = step == 1 ? Visibility.Visible : Visibility.Collapsed;
         PanelStep2.Visibility = step == 2 ? Visibility.Visible : Visibility.Collapsed;
         PanelStep3.Visibility = step == 3 ? Visibility.Visible : Visibility.Collapsed;
+
+        FrameworkElement activePanel = step switch
+        {
+            2 => PanelStep2,
+            3 => PanelStep3,
+            _ => PanelStep1
+        };
+        AnimationHelper.PlayEntranceFadeSlide(activePanel, 8f, 180);
 
         // Step 1 Indicator
         Step1NumberBorder.Background = step >= 1 ? accentBrush : layerBrush;

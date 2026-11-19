@@ -68,3 +68,14 @@ public record SmartReviewSessionSummaryDto(
     IReadOnlyList<WordDto> LapsedWords,
     DateTime CompletedAt
 );
+
+public record ReviewAnalyticsSummaryDto(
+    double TrueRetentionPercent,
+    double TargetRetentionPercent,
+    double RecommendedRetentionPercent,
+    int TotalReviewsInPeriod,
+    int LeechCount,
+    int AverageResponseTimeMs,
+    string AlgorithmName,
+    string CalibrationAdviceKey
+);

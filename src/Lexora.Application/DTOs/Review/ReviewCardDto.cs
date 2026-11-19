@@ -24,10 +24,14 @@ public record ReviewCardDto(
     DateTime NextReviewAt,
     int TotalReviews,
     int CorrectReviews,
-    double Confidence
+    double Confidence,
+    double Stability = 0.0,
+    double Difficulty = 5.0,
+    bool IsLeech = false,
+    double Retrievability = 100.0
 )
 {
-    /// <summary>Friendly status label shown in SM-2 Insights panel.</summary>
+    /// <summary>Friendly status label shown in FSRS/SM-2 Insights panel.</summary>
     public string StatusLabel => Status switch
     {
         LearningStatus.New           => "New",
@@ -44,10 +48,22 @@ public record ReviewCardDto(
     /// <summary>Formatted ease factor, e.g. "2.50".</summary>
     public string EaseFactorText => EaseFactor.ToString("F2");
 
-    /// <summary>Compact interval label, e.g. "< 1 d" or "6 d".</summary>
+    /// <summary>Formatted FSRS stability in days, e.g. "12.4d".</summary>
+    public string StabilityText => Stability <= 0.0 ? "--" : $"{Stability:F1}d";
+
+    /// <summary>Formatted FSRS retrievability, e.g. "91%".</summary>
+    public string RetrievabilityText => $"{Retrievability:F0}%";
+
+    /// <summary>Compact interval label, e.g. "&lt; 1 d" or "6 d".</summary>
     public string IntervalLabel => IntervalDays <= 0 ? "< 1 d" : $"{IntervalDays} d";
 }
 
+public record DailyWorkloadPointDto(
+    DateOnly Date,
+    string Label,
+    int DueCount,
+    bool IsPeak
+);
 
 public record ReviewEvaluationResultDto(
     Guid ReviewCardId,
@@ -55,7 +71,9 @@ public record ReviewEvaluationResultDto(
     LearningStatus PreviousStatus,
     LearningStatus NewStatus,
     int NewIntervalDays,
-    DateTime NextReviewAt
+    DateTime NextReviewAt,
+    bool IsLeech = false,
+    double Stability = 0.0
 );
 
 public enum ReviewSessionMode

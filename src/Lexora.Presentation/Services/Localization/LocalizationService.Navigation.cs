@@ -9,11 +9,14 @@ public partial class LocalizationService
         // ==========================================
         // Navigation Headers
         vi["NavHeader_Overview"] = "TỔNG QUAN";
+        vi["NavHeader_Workspaces"] = "KHÔNG GIAN HỌC";
         vi["NavHeader_Learning"] = "HỌC TẬP & KHO TỪ";
         vi["NavHeader_Practice"] = "LUYỆN TẬP & ĐÁNH GIÁ";
         vi["NavHeader_Archive"] = "KHO LƯU TRỮ & DỮ LIỆU";
-        vi["Nav_Dashboard"] = "Tổng quan";
+        vi["Nav_Dashboard"] = "Hôm nay";
         vi["Nav_Roadmap"] = "Lộ trình học tập";
+        vi["Nav_KnowledgeStudio"] = "Kho Kiến Thức";
+        vi["Nav_PracticeArena"] = "Phòng Luyện Tập";
         vi["Nav_Vocabulary"] = "Từ vựng";
         vi["Nav_Homophones"] = "Từ đồng âm";
         vi["Nav_Review"] = "Ôn tập ngắt quãng";
@@ -73,11 +76,14 @@ public partial class LocalizationService
         // ==========================================
         // Navigation Headers
         en["NavHeader_Overview"] = "OVERVIEW";
+        en["NavHeader_Workspaces"] = "WORKSPACES";
         en["NavHeader_Learning"] = "LEARNING & VOCABULARY";
         en["NavHeader_Practice"] = "PRACTICE & EVALUATION";
         en["NavHeader_Archive"] = "STORAGE & ARCHIVE";
-        en["Nav_Dashboard"] = "Dashboard";
+        en["Nav_Dashboard"] = "Today";
         en["Nav_Roadmap"] = "Learning Roadmap";
+        en["Nav_KnowledgeStudio"] = "Knowledge Studio";
+        en["Nav_PracticeArena"] = "Practice Arena";
         en["Nav_Vocabulary"] = "Vocabulary";
         en["Nav_Homophones"] = "Homophones";
         en["Nav_Review"] = "Spaced Review";

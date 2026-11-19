@@ -187,8 +187,8 @@ public sealed partial class HomophonesPage : Page, ILocalizableView, IThemeAware
 
     private void ApplyLocalization()
     {
-        PageTitleText.Text = Loc.GetString("Homophones_Title");
-        PageSubtitleText.Text = Loc.GetString("Homophones_Subtitle");
+        HomophonesHeader.Title = Loc.GetString("Homophones_Title");
+        HomophonesHeader.Subtitle = Loc.GetString("Homophones_Subtitle");
         TextAddGroup.Text = Loc.GetString("Homophones_AddGroup");
         TextSmartImport.Text = Loc.GetString("Homophones_SmartImport");
         TextExport.Text = Loc.GetString("Action_Export");

@@ -1,4 +1,6 @@
 using System.Runtime.InteropServices;
+using Lexora.Presentation.Views.KnowledgeStudio;
+using Lexora.Presentation.Views.PracticeArena;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -21,6 +23,7 @@ public sealed class ShortcutManager : IShortcutManager
 
     public Type? CurrentPageType { get; private set; }
     public bool IsRunning => _isExecuting;
+    public bool IsOverlayOpen { get; set; }
 
     public event EventHandler? ShortcutsChanged;
     public event EventHandler? GlobalSearchRequested;
@@ -58,7 +61,7 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipDashboard",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
                 _navigationService.Navigate(typeof(DashboardPage));
@@ -74,10 +77,10 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipVocabulary",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(VocabularyPage));
+                NavigateToKnowledgeStudioTab("Vocabulary");
                 return Task.CompletedTask;
             }
         });
@@ -90,10 +93,10 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipHomophones",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(HomophonesPage));
+                NavigateToKnowledgeStudioTab("Homophones");
                 return Task.CompletedTask;
             }
         });
@@ -106,10 +109,10 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Nav_KnowledgeGraph",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(KnowledgeGraphPage));
+                NavigateToKnowledgeStudioTab("KnowledgeGraph");
                 return Task.CompletedTask;
             }
         });
@@ -122,10 +125,10 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipGrammar",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(GrammarPage));
+                NavigateToKnowledgeStudioTab("Grammar");
                 return Task.CompletedTask;
             }
         });
@@ -138,10 +141,10 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipReview",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(ReviewPage));
+                NavigateToPracticeArenaTab("Review");
                 return Task.CompletedTask;
             }
         });
@@ -154,10 +157,10 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipTest",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(TestPage));
+                NavigateToPracticeArenaTab("Test");
                 return Task.CompletedTask;
             }
         });
@@ -170,7 +173,7 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipLearningStorage",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
                 _navigationService.Navigate(typeof(LearningStoragePage));
@@ -186,7 +189,7 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipRoadmap",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
                 _navigationService.Navigate(typeof(RoadmapPage));
@@ -219,7 +222,7 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Nav_ThemeToggle",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = true, // Enable theme toggle even while dialog is open
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
                 var themeService = App.Current?.Services?.GetService<IThemeService>();
@@ -237,7 +240,7 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Nav_Help",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
                 _navigationService.Navigate(typeof(HelpPage));
@@ -253,7 +256,7 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Palette_DictationLab",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
                 ListeningLabRequested?.Invoke(this, EventArgs.Empty);
@@ -269,10 +272,10 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Dashboard_StartReview",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(ReviewPage));
+                NavigateToPracticeArenaTab("Review");
                 return Task.CompletedTask;
             }
         });
@@ -285,10 +288,10 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Shell_TooltipMemoryTips",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Lexora.Presentation.Views.MemoryTips.MemoryTipsPage));
+                NavigateToKnowledgeStudioTab("MemoryTips");
                 return Task.CompletedTask;
             }
         });
@@ -301,13 +304,38 @@ public sealed class ShortcutManager : IShortcutManager
             DescriptionKey = "Nav_Phrases",
             Priority = ShortcutPriority.Global,
             AllowWhenDialogActive = false,
-            AllowWhenTextInputFocused = false,
+            AllowWhenTextInputFocused = true,
             ExecuteAsync = () =>
             {
-                _navigationService.Navigate(typeof(Lexora.Presentation.Views.Phrases.PhrasesPage));
+                NavigateToKnowledgeStudioTab("Phrases");
                 return Task.CompletedTask;
             }
         });
+    }
+
+    private void NavigateToKnowledgeStudioTab(string tabTag)
+    {
+        if (_navigationService.CurrentPageType == typeof(KnowledgeStudioPage))
+        {
+            // Force navigation with tab parameter so KnowledgeStudioPage switches to the requested tab
+            _navigationService.Navigate(typeof(KnowledgeStudioPage), tabTag, force: true);
+        }
+        else
+        {
+            _navigationService.Navigate(typeof(KnowledgeStudioPage), tabTag);
+        }
+    }
+
+    private void NavigateToPracticeArenaTab(string tabTag)
+    {
+        if (_navigationService.CurrentPageType == typeof(PracticeArenaPage))
+        {
+            _navigationService.Navigate(typeof(PracticeArenaPage), tabTag, force: true);
+        }
+        else
+        {
+            _navigationService.Navigate(typeof(PracticeArenaPage), tabTag);
+        }
     }
 
     public void RegisterShortcut(ShortcutDefinition shortcut)
@@ -401,8 +429,20 @@ public sealed class ShortcutManager : IShortcutManager
     {
         ArgumentNullException.ThrowIfNull(e);
 
+        // Ignore auto-repeat keydown events when holding a key to prevent accidental multi-triggers
+        if (e.KeyStatus.WasKeyDown)
+        {
+            return false;
+        }
+
         var key = (ShortcutKey)(int)e.Key;
         var modifiers = GetCurrentModifiers();
+
+        // While CommandPalette (or similar modal overlay) is open, isolate all keys except Ctrl+K toggle
+        if (IsOverlayOpen && !(key == ShortcutKey.K && modifiers == ShortcutModifiers.Control))
+        {
+            return false;
+        }
 
         object? focusedElement = xamlRoot != null ? FocusManager.GetFocusedElement(xamlRoot) : null;
         bool isTextInput = IsTextInputActive(focusedElement);
@@ -423,7 +463,7 @@ public sealed class ShortcutManager : IShortcutManager
     {
         // 1. Reentrancy and rapid debounce guard (120ms threshold)
         long now = Environment.TickCount64;
-        if (_isExecuting || (now - _lastExecutionTick < 120))
+        if (now - _lastExecutionTick < 120)
         {
             return false;
         }
@@ -432,16 +472,15 @@ public sealed class ShortcutManager : IShortcutManager
         var winner = _resolver.Resolve(key, modifiers, isTextInputFocused, isDialogOpen, CurrentPageType);
         if (winner == null) return false;
 
-        // 3. Execute with re-entrancy locking
+        // 3. Execute safely without holding _isExecuting across long-lived modal dialogs
         _lastExecutionTick = now;
-        _isExecuting = true;
-
         _ = ExecuteActionSafelyAsync(winner);
         return true;
     }
 
     private async Task ExecuteActionSafelyAsync(ShortcutDefinition shortcut)
     {
+        _isExecuting = true;
         try
         {
             await shortcut.ExecuteAsync();

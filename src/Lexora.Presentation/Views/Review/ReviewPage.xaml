@@ -269,9 +269,41 @@
                             <PlaneProjection x:Name="FlashcardProjection" CenterOfRotationX="0.5" CenterOfRotationY="0.5" />
                         </Border.Projection>
 
-                        <Grid RowDefinitions="Auto,Auto,Auto">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto">
+                            <!-- Smart Status Strips: Speed Blitz Timer, Re-queued Badge, Leech Rescue Banner -->
+                            <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,8">
+                                <!-- Speed Blitz 3s Countdown -->
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10"
+                                      Visibility="{x:Bind ViewModel.IsSpeedBlitzActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="{x:Bind ViewModel.BlitzTimerText, Mode=OneWay}"
+                                               FontSize="12" FontWeight="Bold"
+                                               Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
+                                    <ProgressBar Grid.Column="1" Value="{x:Bind ViewModel.BlitzProgressPercent, Mode=OneWay}" Maximum="100"
+                                                 Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
+                                </Grid>
+
+                                <!-- Re-queued in Session Badge -->
+                                <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                        BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1"
+                                        CornerRadius="{StaticResource RadiusPill}" Padding="10,3" HorizontalAlignment="Center"
+                                        Visibility="{x:Bind ViewModel.IsCurrentCardRequeued, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE72C;" FontSize="11" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                        <TextBlock Text="{x:Bind Loc.GetString('Review_RequeuedInSession')}" FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Leech Rescue Banner -->
+                                <InfoBar Severity="Warning" IsClosable="False"
+                                         IsOpen="{x:Bind ViewModel.IsCurrentCardLeech, Mode=OneWay}"
+                                         Title="{x:Bind Loc.GetString('Review_LeechBannerTitle')}"
+                                         Message="{x:Bind ViewModel.LeechBannerDescription, Mode=OneWay}"
+                                         Visibility="{x:Bind ViewModel.IsCurrentCardLeech, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </StackPanel>
+
                             <!-- Front Card: Typing Drill OR Standard Display -->
-                            <Grid Grid.Row="0" Margin="0,4,0,16">
+                            <Grid Grid.Row="1" Margin="0,4,0,16">
                                 <!-- Typing Drill Mode -->
                                 <StackPanel Spacing="14" HorizontalAlignment="Stretch"
                                             Visibility="{x:Bind ViewModel.IsTypingRecallActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -456,7 +488,7 @@
                             </Grid>
 
                             <!-- Back Card: Revealed Definitions & Examples -->
-                            <StackPanel Grid.Row="1" Spacing="14"
+                            <StackPanel Grid.Row="2" Spacing="14"
                                         Visibility="{x:Bind ViewModel.IsAnswerVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                                         Margin="0,8,0,16">
                                 <StackPanel.ChildrenTransitions>
@@ -503,7 +535,7 @@
                             </StackPanel>
 
                             <!-- Rating & Action Area -->
-                            <Grid Grid.Row="2" Margin="0,12,0,0">
+                            <Grid Grid.Row="3" Margin="0,12,0,0">
                                 <!-- Show Meaning Button (Space) -->
                                 <Button HorizontalAlignment="Center" Style="{ThemeResource AccentButtonStyle}"
                                         Padding="28,8" CornerRadius="{ThemeResource ControlCornerRadius}" FontSize="14" FontWeight="SemiBold"
@@ -539,6 +571,10 @@
                                                 <TextBlock Text="{x:Bind Loc.GetString('Review_RatingAgain')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
                                             <TextBlock Text="{x:Bind ViewModel.AgainIntervalText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="{StaticResource RadiusPill}" Padding="6,1" HorizontalAlignment="Center"
+                                                    Visibility="{x:Bind ViewModel.IsAgainSuggested, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_SuggestedBadge')}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            </Border>
                                         </StackPanel>
                                     </Button>
 
@@ -555,6 +591,10 @@
                                                 <TextBlock Text="{x:Bind Loc.GetString('Review_RatingHard')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorCautionBrush}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
                                             <TextBlock Text="{x:Bind ViewModel.HardIntervalText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="{StaticResource RadiusPill}" Padding="6,1" HorizontalAlignment="Center"
+                                                    Visibility="{x:Bind ViewModel.IsHardSuggested, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_SuggestedBadge')}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            </Border>
                                         </StackPanel>
                                     </Button>
 
@@ -571,6 +611,10 @@
                                                 <TextBlock Text="{x:Bind Loc.GetString('Review_RatingGood')}" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
                                             <TextBlock Text="{x:Bind ViewModel.GoodIntervalText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="{StaticResource RadiusPill}" Padding="6,1" HorizontalAlignment="Center"
+                                                    Visibility="{x:Bind ViewModel.IsGoodSuggested, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_SuggestedBadge')}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            </Border>
                                         </StackPanel>
                                     </Button>
 
@@ -587,6 +631,10 @@
                                                 <TextBlock Text="{x:Bind Loc.GetString('Review_RatingEasy')}" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
                                             <TextBlock Text="{x:Bind ViewModel.EasyIntervalText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}" CornerRadius="{StaticResource RadiusPill}" Padding="6,1" HorizontalAlignment="Center"
+                                                    Visibility="{x:Bind ViewModel.IsEasySuggested, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{x:Bind Loc.GetString('Review_SuggestedBadge')}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            </Border>
                                         </StackPanel>
                                     </Button>
                                 </Grid>
@@ -760,6 +808,26 @@
                                 </StackPanel>
                             </Border>
                         </Grid>
+
+                        <!-- True Retention vs Target Retention (30d FSRS/SM-2 Calibration) -->
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                CornerRadius="{ThemeResource OverlayCornerRadius}" Padding="14,10" MaxWidth="500" HorizontalAlignment="Stretch">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_TrueRetentionLabel')}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind ViewModel.AnalyticsSummary.AlgorithmName, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ViewModel.AnalyticsSummary.TrueRetentionPercent, Mode=OneWay}" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="%" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="/" FontSize="13" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind Loc.GetString('Review_TargetRetentionLabel')}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind ViewModel.AnalyticsSummary.TargetRetentionPercent, Mode=OneWay}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="%" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
 
                         <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,12,0,0">
                             <Button Style="{ThemeResource AccentButtonStyle}" Padding="20,9" CornerRadius="{ThemeResource ControlCornerRadius}" Click="RestartReviewButton_Click">

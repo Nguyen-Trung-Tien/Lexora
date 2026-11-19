@@ -8,6 +8,7 @@
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:enums="using:Lexora.Domain.Enums"
     xmlns:services="using:Lexora.Presentation.Services"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="Transparent"
     KeyboardAcceleratorPlacementMode="Hidden"
@@ -140,7 +141,7 @@
                             <TextBlock Text="{x:Bind Loc.GetString('Vocab_ImportExport')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                         <DropDownButton.Flyout>
-                            <MenuFlyout Opening="ExportImportFlyout_Opening">
+                            <MenuFlyout helpers:ThemeSyncHelper.SyncTheme="True" Opening="ExportImportFlyout_Opening">
                                 <!-- Smart Import Option (Primary) -->
                                 <MenuFlyoutItem Text="{x:Bind Loc.GetString('Vocab_SmartImport')}" Click="SmartImport_Click">
                                     <MenuFlyoutItem.Icon>
@@ -193,6 +194,7 @@
         </Grid>
 
         <TeachingTip x:Name="VocabHelpTeachingTip"
+                     helpers:ThemeSyncHelper.SyncTheme="True"
                      Target="{x:Bind VocabHelpButton}"
                      Title="{x:Bind Loc.GetString('Vocab_Help_Title')}"
                      Subtitle="{x:Bind Loc.GetString('Vocab_Help_Subtitle')}"

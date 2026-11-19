@@ -13,6 +13,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly ILocalizationService _localizationService;
     private readonly IStudyAdvisorService _advisorService;
     private readonly IRoadmapService? _roadmapService;
+    private readonly IReviewService? _reviewService;
     private readonly EventHandler? _languageChangedHandler;
     private CancellationTokenSource? _loadCts;
     private bool _isLoadingDashboard;
@@ -31,6 +32,18 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     public partial WorkloadForecastDto? WorkloadForecast { get; set; }
+
+    [ObservableProperty]
+    public partial IReadOnlyList<DailyWorkloadPointDto> Workload14DaysList { get; set; } = Array.Empty<DailyWorkloadPointDto>();
+
+    [ObservableProperty]
+    public partial TimeBudgetPlanDto? TimeBudgetPlan { get; set; }
+
+    [ObservableProperty]
+    public partial string TimeBudgetSummaryText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial int SelectedBudgetMinutes { get; set; } = 15;
 
     [ObservableProperty]
     public partial string AdviceTitle { get; set; } = string.Empty;
@@ -132,13 +145,15 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         INavigationService navService,
         ILocalizationService localizationService,
         IStudyAdvisorService advisorService,
-        IRoadmapService? roadmapService = null)
+        IRoadmapService? roadmapService = null,
+        IReviewService? reviewService = null)
     {
         _statsService = statsService;
         _navService = navService;
         _localizationService = localizationService;
         _advisorService = advisorService;
         _roadmapService = roadmapService;
+        _reviewService = reviewService;
         _languageChangedHandler = (s, e) => UpdateLanguageState();
         _localizationService.LanguageChanged += _languageChangedHandler;
 

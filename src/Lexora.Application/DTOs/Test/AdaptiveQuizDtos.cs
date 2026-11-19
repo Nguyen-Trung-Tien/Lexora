@@ -22,7 +22,9 @@ public record AdaptiveQuestionDto(
     int CorrectOptionIndex,
     string Explanation,
     string? ExampleSentence,
-    string? AudioPath
+    string? AudioPath,
+    double ItemDifficultyB = 0.0,
+    double CurrentTheta = 0.0
 );
 
 public record AdaptiveAnswerEvaluationDto(
@@ -35,7 +37,8 @@ public record AdaptiveAnswerEvaluationDto(
     CefrLevel PreviousCalibratedLevel,
     CefrLevel NewCalibratedLevel,
     double RunningScorePercent,
-    string FeedbackMessage
+    string FeedbackMessage,
+    double EstimatedAbilityTheta = 0.0
 );
 
 public record AdaptiveQuizSummaryDto(
@@ -53,5 +56,6 @@ public record AdaptiveQuizSummaryDto(
     IReadOnlyList<WordDto> DifficultWordsToReview,
     IReadOnlyList<string> KeyStrengths,
     IReadOnlyList<string> RecommendedNextSteps,
-    DateTime CompletedAt
+    DateTime CompletedAt,
+    double FinalAbilityTheta = 0.0
 );

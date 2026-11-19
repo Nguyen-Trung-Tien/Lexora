@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Lexora.Presentation.Views.PracticeArena.PracticeArenaPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="Transparent"
+    UseLayoutRounding="True"
+    mc:Ignorable="d">
+
+    <Grid RowDefinitions="Auto,*" Background="Transparent">
+        <Border Grid.Row="0"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="20,8">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <ScrollViewer Grid.Column="0"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Disabled"
+                              HorizontalScrollMode="Enabled"
+                              VerticalScrollMode="Disabled">
+                    <SelectorBar x:Name="ArenaSelectorBar" SelectionChanged="ArenaSelectorBar_SelectionChanged">
+                        <SelectorBarItem x:Name="TabReview" Tag="Review" Text="Spaced Review">
+                            <SelectorBarItem.Icon>
+                                <FontIcon Glyph="&#xE895;" />
+                            </SelectorBarItem.Icon>
+                        </SelectorBarItem>
+                        <SelectorBarItem x:Name="TabTest" Tag="Test" Text="Practice &amp; IRT Test">
+                            <SelectorBarItem.Icon>
+                                <FontIcon Glyph="&#xE765;" />
+                            </SelectorBarItem.Icon>
+                        </SelectorBarItem>
+                    </SelectorBar>
+                </ScrollViewer>
+
+                <Button Grid.Column="1"
+                        x:Name="OpenListeningLabButton"
+                        Click="OpenListeningLab_Click"
+                        Style="{StaticResource LexoraStandardButtonStyle}"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE7F6;" FontSize="13" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock x:Name="ListeningLabLabel" Text="Listening Lab" FontSize="12" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <Frame x:Name="ArenaContentFrame" Grid.Row="1" />
+    </Grid>
+</Page>

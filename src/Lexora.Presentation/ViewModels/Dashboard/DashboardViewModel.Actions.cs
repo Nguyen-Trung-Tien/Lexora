@@ -24,6 +24,12 @@ public partial class DashboardViewModel
             var analytics = await _statsService.GetDetailedAnalyticsAsync(token);
             DailyAdvice = await _advisorService.GetDailyAdviceAsync(analytics.Summary, token);
             WorkloadForecast = await _advisorService.Get7DayForecastAsync(token);
+            TimeBudgetPlan = await _advisorService.GetTimeBudgetPlanAsync(SelectedBudgetMinutes, token);
+            UpdateTimeBudgetText();
+            if (_reviewService != null)
+            {
+                Workload14DaysList = await _reviewService.Get14DayWorkloadSimulationAsync(token);
+            }
             IntelligenceReport = await _statsService.GetLearningIntelligenceReportAsync(token);
 
             UpdateAdviceDisplay();
@@ -75,6 +81,28 @@ public partial class DashboardViewModel
             _isLoadingDashboard = false;
             IsLoading = false;
         }
+    }
+
+    [RelayCommand]
+    public async Task SelectTimeBudgetAsync(string minutesText)
+    {
+        if (int.TryParse(minutesText, out int mins))
+        {
+            SelectedBudgetMinutes = mins;
+            TimeBudgetPlan = await _advisorService.GetTimeBudgetPlanAsync(mins);
+            UpdateTimeBudgetText();
+        }
+    }
+
+    private void UpdateTimeBudgetText()
+    {
+        if (TimeBudgetPlan == null)
+        {
+            TimeBudgetSummaryText = string.Empty;
+            return;
+        }
+        bool isVi = _localizationService.CurrentLanguage.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+        TimeBudgetSummaryText = isVi ? TimeBudgetPlan.SummaryVi : TimeBudgetPlan.SummaryEn;
     }
 
     [RelayCommand]

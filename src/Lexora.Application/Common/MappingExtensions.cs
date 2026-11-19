@@ -89,6 +89,12 @@ public static class MappingExtensions
                 ? Math.Round((double)c.CorrectReviews / c.TotalReviews * 100, 1)
                 : (srEngine != null ? srEngine.CalculateRetentionProbability(c) : 50.0));
 
+        double retrievability = srEngine != null
+            ? srEngine.CalculateRetentionProbability(c)
+            : 100.0;
+
+        bool isLeech = c.IsLeech || c.Lapses >= 6 || (c.Lapses >= 4 && c.TotalReviews > 0 && confidence < 40.0);
+
         return new ReviewCardDto(
             c.Id,
             c.WordId,
@@ -111,7 +117,11 @@ public static class MappingExtensions
             c.NextReviewAt,
             c.TotalReviews,
             c.CorrectReviews,
-            confidence
+            confidence,
+            c.Stability,
+            c.Difficulty,
+            isLeech,
+            retrievability
         );
     }
 

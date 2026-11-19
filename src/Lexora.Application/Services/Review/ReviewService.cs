@@ -16,6 +16,7 @@ public class ReviewService : IReviewService
     private readonly ILearningStorageRepository? _storageRepo;
     private readonly IFsrsSpacedRepetitionEngine? _fsrsEngine;
     private readonly IUserPreferencesService? _preferencesService;
+    private readonly IRoadmapRepository? _roadmapRepo;
 
     public ReviewService(
         IReviewRepository reviewRepo,
@@ -23,7 +24,8 @@ public class ReviewService : IReviewService
         IUnitOfWork unitOfWork,
         ILearningStorageRepository? storageRepo = null,
         IFsrsSpacedRepetitionEngine? fsrsEngine = null,
-        IUserPreferencesService? preferencesService = null)
+        IUserPreferencesService? preferencesService = null,
+        IRoadmapRepository? roadmapRepo = null)
     {
         _reviewRepo = reviewRepo;
         _srEngine = srEngine;
@@ -31,6 +33,21 @@ public class ReviewService : IReviewService
         _storageRepo = storageRepo;
         _fsrsEngine = fsrsEngine;
         _preferencesService = preferencesService;
+        _roadmapRepo = roadmapRepo;
+    }
+
+    private async Task<ExamTarget?> GetActiveExamTargetAsync(CancellationToken cancellationToken)
+    {
+        if (_roadmapRepo == null) return null;
+        try
+        {
+            var roadmap = await _roadmapRepo.GetActiveRoadmapWithDetailsAsync(cancellationToken);
+            return roadmap?.Target;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private (ISpacedRepetitionEngine engine, double desiredRetention, bool isFsrs) GetActiveEngine()
@@ -60,9 +77,13 @@ public class ReviewService : IReviewService
         var result = new List<ReviewCardDto>();
         var seenCardIds = new HashSet<Guid>();
 
-        // 1. Fetch Due Cards
+        // 1. Fetch Due Cards (prioritized by FSRS Retrievability / Urgency + ExamTarget boost)
+        var activeExam = await GetActiveExamTargetAsync(cancellationToken);
         var dueCards = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, dueQuota * 2, cancellationToken);
-        foreach (var c in dueCards)
+        var orderedDue = _fsrsEngine != null
+            ? dueCards.OrderByDescending(c => _fsrsEngine.CalculatePriorityScore(c, DateTime.UtcNow, activeExam)).ToList()
+            : dueCards.ToList();
+        foreach (var c in orderedDue)
         {
             if (result.Count >= dueQuota) break;
             if (seenCardIds.Add(c.Id))
@@ -123,7 +144,37 @@ public class ReviewService : IReviewService
             }
         }
 
-        return result;
+        return InterleaveCards(result);
+    }
+
+    private static IReadOnlyList<ReviewCardDto> InterleaveCards(List<ReviewCardDto> cards)
+    {
+        if (cards.Count <= 2) return cards;
+
+        var remaining = new List<ReviewCardDto>(cards);
+        var interleaved = new List<ReviewCardDto>(cards.Count);
+
+        while (remaining.Count > 0)
+        {
+            int pickIndex = 0;
+            if (interleaved.Count > 0)
+            {
+                var prev = interleaved[^1];
+                for (int i = 0; i < remaining.Count; i++)
+                {
+                    if (remaining[i].PrimaryPartOfSpeech != prev.PrimaryPartOfSpeech)
+                    {
+                        pickIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            interleaved.Add(remaining[pickIndex]);
+            remaining.RemoveAt(pickIndex);
+        }
+
+        return interleaved;
     }
 
     public async Task<IReadOnlyList<ReviewCardDto>> GetNewCardsAsync(int limit = 20, CancellationToken cancellationToken = default)
@@ -192,6 +243,7 @@ public class ReviewService : IReviewService
         ReviewRating rating,
         int responseTimeMs = 0,
         Guid? sessionId = null,
+        bool usedHint = false,
         CancellationToken cancellationToken = default)
     {
         var card = await _reviewRepo.GetByIdAsync(reviewCardId, cancellationToken);
@@ -201,50 +253,82 @@ public class ReviewService : IReviewService
         var prevStatus = card.Status;
         var (engine, desiredRetention, isFsrs) = GetActiveEngine();
 
+        // Response-time & hint guardrail: prevent interval inflation when Easy is clicked after slow recall (> 10s) or using a hint
+        var effectiveRating = (rating == ReviewRating.Easy && (usedHint || responseTimeMs > 10_000))
+            ? ReviewRating.Good
+            : rating;
+
+        var nowUtc = DateTime.UtcNow;
         SpacedRepetitionResult result;
         if (isFsrs && _fsrsEngine != null)
         {
-            var fsrsState = _fsrsEngine.CalculateFsrsNextReview(card, rating, DateTime.UtcNow, desiredRetention);
+            var fsrsState = _fsrsEngine.CalculateFsrsNextReview(card, effectiveRating, nowUtc, desiredRetention);
+            int balancedInterval = fsrsState.IntervalDays;
+            DateTime balancedNextReview = fsrsState.NextReviewAt;
+
+            if (balancedInterval >= 4)
+            {
+                var forecastStart = nowUtc.Date.AddDays(Math.Max(1, balancedInterval - 3));
+                var forecast = await _reviewRepo.GetDueForecastCountsAsync(forecastStart, 7, cancellationToken);
+                balancedInterval = _fsrsEngine.ApplyWorkloadFuzz(balancedInterval, forecast, nowUtc);
+                balancedNextReview = nowUtc.Date.AddDays(balancedInterval);
+            }
+
             double mappedEaseFactor = Math.Clamp(1.3 + (10.0 - fsrsState.Difficulty) * 0.15, 1.3, 3.0);
             mappedEaseFactor = Math.Round(mappedEaseFactor, 2);
 
             card.Stability = fsrsState.Stability;
             card.Difficulty = fsrsState.Difficulty;
+            card.DesiredRetention = desiredRetention;
 
             result = new SpacedRepetitionResult(
                 NewEaseFactor: mappedEaseFactor,
-                NewIntervalDays: fsrsState.IntervalDays,
+                NewIntervalDays: balancedInterval,
                 NewRepetitions: fsrsState.Repetitions,
                 NewLapses: fsrsState.Lapses,
                 NewStatus: fsrsState.Status,
-                NextReviewAt: fsrsState.NextReviewAt
+                NextReviewAt: balancedNextReview
             );
         }
         else
         {
             if (_fsrsEngine != null)
             {
-                var fsrsState = _fsrsEngine.CalculateFsrsNextReview(card, rating, DateTime.UtcNow, desiredRetention);
+                var fsrsState = _fsrsEngine.CalculateFsrsNextReview(card, effectiveRating, nowUtc, desiredRetention);
                 card.Stability = fsrsState.Stability;
                 card.Difficulty = fsrsState.Difficulty;
             }
-            result = _srEngine.CalculateNextReview(card, rating, DateTime.UtcNow);
+            result = _srEngine.CalculateNextReview(card, effectiveRating, nowUtc);
         }
 
         // Apply algorithm results (enforcing EF >= 1.3 invariant)
+        if (card.LastReviewedAt.HasValue)
+        {
+            card.LastElapsedDays = Math.Round(Math.Max(0.0, (nowUtc - card.LastReviewedAt.Value).TotalDays), 2);
+        }
+        if (responseTimeMs > 0)
+        {
+            card.AverageResponseTimeMs = card.AverageResponseTimeMs <= 0
+                ? responseTimeMs
+                : (int)Math.Round(card.AverageResponseTimeMs * 0.7 + responseTimeMs * 0.3);
+        }
+
         card.EaseFactor = Math.Max(1.3, result.NewEaseFactor);
         card.IntervalDays = result.NewIntervalDays;
         card.Repetitions = result.NewRepetitions;
         card.Lapses = result.NewLapses;
         card.Status = result.NewStatus;
         card.NextReviewAt = result.NextReviewAt;
-        card.LastReviewedAt = DateTime.UtcNow;
+        card.LastReviewedAt = nowUtc;
         card.TotalReviews++;
         if (rating >= ReviewRating.Good)
         {
             card.CorrectReviews++;
         }
-        card.UpdatedAt = DateTime.UtcNow;
+        card.IsLeech = _fsrsEngine != null
+            ? _fsrsEngine.IsLeechCard(card)
+            : (card.Lapses >= 6 || (card.Lapses >= 4 && card.TotalReviews > 0 && card.Confidence < 40.0));
+        card.UpdatedAt = nowUtc;
 
         // Synchronize parent word timestamp
         if (card.Word != null)
@@ -330,7 +414,9 @@ public class ReviewService : IReviewService
             prevStatus,
             card.Status,
             card.IntervalDays,
-            card.NextReviewAt
+            card.NextReviewAt,
+            card.IsLeech,
+            card.Stability
         );
     }
 
@@ -342,6 +428,11 @@ public class ReviewService : IReviewService
         int previousRepetitions,
         int previousLapses,
         DateTime previousNextReviewAt,
+        double? previousStability = null,
+        double? previousDifficulty = null,
+        DateTime? previousLastReviewedAt = null,
+        double? previousLastElapsedDays = null,
+        bool? previousIsLeech = null,
         CancellationToken cancellationToken = default)
     {
         var card = await _reviewRepo.GetByIdAsync(reviewCardId, cancellationToken);
@@ -393,6 +484,11 @@ public class ReviewService : IReviewService
         card.Repetitions = previousRepetitions;
         card.Lapses = previousLapses;
         card.NextReviewAt = previousNextReviewAt;
+        if (previousStability.HasValue) card.Stability = previousStability.Value;
+        if (previousDifficulty.HasValue) card.Difficulty = previousDifficulty.Value;
+        if (previousLastReviewedAt.HasValue) card.LastReviewedAt = previousLastReviewedAt.Value;
+        if (previousLastElapsedDays.HasValue) card.LastElapsedDays = previousLastElapsedDays.Value;
+        if (previousIsLeech.HasValue) card.IsLeech = previousIsLeech.Value;
         if (card.TotalReviews > 0) card.TotalReviews--;
         card.UpdatedAt = DateTime.UtcNow;
 
@@ -488,44 +584,51 @@ public class ReviewService : IReviewService
         }
     }
 
+    private static ReviewCard BuildShadowCard(ReviewCardDto card, double desiredRetention) => new()
+    {
+        Id = card.Id,
+        WordId = card.WordId,
+        Status = card.Status,
+        EaseFactor = card.EaseFactor,
+        IntervalDays = card.IntervalDays,
+        Repetitions = card.Repetitions,
+        Lapses = card.Lapses,
+        Stability = card.Stability,
+        Difficulty = card.Difficulty,
+        IsLeech = card.IsLeech,
+        DesiredRetention = desiredRetention,
+        LastReviewedAt = card.LastReviewedAt,
+        NextReviewAt = card.NextReviewAt,
+        TotalReviews = card.TotalReviews,
+        CorrectReviews = card.CorrectReviews
+    };
+
     public IntervalPreviewDto GetCardIntervalPreview(ReviewCardDto card)
     {
-        var dummyCard = new ReviewCard
-        {
-            EaseFactor = card.EaseFactor,
-            IntervalDays = card.IntervalDays,
-            Repetitions = card.Repetitions,
-            Lapses = card.Lapses,
-            Status = card.Status
-        };
+        var (engine, desiredRetention, isFsrs) = GetActiveEngine();
+        var dummyCard = BuildShadowCard(card, desiredRetention);
 
-        var (engine, _, _) = GetActiveEngine();
+        if (isFsrs && _fsrsEngine != null)
+        {
+            return _fsrsEngine.GetIntervalPreview(dummyCard, DateTime.UtcNow, desiredRetention);
+        }
+
         return engine.GetIntervalPreview(dummyCard);
     }
 
     public double GetRetentionProbability(ReviewCardDto card)
     {
-        var dummyCard = new ReviewCard
-        {
-            Id = card.Id,
-            WordId = card.WordId,
-            Status = card.Status,
-            EaseFactor = card.EaseFactor,
-            IntervalDays = card.IntervalDays,
-            Repetitions = card.Repetitions,
-            Lapses = card.Lapses,
-            LastReviewedAt = card.LastReviewedAt,
-            NextReviewAt = card.NextReviewAt
-        };
-
-        var (engine, _, _) = GetActiveEngine();
+        var (engine, desiredRetention, _) = GetActiveEngine();
+        var dummyCard = BuildShadowCard(card, desiredRetention);
         return engine.CalculateRetentionProbability(dummyCard);
     }
 
     public MemoryStabilityMetricsDto GetMemoryStabilityMetrics(ReviewCardDto card)
     {
         double retrievability = GetRetentionProbability(card);
-        double stabilityDays = Math.Max(1.0, card.IntervalDays * (card.EaseFactor / 2.5));
+        double stabilityDays = card.Stability > 0.01
+            ? card.Stability
+            : Math.Max(1.0, card.IntervalDays * (card.EaseFactor / 2.5));
         var preview = GetCardIntervalPreview(card);
 
         string healthLevel = retrievability switch
@@ -549,6 +652,83 @@ public class ReviewService : IReviewService
             IntervalIfGood: preview.GoodText,
             IntervalIfEasy: preview.EasyText,
             MemoryHealthLevel: healthLevel
+        );
+    }
+
+    public ReviewRating? SuggestRatingByResponseTime(ReviewCardDto card, int responseTimeMs, bool usedHint, bool? isTypingCorrect)
+    {
+        if (isTypingCorrect == false)
+        {
+            return ReviewRating.Again;
+        }
+
+        if (usedHint)
+        {
+            return ReviewRating.Hard;
+        }
+
+        if (responseTimeMs <= 0)
+        {
+            return null;
+        }
+
+        if (responseTimeMs < 1800 && card.Lapses == 0)
+        {
+            return ReviewRating.Easy;
+        }
+
+        if (responseTimeMs > 6500)
+        {
+            return ReviewRating.Hard;
+        }
+
+        return ReviewRating.Good;
+    }
+
+    public async Task<ReviewAnalyticsSummaryDto> GetReviewAnalyticsSummaryAsync(int days = 30, CancellationToken cancellationToken = default)
+    {
+        var sinceUtc = DateTime.UtcNow.AddDays(-Math.Max(1, days));
+        var logs = await _reviewRepo.GetLogsSinceAsync(sinceUtc, cancellationToken);
+        var difficult = await _reviewRepo.GetDifficultCardsAsync(100, cancellationToken);
+        var (_, desiredRetention, isFsrs) = GetActiveEngine();
+
+        int total = logs.Count;
+        int passed = logs.Count(l => l.Rating >= ReviewRating.Good);
+        double trueRetention = total == 0 ? 100.0 : Math.Round((double)passed / total * 100.0, 1);
+        double targetPct = Math.Round(desiredRetention * 100.0, 1);
+
+        var timedLogs = logs.Where(l => l.ResponseTimeMs > 0 && l.ResponseTimeMs < 60_000).ToList();
+        int avgResponseMs = timedLogs.Count == 0 ? 0 : (int)Math.Round(timedLogs.Average(l => l.ResponseTimeMs));
+
+        int leechCount = difficult.Count(c => c.IsLeech || (_fsrsEngine != null ? _fsrsEngine.IsLeechCard(c) : c.Lapses >= 6));
+
+        double recommendedRetention = targetPct;
+        string adviceKey = "Review_Calibration_Optimal";
+
+        if (total >= 15)
+        {
+            double delta = trueRetention - targetPct;
+            if (delta < -6.0)
+            {
+                recommendedRetention = Math.Min(95.0, targetPct + 3.0);
+                adviceKey = "Review_Calibration_RaiseRetention";
+            }
+            else if (delta > 6.0 && targetPct > 85.0)
+            {
+                recommendedRetention = Math.Max(85.0, targetPct - 2.0);
+                adviceKey = "Review_Calibration_LowerRetention";
+            }
+        }
+
+        return new ReviewAnalyticsSummaryDto(
+            TrueRetentionPercent: trueRetention,
+            TargetRetentionPercent: targetPct,
+            RecommendedRetentionPercent: recommendedRetention,
+            TotalReviewsInPeriod: total,
+            LeechCount: leechCount,
+            AverageResponseTimeMs: avgResponseMs,
+            AlgorithmName: isFsrs ? "FSRS v5" : "SM-2",
+            CalibrationAdviceKey: adviceKey
         );
     }
 
@@ -612,46 +792,69 @@ public class ReviewService : IReviewService
 
     public async Task<IReadOnlyList<ReviewCardDto>> GetPresetQueueAsync(SmartReviewPresetMode mode, int limit = 30, CancellationToken cancellationToken = default)
     {
+        var now = DateTime.UtcNow;
+        var activeExam = await GetActiveExamTargetAsync(cancellationToken);
+
         switch (mode)
         {
             case SmartReviewPresetMode.UrgentOverdue:
             case SmartReviewPresetMode.StandardDue:
             {
-                var due = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit, cancellationToken);
-                return due.Select(MapToDto).ToList();
+                var due = await _reviewRepo.GetDueCardsAsync(now, limit * 2, cancellationToken);
+                var ordered = _fsrsEngine != null
+                    ? due.OrderByDescending(c => _fsrsEngine.CalculatePriorityScore(c, now, activeExam)).Take(limit)
+                    : due.Take(limit);
+                return InterleaveCards(ordered.Select(MapToDto).ToList());
             }
             case SmartReviewPresetMode.HighForgettingRisk:
             case SmartReviewPresetMode.LeechRescue:
             {
                 var difficult = await _reviewRepo.GetDifficultCardsAsync(limit, cancellationToken);
-                return difficult.Select(MapToDto).ToList();
+                var ordered = difficult
+                    .OrderByDescending(c => c.IsLeech || (_fsrsEngine != null && _fsrsEngine.IsLeechCard(c)))
+                    .ThenByDescending(c => c.Lapses)
+                    .ThenByDescending(c => c.Difficulty);
+                return ordered.Select(MapToDto).ToList();
             }
             case SmartReviewPresetMode.ExamHighYield:
             case SmartReviewPresetMode.HighYieldExam:
             {
-                var allDue = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit * 2, cancellationToken);
-                var examCards = allDue.Where(c => c.Word?.WordExamTags != null && c.Word.WordExamTags.Count > 0).Take(limit).ToList();
+                var allDue = await _reviewRepo.GetDueCardsAsync(now, limit * 2, cancellationToken);
+                var examCards = allDue
+                    .Where(c => c.Word?.WordExamTags != null && c.Word.WordExamTags.Count > 0)
+                    .OrderByDescending(c => _fsrsEngine != null ? _fsrsEngine.CalculatePriorityScore(c, now, activeExam) : 0)
+                    .Take(limit)
+                    .ToList();
                 if (examCards.Count > 0) return examCards.Select(MapToDto).ToList();
                 return allDue.Take(limit).Select(MapToDto).ToList();
             }
             case SmartReviewPresetMode.FreshLearned:
             case SmartReviewPresetMode.SpeedBlitz:
             {
-                var due = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit, cancellationToken);
-                if (due.Count >= 5) return due.Select(MapToDto).ToList();
+                var due = await _reviewRepo.GetDueCardsAsync(now, limit * 2, cancellationToken);
+                var blitzCandidates = due
+                    .OrderByDescending(c => c.Status is LearningStatus.Remembered or LearningStatus.Mastered)
+                    .ThenByDescending(c => c.Stability)
+                    .Take(limit)
+                    .ToList();
+                if (blitzCandidates.Count >= 5) return blitzCandidates.Select(MapToDto).ToList();
                 return await GetBalancedReviewQueueAsync(limit, cancellationToken);
             }
             case SmartReviewPresetMode.LongTermConsolidation:
             case SmartReviewPresetMode.ContextImmersion:
             {
-                var allDue = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit * 2, cancellationToken);
-                var withExamples = allDue.Where(c => c.Word?.Meanings != null && c.Word.Meanings.Any(m => m.Examples.Count > 0)).Take(limit).ToList();
+                var allDue = await _reviewRepo.GetDueCardsAsync(now, limit * 2, cancellationToken);
+                var withExamples = allDue
+                    .Where(c => c.Word?.Meanings != null && c.Word.Meanings.Any(m => m.Examples.Count > 0))
+                    .OrderByDescending(c => _fsrsEngine != null ? _fsrsEngine.CalculatePriorityScore(c, now, activeExam) : 0)
+                    .Take(limit)
+                    .ToList();
                 if (withExamples.Count > 0) return withExamples.Select(MapToDto).ToList();
                 return allDue.Take(limit).Select(MapToDto).ToList();
             }
             default:
             {
-                var due = await _reviewRepo.GetDueCardsAsync(DateTime.UtcNow, limit, cancellationToken);
+                var due = await _reviewRepo.GetDueCardsAsync(now, limit, cancellationToken);
                 return due.Select(MapToDto).ToList();
             }
         }
@@ -691,6 +894,38 @@ public class ReviewService : IReviewService
             accuracy,
             ss.SessionType
         );
+    }
+
+    public async Task<IReadOnlyList<DailyWorkloadPointDto>> Get14DayWorkloadSimulationAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var forecast = await _reviewRepo.GetDueForecastCountsAsync(now, 14, cancellationToken);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var rawPoints = new List<(DateOnly Date, string Label, int Count)>(14);
+        int maxCount = 0;
+
+        for (int i = 0; i < 14; i++)
+        {
+            var date = today.AddDays(i);
+            int count = forecast.GetValueOrDefault(date, 0);
+            if (count > maxCount) maxCount = count;
+            string label = i == 0 ? "Today" : date.ToString("dd/MM");
+            rawPoints.Add((date, label, count));
+        }
+
+        return rawPoints
+            .Select(p => new DailyWorkloadPointDto(p.Date, p.Label, p.Count, maxCount > 0 && p.Count == maxCount))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<ReviewCardDto>> GetLeechCardsAsync(int limit = 20, CancellationToken cancellationToken = default)
+    {
+        var difficult = await _reviewRepo.GetDifficultCardsAsync(Math.Max(limit * 2, 40), cancellationToken);
+        return difficult
+            .Where(c => c.IsLeech || (_fsrsEngine != null ? _fsrsEngine.IsLeechCard(c) : c.Lapses >= 6))
+            .Take(limit)
+            .Select(MapToDto)
+            .ToList();
     }
 
     private ReviewCardDto MapToDto(ReviewCard c) => c.ToDto(GetActiveEngine().engine);

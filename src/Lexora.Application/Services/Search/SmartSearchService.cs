@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Lexora.Application.DTOs;
 using Lexora.Application.Interfaces;
+using Lexora.Application.Services.Search;
 
 namespace Lexora.Application.Services;
 
@@ -209,7 +210,7 @@ public class SmartSearchService : ISmartSearchService
             }
         }
 
-        // 8. Fuzzy match on Term
+        // 8. Fuzzy & Phonetic match on Term
         if (cleanQuery.Length >= 3 && term.Length >= 3)
         {
             double sim = _fuzzyService.CalculateSimilarity(normQuery, normTerm);
@@ -224,6 +225,20 @@ public class SmartSearchService : ISmartSearchService
                     "Fuzzy",
                     "Term",
                     term);
+            }
+
+            if (Math.Abs(cleanQuery.Length - term.Length) <= 4 && sim >= 0.30)
+            {
+                double phoneticSim = PhoneticEncoder.CalculateSimilarity(cleanQuery, term);
+                if (phoneticSim >= 0.78)
+                {
+                    return new SmartSearchMatchResult<WordDto>(
+                        word,
+                        Math.Round(phoneticSim * 62.0, 1),
+                        "Phonetic",
+                        "Term",
+                        term);
+                }
             }
         }
 

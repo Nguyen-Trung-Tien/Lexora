@@ -1,7 +1,9 @@
 using Lexora.Presentation.Services;
 using Lexora.Presentation.ViewModels;
+using Lexora.Presentation.Views.KnowledgeStudio;
 using Lexora.Presentation.Views.MemoryTips;
 using Lexora.Presentation.Views.Phrases;
+using Lexora.Presentation.Views.PracticeArena;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -159,14 +161,16 @@ public sealed partial class ShellPage : Page
                     {
                         DashboardPage => NavItemDashboard,
                         RoadmapPage => NavItemRoadmap,
-                        VocabularyPage => NavItemVocabulary,
-                        HomophonesPage => NavItemHomophones,
-                        KnowledgeGraphPage => NavItemKnowledgeGraph,
-                        ReviewPage => NavItemReview,
-                        TestPage => NavItemTest,
-                        GrammarPage => NavItemGrammar,
-                        PhrasesPage => NavItemPhrases,
-                        MemoryTipsPage => NavItemMemoryTips,
+                        KnowledgeStudioPage => NavItemKnowledgeStudio,
+                        VocabularyPage => NavItemKnowledgeStudio,
+                        HomophonesPage => NavItemKnowledgeStudio,
+                        KnowledgeGraphPage => NavItemKnowledgeStudio,
+                        GrammarPage => NavItemKnowledgeStudio,
+                        PhrasesPage => NavItemKnowledgeStudio,
+                        MemoryTipsPage => NavItemKnowledgeStudio,
+                        PracticeArenaPage => NavItemPracticeArena,
+                        ReviewPage => NavItemPracticeArena,
+                        TestPage => NavItemPracticeArena,
                         LearningStoragePage => NavItemLearningStorage,
                         SettingsPage => NavItemSettings,
                         HelpPage => NavItemHelp,
@@ -254,6 +258,8 @@ public sealed partial class ShellPage : Page
         {
             "Dashboard" => typeof(DashboardPage),
             "Roadmap" => typeof(RoadmapPage),
+            "KnowledgeStudio" => typeof(KnowledgeStudioPage),
+            "PracticeArena" => typeof(PracticeArenaPage),
             "Vocabulary" => typeof(VocabularyPage),
             "Homophones" => typeof(HomophonesPage),
             "KnowledgeGraph" => typeof(KnowledgeGraphPage),
@@ -281,20 +287,13 @@ public sealed partial class ShellPage : Page
     private void UpdateNavigationLabels()
     {
         NavHeaderOverview.Content = _localizationService.GetString("NavHeader_Overview");
-        NavHeaderLearning.Content = _localizationService.GetString("NavHeader_Learning");
-        NavHeaderPractice.Content = _localizationService.GetString("NavHeader_Practice");
+        NavHeaderLearning.Content = _localizationService.GetString("NavHeader_Workspaces");
         NavHeaderArchive.Content = _localizationService.GetString("NavHeader_Archive");
 
         NavItemDashboard.Content = _localizationService.GetString("Nav_Dashboard");
         NavItemRoadmap.Content = _localizationService.GetString("Nav_Roadmap");
-        NavItemVocabulary.Content = _localizationService.GetString("Nav_Vocabulary");
-        NavItemHomophones.Content = _localizationService.GetString("Nav_Homophones");
-        NavItemKnowledgeGraph.Content = _localizationService.GetString("Nav_KnowledgeGraph");
-        NavItemReview.Content = _localizationService.GetString("Nav_Review");
-        NavItemTest.Content = _localizationService.GetString("Nav_Test");
-        NavItemGrammar.Content = _localizationService.GetString("Nav_Grammar");
-        NavItemPhrases.Content = _localizationService.GetString("Nav_Phrases");
-        NavItemMemoryTips.Content = _localizationService.GetString("Nav_MemoryTips");
+        NavItemKnowledgeStudio.Content = _localizationService.GetString("Nav_KnowledgeStudio");
+        NavItemPracticeArena.Content = _localizationService.GetString("Nav_PracticeArena");
         NavItemLearningStorage.Content = _localizationService.GetString("Nav_LearningStorage");
         NavItemHelp.Content = _localizationService.GetString("Nav_Help");
         NavItemSettings.Content = _localizationService.GetString("Nav_Settings");
@@ -302,14 +301,8 @@ public sealed partial class ShellPage : Page
 
         ToolTipService.SetToolTip(NavItemDashboard, _localizationService.GetString("Shell_TooltipDashboard"));
         ToolTipService.SetToolTip(NavItemRoadmap, _localizationService.GetString("Shell_TooltipRoadmap"));
-        ToolTipService.SetToolTip(NavItemVocabulary, _localizationService.GetString("Shell_TooltipVocabulary"));
-        ToolTipService.SetToolTip(NavItemHomophones, _localizationService.GetString("Shell_TooltipHomophones"));
-        ToolTipService.SetToolTip(NavItemKnowledgeGraph, $"{_localizationService.GetString("Nav_KnowledgeGraph")} (Ctrl+4)");
-        ToolTipService.SetToolTip(NavItemGrammar, _localizationService.GetString("Shell_TooltipGrammar"));
-        ToolTipService.SetToolTip(NavItemPhrases, _localizationService.GetString("Shell_TooltipPhrases"));
-        ToolTipService.SetToolTip(NavItemMemoryTips, _localizationService.GetString("Shell_TooltipMemoryTips"));
-        ToolTipService.SetToolTip(NavItemReview, _localizationService.GetString("Shell_TooltipReview"));
-        ToolTipService.SetToolTip(NavItemTest, _localizationService.GetString("Shell_TooltipTest"));
+        ToolTipService.SetToolTip(NavItemKnowledgeStudio, $"{_localizationService.GetString("Nav_KnowledgeStudio")} (Ctrl+2)");
+        ToolTipService.SetToolTip(NavItemPracticeArena, $"{_localizationService.GetString("Nav_PracticeArena")} (Ctrl+6)");
         ToolTipService.SetToolTip(NavItemLearningStorage, _localizationService.GetString("Shell_TooltipLearningStorage"));
         ToolTipService.SetToolTip(NavItemHelp, $"{_localizationService.GetString("Nav_Help")} (F1)");
         ToolTipService.SetToolTip(NavItemSettings, _localizationService.GetString("Shell_TooltipSettings"));
@@ -608,40 +601,40 @@ public sealed partial class ShellPage : Page
                         NavView.SelectedItem = NavItemRoadmap;
                         break;
                     case "KnowledgeGraph":
-                        _navigationService.Navigate(typeof(KnowledgeGraphPage));
-                        NavView.SelectedItem = NavItemKnowledgeGraph;
+                        _navigationService.Navigate(typeof(KnowledgeStudioPage), "KnowledgeGraph");
+                        NavView.SelectedItem = NavItemKnowledgeStudio;
                         break;
                     case "Help":
                         _navigationService.Navigate(typeof(HelpPage));
                         NavView.SelectedItem = NavItemHelp;
                         break;
                     case "Vocabulary":
-                        _navigationService.Navigate(typeof(VocabularyPage));
-                        NavView.SelectedItem = NavItemVocabulary;
+                        _navigationService.Navigate(typeof(KnowledgeStudioPage), "Vocabulary");
+                        NavView.SelectedItem = NavItemKnowledgeStudio;
                         break;
                     case "Homophones":
-                        _navigationService.Navigate(typeof(HomophonesPage));
-                        NavView.SelectedItem = NavItemHomophones;
+                        _navigationService.Navigate(typeof(KnowledgeStudioPage), "Homophones");
+                        NavView.SelectedItem = NavItemKnowledgeStudio;
                         break;
                     case "Review":
-                        _navigationService.Navigate(typeof(ReviewPage));
-                        NavView.SelectedItem = NavItemReview;
+                        _navigationService.Navigate(typeof(PracticeArenaPage), "Review");
+                        NavView.SelectedItem = NavItemPracticeArena;
                         break;
                     case "Test":
-                        _navigationService.Navigate(typeof(TestPage));
-                        NavView.SelectedItem = NavItemTest;
+                        _navigationService.Navigate(typeof(PracticeArenaPage), "Test");
+                        NavView.SelectedItem = NavItemPracticeArena;
                         break;
                     case "Grammar":
-                        _navigationService.Navigate(typeof(GrammarPage));
-                        NavView.SelectedItem = NavItemGrammar;
+                        _navigationService.Navigate(typeof(KnowledgeStudioPage), "Grammar");
+                        NavView.SelectedItem = NavItemKnowledgeStudio;
                         break;
                     case "Phrases":
-                        _navigationService.Navigate(typeof(Lexora.Presentation.Views.Phrases.PhrasesPage));
-                        NavView.SelectedItem = NavItemPhrases;
+                        _navigationService.Navigate(typeof(KnowledgeStudioPage), "Phrases");
+                        NavView.SelectedItem = NavItemKnowledgeStudio;
                         break;
                     case "MemoryTips":
-                        _navigationService.Navigate(typeof(Lexora.Presentation.Views.MemoryTips.MemoryTipsPage));
-                        NavView.SelectedItem = NavItemMemoryTips;
+                        _navigationService.Navigate(typeof(KnowledgeStudioPage), "MemoryTips");
+                        NavView.SelectedItem = NavItemKnowledgeStudio;
                         break;
                     case "LearningStorage":
                         _navigationService.Navigate(typeof(LearningStoragePage));
@@ -658,21 +651,21 @@ public sealed partial class ShellPage : Page
             if (chosen.TargetType == "Homophone")
             {
                 _navigationService.Navigate(typeof(HomophonesPage), chosen.SearchTerm ?? chosen.Title);
-                NavView.SelectedItem = NavItemHomophones;
+                NavView.SelectedItem = NavItemKnowledgeStudio;
                 return;
             }
 
             if (chosen.TargetType == "Grammar")
             {
                 _navigationService.Navigate(typeof(GrammarPage), chosen.SearchTerm ?? chosen.Title);
-                NavView.SelectedItem = NavItemGrammar;
+                NavView.SelectedItem = NavItemKnowledgeStudio;
                 return;
             }
 
             if (!string.IsNullOrEmpty(chosen.SearchTerm))
             {
                 _navigationService.Navigate(typeof(VocabularyPage), chosen.SearchTerm);
-                NavView.SelectedItem = NavItemVocabulary;
+                NavView.SelectedItem = NavItemKnowledgeStudio;
                 return;
             }
         }
@@ -681,13 +674,13 @@ public sealed partial class ShellPage : Page
         if (!string.IsNullOrEmpty(query))
         {
             _navigationService.Navigate(typeof(VocabularyPage), query);
-            NavView.SelectedItem = NavItemVocabulary;
+            NavView.SelectedItem = NavItemKnowledgeStudio;
         }
     }
 
     private void ReviewNowButton_Click(object sender, RoutedEventArgs e)
     {
-        _navigationService.Navigate(typeof(ReviewPage));
-        NavView.SelectedItem = NavItemReview;
+        _navigationService.Navigate(typeof(PracticeArenaPage), "Review");
+        NavView.SelectedItem = NavItemPracticeArena;
     }
 }

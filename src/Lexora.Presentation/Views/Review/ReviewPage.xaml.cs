@@ -44,8 +44,6 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
         SizeChanged += (s, e) => UpdateResponsiveLayout(e.NewSize.Width);
         ActualThemeChanged += (s, e) => OnThemeChanged();
 
-        AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(OnReviewPageKeyDown), handledEventsToo: false);
-
         Unloaded += (s, e) =>
         {
             ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
@@ -448,61 +446,6 @@ public sealed partial class ReviewPage : Page, ILocalizableView, IThemeAwareView
                 }
             }
         });
-    }
-
-    private async void OnReviewPageKeyDown(object sender, KeyRoutedEventArgs e)
-    {
-        if (FocusManager.GetFocusedElement(this.XamlRoot) is TextBox or AutoSuggestBox || SafeDialogExtensions.IsDialogOpen)
-            return;
-
-        if (e.Key == VirtualKey.Space)
-        {
-            if (ViewModel.IsCardActive && !ViewModel.IsAnswerVisible && !ViewModel.IsTypingRecallActive)
-            {
-                e.Handled = true;
-                ShowAnswerButton_Click(this, new RoutedEventArgs());
-            }
-        }
-        else if (e.Key is VirtualKey.Number1 or (VirtualKey)97) // 1 or NumPad1
-        {
-            if (ViewModel.CanRate)
-            {
-                e.Handled = true;
-                await ViewModel.RateCardAsync(ReviewRating.Again);
-            }
-        }
-        else if (e.Key is VirtualKey.Number2 or (VirtualKey)98) // 2 or NumPad2
-        {
-            if (ViewModel.CanRate)
-            {
-                e.Handled = true;
-                await ViewModel.RateCardAsync(ReviewRating.Hard);
-            }
-        }
-        else if (e.Key is VirtualKey.Number3 or (VirtualKey)99) // 3 or NumPad3
-        {
-            if (ViewModel.CanRate)
-            {
-                e.Handled = true;
-                await ViewModel.RateCardAsync(ReviewRating.Good);
-            }
-        }
-        else if (e.Key is VirtualKey.Number4 or (VirtualKey)100) // 4 or NumPad4
-        {
-            if (ViewModel.CanRate)
-            {
-                e.Handled = true;
-                await ViewModel.RateCardAsync(ReviewRating.Easy);
-            }
-        }
-        else if (e.Key == VirtualKey.R)
-        {
-            if (ViewModel.IsCardActive)
-            {
-                e.Handled = true;
-                await ViewModel.PlayPreferredAudioAsync();
-            }
-        }
     }
 
     private void TypingInputBox_KeyDown(object sender, KeyRoutedEventArgs e)

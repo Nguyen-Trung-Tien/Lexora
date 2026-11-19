@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:common="using:Lexora.Presentation.Views.Common"
+    xmlns:controls="using:Lexora.Presentation.Controls"
     xmlns:services="using:Lexora.Presentation.Services"
     xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -90,7 +91,7 @@
                                         ToolTipService.ToolTip="{x:Bind Loc.GetString('Action_More')}">
                             <FontIcon Glyph="&#xE712;" FontSize="14" />
                             <DropDownButton.Flyout>
-                                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuFlyout Placement="BottomEdgeAlignedRight" helpers:ThemeSyncHelper.SyncTheme="True">
                                     <MenuFlyoutItem Text="{x:Bind Loc.GetString('Dashboard_StudyPlannerAction')}"
                                                     Click="OpenStudyPlanner_Click">
                                         <MenuFlyoutItem.Icon>
@@ -322,6 +323,16 @@
 
                         <TextBlock Text="{x:Bind ViewModel.AdviceTitle, Mode=OneWay}" FontSize="18" FontWeight="Bold" />
                         <TextBlock Text="{x:Bind ViewModel.AdviceDescription, Mode=OneWay}" Style="{StaticResource LexoraBodyStyle}" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
+                            <Button Content="10m" Command="{x:Bind ViewModel.SelectTimeBudgetCommand}" CommandParameter="10" Style="{StaticResource LexoraSubtleButtonStyle}" Padding="8,3" FontSize="11" />
+                            <Button Content="15m" Command="{x:Bind ViewModel.SelectTimeBudgetCommand}" CommandParameter="15" Style="{StaticResource LexoraSubtleButtonStyle}" Padding="8,3" FontSize="11" />
+                            <Button Content="30m" Command="{x:Bind ViewModel.SelectTimeBudgetCommand}" CommandParameter="30" Style="{StaticResource LexoraSubtleButtonStyle}" Padding="8,3" FontSize="11" />
+                            <TextBlock Text="{x:Bind ViewModel.TimeBudgetSummaryText, Mode=OneWay}"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
                     </StackPanel>
 
                     <Button Grid.Column="1"
@@ -362,6 +373,21 @@
                             </StackPanel>
                         </Border>
                     </Grid>
+
+                    <!-- 14-Day FSRS Workload Vector Simulation -->
+                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
+                            Padding="12,10">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="14-Day FSRS Workload Simulation"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <controls:VectorChartControl ItemsSource="{x:Bind ViewModel.Workload14DaysList, Mode=OneWay}" Height="120" />
+                        </StackPanel>
+                    </Border>
 
                     <!-- 7-Day Visual Workload Bar Chart (7 equal columns stretching 100% width) -->
                     <ItemsRepeater ItemsSource="{x:Bind ViewModel.ForecastDaysList}">

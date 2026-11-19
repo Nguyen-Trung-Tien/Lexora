@@ -162,13 +162,16 @@ public partial class GrammarViewModel
         IsPracticeMode = false;
         IsPracticeResultMode = true;
 
-        _ = RecordGrammarProgressAsync();
+        _ = RecordGrammarProgressAsync(result);
     }
 
-    private async Task RecordGrammarProgressAsync()
+    private async Task RecordGrammarProgressAsync(GrammarPracticeResultDto result)
     {
         try
         {
+            string? topicLabel = SelectedTopic ?? SelectedRule?.Title;
+            await _grammarService.RecordGrammarPracticeSessionAsync(topicLabel, result.TotalQuestions, result.CorrectCount);
+
             if (_studyPlannerService != null)
             {
                 await _studyPlannerService.RecordTaskCompletionAsync(CurriculumTaskType.StudyGrammar, 1);

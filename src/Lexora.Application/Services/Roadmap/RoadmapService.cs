@@ -156,6 +156,7 @@ public class RoadmapService : IRoadmapService
 
         IReadOnlyList<Word>? fallbackWords = null;
         bool fallbackWordsLoaded = false;
+        var consumedSessionIds = new HashSet<Guid>();
 
         bool anyUpdated = false;
 
@@ -225,16 +226,73 @@ public class RoadmapService : IRoadmapService
                         anyUpdated = true;
                     }
                 }
-                else if ((node.Type == RoadmapNodeType.MockTest || node.Type == RoadmapNodeType.Checkpoint) && recentSessions != null)
+                else if (node.Type == RoadmapNodeType.GrammarPoint && recentSessions != null)
                 {
-                    // Auto-sync completed test sessions when the node is unlocked
                     if (node.Status is NodeStatus.Available or NodeStatus.InProgress)
                     {
-                        var qualifyingTests = recentSessions
-                            .Where(s => s.CompletedAt.HasValue &&
+                        var qualifyingGrammarSessions = recentSessions
+                            .Where(s => !consumedSessionIds.Contains(s.Id) &&
+                                        s.CompletedAt.HasValue &&
                                         s.StartedAt >= activeRoadmap.CreatedAt &&
                                         s.SessionType != null &&
-                                        s.SessionType.StartsWith("Test_", StringComparison.OrdinalIgnoreCase) &&
+                                        s.SessionType.StartsWith("Grammar_", StringComparison.OrdinalIgnoreCase) &&
+                                        s.TotalCards > 0 &&
+                                        (double)s.CorrectCards / s.TotalCards >= 0.70)
+                            .ToList();
+
+                        if (qualifyingGrammarSessions.Count > 0)
+                        {
+                            int target = Math.Max(1, node.TargetItemCount);
+                            int earned = 0;
+                            foreach (var session in qualifyingGrammarSessions)
+                            {
+                                // Each qualifying grammar quiz contributes its correct answers (minimum 5 items toward node mastery)
+                                earned += Math.Max(5, session.CorrectCards);
+                                consumedSessionIds.Add(session.Id);
+                                if (node.CompletedItemCount + earned >= target)
+                                {
+                                    break;
+                                }
+                            }
+
+                            int newCount = Math.Min(target, node.CompletedItemCount + earned);
+                            if (newCount > node.CompletedItemCount)
+                            {
+                                node.CompletedItemCount = newCount;
+                                anyUpdated = true;
+                            }
+
+                            if (node.CompletedItemCount >= target && node.Status != NodeStatus.Mastered)
+                            {
+                                node.Status = NodeStatus.Mastered;
+                                UnlockNextNode(activeRoadmap, node);
+                                anyUpdated = true;
+                            }
+                            else if (node.CompletedItemCount > 0 && node.Status == NodeStatus.Available)
+                            {
+                                node.Status = NodeStatus.InProgress;
+                                anyUpdated = true;
+                            }
+                        }
+                    }
+                }
+                else if ((node.Type == RoadmapNodeType.MockTest || node.Type == RoadmapNodeType.Checkpoint) && recentSessions != null)
+                {
+                    // Auto-sync completed test sessions when the node is unlocked, matching exam target and avoiding double-counting
+                    if (node.Status is NodeStatus.Available or NodeStatus.InProgress)
+                    {
+                        string? expectedTestPrefix = examType.HasValue ? $"Test_{examType.Value}" : null;
+
+                        var qualifyingTests = recentSessions
+                            .Where(s => !consumedSessionIds.Contains(s.Id) &&
+                                        s.CompletedAt.HasValue &&
+                                        s.StartedAt >= activeRoadmap.CreatedAt &&
+                                        s.SessionType != null &&
+                                        (expectedTestPrefix == null
+                                            ? s.SessionType.StartsWith("Test_", StringComparison.OrdinalIgnoreCase)
+                                            : (s.SessionType.Equals(expectedTestPrefix, StringComparison.OrdinalIgnoreCase) ||
+                                               s.SessionType.Equals("AdaptiveQuiz_CAT", StringComparison.OrdinalIgnoreCase) ||
+                                               s.SessionType.Equals("Test_General", StringComparison.OrdinalIgnoreCase))) &&
                                         s.TotalCards > 0 &&
                                         (double)s.CorrectCards / s.TotalCards >= 0.70)
                             .ToList();
@@ -242,7 +300,18 @@ public class RoadmapService : IRoadmapService
                         if (qualifyingTests.Count > 0)
                         {
                             int target = Math.Max(1, node.TargetItemCount);
-                            int completedTestsItems = Math.Min(target, qualifyingTests.Sum(s => Math.Max(1, s.CorrectCards)));
+                            int earned = 0;
+                            foreach (var session in qualifyingTests)
+                            {
+                                earned += Math.Max(1, session.CorrectCards);
+                                consumedSessionIds.Add(session.Id);
+                                if (node.CompletedItemCount + earned >= target)
+                                {
+                                    break;
+                                }
+                            }
+
+                            int completedTestsItems = Math.Min(target, node.CompletedItemCount + earned);
                             if (completedTestsItems > node.CompletedItemCount)
                             {
                                 node.CompletedItemCount = completedTestsItems;
@@ -253,6 +322,11 @@ public class RoadmapService : IRoadmapService
                             {
                                 node.Status = NodeStatus.Mastered;
                                 UnlockNextNode(activeRoadmap, node);
+                                anyUpdated = true;
+                            }
+                            else if (node.CompletedItemCount > 0 && node.Status == NodeStatus.Available)
+                            {
+                                node.Status = NodeStatus.InProgress;
                                 anyUpdated = true;
                             }
                         }
@@ -542,6 +616,48 @@ public class RoadmapService : IRoadmapService
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    public async Task<StudyRoadmapDto?> RebalanceRoadmapPacingAsync(CancellationToken cancellationToken = default)
+    {
+        var activeRoadmap = await _roadmapRepository.GetActiveRoadmapWithDetailsAsync(cancellationToken);
+        if (activeRoadmap == null) return null;
+
+        var now = DateTime.UtcNow;
+        var incompleteMilestones = activeRoadmap.Milestones
+            .Where(m => !m.IsCompleted)
+            .OrderBy(m => m.OrderIndex)
+            .ToList();
+
+        if (incompleteMilestones.Count == 0)
+        {
+            return MapToDto(activeRoadmap);
+        }
+
+        // If target date has passed or remaining milestones are overdue, rebalance smoothly forward
+        double remainingDays = Math.Max(14.0, (activeRoadmap.TargetDate - now).TotalDays);
+        if (activeRoadmap.TargetDate <= now)
+        {
+            remainingDays = incompleteMilestones.Count * 7.0;
+            activeRoadmap.TargetDate = now.AddDays(remainingDays);
+        }
+
+        double stepDays = remainingDays / incompleteMilestones.Count;
+        for (int i = 0; i < incompleteMilestones.Count; i++)
+        {
+            var m = incompleteMilestones[i];
+            if (m.TargetCompletionDate < now || activeRoadmap.TargetDate > now)
+            {
+                m.TargetCompletionDate = now.AddDays((i + 1) * stepDays);
+                m.UpdatedAt = now;
+            }
+        }
+
+        activeRoadmap.UpdatedAt = now;
+        await _roadmapRepository.UpdateAsync(activeRoadmap, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return MapToDto(activeRoadmap);
     }
 
     private static StudyRoadmapDto MapToDto(StudyRoadmap entity) => entity.ToDto();

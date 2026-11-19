@@ -1,6 +1,7 @@
 using Lexora.Domain.Entities;
 using Lexora.Domain.Entities.MemoryTips;
 using Lexora.Domain.Entities.Phrases;
+using Lexora.Domain.Entities.Test;
 using Lexora.Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +34,7 @@ public class LexoraDbContext : DbContext
     public DbSet<RoadmapNode> RoadmapNodes => Set<RoadmapNode>();
     public DbSet<ConversationPhrase> ConversationPhrases => Set<ConversationPhrase>();
     public DbSet<MemoryTip> MemoryTips => Set<MemoryTip>();
+    public DbSet<ItemCalibration> ItemCalibrations => Set<ItemCalibration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -121,8 +123,12 @@ public class LexoraDbContext : DbContext
             b.HasKey(rc => rc.Id);
             b.Property(rc => rc.Stability).HasDefaultValue(0.0);
             b.Property(rc => rc.Difficulty).HasDefaultValue(5.0);
+            b.Property(rc => rc.IsLeech).HasDefaultValue(false);
+            b.Property(rc => rc.LastElapsedDays).HasDefaultValue(0.0);
+            b.Property(rc => rc.AverageResponseTimeMs).HasDefaultValue(0);
             b.HasIndex(rc => rc.NextReviewAt);
             b.HasIndex(rc => rc.Status);
+            b.HasIndex(rc => rc.IsLeech);
             b.HasIndex(rc => new { rc.NextReviewAt, rc.Status });
             b.HasIndex(rc => new { rc.Status, rc.NextReviewAt });
 
@@ -342,5 +348,16 @@ public class LexoraDbContext : DbContext
 
         // MemoryTip configuration
         modelBuilder.ApplyConfiguration(new MemoryTipConfiguration());
+
+        // ItemCalibration (IRT / Elo Adaptive Quiz) configuration
+        modelBuilder.Entity<ItemCalibration>(b =>
+        {
+            b.HasKey(ic => ic.Id);
+            b.Property(ic => ic.DifficultyB).HasDefaultValue(0.0);
+            b.Property(ic => ic.DiscriminationA).HasDefaultValue(1.0);
+            b.HasIndex(ic => ic.WordId).IsUnique().HasFilter("\"WordId\" IS NOT NULL");
+            b.HasIndex(ic => ic.GrammarRuleId).IsUnique().HasFilter("\"GrammarRuleId\" IS NOT NULL");
+            b.HasIndex(ic => ic.DifficultyB);
+        });
     }
 }

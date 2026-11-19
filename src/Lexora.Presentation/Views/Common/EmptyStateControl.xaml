@@ -10,6 +10,11 @@
 
     <Border Style="{StaticResource EmptyStateCard}" HorizontalAlignment="Stretch">
         <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="420">
+            <StackPanel.ChildrenTransitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition FromVerticalOffset="12" />
+                </TransitionCollection>
+            </StackPanel.ChildrenTransitions>
             <Border Width="56" Height="56"
                     CornerRadius="28"
                     Background="{ThemeResource SubtleFillColorSecondaryBrush}"

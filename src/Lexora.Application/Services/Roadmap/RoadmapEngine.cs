@@ -6,8 +6,9 @@ namespace Lexora.Application.Services;
 public class RoadmapEngine
 {
     private const double CanvasStartX = 320.0;
-    private const double CanvasStepY = 130.0;
-    private const double CanvasWaveAmplitude = 200.0;
+    private const double CanvasStepY = 135.0;
+    private const double CanvasMilestoneGap = 48.0;
+    private const double CanvasWaveAmplitude = 190.0;
 
     public StudyRoadmap GenerateAdaptiveRoadmap(
         string title,
@@ -28,20 +29,29 @@ public class RoadmapEngine
             IsActive = true
         };
 
-        var milestoneTemplates = GetMilestoneTemplates(target, startingScore, targetScore);
+        var milestoneTemplates = GetMilestoneTemplates(target, startingScore, targetScore, durationWeeks);
+        var usedTopicIds = new HashSet<Guid>();
+        var usedGrammarIds = new HashSet<Guid>();
+        double itemScale = CalculateDurationItemScale(durationWeeks);
+
         int milestoneIndex = 0;
         int globalNodeIndex = 0;
-        double currentY = 80.0;
+        double currentY = 90.0;
 
         foreach (var mTemplate in milestoneTemplates)
         {
+            if (milestoneIndex > 0)
+            {
+                currentY += CanvasMilestoneGap;
+            }
+
             var milestone = new RoadmapMilestone
             {
                 RoadmapId = roadmap.Id,
                 Title = mTemplate.Title,
                 Description = mTemplate.Description,
                 OrderIndex = milestoneIndex++,
-                TargetCompletionDate = DateTime.UtcNow.AddDays((milestoneIndex * durationWeeks * 7.0) / milestoneTemplates.Count),
+                TargetCompletionDate = DateTime.UtcNow.AddDays((milestoneIndex * Math.Max(2, durationWeeks) * 7.0) / milestoneTemplates.Count),
                 IsCompleted = false
             };
 
@@ -56,39 +66,30 @@ public class RoadmapEngine
 
                 Guid? refId = null;
                 string? refName = nTemplate.SuggestedTopicOrRule;
+                int targetItemCount = Math.Max(5, (int)Math.Round(nTemplate.TargetItemCount * itemScale));
 
-                // 1. Try to bind to real database Topic if node is VocabularySet
+                // 1. Try to bind to real database Topic if node is VocabularySet (preferring unused topics)
                 if (nTemplate.Type == RoadmapNodeType.VocabularySet && availableTopics != null && availableTopics.Count > 0)
                 {
-                    var matchedTopic = availableTopics.FirstOrDefault(t => 
-                        !string.IsNullOrWhiteSpace(nTemplate.SuggestedTopicOrRule) &&
-                        (t.Name.Contains(nTemplate.SuggestedTopicOrRule, StringComparison.OrdinalIgnoreCase) ||
-                         nTemplate.SuggestedTopicOrRule.Contains(t.Name, StringComparison.OrdinalIgnoreCase)))
-                        ?? availableTopics.FirstOrDefault(t => 
-                            nTemplate.Title.Contains(t.Name, StringComparison.OrdinalIgnoreCase) ||
-                            t.Name.Contains(nTemplate.Title, StringComparison.OrdinalIgnoreCase))
-                        ?? availableTopics[globalNodeIndex % availableTopics.Count];
-
+                    var matchedTopic = FindBestTopic(availableTopics, nTemplate, usedTopicIds, globalNodeIndex);
                     if (matchedTopic != null)
                     {
+                        usedTopicIds.Add(matchedTopic.Id);
                         refId = matchedTopic.Id;
                         refName = matchedTopic.Name;
+                        if (matchedTopic.WordTopics != null && matchedTopic.WordTopics.Count > 0)
+                        {
+                            targetItemCount = Math.Clamp(matchedTopic.WordTopics.Count, 10, targetItemCount);
+                        }
                     }
                 }
-                // 2. Try to bind to real database GrammarRule if node is GrammarPoint
+                // 2. Try to bind to real database GrammarRule if node is GrammarPoint (preferring unused rules)
                 else if (nTemplate.Type == RoadmapNodeType.GrammarPoint && availableGrammarRules != null && availableGrammarRules.Count > 0)
                 {
-                    var matchedRule = availableGrammarRules.FirstOrDefault(r => 
-                        !string.IsNullOrWhiteSpace(nTemplate.SuggestedTopicOrRule) &&
-                        (r.Title.Contains(nTemplate.SuggestedTopicOrRule, StringComparison.OrdinalIgnoreCase) ||
-                         (r.Topic != null && r.Topic.Contains(nTemplate.SuggestedTopicOrRule, StringComparison.OrdinalIgnoreCase))))
-                        ?? availableGrammarRules.FirstOrDefault(r => 
-                            nTemplate.Title.Contains(r.Title, StringComparison.OrdinalIgnoreCase) ||
-                            (r.Topic != null && r.Topic.Contains(nTemplate.Title, StringComparison.OrdinalIgnoreCase)))
-                        ?? availableGrammarRules[0];
-
+                    var matchedRule = FindBestGrammarRule(availableGrammarRules, nTemplate, usedGrammarIds);
                     if (matchedRule != null)
                     {
+                        usedGrammarIds.Add(matchedRule.Id);
                         refId = matchedRule.Id;
                         refName = matchedRule.Title;
                     }
@@ -104,7 +105,7 @@ public class RoadmapEngine
                     OrderIndex = nodeIndexInMilestone++,
                     CanvasX = Math.Round(canvasX, 1),
                     CanvasY = Math.Round(canvasY, 1),
-                    TargetItemCount = nTemplate.TargetItemCount,
+                    TargetItemCount = targetItemCount,
                     CompletedItemCount = 0,
                     EaseFactorWeight = CalculateInitialEaseFactor(target, targetScore - startingScore),
                     ReferenceId = refId,
@@ -119,6 +120,51 @@ public class RoadmapEngine
         }
 
         return roadmap;
+    }
+
+    private static Topic? FindBestTopic(
+        IReadOnlyList<Topic> availableTopics,
+        NodeTemplate nTemplate,
+        HashSet<Guid> usedTopicIds,
+        int globalNodeIndex)
+    {
+        var unused = availableTopics.Where(t => !usedTopicIds.Contains(t.Id)).ToList();
+        var pool = unused.Count > 0 ? unused : availableTopics;
+
+        return pool.FirstOrDefault(t =>
+                !string.IsNullOrWhiteSpace(nTemplate.SuggestedTopicOrRule) &&
+                (t.Name.Contains(nTemplate.SuggestedTopicOrRule, StringComparison.OrdinalIgnoreCase) ||
+                 nTemplate.SuggestedTopicOrRule.Contains(t.Name, StringComparison.OrdinalIgnoreCase)))
+            ?? pool.FirstOrDefault(t =>
+                nTemplate.Title.Contains(t.Name, StringComparison.OrdinalIgnoreCase) ||
+                t.Name.Contains(nTemplate.Title, StringComparison.OrdinalIgnoreCase))
+            ?? pool[globalNodeIndex % pool.Count];
+    }
+
+    private static GrammarRule? FindBestGrammarRule(
+        IReadOnlyList<GrammarRule> availableRules,
+        NodeTemplate nTemplate,
+        HashSet<Guid> usedGrammarIds)
+    {
+        var unused = availableRules.Where(r => !usedGrammarIds.Contains(r.Id)).ToList();
+        var pool = unused.Count > 0 ? unused : availableRules;
+
+        return pool.FirstOrDefault(r =>
+                !string.IsNullOrWhiteSpace(nTemplate.SuggestedTopicOrRule) &&
+                (r.Title.Contains(nTemplate.SuggestedTopicOrRule, StringComparison.OrdinalIgnoreCase) ||
+                 (r.Topic != null && r.Topic.Contains(nTemplate.SuggestedTopicOrRule, StringComparison.OrdinalIgnoreCase))))
+            ?? pool.FirstOrDefault(r =>
+                nTemplate.Title.Contains(r.Title, StringComparison.OrdinalIgnoreCase) ||
+                (r.Topic != null && nTemplate.Title.Contains(r.Topic, StringComparison.OrdinalIgnoreCase)))
+            ?? pool[0];
+    }
+
+    private static double CalculateDurationItemScale(int durationWeeks)
+    {
+        if (durationWeeks <= 4) return 0.65;
+        if (durationWeeks <= 8) return 0.85;
+        if (durationWeeks >= 16) return 1.25;
+        return 1.0;
     }
 
     private static string GetDefaultTitle(ExamTarget target, double targetScore) => target switch
@@ -148,75 +194,93 @@ public class RoadmapEngine
     private sealed record MilestoneTemplate(string Title, string Description, IReadOnlyList<NodeTemplate> Nodes);
     private sealed record NodeTemplate(string Title, string Description, RoadmapNodeType Type, int TargetItemCount, string? SuggestedTopicOrRule = null);
 
-    private static IReadOnlyList<MilestoneTemplate> GetMilestoneTemplates(ExamTarget target, double startScore, double targetScore)
+    private static IReadOnlyList<MilestoneTemplate> GetMilestoneTemplates(ExamTarget target, double startScore, double targetScore, int durationWeeks)
     {
         return target switch
         {
-            ExamTarget.Toeic => GetToeicMilestones(startScore, targetScore),
-            ExamTarget.Ielts => GetIeltsMilestones(startScore, targetScore),
-            ExamTarget.Vstep => GetVstepMilestones(startScore, targetScore),
-            _ => GetToeicMilestones(startScore, targetScore)
+            ExamTarget.Toeic => GetToeicMilestones(startScore, targetScore, durationWeeks),
+            ExamTarget.Ielts => GetIeltsMilestones(startScore, targetScore, durationWeeks),
+            ExamTarget.Vstep => GetVstepMilestones(startScore, targetScore, durationWeeks),
+            _ => GetToeicMilestones(startScore, targetScore, durationWeeks)
         };
     }
 
-    private static IReadOnlyList<MilestoneTemplate> GetToeicMilestones(double startScore, double targetScore)
+    private static IReadOnlyList<MilestoneTemplate> GetToeicMilestones(double startScore, double targetScore, int durationWeeks)
     {
-        return
-        [
-            new MilestoneTemplate("Phase 1: High-Frequency Business Foundation", "Master core business, office operations, and contract vocabulary.",
+        var phases = new List<MilestoneTemplate>();
+
+        if (startScore < 650)
+        {
+            phases.Add(new MilestoneTemplate("Phase 1: High-Frequency Business Foundation", "Master core business, office operations, and contract vocabulary.",
             [
                 new NodeTemplate("Office & Corporate Operations", "Corporate communication, departments, meetings", RoadmapNodeType.VocabularySet, 30, "Business & Career"),
                 new NodeTemplate("Business Collocations & Phrasal Verbs", "Common verb-noun pairings in corporate contexts", RoadmapNodeType.VocabularySet, 25, "Business & Career"),
                 new NodeTemplate("Subject-Verb Agreement & Tenses", "Part 5 core grammar mastery", RoadmapNodeType.GrammarPoint, 20, "Tenses"),
                 new NodeTemplate("Foundational Checkpoint Quiz", "Verify retention of Phase 1 concepts", RoadmapNodeType.Checkpoint, 15)
-            ]),
-            new MilestoneTemplate("Phase 2: Commercial, Financial & Travel Terminology", "Expand to purchasing, banking, customer service, and logistics.",
-            [
-                new NodeTemplate("Financial Reports & Invoicing", "Budgeting, accounting statements, billing terms", RoadmapNodeType.VocabularySet, 30, "Business & Career"),
-                new NodeTemplate("Logistics, Shipping & Travel", "Itineraries, cargo handling, flight delays", RoadmapNodeType.VocabularySet, 25, "Daily Life"),
-                new NodeTemplate("Participle Clauses & Conditionals", "Advanced modifiers used in contracts and notices", RoadmapNodeType.GrammarPoint, 20, "Conditionals"),
-                new NodeTemplate("Mid-Term Mock Speed Test", "Timed mini-test simulating Parts 5 & 6", RoadmapNodeType.MockTest, 30)
-            ]),
-            new MilestoneTemplate("Phase 3: Paraphrasing & Speed Comprehension", "Bridge the gap to 800+ score ceiling with high-speed recognition.",
+            ]));
+        }
+
+        phases.Add(new MilestoneTemplate("Phase 2: Commercial, Financial & Travel Terminology", "Expand to purchasing, banking, customer service, and logistics.",
+        [
+            new NodeTemplate("Financial Reports & Invoicing", "Budgeting, accounting statements, billing terms", RoadmapNodeType.VocabularySet, 30, "Business & Career"),
+            new NodeTemplate("Logistics, Shipping & Travel", "Itineraries, cargo handling, flight delays", RoadmapNodeType.VocabularySet, 25, "Daily Life"),
+            new NodeTemplate("Participle Clauses & Conditionals", "Advanced modifiers used in contracts and notices", RoadmapNodeType.GrammarPoint, 20, "Conditionals"),
+            new NodeTemplate("Mid-Term Mock Speed Test", "Timed mini-test simulating Parts 5 & 6", RoadmapNodeType.MockTest, 30)
+        ]));
+
+        if (targetScore >= 650 || durationWeeks >= 8 || startScore >= 650)
+        {
+            phases.Add(new MilestoneTemplate("Phase 3: Paraphrasing & Speed Comprehension", "Bridge the gap to 800+ score ceiling with high-speed recognition.",
             [
                 new NodeTemplate("Synonym Clusters & Subtle Nuances", "Trap words and semantic shifts in Part 7", RoadmapNodeType.VocabularySet, 35, "Technology"),
                 new NodeTemplate("Inversion & Subjunctive Grammar", "Formal correspondence and policy announcements", RoadmapNodeType.GrammarPoint, 15, "Inversion"),
                 new NodeTemplate("Full-Length TOEIC Simulation", "Comprehensive 100-question speed and accuracy test", RoadmapNodeType.MockTest, 100)
-            ])
-        ];
+            ]));
+        }
+
+        return phases;
     }
 
-    private static IReadOnlyList<MilestoneTemplate> GetIeltsMilestones(double startScore, double targetScore)
+    private static IReadOnlyList<MilestoneTemplate> GetIeltsMilestones(double startScore, double targetScore, int durationWeeks)
     {
-        return
-        [
-            new MilestoneTemplate("Phase 1: Academic Word List (AWL) & Syntax", "Establish Band 6.0 lexical base with formal academic terminology.",
+        var phases = new List<MilestoneTemplate>();
+
+        if (startScore < 6.5)
+        {
+            phases.Add(new MilestoneTemplate("Phase 1: Academic Word List (AWL) & Syntax", "Establish Band 6.0 lexical base with formal academic terminology.",
             [
                 new NodeTemplate("Academic Word List Sublist 1-3", "Abstract concepts, methodology, data discussion", RoadmapNodeType.VocabularySet, 35, "Technology"),
                 new NodeTemplate("Complex Sentences & Relative Clauses", "Syntactic variety for Writing Task 1 & 2", RoadmapNodeType.GrammarPoint, 20, "Relative Clauses"),
                 new NodeTemplate("Trend & Data Description Collocations", "Increase, plummet, oscillate, plateau terms", RoadmapNodeType.VocabularySet, 25, "Business & Career"),
                 new NodeTemplate("Academic Diagnostic Checkpoint", "Review retention of AWL sets", RoadmapNodeType.Checkpoint, 20)
-            ]),
-            new MilestoneTemplate("Phase 2: Thematic Collocations & Essay Discourse", "Target Band 7.0+ across Environment, Society, and Technology.",
-            [
-                new NodeTemplate("Environment & Urbanization Lexis", "Sustainability, carbon offsets, habitat loss", RoadmapNodeType.VocabularySet, 30, "Daily Life"),
-                new NodeTemplate("Passive Voice & Impersonal Structures", "Objective academic stance in research writing", RoadmapNodeType.GrammarPoint, 15, "Passive Voice"),
-                new NodeTemplate("Education, Tech & Artificial Intelligence", "Digital divide, pedagogy, automation impact", RoadmapNodeType.VocabularySet, 30, "Technology"),
-                new NodeTemplate("Writing & Reading Speed Assessment", "Timed academic passage analysis", RoadmapNodeType.MockTest, 40)
-            ]),
-            new MilestoneTemplate("Phase 3: Idiomatic Precision & C1/C2 Fluency", "Reach Band 8.0+ through natural phrasing and lexical flexibility.",
+            ]));
+        }
+
+        phases.Add(new MilestoneTemplate("Phase 2: Thematic Collocations & Essay Discourse", "Target Band 7.0+ across Environment, Society, and Technology.",
+        [
+            new NodeTemplate("Environment & Urbanization Lexis", "Sustainability, carbon offsets, habitat loss", RoadmapNodeType.VocabularySet, 30, "Daily Life"),
+            new NodeTemplate("Passive Voice & Impersonal Structures", "Objective academic stance in research writing", RoadmapNodeType.GrammarPoint, 15, "Passive Voice"),
+            new NodeTemplate("Education, Tech & Artificial Intelligence", "Digital divide, pedagogy, automation impact", RoadmapNodeType.VocabularySet, 30, "Technology"),
+            new NodeTemplate("Writing & Reading Speed Assessment", "Timed academic passage analysis", RoadmapNodeType.MockTest, 40)
+        ]));
+
+        if (targetScore >= 7.0 || durationWeeks >= 10 || startScore >= 6.5)
+        {
+            phases.Add(new MilestoneTemplate("Phase 3: Idiomatic Precision & C1/C2 Fluency", "Reach Band 8.0+ through natural phrasing and lexical flexibility.",
             [
                 new NodeTemplate("High-Band Idiomatic Collocations", "Natural native expressions without informal slang", RoadmapNodeType.VocabularySet, 30, "Daily Life"),
                 new NodeTemplate("Cohesive Devices & Discourse Flow", "Furthermore, conversely, in stark contrast", RoadmapNodeType.GrammarPoint, 15, "Connectors"),
                 new NodeTemplate("Full Academic Mock Simulation", "Simulated multi-module test scenario", RoadmapNodeType.MockTest, 40)
-            ])
-        ];
+            ]));
+        }
+
+        return phases;
     }
 
-    private static IReadOnlyList<MilestoneTemplate> GetVstepMilestones(double startScore, double targetScore)
+    private static IReadOnlyList<MilestoneTemplate> GetVstepMilestones(double startScore, double targetScore, int durationWeeks)
     {
-        return
-        [
+        var phases = new List<MilestoneTemplate>
+        {
             new MilestoneTemplate("Phase 1: VSTEP B1-B2 Core Communication", "Master standard Vietnamese national standardized exam themes.",
             [
                 new NodeTemplate("Social Interaction & Daily Life", "Holidays, family, workplace etiquette", RoadmapNodeType.VocabularySet, 30, "Daily Life"),
@@ -231,6 +295,17 @@ public class RoadmapEngine
                 new NodeTemplate("Science, Health & Education Lexis", "Reading passage vocabulary across key genres", RoadmapNodeType.VocabularySet, 30, "Daily Life"),
                 new NodeTemplate("VSTEP Full Reading & Writing Mock", "Timed exam simulation", RoadmapNodeType.MockTest, 40)
             ])
-        ];
+        };
+
+        if (targetScore >= 8.5 && durationWeeks >= 12)
+        {
+            phases.Add(new MilestoneTemplate("Phase 3: VSTEP C1 Mastery & Nuance", "Polish academic register and rapid inference for Band 8.5+.",
+            [
+                new NodeTemplate("Academic Register & Hedging", "Nuanced claims and formal evidence framing", RoadmapNodeType.VocabularySet, 30, "Technology"),
+                new NodeTemplate("C1 Full Simulation Assessment", "Comprehensive timed VSTEP mock", RoadmapNodeType.MockTest, 40)
+            ]));
+        }
+
+        return phases;
     }
 }

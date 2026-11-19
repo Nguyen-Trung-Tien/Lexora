@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:dtos="using:Lexora.Application.DTOs"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:services="using:Lexora.Presentation.Services"
     Background="Transparent"
     NavigationCacheMode="Required" UseLayoutRounding="True">
@@ -103,7 +104,7 @@
                 <!-- Import / Export DropDown -->
                 <DropDownButton Content="{x:Bind Loc.GetString('Phrases_ImportExportButton')}" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="10,6">
                     <DropDownButton.Flyout>
-                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuFlyout Placement="BottomEdgeAlignedRight" helpers:ThemeSyncHelper.SyncTheme="True">
                             <MenuFlyoutItem Click="OnSmartImportClick" Text="{x:Bind Loc.GetString('Phrases_SmartImport')}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon Glyph="&#xE8B5;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />

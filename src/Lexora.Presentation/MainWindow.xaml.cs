@@ -52,12 +52,12 @@ public sealed partial class MainWindow : Window
                 UpdateTitleBarButtons();
             };
 
-            // Centralized keyboard shortcut router
-            root.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((s, e) =>
+            // Centralized keyboard shortcut router (PreviewKeyDown tunneling ensures Buttons/ListViews don't swallow Space/1-4/A-D)
+            root.AddHandler(UIElement.PreviewKeyDownEvent, new KeyEventHandler((s, e) =>
             {
                 var shortcutManager = App.Current.Services.GetService<IShortcutManager>();
                 shortcutManager?.ProcessKeyDown(e, root.XamlRoot);
-            }), handledEventsToo: false);
+            }), handledEventsToo: true);
         }
 
         // 2. Set Taskbar and Window Icon

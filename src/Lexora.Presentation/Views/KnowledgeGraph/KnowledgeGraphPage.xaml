@@ -8,12 +8,18 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dto="using:Lexora.Application.DTOs"
     xmlns:views="using:Lexora.Presentation.Views.KnowledgeGraph"
+    xmlns:helpers="using:Lexora.Presentation.Helpers"
     xmlns:services="using:Lexora.Presentation.Services"
     Background="Transparent"
     SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
 
     <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="16">
+        <Grid.ChildrenTransitions>
+            <TransitionCollection>
+                <EntranceThemeTransition FromVerticalOffset="0" />
+            </TransitionCollection>
+        </Grid.ChildrenTransitions>
         <!-- Top Command Bar / Header Area -->
         <StackPanel Grid.Row="0" Spacing="12">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
@@ -120,7 +126,7 @@
                             <TextBlock x:Name="BtnExportText" Text="{x:Bind Loc.GetString('KnowledgeGraph_Export')}" FontWeight="SemiBold" FontSize="12" />
                         </StackPanel>
                         <DropDownButton.Flyout>
-                            <MenuFlyout Placement="Bottom">
+                            <MenuFlyout Placement="Bottom" helpers:ThemeSyncHelper.SyncTheme="True">
                                 <MenuFlyoutItem Text="{x:Bind Loc.GetString('KnowledgeGraph_ExportJson')}" Click="ExportJson_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE943;" />

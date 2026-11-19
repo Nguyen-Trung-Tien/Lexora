@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Lexora.Application.Common;
 using Lexora.Application.DTOs;
 using Lexora.Application.Services;
 using Lexora.Domain.Entities;
@@ -271,6 +272,150 @@ public class RoadmapEngineTests
         context.TopicName.Should().Be("Business & Career");
         context.LinkedWordIds.Should().Contain(wordId);
         context.HasWords.Should().BeTrue();
+    }
+
+    [Fact]
+    public void GenerateAdaptiveRoadmap_HighStartingScoreToeic_ShouldSkipFoundationPhase()
+    {
+        // Act
+        var roadmap = _engine.GenerateAdaptiveRoadmap("TOEIC 850 Sprint", ExamTarget.Toeic, 700, 850, 8);
+
+        // Assert
+        roadmap.Milestones.Should().HaveCount(2);
+        roadmap.Milestones.First().Title.Should().Contain("Phase 2");
+    }
+
+    [Fact]
+    public void GenerateAdaptiveRoadmap_WithDistinctTopics_ShouldPreferUnusedTopics()
+    {
+        // Arrange
+        var topics = new List<Topic>
+        {
+            new() { Name = "Business & Career" },
+            new() { Name = "Daily Life" },
+            new() { Name = "Technology" },
+            new() { Name = "Finance" }
+        };
+
+        // Act
+        var roadmap = _engine.GenerateAdaptiveRoadmap("TOEIC 750", ExamTarget.Toeic, 450, 750, 12, topics);
+
+        // Assert
+        var vocabTopicIds = roadmap.Milestones
+            .SelectMany(m => m.Nodes)
+            .Where(n => n.Type == RoadmapNodeType.VocabularySet && n.ReferenceId.HasValue)
+            .Select(n => n.ReferenceId!.Value)
+            .ToList();
+
+        vocabTopicIds.Distinct().Count().Should().Be(4);
+    }
+
+    [Fact]
+    public async Task RoadmapService_SyncRoadmapProgress_ShouldAutoAdvanceGrammarNodeFromStudySessions()
+    {
+        // Arrange
+        var mockRepo = new Mock<IRoadmapRepository>();
+        var mockUow = new Mock<IUnitOfWork>();
+        var mockReviewRepo = new Mock<IReviewRepository>();
+
+        var roadmap = _engine.GenerateAdaptiveRoadmap("TOEIC Grammar Sync", ExamTarget.Toeic, 450, 750, 12);
+        roadmap.CreatedAt = DateTime.UtcNow.AddDays(-2);
+        var grammarNode = roadmap.Milestones.SelectMany(m => m.Nodes).First(n => n.Type == RoadmapNodeType.GrammarPoint);
+        grammarNode.Status = NodeStatus.Available;
+        grammarNode.TargetItemCount = 10;
+
+        mockRepo.Setup(r => r.GetActiveRoadmapWithDetailsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roadmap);
+
+        mockReviewRepo.Setup(r => r.GetRecentSessionsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<StudySession>
+            {
+                new()
+                {
+                    StartedAt = DateTime.UtcNow.AddHours(-1),
+                    CompletedAt = DateTime.UtcNow.AddHours(-1),
+                    SessionType = "Grammar_Tenses",
+                    TotalCards = 10,
+                    CorrectCards = 9
+                }
+            });
+
+        var service = new RoadmapService(mockRepo.Object, mockUow.Object, reviewRepository: mockReviewRepo.Object);
+
+        // Act
+        var result = await service.SyncRoadmapProgressAsync();
+
+        // Assert
+        result.Should().NotBeNull();
+        grammarNode.CompletedItemCount.Should().BeGreaterThanOrEqualTo(9);
+        grammarNode.Status.Should().Be(NodeStatus.InProgress);
+    }
+
+    [Fact]
+    public async Task RoadmapService_SyncRoadmapProgress_ShouldFilterTestSessionsByExamTypeAndNotDoubleCount()
+    {
+        // Arrange
+        var mockRepo = new Mock<IRoadmapRepository>();
+        var mockUow = new Mock<IUnitOfWork>();
+        var mockReviewRepo = new Mock<IReviewRepository>();
+
+        var roadmap = _engine.GenerateAdaptiveRoadmap("TOEIC Test Sync", ExamTarget.Toeic, 450, 750, 12);
+        roadmap.CreatedAt = DateTime.UtcNow.AddDays(-2);
+        var testNodes = roadmap.Milestones.SelectMany(m => m.Nodes)
+            .Where(n => n.Type is RoadmapNodeType.Checkpoint or RoadmapNodeType.MockTest)
+            .ToList();
+        testNodes[0].Status = NodeStatus.Available;
+        testNodes[0].TargetItemCount = 10;
+        testNodes[1].Status = NodeStatus.Available;
+        testNodes[1].TargetItemCount = 10;
+
+        mockRepo.Setup(r => r.GetActiveRoadmapWithDetailsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roadmap);
+
+        mockReviewRepo.Setup(r => r.GetRecentSessionsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<StudySession>
+            {
+                // Unrelated exam type should be ignored
+                new()
+                {
+                    StartedAt = DateTime.UtcNow.AddHours(-2),
+                    CompletedAt = DateTime.UtcNow.AddHours(-2),
+                    SessionType = "Test_Ielts",
+                    TotalCards = 20,
+                    CorrectCards = 20
+                },
+                // Single matching TOEIC session should only apply to the first node
+                new()
+                {
+                    StartedAt = DateTime.UtcNow.AddHours(-1),
+                    CompletedAt = DateTime.UtcNow.AddHours(-1),
+                    SessionType = "Test_Toeic",
+                    TotalCards = 10,
+                    CorrectCards = 10
+                }
+            });
+
+        var service = new RoadmapService(mockRepo.Object, mockUow.Object, reviewRepository: mockReviewRepo.Object);
+
+        // Act
+        await service.SyncRoadmapProgressAsync();
+
+        // Assert
+        testNodes[0].Status.Should().Be(NodeStatus.Mastered);
+        testNodes[1].CompletedItemCount.Should().Be(0);
+    }
+
+    [Fact]
+    public void StudyRoadmapDto_ShouldCalculateDailyPacingMetrics()
+    {
+        // Arrange
+        var roadmap = _engine.GenerateAdaptiveRoadmap("TOEIC Pacing", ExamTarget.Toeic, 450, 750, 12);
+        var dto = roadmap.ToDto();
+
+        // Assert
+        dto.RemainingItems.Should().Be(dto.TotalTargetItems);
+        dto.RecommendedDailyItems.Should().BeGreaterThan(0);
+        dto.PacingStatusKey.Should().BeOneOf("Roadmap_Pace_Ahead", "Roadmap_Pace_OnTrack", "Roadmap_Pace_Behind");
     }
 }
 
